@@ -30,7 +30,7 @@ import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector';
 import { getVegaVisRenderer } from './vega_vis_renderer';

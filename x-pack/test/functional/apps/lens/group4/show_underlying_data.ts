@@ -48,7 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('unifiedHistogramChart');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await testSubjects.existOrFail('unifiedDataTableToolbar');
       // check the table columns
       const columns = await PageObjects.discover.getColumnHeaders();
       expect(columns).to.eql(['@timestamp', 'extension.raw', 'bytes']);

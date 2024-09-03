@@ -29,6 +29,8 @@ import {
 import { useMlFromLensKibanaContext } from '../../../common/context';
 import type { CreateADJobParams } from '../../../common/job_details';
 import { JobDetails } from '../../../common/job_details';
+import { mlJobServiceFactory } from '../../../../../application/services/job_service';
+import { toastNotificationServiceProvider } from '../../../../../application/services/toast_notification_service';
 
 interface DropDownLabel {
   label: string;
@@ -51,9 +53,12 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
       share,
       uiSettings,
       dashboardService,
+      notifications: { toasts },
       mlServices: { mlApiServices },
     },
   } = useMlFromLensKibanaContext();
+  const toastNotificationService = toastNotificationServiceProvider(toasts);
+  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApiServices);
 
   const quickJobCreator = useMemo(
     () =>
@@ -62,7 +67,8 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
         uiSettings,
         data.query.timefilter.timefilter,
         dashboardService,
-        mlApiServices
+        mlApiServices,
+        mlJobService
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, uiSettings]

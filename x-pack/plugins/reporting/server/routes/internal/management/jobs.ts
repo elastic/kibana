@@ -22,7 +22,7 @@ const { JOBS } = INTERNAL_ROUTES;
 export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
-  const jobsQuery = jobsQueryFactory(reporting);
+  const jobsQuery = jobsQueryFactory(reporting, { isInternal: true });
 
   const registerInternalGetList = () => {
     // list jobs in the queue, paginated
@@ -47,14 +47,11 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
           return handleUnavailable(res);
         }
 
-        const {
-          management: { jobTypes = [] },
-        } = await reporting.getLicenseInfo();
         const { page: queryPage = '0', size: querySize = '10', ids: queryIds = null } = req.query;
         const page = parseInt(queryPage, 10) || 0;
         const size = Math.min(100, parseInt(querySize, 10) || 10);
         const jobIds = queryIds ? queryIds.split(',') : null;
-        const results = await jobsQuery.list(jobTypes, user, page, size, jobIds);
+        const results = await jobsQuery.list(user, page, size, jobIds);
 
         counters.usageCounter();
 
@@ -86,11 +83,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
           return handleUnavailable(res);
         }
 
-        const {
-          management: { jobTypes = [] },
-        } = await reporting.getLicenseInfo();
-
-        const count = await jobsQuery.count(jobTypes, user);
+        const count = await jobsQuery.count(user);
 
         counters.usageCounter();
 
@@ -105,7 +98,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
   };
 
   // use common route handlers that are shared for public and internal routes
-  const jobHandlers = commonJobsRouteHandlerFactory(reporting);
+  const jobHandlers = commonJobsRouteHandlerFactory(reporting, { isInternal: true });
 
   const registerInternalGetInfo = () => {
     // return some info about the job
@@ -126,13 +119,20 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
         }
 
         const { docId } = req.params;
-        return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) =>
-          res.ok({
-            body: doc,
-            headers: {
-              'content-type': 'application/json',
-            },
-          })
+        return jobManagementPreRouting(
+          reporting,
+          res,
+          docId,
+          user,
+          counters,
+          { isInternal: true },
+          async (doc) =>
+            res.ok({
+              body: doc,
+              headers: {
+                'content-type': 'application/json',
+              },
+            })
         );
       })
     );

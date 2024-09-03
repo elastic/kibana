@@ -29,7 +29,7 @@ const OVERRIDES: Record<string, Partial<FieldDescriptor>> = {
  *  @return {FieldDescriptor}
  */
 export function mergeOverrides(field: FieldDescriptor): FieldDescriptor {
-  if (OVERRIDES.hasOwnProperty(field.name)) {
+  if (Object.hasOwn(OVERRIDES, field.name)) {
     return merge(field, OVERRIDES[field.name]);
   } else {
     return field;

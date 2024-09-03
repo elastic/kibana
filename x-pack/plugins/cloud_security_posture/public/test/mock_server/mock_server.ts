@@ -13,9 +13,9 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { indexPatternFieldEditorPluginMock as dataViewFieldEditorMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import SearchBar from '@kbn/unified-search-plugin/public/search_bar/search_bar';
 import { http, HttpResponse, JsonBodyType } from 'msw';
+import { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { defaultHandlers } from './handlers';
 import { getMockDependencies } from '../fixtures/get_mock_dependencies';
-import { CspClientPluginStartDeps } from '../../types';
 import { MOCK_SERVER_LICENSING_INFO_URL } from './handlers/licensing.handlers.mock';
 
 /**
@@ -130,6 +130,26 @@ export const getMockServerDependencies = () => {
             });
 
             return [dataView];
+          },
+          get: async (id: string) => {
+            const response = await fetch(`${MOCK_SERVER_BASE_URL}/internal/data_views/?id=${id}`);
+
+            const responseJson = await response.json();
+
+            const fields = responseJson.fields.reduce((acc: any, field: any) => {
+              acc[field.name] = field;
+              return acc;
+            }, {});
+
+            const dataView = createStubDataView({
+              spec: {
+                id,
+                title: responseJson.indices[0],
+                fields,
+              },
+            });
+
+            return dataView;
           },
         },
       },

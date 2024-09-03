@@ -3,8 +3,8 @@ id: kibDevTutorialSetupDevEnv
 slug: /kibana-dev-docs/getting-started/setup-dev-env
 title: Set up a Development Environment
 description: Learn how to setup a development environment for contributing to the Kibana repository
-date: 2022-07-07
-tags: ['kibana', 'onboarding', 'dev', 'architecture', 'setup']
+date: 2024-08-09
+tags: ['kibana', 'onboarding', 'dev', 'architecture', 'setup', 'devcontainer']
 ---
 
 Setting up a development environment is pretty easy.
@@ -92,3 +92,28 @@ node scripts/register_git_hook
 ```
 
 After the script completes the pre-commit hook will be created within the file `.git/hooks/pre-commit`. If you choose to not install it, don’t worry, we still run a quick CI check to provide feedback earliest as we can about the same checks.
+
+## Using the Kibana Dev Container (optional)
+
+Kibana also supports using a [dev container](https://containers.dev/) which can integrate with various editors and tools [(supported tools)](https://containers.dev/supporting). The dev container provides a consistent development environment across different machines and setups which is based on Ubuntu Jammy (22.04). The only prerequisite is having [Docker](https://www.docker.com/) installed locally. VS Code is the recommended editor and will be used for these instructions because it is the most mature, but it is not required.
+
+### Setting up the Dev Container
+
+1. Make a copy of `.devcontainer/.env.template` and rename it to `.devcontainer/.env`. Edit any values you're interested in.
+1. There are three options for mounting the Kibana repo into the container:
+    - **Local Filesystem**: Clone the repo locally, or use an existing copy, and open it in VS Code. When prompted, select "Reopen in Dev Container". This uses a bind mount, allowing the container to access and modify files directly on your local filesystem. Your git credentials should be automatically mounted in the container as well. Note that Bazel will create symlinks and a cache inside the container file system. So, if switching to working on your local filesystem afterwards, you will need to bootstrap again.
+    - **Docker Repo Volume**: Use the `Dev Containers: Clone Repository in Named Container Volume...` command from the Command Palette (`F1`). This clones the repo into a Docker volume, isolating it from your local filesystem. You will need to configure your git credentials manually in this isolated environment.
+    - **Docker PR Volume**: Use the `Dev Containers: Clone GitHub Pull Request in Named Container Volume...` command from the Command Palette (`F1`). This is the same as the previous option, but can be useful for testing a PR in insolation of your local filesystem.
+1. VS Code will then build the container, this will take a few minutes the first time, but subsequent builds will utilize Docker caching and be much faster.
+1. Once the container is built and started, it will automatically run `yarn kbn bootstrap`.
+1. You should see the Kibana repo and your terminal will be inside the container. You can develop as normal now, including running `yarn es` from inside the container.
+
+### Customizing the Dev Container
+Installing any extra extensions or making adjustments to the OS environment inside the container will not have an effect on your local OS or VS Code installation. Editing the `devcontainer.json` or `.devcontainer/Dockerfile` should be reserved for changes to all dev environments.
+
+### FIPS Mode
+
+The dev container is pre-configured to run Kibana in FIPS mode if needed. Simply change the `.env` file to `FIPS=1` and reopen your terminal. There should be a log message in your terminal which indicates `FIPS mode enabled`.
+
+### Troubleshooting
+- Sometimes when rebuilding the container, there will be an error message that it failed. Usually hitting retry will fix this, and is only related to VS Code trying to reconnect to the container too quickly.

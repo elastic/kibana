@@ -14,6 +14,9 @@ const visibleIndices = indexes
   .map(({ name, suggestedAs }) => suggestedAs || name)
   .sort();
 
+const addTrailingSpace = (strings: string[], predicate: (s: string) => boolean = (_s) => true) =>
+  strings.map((string) => (predicate(string) ? `${string} ` : string));
+
 const metadataFields = [...METADATA_FIELDS].sort();
 
 describe('autocomplete.suggest', () => {
@@ -33,17 +36,17 @@ describe('autocomplete.suggest', () => {
       test('suggests visible indices on space', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from /', visibleIndices);
-        await assertSuggestions('FROM /', visibleIndices);
-        await assertSuggestions('from /index', visibleIndices);
+        await assertSuggestions('from /', addTrailingSpace(visibleIndices));
+        await assertSuggestions('FROM /', addTrailingSpace(visibleIndices));
+        await assertSuggestions('from /index', addTrailingSpace(visibleIndices));
       });
 
       test('suggests visible indices on comma', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('FROM a,/', visibleIndices);
-        await assertSuggestions('FROM a, /', visibleIndices);
-        await assertSuggestions('from *,/', visibleIndices);
+        await assertSuggestions('FROM a,/', addTrailingSpace(visibleIndices));
+        await assertSuggestions('FROM a, /', addTrailingSpace(visibleIndices));
+        await assertSuggestions('from *,/', addTrailingSpace(visibleIndices));
       });
 
       test('can suggest integration data sources', async () => {
@@ -52,17 +55,21 @@ describe('autocomplete.suggest', () => {
           .filter(({ hidden }) => !hidden)
           .map(({ name, suggestedAs }) => suggestedAs || name)
           .sort();
+        const expectedSuggestions = addTrailingSpace(
+          visibleDataSources,
+          (s) => !integrations.find(({ name }) => name === s)
+        );
         const { assertSuggestions, callbacks } = await setup();
         const cb = {
           ...callbacks,
           getSources: jest.fn().mockResolvedValue(dataSources),
         };
 
-        assertSuggestions('from /', visibleDataSources, { callbacks: cb });
-        assertSuggestions('FROM /', visibleDataSources, { callbacks: cb });
-        assertSuggestions('FROM a,/', visibleDataSources, { callbacks: cb });
-        assertSuggestions('from a, /', visibleDataSources, { callbacks: cb });
-        assertSuggestions('from *,/', visibleDataSources, { callbacks: cb });
+        await assertSuggestions('from /', expectedSuggestions, { callbacks: cb });
+        await assertSuggestions('FROM /', expectedSuggestions, { callbacks: cb });
+        await assertSuggestions('FROM a,/', expectedSuggestions, { callbacks: cb });
+        await assertSuggestions('from a, /', expectedSuggestions, { callbacks: cb });
+        await assertSuggestions('from *,/', expectedSuggestions, { callbacks: cb });
       });
     });
 
@@ -71,7 +78,7 @@ describe('autocomplete.suggest', () => {
 
       test('on <kbd>SPACE</kbd> without comma ",", suggests adding metadata', async () => {
         const { assertSuggestions } = await setup();
-        const expected = ['METADATA $0', ',', '|'].sort();
+        const expected = ['METADATA $0', ',', '| '].sort();
 
         await assertSuggestions('from a, b /', expected);
       });
@@ -86,10 +93,10 @@ describe('autocomplete.suggest', () => {
       test('on <kbd>SPACE</kbd> after "METADATA" column suggests command and pipe operators', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a, b [metadata _index  /]', [',', '|']);
-        await assertSuggestions('from a, b metadata _index /', [',', '|']);
-        await assertSuggestions('from a, b metadata _index, _source /', [',', '|']);
-        await assertSuggestions(`from a, b metadata ${METADATA_FIELDS.join(', ')} /`, ['|']);
+        await assertSuggestions('from a, b [metadata _index  /]', [',', '| ']);
+        await assertSuggestions('from a, b metadata _index /', [',', '| ']);
+        await assertSuggestions('from a, b metadata _index, _source /', [',', '| ']);
+        await assertSuggestions(`from a, b metadata ${METADATA_FIELDS.join(', ')} /`, ['| ']);
       });
 
       test('filters out already used metadata fields', async () => {

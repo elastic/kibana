@@ -201,7 +201,7 @@ export async function queryMonitorStatus(
         configId: `${monitorQueryIdToConfigIdMap[queryId]}`,
         monitorQueryId: queryId,
         status: 'unknown',
-        location: loc,
+        locationId: loc,
       };
     });
   }

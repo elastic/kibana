@@ -69,6 +69,7 @@ describe(`POST ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
     );
 
     usageCounter = {
+      domainId: 'abc123',
       incrementCounter: jest.fn(),
     };
     core.getUsageCounter = jest.fn().mockReturnValue(usageCounter);

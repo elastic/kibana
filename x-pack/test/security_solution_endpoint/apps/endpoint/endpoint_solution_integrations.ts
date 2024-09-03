@@ -106,7 +106,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should show Isolation action in alert details', async () => {
         await pageObjects.timeline.showEventDetails();
-        await testSubjects.click('take-action-dropdown-btn');
+        await testSubjects.click('securitySolutionFlyoutFooterDropdownButton');
         await testSubjects.clickWhenNotDisabled('isolate-host-action-item');
         await testSubjects.existOrFail('endpointHostIsolationForm');
         await testSubjects.click('hostIsolateCancelButton');

@@ -305,8 +305,8 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       description: "Analyze mock web traffic log data for Elastic's website",
       refreshInterval: {
-        pause: false,
-        value: 900000,
+        pause: true,
+        value: 60000,
       },
       timeRestore: true,
       optionsJSON:

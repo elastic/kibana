@@ -1,0 +1,61 @@
+{
+  "id": "@kbn/object-versioning-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/object-versioning-utils",
+        "id": "def-common.validateVersion",
+        "type": "Function",
+        "tags": [],
+        "label": "validateVersion",
+        "description": [],
+        "signature": [
+          "(version: unknown) => { result: true; value: number; } | { result: false; value: null; }"
+        ],
+        "path": "packages/kbn-object-versioning-utils/lib/validate_version.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/object-versioning-utils",
+            "id": "def-common.validateVersion.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-object-versioning-utils/lib/validate_version.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

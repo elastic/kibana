@@ -13,6 +13,7 @@ import type {
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
+import { hasIcon } from '@kbn/visualization-ui-components';
 import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
 import { CollapseExpressionFunction } from '../../../common/expressions/collapse/types';
 import { DatasourceLayers } from '../../types';
@@ -155,7 +156,7 @@ export const toExpression = (
     iconAlign: state.iconAlign ?? metricStateDefaults.iconAlign,
     valueFontSize: state.valueFontMode ?? metricStateDefaults.valueFontMode,
     color: state.color || getDefaultColor(state, isMetricNumeric),
-    icon: state.icon,
+    icon: hasIcon(state.icon) ? state.icon : undefined,
     palette:
       isMetricNumeric && state.palette?.params
         ? [

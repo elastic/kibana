@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 
 import type { DataViewCrudTypes } from '../../common/content_management';
 import { DataViewSOType } from '../../common/content_management';
-import { cmServicesDefinition } from '../../common/content_management/cm_services';
+import { cmServicesDefinition } from './schema/cm_services';
 
 export class DataViewsStorage extends SOContentStorage<DataViewCrudTypes> {
   constructor({

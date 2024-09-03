@@ -18,16 +18,18 @@ import { getFunctionSignatures } from '../src/definitions/helpers';
 import { timeUnits } from '../src/definitions/literals';
 import { nonNullable } from '../src/shared/helpers';
 import {
-  SupportedFieldType,
+  SupportedDataType,
   FunctionDefinition,
-  supportedFieldTypes,
-  isSupportedFieldType,
+  dataTypes,
+  fieldTypes,
+  isFieldType,
+  FunctionParameter,
 } from '../src/definitions/types';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from '../src/validation/function_describe_block_name';
 import { getMaxMinNumberOfParams } from '../src/validation/helpers';
 import { ESQL_NUMBER_TYPES, isNumericType, isStringType } from '../src/shared/esql_types';
 
-export const fieldNameFromType = (type: SupportedFieldType) => `${camelCase(type)}Field`;
+export const fieldNameFromType = (type: SupportedDataType) => `${camelCase(type)}Field`;
 
 function main() {
   const testCasesByFunction: Map<string, Map<string, string[]>> = new Map();
@@ -301,8 +303,8 @@ function generateWhereCommandTestsForEvalFunction(
   // TODO: not sure why there's this constraint...
   const supportedFunction = signatures.some(
     ({ returnType, params }) =>
-      [...ESQL_NUMBER_TYPES, 'string'].includes(returnType) &&
-      params.every(({ type }) => [...ESQL_NUMBER_TYPES, 'string'].includes(type))
+      [...ESQL_NUMBER_TYPES, 'string'].includes(returnType as string) &&
+      params.every(({ type }) => [...ESQL_NUMBER_TYPES, 'string'].includes(type as string))
   );
 
   if (!supportedFunction) {
@@ -312,7 +314,7 @@ function generateWhereCommandTestsForEvalFunction(
   const supportedSignatures = signatures.filter(({ returnType }) =>
     // TODO — not sure why the tests have this limitation... seems like any type
     // that can be part of a boolean expression should be allowed in a where clause
-    [...ESQL_NUMBER_TYPES, 'string'].includes(returnType)
+    [...ESQL_NUMBER_TYPES, 'string'].includes(returnType as string)
   );
   for (const { params, returnType, ...restSign } of supportedSignatures) {
     const correctMapping = getFieldMapping(params);
@@ -905,7 +907,7 @@ function generateStatsCommandTestsForGroupingFunction(
         fieldReplacedType
           // if a param of type time_literal or chrono_literal it will always be a literal
           // so no way to test the constantOnly thing
-          .filter((type) => !['time_literal', 'chrono_literal'].includes(type))
+          .filter((type) => !['time_literal'].includes(type as string))
           .map((type) => `Argument of [${name}] must be a constant, received [${type}Field]`)
       );
     }
@@ -965,7 +967,7 @@ function generateSortCommandTestsForAggFunction(
 
 const generateSortCommandTestsForGroupingFunction = generateSortCommandTestsForAggFunction;
 
-const fieldTypesToConstants: Record<SupportedFieldType, string> = {
+const fieldTypesToConstants: Record<SupportedDataType, string> = {
   text: '"a"',
   keyword: '"a"',
   double: '5.5',
@@ -984,14 +986,21 @@ const fieldTypesToConstants: Record<SupportedFieldType, string> = {
   geo_shape: 'to_geoshape("POINT (30 10)")',
   cartesian_point: 'to_cartesianpoint("POINT (30 10)")',
   cartesian_shape: 'to_cartesianshape("POINT (30 10)")',
+  null: 'NULL',
+  time_duration: '1 day',
+  // the following are never supplied
+  // by the ES function definitions. Just making types happy
+  time_literal: '1 day',
+  unsupported: '',
+  date_nanos: '1420070400000',
 };
 
-const supportedTypesAndFieldNames = supportedFieldTypes.map((type) => ({
+const supportedTypesAndFieldNames = fieldTypes.map((type) => ({
   name: fieldNameFromType(type),
   type,
 }));
 
-const supportedTypesAndConstants = supportedFieldTypes.map((type) => ({
+const supportedTypesAndConstants = dataTypes.map((type) => ({
   name: fieldTypesToConstants[type],
   type,
 }));
@@ -1029,7 +1038,7 @@ const toCartesianShapeSignature = evalFunctionDefinitions.find(
 const toVersionSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_version')!;
 
 // We don't have full list for long, unsigned_long, etc.
-const nestedFunctions: Record<SupportedFieldType, string> = {
+const nestedFunctions: Record<SupportedDataType, string> = {
   double: prepareNestedFunction(toDoubleSignature),
   integer: prepareNestedFunction(toInteger),
   text: prepareNestedFunction(toStringSignature),
@@ -1046,7 +1055,7 @@ const nestedFunctions: Record<SupportedFieldType, string> = {
 };
 
 function getFieldName(
-  typeString: SupportedFieldType,
+  typeString: SupportedDataType,
   { useNestedFunction, isStats }: { useNestedFunction: boolean; isStats: boolean }
 ) {
   if (useNestedFunction && isStats) {
@@ -1082,7 +1091,7 @@ function tweakSignatureForRowCommand(signature: string): string {
    */
   let ret = signature;
   for (const [type, value] of Object.entries(fieldTypesToConstants)) {
-    ret = ret.replace(new RegExp(fieldNameFromType(type as SupportedFieldType), 'g'), value);
+    ret = ret.replace(new RegExp(fieldNameFromType(type as SupportedDataType), 'g'), value);
   }
   return ret;
 }
@@ -1101,8 +1110,8 @@ function getFieldMapping(
   };
 
   return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
-    const typeString: string = type;
-    if (isSupportedFieldType(typeString)) {
+    const typeString: string = type as string;
+    if (isFieldType(typeString)) {
       if (useLiterals && literalOptions) {
         return {
           name: `"${literalOptions[0]}"`,
@@ -1146,8 +1155,8 @@ function generateIncorrectlyTypedParameters(
   name: string,
   signatures: FunctionDefinition['signatures'],
   currentParams: FunctionDefinition['signatures'][number]['params'],
-  availableFields: Array<{ name: string; type: SupportedFieldType }>
-) {
+  availableFields: Array<{ name: string; type: SupportedDataType }>
+): { wrongFieldMapping: FunctionParameter[]; expectedErrors: string[] } {
   const literalValues = {
     string: `"a"`,
     number: '5',
@@ -1167,7 +1176,7 @@ function generateIncorrectlyTypedParameters(
 
       if (type !== 'any') {
         // try to find an unacceptable field
-        const unacceptableField: { name: string; type: SupportedFieldType } | undefined =
+        const unacceptableField: { name: string; type: SupportedDataType } | undefined =
           availableFields
             // sort to make the test deterministic
             .sort((a, b) => a.type.localeCompare(b.type))
@@ -1187,7 +1196,7 @@ function generateIncorrectlyTypedParameters(
       }
 
       // failed to find a bad field... they must all be acceptable
-      const acceptableField: { name: string; type: SupportedFieldType } | undefined =
+      const acceptableField: { name: string; type: SupportedDataType } | undefined =
         type === 'any'
           ? availableFields[0]
           : availableFields.find(({ type: fieldType }) => fieldType === type);
@@ -1252,7 +1261,7 @@ function generateIncorrectlyTypedParameters(
     })
     .filter(nonNullable);
 
-  return { wrongFieldMapping, expectedErrors };
+  return { wrongFieldMapping: wrongFieldMapping as FunctionParameter[], expectedErrors };
 }
 
 /**

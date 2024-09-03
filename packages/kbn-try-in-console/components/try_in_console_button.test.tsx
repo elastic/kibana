@@ -45,7 +45,7 @@ describe('TryInConsoleButton', () => {
     sharePlugin,
     content,
     showIcon,
-    link,
+    type,
   }: Partial<TryInConsoleButtonProps>) => ({
     application: (application ?? mockApplication) as ApplicationStart,
     sharePlugin: (sharePlugin ?? mockShare) as SharePluginStart | undefined,
@@ -53,7 +53,7 @@ describe('TryInConsoleButton', () => {
     consolePlugin,
     content,
     showIcon,
-    link,
+    type,
   });
   beforeEach(() => {
     jest.resetAllMocks();
@@ -73,7 +73,7 @@ describe('TryInConsoleButton', () => {
     const wrapper = render(<TryInConsoleButton {...defaultProps(props)} />);
 
     expect(wrapper.getByTestId('tryInConsoleButton')).toBeTruthy();
-    expect(wrapper.getByRole('button')).toHaveTextContent('Try in Console');
+    expect(wrapper.getByRole('button')).toHaveTextContent('Run in Console');
     expect(mockLocatorUseUrl).toHaveBeenCalledWith(
       {
         loadFrom: 'data:text/plain,OIUQKgBA9A+gzgFwIYLkA',
@@ -83,11 +83,11 @@ describe('TryInConsoleButton', () => {
     );
   });
   it('can render as a link', async () => {
-    const props: Partial<TryInConsoleButtonProps> = { request: 'GET /_stats', link: true };
+    const props: Partial<TryInConsoleButtonProps> = { request: 'GET /_stats', type: 'link' };
     const wrapper = render(<TryInConsoleButton {...defaultProps(props)} />);
 
     expect(wrapper.getByTestId('tryInConsoleLink')).toBeTruthy();
-    expect(wrapper.getByRole('button')).toHaveTextContent('Try in Console');
+    expect(wrapper.getByRole('button')).toHaveTextContent('Run in Console');
   });
   it('renders null if dev tools are unavailable', async () => {
     const props: Partial<TryInConsoleButtonProps> = {
@@ -142,7 +142,7 @@ describe('TryInConsoleButton', () => {
     const props: Partial<TryInConsoleButtonProps> = {
       request: 'GET /_stats',
       content: 'Try my console!!',
-      link: true,
+      type: 'link',
     };
     const wrapper = render(<TryInConsoleButton {...defaultProps(props)} />);
 
@@ -153,7 +153,7 @@ describe('TryInConsoleButton', () => {
     const props: Partial<TryInConsoleButtonProps> = { request: 'GET /_stats' };
     render(<TryInConsoleButton {...defaultProps(props)} />);
 
-    fireEvent.click(screen.getByText('Try in Console'));
+    fireEvent.click(screen.getByText('Run in Console'));
 
     expect(windowOpenSpy).toHaveBeenCalledTimes(1);
     expect(windowOpenSpy).toHaveBeenCalledWith('/app/test/dev_tools', '_blank', 'noreferrer');
@@ -161,7 +161,7 @@ describe('TryInConsoleButton', () => {
   it('can open in new tab without data', async () => {
     render(<TryInConsoleButton {...defaultProps({})} />);
 
-    fireEvent.click(screen.getByText('Try in Console'));
+    fireEvent.click(screen.getByText('Run in Console'));
 
     expect(mockLocatorUseUrl).toHaveBeenCalledWith({}, undefined, [undefined]);
     expect(windowOpenSpy).toHaveBeenCalledTimes(1);
@@ -175,7 +175,7 @@ describe('TryInConsoleButton', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('Try in Console'));
+    fireEvent.click(screen.getByText('Run in Console'));
 
     expect(windowOpenSpy).toHaveBeenCalledTimes(0);
     expect(mockConsole.openEmbeddedConsole).toHaveBeenCalledTimes(1);
@@ -185,7 +185,7 @@ describe('TryInConsoleButton', () => {
     mockConsole.isEmbeddedConsoleAvailable.mockReturnValue(false);
     render(<TryInConsoleButton {...defaultProps({ consolePlugin: mockConsole })} />);
 
-    fireEvent.click(screen.getByText('Try in Console'));
+    fireEvent.click(screen.getByText('Run in Console'));
 
     expect(windowOpenSpy).toHaveBeenCalledTimes(1);
     expect(mockConsole.openEmbeddedConsole).toHaveBeenCalledTimes(0);

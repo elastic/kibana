@@ -40,6 +40,10 @@ export interface PresentationPanelInternalProps<
   showBadges?: boolean;
   showNotifications?: boolean;
 
+  /**
+   * Set to true to not show PanelLoader component while Panel is loading
+   */
+  hideLoader?: boolean;
   hideHeader?: boolean;
   hideInspector?: boolean;
 

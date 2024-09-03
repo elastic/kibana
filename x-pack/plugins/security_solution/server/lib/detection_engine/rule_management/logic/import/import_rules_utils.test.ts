@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { requestContextMock } from '../../../routes/__mocks__';
@@ -16,8 +18,12 @@ describe('importRules', () => {
   const { clients, context } = requestContextMock.createTools();
   const ruleToImport = getImportRulesSchemaMock();
 
+  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    savedObjectsClient = savedObjectsClientMock.create();
   });
 
   it('returns an empty rules response if no rules to import', async () => {
@@ -26,7 +32,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-      existingLists: {},
+      savedObjectsClient,
     });
 
     expect(result).toEqual([]);
@@ -38,7 +44,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-      existingLists: {},
+      savedObjectsClient,
     });
 
     expect(result).toEqual([
@@ -67,7 +73,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-      existingLists: {},
+      savedObjectsClient,
     });
 
     expect(result).toEqual([
@@ -93,7 +99,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-      existingLists: {},
+      savedObjectsClient,
     });
 
     expect(result).toEqual([{ rule_id: ruleToImport.rule_id, status_code: 200 }]);

@@ -28,7 +28,7 @@ import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { catchAxiosErrorFormatAndThrow } from '../../common/endpoint/format_axios_error';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { renderSummaryTable } from './print_run';
-import { parseTestFileConfig, retrieveIntegrations } from './utils';
+import { getOnBeforeHook, parseTestFileConfig, retrieveIntegrations } from './utils';
 import { prefixedOutputLogger } from '../endpoint/common/utils';
 
 import type { ProductType, Credentials, ProjectHandler } from './project_handler/project_handler';
@@ -327,6 +327,12 @@ export const cli = () => {
           alias: 'c',
           type: 'string',
           default: '',
+        })
+        .option('onBeforeHook', {
+          // Execute a hook before running the tests with cypress.open/run
+          alias: 'b',
+          type: 'string',
+          default: '',
         });
 
       log.info(`
@@ -526,6 +532,15 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               `);
               }
               process.env.TEST_CLOUD_HOST_NAME = new URL(BASE_ENV_URL).hostname;
+
+              // If provided, execute the onBeforeHook directly before running the tests once everything is set up
+              if (argv.onBeforeHook) {
+                const onBeforeFilePath = require.resolve(`../../${argv.onBeforeHook}`) as string;
+                const module: unknown = await import(onBeforeFilePath);
+                const onBeforeHook = getOnBeforeHook(module, onBeforeFilePath);
+
+                await onBeforeHook(cyCustomEnv);
+              }
 
               if (isOpen) {
                 await cypress.open({

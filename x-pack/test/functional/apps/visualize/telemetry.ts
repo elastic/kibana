@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         checkTelemetry(`render_lens_${i}`));
     });
 
-    describe('should render visualization once', async () => {
+    describe('should render visualization once', () => {
       let initialRenderCountMap: Record<string, number> = {};
       let afterRefreshRenderCountMap: Record<string, number> = {};
 

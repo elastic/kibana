@@ -25,9 +25,7 @@ describe('console parser', () => {
     const { requests, errors } = parser(input) as ConsoleParserResult;
     expect(requests.length).toBe(1);
     expect(errors.length).toBe(0);
-    const { method, url, startOffset, endOffset } = requests[0];
-    expect(method).toBe('GET');
-    expect(url).toBe('_search');
+    const { startOffset, endOffset } = requests[0];
     // the start offset of the request is the beginning of the string
     expect(startOffset).toBe(0);
     // the end offset of the request is the end of the string
@@ -38,6 +36,10 @@ describe('console parser', () => {
     const input = 'GET _search\nPOST _test_index';
     const { requests } = parser(input) as ConsoleParserResult;
     expect(requests.length).toBe(2);
+    expect(requests[0].startOffset).toBe(0);
+    expect(requests[0].endOffset).toBe(11);
+    expect(requests[1].startOffset).toBe(12);
+    expect(requests[1].endOffset).toBe(28);
   });
 
   it('parses a request with a request body', () => {
@@ -45,15 +47,8 @@ describe('console parser', () => {
       'GET _search\n' + '{\n' + '  "query": {\n' + '    "match_all": {}\n' + '  }\n' + '}';
     const { requests } = parser(input) as ConsoleParserResult;
     expect(requests.length).toBe(1);
-    const { method, url, data } = requests[0];
-    expect(method).toBe('GET');
-    expect(url).toBe('_search');
-    expect(data).toEqual([
-      {
-        query: {
-          match_all: {},
-        },
-      },
-    ]);
+    const { startOffset, endOffset } = requests[0];
+    expect(startOffset).toBe(0);
+    expect(endOffset).toBe(52);
   });
 });

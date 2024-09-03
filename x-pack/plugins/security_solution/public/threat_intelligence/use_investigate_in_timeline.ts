@@ -11,7 +11,7 @@ import { timelineDefaults } from '../timelines/store/defaults';
 import { APP_UI_ID } from '../../common/constants';
 import type { DataProvider } from '../../common/types';
 import { TimelineId } from '../../common/types/timeline';
-import { TimelineType } from '../../common/api/timeline';
+import { TimelineTypeEnum } from '../../common/api/timeline';
 import { useStartTransaction } from '../common/lib/apm/use_start_transaction';
 import { timelineActions } from '../timelines/store';
 import { useCreateTimeline } from '../timelines/hooks/use_create_timeline';
@@ -50,13 +50,14 @@ export const useInvestigateInTimeline = ({
   const { startTransaction } = useStartTransaction();
 
   const updateTimelineIsLoading = useCallback(
-    (payload) => dispatch(timelineActions.updateIsLoading(payload)),
+    (payload: Parameters<typeof timelineActions.updateIsLoading>[0]) =>
+      dispatch(timelineActions.updateIsLoading(payload)),
     [dispatch]
   );
 
   const clearActiveTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
   });
 
   const updateTimeline = useUpdateTimeline();

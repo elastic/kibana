@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SOWithMetadata } from '@kbn/content-management-utils';
+import type { SOWithMetadata } from '@kbn/content-management-utils';
 import { LinksAttributes } from '../../common/content_management';
 import { injectReferences } from '../../common/persistable_state';
 import { LinksByReferenceSerializedState, LinksRuntimeState, LinksSerializedState } from '../types';

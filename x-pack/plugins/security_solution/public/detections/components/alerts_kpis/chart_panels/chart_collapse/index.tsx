@@ -50,7 +50,8 @@ const combinedAggregations = (groupBySelection: GroupBySelection) => {
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeXS};
-  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l});
+  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l}) {
+  }
 `;
 
 const SeverityWrapper = styled(EuiFlexItem)`
@@ -105,7 +106,7 @@ export const ChartCollapse: React.FC<Props> = ({
     });
   }, [data]);
   const groupBy = useMemo(() => getGroupByLabel(groupBySelection), [groupBySelection]);
-  // className="eui-alignMiddle"
+
   return (
     <InspectButtonContainer>
       {!isLoading && (

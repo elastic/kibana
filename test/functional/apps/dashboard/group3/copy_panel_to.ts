@@ -100,9 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('saveDashboardSuccess');
 
       await PageObjects.dashboard.clickCancelOutOfEditMode();
-      const panelOptions = await dashboardPanelActions.getPanelHeading(markdownTitle);
-      await dashboardPanelActions.openContextMenu(panelOptions);
-      await dashboardPanelActions.expectMissingEditPanelAction();
+      await dashboardPanelActions.expectMissingEditPanelAction(markdownTitle);
     });
 
     it('does not show the current dashboard in the dashboard picker', async () => {

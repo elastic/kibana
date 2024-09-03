@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
@@ -17,11 +19,15 @@ import type {
   SentinelOneGetActivitiesParams,
   SentinelOneGetActivitiesResponse,
   SentinelOneGetAgentsResponse,
+  SentinelOneGetAgentsParams,
   SentinelOneGetRemoteScriptResultsApiResponse,
   SentinelOneGetRemoteScriptsParams,
   SentinelOneGetRemoteScriptsResponse,
   SentinelOneGetRemoteScriptStatusApiResponse,
   SentinelOneRemoteScriptExecutionStatus,
+  SentinelOneIsolateHostParams,
+  SentinelOneFetchAgentFilesParams,
+  SentinelOneExecuteScriptParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
   QueryDslQueryContainer,
@@ -57,7 +63,6 @@ import type {
   EndpointActionResponseDataOutput,
   GetProcessesActionOutputContent,
   KillProcessActionOutputContent,
-  KillProcessRequestBody,
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionGetFileOutputContent,
@@ -81,6 +86,8 @@ import type {
   GetProcessesRequestBody,
   IsolationRouteRequestBody,
   ResponseActionGetFileRequestBody,
+  KillProcessRequestBody,
+  UnisolationRouteRequestBody,
 } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
@@ -172,8 +179,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     LogsEndpointAction<TParameters, TOutputContent, TMeta & SentinelOneActionRequestCommonMeta>
   > {
-    const agentUUID = actionRequest.endpoint_ids[0];
-    const agentDetails = await this.getAgentDetails(agentUUID);
+    const agentId = actionRequest.endpoint_ids[0];
+    const agentDetails = await this.getAgentDetails(agentId);
 
     const doc = await super.writeActionRequestToEndpointIndex<
       TParameters,
@@ -182,11 +189,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     >({
       ...actionRequest,
       hosts: {
-        [agentUUID]: { name: agentDetails.computerName },
+        [agentId]: { name: agentDetails.computerName },
       },
       meta: {
         // Add common meta data
-        agentUUID,
+        agentUUID: agentId,
         agentId: agentDetails.id,
         hostName: agentDetails.computerName,
         ...(actionRequest.meta ?? {}),
@@ -200,10 +207,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * Sends actions to SentinelOne directly (via Connector)
    * @private
    */
-  private async sendAction<T = unknown>(
-    actionType: SUB_ACTION,
-    actionParams: object
-  ): Promise<ActionTypeExecutorResult<T>> {
+  private async sendAction<
+    TResponse = unknown,
+    TParams extends Record<string, any> = Record<string, any>
+  >(actionType: SUB_ACTION, actionParams: TParams): Promise<ActionTypeExecutorResult<TResponse>> {
     const executeOptions: Parameters<typeof this.connectorActionsClient.execute>[0] = {
       params: {
         subAction: actionType,
@@ -232,18 +239,18 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     this.log.debug(() => `Response:\n${stringify(actionSendResponse)}`);
 
-    return actionSendResponse as ActionTypeExecutorResult<T>;
+    return actionSendResponse as ActionTypeExecutorResult<TResponse>;
   }
 
   /** Gets agent details directly from SentinelOne */
   private async getAgentDetails(
-    agentUUID: string
+    agentId: string
   ): Promise<SentinelOneGetAgentsResponse['data'][number]> {
-    const cachedEntry = this.cache.get<SentinelOneGetAgentsResponse['data'][number]>(agentUUID);
+    const cachedEntry = this.cache.get<SentinelOneGetAgentsResponse['data'][number]>(agentId);
 
     if (cachedEntry) {
       this.log.debug(
-        `Found cached agent details for UUID [${agentUUID}]:\n${stringify(cachedEntry)}`
+        `Found cached agent details for UUID [${agentId}]:\n${stringify(cachedEntry)}`
       );
       return cachedEntry;
     }
@@ -251,24 +258,25 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     let s1ApiResponse: SentinelOneGetAgentsResponse | undefined;
 
     try {
-      const response = await this.sendAction<SentinelOneGetAgentsResponse>(SUB_ACTION.GET_AGENTS, {
-        uuid: agentUUID,
-      });
+      const response = await this.sendAction<
+        SentinelOneGetAgentsResponse,
+        SentinelOneGetAgentsParams
+      >(SUB_ACTION.GET_AGENTS, { ids: agentId });
 
       s1ApiResponse = response.data;
     } catch (err) {
       throw new ResponseActionsClientError(
-        `Error while attempting to retrieve SentinelOne host with agent id [${agentUUID}]: ${err.message}`,
+        `Error while attempting to retrieve SentinelOne host with agent id [${agentId}]: ${err.message}`,
         500,
         err
       );
     }
 
     if (!s1ApiResponse || !s1ApiResponse.data[0]) {
-      throw new ResponseActionsClientError(`SentinelOne agent id [${agentUUID}] not found`, 404);
+      throw new ResponseActionsClientError(`SentinelOne agent id [${agentId}] not found`, 404);
     }
 
-    this.cache.set(agentUUID, s1ApiResponse.data[0]);
+    this.cache.set(agentId, s1ApiResponse.data[0]);
 
     return s1ApiResponse.data[0];
   }
@@ -287,6 +295,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       };
     }
 
+    // KILL-PROCESS:
     // validate that we have a `process_name`. We need this here because the schema for this command
     // specifically because `KillProcessRequestBody` allows 3 types of parameters.
     if (payload.command === 'kill-process') {
@@ -326,7 +335,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
       if (!error) {
         try {
-          await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: actionRequest.endpoint_ids[0] });
+          await this.sendAction<unknown, SentinelOneIsolateHostParams>(SUB_ACTION.ISOLATE_HOST, {
+            ids: actionRequest.endpoint_ids[0],
+          });
         } catch (err) {
           error = err;
         }
@@ -361,7 +372,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async release(
-    actionRequest: IsolationRouteRequestBody,
+    actionRequest: UnisolationRouteRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails> {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
@@ -379,7 +390,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
       if (!error) {
         try {
-          await this.sendAction(SUB_ACTION.RELEASE_HOST, { uuid: actionRequest.endpoint_ids[0] });
+          await this.sendAction<unknown, SentinelOneIsolateHostParams>(SUB_ACTION.RELEASE_HOST, {
+            ids: actionRequest.endpoint_ids[0],
+          });
         } catch (err) {
           error = err;
         }
@@ -436,17 +449,22 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       command: 'get-file',
     };
 
+    const agentId = actionRequest.endpoint_ids[0];
+
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
       const timestamp = new Date().toISOString();
 
       if (!error) {
         try {
-          await this.sendAction(SUB_ACTION.FETCH_AGENT_FILES, {
-            agentUUID: actionRequest.endpoint_ids[0],
-            files: [actionRequest.parameters.path],
-            zipPassCode: RESPONSE_ACTIONS_ZIP_PASSCODE.sentinel_one,
-          });
+          await this.sendAction<unknown, SentinelOneFetchAgentFilesParams>(
+            SUB_ACTION.FETCH_AGENT_FILES,
+            {
+              agentId: actionRequest.endpoint_ids[0],
+              files: [actionRequest.parameters.path],
+              zipPassCode: RESPONSE_ACTIONS_ZIP_PASSCODE.sentinel_one,
+            }
+          );
         } catch (err) {
           error = err;
         }
@@ -459,8 +477,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
 
       if (!error) {
-        const { id: agentId } = await this.getAgentDetails(actionRequest.endpoint_ids[0]);
-
         const activitySearchCriteria: SentinelOneGetActivitiesParams = {
           // Activity type for fetching a file from a host machine in SentinelOne:
           // {
@@ -491,7 +507,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           };
         } else {
           this.log.warn(
-            `Unable to find a fetch file command entry in SentinelOne activity log. May be unable to complete response action`
+            `Unable to find a fetch file command entry in SentinelOne activity log. May be unable to complete response action. Search criteria used:\n${stringify(
+              activitySearchCriteria
+            )}`
           );
         }
       }
@@ -657,7 +675,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
             }
 
             const downloadAgentFileMethodOptions: SentinelOneDownloadAgentFileParams = {
-              agentUUID: agentId,
+              agentId,
               activityId: getFileAgentResponse.meta?.activityLogEntryId,
             };
             const { data } = await this.sendAction<Readable>(
@@ -764,24 +782,24 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         );
 
         try {
-          const s1Response = await this.sendAction<SentinelOneExecuteScriptResponse>(
-            SUB_ACTION.EXECUTE_SCRIPT,
-            {
-              filter: {
-                uuids: actionRequest.endpoint_ids[0],
-              },
-              script: {
-                scriptId: terminateScriptInfo.scriptId,
-                taskDescription: this.buildExternalComment(reqIndexOptions),
-                requiresApproval: false,
-                outputDestination: 'SentinelCloud',
-                inputParams: terminateScriptInfo.buildScriptArgs({
-                  // @ts-expect-error TS2339: Property 'process_name' does not exist (`.validateRequest()` has already validated that `process_name` exists)
-                  processName: reqIndexOptions.parameters.process_name,
-                }),
-              },
-            }
-          );
+          const s1Response = await this.sendAction<
+            SentinelOneExecuteScriptResponse,
+            SentinelOneExecuteScriptParams
+          >(SUB_ACTION.EXECUTE_SCRIPT, {
+            filter: {
+              ids: actionRequest.endpoint_ids[0],
+            },
+            script: {
+              scriptId: terminateScriptInfo.scriptId,
+              taskDescription: this.buildExternalComment(reqIndexOptions),
+              requiresApproval: false,
+              outputDestination: 'SentinelCloud',
+              inputParams: terminateScriptInfo.buildScriptArgs({
+                // @ts-expect-error TS2339: Property 'process_name' does not exist (`.validateRequest()` has already validated that `process_name` exists)
+                processName: reqIndexOptions.parameters.process_name,
+              }),
+            },
+          });
 
           reqIndexOptions.meta = {
             parentTaskId: s1Response.data?.data?.parentTaskId ?? '',
@@ -841,21 +859,21 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         );
 
         try {
-          const s1Response = await this.sendAction<SentinelOneExecuteScriptResponse>(
-            SUB_ACTION.EXECUTE_SCRIPT,
-            {
-              filter: {
-                uuids: actionRequest.endpoint_ids[0],
-              },
-              script: {
-                scriptId: processesScriptInfo.scriptId,
-                taskDescription: this.buildExternalComment(reqIndexOptions),
-                requiresApproval: false,
-                outputDestination: 'SentinelCloud',
-                inputParams: processesScriptInfo.buildScriptArgs({}),
-              },
-            }
-          );
+          const s1Response = await this.sendAction<
+            SentinelOneExecuteScriptResponse,
+            SentinelOneExecuteScriptParams
+          >(SUB_ACTION.EXECUTE_SCRIPT, {
+            filter: {
+              ids: actionRequest.endpoint_ids[0],
+            },
+            script: {
+              scriptId: processesScriptInfo.scriptId,
+              taskDescription: this.buildExternalComment(reqIndexOptions),
+              requiresApproval: false,
+              outputDestination: 'SentinelCloud',
+              inputParams: processesScriptInfo.buildScriptArgs({}),
+            },
+          });
 
           reqIndexOptions.meta = {
             parentTaskId: s1Response.data?.data?.parentTaskId ?? '',

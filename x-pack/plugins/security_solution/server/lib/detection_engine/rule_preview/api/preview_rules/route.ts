@@ -283,12 +283,13 @@ export const previewRulesRoute = (
                     abortController,
                     scopedClusterClient: coreContext.elasticsearch.client,
                   }),
-                  searchSourceClient: wrapSearchSourceClient({
-                    abortController,
-                    searchSourceClient,
-                  }),
+                  getSearchSourceClient: async () =>
+                    wrapSearchSourceClient({
+                      abortController,
+                      searchSourceClient,
+                    }),
                   uiSettingsClient: coreContext.uiSettings.client,
-                  dataViews: dataViewsService,
+                  getDataViews: async () => dataViewsService,
                   share,
                 },
                 spaceId,

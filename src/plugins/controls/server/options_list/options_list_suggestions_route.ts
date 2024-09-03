@@ -48,6 +48,7 @@ export const setupOptionsListSuggestionsRoute = (
                 filters: schema.maybe(schema.any()),
                 fieldSpec: schema.maybe(schema.any()),
                 allowExpensiveQueries: schema.boolean(),
+                ignoreValidations: schema.maybe(schema.boolean()),
                 searchString: schema.maybe(schema.string()),
                 searchTechnique: schema.maybe(
                   schema.oneOf([
@@ -102,7 +103,7 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, runtimeFieldMap } = request;
+    const { runPastTimeout, filters, runtimeFieldMap, ignoreValidations } = request;
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
@@ -112,7 +113,9 @@ export const setupOptionsListSuggestionsRoute = (
     const validationBuilder = getValidationAggregationBuilder();
 
     const suggestionAggregation: any = suggestionBuilder.buildAggregation(request) ?? {};
-    const validationAggregation: any = validationBuilder.buildAggregation(request);
+    const validationAggregation: any = ignoreValidations
+      ? {}
+      : validationBuilder.buildAggregation(request);
 
     const body: SearchRequest['body'] = {
       size: 0,
@@ -141,7 +144,9 @@ export const setupOptionsListSuggestionsRoute = (
      */
     const results = suggestionBuilder.parse(rawEsResult, request);
     const totalCardinality = results.totalCardinality;
-    const invalidSelections = validationBuilder.parse(rawEsResult, request);
+    const invalidSelections = ignoreValidations
+      ? []
+      : validationBuilder.parse(rawEsResult, request);
 
     return {
       suggestions: results.suggestions,

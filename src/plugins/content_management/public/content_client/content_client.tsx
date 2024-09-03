@@ -7,7 +7,7 @@
  */
 
 import { QueryClient } from '@tanstack/react-query';
-import { validateVersion } from '@kbn/object-versioning/lib/utils';
+import { validateVersion } from '@kbn/object-versioning-utils';
 import type { Version } from '@kbn/object-versioning';
 import { createQueryObservable } from './query_observable';
 import type { CrudClient } from '../crud_client';

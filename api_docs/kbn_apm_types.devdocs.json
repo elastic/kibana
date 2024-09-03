@@ -3640,7 +3640,7 @@
         "label": "Metric",
         "description": [],
         "signature": [
-          "BaseMetric | ",
+          "BaseMetric | TransactionBreakdownMetric | SpanBreakdownMetric | TransactionDurationMetric | ",
           {
             "pluginId": "@kbn/apm-types",
             "scope": "common",
@@ -3648,7 +3648,7 @@
             "section": "def-common.SpanDestinationMetric",
             "text": "SpanDestinationMetric"
           },
-          " | TransactionBreakdownMetric | SpanBreakdownMetric | TransactionDurationMetric | SystemMetric | JVMMetric"
+          " | SystemMetric | JVMMetric"
         ],
         "path": "packages/kbn-apm-types/src/es_schemas/ui/metric.ts",
         "deprecated": false,
@@ -4023,7 +4023,7 @@
         "label": "MetricRaw",
         "description": [],
         "signature": [
-          "BaseMetric | ",
+          "BaseMetric | TransactionBreakdownMetric | SpanBreakdownMetric | TransactionDurationMetric | ",
           {
             "pluginId": "@kbn/apm-types",
             "scope": "common",
@@ -4031,7 +4031,7 @@
             "section": "def-common.SpanDestinationMetric",
             "text": "SpanDestinationMetric"
           },
-          " | TransactionBreakdownMetric | SpanBreakdownMetric | TransactionDurationMetric | SystemMetric | JVMMetric"
+          " | SystemMetric | JVMMetric"
         ],
         "path": "packages/kbn-apm-types/src/es_schemas/raw/metric_raw.ts",
         "deprecated": false,

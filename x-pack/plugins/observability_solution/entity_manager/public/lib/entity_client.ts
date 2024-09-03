@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
+import { CreateEntityDefinitionQuery, DeleteEntityDefinitionQuery } from '@kbn/entities-schema';
 import { EntityManagerUnauthorizedError } from './errors';
 import { IEntityClient } from '../types';
 import {
@@ -21,9 +22,13 @@ export class EntityClient implements IEntityClient {
     return await this.http.get('/internal/entities/managed/enablement');
   }
 
-  async enableManagedEntityDiscovery(): Promise<EnableManagedEntityResponse> {
+  async enableManagedEntityDiscovery(
+    query?: CreateEntityDefinitionQuery
+  ): Promise<EnableManagedEntityResponse> {
     try {
-      return await this.http.put('/internal/entities/managed/enablement');
+      return await this.http.put('/internal/entities/managed/enablement', {
+        query,
+      });
     } catch (err) {
       if (err.body?.statusCode === 403) {
         throw new EntityManagerUnauthorizedError(err.body.message);
@@ -32,9 +37,11 @@ export class EntityClient implements IEntityClient {
     }
   }
 
-  async disableManagedEntityDiscovery(): Promise<DisableManagedEntityResponse> {
+  async disableManagedEntityDiscovery(
+    query?: DeleteEntityDefinitionQuery
+  ): Promise<DisableManagedEntityResponse> {
     try {
-      return await this.http.delete('/internal/entities/managed/enablement');
+      return await this.http.delete('/internal/entities/managed/enablement', { query });
     } catch (err) {
       if (err.body?.statusCode === 403) {
         throw new EntityManagerUnauthorizedError(err.body.message);

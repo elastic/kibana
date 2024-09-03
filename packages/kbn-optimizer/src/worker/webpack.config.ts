@@ -50,6 +50,7 @@ export function getWebpackConfig(
     profile: worker.profileWebpack,
 
     output: {
+      hashFunction: 'sha1',
       path: bundle.outputDir,
       filename: `${bundle.id}.${bundle.type}.js`,
       chunkFilename: `${bundle.id}.chunk.[id].js`,
@@ -212,6 +213,18 @@ export function getWebpackConfig(
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMap: true,
                       quietDeps: true,
+                      logger: {
+                        warn: (message: string, warning: any) => {
+                          // Muted - see https://github.com/elastic/kibana/issues/190345 for tracking remediation
+                          if (warning?.deprecationType?.id === 'mixed-decls') return;
+
+                          if (warning.deprecation)
+                            return process.stderr.write(
+                              `DEPRECATION WARNING: ${message}\n${warning.stack}`
+                            );
+                          process.stderr.write('WARNING: ' + message);
+                        },
+                      },
                     },
                   },
                 },

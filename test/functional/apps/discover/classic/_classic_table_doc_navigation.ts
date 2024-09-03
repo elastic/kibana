@@ -36,11 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitForDocTableLoadingComplete();
-    });
-
-    beforeEach(async function () {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitForDocTableLoadingComplete();

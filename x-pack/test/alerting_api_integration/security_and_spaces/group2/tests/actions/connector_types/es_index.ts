@@ -7,7 +7,9 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 
+import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 const ES_TEST_INDEX_NAME = 'functional-test-actions-index';
 
@@ -16,6 +18,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
   const es: Client = getService('es');
   const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const retry = getService('retry');
 
   describe('index action', () => {
     beforeEach(() => esDeleteAllIndices(ES_TEST_INDEX_NAME));
@@ -214,6 +217,23 @@ export default function indexTest({ getService }: FtrProviderContext) {
       }
       expect(passed1).to.be(true);
       expect(passed2).to.be(true);
+
+      const events: IValidatedEvent[] = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'default',
+          type: 'action',
+          id: createdAction.id,
+          provider: 'actions',
+          actions: new Map([
+            ['execute-start', { equal: 1 }],
+            ['execute', { equal: 1 }],
+          ]),
+        });
+      });
+
+      const executeEvent = events[1];
+      expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
     });
 
     it('should execute successly with refresh false', async () => {

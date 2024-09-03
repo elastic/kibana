@@ -9,7 +9,7 @@
 import React, { Suspense } from 'react';
 
 import { OverlayRef } from '@kbn/core/public';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, htmlIdGenerator } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { PresentationContainer } from '@kbn/presentation-containers';
@@ -20,6 +20,8 @@ const LazyAddPanelFlyout = React.lazy(async () => {
   return { default: module.AddPanelFlyout };
 });
 
+const htmlId = htmlIdGenerator('modalTitleId');
+
 export const openAddPanelFlyout = ({
   container,
   onAddPanel,
@@ -29,21 +31,28 @@ export const openAddPanelFlyout = ({
   onAddPanel?: (id: string) => void;
   onClose?: () => void;
 }): OverlayRef => {
+  const modalTitleId = htmlId();
+
   // send the overlay ref to the root embeddable if it is capable of tracking overlays
   const flyoutSession = core.overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazyAddPanelFlyout container={container} onAddPanel={onAddPanel} />
+        <LazyAddPanelFlyout
+          container={container}
+          onAddPanel={onAddPanel}
+          modalTitleId={modalTitleId}
+        />
       </Suspense>,
       core
     ),
     {
-      'data-test-subj': 'dashboardAddPanel',
       ownFocus: true,
       onClose: (overlayRef) => {
         if (onClose) onClose();
         overlayRef.close();
       },
+      'data-test-subj': 'dashboardAddPanel',
+      'aria-labelledby': modalTitleId,
     }
   );
 

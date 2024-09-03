@@ -27,7 +27,7 @@ export const useFetchAlertsFieldsQuery = (
   { http, ...params }: UseFetchAlertsFieldsQueryParams,
   options?: Pick<
     QueryOptionsOverrides<typeof fetchAlertsFields>,
-    'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
+    'placeholderData' | 'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
   >
 ) => {
   const { featureIds } = params;
@@ -37,10 +37,12 @@ export const useFetchAlertsFieldsQuery = (
   );
 
   return useQuery({
-    queryKey: queryKeyPrefix.concat(JSON.stringify(featureIds)),
+    queryKey: queryKeyPrefix.concat(featureIds),
     queryFn: () => fetchAlertsFields({ http, featureIds: validFeatureIds }),
-    enabled: validFeatureIds.length > 0,
-    initialData: { browserFields: {}, fields: [] },
+    placeholderData: { browserFields: {}, fields: [] },
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
     ...options,
+    enabled: validFeatureIds.length > 0 && (options?.enabled == null || options.enabled),
   });
 };

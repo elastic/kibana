@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as yaml from 'js-yaml';
+import { safeDump } from 'js-yaml';
 
 import type { AssetOptions } from './generate';
 
@@ -34,5 +34,5 @@ export const createManifest = (assetOptions: AssetOptions) => {
     },
   };
 
-  return yaml.dump(manifest);
+  return safeDump(manifest);
 };

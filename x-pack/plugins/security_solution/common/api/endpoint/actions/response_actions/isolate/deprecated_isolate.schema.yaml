@@ -1,0 +1,33 @@
+openapi: 3.0.0
+info:
+  title: Endpoint Isolate Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/isolate:
+    post:
+      summary: Permanently redirects to a new location
+      operationId: EndpointIsolateRedirect
+      deprecated: true
+      x-codegen-enabled: true
+      x-labels: [ess]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+      responses:
+        '308':
+          description: Permanent Redirect
+          headers:
+            Location:
+              description: Permanently redirects to "/api/endpoint/action/isolate"
+              schema:
+                type: string
+                example: "/api/endpoint/action/isolate"
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'

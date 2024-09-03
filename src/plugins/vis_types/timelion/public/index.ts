@@ -7,7 +7,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import type { TimelionPublicConfig } from '../config';
+import type { TimelionPublicConfig } from '../server/config';
 import { TimelionVisPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext<TimelionPublicConfig>) {

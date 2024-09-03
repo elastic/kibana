@@ -10,24 +10,27 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import { cleanFleetIndices, createFleetAgent } from './helpers';
-import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const spaces = getService('spaces');
+  let TEST_SPACE_1: string;
 
-  describe('package install', async function () {
+  describe('package install', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
     before(async () => {
+      TEST_SPACE_1 = spaces.getDefaultTestSpace();
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.savedObjects.cleanStandardList({
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
+      await spaces.createTestSpace(TEST_SPACE_1);
     });
 
     after(async () => {
@@ -37,8 +40,6 @@ export default function (providerContext: FtrProviderContext) {
       });
       await cleanFleetIndices(esClient);
     });
-
-    setupTestSpaces(providerContext);
 
     describe('kibana_assets', () => {
       describe('with package installed in default space', () => {

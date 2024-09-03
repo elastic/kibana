@@ -32,7 +32,7 @@ import {
 } from '../../../common';
 import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
-import { ConfigSchema, SearchSessionsConfigSchema } from '../../../config';
+import { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
 import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {
@@ -400,7 +400,7 @@ export class SearchSessionService implements ISearchSessionService {
 
     const session = await this.get(deps, user, sessionId);
     const requestHash = createRequestHash(searchRequest.params);
-    if (!session.attributes.idMapping.hasOwnProperty(requestHash)) {
+    if (!Object.hasOwn(session.attributes.idMapping, requestHash)) {
       this.logger.error(`SearchSessionService: getId | ${sessionId} | ${requestHash} not found`);
       this.logger.debug(
         `SearchSessionService: getId not found search with params: ${JSON.stringify(

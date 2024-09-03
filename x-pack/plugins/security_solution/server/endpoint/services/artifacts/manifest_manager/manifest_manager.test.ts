@@ -84,9 +84,11 @@ describe('ManifestManager', () => {
   const ARTIFACT_NAME_BLOCKLISTS_LINUX = 'endpoint-blocklist-linux-v1';
 
   const getMockPolicyFetchAllItemIds = (items: string[]) =>
-    jest.fn(async function* () {
-      yield items;
-    });
+    jest.fn(async () =>
+      jest.fn(async function* () {
+        yield items;
+      })()
+    );
 
   let ARTIFACTS: InternalArtifactCompleteSchema[] = [];
   let ARTIFACTS_BY_ID: { [K: string]: InternalArtifactCompleteSchema } = {};
@@ -1265,9 +1267,11 @@ describe('ManifestManager', () => {
 
   describe('tryDispatch', () => {
     const getMockPolicyFetchAllItems = (items: PackagePolicy[]) =>
-      jest.fn(async function* () {
-        yield items;
-      });
+      jest.fn(async () =>
+        jest.fn(async function* () {
+          yield items;
+        })()
+      );
 
     test(`Should not dispatch if no policies`, async () => {
       const context = buildManifestManagerContextMock({});

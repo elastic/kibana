@@ -20,6 +20,7 @@ import {
 
 import { connectToQueryState, DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 
@@ -32,6 +33,10 @@ export interface AppState {
    * Array of filters
    */
   filters: Filter[];
+  /**
+   * Data Grid related state
+   */
+  grid?: DiscoverGridSettings;
   /**
    * Number of records to be fetched before anchor records (newer records)
    */

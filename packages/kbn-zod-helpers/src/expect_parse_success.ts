@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SafeParseReturnType, SafeParseSuccess } from 'zod';
+import type { SafeParseReturnType, SafeParseSuccess } from '@kbn/zod';
 import { stringifyZodError } from './stringify_zod_error';
 
 export function expectParseSuccess<Input, Output>(

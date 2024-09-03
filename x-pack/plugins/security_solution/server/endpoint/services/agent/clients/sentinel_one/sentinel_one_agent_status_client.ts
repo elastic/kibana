@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { stringify } from '../../../../utils/stringify';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { catchAndWrapError } from '../../../../utils';
 import { getPendingActionsSummary } from '../../..';
@@ -30,75 +32,74 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
     const esClient = this.options.esClient;
     const metadataService = this.options.endpointService.getEndpointMetadataService();
     const sortField = 'sentinel_one.agent.last_active_date';
-
-    const query = {
-      bool: {
-        must: [
-          {
-            bool: {
-              filter: [
-                {
-                  terms: {
-                    'sentinel_one.agent.uuid': agentIds,
-                  },
-                },
-              ],
-            },
-          },
-        ],
+    const searchRequest: SearchRequest = {
+      index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
+      from: 0,
+      size: DEFAULT_MAX_TABLE_QUERY_SIZE,
+      query: {
+        bool: {
+          should: [
+            { bool: { filter: [{ terms: { 'sentinel_one.agent.agent.id': agentIds } }] } },
+            { bool: { filter: [{ terms: { 'sentinel_one.agent.uuid': agentIds } }] } },
+          ],
+          minimum_should_match: 1,
+        },
       },
+      collapse: {
+        field: 'sentinel_one.agent.agent.id',
+        inner_hits: {
+          name: 'most_recent',
+          size: 1,
+          sort: [{ [sortField]: { order: 'desc' } }],
+          _source: [
+            'sentinel_one.agent.agent.id',
+            'sentinel_one.agent.uuid',
+            'sentinel_one.agent.network_status',
+            'sentinel_one.agent.last_active_date',
+            'sentinel_one.agent.is_active',
+            'sentinel_one.agent.is_pending_uninstall',
+            'sentinel_one.agent.is_uninstalled',
+          ],
+        },
+      },
+      sort: [
+        {
+          [sortField]: {
+            order: 'desc',
+          },
+        },
+      ],
+      _source: false,
     };
 
     try {
       const [searchResponse, allPendingActions] = await Promise.all([
-        esClient.search(
-          {
-            index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
-            from: 0,
-            size: DEFAULT_MAX_TABLE_QUERY_SIZE,
-            query,
-            collapse: {
-              field: 'sentinel_one.agent.uuid',
-              inner_hits: {
-                name: 'most_recent',
-                size: 1,
-                sort: [
-                  {
-                    [sortField]: {
-                      order: 'desc',
-                    },
-                  },
-                ],
-              },
-            },
-            sort: [
-              {
-                [sortField]: {
-                  order: 'desc',
-                },
-              },
-            ],
-            _source: false,
-          },
-          { ignore: [404] }
-        ),
+        esClient.search(searchRequest, { ignore: [404] }),
 
         getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
       ]).catch(catchAndWrapError);
 
+      this.log.debug(
+        () =>
+          `Searching SentinelOne agent data index [${SENTINEL_ONE_AGENT_INDEX_PATTERN}] with:\n${stringify(
+            searchRequest,
+            15
+          )}\n\nReturned:\n${stringify(searchResponse, 15)}`
+      );
+
       const mostRecentAgentInfosByAgentId = searchResponse?.hits?.hits?.reduce<
         Record<string, RawSentinelOneInfo>
       >((acc, hit) => {
-        if (hit.fields?.['sentinel_one.agent.uuid'][0]) {
-          acc[hit.fields?.['sentinel_one.agent.uuid'][0]] =
+        if (hit.fields?.['sentinel_one.agent.agent.id']?.[0]) {
+          acc[hit.fields['sentinel_one.agent.agent.id'][0]] =
             hit.inner_hits?.most_recent.hits.hits[0]._source;
         }
 
         return acc;
       }, {});
 
-      return agentIds.reduce<AgentStatusRecords>((acc, agentId) => {
-        const agentInfo = mostRecentAgentInfosByAgentId[agentId].sentinel_one.agent;
+      const response = agentIds.reduce<AgentStatusRecords>((acc, agentId) => {
+        const agentInfo = mostRecentAgentInfosByAgentId[agentId]?.sentinel_one?.agent;
 
         const pendingActions = allPendingActions.find(
           (agentPendingActions) => agentPendingActions.agent_id === agentId
@@ -107,7 +108,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
         acc[agentId] = {
           agentId,
           agentType: this.agentType,
-          found: agentInfo?.uuid === agentId,
+          found: agentInfo?.uuid === agentId || agentInfo.agent.id === agentId,
           isolated: agentInfo?.network_status === SENTINEL_ONE_NETWORK_STATUS.DISCONNECTED,
           lastSeen: agentInfo?.last_active_date || '',
           status: agentInfo?.is_active
@@ -121,9 +122,13 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
 
         return acc;
       }, {});
+
+      this.log.debug(() => `Agent status response:\n${stringify(response)}`);
+
+      return response;
     } catch (err) {
       const error = new AgentStatusClientError(
-        `Failed to fetch sentinel one agent status for agentIds: [${agentIds}], failed with: ${err.message}`,
+        `Failed to fetch SentinelOne agent status for agentIds: [${agentIds}], failed with: ${err.message}`,
         500,
         err
       );

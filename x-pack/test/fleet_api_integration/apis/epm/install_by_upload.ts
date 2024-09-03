@@ -13,7 +13,6 @@ import { HTTPError } from 'superagent';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
 /*
@@ -26,6 +25,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esClient = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const testPkgArchiveTgz = path.join(
     path.dirname(__filename),
@@ -69,9 +69,12 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('Installs packages from direct upload', async () => {
+  describe('Installs packages from direct upload', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     afterEach(async () => {
       if (isDockerRegistryEnabledOrSkipped(providerContext)) {

@@ -59,7 +59,7 @@ it('creates cache keys', () => {
       },
       "dllName": "manifest-name",
       "dllRefs": Object {
-        "./some-foo.ts": "1:ku/53aRMuAA+4TmQeCWA/w:GtuPW9agF2yecW0xAIHtUQ",
+        "./some-foo.ts": "1:8ZZnQFMG7xLG5lQakybjWCNbihQ:6Yk7GIWDT9j4uCAeHPI2xJcHgrE",
       },
       "spec": Object {
         "banner": undefined,

@@ -16,6 +16,7 @@ import type {
   Columns,
   Criteria,
   ItemsPerRow,
+  SiemTables,
   SortingBasicTable,
 } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
@@ -96,7 +97,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     getHostsSelector(state, type)
   );
 
-  const updateLimitPagination = useCallback(
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
     (newLimit) =>
       dispatch(
         hostsActions.updateTableLimit({
@@ -108,7 +109,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     [type, dispatch]
   );
 
-  const updateActivePage = useCallback(
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
     (newPage) =>
       dispatch(
         hostsActions.updateTableActivePage({

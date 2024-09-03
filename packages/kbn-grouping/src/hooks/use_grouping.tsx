@@ -56,7 +56,7 @@ export type DynamicGroupingProps<T> = Pick<
 /** Interface for configuring grouping package where T is the consumer `GroupingAggregation`
  *  @interface GroupingArgs<T>
  */
-interface GroupingArgs<T> {
+export interface GroupingArgs<T> {
   componentProps: StaticGroupingProps<T>;
   defaultGroupingOptions: GroupOption[];
   fields: FieldSpec[];

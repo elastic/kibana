@@ -134,7 +134,7 @@ export function createAddFieldStatsTableAction(
     id: 'create-field-stats-table',
     grouping: COMMON_VISUALIZATION_GROUPING,
     order: 10,
-    getIconType: () => 'inspect',
+    getIconType: () => 'fieldStatistics',
     getDisplayName: () =>
       i18n.translate('xpack.dataVisualizer.fieldStatistics.displayName', {
         defaultMessage: 'Field statistics',

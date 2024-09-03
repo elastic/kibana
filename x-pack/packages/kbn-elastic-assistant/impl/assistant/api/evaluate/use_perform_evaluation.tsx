@@ -6,9 +6,10 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
+import { PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common';
 import { postEvaluation } from './evaluate';
 
 const PERFORM_EVALUATION_MUTATION_KEY = ['elastic-assistant', 'perform-evaluation'];
@@ -18,17 +19,12 @@ export interface UsePerformEvaluationParams {
   toasts?: IToasts;
 }
 
-export interface PerformEvaluationParams {
-  agents: string[];
-  dataset: string | undefined;
-  datasetName: string | undefined;
-  evalModel: string[];
-  evalPrompt: string;
-  evaluationType: string[];
-  models: string[];
-  outputIndex: string;
-  projectName: string | undefined;
-  runName: string | undefined;
+export interface ResponseError {
+  statusCode: number;
+  success: boolean;
+  message: {
+    error: string;
+  };
 }
 
 /**
@@ -43,15 +39,14 @@ export interface PerformEvaluationParams {
 export const usePerformEvaluation = ({ http, toasts }: UsePerformEvaluationParams) => {
   return useMutation(
     PERFORM_EVALUATION_MUTATION_KEY,
-    (evalParams?: PerformEvaluationParams | void) => {
-      // Optional params workaround: see: https://github.com/TanStack/query/issues/1077#issuecomment-1431247266
-      return postEvaluation({ http, evalParams: evalParams ?? undefined });
+    (evalParams: PostEvaluateRequestBodyInput) => {
+      return postEvaluation({ http, evalParams });
     },
     {
-      onError: (error: IHttpFetchError<ResponseErrorBody>) => {
+      onError: (error: IHttpFetchError<ResponseError>) => {
         if (error.name !== 'AbortError') {
           toasts?.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
+            error?.body?.message?.error ? new Error(error.body.message.error) : error,
             {
               title: i18n.translate('xpack.elasticAssistant.evaluation.evaluationError', {
                 defaultMessage: 'Error performing evaluation...',

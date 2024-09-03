@@ -126,7 +126,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         {
           selector: 'trustedAppsListPage-card-criteriaConditions',
           value:
-            'OSIS WindowsAND file.pathis one of\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
+            ' OSIS WindowsAND process.executable.caselessIS c:\\randomFolder\\randomFile.exe, c:\\randomFolder\\randomFile2.exe',
         },
         {
           selector: 'trustedAppsListPage-card-header-title',
@@ -188,14 +188,11 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
           selector: 'eventFilters-form-description-input',
           value: 'This is the event filter description',
         },
-        {
-          type: 'click',
-          selector: 'fieldAutocompleteComboBox',
-        },
+
         {
           type: 'input',
-          customSelector: '[data-test-subj="fieldAutocompleteComboBox"] input',
-          value: '@timestamp{downArrow}{enter}',
+          selector: 'fieldAutocompleteComboBox',
+          value: '@timestamp',
         },
         {
           type: 'click',
@@ -239,12 +236,9 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
           value: 'This is the event filter description edited',
         },
         {
-          type: 'click',
+          type: 'input',
           selector: 'fieldAutocompleteComboBox',
-        },
-        {
-          type: 'click',
-          customSelector: 'button[title="agent.name"]',
+          value: '{selectAll}agent.name',
         },
         {
           type: 'input',
@@ -281,10 +275,10 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       entries: [
         {
-          field: 'destination.ip',
+          field: 'agent.id',
           operator: 'included',
           type: 'match',
-          value: '1.2.3.4',
+          value: 'mr agent',
         },
       ],
       os_types: ['windows'],
@@ -382,7 +376,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         {
           selector: 'blocklistPage-card-criteriaConditions',
           value:
-            'OSIS WindowsAND file.path.caselessis one of\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
+            ' OSIS WindowsAND file.path.caselessis one of c:\\randomFolder\\randomFile.exe c:\\randomFolder\\randomFile2.exe',
         },
         {
           selector: 'blocklistPage-card-header-title',
@@ -404,16 +398,10 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
       entries: [
         {
-          field: 'file.Ext.code_signature',
-          entries: [
-            {
-              field: 'subject_name',
-              value: ['wegwergwegw'],
-              type: 'match_any',
-              operator: 'included',
-            },
-          ],
-          type: 'nested',
+          field: 'file.hash.sha256',
+          value: ['a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476'],
+          type: 'match_any',
+          operator: 'included',
         },
       ],
       os_types: ['windows'],
@@ -484,7 +472,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       checkResults: [
         {
           selector: 'hostIsolationExceptionsListPage-card-criteriaConditions',
-          value: 'OSIS Windows, Linux, Mac\nAND destination.ipIS 2.2.2.2/24',
+          value: ' OSIS Windows, Linux, MacAND destination.ipIS 2.2.2.2/24',
         },
         {
           selector: 'hostIsolationExceptionsListPage-card-header-title',

@@ -7,12 +7,7 @@
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Embeddable } from '@kbn/embeddable-plugin/public';
 
-import {
-  createResetGroupByFieldAction,
-  formatAlertsData,
-  showInitialLoadingSpinner,
-} from './helpers';
-import { result, textResult, stackedByBooleanField, stackedByTextField } from './mock_data';
+import { createResetGroupByFieldAction, showInitialLoadingSpinner } from './helpers';
 import type { LensDataTableEmbeddable } from '../../../../common/components/visualization_actions/types';
 
 describe('helpers', () => {
@@ -40,18 +35,6 @@ describe('helpers', () => {
         false
       );
     });
-  });
-});
-
-describe('formatAlertsData', () => {
-  test('stack by a boolean field', () => {
-    const res = formatAlertsData(stackedByBooleanField);
-    expect(res).toEqual(result);
-  });
-
-  test('stack by a text field', () => {
-    const res = formatAlertsData(stackedByTextField);
-    expect(res).toEqual(textResult);
   });
 });
 

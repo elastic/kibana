@@ -38,6 +38,8 @@ export const useSaveToLibrary = ({
         getOriginatingPath={(dashboardId) =>
           `${SecurityPageName.dashboards}/${getEditOrCreateDashboardPath(dashboardId)}`
         }
+        // Type 'string' is not assignable to type 'RedirectToProps | undefined'.
+        // @ts-expect-error
         redirectTo={redirectTo}
       />,
       startServices

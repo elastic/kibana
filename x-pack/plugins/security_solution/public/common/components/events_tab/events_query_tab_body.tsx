@@ -13,7 +13,7 @@ import type { Filter } from '@kbn/es-query';
 import { dataTableActions } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import type { CustomBulkAction } from '../../../../common/types';
-import { RowRendererId } from '../../../../common/api/timeline';
+import { RowRendererValues } from '../../../../common/api/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import { MatrixHistogram } from '../matrix_histogram';
@@ -131,7 +131,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   const defaultModel = useMemo(
     () => ({
       ...eventsDefaultModel,
-      excludedRowRendererIds: showExternalAlerts ? Object.values(RowRendererId) : [],
+      excludedRowRendererIds: showExternalAlerts ? RowRendererValues : [],
     }),
     [showExternalAlerts]
   );

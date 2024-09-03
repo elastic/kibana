@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const listingTable = getService('listingTable');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const testSubjects = getService('testSubjects');
 
   describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
@@ -232,6 +233,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const newPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(newPanelCount).to.equal(originalPanelCount);
+      });
+    });
+
+    describe('insights', () => {
+      const DASHBOARD_NAME = 'Insights Dashboard';
+
+      before(async () => {
+        await PageObjects.dashboard.navigateToApp();
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME, {
+          saveAsNew: true,
+          waitDialogIsClosed: false,
+          exitFromEditMode: false,
+        });
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+      });
+
+      it('shows the insights panel and counts the views', async () => {
+        await listingTable.searchForItemWithName(DASHBOARD_NAME);
+
+        async function getViewsCount() {
+          await listingTable.inspectVisualization();
+          const totalViewsStats = await testSubjects.find('views-stats-total-views');
+          const viewsStr = await (
+            await totalViewsStats.findByCssSelector('.euiStat__title')
+          ).getVisibleText();
+          await listingTable.closeInspector();
+          return Number(viewsStr);
+        }
+
+        const views1 = await getViewsCount();
+        expect(views1).to.be(1);
+
+        await listingTable.clickItemLink('dashboard', DASHBOARD_NAME);
+        await PageObjects.dashboard.waitForRenderComplete();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        const views2 = await getViewsCount();
+        expect(views2).to.be(2);
       });
     });
   });

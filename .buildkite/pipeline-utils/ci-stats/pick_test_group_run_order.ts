@@ -10,6 +10,8 @@ import * as Fs from 'fs';
 
 import * as globby from 'globby';
 import minimatch from 'minimatch';
+
+// eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
 import { load as loadYaml } from 'js-yaml';
 
 import { BuildkiteClient, BuildkiteStep } from '../buildkite';

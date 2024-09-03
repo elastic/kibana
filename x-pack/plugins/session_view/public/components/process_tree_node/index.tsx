@@ -128,7 +128,7 @@ export function ProcessTreeNode({
   const nodeRef = useVisible({
     viewPortEl: scrollerRef.current,
     visibleCallback: useCallback(
-      (isVisible, isAbove) => {
+      (isVisible: any, isAbove: any) => {
         onChangeJumpToEventVisibility(isVisible, isAbove);
       },
       [onChangeJumpToEventVisibility]

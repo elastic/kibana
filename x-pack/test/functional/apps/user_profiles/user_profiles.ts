@@ -12,10 +12,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'userProfiles', 'settings']);
   const toasts = getService('toasts');
 
-  describe('User Profile Page', async () => {
+  describe('User Profile Page', () => {
     before(async () => {});
 
-    describe('Details', async () => {
+    describe('Details', () => {
       before(async () => {
         await pageObjects.common.navigateToApp('security_account');
       });
@@ -57,7 +57,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Change Password', async () => {
+    describe('Change Password', () => {
       before(async () => {
         await pageObjects.common.navigateToApp('security_account');
       });
@@ -91,7 +91,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Theme', async () => {
+    describe('Theme', () => {
       it('should change theme based on the User Profile Theme control with default Adv. Settings value (light)', async () => {
         await pageObjects.common.navigateToApp('security_account');
 

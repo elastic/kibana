@@ -45,10 +45,10 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
       });
       expect(response.status).to.be(200);
       expect(response.body).to.eql({
-        transaction: 'traces-apm*,apm-*',
-        span: 'traces-apm*,apm-*',
-        error: 'logs-apm*,apm-*',
-        metric: 'metrics-apm*,apm-*',
+        transaction: 'traces-apm*,apm-*,traces-*.otel-*',
+        span: 'traces-apm*,apm-*,traces-*.otel-*',
+        error: 'logs-apm*,apm-*,logs-*.otel-*',
+        metric: 'metrics-apm*,apm-*,metrics-*.otel-*',
         onboarding: 'apm-*',
         sourcemap: 'apm-*',
       });

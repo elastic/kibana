@@ -140,7 +140,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
   },
   listeners: ({ actions, values }) => ({
     addSchemaField: ({ fieldName, fieldType }) => {
-      if (values.schema.hasOwnProperty(fieldName)) {
+      if (Object.hasOwn(values.schema, fieldName)) {
         setErrorMessage(ADD_SCHEMA_ERROR(fieldName));
         actions.closeModal();
       } else {

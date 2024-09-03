@@ -7,7 +7,10 @@
 
 import { GenericFtrProviderContext } from '@kbn/test';
 
-import { pageObjects } from '../page_objects';
-import { services } from '../services';
+import { pageObjects, svlPageObjects } from '../page_objects';
+import { services, svlServices } from '../services';
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export type FtrProviderContext = GenericFtrProviderContext<
+  typeof services & typeof svlServices,
+  typeof pageObjects & typeof svlPageObjects
+>;

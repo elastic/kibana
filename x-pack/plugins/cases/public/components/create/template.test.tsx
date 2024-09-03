@@ -22,6 +22,10 @@ describe('CustomFields', () => {
     appMockRender = createAppMockRenderer();
   });
 
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('renders correctly', async () => {
     appMockRender.render(
       <TemplateSelector

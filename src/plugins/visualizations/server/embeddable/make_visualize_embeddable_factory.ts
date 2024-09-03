@@ -126,7 +126,7 @@ const getEmbeddedVisualizationSearchSourceMigrations = (
               searchSource: migrate(_state.savedVis.data.searchSource),
             },
           },
-        };
+        } as SerializableRecord;
       }
   );
 

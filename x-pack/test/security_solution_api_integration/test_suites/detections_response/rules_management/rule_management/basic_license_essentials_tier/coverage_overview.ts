@@ -614,7 +614,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('error cases', async () => {
+      describe('error cases', () => {
         it('throws error when request body is not valid', async () => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)

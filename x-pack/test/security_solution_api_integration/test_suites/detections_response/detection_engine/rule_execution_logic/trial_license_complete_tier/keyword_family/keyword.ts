@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('Rule detects against a keyword of event.dataset', () => {
+  describe('@ess @serverless @serverlessQA Rule detects against a keyword of event.dataset', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_keyword_family/keyword');
     });
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
     });
 
-    describe('@ess @serverless @serverlessQA "kql" rule type', () => {
+    describe('"kql" rule type', () => {
       it('should detect the "dataset_name_1" from "event.dataset"', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['keyword']),
@@ -91,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('"threshold" rule type', async () => {
+    describe('"threshold" rule type', () => {
       it('should detect the "dataset_name_1" from "event.dataset"', async () => {
         const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForAlertTesting(['keyword']),

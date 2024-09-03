@@ -195,10 +195,6 @@ export const getDocumentationSections = async (language: string) => {
   }
 };
 
-export const getInlineEditorText = (queryString: string, isMultiLine: boolean) => {
-  return isMultiLine ? queryString.replace(/\r?\n|\r/g, ' ').replace(/  +/g, ' ') : queryString;
-};
-
 export const getWrappedInPipesCode = (code: string, isWrapped: boolean): string => {
   const pipes = code?.split('|');
   const codeNoLines = pipes?.map((pipe) => {
@@ -213,7 +209,11 @@ export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
     pattern: '*',
     isRollupIndex: () => false,
   });
-  return indices.map((index) => ({ name: index.name, hidden: index.name.startsWith('.') }));
+
+  return indices.map((index) => {
+    const [tag] = index?.tags ?? [];
+    return { name: index.name, hidden: index.name.startsWith('.'), type: tag?.name ?? 'Index' };
+  });
 };
 
 export const getRemoteIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
@@ -227,7 +227,10 @@ export const getRemoteIndicesList = async (dataViews: DataViewsPublicPluginStart
     return !index.startsWith('.') && !Boolean(source.item.indices);
   });
 
-  return finalIndicesList.map((source) => ({ name: source.name, hidden: false }));
+  return finalIndicesList.map((source) => {
+    const [tag] = source?.tags ?? [];
+    return { name: source.name, hidden: false, type: tag?.name ?? 'Index' };
+  });
 };
 
 // refresh the esql cache entry after 10 minutes
@@ -265,6 +268,7 @@ const getIntegrations = async (core: CoreStart) => {
       hidden: false,
       title: source.title,
       dataStreams: source.dataStreams,
+      type: 'Integration',
     })) ?? []
   );
 };

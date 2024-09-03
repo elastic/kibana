@@ -65,12 +65,12 @@ test('can remove a specific WHERE command', () => {
 
   const print = () =>
     new Visitor()
+      .on('visitExpression', (ctx) => '<expr>')
       .on('visitColumnExpression', (ctx) => ctx.node.name)
       .on(
         'visitFunctionCallExpression',
         (ctx) => `${ctx.node.name}(${[...ctx.visitArguments()].join(', ')})`
       )
-      .on('visitExpression', (ctx) => '<expr>')
       .on('visitCommand', (ctx) => {
         if (ctx.node.name === 'where') {
           const args = [...ctx.visitArguments()].join(', ');
@@ -84,12 +84,12 @@ test('can remove a specific WHERE command', () => {
 
   const removeFilter = (field: string) => {
     query.ast = new Visitor()
+      .on('visitExpression', (ctx) => ctx.node)
       .on('visitColumnExpression', (ctx) => (ctx.node.name === field ? null : ctx.node))
       .on('visitFunctionCallExpression', (ctx) => {
         const args = [...ctx.visitArguments()];
         return args.some((arg) => arg === null) ? null : ctx.node;
       })
-      .on('visitExpression', (ctx) => ctx.node)
       .on('visitCommand', (ctx) => {
         if (ctx.node.name === 'where') {
           ctx.node.args = [...ctx.visitArguments()].filter(Boolean);
@@ -116,6 +116,9 @@ test('can remove a specific WHERE command', () => {
 
 export const prettyPrint = (ast: ESQLAstQueryNode) =>
   new Visitor()
+    .on('visitExpression', (ctx) => {
+      return '<EXPRESSION>';
+    })
     .on('visitSourceExpression', (ctx) => {
       return ctx.node.name;
     })
@@ -140,9 +143,6 @@ export const prettyPrint = (ast: ESQLAstQueryNode) =>
     })
     .on('visitInlineCastExpression', (ctx) => {
       return '<CAST>';
-    })
-    .on('visitExpression', (ctx) => {
-      return '<EXPRESSION>';
     })
     .on('visitCommandOption', (ctx) => {
       let args = '';

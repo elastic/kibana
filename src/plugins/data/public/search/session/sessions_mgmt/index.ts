@@ -15,7 +15,7 @@ import type { ISessionsClient, SearchUsageCollector } from '../../..';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../constants';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
-import { SearchSessionsConfigSchema } from '../../../../config';
+import type { SearchSessionsConfigSchema } from '../../../../server/config';
 
 export interface IManagementSectionsPluginsSetup {
   management: ManagementSetup;

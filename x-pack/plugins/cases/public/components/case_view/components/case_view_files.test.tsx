@@ -26,8 +26,7 @@ const caseData: CaseUI = {
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/185046
-describe.skip('Case View Page files tab', () => {
+describe('Case View Page files tab', () => {
   let appMockRender: AppMockRenderer;
 
   useGetCaseFilesMock.mockReturnValue({
@@ -37,10 +36,11 @@ describe.skip('Case View Page files tab', () => {
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('should render the utility bar for the files table', async () => {

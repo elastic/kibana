@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { uniq } from 'lodash';
 import type {
   DataSourceProfileService,
   DocumentProfileService,
-  RootProfileProvider,
   RootProfileService,
 } from '../profiles';
 import type { BaseProfileProvider, BaseProfileService } from '../profile_service';
@@ -19,6 +17,7 @@ import { exampleDocumentProfileProvider } from './example_document_profile';
 import { exampleRootProfileProvider } from './example_root_pofile';
 import { createLogsDataSourceProfileProviders } from './logs_data_source_profile';
 import { createLogDocumentProfileProvider } from './log_document_profile';
+import { createSecurityRootProfileProvider } from './security/security_root_profile';
 import {
   createProfileProviderServices,
   ProfileProviderServices,
@@ -28,40 +27,37 @@ export const registerProfileProviders = ({
   rootProfileService,
   dataSourceProfileService,
   documentProfileService,
-  experimentalProfileIds,
+  enabledExperimentalProfileIds,
 }: {
   rootProfileService: RootProfileService;
   dataSourceProfileService: DataSourceProfileService;
   documentProfileService: DocumentProfileService;
-  experimentalProfileIds: string[];
+  /**
+   * List of experimental profile Ids which are enabled in kibana config.
+   * */
+  enabledExperimentalProfileIds: string[];
 }) => {
   const providerServices = createProfileProviderServices();
   const rootProfileProviders = createRootProfileProviders(providerServices);
   const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
   const documentProfileProviders = createDocumentProfileProviders(providerServices);
-  const enabledProfileIds = uniq([
-    ...extractProfileIds(rootProfileProviders),
-    ...extractProfileIds(dataSourceProfileProviders),
-    ...extractProfileIds(documentProfileProviders),
-    ...experimentalProfileIds,
-  ]);
 
   registerEnabledProfileProviders({
     profileService: rootProfileService,
-    availableProviders: [exampleRootProfileProvider, ...rootProfileProviders],
-    enabledProfileIds,
+    providers: [...rootProfileProviders],
+    enabledExperimentalProfileIds,
   });
 
   registerEnabledProfileProviders({
     profileService: dataSourceProfileService,
-    availableProviders: [exampleDataSourceProfileProvider, ...dataSourceProfileProviders],
-    enabledProfileIds,
+    providers: [...dataSourceProfileProviders],
+    enabledExperimentalProfileIds,
   });
 
   registerEnabledProfileProviders({
     profileService: documentProfileService,
-    availableProviders: [exampleDocumentProfileProvider, ...documentProfileProviders],
-    enabledProfileIds,
+    providers: [...documentProfileProviders],
+    enabledExperimentalProfileIds,
   });
 };
 
@@ -70,30 +66,37 @@ export const registerEnabledProfileProviders = <
   TService extends BaseProfileService<TProvider, {}>
 >({
   profileService,
-  availableProviders,
-  enabledProfileIds,
+  providers: availableProviders,
+  enabledExperimentalProfileIds = [],
 }: {
   profileService: TService;
-  availableProviders: TProvider[];
-  enabledProfileIds: string[];
+  providers: TProvider[];
+  /**
+   * List of experimental profile Ids which are enabled in kibana config.
+   * */
+  enabledExperimentalProfileIds?: string[];
 }) => {
   for (const provider of availableProviders) {
-    if (enabledProfileIds.includes(provider.profileId)) {
+    const isProfileExperimental = provider.isExperimental ?? false;
+    const isProfileEnabled =
+      enabledExperimentalProfileIds.includes(provider.profileId) || !isProfileExperimental;
+    if (isProfileEnabled) {
       profileService.registerProvider(provider);
     }
   }
 };
 
-const extractProfileIds = (providers: Array<BaseProfileProvider<{}>>) =>
-  providers.map(({ profileId }) => profileId);
-
-const createRootProfileProviders = (_providerServices: ProfileProviderServices) =>
-  [] as RootProfileProvider[];
+const createRootProfileProviders = (_providerServices: ProfileProviderServices) => [
+  exampleRootProfileProvider,
+  createSecurityRootProfileProvider(_providerServices),
+];
 
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
+  exampleDataSourceProfileProvider,
   ...createLogsDataSourceProfileProviders(providerServices),
 ];
 
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
+  exampleDocumentProfileProvider,
   createLogDocumentProfileProvider(providerServices),
 ];

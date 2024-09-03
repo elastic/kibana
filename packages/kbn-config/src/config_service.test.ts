@@ -726,4 +726,19 @@ describe('Dynamic Overrides', () => {
       await firstValueFrom(configService.getConfig$().pipe(map((cfg) => cfg.toRaw())))
     ).toStrictEqual({ namespace1: { key: 'another-value' } });
   });
+
+  test('is able to remove a field when setting it to `null`', async () => {
+    configService.addDynamicConfigPaths('namespace1', ['key']);
+    configService.setDynamicConfigOverrides({ 'namespace1.key': 'another-value' });
+
+    expect(
+      await firstValueFrom(configService.getConfig$().pipe(map((cfg) => cfg.toRaw())))
+    ).toStrictEqual({ namespace1: { key: 'another-value' } });
+
+    configService.setDynamicConfigOverrides({ 'namespace1.key': null });
+
+    expect(
+      await firstValueFrom(configService.getConfig$().pipe(map((cfg) => cfg.toRaw())))
+    ).toStrictEqual({ namespace1: {} });
+  });
 });

@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
+import { KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BenchmarksSection } from './benchmarks_section';
 import { getMockDashboardData, getBenchmarkMockData } from '../mock';
 import { TestProvider } from '../../../test/test_provider';
-import { KSPM_POLICY_TEMPLATE } from '../../../../common/constants';
 import {
   DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
   DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,

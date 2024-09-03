@@ -19,8 +19,7 @@ export const useLogSourceConfigurationFormState = (logViewAttributes?: LogViewAt
     useMemo(
       () =>
         logViewAttributes?.logIndices ?? {
-          type: 'index_name',
-          indexName: '',
+          type: 'kibana_advanced_setting',
         },
       [logViewAttributes]
     )

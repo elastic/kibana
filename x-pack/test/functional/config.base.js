@@ -185,6 +185,15 @@ export default async function ({ readConfigFile }) {
       maintenanceWindows: {
         pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
       },
+      obsAIAssistant: {
+        pathname: '/app/observabilityAIAssistant',
+      },
+      aiAssistantManagementSelection: {
+        pathname: '/app/management/kibana/aiAssistantManagementSelection',
+      },
+      obsAIAssistantManagement: {
+        pathname: '/app/management/kibana/observabilityAiAssistantManagement',
+      },
     },
 
     suiteTags: {

@@ -9,6 +9,7 @@
 import type {
   PropertyName as EsPropertyName,
   MappingProperty as EsMappingProperty,
+  MappingPropertyBase as EsMappingPropertyBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 /**
@@ -64,19 +65,20 @@ export interface SavedObjectsMappingProperties {
  *
  * @public
  */
-export type SavedObjectsFieldMapping = EsMappingProperty & {
-  /**
-   * The dynamic property of the mapping, either `false` or `'strict'`. If
-   * unspecified `dynamic: 'strict'` will be inherited from the top-level
-   * index mappings.
-   *
-   * Note: To limit the number of mapping fields Saved Object types should
-   * *never* use `dynamic: true`.
-   */
-  dynamic?: false | 'strict';
-  /**
-   * Some mapping types do not accept the `properties` attributes. Explicitly adding it as optional to our type
-   * to avoid type failures on all code using accessing them via `SavedObjectsFieldMapping.properties`.
-   */
-  properties?: Record<EsPropertyName, EsMappingProperty>;
-};
+export type SavedObjectsFieldMapping = EsMappingProperty &
+  EsMappingPropertyBase & {
+    /**
+     * The dynamic property of the mapping, either `false` or `'strict'`. If
+     * unspecified `dynamic: 'strict'` will be inherited from the top-level
+     * index mappings.
+     *
+     * Note: To limit the number of mapping fields Saved Object types should
+     * *never* use `dynamic: true`.
+     */
+    dynamic?: false | 'strict';
+    /**
+     * Some mapping types do not accept the `properties` attributes. Explicitly adding it as optional to our type
+     * to avoid type failures on all code using accessing them via `SavedObjectsFieldMapping.properties`.
+     */
+    properties?: Record<EsPropertyName, EsMappingProperty>;
+  };

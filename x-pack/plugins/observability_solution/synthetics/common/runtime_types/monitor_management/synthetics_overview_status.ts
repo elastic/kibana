@@ -44,7 +44,7 @@ export const OverviewPendingStatusMetaDataCodec = t.intersection([
     monitorQueryId: t.string,
     configId: t.string,
     status: t.string,
-    location: t.string,
+    locationId: t.string,
   }),
   t.partial({
     timestamp: t.string,

@@ -68,7 +68,6 @@
     "@kbn/ml-url-state",
     "@kbn/monaco",
     "@kbn/react-field",
-    "@kbn/repo-info",
     "@kbn/rison",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-management-plugin",

@@ -547,6 +547,7 @@ Array [
       },
       "api": Array [
         "bulkGetUserProfiles",
+        "dashboardUsageStats",
         "store_search_session",
       ],
       "app": Array [
@@ -603,6 +604,7 @@ Array [
     "privilege": Object {
       "api": Array [
         "bulkGetUserProfiles",
+        "dashboardUsageStats",
       ],
       "app": Array [
         "dashboards",
@@ -1167,6 +1169,7 @@ Array [
       },
       "api": Array [
         "bulkGetUserProfiles",
+        "dashboardUsageStats",
         "store_search_session",
       ],
       "app": Array [
@@ -1223,6 +1226,7 @@ Array [
     "privilege": Object {
       "api": Array [
         "bulkGetUserProfiles",
+        "dashboardUsageStats",
       ],
       "app": Array [
         "dashboards",

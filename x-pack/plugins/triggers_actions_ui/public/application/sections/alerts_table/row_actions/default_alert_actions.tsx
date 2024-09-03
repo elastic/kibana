@@ -11,17 +11,22 @@ import type { AlertActionsProps } from '../../../../types';
 import { ViewAlertDetailsAlertAction } from './view_alert_details_alert_action';
 import { MuteAlertAction } from './mute_alert_action';
 import { MarkAsUntrackedAlertAction } from './mark_as_untracked_alert_action';
+import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 
 /**
  * Common alerts table row actions
  */
 export const DefaultAlertActions = (props: AlertActionsProps) => {
+  const { authorizedToCreateAnyRules } = useLoadRuleTypesQuery({
+    filteredRuleTypes: [],
+  });
+
   return (
     <>
       <ViewRuleDetailsAlertAction {...props} />
       <ViewAlertDetailsAlertAction {...props} />
-      <MarkAsUntrackedAlertAction {...props} />
-      <MuteAlertAction {...props} />
+      {authorizedToCreateAnyRules && <MarkAsUntrackedAlertAction {...props} />}
+      {authorizedToCreateAnyRules && <MuteAlertAction {...props} />}
     </>
   );
 };

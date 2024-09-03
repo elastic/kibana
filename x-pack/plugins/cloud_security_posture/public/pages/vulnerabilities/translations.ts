@@ -9,18 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 import { VULNERABILITY_GROUPING_OPTIONS } from '../../common/constants';
 
-export const FILTER_IN = i18n.translate('xpack.csp.vulnerabilities.table.filterIn', {
-  defaultMessage: 'Filter in',
-});
-export const FILTER_OUT = i18n.translate('xpack.csp.vulnerabilities.table.filterOut', {
-  defaultMessage: 'Filter out',
-});
-export const SEARCH_BAR_PLACEHOLDER = i18n.translate(
-  'xpack.csp.vulnerabilities.searchBar.placeholder',
-  {
-    defaultMessage: 'Search vulnerabilities (eg. vulnerability.severity : "CRITICAL" )',
-  }
-);
 export const VULNERABILITIES = i18n.translate('xpack.csp.vulnerabilities', {
   defaultMessage: 'Vulnerabilities',
 });

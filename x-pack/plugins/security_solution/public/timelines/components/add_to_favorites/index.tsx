@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { State } from '../../../common/store';
 import { selectTimelineById } from '../../store/selectors';
 import { timelineActions } from '../../store';
-import { TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
 import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../timeline/tour/step_config';
 
 const ADD_TO_FAVORITES = i18n.translate(
@@ -51,7 +51,7 @@ export const AddToFavoritesButton = React.memo<AddToFavoritesButtonProps>(
       selectTimelineById(state, timelineId)
     );
 
-    const isTimelineDraftOrImmutable = status !== TimelineStatus.active;
+    const isTimelineDraftOrImmutable = status !== TimelineStatusEnum.active;
     const label = isFavorite ? REMOVE_FROM_FAVORITES : ADD_TO_FAVORITES;
 
     const handleClick = useCallback(

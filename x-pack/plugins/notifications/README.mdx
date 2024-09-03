@@ -18,10 +18,10 @@ The `start` function exposes the following interface:
 
 To use the exposed plugin start contract:
 
-1. Make sure `notifications` is in your `optionalPlugins` in the `kibana.json` file:
+1. Make sure `notifications` is in your `requiredPlugins` in the `kibana.jsonc` file:
 
 ```json5
-// <plugin>/kibana.json
+// <plugin>/kibana.jsonc
 {
 "id": "...",
 "requiredPlugins": ["notifications"]

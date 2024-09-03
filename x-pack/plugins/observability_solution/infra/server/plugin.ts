@@ -16,13 +16,19 @@ import {
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
-import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
+import {
+  AssetDetailsLocatorDefinition,
+  InventoryLocatorDefinition,
+  MetricsExplorerLocatorDefinition,
+} from '@kbn/observability-shared-plugin/common';
+import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
+import { mapValues } from 'lodash';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
-import { initInfraServer } from './infra_server';
+import { registerRoutes } from './infra_server';
 import { InfraServerPluginSetupDeps, InfraServerPluginStartDeps } from './lib/adapters/framework';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
@@ -174,8 +180,8 @@ export class InfraServerPlugin
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
     const framework = new KibanaFramework(core, this.config, plugins);
+
     const metricsClient = plugins.metricsDataAccess.client;
-    const getApmIndices = plugins.apmDataAccess.getApmIndices;
     metricsClient.setDefaultMetricIndicesHandler(async (options: GetMetricIndicesOptions) => {
       const sourceConfiguration = await sources.getInfraSourceConfiguration(
         options.savedObjectsClient,
@@ -184,13 +190,22 @@ export class InfraServerPlugin
       return sourceConfiguration.configuration.metricAlias;
     });
     const sources = new InfraSources({
-      config: this.config,
       metricsClient,
     });
+
     const sourceStatus = new InfraSourceStatus(
       new InfraElasticsearchSourceStatusAdapter(framework),
       { sources }
     );
+
+    const alertsLocator = plugins.share.url.locators.get<AlertsLocatorParams>(alertsLocatorID);
+    const assetDetailsLocator = plugins.share.url.locators.create(
+      new AssetDetailsLocatorDefinition()
+    );
+    const metricsExplorerLocator = plugins.share.url.locators.create(
+      new MetricsExplorerLocatorDefinition()
+    );
+    const inventoryLocator = plugins.share.url.locators.create(new InventoryLocatorDefinition());
 
     // Setup infra services
     const inventoryViews = this.inventoryViews.setup();
@@ -212,13 +227,24 @@ export class InfraServerPlugin
       metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),
     };
 
+    // Instead of passing plugins individually to `libs` on a necessity basis,
+    // this provides an object with all plugins infra depends on
+    const libsPlugins = mapValues(plugins, (value, key) => {
+      return {
+        setup: value,
+        start: () =>
+          core.getStartServices().then((services) => {
+            const [, pluginsStartContracts] = services;
+            return pluginsStartContracts[key as keyof InfraServerPluginStartDeps];
+          }),
+      };
+    }) as InfraBackendLibs['plugins'];
+
     this.libs = {
       configuration: this.config,
       framework,
       sources,
       sourceStatus,
-      metricsClient,
-      getApmIndices,
       ...domainLibs,
       handleEsError,
       logsRules: this.logsRules.setup(core, plugins),
@@ -227,7 +253,7 @@ export class InfraServerPlugin
       getAlertDetailsConfig: () => plugins.observability.getAlertDetailsConfig(),
       logger: this.logger,
       basePath: core.http.basePath,
-      alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
+      plugins: libsPlugins,
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);
@@ -257,7 +283,12 @@ export class InfraServerPlugin
       ]);
     }
 
-    registerRuleTypes(plugins.alerting, this.libs, this.config);
+    registerRuleTypes(plugins.alerting, this.libs, this.config, {
+      alertsLocator,
+      assetDetailsLocator,
+      metricsExplorerLocator,
+      inventoryLocator,
+    });
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
@@ -265,6 +296,7 @@ export class InfraServerPlugin
         const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.client;
         const uiSettingsClient = coreContext.uiSettings.client;
+
         const mlSystem = plugins.ml?.mlSystemProvider(request, savedObjectsClient);
         const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
           request,
@@ -272,12 +304,19 @@ export class InfraServerPlugin
         );
         const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
+        const getMetricsIndices = async () => {
+          return metricsClient.getMetricIndices({
+            savedObjectsClient,
+          });
+        };
+
         return {
           mlAnomalyDetectors,
           mlSystem,
           spaceId,
           savedObjectsClient,
           uiSettingsClient,
+          getMetricsIndices,
         };
       }
     );
@@ -291,7 +330,7 @@ export class InfraServerPlugin
     } as InfraPluginSetup;
   }
 
-  start(core: CoreStart, pluginsStart: InfraServerPluginStartDeps) {
+  start(core: CoreStart) {
     const inventoryViews = this.inventoryViews.start({
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,
@@ -302,7 +341,7 @@ export class InfraServerPlugin
       savedObjects: core.savedObjects,
     });
 
-    initInfraServer(this.libs, core, pluginsStart);
+    registerRoutes(this.libs);
 
     return {
       inventoryViews,

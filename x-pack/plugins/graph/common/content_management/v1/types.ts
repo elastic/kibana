@@ -17,7 +17,7 @@ import {
   CreateResult,
   UpdateResult,
 } from '@kbn/content-management-plugin/common';
-import { ContentManagementCrudTypes } from '@kbn/content-management-utils';
+import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 
 import { GraphContentType } from '../types';
 

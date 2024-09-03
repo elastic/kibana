@@ -5,26 +5,42 @@
  * 2.0.
  */
 
-const KIBANAS_PER_PARTITION = 2;
+interface GetPartitionMapOpts {
+  kibanasPerPartition: number;
+  partitions: number[];
+  podNames: string[];
+}
 
-export function getParitionMap(podNames: string[], partitions: number[]): Record<number, string[]> {
+export function getPartitionMap({
+  kibanasPerPartition,
+  podNames,
+  partitions,
+}: GetPartitionMapOpts): Record<number, string[]> {
   const map: Record<number, string[]> = {};
   let counter = 0;
-  for (const parition of partitions) {
-    map[parition] = [];
-    for (let i = 0; i < KIBANAS_PER_PARTITION; i++) {
-      map[parition].push(podNames.sort()[counter++ % podNames.length]);
+  for (const partition of partitions) {
+    map[partition] = [];
+    for (let i = 0; i < kibanasPerPartition; i++) {
+      map[partition].push(podNames.sort()[counter++ % podNames.length]);
     }
   }
   return map;
 }
 
-export function assignPodPartitions(
-  podName: string,
-  podNames: string[],
-  partitions: number[]
-): number[] {
-  const map = getParitionMap(podNames, partitions);
+interface AssignPodPartitionsOpts {
+  kibanasPerPartition: number;
+  podName: string;
+  podNames: string[];
+  partitions: number[];
+}
+
+export function assignPodPartitions({
+  kibanasPerPartition,
+  podName,
+  podNames,
+  partitions,
+}: AssignPodPartitionsOpts): number[] {
+  const map = getPartitionMap({ kibanasPerPartition, podNames, partitions });
   const podPartitions: number[] = [];
   for (const partition of Object.keys(map)) {
     if (map[Number(partition)].indexOf(podName) !== -1) {

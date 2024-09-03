@@ -139,7 +139,8 @@ function validateConnectorTypeConfig(
 async function slackExecutor(
   execOptions: SlackConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, secrets, params, configurationUtilities, logger } = execOptions;
+  const { actionId, secrets, params, configurationUtilities, logger, connectorUsageCollector } =
+    execOptions;
 
   let result: IncomingWebhookResult;
   const { webhookUrl } = secrets;
@@ -163,6 +164,7 @@ async function slackExecutor(
     const webhook = new IncomingWebhook(webhookUrl, {
       agent,
     });
+    connectorUsageCollector.addRequestBodyBytes(undefined, { text: message });
     result = await webhook.send(message);
   } catch (err) {
     if (err.original == null || err.original.response == null) {

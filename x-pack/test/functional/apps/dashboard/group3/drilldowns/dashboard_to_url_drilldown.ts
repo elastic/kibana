@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 const DRILLDOWN_TO_DISCOVER_URL = 'Go to discover';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
   const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
   const PageObjects = getPageObjects(['dashboard', 'common', 'header', 'timePicker', 'discover']);
@@ -32,8 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       // create drilldown
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.clickContextMenuMoreItem();
       await dashboardDrilldownPanelActions.expectExistsCreateDrilldownAction();
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();

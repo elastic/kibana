@@ -28,9 +28,13 @@ export interface Change {
 export type ChangeSet = Record<string, Change>;
 
 const createNameNotAllowedValidator =
-  (namesNotAllowed: Context['namesNotAllowed']): ValidationFunc<{}, string, string> =>
-  ({ value }) => {
-    if (namesNotAllowed.fields.includes(value)) {
+  (dataView: Context['dataView'], fieldName?: string): ValidationFunc<{}, string, string> =>
+  async ({ value }) => {
+    const runtimeComposites = Object.entries(dataView.getAllRuntimeFields())
+      .filter(([, _runtimeField]) => _runtimeField.type === 'composite')
+      .map(([_runtimeFieldName]) => _runtimeFieldName);
+
+    if (value !== fieldName && (await dataView.getFieldByName(value, true))) {
       return {
         message: i18n.translate(
           'indexPatternFieldEditor.editor.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
@@ -39,7 +43,7 @@ const createNameNotAllowedValidator =
           }
         ),
       };
-    } else if (namesNotAllowed.runtimeComposites.includes(value)) {
+    } else if (value !== fieldName && runtimeComposites.includes(value)) {
       return {
         message: i18n.translate(
           'indexPatternFieldEditor.editor.runtimeFieldsEditor.existCompositeNamesValidationErrorMessage',
@@ -55,20 +59,13 @@ const createNameNotAllowedValidator =
  * Dynamically retrieve the config for the "name" field, adding
  * a validator to avoid duplicated runtime fields to be created.
  *
- * @param namesNotAllowed Array of names not allowed for the field "name"
  * @param field Initial value of the form
  */
 export const getNameFieldConfig = (
-  namesNotAllowed?: Context['namesNotAllowed'],
+  dataView: Context['dataView'],
   field?: Props['field']
 ): FieldConfig<string, Field> => {
   const nameFieldConfig = schema.name as FieldConfig<string, Field>;
-
-  if (!namesNotAllowed) {
-    return nameFieldConfig;
-  }
-
-  const filterOutCurrentFieldName = (name: string) => name !== field?.name;
 
   // Add validation to not allow duplicates
   return {
@@ -76,10 +73,7 @@ export const getNameFieldConfig = (
     validations: [
       ...(nameFieldConfig.validations ?? []),
       {
-        validator: createNameNotAllowedValidator({
-          fields: namesNotAllowed.fields.filter(filterOutCurrentFieldName),
-          runtimeComposites: namesNotAllowed.runtimeComposites.filter(filterOutCurrentFieldName),
-        }),
+        validator: createNameNotAllowedValidator(dataView, field?.name),
       },
     ],
   };

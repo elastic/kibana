@@ -7,5 +7,6 @@
  */
 
 export const getUsageCollection = () => ({
+  domainId: 'abc123',
   incrementCounter: jest.fn(),
 });

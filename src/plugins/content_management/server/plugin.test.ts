@@ -80,14 +80,15 @@ const setup = () => {
       ...coreSetup,
       http,
     },
+    pluginsSetup: {},
   };
 };
 
 describe('ContentManagementPlugin', () => {
   describe('setup()', () => {
     test('should expose the core API', () => {
-      const { plugin, coreSetup } = setup();
-      const api = plugin.setup(coreSetup);
+      const { plugin, coreSetup, pluginsSetup } = setup();
+      const api = plugin.setup(coreSetup, pluginsSetup);
 
       expect(Object.keys(api).sort()).toEqual(['crud', 'eventBus', 'register']);
       expect(api.crud('')).toBe('mockedCrud');
@@ -96,19 +97,18 @@ describe('ContentManagementPlugin', () => {
     });
 
     describe('RPC', () => {
-      test('should create a single POST HTTP route on the router', () => {
-        const { plugin, coreSetup, router } = setup();
-        plugin.setup(coreSetup);
+      test('should create a rpc POST HTTP route on the router', () => {
+        const { plugin, coreSetup, router, pluginsSetup } = setup();
+        plugin.setup(coreSetup, pluginsSetup);
 
-        expect(router.post).toBeCalledTimes(1);
         const [routeConfig]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
 
         expect(routeConfig.path).toBe('/api/content_management/rpc/{name}');
       });
 
       test('should register all the procedures in the RPC service and the route handler must send to each procedure the core request context + the request body as input', async () => {
-        const { plugin, coreSetup, router } = setup();
-        plugin.setup(coreSetup);
+        const { plugin, coreSetup, router, pluginsSetup } = setup();
+        plugin.setup(coreSetup, pluginsSetup);
 
         const [_, handler]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
 
@@ -151,8 +151,8 @@ describe('ContentManagementPlugin', () => {
       });
 
       test('should return error in custom error format', async () => {
-        const { plugin, coreSetup, router } = setup();
-        plugin.setup(coreSetup);
+        const { plugin, coreSetup, router, pluginsSetup } = setup();
+        plugin.setup(coreSetup, pluginsSetup);
 
         const [_, handler]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
 

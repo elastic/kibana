@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export interface LogSource {
-  indexPattern: string;
-}
+export * from './services/log_sources_service/types';

@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('index pattern wizard ccs', () => {
-      describe('remote cluster only', async () => {
+      describe('remote cluster only', () => {
         beforeEach(async function () {
           await kibanaServer.uiSettings.replace({});
           await PageObjects.settings.navigateTo();
@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await kibanaServer.savedObjects.cleanStandardList();
         });
       });
-      describe('remote and local clusters', async () => {
+      describe('remote and local clusters', () => {
         before(async () => {
           await es.transport.request({
             path: '/blogs/_doc',

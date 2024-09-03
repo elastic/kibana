@@ -54,7 +54,7 @@ Object {
                 id="modalForm_generated-id"
               >
                 <div
-                  class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+                  class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
                   id="generated-id-row"
                 >
                   <div
@@ -62,7 +62,7 @@ Object {
                   >
                     <label
                       aria-invalid="false"
-                      class="euiFormLabel euiFormRow__label"
+                      class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
                       for="generated-id"
                       id="generated-id-label"
                     >
@@ -73,10 +73,10 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout euiFormControlLayout--fullWidth"
+                      class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
                     >
                       <div
-                        class="euiFormControlLayout__childrenWrapper"
+                        class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
                       >
                         <input
                           class="euiFieldText emotion-euiFieldText-fullWidth"
@@ -91,14 +91,14 @@ Object {
                   </div>
                 </div>
                 <div
-                  class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+                  class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
                   id="generated-id-row"
                 >
                   <div
                     class="euiFormRow__labelWrapper"
                   >
                     <label
-                      class="euiFormLabel euiFormRow__label"
+                      class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
                       for="generated-id"
                       id="generated-id-label"
                     >
@@ -109,10 +109,10 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--euiTextArea emotion-euiTextArea"
+                      class="euiFormControlLayout euiFormControlLayout--euiTextArea emotion-euiFormControlLayout-fullWidth-euiTextArea"
                     >
                       <div
-                        class="euiFormControlLayout__childrenWrapper"
+                        class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
                       >
                         <textarea
                           class="euiTextArea emotion-euiTextArea-vertical-fullWidth"

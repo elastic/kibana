@@ -38,3 +38,6 @@ export const mockedReduxEmbeddablePackage: ReduxToolsPackage = {
 };
 
 export * from './__stories__/fixtures/flights';
+export const setMockedPresentationUtilServices = () => {
+  pluginServices.setRegistry(stubRegistry.start({}));
+};

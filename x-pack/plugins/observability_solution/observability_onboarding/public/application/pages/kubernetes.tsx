@@ -19,7 +19,7 @@ export const KubernetesPage = () => (
         headlineCopy={i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.kubernetes.text',
           {
-            defaultMessage: 'Setting up Kubernetes with Elastic Agent',
+            defaultMessage: 'Monitor your Kubernetes Cluster with standalone Elastic Agent',
           }
         )}
         captionCopy={i18n.translate(

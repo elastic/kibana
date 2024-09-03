@@ -18,6 +18,14 @@ import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../factories';
 import { getFunctionSignatures } from '../../definitions/helpers';
+import { ESQLRealField } from '../../validation/types';
+import {
+  FieldType,
+  fieldTypes,
+  FunctionParameterType,
+  FunctionReturnType,
+  SupportedDataType,
+} from '../../definitions/types';
 
 export interface Integration {
   name: string;
@@ -38,18 +46,8 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 
 export const triggerCharacters = [',', '(', '=', ' '];
 
-export const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
-  ...[
-    'string',
-    'double',
-    'date',
-    'boolean',
-    'ip',
-    'geo_point',
-    'geo_shape',
-    'cartesian_point',
-    'cartesian_shape',
-  ].map((type) => ({
+export const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
+  ...fieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
   })),
@@ -124,7 +122,7 @@ export const policies = [
  */
 export function getFunctionSignaturesByReturnType(
   command: string,
-  _expectedReturnType: string | string[],
+  _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
     grouping,
@@ -140,7 +138,7 @@ export function getFunctionSignaturesByReturnType(
     builtin?: boolean;
     skipAssign?: boolean;
   } = {},
-  paramsTypes?: string[],
+  paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string
 ): PartialSuggestionWithText[] {
@@ -177,7 +175,7 @@ export function getFunctionSignaturesByReturnType(
       }
       const filteredByReturnType = signatures.filter(
         ({ returnType }) =>
-          expectedReturnType.includes('any') || expectedReturnType.includes(returnType)
+          expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
       );
       if (!filteredByReturnType.length) {
         return false;
@@ -226,14 +224,16 @@ export function getFunctionSignaturesByReturnType(
     });
 }
 
-export function getFieldNamesByType(_requestedType: string | string[]) {
+export function getFieldNamesByType(
+  _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>
+) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
     .filter(({ type }) => requestedType.includes('any') || requestedType.includes(type))
     .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
-export function getLiteralsByType(_type: string | string[]) {
+export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
   const type = Array.isArray(_type) ? _type : [_type];
   if (type.includes('time_literal')) {
     // return only singular
@@ -242,13 +242,13 @@ export function getLiteralsByType(_type: string | string[]) {
   return [];
 }
 
-export function getDateLiteralsByFieldType(_requestedType: string | string[]) {
+export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType[]) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return requestedType.includes('date') ? [TIME_PICKER_SUGGESTION, ...TIME_SYSTEM_PARAMS] : [];
 }
 
 export function createCustomCallbackMocks(
-  customFields?: Array<{ name: string; type: string }>,
+  customFields?: ESQLRealField[],
   customSources?: Array<{ name: string; hidden: boolean }>,
   customPolicies?: Array<{
     name: string;
@@ -286,7 +286,7 @@ export function getPolicyFields(policyName: string) {
 }
 
 export interface SuggestOptions {
-  ctx?: EditorContext;
+  triggerCharacter?: string;
   callbacks?: ESQLCallbacks;
 }
 
@@ -301,9 +301,10 @@ export const setup = async (caret = '/') => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
-    const ctx =
-      opts.ctx ??
-      (pos > 0 ? { triggerKind: 1, triggerCharacter: query[pos - 1] } : { triggerKind: 0 });
+    const ctx: EditorContext = opts.triggerCharacter
+      ? { triggerKind: 1, triggerCharacter: opts.triggerCharacter }
+      : { triggerKind: 0 };
+
     return await autocomplete.suggest(
       querySansCaret,
       pos,
@@ -318,22 +319,28 @@ export const setup = async (caret = '/') => {
     expected: Array<string | PartialSuggestionWithText>,
     opts?: SuggestOptions
   ) => {
-    const result = await suggest(query, opts);
-    const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
+    try {
+      const result = await suggest(query, opts);
+      const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
 
-    const expectedTexts = expected
-      .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
-      .sort();
+      const expectedTexts = expected
+        .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
+        .sort();
 
-    expect(resultTexts).toEqual(expectedTexts);
+      expect(resultTexts).toEqual(expectedTexts);
 
-    const expectedNonStringSuggestions = expected.filter(
-      (suggestion) => typeof suggestion !== 'string'
-    ) as PartialSuggestionWithText[];
+      const expectedNonStringSuggestions = expected.filter(
+        (suggestion) => typeof suggestion !== 'string'
+      ) as PartialSuggestionWithText[];
 
-    for (const expectedSuggestion of expectedNonStringSuggestions) {
-      const suggestion = result.find((s) => s.text === expectedSuggestion.text);
-      expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+      for (const expectedSuggestion of expectedNonStringSuggestions) {
+        const suggestion = result.find((s) => s.text === expectedSuggestion.text);
+        expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed query\n-------------\n${query}`);
+      throw error;
     }
   };
 

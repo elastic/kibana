@@ -183,7 +183,7 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
-    it('should style fill layer as expected', async () => {
+    it('should style fill layer as expected again', async () => {
       const layer = mapboxStyle.layers.find((mbLayer) => {
         return mbLayer.id === 'n1t6f_line';
       });

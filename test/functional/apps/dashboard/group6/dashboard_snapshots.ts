@@ -63,7 +63,6 @@ export default function ({
 
       await PageObjects.dashboard.saveDashboard('tsvb');
       await PageObjects.dashboard.clickFullScreenMode();
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
@@ -85,7 +84,6 @@ export default function ({
 
       await PageObjects.dashboard.saveDashboard('area');
       await PageObjects.dashboard.clickFullScreenMode();
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
@@ -98,7 +96,7 @@ export default function ({
       expect(percentDifference).to.be.lessThan(0.029);
     });
 
-    describe('compare controls snapshot', async () => {
+    describe('compare controls snapshot', () => {
       const waitForPageReady = async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('page ready for screenshot', async () => {

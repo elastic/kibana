@@ -12,9 +12,9 @@ import type {
   UseFetchRelatedAlertsBySameSourceEventResult,
 } from './use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedAlertsBySameSourceEvent } from './use_fetch_related_alerts_by_same_source_event';
-import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
+import { useAlertPrevalence } from './use_alert_prevalence';
 
-jest.mock('../../../../common/containers/alerts/use_alert_prevalence');
+jest.mock('./use_alert_prevalence');
 
 const originalEventId = 'originalEventId';
 const scopeId = 'scopeId';

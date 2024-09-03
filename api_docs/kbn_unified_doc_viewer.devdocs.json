@@ -295,7 +295,7 @@
         "label": "FieldName",
         "description": [],
         "signature": [
-          "({\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  scripted = false,\n  highlight = '',\n  isPinned = false,\n}: Props) => JSX.Element"
+          "({\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  scripted = false,\n  highlight = '',\n}: Props) => JSX.Element"
         ],
         "path": "packages/kbn-unified-doc-viewer/src/components/field_name/field_name.tsx",
         "deprecated": false,
@@ -306,7 +306,7 @@
             "id": "def-common.FieldName.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  scripted = false,\n  highlight = '',\n  isPinned = false,\n}",
+            "label": "{\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  scripted = false,\n  highlight = '',\n}",
             "description": [],
             "signature": [
               "Props"

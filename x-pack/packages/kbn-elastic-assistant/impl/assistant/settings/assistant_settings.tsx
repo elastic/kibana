@@ -175,6 +175,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
         conversationSettings[defaultSelectedConversationId] == null;
       const newSelectedConversation: Conversation | undefined =
         Object.values(conversationSettings)[0];
+
       if (isSelectedConversationDeleted && newSelectedConversation != null) {
         onConversationSelected({
           cId: newSelectedConversation.id,

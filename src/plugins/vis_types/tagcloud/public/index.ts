@@ -7,7 +7,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { TagcloudPublicConfig } from '../config';
+import type { TagcloudPublicConfig } from '../server/config';
 import { TagCloudPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext<TagcloudPublicConfig>) {

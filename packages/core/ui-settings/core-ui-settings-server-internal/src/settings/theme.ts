@@ -50,9 +50,9 @@ export const getThemeSettings = (
       description: i18n.translate('core.ui_settings.params.darkModeText', {
         defaultMessage:
           `The UI theme that the Kibana UI should use. ` +
-          `Set to 'enabled' or 'disabled' to enable or disable the dark theme. ` +
-          `Set to 'system' to have the Kibana UI theme follow the system theme. ` +
-          `A page refresh is required for the setting to be applied.`,
+          `Set to 'Enabled' to enable the dark theme, or 'Disabled' to disable it. ` +
+          `Set to 'Sync with system' to have the Kibana UI theme follow the system theme. ` +
+          `A page reload is required for the setting to be applied.`,
       }),
       type: 'select',
       options: ['enabled', 'disabled', 'system'],

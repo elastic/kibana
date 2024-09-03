@@ -10,7 +10,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/cor
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createMetricVisTypeDefinition } from './metric_vis_type';
-import { MetricPublicConfig } from '../config';
+import type { MetricPublicConfig } from '../server/config';
 import { setDataViewsStart } from './services';
 
 /** @internal */

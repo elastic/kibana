@@ -11,8 +11,8 @@ import path from 'path';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { v4 as uuidV4 } from 'uuid';
+import { services } from './services';
 import { ScalabilityTestRunner } from './runner';
 import { FtrProviderContext } from './ftr_provider_context';
 import { ScalabilityJourney } from './types';
@@ -49,7 +49,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseConfig,
 
-    services: commonFunctionalServices,
+    services,
     pageObjects: {},
 
     testRunner: (context: FtrProviderContext) =>

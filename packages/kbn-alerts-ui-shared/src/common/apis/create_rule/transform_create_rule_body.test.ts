@@ -55,6 +55,10 @@ const ruleToCreate: CreateRuleBody<RuleTypeParams> = {
   alertDelay: {
     active: 10,
   },
+  flapping: {
+    lookBackWindow: 10,
+    statusChangeThreshold: 10,
+  },
 };
 
 describe('transformCreateRuleBody', () => {
@@ -96,8 +100,11 @@ describe('transformCreateRuleBody', () => {
         },
         { id: '.test-system-action', params: {} },
       ],
-
       alert_delay: { active: 10 },
+      flapping: {
+        look_back_window: 10,
+        status_change_threshold: 10,
+      },
     });
   });
 });

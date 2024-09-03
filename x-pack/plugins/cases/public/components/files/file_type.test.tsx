@@ -44,6 +44,10 @@ describe('getFileType', () => {
       jest.clearAllMocks();
     });
 
+    afterEach(async () => {
+      await appMockRender.clearQueryCache();
+    });
+
     it('event renders a clickable name if the file is an image', async () => {
       appMockRender = createAppMockRenderer();
 
@@ -141,7 +145,10 @@ describe('getFileType', () => {
 
     it('empty externalReferenceMetadata returns blank FileAttachmentViewObject', () => {
       expect(
-        fileType.getAttachmentViewObject({ ...attachmentViewProps, externalReferenceMetadata: {} })
+        fileType.getAttachmentViewObject({
+          ...attachmentViewProps,
+          externalReferenceMetadata: {},
+        })
       ).toEqual({
         event: 'added an unknown file',
         hideDefaultActions: true,

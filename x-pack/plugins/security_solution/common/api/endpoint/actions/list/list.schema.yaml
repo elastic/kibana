@@ -1,0 +1,54 @@
+openapi: 3.0.0
+info:
+  title: Actions List Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action:
+    get:
+      summary: Get Actions List schema
+      operationId: EndpointGetActionsList
+      description: Get a list of action requests and their responses
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/GetEndpointActionListRouteQuery'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+components:
+  schemas:
+    GetEndpointActionListRouteQuery:
+      type: object
+      properties:
+        agentIds:
+          $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentIds'
+        agentTypes:
+          $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentTypes'
+        commands:
+          $ref: '../../model/schema/common.schema.yaml#/components/schemas/Commands'
+        page:
+          $ref: '../../model/schema/common.schema.yaml#/components/schemas/Page'
+        pageSize:
+          type: integer
+          default: 10
+          minimum: 1
+          maximum: 10000
+          description: Number of items per page
+        startDate:
+          $ref: '../../model/schema/common.schema.yaml#/components/schemas/StartDate'
+        endDate:
+          $ref: '../../model/schema/common.schema.yaml#/components/schemas/EndDate'
+        userIds:
+          $ref: '../../model/schema/common.schema.yaml#/components/schemas/UserIds'
+        types:
+          $ref: '../../model/schema/common.schema.yaml#/components/schemas/Types'
+        withOutputs:
+          $ref: '../../model/schema/common.schema.yaml#/components/schemas/WithOutputs'

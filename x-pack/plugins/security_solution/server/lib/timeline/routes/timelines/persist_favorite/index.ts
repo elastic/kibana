@@ -17,7 +17,7 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 import { persistFavorite } from '../../../saved_object/timelines';
-import { TimelineType, persistFavoriteSchema } from '../../../../../../common/api/timeline';
+import { TimelineTypeEnum, persistFavoriteSchema } from '../../../../../../common/api/timeline';
 
 export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
   router.versioned
@@ -48,7 +48,7 @@ export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter, _: Co
             timelineId || null,
             templateTimelineId || null,
             templateTimelineVersion || null,
-            timelineType || TimelineType.default
+            timelineType || TimelineTypeEnum.default
           );
 
           return response.ok({

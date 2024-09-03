@@ -55,7 +55,7 @@ export const useDateRangePicker = (isFlyout: boolean) => {
   });
 
   const updateActionListDateRanges = useCallback(
-    ({ start, end }) => {
+    ({ start, end }: DurationRange) => {
       setDateRangePickerState((prevState) => ({
         ...prevState,
         startDate: start,
@@ -66,7 +66,7 @@ export const useDateRangePicker = (isFlyout: boolean) => {
   );
 
   const updateActionListRecentlyUsedDateRanges = useCallback(
-    (recentlyUsedDateRanges) => {
+    (recentlyUsedDateRanges: DateRangePickerValues['recentlyUsedDateRanges']) => {
       setDateRangePickerState((prevState) => ({
         ...prevState,
         recentlyUsedDateRanges,
@@ -331,11 +331,6 @@ export const useActionsLogFilter = ({
 
           // upload - v8.9
           if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
-            return false;
-          }
-
-          // `scan` - v8.15
-          if (commandName === 'scan' && !featureFlags.responseActionScanEnabled) {
             return false;
           }
 

@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const find = getService('find');
   const esArchiver = getService('esArchiver');
@@ -40,6 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await PageObjects.common.unsetTime();
     });
 
     it('highlighting on filtering works', async function () {
@@ -77,26 +77,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
 
-      await dashboardPanelActions.openContextMenu();
-      const actionExists = await testSubjects.exists(
+      await dashboardPanelActions.clickContextMenuItem(
         'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH'
       );
-      if (!actionExists) {
-        await dashboardPanelActions.clickContextMenuMoreItem();
-      }
-      const actionElement = await testSubjects.find(
-        'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH'
-      );
-      await actionElement.click();
 
       await PageObjects.discover.waitForDiscoverAppOnScreen();
       expect(await PageObjects.discover.getSavedSearchTitle()).to.equal(
         'Rendering Test: saved search'
       );
-    });
-
-    after(async () => {
-      await PageObjects.common.unsetTime();
     });
   });
 }

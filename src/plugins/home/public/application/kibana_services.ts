@@ -28,7 +28,7 @@ import { TutorialService } from '../services/tutorials';
 import { AddDataService } from '../services/add_data';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
 import { EnvironmentService } from '../services/environment';
-import { ConfigSchema } from '../../config';
+import type { ConfigSchema } from '../../server/config';
 import type { WelcomeService } from '../services/welcome';
 
 export interface HomeKibanaServices {

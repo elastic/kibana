@@ -50,7 +50,12 @@ export function DependencyOperationDetailView() {
     },
   } = useApmParams('/dependencies/operation');
 
-  useDependencyDetailOperationsBreadcrumb();
+  useDependencyDetailOperationsBreadcrumb({
+    title: spanName,
+    href: router.link('/dependencies/operation', {
+      query,
+    }),
+  });
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

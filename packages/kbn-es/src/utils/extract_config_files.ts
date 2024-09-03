@@ -43,11 +43,11 @@ export function extractConfigFiles(
   return localConfig;
 }
 
-function isFile(dest = '') {
+export function isFile(dest = '') {
   return fs.existsSync(dest) && fs.statSync(dest).isFile();
 }
 
-function copyFileSync(src: string, dest: string) {
+export function copyFileSync(src: string, dest: string) {
   const destPath = path.dirname(dest);
 
   if (!fs.existsSync(destPath)) {

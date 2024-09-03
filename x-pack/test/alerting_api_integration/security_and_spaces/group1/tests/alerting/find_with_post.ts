@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { Agent as SuperTestAgent } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -17,7 +18,7 @@ const findTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
   supertest: SuperTestAgent,
-  supertestWithoutAuth: any
+  supertestWithoutAuth: SupertestWithoutAuthProviderType
 ) => {
   describe(describeType, () => {
     afterEach(async () => {

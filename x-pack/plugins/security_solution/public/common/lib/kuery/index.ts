@@ -17,7 +17,7 @@ import memoizeOne from 'memoize-one';
 import { prepareKQLParam } from '../../../../common/utils/kql';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { DataProvider, DataProvidersAnd } from '../../../../common/types';
-import { DataProviderType } from '../../../../common/api/timeline';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline';
 import { EXISTS_OPERATOR } from '../../../../common/types/timeline';
 
 export type PrimitiveOrArrayOfPrimitives =
@@ -125,7 +125,7 @@ const buildQueryMatch = (
 ) =>
   `${dataProvider.excluded ? 'NOT ' : ''}${
     dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
-    dataProvider.type !== DataProviderType.template
+    dataProvider.type !== DataProviderTypeEnum.template
       ? checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
         ? convertNestedFieldToQuery(
             dataProvider.queryMatch.field,

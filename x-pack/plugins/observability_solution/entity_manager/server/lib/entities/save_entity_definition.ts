@@ -8,26 +8,11 @@
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
-import { EntityIdConflict } from './errors/entity_id_conflict_error';
 
 export async function saveEntityDefinition(
   soClient: SavedObjectsClientContract,
   definition: EntityDefinition
 ): Promise<EntityDefinition> {
-  const response = await soClient.find<EntityDefinition>({
-    type: SO_ENTITY_DEFINITION_TYPE,
-    page: 1,
-    perPage: 1,
-    filter: `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${definition.id})`,
-  });
-
-  if (response.total === 1) {
-    throw new EntityIdConflict(
-      `Entity definition with [${definition.id}] already exists.`,
-      definition
-    );
-  }
-
   await soClient.create<EntityDefinition>(SO_ENTITY_DEFINITION_TYPE, definition, {
     id: definition.id,
     managed: definition.managed,
@@ -35,4 +20,26 @@ export async function saveEntityDefinition(
   });
 
   return definition;
+}
+
+export async function entityDefinitionExists(
+  soClient: SavedObjectsClientContract,
+  id: string
+): Promise<boolean> {
+  const response = await soClient.find<EntityDefinition>({
+    type: SO_ENTITY_DEFINITION_TYPE,
+    page: 1,
+    perPage: 1,
+    filter: `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${id})`,
+  });
+
+  return response.total === 1;
+}
+
+export async function updateEntityDefinition(
+  soClient: SavedObjectsClientContract,
+  id: string,
+  definition: Partial<EntityDefinition>
+) {
+  await soClient.update<EntityDefinition>(SO_ENTITY_DEFINITION_TYPE, id, definition);
 }

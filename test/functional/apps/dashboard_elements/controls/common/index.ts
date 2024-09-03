@@ -26,7 +26,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
     });
 
-    // enable the controls lab and navigate to the dashboard listing page to start
     await dashboard.navigateToApp();
     await dashboard.preserveCrossAppState();
   }

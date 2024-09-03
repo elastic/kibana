@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import {
   Plugin,
   CoreSetup,
@@ -13,8 +14,9 @@ import {
   PluginInitializerContext,
   PluginConfigDescriptor,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
-import { upsertComponent } from './lib/manage_index_templates';
+import { installEntityManagerTemplates } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import {
   EntityManagerPluginSetupDependencies,
@@ -22,11 +24,10 @@ import {
   EntityManagerServerSetup,
 } from './types';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
-import { entitiesEventComponentTemplateConfig } from './templates/components/event';
 import { entityDefinition, EntityDiscoveryApiKeyType } from './saved_objects';
-import { entitiesEntityComponentTemplateConfig } from './templates/components/entity';
-import { entitiesLatestBaseComponentTemplateConfig } from './templates/components/base_latest';
-import { entitiesHistoryBaseComponentTemplateConfig } from './templates/components/base_history';
+import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
+import { builtInDefinitions } from './lib/entities/built_in';
+import { EntityClient } from './lib/entity_client';
 
 export type EntityManagerServerPluginSetup = ReturnType<EntityManagerServerPlugin['setup']>;
 export type EntityManagerServerPluginStart = ReturnType<EntityManagerServerPlugin['start']>;
@@ -74,6 +75,12 @@ export class EntityManagerServerPlugin
       router,
       logger: this.logger,
       server: this.server,
+      getScopedClient: async ({ request }: { request: KibanaRequest }) => {
+        const [coreStart] = await core.getStartServices();
+        const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+        const soClient = coreStart.savedObjects.getScopedClient(request);
+        return new EntityClient({ esClient, soClient, logger: this.logger });
+      },
     });
 
     return {};
@@ -89,29 +96,21 @@ export class EntityManagerServerPlugin
 
     const esClient = core.elasticsearch.client.asInternalUser;
 
-    // Install entities component templates and index template
-    Promise.all([
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesHistoryBaseComponentTemplateConfig,
-      }),
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesLatestBaseComponentTemplateConfig,
-      }),
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesEventComponentTemplateConfig,
-      }),
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesEntityComponentTemplateConfig,
-      }),
-    ]).catch(() => {});
+    installEntityManagerTemplates({ esClient, logger: this.logger })
+      .then(async () => {
+        // the api key validation requires a check against the cluster license
+        // which is lazily loaded. we ensure it gets loaded before the update
+        await firstValueFrom(plugins.licensing.license$);
+        const { success } = await upgradeBuiltInEntityDefinitions({
+          definitions: builtInDefinitions,
+          server: this.server!,
+        });
+
+        if (success) {
+          this.logger.info('Builtin definitions were successfully upgraded');
+        }
+      })
+      .catch((err) => this.logger.error(err));
 
     return {};
   }

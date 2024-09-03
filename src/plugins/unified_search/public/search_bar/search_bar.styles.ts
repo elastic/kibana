@@ -9,10 +9,10 @@
 import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const searchBarStyles = ({ euiTheme }: UseEuiTheme) => {
+export const searchBarStyles = ({ euiTheme }: UseEuiTheme, isESQLQuery: boolean) => {
   return {
     uniSearchBar: css`
-      padding: ${euiTheme.size.s};
+      padding: ${isESQLQuery ? 0 : euiTheme.size.s};
       position: relative;
     `,
     detached: css`
@@ -20,6 +20,10 @@ export const searchBarStyles = ({ euiTheme }: UseEuiTheme) => {
     `,
     inPage: css`
       padding: 0;
+    `,
+    withBorders: css`
+      border: ${euiTheme.border.thin};
+      border-bottom: none;
     `,
     hidden: css`
       display: none;

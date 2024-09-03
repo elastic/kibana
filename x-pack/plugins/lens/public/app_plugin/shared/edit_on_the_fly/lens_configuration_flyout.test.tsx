@@ -227,6 +227,32 @@ describe('LensEditConfigurationFlyout', () => {
     expect(saveByRefSpy).toHaveBeenCalled();
   });
 
+  it('should call the onApplyCb callback if apply button is clicked', async () => {
+    const onApplyCbSpy = jest.fn();
+
+    renderConfigFlyout(
+      {
+        closeFlyout: jest.fn(),
+        onApplyCb: onApplyCbSpy,
+      },
+      { esql: 'from index1 | limit 10' }
+    );
+    userEvent.click(screen.getByTestId('applyFlyoutButton'));
+    expect(onApplyCbSpy).toHaveBeenCalledWith({
+      title: 'test',
+      visualizationType: 'testVis',
+      state: {
+        datasourceStates: { testDatasource: 'state' },
+        visualization: {},
+        filters: [],
+        query: { esql: 'from index1 | limit 10' },
+      },
+      filters: [],
+      query: { esql: 'from index1 | limit 10' },
+      references: [],
+    });
+  });
+
   it('should not display the editor if canEditTextBasedQuery prop is false', async () => {
     renderConfigFlyout({
       canEditTextBasedQuery: false,

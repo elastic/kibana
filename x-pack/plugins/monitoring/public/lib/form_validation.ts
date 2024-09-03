@@ -21,7 +21,7 @@ export function getMissingFieldErrors(data: any, defaultData: any) {
   const errors: any = {};
 
   for (const key in data) {
-    if (!data.hasOwnProperty(key)) {
+    if (!Object.hasOwn(data, key)) {
       continue;
     }
 

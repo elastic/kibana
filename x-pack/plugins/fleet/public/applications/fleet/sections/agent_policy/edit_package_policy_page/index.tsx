@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { isEmpty } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -63,6 +62,8 @@ import { RootPrivilegesCallout } from '../create_package_policy_page/single_page
 
 import { StepsWithLessPadding } from '../create_package_policy_page/single_page_layout';
 
+import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
+
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
@@ -105,6 +106,7 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
+  const { isAgentlessPackagePolicy } = useAgentless();
 
   const {
     // data
@@ -247,7 +249,10 @@ export const EditPackagePolicyForm = memo<{
       return;
     }
     if (
-      (agentCount !== 0 || agentPoliciesToAdd.length > 0 || agentPoliciesToRemove.length > 0) &&
+      (agentCount !== 0 ||
+        agentPolicies.length === 0 ||
+        agentPoliciesToAdd.length > 0 ||
+        agentPoliciesToRemove.length > 0) &&
       !hasAgentlessAgentPolicy &&
       formState !== 'CONFIRM'
     ) {
@@ -446,6 +451,7 @@ export const EditPackagePolicyForm = memo<{
         onChange={handleExtensionViewOnChange}
         validationResults={validationResults}
         isEditPage={true}
+        isAgentlessEnabled={isAgentlessPackagePolicy(packagePolicy)}
       />
     </ExtensionWrapper>
   );
@@ -481,7 +487,7 @@ export const EditPackagePolicyForm = memo<{
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />
-        ) : loadingError || isEmpty(existingAgentPolicies) || !packageInfo ? (
+        ) : loadingError || !packageInfo ? (
           <ErrorComponent
             title={
               <FormattedMessage

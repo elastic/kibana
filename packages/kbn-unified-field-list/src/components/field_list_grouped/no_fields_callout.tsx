@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const defaultNoFieldsMessageCopy = i18n.translate(
@@ -32,32 +33,43 @@ export const NoFieldsCallout = ({
   isAffectedByGlobalFilter?: boolean;
   'data-test-subj'?: string;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   if (!fieldsExistInIndex) {
     return (
-      <EuiCallOut
+      <EuiText
         size="s"
-        color="warning"
-        title={i18n.translate('unifiedFieldList.fieldList.noFieldsCallout.noFieldsLabel', {
-          defaultMessage: 'No fields exist in this data view.',
-        })}
+        color="subdued"
+        css={css`
+          padding: ${euiTheme.size.s};
+        `}
         data-test-subj={`${dataTestSubject}-noFieldsExist`}
-      />
+      >
+        <p>
+          {i18n.translate('unifiedFieldList.fieldList.noFieldsCallout.noFieldsLabel', {
+            defaultMessage: 'No fields exist in this data view.',
+          })}
+        </p>
+      </EuiText>
     );
   }
 
   return (
-    <EuiCallOut
+    <EuiText
       size="s"
-      color="warning"
-      title={
-        isAffectedByFieldFilter
+      color="subdued"
+      css={css`
+        padding: ${euiTheme.size.s};
+      `}
+      data-test-subj={`${dataTestSubject}-noFieldsMatch`}
+    >
+      <p>
+        {isAffectedByFieldFilter
           ? i18n.translate('unifiedFieldList.fieldList.noFieldsCallout.noFilteredFieldsLabel', {
               defaultMessage: 'No fields match the selected filters.',
             })
-          : defaultNoFieldsMessage
-      }
-      data-test-subj={`${dataTestSubject}-noFieldsMatch`}
-    >
+          : defaultNoFieldsMessage}
+      </p>
       {(isAffectedByTimerange || isAffectedByFieldFilter || isAffectedByGlobalFilter) && (
         <>
           <strong>
@@ -99,6 +111,6 @@ export const NoFieldsCallout = ({
           </ul>
         </>
       )}
-    </EuiCallOut>
+    </EuiText>
   );
 };

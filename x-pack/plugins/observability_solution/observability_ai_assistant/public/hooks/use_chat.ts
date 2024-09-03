@@ -21,7 +21,6 @@ import {
 import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantService } from '..';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
-import { useUserPreferredLanguage } from './use_user_preferred_language';
 
 export enum ChatState {
   Ready = 'ready',
@@ -87,8 +86,6 @@ function useChatWithoutContext({
   const [pendingMessages, setPendingMessages] = useState<Message[]>();
 
   const abortControllerRef = useRef(new AbortController());
-
-  const { getPreferredLanguage } = useUserPreferredLanguage();
 
   const onChatCompleteRef = useRef(onChatComplete);
   onChatCompleteRef.current = onChatComplete;
@@ -164,7 +161,6 @@ function useChatWithoutContext({
         disableFunctions: disableFunctions ?? false,
         signal: abortControllerRef.current.signal,
         conversationId,
-        responseLanguage: getPreferredLanguage(),
       });
 
       function getPendingMessages() {
@@ -263,7 +259,6 @@ function useChatWithoutContext({
       disableFunctions,
       service,
       systemMessage,
-      getPreferredLanguage,
     ]
   );
 

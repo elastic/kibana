@@ -7,7 +7,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 import { VegaPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {

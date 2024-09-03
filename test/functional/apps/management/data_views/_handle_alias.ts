@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.createIndexPattern('alias2*', 'date');
     });
 
-    describe('discover verify hits', async () => {
+    describe('discover verify hits', () => {
       before(async () => {
         const from = 'Nov 12, 2016 @ 05:00:00.000';
         const to = 'Nov 19, 2016 @ 05:00:00.000';

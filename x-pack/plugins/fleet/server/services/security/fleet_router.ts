@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import type {
-  IKibanaResponse,
-  IRouter,
-  KibanaRequest,
-  KibanaResponseFactory,
-  Logger,
-  RequestHandler,
-  RouteMethod,
+import {
+  type IKibanaResponse,
+  type IRouter,
+  type KibanaRequest,
+  type KibanaResponseFactory,
+  type Logger,
+  type RequestHandler,
+  type RouteMethod,
 } from '@kbn/core/server';
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 
 import { PUBLIC_API_ACCESS } from '../../../common/constants';
-
 import type { FleetRequestHandlerContext } from '../..';
-
 import { getRequestStore } from '../request_store';
 
 import type { FleetVersionedRouteConfig } from './types';
@@ -82,6 +80,7 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
       logger.info(`User does not have required fleet authz to access path: ${request.route.path}`);
       return response.forbidden();
     }
+
     return handler(context, request, response);
   };
 

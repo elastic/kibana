@@ -9,8 +9,9 @@ import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public'
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import { getDataViewAndSavedSearchCallback } from '../../util/index_utils';
 import type { JobType } from '../../../../common/types/saved_objects';
-import { newJobCapsServiceAnalytics } from './new_job_capabilities_service_analytics';
-import { newJobCapsService } from './new_job_capabilities_service';
+import type { MlApiServices } from '../ml_api_service';
+import { mlJobCapsServiceAnalyticsFactory } from './new_job_capabilities_service_analytics';
+import { mlJobCapsServiceFactory } from './new_job_capabilities_service';
 
 export const ANOMALY_DETECTOR = 'anomaly-detector';
 export const DATA_FRAME_ANALYTICS = 'data-frame-analytics';
@@ -20,6 +21,7 @@ export const DATA_FRAME_ANALYTICS = 'data-frame-analytics';
 export function loadNewJobCapabilities(
   dataViewId: string,
   savedSearchId: string,
+  mlApiServices: MlApiServices,
   dataViewsService: DataViewsContract,
   savedSearchService: SavedSearchPublicPluginStart,
   jobType: JobType
@@ -27,7 +29,9 @@ export function loadNewJobCapabilities(
   return new Promise(async (resolve, reject) => {
     try {
       const serviceToUse =
-        jobType === ANOMALY_DETECTOR ? newJobCapsService : newJobCapsServiceAnalytics;
+        jobType === ANOMALY_DETECTOR
+          ? mlJobCapsServiceFactory(mlApiServices)
+          : mlJobCapsServiceAnalyticsFactory(mlApiServices);
 
       if (dataViewId !== undefined) {
         // index pattern is being used

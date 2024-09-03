@@ -31,7 +31,15 @@ describe('ES capabilities for serverless ES', () => {
   });
 
   it('returns the correct capabilities', async () => {
-    const capabilities = await getCapabilitiesFromClient(client);
+    const capabilities = await Promise.race([
+      getCapabilitiesFromClient(client),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject('Waited 10+ seconds to get capabilities from ES, timed out...'),
+          10_000
+        )
+      ),
+    ]);
     expect(capabilities).toEqual({
       serverless: true,
     });

@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Painless lab app', function () {
     loadTestFile(require.resolve('./painless_lab'));
+    loadTestFile(require.resolve('./painless_lab_flyout'));
   });
 };

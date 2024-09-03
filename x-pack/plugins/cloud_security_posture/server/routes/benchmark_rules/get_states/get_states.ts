@@ -6,9 +6,9 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH } from '@kbn/cloud-security-posture-common';
+import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CspRouter } from '../../../types';
-import { CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH } from '../../../../common/constants';
-import { CspBenchmarkRulesStates } from '../../../../common/types/rules/v4';
 import { getCspBenchmarkRulesStatesHandler } from './v1';
 
 export const defineGetCspBenchmarkRulesStatesRoute = (router: CspRouter) =>

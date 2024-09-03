@@ -19,12 +19,12 @@ interface InspectorDataGridProps extends VegaRuntimeData {
 export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: InspectorDataGridProps) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
   const onChangeItemsPerPage = useCallback(
-    (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
+    (pageSize: number) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
     [setPagination]
   );
 
   const onChangePage = useCallback(
-    (pageIndex) => setPagination((p) => ({ ...p, pageIndex })),
+    (pageIndex: number) => setPagination((p) => ({ ...p, pageIndex })),
     [setPagination]
   );
 
@@ -75,7 +75,7 @@ export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: Inspecto
       // then the row index must be adjusted as `data` has already been pruned to the page size
       adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
-      return gridData.hasOwnProperty(adjustedRowIndex)
+      return Object.hasOwn(gridData, adjustedRowIndex)
         ? gridData[adjustedRowIndex][columnId] || null
         : null;
     }) as EuiDataGridProps['renderCellValue'];

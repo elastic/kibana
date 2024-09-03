@@ -11,3 +11,18 @@ import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plu
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
+
+// This is a line of shared icon names used by Reference Lines, Annotations and Metric chart
+export type SharedSetOfIcons =
+  | 'empty'
+  | 'asterisk'
+  | 'alert'
+  | 'bell'
+  | 'bolt'
+  | 'bug'
+  | 'editorComment'
+  | 'flag'
+  | 'heart'
+  | 'mapMarker'
+  | 'starEmpty'
+  | 'tag';

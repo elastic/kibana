@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataFrameAnalyticsId } from '@kbn/ml-data-frame-analytics-utils';
 import { useDataSource } from '../../../contexts/ml/data_source_context';
-import { ml } from '../../../services/ml_api_service';
+import { useMlApiContext } from '../../../contexts/kibana';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
 import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor';
 import {
@@ -46,6 +46,7 @@ interface Props {
 }
 
 export const Page: FC<Props> = ({ jobId }) => {
+  const ml = useMlApiContext();
   const [currentStep, setCurrentStep] = useState<ANALYTICS_STEPS>(ANALYTICS_STEPS.CONFIGURATION);
   const [activatedSteps, setActivatedSteps] = useState<boolean[]>([
     true,

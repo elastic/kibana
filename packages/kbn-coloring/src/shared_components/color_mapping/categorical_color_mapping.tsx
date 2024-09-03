@@ -15,22 +15,26 @@ import { Container } from './components/container/container';
 import { ColorMapping } from './config';
 import { uiReducer } from './state/ui';
 
+export interface ColorMappingInputCategoricalData {
+  type: 'categories';
+  /** an ORDERED array of categories rendered in the visualization  */
+  categories: Array<string | string[]>;
+}
+
+export interface ColorMappingInputContinuousData {
+  type: 'ranges';
+  min: number;
+  max: number;
+  bins: number;
+}
+
 /**
  * A configuration object that is required to populate correctly the visible categories
  * or the ranges in the CategoricalColorMapping component
  */
 export type ColorMappingInputData =
-  | {
-      type: 'categories';
-      /** an ORDERED array of categories rendered in the visualization  */
-      categories: Array<string | string[]>;
-    }
-  | {
-      type: 'ranges';
-      min: number;
-      max: number;
-      bins: number;
-    };
+  | ColorMappingInputCategoricalData
+  | ColorMappingInputContinuousData;
 
 /**
  * The props of the CategoricalColorMapping component

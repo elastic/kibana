@@ -18,7 +18,10 @@ export default createTestConfig({
   },
   suiteTags: { exclude: ['skipSvlSearch'] },
   // add feature flags
-  kbnServerArgs: ['--xpack.security.roleManagementEnabled=true'],
+  kbnServerArgs: [
+    '--xpack.security.roleManagementEnabled=true',
+    `--xpack.searchIndices.enabled=true`, // global empty state FF
+  ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 

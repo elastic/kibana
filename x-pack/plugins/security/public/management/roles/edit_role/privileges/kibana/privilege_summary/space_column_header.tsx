@@ -9,10 +9,10 @@ import React, { Fragment, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
+import { isGlobalPrivilegeDefinition } from '@kbn/security-role-management-model';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 
-import type { RoleKibanaPrivilege } from '../../../../../../../common';
-import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 
 export interface SpaceColumnHeaderProps {

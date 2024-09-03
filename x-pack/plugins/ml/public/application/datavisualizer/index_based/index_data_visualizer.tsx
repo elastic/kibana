@@ -18,7 +18,7 @@ import type {
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
-import { useMlKibana, useMlLocator } from '../../contexts/kibana';
+import { useMlApiContext, useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
@@ -40,10 +40,11 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
       },
     },
   } = useMlKibana();
+  const mlApiServices = useMlApiContext();
   const { showNodeInfo } = useEnabledFeatures();
   const mlLocator = useMlLocator()!;
   const mlFeaturesDisabled = !isFullLicense();
-  getMlNodeCount();
+  getMlNodeCount(mlApiServices);
 
   const [IndexDataVisualizer, setIndexDataVisualizer] = useState<IndexDataVisualizerSpec | null>(
     null

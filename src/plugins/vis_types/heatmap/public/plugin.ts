@@ -13,7 +13,7 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { HeatmapPublicConfig } from '../config';
+import type { HeatmapPublicConfig } from '../server/config';
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../common';
 import { heatmapVisType } from './vis_type';
 import { setDataViewsStart } from './services';

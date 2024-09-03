@@ -31,7 +31,7 @@ export interface DefaultEmbeddableApi<
 > extends DefaultPresentationPanelApi,
     HasType,
     PublishesPhaseEvents,
-    PublishesUnsavedChanges,
+    Partial<PublishesUnsavedChanges>,
     HasSerializableState<SerializedState>,
     HasSnapshottableState<RuntimeState> {}
 

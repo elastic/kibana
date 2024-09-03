@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment/moment';
-import { SearchConfigSchema, SearchSessionsConfigSchema } from './config';
+import type { SearchConfigSchema, SearchSessionsConfigSchema } from './server/config';
 
 export const getMockSearchConfig = ({
   sessions: { enabled = true, defaultExpiration = moment.duration(7, 'd') } = {

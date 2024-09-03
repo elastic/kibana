@@ -6,35 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { KibanaFeature } from '@kbn/features-plugin/common';
 
-import type { RolePayloadSchemaType } from './model';
+import { roleGrantsSubFeaturePrivileges } from './lib';
 import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { validateKibanaPrivileges } from '../../../lib';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-
-const roleGrantsSubFeaturePrivileges = (features: KibanaFeature[], role: RolePayloadSchemaType) => {
-  if (!role.kibana) {
-    return false;
-  }
-
-  const subFeaturePrivileges = new Map(
-    features.map((feature) => [
-      feature.id,
-      feature.subFeatures.map((sf) => sf.privilegeGroups.map((pg) => pg.privileges)).flat(2),
-    ])
-  );
-
-  const hasAnySubFeaturePrivileges = role.kibana.some((kibanaPrivilege) =>
-    Object.entries(kibanaPrivilege.feature ?? {}).some(([featureId, privileges]) => {
-      return !!subFeaturePrivileges.get(featureId)?.some(({ id }) => privileges.includes(id));
-    })
-  );
-
-  return hasAnySubFeaturePrivileges;
-};
 
 export function definePutRolesRoutes({
   router,

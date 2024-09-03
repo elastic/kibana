@@ -12,7 +12,7 @@ import { PinEventAction } from './pin_event_action';
 import { useUserPrivileges } from '../user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../user_privileges/endpoint/mocks';
 import { TestProviders } from '../../mock';
-import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 
 jest.mock('../user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
@@ -36,7 +36,7 @@ describe('PinEventAction', () => {
             noteIds={[]}
             onPinClicked={jest.fn}
             eventIsPinned={false}
-            timelineType={TimelineType.default}
+            timelineType={TimelineTypeEnum.default}
           />
         </TestProviders>
       );
@@ -57,7 +57,7 @@ describe('PinEventAction', () => {
             noteIds={[]}
             onPinClicked={jest.fn}
             eventIsPinned={false}
-            timelineType={TimelineType.default}
+            timelineType={TimelineTypeEnum.default}
           />
         </TestProviders>
       );

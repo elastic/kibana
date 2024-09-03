@@ -58,6 +58,7 @@ module.exports = (_, argv) => {
         '@babel/runtime/helpers/wrapNativeSuper',
 
         // modules from npm
+        '@elastic/apm-rum-core',
         '@elastic/charts',
         '@elastic/eui',
         '@elastic/eui/optimize/es/components/provider/nested',

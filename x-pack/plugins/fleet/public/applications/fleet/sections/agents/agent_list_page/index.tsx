@@ -101,7 +101,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSelectedStatus,
     selectedTags,
     setSelectedTags,
-    agentPolicies,
+    allAgentPolicies,
     agentPoliciesRequest,
     agentPoliciesIndexedById,
     pagination,
@@ -167,10 +167,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortField(sort!.field);
     setSortOrder(sort!.direction);
   };
-
-  const showInactive = useMemo(() => {
-    return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
-  }, [selectedStatus]);
 
   const renderActions = (agent: Agent) => {
     const agentPolicy =
@@ -290,14 +286,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             refreshAgentActivity={isLoading}
             setSearch={setSearch}
             setSelectedStatus={setSelectedStatus}
-            agentPolicies={agentPolicies}
+            agentPolicies={allAgentPolicies}
           />
         </EuiPortal>
       ) : null}
       {enrollmentFlyout.isOpen ? (
         <EuiPortal>
           <AgentEnrollmentFlyout
-            agentPolicy={agentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
+            agentPolicy={allAgentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
             onClose={() => {
               setEnrollmentFlyoutState({ isOpen: false });
               fetchData();
@@ -405,7 +401,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       )}
       {/* Search and filter bar */}
       <SearchAndFilterBar
-        agentPolicies={agentPolicies}
+        agentPolicies={allAgentPolicies}
         draftKuery={draftKuery}
         onDraftKueryChange={setDraftKuery}
         onSubmitSearch={onSubmitSearch}
@@ -435,7 +431,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
       <AgentTableHeader
-        showInactive={showInactive}
         totalAgents={nAgentsInTable}
         agentStatus={agentsStatus}
         selectableAgents={agentsOnCurrentPage?.filter(isAgentSelectable).length || 0}

@@ -13,7 +13,7 @@ import { CopyIDAction } from './copy_id_action';
 const mockInferenceEndpoint = {
   deployment: 'not_applicable',
   endpoint: {
-    model_id: 'hugging-face-embeddings',
+    inference_id: 'hugging-face-embeddings',
     task_type: 'text_embedding',
     service: 'hugging_face',
     service_settings: {
@@ -58,7 +58,7 @@ describe('CopyIDAction', () => {
 
   it('renders the label with correct text', () => {
     const TestComponent = () => {
-      return <CopyIDAction modelId={mockInferenceEndpoint.endpoint.model_id} />;
+      return <CopyIDAction inferenceId={mockInferenceEndpoint.endpoint.inference_id} />;
     };
 
     const { getByTestId } = render(<TestComponent />);

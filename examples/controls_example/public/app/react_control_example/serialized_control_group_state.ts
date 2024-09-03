@@ -7,11 +7,12 @@
  */
 
 import { SerializedPanelState } from '@kbn/presentation-containers';
-import { ControlGroupSerializedState } from '../../react_controls/control_group/types';
-import { OPTIONS_LIST_CONTROL_TYPE } from '../../react_controls/data_controls/options_list_control/constants';
-import { RANGE_SLIDER_CONTROL_TYPE } from '../../react_controls/data_controls/range_slider/types';
-import { SEARCH_CONTROL_TYPE } from '../../react_controls/data_controls/search_control/types';
-import { TIMESLIDER_CONTROL_TYPE } from '../../react_controls/timeslider_control/types';
+import { ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import {
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
+} from '@kbn/controls-plugin/common';
 
 const SERIALIZED_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.controls.reactControlExample.controlGroupSerializedState';
@@ -37,22 +38,8 @@ const searchControlId = 'searchControl1';
 const rangeSliderControlId = 'rangeSliderControl1';
 const timesliderControlId = 'timesliderControl1';
 const controlGroupPanels = {
-  [searchControlId]: {
-    type: SEARCH_CONTROL_TYPE,
-    order: 3,
-    grow: true,
-    width: 'medium',
-    explicitInput: {
-      id: searchControlId,
-      fieldName: 'message',
-      title: 'Message',
-      grow: true,
-      width: 'medium',
-      enhancements: {},
-    },
-  },
   [rangeSliderControlId]: {
-    type: RANGE_SLIDER_CONTROL_TYPE,
+    type: RANGE_SLIDER_CONTROL,
     order: 1,
     grow: true,
     width: 'medium',
@@ -66,7 +53,7 @@ const controlGroupPanels = {
     },
   },
   [timesliderControlId]: {
-    type: TIMESLIDER_CONTROL_TYPE,
+    type: TIME_SLIDER_CONTROL,
     order: 4,
     grow: true,
     width: 'medium',
@@ -77,7 +64,7 @@ const controlGroupPanels = {
     },
   },
   [optionsListId]: {
-    type: OPTIONS_LIST_CONTROL_TYPE,
+    type: OPTIONS_LIST_CONTROL,
     order: 2,
     grow: true,
     width: 'medium',
@@ -103,17 +90,12 @@ const initialSerializedControlGroupState = {
   } as object,
   references: [
     {
-      name: `controlGroup_${searchControlId}:${SEARCH_CONTROL_TYPE}DataView`,
+      name: `controlGroup_${rangeSliderControlId}:rangeSliderDataView`,
       type: 'index-pattern',
       id: WEB_LOGS_DATA_VIEW_ID,
     },
     {
-      name: `controlGroup_${rangeSliderControlId}:${RANGE_SLIDER_CONTROL_TYPE}DataView`,
-      type: 'index-pattern',
-      id: WEB_LOGS_DATA_VIEW_ID,
-    },
-    {
-      name: `controlGroup_${optionsListId}:optionsListControlDataView`,
+      name: `controlGroup_${optionsListId}:optionsListDataView`,
       type: 'index-pattern',
       id: WEB_LOGS_DATA_VIEW_ID,
     },

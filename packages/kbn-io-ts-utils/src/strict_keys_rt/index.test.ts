@@ -206,7 +206,38 @@ describe('strictKeysRt', () => {
       {
         type: t.array(t.type({ foo: t.string })),
         passes: [[{ foo: 'bar' }], [{ foo: 'baz' }, { foo: 'bar' }]],
-        fails: [],
+        fails: [{ foo: 'bar', bar: 'foo' }],
+      },
+      {
+        type: t.type({
+          nestedArray: t.array(
+            t.type({
+              bar: t.string,
+            })
+          ),
+        }),
+        passes: [
+          {
+            nestedArray: [],
+          },
+          {
+            nestedArray: [
+              {
+                bar: 'foo',
+              },
+            ],
+          },
+        ],
+        fails: [
+          {
+            nestedArray: [
+              {
+                bar: 'foo',
+                foo: 'bar',
+              },
+            ],
+          },
+        ],
       },
     ];
 

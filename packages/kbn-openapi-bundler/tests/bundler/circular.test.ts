@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { dump } from 'js-yaml';
+import { safeDump } from 'js-yaml';
 import { OpenAPIV3 } from 'openapi-types';
 import { bundleSpecs } from './bundle_specs';
 import { createOASDocument } from '../create_oas_document';
@@ -48,7 +48,8 @@ describe('OpenAPI Bundler - circular specs', () => {
       })
     );
 
-    expect(dump(bundledSpec.paths['/api/some_api']!.get!.responses['200'])).toMatchInlineSnapshot(`
+    expect(safeDump(bundledSpec.paths['/api/some_api']!.get!.responses['200']))
+      .toMatchInlineSnapshot(`
 "content:
   application/json:
     schema: &ref_0

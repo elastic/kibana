@@ -50,7 +50,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     { label: 'host.name', searchPath: 'host.name' },
   ];
 
-  describe('rule', async () => {
+  describe('rule', () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);

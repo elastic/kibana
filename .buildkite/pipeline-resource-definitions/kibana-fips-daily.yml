@@ -19,12 +19,12 @@ spec:
       description: Run Kibana FIPS smoke tests
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: "#kibana-fips-ftr-errors"
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: "true"
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       repository: elastic/kibana
       branch_configuration: main
       default_branch: main
-      pipeline_file: ".buildkite/pipelines/fips.yml"
+      pipeline_file: '.buildkite/pipelines/fips.yml'
       provider_settings:
         trigger_mode: none
       schedules:

@@ -279,7 +279,7 @@ THE SOFTWARE.
 ---
 This code is part of the Services provided by FullStory, Inc. For license information, please refer to https://www.fullstory.com/legal/terms-and-conditions/
 Portions of this code are licensed under the following license:
-  For license information please see fs.js.LICENSE.txt
+  For license information please see https://edge.fullstory.com/s/fs.js.LEGAL.txt
 
 ---
 This product bundles bootstrap@3.3.6 which is available under a

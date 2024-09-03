@@ -19,6 +19,7 @@ import {
   testPipelineValidResult,
   testPipelineInvalidEcs,
 } from '../../../__jest__/fixtures/categorization';
+import type { SimplifiedProcessors } from '../../types';
 import { mockedRequestWithPipeline } from '../../../__jest__/fixtures';
 import { handleReview } from './review';
 import { handleCategorization } from './categorization';
@@ -30,7 +31,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
-const mockLlm = new FakeLLM({
+const model = new FakeLLM({
   response: "I'll callback later.",
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
@@ -44,7 +45,7 @@ jest.mock('../../util/pipeline', () => ({
 }));
 
 describe('runCategorizationGraph', () => {
-  const mockClient = {
+  const client = {
     asCurrentUser: {
       ingest: {
         simulate: jest.fn(),
@@ -63,33 +64,61 @@ describe('runCategorizationGraph', () => {
     // We do not care about ES in these tests, the mock is just to prevent errors.
 
     // After this is triggered, the mock of TestPipeline will trigger the expected error, to route to error handler
-    (handleCategorization as jest.Mock).mockImplementation(async () => ({
-      currentPipeline: categorizationInitialPipeline,
-      currentProcessors: await mockInvokeCategorization(),
-      reviewed: false,
-      finalized: false,
-      lastExecutedChain: 'categorization',
-    }));
+    (handleCategorization as jest.Mock).mockImplementation(async () => {
+      const currentProcessors = await mockInvokeCategorization();
+      const processors = {
+        type: 'categorization',
+        processors: currentProcessors,
+      } as SimplifiedProcessors;
+      const currentPipeline = combineProcessors(categorizationInitialPipeline, processors);
+      return {
+        currentPipeline,
+        currentProcessors,
+        reviewed: false,
+        finalized: false,
+        lastExecutedChain: 'categorization',
+      };
+    });
     // Error pipeline resolves it, though the responce includes an invalid categorization
-    (handleErrors as jest.Mock).mockImplementation(async () => ({
-      currentPipeline: categorizationInitialPipeline,
-      currentProcessors: await mockInvokeError(),
-      reviewed: false,
-      finalized: false,
-      lastExecutedChain: 'error',
-    }));
+    (handleErrors as jest.Mock).mockImplementation(async () => {
+      const currentProcessors = await mockInvokeError();
+      const processors = {
+        type: 'categorization',
+        processors: currentProcessors,
+      } as SimplifiedProcessors;
+      const currentPipeline = combineProcessors(categorizationInitialPipeline, processors);
+      return {
+        currentPipeline,
+        currentProcessors,
+        reviewed: false,
+        finalized: false,
+        lastExecutedChain: 'error',
+      };
+    });
     // Invalid categorization is resolved and returned correctly, which routes it to a review
-    (handleInvalidCategorization as jest.Mock).mockImplementation(async () => ({
-      currentPipeline: categorizationInitialPipeline,
-      currentProcessors: await mockInvokeInvalid(),
-      reviewed: false,
-      finalized: false,
-      lastExecutedChain: 'invalidCategorization',
-    }));
+    (handleInvalidCategorization as jest.Mock).mockImplementation(async () => {
+      const currentProcessors = await mockInvokeInvalid();
+      const processors = {
+        type: 'categorization',
+        processors: currentProcessors,
+      } as SimplifiedProcessors;
+      const currentPipeline = combineProcessors(categorizationInitialPipeline, processors);
+      return {
+        currentPipeline,
+        currentProcessors,
+        reviewed: false,
+        finalized: false,
+        lastExecutedChain: 'invalidCategorization',
+      };
+    });
     // After the review it should route to modelOutput and finish.
     (handleReview as jest.Mock).mockImplementation(async () => {
       const currentProcessors = await mockInvokeReview();
-      const currentPipeline = combineProcessors(categorizationInitialPipeline, currentProcessors);
+      const processors = {
+        type: 'categorization',
+        processors: currentProcessors,
+      } as SimplifiedProcessors;
+      const currentPipeline = combineProcessors(categorizationInitialPipeline, processors);
       return {
         currentProcessors,
         currentPipeline,
@@ -102,14 +131,14 @@ describe('runCategorizationGraph', () => {
 
   it('Ensures that the graph compiles', async () => {
     try {
-      await getCategorizationGraph(mockClient, mockLlm);
+      await getCategorizationGraph({ client, model });
     } catch (error) {
-      // noop
+      throw Error(`getCategorizationGraph threw an error: ${error}`);
     }
   });
 
   it('Runs the whole graph, with mocked outputs from the LLM.', async () => {
-    const categorizationGraph = await getCategorizationGraph(mockClient, mockLlm);
+    const categorizationGraph = await getCategorizationGraph({ client, model });
 
     (testPipeline as jest.Mock)
       .mockResolvedValueOnce(testPipelineValidResult)
@@ -122,8 +151,8 @@ describe('runCategorizationGraph', () => {
     let response;
     try {
       response = await categorizationGraph.invoke(mockedRequestWithPipeline);
-    } catch (e) {
-      // noop
+    } catch (error) {
+      throw Error(`getCategorizationGraph threw an error: ${error}`);
     }
 
     expect(response.results).toStrictEqual(categorizationExpectedResults);

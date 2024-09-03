@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
-import { validateVersion } from '@kbn/object-versioning/lib/utils';
+import { validateVersion } from '@kbn/object-versioning-utils';
 
 export const procedureNames = [
   'get',

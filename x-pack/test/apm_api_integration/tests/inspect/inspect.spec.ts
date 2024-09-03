@@ -93,7 +93,7 @@ export default function inspectFlagTests({ getService }: FtrProviderContext) {
 
           expect(status).to.be(200);
           expect(body._inspect?.map((res) => res.stats?.indexPattern.value)).to.eql([
-            ['metrics-apm*', 'apm-*'],
+            ['metrics-apm*', 'apm-*', 'metrics-*.otel-*'],
           ]);
         });
       });

@@ -21,7 +21,7 @@ export type OpenContentEditorParams = Pick<
   | 'readonlyReason'
   | 'entityName'
   | 'customValidators'
-  | 'showActivityView'
+  | 'appendRows'
 >;
 
 export function useOpenContentEditor() {

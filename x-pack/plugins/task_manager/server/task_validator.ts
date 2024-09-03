@@ -57,13 +57,14 @@ export class TaskValidator {
       return task;
     }
 
+    const taskTypeDef = this.definitions.get(task.taskType);
+
     // In the scenario the task is unused / deprecated and Kibana needs to manipulate the task,
     // we'll do a pass-through for those
-    if (!this.definitions.has(task.taskType)) {
+    if (!taskTypeDef) {
       return task;
     }
 
-    const taskTypeDef = this.definitions.get(task.taskType);
     const latestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
 
     // TODO: Remove once all task types have defined their state schema.
@@ -106,13 +107,13 @@ export class TaskValidator {
       return taskWithValidatedTimeout;
     }
 
+    const taskTypeDef = this.definitions.get(taskWithValidatedTimeout.taskType);
+
     // In the scenario the task is unused / deprecated and Kibana needs to manipulate the task,
     // we'll do a pass-through for those
-    if (!this.definitions.has(taskWithValidatedTimeout.taskType)) {
+    if (!taskTypeDef) {
       return taskWithValidatedTimeout;
     }
-
-    const taskTypeDef = this.definitions.get(taskWithValidatedTimeout.taskType);
     const latestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
 
     // TODO: Remove once all task types have defined their state schema.

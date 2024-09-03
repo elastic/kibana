@@ -9,6 +9,7 @@ import moment from 'moment';
 import {
   FIELD_TYPES,
   Form,
+  FormSubmitHandler,
   getUseField,
   useForm,
   useFormData,
@@ -136,7 +137,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     };
   }, [isScopedQueryEnabled, scopedQueryFeatureFlag, query, filters]);
 
-  const submitMaintenanceWindow = useCallback(
+  const submitMaintenanceWindow = useCallback<FormSubmitHandler<FormProps>>(
     async (formData, isValid) => {
       if (!isValid || scopedQueryErrors.length !== 0) {
         return;

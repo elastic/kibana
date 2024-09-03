@@ -32,7 +32,6 @@ import { PreviewState } from '../../preview/types';
 
 interface Props {
   links: { runtimePainless: string };
-  existingConcreteFields?: Array<{ name: string; type: string }>;
   placeholder?: string;
 }
 
@@ -60,8 +59,9 @@ const currentDocumentIsLoadingSelector = (state: PreviewState) => state.isLoadin
 const currentErrorSelector = (state: PreviewState) => state.previewResponse?.error;
 const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
 const isPreviewAvailableSelector = (state: PreviewState) => state.isPreviewAvailable;
+const concreteFieldsSelector = (state: PreviewState) => state.concreteFields;
 
-const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Props) => {
+const ScriptFieldComponent = ({ links, placeholder }: Props) => {
   const {
     validation: { setScriptEditorValidation },
   } = useFieldPreviewContext();
@@ -75,6 +75,13 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
   const isFetchingDoc = useStateSelector(controller.state$, currentDocumentIsLoadingSelector);
   const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
   const isPreviewAvailable = useStateSelector(controller.state$, isPreviewAvailableSelector);
+  /**
+   * An array of existing concrete fields. If the user gives a name to the runtime
+   * field that matches one of the concrete fields, a callout will be displayed
+   * to indicate that this runtime field will shadow the concrete field.
+   * It is also used to provide the list of field autocomplete suggestions to the code editor.
+   */
+  const concreteFields = useStateSelector(controller.state$, concreteFieldsSelector);
   const [validationData$, nextValidationData$] = useBehaviorSubject<
     | {
         isFetchingDoc: boolean;
@@ -91,8 +98,8 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
   const currentDocId = currentDocument?._id;
 
   const suggestionProvider = useMemo(
-    () => PainlessLang.getSuggestionProvider(painlessContext, existingConcreteFields),
-    [painlessContext, existingConcreteFields]
+    () => PainlessLang.getSuggestionProvider(painlessContext, concreteFields),
+    [painlessContext, concreteFields]
   );
 
   const { validateFields } = useFormContext();

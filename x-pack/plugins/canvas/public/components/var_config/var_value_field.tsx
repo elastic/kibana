@@ -48,7 +48,7 @@ export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
   ];
 
   const onNumberChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const floatVal = parseFloat(e.target.value);
       const varValue = isNaN(floatVal) ? '' : floatVal;
       onChange(varValue);

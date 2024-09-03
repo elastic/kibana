@@ -23,8 +23,6 @@ properties:
     type: string
   output_id:
     type: string
-    description: Not supported output can be set at the agent policy level only
-    deprecated: true
   inputs:
     type: array
     items:

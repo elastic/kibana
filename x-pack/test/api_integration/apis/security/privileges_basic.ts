@@ -44,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
             ml: ['all', 'read', 'minimal_all', 'minimal_read'],
             siem: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -145,6 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
               'trusted_applications_read',
               'file_operations_all',
               'execute_operations_all',
+              'scan_operations_all',
             ],
             uptime: [
               'all',
@@ -160,6 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_read',
               'update_anonymization',
             ],
+            securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: [
               'all',
               'read',

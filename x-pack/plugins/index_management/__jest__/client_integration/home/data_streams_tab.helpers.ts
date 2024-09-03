@@ -27,6 +27,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     clickIncludeStatsSwitch: () => void;
     toggleViewFilterAt: (index: number) => void;
     sortTableOnStorageSize: () => void;
+    sortTableOnName: () => void;
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
@@ -110,6 +111,14 @@ export const setup = async (
     const { find, component } = testBed;
     act(() => {
       find('tableHeaderCell_storageSizeBytes_3.tableHeaderSortButton').simulate('click');
+    });
+    component.update();
+  };
+
+  const sortTableOnName = () => {
+    const { find, component } = testBed;
+    act(() => {
+      find('tableHeaderCell_name_0.tableHeaderSortButton').simulate('click');
     });
     component.update();
   };
@@ -235,6 +244,7 @@ export const setup = async (
       clickIncludeStatsSwitch,
       toggleViewFilterAt,
       sortTableOnStorageSize,
+      sortTableOnName,
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,

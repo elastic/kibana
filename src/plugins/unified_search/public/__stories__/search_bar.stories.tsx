@@ -566,7 +566,7 @@ storiesOf('SearchBar', module)
       ],
     } as unknown as SearchBarProps)
   )
-  .add('with dataviewPicker with ESQL', () =>
+  .add('with dataviewPicker with ES|QL', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -582,13 +582,13 @@ storiesOf('SearchBar', module)
       },
     } as SearchBarProps)
   )
-  .add('with dataviewPicker with ESQL and ESQL query', () =>
+  .add('with dataviewPicker with ES|QL and ES|QL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'ESQL',
+          label: 'ES|QL',
           title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
@@ -599,13 +599,13 @@ storiesOf('SearchBar', module)
       query: { esql: 'from dataview | project field1, field2' },
     } as unknown as SearchBarProps<Query>)
   )
-  .add('with dataviewPicker with ESQL and large ESQL query', () =>
+  .add('with dataviewPicker with ES|QL and large ES|QL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'ESQL',
+          label: 'ES|QL',
           title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
@@ -618,13 +618,13 @@ storiesOf('SearchBar', module)
       },
     } as unknown as SearchBarProps<Query>)
   )
-  .add('with dataviewPicker with ESQL and errors in ESQL query', () =>
+  .add('with dataviewPicker with ES|QL and errors in ES|QL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'ESQL',
+          label: 'ES|QL',
           title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),

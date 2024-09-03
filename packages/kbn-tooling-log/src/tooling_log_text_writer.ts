@@ -25,7 +25,7 @@ const MSG_PREFIXES = {
   error: `${red('ERROR')} `,
 };
 
-const has = <T extends object>(obj: T, key: any): key is keyof T => obj.hasOwnProperty(key);
+const has = <T extends object>(obj: T, key: any): key is keyof T => Object.hasOwn(obj, key);
 
 export interface ToolingLogTextWriterConfig {
   /**
@@ -103,7 +103,8 @@ export class ToolingLogTextWriter implements Writer {
       }
     }
 
-    const prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
+    let prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
+    prefix = msg.context ? prefix + `[${msg.context}] ` : prefix;
     ToolingLogTextWriter.write(this.writeTo, prefix, msg);
     return true;
   }

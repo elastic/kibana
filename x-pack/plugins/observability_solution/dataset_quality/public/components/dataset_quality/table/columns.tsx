@@ -14,42 +14,40 @@ import {
   EuiIcon,
   EuiLink,
   EuiToolTip,
-  EuiButtonIcon,
   EuiText,
   formatNumber,
   EuiSkeletonRectangle,
+  EuiTableHeader,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { css } from '@emotion/react';
+import { BrowserUrlService } from '@kbn/share-plugin/public';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
   BYTE_NUMBER_FORMAT,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
-import { NavigationSource } from '../../../services/telemetry';
 import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
 import { PrivilegesWarningIconWrapper, IntegrationIcon } from '../../common';
-import { useRedirectLink } from '../../../hooks';
-import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
+import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
+import { TimeRangeConfig } from '../../../../common/types';
+import { DatasetQualityDetailsLink } from './dataset_quality_details_link';
 
-const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
-  defaultMessage: 'Expand',
-});
-const collapseDatasetAriaLabel = i18n.translate('xpack.datasetQuality.collapseLabel', {
-  defaultMessage: 'Collapse',
-});
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Data Set Name',
 });
 
 const namespaceColumnName = i18n.translate('xpack.datasetQuality.namespaceColumnName', {
   defaultMessage: 'Namespace',
+});
+
+const typeColumnName = i18n.translate('xpack.datasetQuality.typeColumnName', {
+  defaultMessage: 'Type',
 });
 
 const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
@@ -160,74 +158,58 @@ export const getDatasetQualityTableColumns = ({
   fieldFormats,
   canUserMonitorDataset,
   canUserMonitorAnyDataStream,
-  selectedDataset,
-  openFlyout,
   loadingDataStreamStats,
   loadingDegradedStats,
   showFullDatasetNames,
   isSizeStatsAvailable,
   isActiveDataset,
+  timeRange,
+  urlService,
 }: {
   fieldFormats: FieldFormatsStart;
   canUserMonitorDataset: boolean;
   canUserMonitorAnyDataStream: boolean;
-  selectedDataset?: FlyoutDataset;
   loadingDataStreamStats: boolean;
   loadingDegradedStats: boolean;
   showFullDatasetNames: boolean;
   isSizeStatsAvailable: boolean;
-  openFlyout: (selectedDataset: FlyoutDataset) => void;
   isActiveDataset: (lastActivity: number) => boolean;
+  timeRange: TimeRangeConfig;
+  urlService: BrowserUrlService;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
-      name: '',
-      render: (dataStreamStat: DataStreamStat) => {
-        const isExpanded = dataStreamStat.rawName === selectedDataset?.rawName;
-
-        return (
-          <EuiButtonIcon
-            data-test-subj="datasetQualityExpandButton"
-            size="xs"
-            color="text"
-            onClick={() => openFlyout(dataStreamStat as FlyoutDataset)}
-            iconType={isExpanded ? 'minimize' : 'expand'}
-            title={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
-            aria-label={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
-          />
-        );
-      },
-      width: '40px',
-      css: css`
-        &.euiTableCellContent {
-          padding: 0;
-        }
-      `,
-    },
-    {
-      name: nameColumnName,
+      name: (
+        <EuiTableHeader data-test-subj="datasetQualityNameColumn">{nameColumnName}</EuiTableHeader>
+      ),
       field: 'title',
       sortable: true,
       render: (title: string, dataStreamStat: DataStreamStat) => {
-        const { integration, name } = dataStreamStat;
+        const { integration, name, rawName } = dataStreamStat;
 
         return (
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <IntegrationIcon integration={integration} />
-            </EuiFlexItem>
-            <EuiText size="s">{title}</EuiText>
-            {showFullDatasetNames && (
-              <EuiText size="xs" color="subdued">
-                <em>{name}</em>
-              </EuiText>
-            )}
-          </EuiFlexGroup>
+          <DatasetQualityDetailsLink urlService={urlService} dataStream={rawName}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <IntegrationIcon integration={integration} />
+              </EuiFlexItem>
+              <EuiText size="s">{title}</EuiText>
+              {showFullDatasetNames && (
+                <EuiText size="xs" color="subdued">
+                  <em>{name}</em>
+                </EuiText>
+              )}
+            </EuiFlexGroup>
+          </DatasetQualityDetailsLink>
         );
       },
     },
     {
-      name: namespaceColumnName,
+      name: (
+        <EuiTableHeader data-test-subj="datasetQualityNamespaceColumn">
+          {namespaceColumnName}
+        </EuiTableHeader>
+      ),
       field: 'namespace',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
@@ -235,10 +217,23 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '160px',
     },
+    {
+      name: typeColumnName,
+      field: 'type',
+      sortable: true,
+      render: (_, dataStreamStat: DataStreamStat) => (
+        <EuiBadge color="hollow">{dataStreamStat.type}</EuiBadge>
+      ),
+      width: '160px',
+    },
     ...(isSizeStatsAvailable && canUserMonitorDataset && canUserMonitorAnyDataStream
       ? [
           {
-            name: sizeColumnName,
+            name: (
+              <EuiTableHeader data-test-subj="datasetQualitySizeColumn">
+                {sizeColumnName}
+              </EuiTableHeader>
+            ),
             field: 'sizeBytes',
             sortable: true,
             render: (_: any, dataStreamStat: DataStreamStat) => {
@@ -267,12 +262,14 @@ export const getDatasetQualityTableColumns = ({
       : []),
     {
       name: (
-        <EuiToolTip content={datasetQualityColumnTooltip}>
-          <span>
-            {`${datasetQualityColumnName} `}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <EuiTableHeader data-test-subj="datasetQualityQualityColumn">
+          <EuiToolTip content={datasetQualityColumnTooltip}>
+            <span>
+              {`${datasetQualityColumnName} `}
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        </EuiTableHeader>
       ),
       field: 'degradedDocs.percentage',
       sortable: true,
@@ -283,12 +280,14 @@ export const getDatasetQualityTableColumns = ({
     },
     {
       name: (
-        <EuiToolTip content={degradedDocsColumnTooltip}>
-          <span>
-            {`${degradedDocsColumnName} `}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+        <EuiTableHeader data-test-subj="datasetQualityPercentageColumn">
+          <EuiToolTip content={degradedDocsColumnTooltip}>
+            <span>
+              {`${degradedDocsColumnName} `}
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        </EuiTableHeader>
       ),
       field: 'degradedDocs.percentage',
       sortable: true,
@@ -296,6 +295,7 @@ export const getDatasetQualityTableColumns = ({
         <DegradedDocsPercentageLink
           isLoading={loadingDegradedStats}
           dataStreamStat={dataStreamStat}
+          timeRange={timeRange}
         />
       ),
       width: '140px',
@@ -303,7 +303,11 @@ export const getDatasetQualityTableColumns = ({
     ...(canUserMonitorDataset && canUserMonitorAnyDataStream
       ? [
           {
-            name: lastActivityColumnName,
+            name: (
+              <EuiTableHeader data-test-subj="datasetQualityLastActivityColumn">
+                {lastActivityColumnName}
+              </EuiTableHeader>
+            ),
             field: 'lastActivity',
             render: (timestamp: number, { userPrivileges, title }: DataStreamStat) => (
               <PrivilegesWarningIconWrapper
@@ -339,7 +343,11 @@ export const getDatasetQualityTableColumns = ({
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (
-        <RedirectLink dataStreamStat={dataStreamStat} title={openActionName} />
+        <RedirectLink
+          dataStreamStat={dataStreamStat}
+          title={openActionName}
+          timeRange={timeRange}
+        />
       ),
       width: '100px',
     },
@@ -349,13 +357,17 @@ export const getDatasetQualityTableColumns = ({
 const RedirectLink = ({
   dataStreamStat,
   title,
+  timeRange,
 }: {
   dataStreamStat: DataStreamStat;
   title: string;
+  timeRange: TimeRangeConfig;
 }) => {
+  const { sendTelemetry } = useDatasetRedirectLinkTelemetry({ rawName: dataStreamStat.rawName });
   const redirectLinkProps = useRedirectLink({
     dataStreamStat,
-    telemetry: { page: 'main', navigationSource: NavigationSource.Table },
+    sendTelemetry,
+    timeRangeConfig: timeRange,
   });
 
   return (

@@ -39,7 +39,7 @@ describe('logDocumentProfileProvider', () => {
       logDocumentProfileProvider.resolve({
         rootContext: ROOT_CONTEXT,
         dataSourceContext: DATA_SOURCE_CONTEXT,
-        record: buildMockRecord('logs-2000-01-01', {
+        record: buildMockRecord('another-index', {
           'data_stream.type': ['logs'],
         }),
       })
@@ -51,11 +51,24 @@ describe('logDocumentProfileProvider', () => {
       logDocumentProfileProvider.resolve({
         rootContext: ROOT_CONTEXT,
         dataSourceContext: DATA_SOURCE_CONTEXT,
-        record: buildMockRecord('logs-2000-01-01', {
+        record: buildMockRecord('another-index', {
           'log.level': ['INFO'],
         }),
       })
     ).toEqual(RESOLUTION_MATCH);
+  });
+
+  it('does not match records where fields prefixed with "log." are null', () => {
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record: buildMockRecord('another-index', {
+          'log.level': null,
+          'log.other': undefined,
+        }),
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
   });
 
   it('matches records with indices matching the allowed pattern', () => {
@@ -112,7 +125,7 @@ describe('logDocumentProfileProvider', () => {
   });
 });
 
-const buildMockRecord = (index: string, fields: Record<string, unknown[]> = {}) =>
+const buildMockRecord = (index: string, fields: Record<string, unknown> = {}) =>
   buildDataTableRecord({
     _id: '',
     _index: index,

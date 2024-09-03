@@ -467,7 +467,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createCase(supertest, getPostCaseRequest({ description: longDescription }), 400);
       });
 
-      describe('tags', async () => {
+      describe('tags', () => {
         it('400s if the a tag is a whitespace', async () => {
           const tags = ['test', ' '];
 
@@ -493,7 +493,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('categories', async () => {
+      describe('categories', () => {
         it('400s when the category is too long', async () => {
           await createCase(
             supertest,
@@ -525,7 +525,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('customFields', async () => {
+      describe('customFields', () => {
         it('400s when trying to patch with duplicated custom field keys', async () => {
           await createCase(
             supertest,

@@ -21,6 +21,7 @@ import { basicResolvers } from '../../resolvers';
 import { preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { NavigateToPageButton } from '../../components/navigate_to_page_button';
+import { useMlJobService } from '../../../services/job_service';
 
 enum MODE {
   NEW_JOB,
@@ -218,11 +219,12 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode, extraButt
       data: { dataViews: dataViewsService },
     },
   } = useMlKibana();
+  const mlJobService = useMlJobService();
 
   const newJobResolvers = {
     ...basicResolvers(),
     preConfiguredJobRedirect: () =>
-      preConfiguredJobRedirect(dataViewsService, basePath.get(), navigateToUrl),
+      preConfiguredJobRedirect(mlJobService, dataViewsService, basePath.get(), navigateToUrl),
   };
 
   const { context } = useRouteResolver(

@@ -1,0 +1,70 @@
+title: Elasticsearch ES|QL query rule params
+description: > 
+  An Elasticsearch query rule can run an ES|QL query and compare the number of matches to a configured threshold.
+  These parameters are appropriate when `rule_type_id` is `.es-query`.
+  NOTE: This functionality is in technical pre view and may be changed or removed in a future release.
+  Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+type: object
+x-technical-preview: true
+required:
+  - esqlQuery
+  - searchType
+  - size
+  - threshold
+  - thresholdComparator
+  - timeWindowSize
+  - timeWindowUnit
+properties:
+  aggField:
+    $ref: 'aggfield.yaml'
+  aggType:
+    $ref: 'aggtype.yaml'
+  esqlQuery:
+    type: object
+    required:
+      - esql
+    properties:
+      esql:
+        description: The query definition, which uses Elasticsearch Query Language.
+        type: string
+  excludeHitsFromPreviousRun:
+    $ref: 'excludehitsfrompreviousrun.yaml'
+  groupBy:
+    $ref: 'groupby.yaml'
+  searchType:
+    description: The type of query, in this case a query that uses Elasticsearch Query Language (ES|QL).
+    type: string
+    enum:
+      - esqlQuery
+    example: esqlQuery
+  size:
+    type: integer
+    description: >
+      When `searchType` is `esqlQuery`, this property is required but it does not affect the rule behavior.
+    example: 0
+  termSize:
+    $ref: 'termsize.yaml'
+  threshold:
+    type: array
+    items:
+      type: integer
+      minimum: 0
+      maximum: 0
+    description: >
+      The threshold value that is used with the `thresholdComparator`.
+      When `searchType` is `esqlQuery`, this property is required and must be set to zero.
+  thresholdComparator:
+    type: string
+    description: >
+      The comparison function for the threshold.
+      When `searchType` is `esqlQuery`, this property is required and must be set to ">".
+      Since the `threshold` value must be `0`, the result is that an alert occurs whenever the query returns results.
+    enum:
+      - ">"
+    example: ">"
+  timeField:
+    $ref: 'timefield.yaml'
+  timeWindowSize:
+    $ref: 'timewindowsize.yaml'
+  timeWindowUnit:
+    $ref: 'timewindowunit.yaml'

@@ -11,7 +11,7 @@ import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
-interface Props {
+export interface Props {
   field: FieldHook;
   euiFieldProps: {
     options: Array<

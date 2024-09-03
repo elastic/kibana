@@ -76,7 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('visualization object edit menu', () => {
       it('opens a visualization when edit link is clicked', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const currentUrl = await browser.getCurrentUrl();
@@ -118,7 +117,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('opens a saved search when edit link is clicked', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const queryName = await PageObjects.discover.getCurrentQueryName();
@@ -139,15 +137,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before('reset dashboard', async () => {
         const currentUrl = await browser.getCurrentUrl();
         await browser.get(currentUrl.toString(), false);
-      });
-
-      before('and add one panel and save to put dashboard in "view" mode', async () => {
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         await PageObjects.dashboard.saveDashboard(dashboardName + '2');
-      });
-
-      before('expand panel to "full screen"', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickExpandPanelToggle();
       });
 

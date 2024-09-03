@@ -151,7 +151,7 @@ export function TimeShift({
               options={timeShiftOptions.filter(({ value }) => {
                 const parsedValue = parseTimeShift(value);
                 return (
-                  parsedValue && !isValueTooSmall(parsedValue) && !isValueNotMultiple(parsedValue) // &&
+                  parsedValue && !isValueTooSmall(parsedValue) && !isValueNotMultiple(parsedValue)
                 );
               })}
               selectedOptions={getSelectedOption()}

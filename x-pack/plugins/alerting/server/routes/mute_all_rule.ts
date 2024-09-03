@@ -14,7 +14,11 @@ import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types'
 import { trackDeprecatedRouteUsage } from '../lib/track_deprecated_route_usage';
 
 const paramSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: {
+      description: 'The identifier for the rule.',
+    },
+  }),
 });
 
 export const muteAllRuleRoute = (
@@ -31,7 +35,14 @@ export const muteAllRuleRoute = (
         tags: ['oas-tag:alerting'],
       },
       validate: {
-        params: paramSchema,
+        request: {
+          params: paramSchema,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

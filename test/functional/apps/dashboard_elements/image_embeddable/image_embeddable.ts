@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
   const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
 
@@ -53,8 +52,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('image embeddable should support drilldowns', async () => {
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.clickContextMenuMoreItem();
       await dashboardDrilldownPanelActions.expectExistsCreateDrilldownAction();
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();

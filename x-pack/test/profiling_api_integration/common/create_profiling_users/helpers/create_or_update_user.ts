@@ -37,11 +37,11 @@ export async function createOrUpdateUser({
     username: user.username,
   });
   if (!existingUser) {
-    createUser({ elasticsearch, newUser: user, securityService });
+    await createUser({ elasticsearch, newUser: user, securityService });
     return;
   }
 
-  updateUser({
+  await updateUser({
     existingUser,
     newUser: user,
     securityService,

@@ -36,8 +36,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should only show one slack connector', async () => {
-        if (await testSubjects.exists('createActionButton')) {
-          await testSubjects.click('createActionButton');
+        if (await testSubjects.exists('createConnectorButton')) {
+          await testSubjects.click('createConnectorButton');
         } else {
           await testSubjects.click('createFirstActionButton');
         }
@@ -98,7 +98,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('rule creation', async () => {
+    describe('rule creation', () => {
       const webhookConnectorName = generateUniqueKey();
       const webApiConnectorName = generateUniqueKey();
       let webApiAction: { id: string };

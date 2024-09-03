@@ -25,6 +25,7 @@ export interface RouteDependencies {
     isSecurityEnabled: () => boolean;
     isLegacyTemplatesEnabled: boolean;
     isIndexStatsEnabled: boolean;
+    isSizeAndDocCountEnabled: boolean;
     isDataStreamStatsEnabled: boolean;
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;

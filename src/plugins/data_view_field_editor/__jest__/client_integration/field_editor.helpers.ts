@@ -20,15 +20,22 @@ export const defaultProps: Props = {
 
 export type FieldEditorTestBed = TestBed & { actions: ReturnType<typeof getCommonActions> };
 
-export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => {
+export const setup = async (
+  props?: Partial<Props>,
+  deps?: Partial<Context>,
+  getByNameOverride?: () => any
+) => {
   let testBed: TestBed<string>;
 
   await act(async () => {
-    testBed = await registerTestBed(WithFieldEditorDependencies(FieldEditor, deps), {
-      memoryRouter: {
-        wrapComponent: false,
-      },
-    })({ ...defaultProps, ...props });
+    testBed = await registerTestBed(
+      WithFieldEditorDependencies(FieldEditor, deps, getByNameOverride),
+      {
+        memoryRouter: {
+          wrapComponent: false,
+        },
+      }
+    )({ ...defaultProps, ...props });
   });
   testBed!.component.update();
 

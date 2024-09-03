@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Reference } from '@kbn/content-management-utils';
+import type { Reference } from '@kbn/content-management-utils';
 import { omit } from 'lodash';
 import { DASHBOARD_LINK_TYPE, LinksAttributes } from '../content_management';
 

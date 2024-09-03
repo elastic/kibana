@@ -187,7 +187,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const handleClick = useCallback(
-    (event) => {
+    (event: any) => {
       event.preventDefault();
 
       if (logsDataView?.id) {
@@ -584,7 +584,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
   >({});
 
-  const renderQueryColumn = useCallback((query: string, item) => {
+  const renderQueryColumn = useCallback((query: string, item: any) => {
     const singleLine = removeMultilines(query);
     const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
 
@@ -618,7 +618,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderLastResultsColumn = useCallback(
-    (item) => (
+    (item: any) => (
       <ScheduledQueryLastResults
         actionId={getPackActionId(item.id, packName)}
         interval={item.interval}
@@ -627,19 +627,19 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     [packName]
   );
   const renderDocsColumn = useCallback(
-    (item) => (
+    (item: any) => (
       <DocsColumnResults actionId={getPackActionId(item.id, packName)} interval={item.interval} />
     ),
     [packName]
   );
   const renderAgentsColumn = useCallback(
-    (item) => (
+    (item: any) => (
       <AgentsColumnResults actionId={getPackActionId(item.id, packName)} interval={item.interval} />
     ),
     [packName]
   );
   const renderErrorsColumn = useCallback(
-    (item) => (
+    (item: any) => (
       <ErrorsColumnResults
         queryId={item.id}
         interval={item.interval}
@@ -652,12 +652,12 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderDiscoverResultsAction = useCallback(
-    (item) => <PackViewInDiscoverAction item={item} packName={packName} />,
+    (item: any) => <PackViewInDiscoverAction item={item} packName={packName} />,
     [packName]
   );
 
   const renderLensResultsAction = useCallback(
-    (item) => <PackViewInLensAction item={item} packName={packName} />,
+    (item: any) => <PackViewInLensAction item={item} packName={packName} />,
     [packName]
   );
 

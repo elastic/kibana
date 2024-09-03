@@ -9,7 +9,7 @@ import type { SavedObjectsClient } from '@kbn/core/server';
 import { set } from '@kbn/safer-lodash-set';
 import { has, map, mapKeys } from 'lodash';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import produce from 'immer';
 import { convertShardsToObject } from '../routes/utils';
 import { packSavedObjectType } from '../../common/types';
@@ -58,7 +58,7 @@ export const updateGlobalPacksCreateCallback = async (
               ...packagePolicy.policy_ids.map((policyId) => ({
                 id: policyId,
                 name: agentPolicies[policyId]?.name,
-                type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+                type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
               })),
             ],
           }

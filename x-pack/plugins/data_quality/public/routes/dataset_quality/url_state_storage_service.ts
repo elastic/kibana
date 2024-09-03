@@ -6,7 +6,7 @@
  */
 
 import { IToasts } from '@kbn/core-notifications-browser';
-import { DatasetQualityPublicState } from '@kbn/dataset-quality-plugin/public/controller';
+import { DatasetQualityPublicState } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
 import { createPlainError, formatErrors } from '@kbn/io-ts-utils';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import * as Either from 'fp-ts/lib/Either';

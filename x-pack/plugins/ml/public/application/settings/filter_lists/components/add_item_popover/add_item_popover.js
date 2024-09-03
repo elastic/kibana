@@ -105,7 +105,7 @@ export class AddItemPopover extends Component {
           closePopover={this.closePopover}
           initialFocus="#filter_list_add_item_input_row"
         >
-          <EuiForm>
+          <EuiForm data-test-subj="mlFilterListAddItemPopoverContent">
             <EuiFormRow
               id="filter_list_add_item_input_row"
               label={

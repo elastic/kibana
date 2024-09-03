@@ -19,6 +19,7 @@ import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_chart
 import { useTableSeverity } from '../components/controls/select_severity';
 import { AnomalyDetectionAlertsStateService } from './alerts';
 import { explorerServiceFactory, type ExplorerService } from './explorer_dashboard_service';
+import { useMlJobService } from '../services/job_service';
 
 export interface AnomalyExplorerContextValue {
   anomalyExplorerChartsService: AnomalyExplorerChartsService;
@@ -65,6 +66,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       data,
     },
   } = useMlKibana();
+  const mlJobService = useMlJobService();
 
   const [, , tableSeverityState] = useTableSeverity();
 
@@ -80,7 +82,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
   // updates so using `useEffect` is the right thing to do here to not get errors
   // related to React lifecycle methods.
   useEffect(() => {
-    const explorerService = explorerServiceFactory(mlFieldFormatService);
+    const explorerService = explorerServiceFactory(mlJobService, mlFieldFormatService);
 
     const anomalyTimelineService = new AnomalyTimelineService(
       timefilter,
@@ -93,6 +95,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
     );
 
     const anomalyTimelineStateService = new AnomalyTimelineStateService(
+      mlJobService,
       anomalyExplorerUrlStateService,
       anomalyExplorerCommonStateService,
       anomalyTimelineService,

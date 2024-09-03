@@ -22,10 +22,14 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('sources', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
-    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
-    before(() => kibanaServer.savedObjects.cleanStandardList());
-    after(() => kibanaServer.savedObjects.cleanStandardList());
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
     const patchRequest = async (
       body: PartialMetricsSourceConfigurationProperties

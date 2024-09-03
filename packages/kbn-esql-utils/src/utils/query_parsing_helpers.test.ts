@@ -12,6 +12,7 @@ import {
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
+  retieveMetadataColumns,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -77,17 +78,17 @@ describe('esql query helpers', () => {
   describe('getLimitFromESQLQuery', () => {
     it('should return default limit when ES|QL query is empty', () => {
       const limit = getLimitFromESQLQuery('');
-      expect(limit).toBe(500);
+      expect(limit).toBe(1000);
     });
 
     it('should return default limit when ES|QL query does not contain LIMIT command', () => {
       const limit = getLimitFromESQLQuery('FROM foo');
-      expect(limit).toBe(500);
+      expect(limit).toBe(1000);
     });
 
     it('should return default limit when ES|QL query contains invalid LIMIT command', () => {
       const limit = getLimitFromESQLQuery('FROM foo | LIMIT iAmNotANumber');
-      expect(limit).toBe(500);
+      expect(limit).toBe(1000);
     });
 
     it('should return limit when ES|QL query contains LIMIT command', () => {
@@ -95,7 +96,7 @@ describe('esql query helpers', () => {
       expect(limit).toBe(10000);
     });
 
-    it('should return last limit when ES|QL query contains multiple LIMIT command', () => {
+    it('should return minimum limit when ES|QL query contains multiple LIMIT command', () => {
       const limit = getLimitFromESQLQuery('FROM foo | LIMIT 200 | LIMIT 0');
       expect(limit).toBe(0);
     });
@@ -150,10 +151,12 @@ describe('esql query helpers', () => {
     });
 
     it('should return the time field if there is at least one time param', () => {
-      expect(getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?start')).toBe('time');
+      expect(getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?t_start')).toBe(
+        'time'
+      );
     });
 
-    it('should return undefined if there is one named param but is not ?start or ?end', () => {
+    it('should return undefined if there is one named param but is not ?t_start or ?t_end', () => {
       expect(
         getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?late')
       ).toBeUndefined();
@@ -161,16 +164,29 @@ describe('esql query helpers', () => {
 
     it('should return undefined if there is one named param but is used without a time field', () => {
       expect(
-        getTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?start)')
+        getTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?t_start)')
       ).toBeUndefined();
     });
 
     it('should return the time field if there is at least one time param in the bucket function', () => {
       expect(
         getTimeFieldFromESQLQuery(
-          'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?start, ?end)'
+          'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?t_start, ?t_end)'
         )
       ).toBe('event.timefield');
+    });
+  });
+
+  describe('retieveMetadataColumns', () => {
+    it('should return metadata columns if they exist', () => {
+      expect(retieveMetadataColumns('from a  metadata _id, _ignored | eval b = 1')).toStrictEqual([
+        '_id',
+        '_ignored',
+      ]);
+    });
+
+    it('should return empty columns if metadata doesnt exist', () => {
+      expect(retieveMetadataColumns('from a | eval b = 1')).toStrictEqual([]);
     });
   });
 });

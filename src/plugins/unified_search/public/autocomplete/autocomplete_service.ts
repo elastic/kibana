@@ -17,7 +17,7 @@ import {
 } from './providers/value_suggestion_provider';
 import type { ValueSuggestionsGetFn } from './providers/value_suggestion_provider';
 
-import { ConfigSchema } from '../../config';
+import type { ConfigSchema } from '../../server/config';
 import { createUsageCollector } from './collectors';
 import {
   KUERY_LANGUAGE_NAME,

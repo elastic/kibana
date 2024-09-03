@@ -20,8 +20,5 @@ export const updateFilterSchema = schema.object({
 });
 
 export const filterIdSchema = schema.object({
-  /**
-   * ID of the filter
-   */
-  filterId: schema.string(),
+  filterId: schema.string({ meta: { description: 'ID of the filter' } }),
 });

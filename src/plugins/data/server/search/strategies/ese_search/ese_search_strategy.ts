@@ -31,7 +31,7 @@ import {
   getTotalLoaded,
   shimHitsTotal,
 } from '../es_search';
-import { SearchConfigSchema } from '../../../../config';
+import { SearchConfigSchema } from '../../../config';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 export const enhancedEsSearchStrategyProvider = (

@@ -91,7 +91,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.console.monaco.getCurrentLineNumber()).to.be(4);
       });
 
-      describe('open documentation', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/190321
+      describe.skip('open documentation', () => {
         const requests = ['GET _search', 'GET test_index/_search', 'GET /_search'];
         requests.forEach((request) => {
           it('should open documentation when Ctrl+/ is pressed', async () => {
@@ -144,6 +145,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           // the settings are not applied synchronously, so we retry for a time
           expect(await PageObjects.console.monaco.getFontSize()).to.be('24px');
+        });
+      });
+    });
+
+    describe('invalid requests', () => {
+      const invalidRequestText = 'GET _search\n{"query": {"match_all": {';
+      it(`should not delete any text if indentations applied to an invalid request`, async () => {
+        await PageObjects.console.monaco.clearEditorText();
+        await PageObjects.console.monaco.enterText(invalidRequestText);
+        await PageObjects.console.monaco.selectCurrentRequest();
+        await PageObjects.console.monaco.pressCtrlI();
+        // Sleep for a bit and then check that the text has not changed
+        await PageObjects.common.sleep(1000);
+        await retry.try(async () => {
+          const request = await PageObjects.console.monaco.getEditorText();
+          expect(request).to.be.eql(invalidRequestText);
+        });
+      });
+
+      it(`should include an invalid json when sending a request`, async () => {
+        await PageObjects.console.monaco.clearEditorText();
+        await PageObjects.console.monaco.enterText(invalidRequestText);
+        await PageObjects.console.monaco.selectCurrentRequest();
+        await PageObjects.console.monaco.pressCtrlEnter();
+
+        await retry.try(async () => {
+          const actualResponse = await PageObjects.console.monaco.getOutputText();
+          expect(actualResponse).to.contain('parsing_exception');
+          expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
         });
       });
     });

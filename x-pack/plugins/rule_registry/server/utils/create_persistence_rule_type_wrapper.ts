@@ -249,13 +249,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
           ...options,
           services: {
             ...options.services,
-            alertWithPersistence: async (
-              alerts,
-              refresh,
-              maxAlerts = undefined,
-              enrichAlerts,
-              currentTimeOverride
-            ) => {
+            alertWithPersistence: async (alerts, refresh, maxAlerts = undefined, enrichAlerts) => {
               const numAlerts = alerts.length;
               logger.debug(`Found ${numAlerts} alerts.`);
 
@@ -307,7 +301,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
-                  currentTimeOverride,
+                  currentTimeOverride: undefined,
                 });
 
                 const response = await ruleDataClientWriter.bulk({

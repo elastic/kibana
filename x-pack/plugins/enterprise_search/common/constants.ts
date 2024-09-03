@@ -230,6 +230,7 @@ export const APP_SEARCH_URL = '/app/enterprise_search/app_search';
 export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/enterprise_search/elasticsearch';
 export const WORKPLACE_SEARCH_URL = '/app/enterprise_search/workplace_search';
 export const CREATE_NEW_INDEX_URL = '/search_indices/new_index';
+export const PLAYGROUND_URL = '/playground';
 
 export const MANAGE_API_KEYS_URL = '/app/management/security/api_keys';
 

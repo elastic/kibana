@@ -16,7 +16,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { KbnUrlStateStorageFromRouterProvider } from './utils/kbn_url_state_context';
 import { useKibanaContextForPluginProvider } from './utils/use_kibana';
 import { AppPluginStartDependencies, DataQualityPluginStart } from './types';
-import { DatasetQualityRoute } from './routes';
+import { DatasetQualityRoute, DatasetQualityDetailsRoute } from './routes';
 import { PLUGIN_ID } from '../common';
 
 export const renderApp = (
@@ -55,6 +55,7 @@ const AppWithExecutionContext = ({
         <PerformanceContextProvider>
           <Routes>
             <Route path="/" exact={true} render={() => <DatasetQualityRoute />} />
+            <Route path="/details" exact={true} render={() => <DatasetQualityDetailsRoute />} />
           </Routes>
         </PerformanceContextProvider>
       </Router>

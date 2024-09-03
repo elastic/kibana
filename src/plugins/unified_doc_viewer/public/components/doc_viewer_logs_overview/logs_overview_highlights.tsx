@@ -52,6 +52,10 @@ export function LogsOverviewHighlights({
     value: flattenedDoc[field],
   });
 
+  const shouldRenderHighlight = (field: keyof LogDocumentOverview) => {
+    return Boolean(formattedDoc[field] && flattenedDoc[field]);
+  };
+
   return (
     <>
       {/* Service & Infrastructure highlight */}
@@ -59,7 +63,7 @@ export function LogsOverviewHighlights({
         title={serviceInfraAccordionTitle}
         data-test-subj="unifiedDocViewLogsOverviewHighlightSectionServiceInfra"
       >
-        {formattedDoc[fieldConstants.SERVICE_NAME_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.SERVICE_NAME_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewService"
             label={serviceLabel}
@@ -67,7 +71,7 @@ export function LogsOverviewHighlights({
             {...getHighlightProps(fieldConstants.SERVICE_NAME_FIELD)}
           />
         )}
-        {formattedDoc[fieldConstants.HOST_NAME_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.HOST_NAME_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewHostName"
             label={hostNameLabel}
@@ -75,7 +79,7 @@ export function LogsOverviewHighlights({
             {...getHighlightProps(fieldConstants.HOST_NAME_FIELD)}
           />
         )}
-        {formattedDoc[fieldConstants.TRACE_ID_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.TRACE_ID_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewTrace"
             label={traceLabel}
@@ -83,7 +87,7 @@ export function LogsOverviewHighlights({
             {...getHighlightProps(fieldConstants.TRACE_ID_FIELD)}
           />
         )}
-        {formattedDoc[fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewClusterName"
             label={orchestratorClusterNameLabel}
@@ -91,7 +95,7 @@ export function LogsOverviewHighlights({
             {...getHighlightProps(fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD)}
           />
         )}
-        {formattedDoc[fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewResourceId"
             label={orchestratorResourceIdLabel}
@@ -105,7 +109,7 @@ export function LogsOverviewHighlights({
         title={cloudAccordionTitle}
         data-test-subj="unifiedDocViewLogsOverviewHighlightSectionCloud"
       >
-        {formattedDoc[fieldConstants.CLOUD_PROVIDER_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.CLOUD_PROVIDER_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewCloudProvider"
             label={cloudProviderLabel}
@@ -120,7 +124,7 @@ export function LogsOverviewHighlights({
             {...getHighlightProps(fieldConstants.CLOUD_PROVIDER_FIELD)}
           />
         )}
-        {formattedDoc[fieldConstants.CLOUD_REGION_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.CLOUD_REGION_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewCloudRegion"
             label={cloudRegionLabel}
@@ -128,7 +132,7 @@ export function LogsOverviewHighlights({
             {...getHighlightProps(fieldConstants.CLOUD_REGION_FIELD)}
           />
         )}
-        {formattedDoc[fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewCloudAz"
             label={cloudAvailabilityZoneLabel}
@@ -136,7 +140,7 @@ export function LogsOverviewHighlights({
             {...getHighlightProps(fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD)}
           />
         )}
-        {formattedDoc[fieldConstants.CLOUD_PROJECT_ID_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.CLOUD_PROJECT_ID_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewCloudProjectId"
             label={cloudProjectIdLabel}
@@ -144,7 +148,7 @@ export function LogsOverviewHighlights({
             {...getHighlightProps(fieldConstants.CLOUD_PROJECT_ID_FIELD)}
           />
         )}
-        {formattedDoc[fieldConstants.CLOUD_INSTANCE_ID_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.CLOUD_INSTANCE_ID_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewCloudInstanceId"
             label={cloudInstanceIdLabel}
@@ -158,7 +162,7 @@ export function LogsOverviewHighlights({
         title={otherAccordionTitle}
         data-test-subj="unifiedDocViewLogsOverviewHighlightSectionOther"
       >
-        {formattedDoc[fieldConstants.LOG_FILE_PATH_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.LOG_FILE_PATH_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewLogPathFile"
             label={logPathFileLabel}
@@ -166,7 +170,7 @@ export function LogsOverviewHighlights({
             {...getHighlightProps(fieldConstants.LOG_FILE_PATH_FIELD)}
           />
         )}
-        {formattedDoc[fieldConstants.DATASTREAM_DATASET_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.DATASTREAM_DATASET_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewDataset"
             label={datasetLabel}
@@ -174,7 +178,7 @@ export function LogsOverviewHighlights({
             {...getHighlightProps(fieldConstants.DATASTREAM_DATASET_FIELD)}
           />
         )}
-        {formattedDoc[fieldConstants.DATASTREAM_NAMESPACE_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.DATASTREAM_NAMESPACE_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewNamespace"
             label={namespaceLabel}
@@ -183,7 +187,7 @@ export function LogsOverviewHighlights({
             {...getHighlightProps(fieldConstants.DATASTREAM_NAMESPACE_FIELD)}
           />
         )}
-        {formattedDoc[fieldConstants.AGENT_NAME_FIELD] && (
+        {shouldRenderHighlight(fieldConstants.AGENT_NAME_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewLogShipper"
             label={shipperLabel}

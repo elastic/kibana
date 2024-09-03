@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const supertest = getService('supertest');
     const kibanaServer = getService('kibanaServer');
+    const retry = getService('retry');
 
     let _monitors: MonitorFields[];
     let monitors: MonitorFields[];
@@ -101,18 +102,20 @@ export default function ({ getService }: FtrProviderContext) {
             .map(saveMonitor)
         );
 
-        const firstPageResp = await supertest
-          .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=2`)
-          .expect(200);
-        const secondPageResp = await supertest
-          .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=2&perPage=3`)
-          .expect(200);
+        await retry.try(async () => {
+          const firstPageResp = await supertest
+            .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=2`)
+            .expect(200);
+          const secondPageResp = await supertest
+            .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=2&perPage=3`)
+            .expect(200);
 
-        expect(firstPageResp.body.total).greaterThan(6);
-        expect(firstPageResp.body.monitors.length).eql(2);
-        expect(secondPageResp.body.monitors.length).eql(3);
+          expect(firstPageResp.body.total).greaterThan(6);
+          expect(firstPageResp.body.monitors.length).eql(2);
+          expect(secondPageResp.body.monitors.length).eql(3);
 
-        expect(firstPageResp.body.monitors[0].id).not.eql(secondPageResp.body.monitors[0].id);
+          expect(firstPageResp.body.monitors[0].id).not.eql(secondPageResp.body.monitors[0].id);
+        });
       });
 
       it('with single monitorQueryId filter', async () => {

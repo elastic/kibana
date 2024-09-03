@@ -1,6 +1,55 @@
 {
   "openapi": "3.0.0",
-  "tags": [],
+  "tags": [
+    {
+      "name": "Data streams"
+    },
+    {
+      "name": "Elastic Agents"
+    },
+    {
+      "name": "Elastic Agent actions"
+    },
+    {
+      "name": "Elastic Agent binary download sources"
+    },
+    {
+      "name": "Elastic Agent policies"
+    },
+    {
+      "name": "Elastic Agent status"
+    },
+    {
+      "name": "Elastic Package Manager (EPM)"
+    },
+    {
+      "name": "Fleet enrollment API keys"
+    },
+    {
+      "name": "Fleet internals"
+    },
+    {
+      "name": "Fleet Server hosts"
+    },
+    {
+      "name": "Fleet Kubernetes"
+    },
+    {
+      "name": "Fleet outputs"
+    },
+    {
+      "name": "Fleet package policies"
+    },
+    {
+      "name": "Fleet proxies"
+    },
+    {
+      "name": "Fleet service tokens"
+    },
+    {
+      "name": "Fleet uninstall tokens"
+    }
+  ],
   "info": {
     "title": "Fleet",
     "description": "OpenAPI schema for Fleet API endpoints",
@@ -243,7 +292,7 @@
       "post": {
         "summary": "Create service token",
         "tags": [
-          "Service tokens"
+          "Fleet service tokens"
         ],
         "responses": {
           "200": {
@@ -281,7 +330,7 @@
       "post": {
         "summary": "Create service token",
         "tags": [
-          "Service tokens"
+          "Fleet service tokens"
         ],
         "responses": {
           "200": {
@@ -1649,7 +1698,7 @@
       "get": {
         "summary": "Get agent setup info",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -1676,7 +1725,7 @@
       "post": {
         "summary": "Initiate agent setup",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "operationId": "setup-agents",
         "responses": {
@@ -1726,7 +1775,7 @@
       "get": {
         "summary": "Get agent status summary",
         "tags": [
-          "Agent status"
+          "Elastic Agent status"
         ],
         "responses": {
           "200": {
@@ -1797,7 +1846,7 @@
       "get": {
         "summary": "Get agent status summary",
         "tags": [
-          "Agent status"
+          "Elastic Agent status"
         ],
         "responses": {
           "200": {
@@ -1888,7 +1937,7 @@
       "get": {
         "summary": "Get incoming agent data",
         "tags": [
-          "Agent status"
+          "Elastic Agent status"
         ],
         "responses": {
           "200": {
@@ -1941,7 +1990,7 @@
       "get": {
         "summary": "List agents",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2002,7 +2051,7 @@
       "post": {
         "summary": "List agents by action ids",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2052,7 +2101,7 @@
       "post": {
         "summary": "Bulk upgrade agents",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2106,7 +2155,7 @@
       "get": {
         "summary": "Get agent action status",
         "tags": [
-          "Agent actions"
+          "Elastic Agent actions"
         ],
         "parameters": [
           {
@@ -2276,7 +2325,7 @@
       "get": {
         "summary": "Get agent by ID",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2311,7 +2360,7 @@
       "put": {
         "summary": "Update agent by ID",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2367,7 +2416,7 @@
       "delete": {
         "summary": "Delete agent by ID",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2417,7 +2466,7 @@
       "post": {
         "summary": "Create agent action",
         "tags": [
-          "Agent actions"
+          "Elastic Agent actions"
         ],
         "responses": {
           "200": {
@@ -2471,16 +2520,8 @@
         }
       }
     },
-    "/agents/{agentId}/actions/{actionId}/cancel": {
+    "/agents/actions/{actionId}/cancel": {
       "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "agentId",
-          "in": "path",
-          "required": true
-        },
         {
           "schema": {
             "type": "string"
@@ -2493,7 +2534,7 @@
       "post": {
         "summary": "Cancel agent action",
         "tags": [
-          "Agent actions"
+          "Elastic Agent actions"
         ],
         "responses": {
           "200": {
@@ -2545,7 +2586,7 @@
       "get": {
         "summary": "Get file uploaded by agent",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2593,7 +2634,7 @@
       "delete": {
         "summary": "Delete file uploaded by agent",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2640,7 +2681,7 @@
       "post": {
         "summary": "Reassign agent",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2685,7 +2726,7 @@
       "put": {
         "summary": "Reassign agent",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2743,7 +2784,7 @@
       "post": {
         "summary": "Unenroll agent",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2820,7 +2861,7 @@
       "post": {
         "summary": "Upgrade agent",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2869,7 +2910,7 @@
       "get": {
         "summary": "List agent uploads",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2906,7 +2947,7 @@
       "post": {
         "summary": "Bulk reassign agents",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -2978,7 +3019,7 @@
       "post": {
         "summary": "Bulk unenroll agents",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -3061,7 +3102,7 @@
       "post": {
         "summary": "Bulk update agent tags",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -3151,7 +3192,7 @@
       "get": {
         "summary": "List agent tags",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -3185,7 +3226,7 @@
       "post": {
         "summary": "Request agent diagnostics",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "requestBody": {
           "content": {
@@ -3243,7 +3284,7 @@
       "post": {
         "summary": "Bulk request diagnostics from agents",
         "tags": [
-          "Agents"
+          "Elastic Agents"
         ],
         "responses": {
           "200": {
@@ -3325,7 +3366,7 @@
       "get": {
         "summary": "List agent policies",
         "tags": [
-          "Agent policies"
+          "Elastic Agent policies"
         ],
         "responses": {
           "200": {
@@ -3377,6 +3418,9 @@
             "$ref": "#/components/parameters/kuery"
           },
           {
+            "$ref": "#/components/parameters/format"
+          },
+          {
             "schema": {
               "type": "boolean"
             },
@@ -3398,7 +3442,7 @@
       "post": {
         "summary": "Create agent policy",
         "tags": [
-          "Agent policies"
+          "Elastic Agent policies"
         ],
         "responses": {
           "200": {
@@ -3447,12 +3491,15 @@
           "name": "agentPolicyId",
           "in": "path",
           "required": true
+        },
+        {
+          "$ref": "#/components/parameters/format"
         }
       ],
       "get": {
         "summary": "Get agent policy by ID",
         "tags": [
-          "Agent policies"
+          "Elastic Agent policies"
         ],
         "responses": {
           "200": {
@@ -3484,7 +3531,7 @@
       "put": {
         "summary": "Update agent policy by ID",
         "tags": [
-          "Agent policies"
+          "Elastic Agent policies"
         ],
         "responses": {
           "200": {
@@ -3535,12 +3582,15 @@
           "name": "agentPolicyId",
           "in": "path",
           "required": true
+        },
+        {
+          "$ref": "#/components/parameters/format"
         }
       ],
       "post": {
         "summary": "Copy agent policy by ID",
         "tags": [
-          "Agent policies"
+          "Elastic Agent policies"
         ],
         "operationId": "agent-policy-copy",
         "parameters": [
@@ -3598,7 +3648,7 @@
       "get": {
         "summary": "Get full agent policy by ID",
         "tags": [
-          "Agent policies"
+          "Elastic Agent policies"
         ],
         "operationId": "agent-policy-full",
         "responses": {
@@ -3668,7 +3718,7 @@
       "get": {
         "summary": "Download agent policy by ID",
         "tags": [
-          "Agent policies"
+          "Elastic Agent policies"
         ],
         "operationId": "agent-policy-download",
         "responses": {
@@ -3731,7 +3781,7 @@
       "post": {
         "summary": "Bulk get agent policies",
         "tags": [
-          "Agent policies"
+          "Elastic Agent policies"
         ],
         "requestBody": {
           "content": {
@@ -3789,14 +3839,18 @@
         },
         "operationId": "bulk-get-agent-policies",
         "security": [],
-        "parameters": []
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/format"
+          }
+        ]
       }
     },
     "/agent_policies/delete": {
       "post": {
         "summary": "Delete agent policy by ID",
         "tags": [
-          "Agent policies"
+          "Elastic Agent policies"
         ],
         "operationId": "delete-agent-policy",
         "responses": {
@@ -3892,7 +3946,7 @@
       "get": {
         "summary": "List enrollment API keys",
         "tags": [
-          "Enrollment API keys"
+          "Fleet enrollment API keys"
         ],
         "responses": {
           "200": {
@@ -3946,7 +4000,7 @@
       "post": {
         "summary": "Create enrollment API key",
         "tags": [
-          "Enrollment API keys"
+          "Fleet enrollment API keys"
         ],
         "responses": {
           "200": {
@@ -3997,7 +4051,7 @@
       "get": {
         "summary": "Get enrollment API key by ID",
         "tags": [
-          "Enrollment API keys"
+          "Fleet enrollment API keys"
         ],
         "responses": {
           "200": {
@@ -4028,7 +4082,7 @@
       "delete": {
         "summary": "Delete enrollment API key by ID",
         "tags": [
-          "Enrollment API keys"
+          "Fleet enrollment API keys"
         ],
         "responses": {
           "200": {
@@ -4069,7 +4123,18 @@
       "get": {
         "summary": "List enrollment API keys",
         "tags": [
-          "Enrollment API keys"
+          "Fleet enrollment API keys"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/page_index"
+          },
+          {
+            "$ref": "#/components/parameters/kuery"
+          }
         ],
         "responses": {
           "200": {
@@ -4116,13 +4181,12 @@
             "$ref": "#/components/responses/error"
           }
         },
-        "operationId": "get-enrollment-api-keys",
-        "parameters": []
+        "operationId": "get-enrollment-api-keys"
       },
       "post": {
         "summary": "Create enrollment API key",
         "tags": [
-          "Enrollment API keys"
+          "Fleet enrollment API keys"
         ],
         "responses": {
           "200": {
@@ -4150,6 +4214,28 @@
             "$ref": "#/components/responses/error"
           }
         },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the enrollment API key. Must be unique."
+                  },
+                  "policy_id": {
+                    "type": "string",
+                    "description": "The ID of the agent policy the Elastic Agent will be enrolled in."
+                  }
+                },
+                "required": [
+                  "policy_id"
+                ]
+              }
+            }
+          }
+        },
         "operationId": "create-enrollment-api-keys",
         "parameters": [
           {
@@ -4172,7 +4258,7 @@
       "get": {
         "summary": "Get enrollment API key by ID",
         "tags": [
-          "Enrollment API keys"
+          "Fleet enrollment API keys"
         ],
         "responses": {
           "200": {
@@ -4200,9 +4286,9 @@
         "operationId": "get-enrollment-api-key"
       },
       "delete": {
-        "summary": "Delete enrollment API key by ID",
+        "summary": "Revoke enrollment API key by ID by marking it as inactive",
         "tags": [
-          "Enrollment API keys"
+          "Fleet enrollment API keys"
         ],
         "responses": {
           "200": {
@@ -4242,7 +4328,7 @@
       "get": {
         "summary": "List package policies",
         "tags": [
-          "Package policies"
+          "Fleet package policies"
         ],
         "responses": {
           "200": {
@@ -4300,7 +4386,7 @@
       "post": {
         "summary": "Create package policy",
         "tags": [
-          "Package policies"
+          "Fleet package policies"
         ],
         "operationId": "create-package-policy",
         "responses": {
@@ -4353,7 +4439,7 @@
       "post": {
         "summary": "Bulk get package policies",
         "tags": [
-          "Package policies"
+          "Fleet package policies"
         ],
         "requestBody": {
           "content": {
@@ -4418,7 +4504,7 @@
       "post": {
         "summary": "Delete package policy",
         "tags": [
-          "Package policies"
+          "Fleet package policies"
         ],
         "operationId": "post-delete-package-policy",
         "requestBody": {
@@ -4488,7 +4574,7 @@
       "post": {
         "summary": "Upgrade package policy to a newer package version",
         "tags": [
-          "Package policies"
+          "Fleet package policies"
         ],
         "operationId": "upgrade-package-policy",
         "requestBody": {
@@ -4553,7 +4639,7 @@
       "post": {
         "summary": "Dry run package policy upgrade",
         "tags": [
-          "Package policies"
+          "Fleet package policies"
         ],
         "operationId": "upgrade-package-policy-dry-run",
         "requestBody": {
@@ -4627,7 +4713,7 @@
       "get": {
         "summary": "Get package policy by ID",
         "tags": [
-          "Package policies"
+          "Fleet package policies"
         ],
         "responses": {
           "200": {
@@ -4662,7 +4748,7 @@
       "put": {
         "summary": "Update package policy by ID",
         "tags": [
-          "Package policies"
+          "Fleet package policies"
         ],
         "operationId": "update-package-policy",
         "requestBody": {
@@ -4713,7 +4799,7 @@
       "delete": {
         "summary": "Delete package policy by ID",
         "tags": [
-          "Package policies"
+          "Fleet package policies"
         ],
         "operationId": "delete-package-policy",
         "responses": {
@@ -4754,7 +4840,7 @@
       "get": {
         "summary": "List outputs",
         "tags": [
-          "Outputs"
+          "Fleet outputs"
         ],
         "responses": {
           "200": {
@@ -4793,7 +4879,7 @@
       "post": {
         "summary": "Create output",
         "tags": [
-          "Outputs"
+          "Fleet outputs"
         ],
         "responses": {
           "200": {
@@ -4832,7 +4918,7 @@
       "get": {
         "summary": "Get output by ID",
         "tags": [
-          "Outputs"
+          "Fleet outputs"
         ],
         "responses": {
           "200": {
@@ -4869,7 +4955,7 @@
       "delete": {
         "summary": "Delete output by ID",
         "tags": [
-          "Outputs"
+          "Fleet outputs"
         ],
         "operationId": "delete-output",
         "responses": {
@@ -4904,7 +4990,7 @@
       "put": {
         "summary": "Update output by ID",
         "tags": [
-          "Outputs"
+          "Fleet outputs"
         ],
         "operationId": "update-output",
         "requestBody": {
@@ -4947,7 +5033,7 @@
       "get": {
         "summary": "Get latest output health",
         "tags": [
-          "Outputs"
+          "Fleet outputs"
         ],
         "responses": {
           "200": {
@@ -4995,7 +5081,7 @@
       "post": {
         "summary": "Generate Logstash API key",
         "tags": [
-          "Outputs"
+          "Fleet outputs"
         ],
         "responses": {
           "200": {
@@ -5029,7 +5115,7 @@
       "get": {
         "summary": "List agent binary download sources",
         "tags": [
-          "Agent binary download sources"
+          "Elastic Agent binary download sources"
         ],
         "responses": {
           "200": {
@@ -5068,7 +5154,7 @@
       "post": {
         "summary": "Create agent binary download source",
         "tags": [
-          "Agent binary download sources"
+          "Elastic Agent binary download sources"
         ],
         "responses": {
           "200": {
@@ -5125,7 +5211,7 @@
       "get": {
         "summary": "Get agent binary download source by ID",
         "tags": [
-          "Agent binary download sources"
+          "Elastic Agent binary download sources"
         ],
         "responses": {
           "200": {
@@ -5165,7 +5251,7 @@
       "delete": {
         "summary": "Delete agent binary download source by ID",
         "tags": [
-          "Agent binary download sources"
+          "Elastic Agent binary download sources"
         ],
         "operationId": "delete-download-source",
         "responses": {
@@ -5200,7 +5286,7 @@
       "put": {
         "summary": "Update agent binary download source by ID",
         "tags": [
-          "Agent binary download sources"
+          "Elastic Agent binary download sources"
         ],
         "operationId": "update-download-source",
         "requestBody": {
@@ -5510,7 +5596,7 @@
       "get": {
         "summary": "List proxies",
         "tags": [
-          "Proxies"
+          "Fleet proxies"
         ],
         "responses": {
           "200": {
@@ -5549,7 +5635,7 @@
       "post": {
         "summary": "Create proxy",
         "tags": [
-          "Proxies"
+          "Fleet proxies"
         ],
         "responses": {
           "200": {
@@ -5614,7 +5700,7 @@
       "get": {
         "summary": "Get proxy by ID",
         "tags": [
-          "Proxies"
+          "Fleet proxies"
         ],
         "responses": {
           "200": {
@@ -5654,7 +5740,7 @@
       "delete": {
         "summary": "Delete proxy by ID",
         "tags": [
-          "Proxies"
+          "Fleet proxies"
         ],
         "operationId": "delete-fleet-proxies",
         "responses": {
@@ -5689,7 +5775,7 @@
       "put": {
         "summary": "Update proxy by ID",
         "tags": [
-          "Proxies"
+          "Fleet proxies"
         ],
         "operationId": "update-fleet-proxies",
         "requestBody": {
@@ -5755,7 +5841,7 @@
       "get": {
         "summary": "Get full K8s agent manifest",
         "tags": [
-          "Kubernetes"
+          "Fleet Kubernetes"
         ],
         "responses": {
           "200": {
@@ -5810,7 +5896,7 @@
       "get": {
         "summary": "List metadata for latest uninstall tokens per agent policy",
         "tags": [
-          "Uninstall tokens"
+          "Fleet uninstall tokens"
         ],
         "responses": {
           "200": {
@@ -5898,7 +5984,7 @@
       "get": {
         "summary": "Get one decrypted uninstall token by its ID",
         "tags": [
-          "Uninstall tokens"
+          "Fleet uninstall tokens"
         ],
         "responses": {
           "200": {
@@ -7054,7 +7140,7 @@
       },
       "agent_status": {
         "type": "string",
-        "title": "Agent status",
+        "title": "Elastic Agent status",
         "enum": [
           "offline",
           "error",
@@ -7484,8 +7570,7 @@
             "type": "string"
           },
           "output_id": {
-            "type": "string",
-            "deprecated": true
+            "type": "string"
           },
           "inputs": {
             "type": "array",
@@ -7523,6 +7608,7 @@
           },
           "policy_id": {
             "type": "string",
+            "nullable": true,
             "deprecated": true
           },
           "policy_ids": {
@@ -8159,19 +8245,24 @@
             "type": "string"
           },
           "api_key_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The ID of the API key in the Security API."
           },
           "api_key": {
-            "type": "string"
+            "type": "string",
+            "description": "The enrollment API key (token) used for enrolling Elastic Agents."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "The name of the enrollment API key."
           },
           "active": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents."
           },
           "policy_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The ID of the agent policy the Elastic Agent will be enrolled in."
           },
           "created_at": {
             "type": "string"
@@ -8208,11 +8299,18 @@
             "description": "The package policy namespace. Leave blank to inherit the agent policy's namespace.",
             "example": "customnamespace"
           },
+          "output_id": {
+            "type": "string",
+            "description": "Output ID to send package data to",
+            "example": "output-id",
+            "nullable": true
+          },
           "policy_id": {
             "type": "string",
             "description": "Agent policy ID where that package policy will be added",
             "example": "agent-policy-id",
-            "deprecated": true
+            "deprecated": true,
+            "nullable": true
           },
           "policy_ids": {
             "type": "array",

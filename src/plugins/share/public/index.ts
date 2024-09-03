@@ -8,7 +8,7 @@
 
 import type { PluginInitializerContext } from '@kbn/core/public';
 
-export type { ConfigSchema } from '../common/config';
+export type { ConfigSchema } from '../server/config';
 
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
 

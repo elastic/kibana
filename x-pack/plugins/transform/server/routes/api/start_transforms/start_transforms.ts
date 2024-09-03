@@ -7,11 +7,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
-} from '../../../../common/api_schemas/start_transforms';
+} from '../../api_schemas/start_transforms';
+import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 
 import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
 

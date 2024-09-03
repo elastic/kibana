@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 
 import type { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
@@ -72,6 +73,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   success: boolean;
   warning: boolean;
   warningMessages: string[];
+  suppressedAlertsCount?: number;
 }
 
 export interface RunOpts<TParams extends RuleParams> {
@@ -139,6 +141,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   isPreview?: boolean;
   experimentalFeatures?: ExperimentalFeatures;
   alerting: SetupPlugins['alerting'];
+  analytics?: AnalyticsServiceSetup;
 }
 
 export type CreateSecurityRuleTypeWrapper = (

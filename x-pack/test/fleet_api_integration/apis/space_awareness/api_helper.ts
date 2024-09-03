@@ -15,6 +15,8 @@ import {
   GetAgentsResponse,
   GetOneAgentPolicyResponse,
   GetOneAgentResponse,
+  GetOnePackagePolicyResponse,
+  GetPackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   GetEnrollmentAPIKeysResponse,
@@ -27,21 +29,30 @@ import {
   PutSpaceSettingsRequest,
   GetActionStatusResponse,
   PostNewAgentActionResponse,
+  UpdateAgentPolicyResponse,
+  UpdateAgentPolicyRequest,
+  UpdatePackageResponse,
+  UpdatePackageRequest,
 } from '@kbn/fleet-plugin/common/types';
 import {
   GetUninstallTokenResponse,
   GetUninstallTokensMetadataResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import { SimplifiedPackagePolicy } from '@kbn/fleet-plugin/common/services/simplified_package_policy_helper';
+import { testUsers } from '../test_users';
 
 export class SpaceTestApiClient {
-  constructor(private readonly supertest: Agent) {}
+  constructor(
+    private readonly supertest: Agent,
+    private readonly auth = testUsers.fleet_all_int_all
+  ) {}
   private getBaseUrl(spaceId?: string) {
     return spaceId ? `/s/${spaceId}` : '';
   }
   async setup(spaceId?: string): Promise<CreateAgentPolicyResponse> {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/setup`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send({})
       .expect(200);
@@ -55,6 +66,7 @@ export class SpaceTestApiClient {
   ): Promise<CreateAgentPolicyResponse> {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send({
         name: `test ${uuidV4()}`,
@@ -75,6 +87,23 @@ export class SpaceTestApiClient {
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies`)
       .set('kbn-xsrf', 'xxxx')
       .send(data)
+      .expect(200);
+
+    return res;
+  }
+  async getPackagePolicy(
+    packagePolicyId: string,
+    spaceId?: string
+  ): Promise<GetOnePackagePolicyResponse> {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies/${packagePolicyId}`)
+      .expect(200);
+
+    return res;
+  }
+  async getPackagePolicies(spaceId?: string): Promise<GetPackagePoliciesResponse> {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies`)
       .expect(200);
 
     return res;
@@ -110,6 +139,29 @@ export class SpaceTestApiClient {
       .expect(200);
 
     return res;
+  }
+  async putAgentPolicy(
+    policyId: string,
+    data: Partial<UpdateAgentPolicyRequest['body']>,
+    spaceId?: string
+  ): Promise<UpdateAgentPolicyResponse> {
+    const { body: res, statusCode } = await this.supertest
+      .put(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies/${policyId}`)
+      .auth(this.auth.username, this.auth.password)
+      .send({
+        ...data,
+      })
+      .set('kbn-xsrf', 'xxxx');
+
+    if (statusCode === 200) {
+      return res;
+    }
+
+    if (statusCode === 404) {
+      throw new Error('404 "Not Found"');
+    } else {
+      throw new Error(`${statusCode} ${res?.error} ${res.message}`);
+    }
   }
   async getAgentPolicies(spaceId?: string): Promise<GetAgentPoliciesResponse> {
     const { body: res } = await this.supertest
@@ -206,6 +258,78 @@ export class SpaceTestApiClient {
 
     return res;
   }
+  async reassignAgent(agentId: string, policyId: string, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/reassign`)
+      .set('kbn-xsrf', 'xxx')
+      .send({
+        policy_id: policyId,
+      })
+      .expect(200);
+
+    return res;
+  }
+  async bulkReassignAgents(data: any, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_reassign`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+
+    return res;
+  }
+  async upgradeAgent(agentId: string, data: any, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/upgrade`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+
+    return res;
+  }
+  async bulkUpgradeAgents(data: any, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_upgrade`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+
+    return res;
+  }
+  async requestAgentDiagnostics(agentId: string, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/request_diagnostics`)
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+
+    return res;
+  }
+  async bulkRequestDiagnostics(data: any, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_request_diagnostics`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+
+    return res;
+  }
+  async unenrollAgent(agentId: string, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/unenroll`)
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+
+    return res;
+  }
+  async bulkUnenrollAgents(data: any, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_unenroll`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+
+    return res;
+  }
   async bulkUpdateAgentTags(data: any, spaceId?: string) {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_update_agent_tags`)
@@ -245,11 +369,31 @@ export class SpaceTestApiClient {
   }
   // Package install
   async getPackage(
-    { pkgName, pkgVersion }: { pkgName: string; pkgVersion: string },
+    { pkgName, pkgVersion }: { pkgName: string; pkgVersion?: string },
     spaceId?: string
   ): Promise<GetInfoResponse> {
     const { body: res } = await this.supertest
-      .get(`${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+      .get(
+        pkgVersion
+          ? `${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}`
+          : `${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}`
+      )
+      .expect(200);
+
+    return res;
+  }
+  async updatePackage(
+    {
+      pkgName,
+      pkgVersion,
+      data,
+    }: { pkgName: string; pkgVersion: string; data: UpdatePackageRequest['body'] },
+    spaceId?: string
+  ): Promise<UpdatePackageResponse> {
+    const { body: res } = await this.supertest
+      .put(`${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ ...data })
       .expect(200);
 
     return res;
@@ -312,13 +456,28 @@ export class SpaceTestApiClient {
 
     return res;
   }
-
   async postNewAgentAction(agentId: string, spaceId?: string): Promise<PostNewAgentActionResponse> {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/actions`)
       .set('kbn-xsrf', 'xxxx')
       .send({ action: { type: 'UNENROLL' } })
       .expect(200);
+
+    return res;
+  }
+  async cancelAction(actionId: string, spaceId?: string): Promise<PostNewAgentActionResponse> {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/actions/${actionId}/cancel`)
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+    return res;
+  }
+  // Enable space awareness
+  async postEnableSpaceAwareness(spaceId?: string): Promise<any> {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/internal/fleet/enable_space_awareness`)
+      .set('kbn-xsrf', 'xxxx')
+      .set('elastic-api-version', '1');
 
     return res;
   }

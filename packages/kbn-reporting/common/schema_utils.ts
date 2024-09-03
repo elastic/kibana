@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue } from '@kbn/config-schema';
+import type { ByteSizeValue } from '@kbn/config-schema';
 import moment from 'moment';
 
 /*

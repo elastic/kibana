@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+
+// Disabling it for now until the EUI team fixes it
+/* eslint-disable @elastic/eui/href-or-on-click */
+
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../context/kibana_context/use_kibana';
+import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export const addApmData = {
@@ -40,28 +43,30 @@ export function AddApmData({
 }) {
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
-  const {
-    application: { navigateToUrl },
-  } = useKibana().services;
 
-  function handleClick() {
-    navigateToUrl(basePath.prepend(addApmData.link));
-    onClick?.();
-  }
   return (
-    <EuiButton data-test-subj={props['data-test-subj']} size="s" onClick={handleClick}>
+    <EuiButton
+      data-test-subj={props['data-test-subj']}
+      size="s"
+      onClick={onClick}
+      href={basePath.prepend(addApmData.link)}
+    >
       {addApmData.name}
     </EuiButton>
   );
 }
 
 export function AssociateServiceLogs({ onClick }: { onClick?: () => void }) {
-  function handleClick() {
-    window.open(associateServiceLogs.link, '_blank');
-    onClick?.();
-  }
   return (
-    <EuiButton data-test-subj="associateServiceLogsButton" size="s" onClick={handleClick}>
+    <EuiButton
+      data-test-subj="associateServiceLogsButton"
+      size="s"
+      onClick={onClick}
+      href={associateServiceLogs.link}
+      target="_blank"
+      iconType="popout"
+      iconSide="right"
+    >
       {associateServiceLogs.name}
     </EuiButton>
   );
@@ -70,16 +75,14 @@ export function AssociateServiceLogs({ onClick }: { onClick?: () => void }) {
 export function CollectServiceLogs({ onClick }: { onClick?: () => void }) {
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
-  const {
-    application: { navigateToUrl },
-  } = useKibana().services;
 
-  function handleClick() {
-    navigateToUrl(basePath.prepend(collectServiceLogs.link));
-    onClick?.();
-  }
   return (
-    <EuiButton data-test-subj="collectServiceLogsButton" size="s" onClick={handleClick}>
+    <EuiButton
+      data-test-subj="collectServiceLogsButton"
+      size="s"
+      onClick={onClick}
+      href={basePath.prepend(collectServiceLogs.link)}
+    >
       {collectServiceLogs.name}
     </EuiButton>
   );

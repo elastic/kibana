@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const browser = getService('browser');
   const find = getService('find');
   const supertest = getService('supertest');
+  const log = getService('log');
   const PageObjects = getPageObjects(['common']);
 
   describe('Telemetry service', () => {
@@ -30,7 +31,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         return browser.executeAsync<boolean>((cb) => {
           (window as unknown as Record<string, () => Promise<boolean>>)
             ._checkCanSendTelemetry()
-            .then(cb);
+            .then(cb)
+            .catch((err) => log.error(err));
         });
       };
 
@@ -39,7 +41,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await browser.executeAsync<void>((cb) => {
           (window as unknown as Record<string, () => Promise<boolean>>)
             ._resetTelemetry()
-            .then(() => cb());
+            .then(() => cb())
+            .catch((err) => log.error(err));
         });
       });
 

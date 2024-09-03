@@ -19,6 +19,7 @@ import { errorMessageStrings as strings } from './message_strings';
 describe('<KibanaErrorBoundary>', () => {
   let services: KibanaErrorBoundaryServices;
   beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     services = getServicesMock();
   });
 

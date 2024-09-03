@@ -22,6 +22,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
     complete: [
       ProductFeatureKey.advancedInsights,
       ProductFeatureKey.assistant,
+      ProductFeatureKey.attackDiscovery,
       ProductFeatureKey.investigationGuide,
       ProductFeatureKey.investigationGuideInteractions,
       ProductFeatureKey.threatIntelligence,

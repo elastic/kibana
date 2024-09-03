@@ -224,6 +224,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       shouldShowFieldHandler: showFieldHandler,
       row: rows[0],
+      isCompressed: true,
     });
   });
 
@@ -329,6 +330,7 @@ describe('Unified data table cell rendering', function () {
       shouldShowFieldHandler: showFieldHandler,
       row: rows[0],
       isPlainRecord: true,
+      isCompressed: true,
     });
   });
 
@@ -367,6 +369,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       shouldShowFieldHandler: showFieldHandler,
       row: rows[0],
+      isCompressed: true,
     });
   });
 
@@ -406,6 +409,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 1,
       shouldShowFieldHandler: showFieldHandler,
       row: rows[0],
+      isCompressed: true,
     });
   });
 
@@ -519,6 +523,7 @@ describe('Unified data table cell rendering', function () {
       shouldShowFieldHandler: showFieldHandler,
       useTopLevelObjectColumns: true,
       row: rows[0],
+      isCompressed: true,
     });
   });
 
@@ -559,6 +564,7 @@ describe('Unified data table cell rendering', function () {
       shouldShowFieldHandler: showFieldHandler,
       useTopLevelObjectColumns: true,
       row: rows[0],
+      isCompressed: true,
     });
   });
 

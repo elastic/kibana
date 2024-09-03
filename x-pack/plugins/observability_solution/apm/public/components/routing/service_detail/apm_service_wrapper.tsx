@@ -33,7 +33,10 @@ export function ApmServiceWrapper() {
         }),
       },
     ],
-    [query, router, serviceName]
+    [query, router, serviceName],
+    {
+      omitRootOnServerless: true,
+    }
   );
 
   return <Outlet />;

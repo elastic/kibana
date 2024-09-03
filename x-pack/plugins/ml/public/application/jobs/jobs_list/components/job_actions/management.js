@@ -22,6 +22,10 @@ import { i18n } from '@kbn/i18n';
 import { isManagedJob } from '../../../jobs_utils';
 
 export function actionsMenuContent(
+  toastNotifications,
+  application,
+  mlApiServices,
+  mlJobService,
   showEditJobFlyout,
   showDatafeedChartFlyout,
   showDeleteJobModal,
@@ -73,7 +77,7 @@ export function actionsMenuContent(
         if (isManagedJob(item)) {
           showStopDatafeedsConfirmModal([item]);
         } else {
-          stopDatafeeds([item], refreshJobs);
+          stopDatafeeds(toastNotifications, mlJobService, [item], refreshJobs);
         }
 
         closeMenu(true);
@@ -110,7 +114,7 @@ export function actionsMenuContent(
         if (isManagedJob(item)) {
           showCloseJobsConfirmModal([item]);
         } else {
-          closeJobs([item], refreshJobs);
+          closeJobs(toastNotifications, mlJobService, [item], refreshJobs);
         }
 
         closeMenu(true);
@@ -149,7 +153,7 @@ export function actionsMenuContent(
         return isJobBlocked(item) === false && canCreateJob;
       },
       onClick: (item) => {
-        cloneJob(item.id);
+        cloneJob(toastNotifications, application, mlApiServices, mlJobService, item.id);
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonCloneJob',

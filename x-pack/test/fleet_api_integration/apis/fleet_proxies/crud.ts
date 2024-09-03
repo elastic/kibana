@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -16,6 +15,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   async function getLatestFleetPolicies(policyId: string): Promise<any> {
     const policyDocRes = await es.search({
@@ -31,21 +31,20 @@ export default function (providerContext: FtrProviderContext) {
     return policyDocRes.hits.hits[0]?._source;
   }
 
-  describe('fleet_proxies_crud', async function () {
-    skipIfNoDockerRegistry(providerContext);
-    before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
-    setupFleetAndAgents(providerContext);
-
+  describe('fleet_proxies_crud', function () {
     const existingId = 'test-default-123';
     const fleetServerHostId = 'test-fleetserver-123';
     const policyId = 'test-policy-123';
     const outputId = 'test-output-123';
     let downloadSourceId: string;
 
-    before(async function () {
+    skipIfNoDockerRegistry(providerContext);
+
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await fleetAndAgents.setup();
+
       await kibanaServer.savedObjects.clean({
         types: ['fleet-proxy'],
       });

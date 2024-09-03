@@ -13,7 +13,7 @@ describe('deleteInferenceEndpoint', () => {
   beforeEach(() => {
     mockClient = {
       inference: {
-        deleteModel: jest.fn(),
+        delete: jest.fn(),
       },
     };
   });
@@ -24,7 +24,7 @@ describe('deleteInferenceEndpoint', () => {
 
     await deleteInferenceEndpoint(mockClient, type, id);
 
-    expect(mockClient.inference.deleteModel).toHaveBeenCalledWith({
+    expect(mockClient.inference.delete).toHaveBeenCalledWith({
       inference_id: id,
       task_type: type,
     });

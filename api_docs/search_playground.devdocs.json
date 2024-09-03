@@ -245,6 +245,36 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.PLUGIN_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/search_playground\""
+        ],
+        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.SEARCH_MODE_FEATURE_FLAG_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_MODE_FEATURE_FLAG_ID",
+        "description": [],
+        "signature": [
+          "\"searchPlayground:searchModeEnabled\""
+        ],
+        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []

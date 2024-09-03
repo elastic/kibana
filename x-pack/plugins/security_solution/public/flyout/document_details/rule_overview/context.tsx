@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, memo, useContext, useMemo } from 'react';
-import { FlyoutError } from '../../shared/components/flyout_error';
+import { FlyoutError } from '@kbn/security-solution-common';
 import type { RuleOverviewPanelProps } from '.';
 
 export interface RuleOverviewPanelContext {

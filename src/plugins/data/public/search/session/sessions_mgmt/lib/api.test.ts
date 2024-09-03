@@ -16,7 +16,7 @@ import { SearchSessionStatus } from '../../../../../common';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SearchSessionsMgmtAPI } from './api';
-import { SearchSessionsConfigSchema } from '../../../../../config';
+import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: MockedKeys<CoreStart>;

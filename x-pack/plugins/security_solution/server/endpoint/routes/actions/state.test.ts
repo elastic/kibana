@@ -103,6 +103,7 @@ describe('when calling the Action state route handler', () => {
           canAccessResponseConsole: false,
           canWriteExecuteOperations: false,
           canWriteFileOperations: false,
+          canWriteScanOperations: false,
         },
       });
 

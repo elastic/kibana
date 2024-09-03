@@ -42,6 +42,9 @@ class ErrorBoundaryInternal extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by Kibana React Error Boundary'); // eslint-disable-line no-console
+    console.error(error); // eslint-disable-line no-console
+
     const { name, isFatal } = this.props.services.errorService.registerError(error, errorInfo);
     this.setState(() => {
       return { error, errorInfo, componentName: name, isFatal };

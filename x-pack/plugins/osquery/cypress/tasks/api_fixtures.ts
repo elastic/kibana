@@ -175,7 +175,7 @@ export const loadLiveQuery = (
   }).then((response) => response.body.data);
 
 export const loadRule = (includeResponseActions = false) => {
-  cy.login(ServerlessRoleName.SOC_MANAGER);
+  cy.login(ServerlessRoleName.SOC_MANAGER, false);
 
   return request<RuleResponse>({
     method: 'POST',

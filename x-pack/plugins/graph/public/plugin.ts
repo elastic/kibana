@@ -32,7 +32,7 @@ import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plu
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { checkLicense } from '../common/check_license';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface GraphPluginSetupDependencies {

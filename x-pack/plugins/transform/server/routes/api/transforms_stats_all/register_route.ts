@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   getTransformStatsQuerySchema,
   type GetTransformStatsQuerySchema,
-} from '../../../../common/api_schemas/transforms_stats';
+} from '../../api_schemas/transforms_stats';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';

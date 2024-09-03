@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { RuleSignatureId } from './rule_schema/common_attributes.gen';
 

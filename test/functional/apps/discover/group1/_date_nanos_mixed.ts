@@ -40,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos_mixed');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await PageObjects.common.unsetTime();
     });
 
     it('shows a list of records of indices with date & date_nanos fields in the right order', async function () {
@@ -52,10 +53,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(rowData3).to.contain('Jan 1, 2019 @ 12:10:30.123456789');
       const rowData4 = await PageObjects.discover.getDocTableIndex(isLegacy ? 7 : 4);
       expect(rowData4).to.contain('Jan 1, 2019 @ 12:10:30.123000000');
-    });
-
-    after(async () => {
-      await PageObjects.common.unsetTime();
     });
   });
 }

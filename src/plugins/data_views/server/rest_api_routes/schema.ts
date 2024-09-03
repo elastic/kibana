@@ -14,7 +14,7 @@ import {
   runtimeFieldSchema,
   serializedFieldFormatSchema,
   fieldSpecSchemaFields,
-} from '../../common/schemas';
+} from '../schemas';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../common/constants';
 
 export const dataViewSpecSchema = schema.object({

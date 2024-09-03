@@ -26,19 +26,20 @@ import { i18n } from '@kbn/i18n';
 import { type MLHttpFetchError, extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
-import { ml } from '../../../../../services/ml_api_service';
 import type { JobValidator } from '../../job_validator/job_validator';
 import { VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import type { JobCreator } from '../job_creator';
+import type { MlApiServices } from '../../../../../services/ml_api_service';
 
-export type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[0];
+export type CalculatePayload = Parameters<MlApiServices['calculateModelMemoryLimit$']>[0];
 
 type ModelMemoryEstimator = ReturnType<typeof modelMemoryEstimatorProvider>;
 
 export const modelMemoryEstimatorProvider = (
   jobCreator: JobCreator,
-  jobValidator: JobValidator
+  jobValidator: JobValidator,
+  mlApiServices: MlApiServices
 ) => {
   const modelMemoryCheck$ = new Subject<CalculatePayload>();
   const error$ = new Subject<MLHttpFetchError>();
@@ -64,7 +65,7 @@ export const modelMemoryEstimatorProvider = (
         // don't call the endpoint with invalid payload
         filter(() => jobValidator.isModelMemoryEstimationPayloadValid),
         switchMap((payload) => {
-          return ml.calculateModelMemoryLimit$(payload).pipe(
+          return mlApiServices.calculateModelMemoryLimit$(payload).pipe(
             pluck('modelMemoryLimit'),
             catchError((error) => {
               // eslint-disable-next-line no-console
@@ -90,13 +91,16 @@ export const useModelMemoryEstimator = (
   jobCreatorUpdated: number
 ) => {
   const {
-    services: { notifications },
+    services: {
+      notifications,
+      mlServices: { mlApiServices },
+    },
   } = useMlKibana();
 
   // Initialize model memory estimator only once
   const modelMemoryEstimator = useMemo<ModelMemoryEstimator>(
-    () => modelMemoryEstimatorProvider(jobCreator, jobValidator),
-    [jobCreator, jobValidator]
+    () => modelMemoryEstimatorProvider(jobCreator, jobValidator, mlApiServices),
+    [jobCreator, jobValidator, mlApiServices]
   );
 
   // Listen for estimation results and errors

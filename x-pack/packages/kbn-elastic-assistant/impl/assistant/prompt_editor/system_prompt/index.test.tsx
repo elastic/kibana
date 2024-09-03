@@ -62,7 +62,7 @@ jest.mock('../../use_conversation', () => {
 });
 
 describe('SystemPrompt', () => {
-  const editingSystemPromptId = undefined;
+  const currentSystemPromptId = undefined;
   const isSettingsModalVisible = false;
   const onSystemPromptSelectionChange = jest.fn();
   const setIsSettingsModalVisible = jest.fn();
@@ -86,7 +86,7 @@ describe('SystemPrompt', () => {
       render(
         <SystemPrompt
           conversation={conversation}
-          editingSystemPromptId={editingSystemPromptId}
+          currentSystemPromptId={currentSystemPromptId}
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -113,7 +113,7 @@ describe('SystemPrompt', () => {
       render(
         <SystemPrompt
           conversation={BASE_CONVERSATION}
-          editingSystemPromptId={mockSystemPrompt.id}
+          currentSystemPromptId={mockSystemPrompt.id}
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -144,7 +144,7 @@ describe('SystemPrompt', () => {
         <TestProviders>
           <SystemPrompt
             conversation={BASE_CONVERSATION}
-            editingSystemPromptId={editingSystemPromptId}
+            currentSystemPromptId={currentSystemPromptId}
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -191,7 +191,7 @@ describe('SystemPrompt', () => {
         <TestProviders>
           <SystemPrompt
             conversation={BASE_CONVERSATION}
-            editingSystemPromptId={editingSystemPromptId}
+            currentSystemPromptId={currentSystemPromptId}
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -252,7 +252,7 @@ describe('SystemPrompt', () => {
         <TestProviders>
           <SystemPrompt
             conversation={BASE_CONVERSATION}
-            editingSystemPromptId={editingSystemPromptId}
+            currentSystemPromptId={currentSystemPromptId}
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -320,7 +320,7 @@ describe('SystemPrompt', () => {
         <TestProviders>
           <SystemPrompt
             conversation={BASE_CONVERSATION}
-            editingSystemPromptId={editingSystemPromptId}
+            currentSystemPromptId={currentSystemPromptId}
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -403,7 +403,7 @@ describe('SystemPrompt', () => {
         <TestProviders>
           <SystemPrompt
             conversation={BASE_CONVERSATION}
-            editingSystemPromptId={editingSystemPromptId}
+            currentSystemPromptId={currentSystemPromptId}
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -473,7 +473,7 @@ describe('SystemPrompt', () => {
       <TestProviders>
         <SystemPrompt
           conversation={BASE_CONVERSATION}
-          editingSystemPromptId={mockSystemPrompt.id}
+          currentSystemPromptId={mockSystemPrompt.id}
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}

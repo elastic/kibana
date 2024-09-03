@@ -39,7 +39,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { ISearchOptions } from '@kbn/search-types';
 import { SearchUsageCollector } from '../..';
-import { ConfigSchema } from '../../../config';
+import type { ConfigSchema } from '../../../server/config';
 import type {
   SessionMeta,
   SessionStateContainer,

@@ -21,3 +21,4 @@ export * from './persist_note/persist_note_route';
 export * from './pinned_events/pinned_events_route';
 export * from './install_prepackaged_timelines/install_prepackaged_timelines';
 export * from './copy_timeline/copy_timeline_route';
+export * from './get_notes/get_notes_route';

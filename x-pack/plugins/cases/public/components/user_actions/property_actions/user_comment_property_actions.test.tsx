@@ -17,8 +17,7 @@ import {
 import { UserCommentPropertyActions } from './user_comment_property_actions';
 import { waitFor } from '@testing-library/react';
 
-// FLAKY: https://github.com/elastic/kibana/issues/175310
-describe.skip('UserCommentPropertyActions', () => {
+describe('UserCommentPropertyActions', () => {
   let appMock: AppMockRenderer;
 
   const props = {
@@ -31,6 +30,10 @@ describe.skip('UserCommentPropertyActions', () => {
   beforeEach(() => {
     appMock = createAppMockRenderer();
     jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    await appMock.clearQueryCache();
   });
 
   it('renders the correct number of actions', async () => {

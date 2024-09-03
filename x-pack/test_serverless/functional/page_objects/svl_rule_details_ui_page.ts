@@ -91,8 +91,7 @@ export function SvlRuleDetailsPageProvider({ getService }: FtrProviderContext) {
       });
     },
     async clickPaginationNextPage() {
-      const nextButton = await testSubjects.find(`pagination-button-next`);
-      nextButton.click();
+      await testSubjects.click(`pagination-button-next`);
     },
     async isViewInAppDisabled() {
       await retry.try(async () => {

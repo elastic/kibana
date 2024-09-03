@@ -60,6 +60,7 @@ paths:
       x-codegen-enabled: true
       operationId: BulkDeleteRulesPost
       deprecated: true
+      summary: Delete multiple detection rules
       description: Deletes multiple rules.
       tags:
         - Bulk API

@@ -23,7 +23,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { DATA_QUALITY_LOCATOR_ID, DataQualityLocatorParams } from '@kbn/deeplinks-observability';
+import {
+  DATA_QUALITY_DETAILS_LOCATOR_ID,
+  DataQualityDetailsLocatorParams,
+} from '@kbn/deeplinks-observability';
 import { BrowserUrlService } from '@kbn/share-plugin/public';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
@@ -37,13 +40,6 @@ const DEFAULT_ROWS_PER_PAGE = 5;
 interface DegradedField {
   issue: string;
   values: string[];
-}
-
-interface ParamsForLocator {
-  dataStreamType: string;
-  dataStreamName: string;
-  dataStreamNamespace: string;
-  rawName: string;
 }
 
 interface TableOptions {
@@ -117,7 +113,7 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
   const columns = getDegradedFieldsColumns();
   const tableData = getDataFormattedForTable(ignoredFieldValues);
 
-  const paramsForLocator = getParamsForLocator(sourceFields);
+  const dataStream = getDataStreamRawName(sourceFields);
 
   const accordionId = useGeneratedHtmlId({
     prefix: qualityIssuesAccordionTitle,
@@ -194,9 +190,7 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
         buttonContent={accordionTitle}
         paddingSize="m"
         initialIsOpen={false}
-        extraAction={
-          <DatasetQualityLink urlService={urlService} paramsForLocator={paramsForLocator} />
-        }
+        extraAction={<DatasetQualityLink urlService={urlService} dataStream={dataStream} />}
         data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsAccordion"
       >
         <EuiBasicTable
@@ -246,9 +240,9 @@ const getDataFormattedForTable = (
   }));
 };
 
-const getParamsForLocator = (
+const getDataStreamRawName = (
   sourceFields: DataTableRecord['raw']['fields']
-): ParamsForLocator | undefined => {
+): string | undefined => {
   if (sourceFields) {
     const dataStreamTypeArr = sourceFields['data_stream.type'];
     const dataStreamType = dataStreamTypeArr ? dataStreamTypeArr[0] : undefined;
@@ -256,49 +250,35 @@ const getParamsForLocator = (
     const dataStreamName = dataStreamNameArr ? dataStreamNameArr[0] : undefined;
     const dataStreamNamespaceArr = sourceFields['data_stream.namespace'];
     const dataStreamNamespace = dataStreamNamespaceArr ? dataStreamNamespaceArr[0] : undefined;
-    let rawName;
+    let dataStream;
 
     if (dataStreamType && dataStreamName && dataStreamNamespace) {
-      rawName = `${dataStreamType}-${dataStreamName}-${dataStreamNamespace}`;
+      dataStream = `${dataStreamType}-${dataStreamName}-${dataStreamNamespace}`;
     }
 
-    if (rawName) {
-      return {
-        dataStreamType,
-        dataStreamName,
-        dataStreamNamespace,
-        rawName,
-      };
-    }
+    return dataStream;
   }
 };
 
 const DatasetQualityLink = React.memo(
   ({
     urlService,
-    paramsForLocator,
+    dataStream,
   }: {
     urlService: BrowserUrlService;
-    paramsForLocator?: ParamsForLocator;
+    dataStream: string | undefined;
   }) => {
-    const locator = urlService.locators.get<DataQualityLocatorParams>(DATA_QUALITY_LOCATOR_ID);
-    const locatorParams: DataQualityLocatorParams = paramsForLocator
-      ? {
-          flyout: {
-            dataset: {
-              rawName: paramsForLocator.rawName,
-              type: paramsForLocator.dataStreamType,
-              name: paramsForLocator.dataStreamName,
-              namespace: paramsForLocator.dataStreamNamespace,
-            },
-          },
-        }
-      : {};
+    if (!dataStream) {
+      return null;
+    }
+    const locator = urlService.locators.get<DataQualityDetailsLocatorParams>(
+      DATA_QUALITY_DETAILS_LOCATOR_ID
+    );
 
-    const datasetQualityUrl = locator?.getRedirectUrl(locatorParams);
+    const datasetQualityUrl = locator?.getRedirectUrl({ dataStream });
 
     const navigateToDatasetQuality = () => {
-      locator?.navigate(locatorParams);
+      locator?.navigate({ dataStream });
     };
 
     const datasetQualityLinkProps = getRouterLinkProps({
@@ -306,7 +286,7 @@ const DatasetQualityLink = React.memo(
       onClick: navigateToDatasetQuality,
     });
 
-    return paramsForLocator ? (
+    return (
       <EuiHeaderLink
         {...datasetQualityLinkProps}
         color="primary"
@@ -316,6 +296,6 @@ const DatasetQualityLink = React.memo(
       >
         {datasetQualityLinkTitle}
       </EuiHeaderLink>
-    ) : null;
+    );
   }
 );

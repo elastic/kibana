@@ -14,7 +14,7 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { CspClientPluginStartDeps } from '../types';
+import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { getMockDependencies } from './fixtures/get_mock_dependencies';
 
 interface CspAppDeps {

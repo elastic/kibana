@@ -26,6 +26,7 @@ export const getDataStreamMock = (): DataStream => ({
   ],
   rawSamples,
   pipeline: getPipelineMock(),
+  samplesFormat: { name: 'ndjson', multiline: false },
 });
 
 export const getIntegrationMock = (): Integration => ({

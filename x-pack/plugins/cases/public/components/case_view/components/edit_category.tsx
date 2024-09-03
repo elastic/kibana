@@ -28,7 +28,7 @@ import { RemovableItem } from '../../removable_item/removable_item';
 
 export interface EditCategoryProps {
   isLoading: boolean;
-  onSubmit: (category?: string | null) => void;
+  onSubmit: (category: string | null) => void;
   category?: string | null;
 }
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export { DataQualityPanel } from './impl/data_quality';
+export { DataQualityPanel } from './impl/data_quality_panel';
 
-export { getIlmPhaseDescription } from './impl/data_quality/helpers';
+export { getIlmPhaseDescription } from './impl/data_quality_panel/utils/get_ilm_phase_description';
 
 export {
   DATA_QUALITY_PROMPT_CONTEXT_PILL,
@@ -17,6 +17,11 @@ export {
   ILM_PHASE,
   INDEX_LIFECYCLE_MANAGEMENT_PHASES,
   SELECT_ONE_OR_MORE_ILM_PHASES,
-} from './impl/data_quality/translations';
+  DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
+} from './impl/data_quality_panel/translations';
 
-export { ECS_REFERENCE_URL } from './impl/data_quality/data_quality_panel/index_properties/markdown/helpers';
+export {
+  ECS_REFERENCE_URL,
+  ECS_FIELD_REFERENCE_URL,
+  MAPPING_URL,
+} from './impl/data_quality_panel/constants';

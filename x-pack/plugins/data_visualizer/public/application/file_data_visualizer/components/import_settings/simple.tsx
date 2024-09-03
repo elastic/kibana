@@ -11,19 +11,22 @@ import type { FC } from 'react';
 import React from 'react';
 
 import { EuiFieldText, EuiFormRow, EuiCheckbox, EuiSpacer } from '@elastic/eui';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { CombinedField } from '../../../common/components/combined_fields';
 import { CombinedFieldsReadOnlyForm } from '../../../common/components/combined_fields';
 import { CreateDataViewToolTip } from './create_data_view_tooltip';
+import { SemanticTextInfo } from './semantic_text_info';
 
 interface Props {
   index: string;
   initialized: boolean;
-  onIndexChange(): void;
+  onIndexChange(i: string): void;
   createDataView: boolean;
   onCreateDataViewChange(): void;
   indexNameError: string;
   combinedFields: CombinedField[];
   canCreateDataView: boolean;
+  results: FindFileStructureResponse;
 }
 
 export const SimpleSettings: FC<Props> = ({
@@ -35,6 +38,7 @@ export const SimpleSettings: FC<Props> = ({
   indexNameError,
   combinedFields,
   canCreateDataView,
+  results,
 }) => {
   return (
     <React.Fragment>
@@ -57,7 +61,7 @@ export const SimpleSettings: FC<Props> = ({
           )}
           value={index}
           disabled={initialized === true}
-          onChange={onIndexChange}
+          onChange={(e) => onIndexChange(e.target.value)}
           isInvalid={indexNameError !== ''}
           aria-label={i18n.translate(
             'xpack.dataVisualizer.file.simpleImportSettings.indexNameAriaLabel',
@@ -87,7 +91,7 @@ export const SimpleSettings: FC<Props> = ({
         />
       </CreateDataViewToolTip>
 
-      <EuiSpacer size="m" />
+      <SemanticTextInfo results={results} />
 
       <CombinedFieldsReadOnlyForm combinedFields={combinedFields} />
     </React.Fragment>

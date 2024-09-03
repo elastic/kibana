@@ -23,6 +23,10 @@
     "@kbn/analytics-collection-utils",
     "@kbn/logging",
     "@kbn/core-saved-objects-server",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/es-query",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-saved-objects-api-server",
   ],
   "exclude": [
     "target/**/*",

@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.get('vary')).to.equal('accept-encoding, user-hash');
       expect(response.get('etag')).to.not.be.empty();
 
-      kibanaServer.uiSettings.replace({ 'data_views:cache_max_age': 5 });
+      await kibanaServer.uiSettings.replace({ 'data_views:cache_max_age': 5 });
     });
 
     it('returns 304 on matching etag', async () => {

@@ -17,6 +17,8 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import { createAppContextStartContractMock as fleetCreateAppContextStartContractMock } from '@kbn/fleet-plugin/server/mocks';
+import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
 import type { HostInfo, MetadataListResponse } from '../../../../common/endpoint/types';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { registerEndpointRoutes } from '.';
@@ -135,6 +137,11 @@ describe('test endpoint routes', () => {
         page: 1,
         per_page: 10,
       });
+      fleetAppContextService.start(
+        fleetCreateAppContextStartContractMock({}, false, {
+          withoutSpaceExtensions: mockSavedObjectClient,
+        })
+      );
       mockAgentClient.getAgentStatusById.mockResolvedValue('error');
       mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
       mockAgentPolicyService.getByIds = jest.fn().mockResolvedValueOnce([]);

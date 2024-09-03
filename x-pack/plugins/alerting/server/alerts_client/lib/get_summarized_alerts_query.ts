@@ -324,7 +324,6 @@ export const getQueryByScopedQueries = ({
       aggs: {
         alertId: {
           top_hits: {
-            size: 1,
             _source: {
               includes: [ALERT_UUID],
             },

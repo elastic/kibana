@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { ConfigSchema } from '../config';
+import { ConfigSchema } from './config';
 import { AutocompleteService } from './autocomplete';
 import { AutocompleteSetup } from './autocomplete/autocomplete_service';
 

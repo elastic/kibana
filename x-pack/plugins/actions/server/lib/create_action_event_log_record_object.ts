@@ -37,6 +37,7 @@ interface CreateActionEventLogRecordParams {
   relatedSavedObjects?: RelatedSavedObjects;
   isInMemory?: boolean;
   source?: ActionExecutionSource<unknown>;
+  actionTypeId: string;
 }
 
 export function createActionEventLogRecordObject(params: CreateActionEventLogRecordParams): Event {
@@ -54,6 +55,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
     isInMemory,
     actionId,
     source,
+    actionTypeId,
   } = params;
 
   const kibanaAlertRule = {
@@ -89,6 +91,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
       action: {
         ...(name ? { name } : {}),
         id: actionId,
+        type_id: actionTypeId,
         execution: {
           uuid: actionExecutionId,
         },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { load } from 'js-yaml';
+import { safeLoad } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
 import type { EcsMappingState } from '../../types';
@@ -44,7 +44,7 @@ function generateProcessor(
       date: {
         field: currentPath,
         target_field: ecsField.target,
-        formats: ecsField.date_formats,
+        formats: convertIfIsoDate(ecsField.date_formats),
         if: currentPath.replace(/\./g, '?.'),
       },
     };
@@ -57,6 +57,19 @@ function generateProcessor(
       ignore_missing: true,
     },
   };
+}
+
+// While some custom date formats might use the 'T' representation of time widely used in ISO8601, this function only appends the 'ISO8601' format to the date processor as a fallback.
+// This is because many vendors tend to use multiple versions representing seconds, milli, nano etc, and the format returned by the LLM usually hits most but not all.
+// Since log samples can be inconclusive we add the ISO8601 format as a fallback to ensure the date processor can handle all of the combinations of values.
+function convertIfIsoDate(date: string[]): string[] {
+  if (date.some((d) => d.includes('T'))) {
+    if (date.some((d) => d === 'ISO8601')) {
+      return date;
+    }
+    return [...date, 'ISO8601'];
+  }
+  return date;
 }
 
 function getSampleValue(key: string, samples: Record<string, any>): unknown {
@@ -148,9 +161,9 @@ function generateProcessors(ecsMapping: object, samples: object, basePath: strin
 }
 
 export function createPipeline(state: EcsMappingState): IngestPipeline {
-  const samples = JSON.parse(state.formattedSamples);
+  const samples = JSON.parse(state.combinedSamples);
 
-  const processors = generateProcessors(state.currentMapping, samples);
+  const processors = generateProcessors(state.finalMapping, samples);
   // Retrieve all source field names from convert processors to populate single remove processor:
   const fieldsToRemove = processors
     .map((p: any) => p.convert?.field)
@@ -160,7 +173,7 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
     ecs_version: state.ecsVersion,
     package_name: state.packageName,
     data_stream_name: state.dataStreamName,
-    log_format: state.logFormat,
+    log_format: state.samplesFormat,
     fields_to_remove: fieldsToRemove,
   };
   const templatesPath = joinPath(__dirname, '../../templates');
@@ -172,6 +185,6 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
   });
   const template = env.getTemplate('pipeline.yml.njk');
   const renderedTemplate = template.render(mappedValues);
-  const ingestPipeline = load(renderedTemplate) as IngestPipeline;
+  const ingestPipeline = safeLoad(renderedTemplate) as IngestPipeline;
   return ingestPipeline;
 }

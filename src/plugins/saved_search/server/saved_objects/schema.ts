@@ -129,3 +129,9 @@ export const SCHEMA_SEARCH_MODEL_VERSION_4 = SCHEMA_SEARCH_MODEL_VERSION_3.exten
     ])
   ),
 });
+
+export const SCHEMA_SEARCH_MODEL_VERSION_5 = SCHEMA_SEARCH_MODEL_VERSION_4.extends({
+  density: schema.maybe(
+    schema.oneOf([schema.literal('compact'), schema.literal('normal'), schema.literal('expanded')])
+  ),
+});

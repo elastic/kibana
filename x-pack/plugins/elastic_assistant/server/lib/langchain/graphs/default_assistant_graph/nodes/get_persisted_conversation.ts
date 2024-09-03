@@ -8,44 +8,34 @@
 import { AgentState, NodeParamsBase } from '../types';
 import { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
 import { getLangChainMessages } from '../../../helpers';
+import { NodeType } from '../constants';
 
 export interface GetPersistedConversationParams extends NodeParamsBase {
   conversationsDataClient?: AIAssistantConversationsDataClient;
-  conversationId?: string;
   state: AgentState;
 }
 
-export const GET_PERSISTED_CONVERSATION_NODE = 'getPersistedConversation';
-
-export const getPersistedConversation = async ({
-  conversationsDataClient,
-  conversationId,
+export async function getPersistedConversation({
   logger,
   state,
-}: GetPersistedConversationParams) => {
-  logger.debug(`Node state:\n ${JSON.stringify(state, null, 2)}`);
-  if (!conversationId) {
-    logger.debug('Cannot get conversation, because conversationId is undefined');
-    return {
-      conversation: undefined,
-      messages: [],
-      chatTitle: '',
-      input: state.input,
-    };
-  }
+  conversationsDataClient,
+}: GetPersistedConversationParams): Promise<Partial<AgentState>> {
+  logger.debug(
+    () => `${NodeType.GET_PERSISTED_CONVERSATION}: Node state:\n${JSON.stringify(state, null, 2)}`
+  );
 
-  const conversation = await conversationsDataClient?.getConversation({ id: conversationId });
+  const conversation = await conversationsDataClient?.getConversation({ id: state.conversationId });
   if (!conversation) {
     logger.debug('Requested conversation, because conversation is undefined');
     return {
       conversation: undefined,
       messages: [],
       chatTitle: '',
-      input: state.input,
+      lastNode: NodeType.GET_PERSISTED_CONVERSATION,
     };
   }
 
-  logger.debug(`conversationId: ${conversationId}`);
+  logger.debug(`conversationId: ${state.conversationId}`);
 
   const messages = getLangChainMessages(conversation.messages ?? []);
 
@@ -56,6 +46,7 @@ export const getPersistedConversation = async ({
       messages,
       chatTitle: conversation.title,
       input: lastMessage?.content as string,
+      lastNode: NodeType.GET_PERSISTED_CONVERSATION,
     };
   }
 
@@ -63,6 +54,6 @@ export const getPersistedConversation = async ({
     conversation,
     messages,
     chatTitle: conversation.title,
-    input: state.input,
+    lastNode: NodeType.GET_PERSISTED_CONVERSATION,
   };
-};
+}

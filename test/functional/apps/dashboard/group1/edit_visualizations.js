@@ -34,7 +34,6 @@ export default function ({ getService, getPageObjects }) {
   };
 
   const editMarkdownVis = async () => {
-    await dashboardPanelActions.openContextMenu();
     await dashboardPanelActions.clickEdit();
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.visEditor.setMarkdownTxt(modifiedMarkdownText);
@@ -86,7 +85,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('cancel button returns to dashboard with no modal if there are no changes to apply', async () => {
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.header.waitUntilLoadingHasFinished();
 

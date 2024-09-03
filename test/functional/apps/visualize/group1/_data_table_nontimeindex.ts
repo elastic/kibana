@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(data).to.be.eql([['14,004', '1,412.6']]);
     });
 
-    describe('data table with date histogram', async () => {
+    describe('data table with date histogram', () => {
       before(async () => {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();

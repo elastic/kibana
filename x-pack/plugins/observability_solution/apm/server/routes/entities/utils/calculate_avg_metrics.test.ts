@@ -34,6 +34,7 @@ describe('calculateAverageMetrics', () => {
           },
         ],
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
       {
         agentName: 'java' as AgentName,
@@ -57,6 +58,7 @@ describe('calculateAverageMetrics', () => {
           },
         ],
         serviceName: 'service-2',
+        hasLogMetrics: true,
       },
     ];
 
@@ -76,6 +78,7 @@ describe('calculateAverageMetrics', () => {
           throughput: 7.5,
         },
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
       {
         agentName: 'java' as AgentName,
@@ -90,6 +93,7 @@ describe('calculateAverageMetrics', () => {
           throughput: 10,
         },
         serviceName: 'service-2',
+        hasLogMetrics: true,
       },
     ]);
   });
@@ -117,6 +121,7 @@ describe('calculateAverageMetrics', () => {
           },
         ],
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
     ];
 
@@ -135,6 +140,7 @@ describe('calculateAverageMetrics', () => {
           throughput: 7.5,
         },
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
     ]);
   });
@@ -176,5 +182,55 @@ describe('mergeMetrics', () => {
     const result = mergeMetrics(metrics);
 
     expect(result).toEqual({});
+  });
+
+  it('returns metrics with zero value', () => {
+    const metrics = [
+      {
+        failedTransactionRate: 0,
+        latency: 4,
+        logErrorRate: 5,
+        logRate: 5,
+        throughput: 5,
+      },
+    ];
+
+    const result = mergeMetrics(metrics);
+
+    expect(result).toEqual({
+      failedTransactionRate: [0],
+      latency: [4],
+      logErrorRate: [5],
+      logRate: [5],
+      throughput: [5],
+    });
+  });
+
+  it('does not return metrics with null', () => {
+    const metrics = [
+      {
+        failedTransactionRate: null,
+        latency: null,
+        logErrorRate: 5,
+        logRate: 5,
+        throughput: 5,
+      },
+      {
+        failedTransactionRate: 5,
+        latency: null,
+        logErrorRate: 5,
+        logRate: 5,
+        throughput: 5,
+      },
+    ];
+
+    const result = mergeMetrics(metrics);
+
+    expect(result).toEqual({
+      failedTransactionRate: [5],
+      logErrorRate: [5, 5],
+      logRate: [5, 5],
+      throughput: [5, 5],
+    });
   });
 });

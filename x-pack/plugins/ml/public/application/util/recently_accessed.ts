@@ -10,13 +10,12 @@
 import { i18n } from '@kbn/i18n';
 
 import type { ChromeRecentlyAccessed } from '@kbn/core/public';
-import { getRecentlyAccessed } from './dependency_cache';
 
 export function addItemToRecentlyAccessed(
   page: string,
   itemId: string,
   url: string,
-  recentlyAccessedService?: ChromeRecentlyAccessed
+  recentlyAccessedService: ChromeRecentlyAccessed
 ) {
   let pageLabel = '';
   let id = `ml-job-${itemId}`;
@@ -44,6 +43,6 @@ export function addItemToRecentlyAccessed(
       return;
   }
 
-  const recentlyAccessed = recentlyAccessedService ?? getRecentlyAccessed();
+  const recentlyAccessed = recentlyAccessedService;
   recentlyAccessed.add(url, `ML - ${itemId} - ${pageLabel}`, id);
 }

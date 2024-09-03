@@ -15,3 +15,9 @@ export { sendRequest, collapseLiteralStrings, expandLiteralStrings };
 export { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 export { toMountPoint } from '@kbn/react-kibana-mount';
+
+export type {
+  SendRequestConfig,
+  SendRequestResponse,
+  Error,
+} from '@kbn/es-ui-shared-plugin/public';

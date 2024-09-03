@@ -36,9 +36,17 @@ export const getDynamicSettings = async (): Promise<DynamicSettings> => {
 export const setDynamicSettings = async ({
   settings,
 }: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {
+  const newSettings: DynamicSettings = {
+    certAgeThreshold: settings.certAgeThreshold,
+    certExpirationThreshold: settings.certExpirationThreshold,
+    defaultConnectors: settings.defaultConnectors,
+    defaultEmail: settings.defaultEmail,
+    defaultTLSRuleEnabled: settings.defaultTLSRuleEnabled,
+    defaultStatusRuleEnabled: settings.defaultStatusRuleEnabled,
+  };
   return await apiService.put(
     SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,
-    settings,
+    newSettings,
     DynamicSettingsSaveCodec,
     {
       version: '2023-10-31',

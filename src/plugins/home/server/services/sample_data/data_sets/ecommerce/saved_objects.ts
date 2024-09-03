@@ -141,7 +141,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: 'Analyze mock eCommerce orders and revenue',
       refreshInterval: {
         pause: true,
-        value: 0,
+        value: 60000,
       },
       timeRestore: true,
       optionsJSON:

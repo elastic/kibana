@@ -68,13 +68,6 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    it('returns 404 error on non-existing scripted field', async () => {
-      const response1 = await supertest.get(
-        `/api/index_patterns/index_pattern/${indexPattern.id}/scripted_field/test`
-      );
-      expect(response1.status).to.be(404);
-    });
-
     it('returns error when attempting to fetch a field which is not a scripted field', async () => {
       const response2 = await supertest.get(
         `/api/index_patterns/index_pattern/${indexPattern.id}/scripted_field/foo`

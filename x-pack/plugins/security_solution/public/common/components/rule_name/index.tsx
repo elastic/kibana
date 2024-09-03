@@ -32,7 +32,7 @@ const RuleNameComponents = ({ name, id, appId }: RuleNameProps) => {
     [getUrlForApp, id, appId]
   );
   const goToRuleDetails = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(appId, {
         deepLinkId: 'rules',

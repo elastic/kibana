@@ -51,6 +51,9 @@ export function createObservabilityAIAssistantAPIConfig({
     servers,
     services: {
       ...services,
+      getScopedApiClientForUsername: () => {
+        return (username: string) => getScopedApiClient(kibanaServer, username);
+      },
       apmSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
         getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
       observabilityAIAssistantAPIClient: async () => {

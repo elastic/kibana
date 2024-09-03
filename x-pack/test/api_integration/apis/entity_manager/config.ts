@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { resolve } from 'path';
 import { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -21,10 +22,18 @@ export default async function createTestConfig({
 }: FtrConfigProviderContext): Promise<EntityManagerConfig> {
   const baseIntegrationTestsConfig = await readConfigFile(require.resolve('../../config.ts'));
   const services = baseIntegrationTestsConfig.get('services');
+  const entityManagerFixturePlugin = resolve(__dirname, './fixture_plugin');
 
   return {
     ...baseIntegrationTestsConfig.getAll(),
     testFiles: [require.resolve('.')],
+    kbnTestServer: {
+      ...baseIntegrationTestsConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${entityManagerFixturePlugin}`,
+      ],
+    },
     services: {
       ...services,
     },

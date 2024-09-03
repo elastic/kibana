@@ -28,7 +28,7 @@ const mockDataView = {
   toSpec: () => ({}),
 } as jest.Mocked<DataView>;
 
-const series = { id: 'exmaple-01', rows: [], columns: [] };
+const series = { id: 'example-01', rows: [], columns: [] };
 const uiCapabilities: Capabilities = {
   navLinks: { show: false },
   management: { fake: { show: false } },
@@ -71,14 +71,17 @@ const mountComponentWithProviders = (props: Props): ReactWrapper => {
   );
 };
 
-jest.mock('../../../link_to', () => ({
-  useNodeDetailsRedirect: jest.fn(() => ({
-    getNodeDetailUrl: jest.fn(() => ({
-      onClick: jest.fn(),
-      href: '/ftw/app/r?l=ASSET_DETAILS_LOCATOR&v=8.15.0&lz=N4IghgzhCmAuAicwEsA2EQC5gF8A0IA%2BmFqLMgLbSkgBmATgPYVYgCMA7GwCwAMArADZB3NgCZBADhAFYjVpx69BvMaInSc%2BcFDgAVAJ4AHaphAALRhFgydMWAEkAJqwBUt62FinQjesgBzZAA7AEEjI2dWKlh%2FAGMMAj9AkIBlaDB6OPNWAH4Y%2BIgAUQAPI1Q%2FaHoAXgAKbMzYAHkjckZgiExazziAa0wAQlo8WGNoTFQQ6DwDUJLkCABZRidxhmYALSrGAEo8Rlbkds7asACA%2BmgAryPgzDAANwC8AuQEwdrT88vrtrvH55xRgVeiYIEg3h4WjIaCoJyYCAGazQCgAOjiRgArqi5LAwKhUcE%2FGijHFYHsvhcrjd2vcnnhwX4wcC%2FGwoTC4ZhepiAEZVYJwaAQVFGFborGozEQM7QQkrWWk8l4Sk%2FGn%2FemM0GasTs2HwpyMPpVcXY3H4kVknZ7CCMTFZcarWhgTGoJXkKj0MDBALjWrrCiYIkAdwAtGxzHgQt56A98ZgAKQAZiKSfgbF4EBGjEDjCDVoAZK8EqVypV6AA1GFB5zVADkvFrtmSQWCAAUvOZgmAqKwAPTQMogqogLRAA%3D',
+jest.mock(
+  '@kbn/metrics-data-access-plugin/public/pages/link_to/use_asset_details_redirect',
+  () => ({
+    useAssetDetailsRedirect: jest.fn(() => ({
+      getAssetDetailUrl: jest.fn(() => ({
+        onClick: jest.fn(),
+        href: '/ftw/app/r?l=ASSET_DETAILS_LOCATOR&v=8.15.0&lz=N4IghgzhCmAuAicwEsA2EQC5gF8A0IA%2BmFqLMgLbSkgBmATgPYVYgCMA7GwCwAMArADZB3NgCZBADhAFYjVpx69BvMaInSc%2BcFDgAVAJ4AHaphAALRhFgydMWAEkAJqwBUt62FinQjesgBzZAA7AEEjI2dWKlh%2FAGMMAj9AkIBlaDB6OPNWAH4Y%2BIgAUQAPI1Q%2FaHoAXgAKbMzYAHkjckZgiExazziAa0wAQlo8WGNoTFQQ6DwDUJLkCABZRidxhmYALSrGAEo8Rlbkds7asACA%2BmgAryPgzDAANwC8AuQEwdrT88vrtrvH55xRgVeiYIEg3h4WjIaCoJyYCAGazQCgAOjiRgArqi5LAwKhUcE%2FGijHFYHsvhcrjd2vcnnhwX4wcC%2FGwoTC4ZhepiAEZVYJwaAQVFGFborGozEQM7QQkrWWk8l4Sk%2FGn%2FemM0GasTs2HwpyMPpVcXY3H4kVknZ7CCMTFZcarWhgTGoJXkKj0MDBALjWrrCiYIkAdwAtGxzHgQt56A98ZgAKQAZiKSfgbF4EBGjEDjCDVoAZK8EqVypV6AA1GFB5zVADkvFrtmSQWCAAUvOZgmAqKwAPTQMogqogLRAA%3D',
+      })),
     })),
-  })),
-}));
+  })
+);
 
 describe('MetricsExplorerChartContextMenu', () => {
   describe('component', () => {

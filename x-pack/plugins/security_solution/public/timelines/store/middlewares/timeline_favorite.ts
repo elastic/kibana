@@ -18,7 +18,7 @@ import {
   showCallOutUnauthorizedMsg,
 } from '../actions';
 import type { ResponseFavoriteTimeline } from '../../../../common/api/timeline';
-import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { persistFavorite } from '../../containers/api';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
@@ -46,7 +46,7 @@ export const favoriteTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, S
           timelineId: timeline.id,
           templateTimelineId: timeline.templateTimelineId,
           templateTimelineVersion: timeline.templateTimelineVersion,
-          timelineType: timeline.timelineType ?? TimelineType.default,
+          timelineType: timeline.timelineType ?? TimelineTypeEnum.default,
         });
 
         const response: ResponseFavoriteTimeline = get('data.persistFavorite', result);

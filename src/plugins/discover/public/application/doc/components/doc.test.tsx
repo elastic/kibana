@@ -19,7 +19,9 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
 import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/types';
+import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
+const discoverServices = createDiscoverServicesMock();
 const mockSearchApi = jest.fn();
 
 beforeEach(() => {
@@ -68,6 +70,8 @@ async function mountDoc(update = false) {
     },
     locator: { getUrl: jest.fn(() => Promise.resolve('mock-url')) },
     chrome: { setBreadcrumbs: jest.fn() },
+    profilesManager: discoverServices.profilesManager,
+    core: discoverServices.core,
   };
   setUnifiedDocViewerServices({
     ...mockUnifiedDocViewerServices,

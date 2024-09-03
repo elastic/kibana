@@ -17,6 +17,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
 import useMount from 'react-use/lib/useMount';
 import { usePageUrlState } from '@kbn/ml-url-state';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { EntityFilter } from './entity_filter';
 import { useMlNotifications } from '../../contexts/ml/ml_notifications_context';
@@ -26,7 +27,6 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import type { ListingPageUrlState } from '../../../../common/types/common';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import type {
   MlNotificationMessageLevel,

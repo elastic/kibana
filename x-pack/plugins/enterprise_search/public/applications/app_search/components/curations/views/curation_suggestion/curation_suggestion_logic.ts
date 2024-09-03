@@ -282,7 +282,7 @@ const updateSuggestion = async (
     }
   );
 
-  if (response.results[0].hasOwnProperty('error')) {
+  if (Object.hasOwn(response.results[0], 'error')) {
     throw new Error((response.results[0] as APIResponseError).error);
   }
 

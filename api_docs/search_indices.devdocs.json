@@ -1,0 +1,183 @@
+{
+  "id": "searchIndices",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "searchIndices",
+      "id": "def-public.SearchIndicesPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchIndicesPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/search_indices/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "searchIndices",
+          "id": "def-public.SearchIndicesPluginSetup.enabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "enabled",
+          "description": [],
+          "path": "x-pack/plugins/search_indices/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "searchIndices",
+      "id": "def-public.SearchIndicesPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchIndicesPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/search_indices/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "searchIndices",
+      "id": "def-server.SearchIndicesPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchIndicesPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/search_indices/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "searchIndices",
+      "id": "def-server.SearchIndicesPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchIndicesPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/search_indices/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "searchIndices",
+        "id": "def-common.IndicesStatusResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndicesStatusResponse",
+        "description": [],
+        "path": "x-pack/plugins/search_indices/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "searchIndices",
+            "id": "def-common.IndicesStatusResponse.indexNames",
+            "type": "Array",
+            "tags": [],
+            "label": "indexNames",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/search_indices/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchIndices",
+        "id": "def-common.UserStartPrivilegesResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserStartPrivilegesResponse",
+        "description": [],
+        "path": "x-pack/plugins/search_indices/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "searchIndices",
+            "id": "def-common.UserStartPrivilegesResponse.privileges",
+            "type": "Object",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              "{ canCreateApiKeys: boolean; canCreateIndex: boolean; }"
+            ],
+            "path": "x-pack/plugins/search_indices/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "searchIndices",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"searchIndices\""
+        ],
+        "path": "x-pack/plugins/search_indices/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchIndices",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"searchIndices\""
+        ],
+        "path": "x-pack/plugins/search_indices/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

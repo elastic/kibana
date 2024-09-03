@@ -15,7 +15,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type DeleteListIndexResponse = z.infer<typeof DeleteListIndexResponse>;
 export const DeleteListIndexResponse = z.object({

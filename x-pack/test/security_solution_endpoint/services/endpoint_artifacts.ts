@@ -10,7 +10,12 @@ import type {
   CreateExceptionListSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_ARTIFACT_LISTS,
+  ENDPOINT_ARTIFACT_LIST_IDS,
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
+} from '@kbn/securitysolution-list-constants';
 import { Response } from 'superagent';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/trusted_apps/constants';
@@ -120,6 +125,26 @@ export class EndpointArtifactsTestResources extends FtrService {
     const blocklist = this.exceptionsGenerator.generateBlocklistForCreate(overrides);
 
     return this.createExceptionItem(blocklist);
+  }
+
+  async createArtifact(
+    listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): Promise<ArtifactTestData | undefined> {
+    switch (listId) {
+      case ENDPOINT_ARTIFACT_LISTS.trustedApps.id: {
+        return this.createTrustedApp(overrides);
+      }
+      case ENDPOINT_ARTIFACT_LISTS.eventFilters.id: {
+        return this.createEventFilter(overrides);
+      }
+      case ENDPOINT_ARTIFACT_LISTS.blocklists.id: {
+        return this.createBlocklist(overrides);
+      }
+      case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id: {
+        return this.createHostIsolationException(overrides);
+      }
+    }
   }
 
   async getArtifactsFromUnifiedManifestSO(): Promise<

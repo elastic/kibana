@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CspBenchmarkRuleMetadata } from '../types/latest';
+import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 
 const CSP_RULE_TAG = 'Cloud Security';
 const CSP_RULE_TAG_USE_CASE = 'Use Case: Configuration Audit';
@@ -29,7 +29,7 @@ export const convertRuleTagsToMatchAnyKQL = (tags: string[]): string => {
 export const getFindingsDetectionRuleSearchTags = (
   cspBenchmarkRule: CspBenchmarkRuleMetadata
 ): string[] => {
-  if (!cspBenchmarkRule.benchmark || !cspBenchmarkRule.benchmark.id) {
+  if (!cspBenchmarkRule?.benchmark || !cspBenchmarkRule?.benchmark?.id) {
     // Return an empty array if benchmark ID is undefined
     return [];
   }

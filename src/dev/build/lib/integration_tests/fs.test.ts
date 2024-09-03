@@ -305,11 +305,10 @@ describe('untar()', () => {
     expect(await read(resolve(destination, 'foo_dir/foo/foo.txt'))).toBe('foo\n');
   });
 
-  it('passed thrid argument to Extract class, overriding path with destination', async () => {
+  it('passed thrid argument to Extract class', async () => {
     const destination = resolve(TMP, 'a/b/c');
 
     await untar(FOO_TAR_PATH, destination, {
-      path: '/dev/null',
       strip: 1,
     });
 

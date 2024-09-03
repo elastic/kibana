@@ -9,6 +9,7 @@
 import * as contexts from './contexts';
 import type {
   ESQLAstCommand,
+  ESQLAstRenameExpression,
   ESQLColumn,
   ESQLFunction,
   ESQLInlineCast,
@@ -118,11 +119,10 @@ export class GlobalVisitorContext<
         if (!this.methods.visitStatsCommand) break;
         return this.visitStatsCommand(parent, commandNode, input as any);
       }
-      // TODO: uncomment this when the command is implemented
-      // case 'inline_stats': {
-      //   if (!this.methods.visitInlineStatsCommand) break;
-      //   return this.visitInlineStatsCommand(parent, commandNode, input as any);
-      // }
+      case 'inline_stats': {
+        if (!this.methods.visitInlineStatsCommand) break;
+        return this.visitInlineStatsCommand(parent, commandNode, input as any);
+      }
       case 'lookup': {
         if (!this.methods.visitLookupCommand) break;
         return this.visitLookupCommand(parent, commandNode, input as any);
@@ -399,6 +399,18 @@ export class GlobalVisitorContext<
         if (!this.methods.visitInlineCastExpression) break;
         return this.visitInlineCastExpression(parent, expressionNode, input as any);
       }
+      case 'option': {
+        switch (expressionNode.name) {
+          case 'as': {
+            if (!this.methods.visitRenameExpression) break;
+            return this.visitRenameExpression(
+              parent,
+              expressionNode as ESQLAstRenameExpression,
+              input as any
+            );
+          }
+        }
+      }
     }
     return this.visitExpressionGeneric(parent, expressionNode, input as any);
   }
@@ -464,5 +476,14 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitInlineCastExpression'> {
     const context = new contexts.InlineCastExpressionVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitInlineCastExpression', context, input);
+  }
+
+  public visitRenameExpression(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstRenameExpression,
+    input: types.VisitorInput<Methods, 'visitRenameExpression'>
+  ): types.VisitorOutput<Methods, 'visitRenameExpression'> {
+    const context = new contexts.RenameExpressionVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitRenameExpression', context, input);
   }
 }

@@ -21,6 +21,17 @@ export const testUsers: {
     username: 'fleet_all_int_all',
     password: 'changeme',
   },
+  fleet_all_int_all_default_space_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+      },
+      spaces: ['default'],
+    },
+    username: 'fleet_all_int_all_default_space_only',
+    password: 'changeme',
+  },
   fleet_read_only: {
     permissions: {
       feature: {
@@ -231,9 +242,12 @@ export const testUsers: {
   },
 };
 
-export const setupTestUsers = async (security: SecurityService) => {
+export const setupTestUsers = async (security: SecurityService, spaceAwarenessEnabled = false) => {
   for (const roleName in testUsers) {
-    if (testUsers.hasOwnProperty(roleName)) {
+    if (!spaceAwarenessEnabled && roleName === 'fleet_all_int_all_default_space_only') {
+      continue;
+    }
+    if (Object.hasOwn(testUsers, roleName)) {
       const user = testUsers[roleName];
 
       if (user.permissions) {

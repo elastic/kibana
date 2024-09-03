@@ -8,7 +8,8 @@
 import React, { Component } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { ml } from '../../../../services/ml_api_service';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
@@ -36,10 +37,12 @@ import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_conf
 import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_modal';
 import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
 import { removeNodeInfo } from '../../../../../../common/util/job_utils';
+import { mlJobServiceFactory } from '../../../../services/job_service';
+import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 
 let blockingJobsRefreshTimeout = null;
 
-export class JobsListView extends Component {
+export class JobsListViewUI extends Component {
   constructor(props) {
     super(props);
 
@@ -77,6 +80,11 @@ export class JobsListView extends Component {
      * @private
      */
     this._isFiltersSet = false;
+
+    this.mlJobService = mlJobServiceFactory(
+      toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
+      props.kibana.services.mlServices.mlApiServices
+    );
   }
 
   componentDidMount() {
@@ -98,7 +106,7 @@ export class JobsListView extends Component {
   }
 
   openAutoStartDatafeedModal() {
-    const job = checkForAutoStartDatafeed();
+    const job = checkForAutoStartDatafeed(this.mlJobService);
     if (job !== undefined) {
       this.showStartDatafeedModal([job]);
     }
@@ -139,7 +147,7 @@ export class JobsListView extends Component {
       }
 
       this.setState({ itemIdToExpandedRowMap }, () => {
-        loadFullJob(jobId)
+        loadFullJob(this.props.kibana.services.mlServices.mlApiServices, jobId)
           .then((job) => {
             const fullJobsList = { ...this.state.fullJobsList };
             if (this.props.showNodeInfo === false) {
@@ -316,6 +324,7 @@ export class JobsListView extends Component {
       this.setState({ loading: true });
     }
 
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
     const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
     try {
       let jobsAwaitingNodeCount = 0;
@@ -378,6 +387,7 @@ export class JobsListView extends Component {
       return;
     }
 
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
     const { jobs } = await ml.jobs.blockingJobTasks();
     const blockingJobIds = jobs.map((j) => Object.keys(j)[0]).sort();
     const taskListHasChanged = blockingJobIds.join() !== this.state.blockingJobIds.join();
@@ -552,3 +562,5 @@ export class JobsListView extends Component {
     return <div>{this.renderJobsListComponents()}</div>;
   }
 }
+
+export const JobsListView = withKibana(JobsListViewUI);

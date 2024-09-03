@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getAutoApplyEnabled()).not.to.be.ok();
 
       await browser.refresh();
-      PageObjects.lens.waitForEmptyWorkspace();
+      await PageObjects.lens.waitForEmptyWorkspace();
 
       expect(await PageObjects.lens.getAutoApplyEnabled()).not.to.be.ok();
 
@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getAutoApplyEnabled()).to.be.ok();
 
       await browser.refresh();
-      PageObjects.lens.waitForEmptyWorkspace();
+      await PageObjects.lens.waitForEmptyWorkspace();
 
       expect(await PageObjects.lens.getAutoApplyEnabled()).to.be.ok();
 
@@ -59,13 +59,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         keepOpen: true,
       });
 
-      PageObjects.lens.toggleFullscreen();
+      await PageObjects.lens.toggleFullscreen();
 
       expect(await PageObjects.lens.applyChangesExists('toolbar')).to.be.ok();
 
-      PageObjects.lens.toggleFullscreen();
+      await PageObjects.lens.toggleFullscreen();
 
-      PageObjects.lens.closeDimensionEditor();
+      await PageObjects.lens.closeDimensionEditor();
     });
 
     it('should apply changes when "Apply" is clicked', async () => {

@@ -7,7 +7,7 @@
  */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ConfigSchema, configSchema } from '../common/config';
+import { ConfigSchema, configSchema } from './config';
 
 export type {
   SharePublicSetup as SharePluginSetup,

@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
     }
 
-    describe('shared links with state in query', async () => {
+    describe('shared links with state in query', () => {
       let teardown: () => Promise<void>;
       before(async function () {
         teardown = await setup({ storeStateInSessionStorage: false });
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('shared links with state in sessionStorage', async () => {
+    describe('shared links with state in sessionStorage', () => {
       let teardown: () => Promise<void>;
       before(async function () {
         teardown = await setup({ storeStateInSessionStorage: true });

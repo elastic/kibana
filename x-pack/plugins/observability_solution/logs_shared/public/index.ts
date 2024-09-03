@@ -46,6 +46,10 @@ export {
 } from './components/logging/log_text_stream/log_entry_column';
 export type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
 export type { LogStreamProps } from './components/log_stream/log_stream';
+export type {
+  UpdatedDateRange,
+  VisibleInterval,
+} from './components/logging/log_text_stream/scrollable_log_text_stream_view';
 
 export const WithSummary = dynamic(() => import('./containers/logs/log_summary/with_summary'));
 export const LogEntryFlyout = dynamic(

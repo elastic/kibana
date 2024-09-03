@@ -30,7 +30,9 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInServerlessMKI Prebuilt Rules status', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/190960
+  // Failing: See https://github.com/elastic/kibana/issues/190952
+  describe.skip('@ess @serverless @skipInServerlessMKI Prebuilt Rules status', () => {
     describe('get_prebuilt_rules_status', () => {
       beforeEach(async () => {
         await deleteAllPrebuiltRuleAssets(es, log);

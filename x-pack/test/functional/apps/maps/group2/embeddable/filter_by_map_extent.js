@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+const FILTER_BY_MAP_EXTENT_DATA_TEST_SUBJ = 'embeddablePanelAction-FILTER_BY_MAP_EXTENT';
+
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'lens', 'maps']);
 
@@ -34,9 +36,10 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should filter dashboard by map extent when "filter by map extent" is enabled', async () => {
-      const mapPanelHeader = await dashboardPanelActions.getPanelHeading('document example');
-      await dashboardPanelActions.openContextMenuMorePanel(mapPanelHeader);
-      await testSubjects.click('embeddablePanelAction-FILTER_BY_MAP_EXTENT');
+      await dashboardPanelActions.clickContextMenuItemByTitle(
+        FILTER_BY_MAP_EXTENT_DATA_TEST_SUBJ,
+        'document example'
+      );
       await testSubjects.setEuiSwitch(
         'filterByMapExtentSwitch24ade730-afe4-42b6-919a-c4e0a98c94f2',
         'check'
@@ -54,9 +57,11 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should remove map extent filter dashboard when "filter by map extent" is disabled', async () => {
-      const mapPanelHeader = await dashboardPanelActions.getPanelHeading('document example');
-      await dashboardPanelActions.openContextMenuMorePanel(mapPanelHeader);
-      await testSubjects.click('embeddablePanelAction-FILTER_BY_MAP_EXTENT');
+      await dashboardPanelActions.clickContextMenuItemByTitle(
+        FILTER_BY_MAP_EXTENT_DATA_TEST_SUBJ,
+        'document example'
+      );
+
       await testSubjects.setEuiSwitch(
         'filterByMapExtentSwitch24ade730-afe4-42b6-919a-c4e0a98c94f2',
         'uncheck'

@@ -27,7 +27,7 @@ export type ContentProvider = (nodeId: string) => PanelContent | void;
 
 export type PanelNavNode = Pick<
   ChromeProjectNavigationNode,
-  'id' | 'children' | 'path' | 'sideNavStatus'
+  'id' | 'children' | 'path' | 'sideNavStatus' | 'deepLink'
 > & {
   title: string | ReactNode;
 };

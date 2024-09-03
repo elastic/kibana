@@ -36,6 +36,10 @@ describe('useActions', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('renders column actions', async () => {
     const { result } = renderHook(() => useActions({ disableActions: false }), {
       wrapper: appMockRender.AppWrapper,

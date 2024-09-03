@@ -7,7 +7,7 @@
  */
 
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, GaugeConfig } from '../config';
+import { configSchema, GaugeConfig } from './config';
 
 export const config: PluginConfigDescriptor<GaugeConfig> = {
   exposeToBrowser: {

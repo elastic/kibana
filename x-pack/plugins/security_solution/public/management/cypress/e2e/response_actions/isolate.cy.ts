@@ -255,7 +255,7 @@ describe.skip(
             if ($status.find('[title="Isolated"]').length > 0) {
               cy.getByTestSubj('euiFlyoutCloseButton').click();
               cy.getByTestSubj(`comment-action-show-alert-${caseAlertId}`).click();
-              cy.getByTestSubj('take-action-dropdown-btn').click();
+              cy.getByTestSubj('securitySolutionFlyoutFooterDropdownButton').click();
             }
             cy.get('[title="Isolated"]').should('not.exist');
           });

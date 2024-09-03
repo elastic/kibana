@@ -18,11 +18,12 @@ import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { isEmpty } from 'lodash';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { timelineActions } from '../../../../timelines/store';
 import { sendAlertToTimelineAction } from '../actions';
 import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
@@ -135,22 +136,32 @@ export const useInvestigateInTimeline = ({
   );
 
   const updateTimelineIsLoading = useCallback(
-    (payload) => dispatch(timelineActions.updateIsLoading(payload)),
+    (payload: Parameters<typeof timelineActions.updateIsLoading>[0]) =>
+      dispatch(timelineActions.updateIsLoading(payload)),
     [dispatch]
   );
 
   const clearActiveTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
   });
 
   const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineDisabled'
   );
+
   const updateTimeline = useUpdateTimeline();
 
   const createTimeline = useCallback(
     async ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
+      const newColumns = timeline.columns;
+      const newColumnsOverride =
+        !newColumns || isEmpty(newColumns)
+          ? !unifiedComponentsInTimelineDisabled
+            ? defaultUdtHeaders
+            : defaultHeaders
+          : newColumns;
+
       await clearActiveTimeline();
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       updateTimeline({
@@ -160,11 +171,12 @@ export const useInvestigateInTimeline = ({
         notes: [],
         timeline: {
           ...timeline,
-          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
+          columns: newColumnsOverride,
           indexNames: timeline.indexNames ?? [],
           show: true,
           excludedRowRendererIds:
-            !unifiedComponentsInTimelineDisabled && timeline.timelineType !== TimelineType.template
+            !unifiedComponentsInTimelineDisabled &&
+            timeline.timelineType !== TimelineTypeEnum.template
               ? timeline.excludedRowRendererIds
               : [],
         },

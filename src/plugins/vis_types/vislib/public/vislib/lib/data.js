@@ -23,7 +23,7 @@ import { getFormatService } from '../../services';
 class D3MappableObject {
   constructor(data) {
     for (const key in data) {
-      if (data.hasOwnProperty(key)) {
+      if (Object.hasOwn(data, key)) {
         this[key] = data[key];
       }
     }

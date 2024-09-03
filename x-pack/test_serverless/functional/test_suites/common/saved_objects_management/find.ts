@@ -44,37 +44,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await kibanaServer.savedObjects.cleanStandardList();
       });
 
-      it('returns saved objects with importableAndExportable types', async () =>
-        await supertest
+      it('returns saved objects with importableAndExportable types', async () => {
+        const resp = await supertest
           .get('/api/kibana/management/saved_objects/_find?type=test-hidden-importable-exportable')
           .set(svlCommonApi.getCommonRequestHeader())
           .set(svlCommonApi.getInternalRequestHeader())
-          .expect(200)
-          .then((resp) => {
-            expect(
-              resp.body.saved_objects.map((so: { id: string; type: string }) => ({
-                id: so.id,
-                type: so.type,
-              }))
-            ).to.eql([
-              {
-                type: 'test-hidden-importable-exportable',
-                id: 'ff3733a0-9fty-11e7-ahb3-3dcb94193fab',
-              },
-            ]);
-          }));
+          .expect(200);
+        expect(
+          resp.body.saved_objects.map((so: { id: string; type: string }) => ({
+            id: so.id,
+            type: so.type,
+          }))
+        ).to.eql([
+          {
+            type: 'test-hidden-importable-exportable',
+            id: 'ff3733a0-9fty-11e7-ahb3-3dcb94193fab',
+          },
+        ]);
+      });
 
-      it('returns empty response for non importableAndExportable types', async () =>
-        await supertest
+      it('returns empty response for non importableAndExportable types', async () => {
+        const resp = await supertest
           .get(
             '/api/kibana/management/saved_objects/_find?type=test-hidden-non-importable-exportable'
           )
           .set(svlCommonApi.getCommonRequestHeader())
           .set(svlCommonApi.getInternalRequestHeader())
-          .expect(200)
-          .then((resp) => {
-            expect(resp.body.saved_objects).to.eql([]);
-          }));
+          .expect(200);
+        expect(resp.body.saved_objects).to.eql([]);
+      });
     });
   });
 }

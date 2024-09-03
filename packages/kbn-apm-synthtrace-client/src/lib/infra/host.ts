@@ -8,6 +8,7 @@
 /* eslint-disable max-classes-per-file */
 import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
+import { k8sNode } from './k8s_node';
 import { pod } from './pod';
 
 interface HostDocument extends Fields {
@@ -20,17 +21,20 @@ interface HostDocument extends Fields {
   'host.ip'?: string;
   'host.os.name'?: string;
   'host.os.version'?: string;
+  'host.os.platform'?: string;
   'cloud.provider'?: string;
 }
 
 class Host extends Entity<HostDocument> {
-  cpu() {
+  cpu({ cpuTotalValue }: { cpuTotalValue?: number } = {}) {
     return new HostMetrics({
       ...this.fields,
-      'system.cpu.total.norm.pct': 0.094,
+      'system.cpu.total.norm.pct': cpuTotalValue ?? 0.98,
       'system.cpu.user.pct': 0.805,
       'system.cpu.system.pct': 0.704,
       'system.cpu.cores': 16,
+      'process.cpu.pct': 0.1,
+      'system.cpu.nice.pct': 0.1,
       'metricset.period': 10000,
       'metricset.name': 'cpu',
     });
@@ -45,6 +49,7 @@ class Host extends Entity<HostDocument> {
       'system.memory.total': 68719476736,
       'system.memory.used.bytes': 39964708864,
       'system.memory.used.pct': 0.582,
+      'process.memory.pct': 0.1,
       'metricset.period': 10000,
       'metricset.name': 'memory',
     });
@@ -72,6 +77,22 @@ class Host extends Entity<HostDocument> {
     });
   }
 
+  core() {
+    return new HostMetrics({
+      ...this.fields,
+      'system.core.total.pct': 0.98,
+      'system.core.user.pct': 0.805,
+      'system.core.nice.pct': 0.704,
+      'system.core.idle.pct': 0.1,
+      'system.core.iowait.pct': 0.1,
+      'system.core.irq.pct': 0.1,
+      'system.core.softirq.pct': 0.1,
+      'system.core.steal.pct': 0.1,
+      'metricset.period': 10000,
+      'metricset.name': 'core',
+    });
+  }
+
   filesystem() {
     return new HostMetrics({
       ...this.fields,
@@ -95,6 +116,10 @@ class Host extends Entity<HostDocument> {
 
   pod(uid: string) {
     return pod(uid, this.fields['host.hostname']);
+  }
+
+  node(podUid: string) {
+    return k8sNode(this.fields['host.hostname'], podUid);
   }
 }
 
@@ -120,6 +145,17 @@ export interface HostMetricsDocument extends HostDocument {
   'system.load'?: { 1: number; cores: number };
   'host.network.ingress.bytes'?: number;
   'host.network.egress.bytes'?: number;
+  'process.cpu.pct'?: number;
+  'process.memory.pct'?: number;
+  'system.core.total.pct'?: number;
+  'system.core.user.pct'?: number;
+  'system.core.nice.pct'?: number;
+  'system.core.idle.pct'?: number;
+  'system.core.iowait.pct'?: number;
+  'system.core.irq.pct'?: number;
+  'system.core.softirq.pct'?: number;
+  'system.core.steal.pct'?: number;
+  'system.cpu.nice.pct'?: number;
 }
 
 class HostMetrics extends Serializable<HostMetricsDocument> {}
@@ -132,6 +168,7 @@ export function host(name: string): Host {
     'host.name': name,
     'host.ip': '10.128.0.2',
     'host.os.name': 'Linux',
+    'host.os.platform': 'ubuntu',
     'host.os.version': '4.19.76-linuxkit',
     'cloud.provider': 'gcp',
   });

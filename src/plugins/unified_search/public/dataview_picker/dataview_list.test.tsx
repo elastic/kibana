@@ -54,7 +54,6 @@ describe('DataView list component', () => {
       currentDataViewId: 'dataview-1',
       onChangeDataView: changeDataViewSpy,
       dataViewsList: list,
-      isTextBasedLangSelected: false,
     };
   });
 
@@ -75,17 +74,8 @@ describe('DataView list component', () => {
     ]);
   });
 
-  it('should render a warning icon if a text based language is selected', () => {
-    const component = shallow(<DataViewsList {...props} isTextBasedLangSelected />);
-
-    expect(getDataViewPickerOptions(component)!.map((option: any) => option.append)).not.toBeNull();
-  });
-
   describe('ad hoc data views', () => {
-    const runAdHocDataViewTest = (
-      esqlMode: boolean,
-      esqlDataViews: DataViewListItemEnhanced[] = []
-    ) => {
+    const runAdHocDataViewTest = (esqlDataViews: DataViewListItemEnhanced[] = []) => {
       const dataViewList = [
         ...list,
         {
@@ -95,9 +85,7 @@ describe('DataView list component', () => {
         },
         ...esqlDataViews,
       ];
-      const component = shallow(
-        <DataViewsList {...props} dataViewsList={dataViewList} isTextBasedLangSelected={esqlMode} />
-      );
+      const component = shallow(<DataViewsList {...props} dataViewsList={dataViewList} />);
       expect(getDataViewPickerOptions(component)!.map((option: any) => option.label)).toEqual([
         'dataview-1',
         'dataview-2',
@@ -114,20 +102,12 @@ describe('DataView list component', () => {
       },
     ];
 
-    it('should show ad hoc data views for text based mode', () => {
-      runAdHocDataViewTest(true);
-    });
-
     it('should show ad hoc data views for data view mode', () => {
-      runAdHocDataViewTest(false);
-    });
-
-    it('should not show ES|QL ad hoc data views for text based mode', () => {
-      runAdHocDataViewTest(true, esqlDataViews);
+      runAdHocDataViewTest();
     });
 
     it('should not show ES|QL ad hoc data views for data view mode', () => {
-      runAdHocDataViewTest(false, esqlDataViews);
+      runAdHocDataViewTest(esqlDataViews);
     });
   });
 });

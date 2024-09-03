@@ -18,21 +18,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/181883
-  describe.skip('gauge chart', function indexPatternCreation() {
+  async function initGaugeVis() {
+    log.debug('navigateToApp visualize');
+    await PageObjects.visualize.navigateToNewAggBasedVisualization();
+    log.debug('clickGauge');
+    await PageObjects.visualize.clickGauge();
+    await PageObjects.visualize.clickNewSearch();
+    await PageObjects.timePicker.setDefaultAbsoluteRange();
+  }
+
+  describe('gauge chart', function indexPatternCreation() {
     before(async () => {
       await PageObjects.visualize.initTests();
+      await initGaugeVis();
     });
-    async function initGaugeVis() {
-      log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
-      log.debug('clickGauge');
-      await PageObjects.visualize.clickGauge();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-    }
-
-    before(initGaugeVis);
 
     it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
@@ -57,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('gaugePercentageMode');
       await testSubjects.setValue('gaugePercentageModeFormatPattern', '0.0%');
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo(false);
 
       await retry.try(async function tryingForTime() {
         const expectedTexts = ['57.3%', 'Average bytes'];
@@ -77,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectField('machine.os.raw');
         log.debug('Size = 4');
         await PageObjects.visEditor.setSize(4);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(false);
       });
 
       it('should show Split Gauges', async () => {
@@ -113,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickBucket('Metric', 'metrics');
         await PageObjects.visEditor.selectAggregation('Min', 'metrics');
         await PageObjects.visEditor.selectField('bytes', 'metrics');
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(false);
 
         await retry.try(async function tryingForTime() {
           const metricValue = await PageObjects.visChart.getGaugeValue();

@@ -15,7 +15,7 @@ describe('generateNewAgentPolicyWithDefaults', () => {
       name: '',
       description: '',
       namespace: 'default',
-      monitoring_enabled: ['logs', 'metrics'],
+      monitoring_enabled: ['logs', 'metrics', 'traces'],
       inactivity_timeout: 1209600,
       is_protected: false,
     });

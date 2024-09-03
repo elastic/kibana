@@ -10,7 +10,7 @@ import stats from 'stats-lite';
 import { JsonObject } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
 import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
-import { AveragedStat } from './task_run_calcultors';
+import { AveragedStat } from './task_run_calculators';
 import { TaskPersistenceTypes } from './task_run_statistics';
 import { asErr, asOk, map, Result } from '../lib/result_type';
 
@@ -61,8 +61,10 @@ export function estimateCapacity(
     non_recurring: percentageOfExecutionsUsedByNonRecurringTasks,
   } = capacityStats.runtime.value.execution.persistence;
   const { overdue, capacity_requirements: capacityRequirements } = workload;
-  const { poll_interval: pollInterval, max_workers: maxWorkers } =
-    capacityStats.configuration.value;
+  const {
+    poll_interval: pollInterval,
+    capacity: { config: configuredCapacity },
+  } = capacityStats.configuration.value;
 
   /**
    * On average, how many polling cycles does it take to execute a task?
@@ -78,10 +80,10 @@ export function estimateCapacity(
   );
 
   /**
-   * Given the current configuration how much task capacity do we have?
+   * Given the current configuration how much capacity do we have to run normal cost tasks?
    */
   const capacityPerMinutePerKibana = Math.round(
-    ((60 * 1000) / (averagePollIntervalsPerExecution * pollInterval)) * maxWorkers
+    ((60 * 1000) / (averagePollIntervalsPerExecution * pollInterval)) * configuredCapacity
   );
 
   /**

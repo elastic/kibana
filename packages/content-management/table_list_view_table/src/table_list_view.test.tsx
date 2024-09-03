@@ -1052,7 +1052,7 @@ describe('TableListView', () => {
   });
 
   describe('search', () => {
-    const updatedAt = new Date('2023-07-15').toISOString();
+    const updatedAt = moment('2023-07-15').toISOString();
 
     const hits: UserContentCommonSchema[] = [
       {
@@ -1146,7 +1146,7 @@ describe('TableListView', () => {
           {
             id: 'item-from-search',
             type: 'dashboard',
-            updatedAt: new Date('2023-07-01').toISOString(),
+            updatedAt: moment('2023-07-01').toISOString(),
             attributes: {
               title: 'Item from search',
             },

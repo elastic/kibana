@@ -178,10 +178,10 @@ const setup = () => {
 
   services = {
     ...alertsServices,
-    searchSourceClient: {
+    getSearchSourceClient: jest.fn().mockResolvedValue({
       ...searchSourceCommonMock,
       create: jest.fn(() => Promise.resolve(mockedSearchSource)),
-    },
+    }),
   };
 
   services.alertsClient.report.mockImplementation((params: any) => {

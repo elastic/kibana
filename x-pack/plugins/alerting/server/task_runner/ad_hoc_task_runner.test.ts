@@ -47,7 +47,7 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { alertsMock } from '../mocks';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { AlertsService } from '../alerts_service';
-import { ReplaySubject } from 'rxjs';
+import { of, ReplaySubject } from 'rxjs';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
 import {
   AlertInstanceContext,
@@ -124,12 +124,14 @@ type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 const alertingEventLogger = alertingEventLoggerMock.create();
+const elasticsearchAndSOAvailability$ = of(true);
 const alertsService = new AlertsService({
   logger,
   pluginStop$: new ReplaySubject(1),
   kibanaVersion: '8.8.0',
   elasticsearchClientPromise: Promise.resolve(clusterClient),
   dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
+  elasticsearchAndSOAvailability$,
 });
 const backfillClient = backfillClientMock.create();
 const dataPlugin = dataPluginMock.createStartContract();

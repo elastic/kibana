@@ -46,6 +46,7 @@ export async function fetchHitsInInterval(
   rows: DataTableRecord[];
   interceptedWarnings: SearchResponseWarning[];
 }> {
+  const { profilesManager } = services;
   const range: RangeQuery = {
     format: 'strict_date_optional_time',
   };
@@ -96,7 +97,11 @@ export async function fetchHitsInInterval(
 
   const { rawResponse } = await lastValueFrom(fetch$);
   const dataView = searchSource.getField('index');
-  const rows = rawResponse.hits?.hits.map((hit) => buildDataTableRecord(hit, dataView!));
+  const rows = rawResponse.hits?.hits.map((hit) =>
+    profilesManager.resolveDocumentProfile({
+      record: buildDataTableRecord(hit, dataView!),
+    })
+  );
   const interceptedWarnings: SearchResponseWarning[] = [];
   services.data.search.showWarnings(adapter, (warning) => {
     interceptedWarnings.push(warning);

@@ -229,7 +229,7 @@ function renderSettings({
       .filter(filterByAgent(newConfig.agent_name as AgentName))
       .map((setting) => (
         <SettingFormRow
-          isUnsaved={unsavedChanges.hasOwnProperty(setting.key)}
+          isUnsaved={Object.hasOwn(unsavedChanges, setting.key)}
           key={setting.key}
           setting={setting}
           value={newConfig.settings[setting.key]}

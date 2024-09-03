@@ -17,7 +17,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -193,6 +192,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     'Baseline rate',
     'Deviation rate',
   ]);
+  // null is used as the uninitialized state to identify the first load.
+  const [skippedFields, setSkippedFields] = useState<string[] | null>(null);
 
   const onGroupResultsToggle = (optionId: string) => {
     setToggleIdSelected(optionId);
@@ -207,20 +208,27 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     fieldFilterSkippedItems,
     keywordFieldCandidates,
     textFieldCandidates,
-    selectedKeywordFieldCandidates,
-    selectedTextFieldCandidates,
   } = fieldCandidates;
   const fieldFilterButtonDisabled =
     isRunning || fieldCandidates.isLoading || fieldFilterUniqueItems.length === 0;
 
-  const onFieldsFilterChange = (skippedFields: string[]) => {
+  // Set skipped fields only on first load, otherwise we'd overwrite the user's selection.
+  useEffect(() => {
+    if (skippedFields === null && fieldFilterSkippedItems.length > 0)
+      setSkippedFields(fieldFilterSkippedItems);
+  }, [fieldFilterSkippedItems, skippedFields]);
+
+  const onFieldsFilterChange = (skippedFieldsUpdate: string[]) => {
     dispatch(resetResults());
+    setSkippedFields(skippedFieldsUpdate);
     setOverrides({
       loaded: 0,
       remainingKeywordFieldCandidates: keywordFieldCandidates.filter(
-        (d) => !skippedFields.includes(d)
+        (d) => !skippedFieldsUpdate.includes(d)
       ),
-      remainingTextFieldCandidates: textFieldCandidates.filter((d) => !skippedFields.includes(d)),
+      remainingTextFieldCandidates: textFieldCandidates.filter(
+        (d) => !skippedFieldsUpdate.includes(d)
+      ),
       regroupOnly: false,
     });
     startHandler(true, false);
@@ -287,8 +295,12 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     if (!continueAnalysis) {
       dispatch(resetResults());
       setOverrides({
-        remainingKeywordFieldCandidates: selectedKeywordFieldCandidates,
-        remainingTextFieldCandidates: selectedTextFieldCandidates,
+        remainingKeywordFieldCandidates: keywordFieldCandidates.filter(
+          (d) => skippedFields === null || !skippedFields.includes(d)
+        ),
+        remainingTextFieldCandidates: textFieldCandidates.filter(
+          (d) => skippedFields === null || !skippedFields.includes(d)
+        ),
       });
     }
 
@@ -415,26 +427,22 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         shouldRerunAnalysis={shouldRerunAnalysis}
       >
         <EuiFlexItem grow={false}>
-          <EuiFormRow display="columnCompressedSwitch">
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">{groupResultsMessage}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  data-test-subj={`aiopsLogRateAnalysisGroupSwitch${
-                    groupResults ? ' checked' : ''
-                  }`}
-                  buttonSize="s"
-                  isDisabled={disabledGroupResultsSwitch}
-                  legend="Smart grouping"
-                  options={toggleButtons}
-                  idSelected={toggleIdSelected}
-                  onChange={onGroupResultsToggle}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">{groupResultsMessage}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                data-test-subj={`aiopsLogRateAnalysisGroupSwitch${groupResults ? ' checked' : ''}`}
+                buttonSize="s"
+                isDisabled={disabledGroupResultsSwitch}
+                legend="Smart grouping"
+                options={toggleButtons}
+                idSelected={toggleIdSelected}
+                onChange={onGroupResultsToggle}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <FieldFilterPopover

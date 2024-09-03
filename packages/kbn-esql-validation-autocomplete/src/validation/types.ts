@@ -7,6 +7,7 @@
  */
 
 import type { ESQLMessage, ESQLLocation } from '@kbn/esql-ast';
+import { FieldType } from '../definitions/types';
 import type { EditorError } from '../types';
 
 export interface ESQLVariable {
@@ -17,10 +18,9 @@ export interface ESQLVariable {
 
 export interface ESQLRealField {
   name: string;
-  type: string;
+  type: FieldType;
   metadata?: {
     description?: string;
-    type?: string;
   };
 }
 

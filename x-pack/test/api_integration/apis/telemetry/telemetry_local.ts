@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import deepmerge from 'deepmerge';
 import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
 import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
+import ossPackagesTelemetrySchema from '@kbn/telemetry-plugin/schema/kbn_packages.json';
 import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
@@ -56,7 +57,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should pass the schema validation', () => {
       const root = deepmerge(ossRootTelemetrySchema, xpackRootTelemetrySchema);
-      const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
+      const plugins = deepmerge(
+        deepmerge(ossPluginsTelemetrySchema, ossPackagesTelemetrySchema),
+        xpackPluginsTelemetrySchema
+      );
 
       try {
         assertTelemetryPayload({ root, plugins }, stats);

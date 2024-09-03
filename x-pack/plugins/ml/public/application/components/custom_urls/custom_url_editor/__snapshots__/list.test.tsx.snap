@@ -13,11 +13,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         data-test-subj="mlJobEditCustomUrlItemLabel"
-        describedByIds={Array []}
-        display="row"
         error={Array []}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
           <Memo(MemoizedFormattedMessage)
@@ -25,7 +21,6 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             id="xpack.ml.customUrlEditorList.labelLabel"
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           data-test-subj="mlJobEditCustomUrlLabelInput_0"
@@ -37,18 +32,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         label={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="URL"
             id="xpack.ml.customUrlEditorList.urlLabel"
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           data-test-subj="mlJobEditCustomUrlInput_0"
@@ -63,11 +53,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       grow={false}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         error={Array []}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
           <Memo(MemoizedFormattedMessage)
@@ -75,7 +61,6 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             id="xpack.ml.customUrlEditorList.timeRangeLabel"
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           isInvalid={false}
@@ -89,11 +74,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       grow={false}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
         hasEmptyLabelSpace={true}
-        labelType="label"
       >
         <EuiToolTip
           content={
@@ -121,11 +102,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       grow={false}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
         hasEmptyLabelSpace={true}
-        labelType="label"
       >
         <EuiToolTip
           content={
@@ -162,11 +139,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         data-test-subj="mlJobEditCustomUrlItemLabel"
-        describedByIds={Array []}
-        display="row"
         error={Array []}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
           <Memo(MemoizedFormattedMessage)
@@ -174,7 +147,6 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             id="xpack.ml.customUrlEditorList.labelLabel"
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           data-test-subj="mlJobEditCustomUrlLabelInput_1"
@@ -186,18 +158,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         label={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="URL"
             id="xpack.ml.customUrlEditorList.urlLabel"
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           data-test-subj="mlJobEditCustomUrlInput_1"
@@ -212,11 +179,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       grow={false}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         error={Array []}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
           <Memo(MemoizedFormattedMessage)
@@ -224,7 +187,6 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             id="xpack.ml.customUrlEditorList.timeRangeLabel"
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           isInvalid={false}
@@ -238,11 +200,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       grow={false}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
         hasEmptyLabelSpace={true}
-        labelType="label"
       >
         <EuiToolTip
           content={
@@ -270,11 +228,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       grow={false}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
         hasEmptyLabelSpace={true}
-        labelType="label"
       >
         <EuiToolTip
           content={
@@ -311,11 +265,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     >
       <EuiFormRow
         data-test-subj="mlJobEditCustomUrlItemLabel"
-        describedByIds={Array []}
-        display="row"
         error={Array []}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
           <Memo(MemoizedFormattedMessage)
@@ -323,7 +273,6 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             id="xpack.ml.customUrlEditorList.labelLabel"
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           data-test-subj="mlJobEditCustomUrlLabelInput_2"
@@ -335,18 +284,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         label={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="URL"
             id="xpack.ml.customUrlEditorList.urlLabel"
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           data-test-subj="mlJobEditCustomUrlInput_2"
@@ -361,11 +305,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       grow={false}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         error={Array []}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
           <Memo(MemoizedFormattedMessage)
@@ -373,7 +313,6 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             id="xpack.ml.customUrlEditorList.timeRangeLabel"
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           isInvalid={false}
@@ -387,11 +326,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       grow={false}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
         hasEmptyLabelSpace={true}
-        labelType="label"
       >
         <EuiToolTip
           content={
@@ -419,11 +354,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       grow={false}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
         hasEmptyLabelSpace={true}
-        labelType="label"
       >
         <EuiToolTip
           content={

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { HostsQueries } from '../model/factory_query_type';
 import { inspect } from '../model/inspect';
 import { pagination } from '../model/pagination';

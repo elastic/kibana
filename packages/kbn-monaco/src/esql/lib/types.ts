@@ -6,19 +6,27 @@
  * Side Public License, v 1.
  */
 
+import { SuggestionRawDefinition } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../../monaco_imports';
 
 export type MonacoAutocompleteCommandDefinition = Pick<
   monaco.languages.CompletionItem,
   | 'label'
   | 'insertText'
+  | 'filterText'
   | 'kind'
   | 'detail'
   | 'documentation'
   | 'sortText'
   | 'insertTextRules'
   | 'command'
-  | 'range'
->;
+> & { range?: monaco.IRange };
 
 export type MonacoCodeAction = monaco.languages.CodeAction;
+
+export type SuggestionRawDefinitionWithMonacoRange = Omit<
+  SuggestionRawDefinition,
+  'rangeToReplace'
+> & {
+  range?: monaco.IRange;
+};

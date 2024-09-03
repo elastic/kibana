@@ -22,7 +22,8 @@
       "licensing",
       "share",
       "kibanaUtils",
-      "alerting"
+      "alerting",
+      "spaces"
     ],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["kibanaReact", "usageCollection"]

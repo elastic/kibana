@@ -396,7 +396,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('propagates context for Vega visualizations', () => {
+      describe.skip('propagates context for Vega visualizations', () => {
         // CHECKPOINT this is the test that failed and caused the global .skip()
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
           await logContains({

@@ -128,6 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
             'siem',
             'slo',
             'securitySolutionAssistant',
+            'securitySolutionAttackDiscovery',
             'securitySolutionCases',
             'fleet',
             'fleetv2',

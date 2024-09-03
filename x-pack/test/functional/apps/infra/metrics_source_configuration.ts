@@ -86,7 +86,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the no indices screen when no indices match the pattern', async () => {
         await pageObjects.common.navigateToApp('infraOps');
-        await pageObjects.infraHome.getNoMetricsIndicesPrompt();
+        await pageObjects.infraHome.noDataPromptExists();
       });
 
       it('can change the metric indices to a remote cluster when connection does not exist', async () => {

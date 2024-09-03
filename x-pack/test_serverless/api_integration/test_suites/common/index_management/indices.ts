@@ -63,7 +63,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         const sortedReceivedKeys = Object.keys(indexCreated).sort();
 
-        expect(sortedReceivedKeys).to.eql(['aliases', 'hidden', 'isFrozen', 'name']);
+        expect(sortedReceivedKeys).to.eql([
+          'aliases',
+          'documents',
+          'hidden',
+          'isFrozen',
+          'name',
+          'size',
+        ]);
       });
     });
 
@@ -77,7 +84,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(index).to.be.ok();
 
-        expect(Object.keys(index).sort()).to.eql(['aliases', 'hidden', 'isFrozen', 'name']);
+        expect(Object.keys(index).sort()).to.eql([
+          'aliases',
+          'documents',
+          'hidden',
+          'isFrozen',
+          'name',
+          'size',
+        ]);
       });
 
       it('throws 404 for a non-existent index', async () => {
@@ -121,7 +135,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(index).to.be.ok();
 
-        expect(Object.keys(index).sort()).to.eql(['aliases', 'hidden', 'isFrozen', 'name']);
+        expect(Object.keys(index).sort()).to.eql([
+          'aliases',
+          'documents',
+          'hidden',
+          'isFrozen',
+          'name',
+          'size',
+        ]);
       });
 
       it('fails to re-create the same index', async () => {
@@ -147,7 +168,14 @@ export default function ({ getService }: FtrProviderContext) {
           (index: { name: string }) => index.name === 'reload-test-index'
         );
         const sortedReceivedKeys = Object.keys(indexCreated).sort();
-        expect(sortedReceivedKeys).to.eql(['aliases', 'hidden', 'isFrozen', 'name']);
+        expect(sortedReceivedKeys).to.eql([
+          'aliases',
+          'documents',
+          'hidden',
+          'isFrozen',
+          'name',
+          'size',
+        ]);
         expect(body.length > 1).to.be(true); // to contrast it with the next test
       });
 

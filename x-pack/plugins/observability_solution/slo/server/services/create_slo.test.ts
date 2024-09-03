@@ -10,6 +10,7 @@ import {
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
+  ScopedClusterClientMock,
 } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { CreateSLO } from './create_slo';
@@ -25,6 +26,7 @@ import { TransformManager } from './transform_manager';
 
 describe('CreateSLO', () => {
   let mockEsClient: ElasticsearchClientMock;
+  let mockScopedClusterClient: ScopedClusterClientMock;
   let mockLogger: jest.Mocked<MockedLogger>;
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
@@ -35,12 +37,14 @@ describe('CreateSLO', () => {
 
   beforeEach(() => {
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockLogger = loggingSystemMock.createLogger();
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     createSLO = new CreateSLO(
       mockEsClient,
+      mockScopedClusterClient,
       mockRepository,
       mockTransformManager,
       mockSummaryTransformManager,
@@ -82,7 +86,9 @@ describe('CreateSLO', () => {
 
       expect(mockTransformManager.install).toHaveBeenCalled();
       expect(mockTransformManager.start).toHaveBeenCalled();
-      expect(mockEsClient.ingest.putPipeline.mock.calls[0]).toMatchSnapshot();
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline.mock.calls[0]
+      ).toMatchSnapshot();
       expect(mockSummaryTransformManager.install).toHaveBeenCalled();
       expect(mockSummaryTransformManager.start).toHaveBeenCalled();
       expect(mockEsClient.index.mock.calls[0]).toMatchSnapshot();
@@ -165,7 +171,9 @@ describe('CreateSLO', () => {
       );
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
-      expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalledTimes(1);
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledTimes(1);
 
       expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
       expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
@@ -186,7 +194,9 @@ describe('CreateSLO', () => {
       expect(mockRepository.deleteById).toHaveBeenCalled();
       expect(mockTransformManager.stop).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
-      expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalledTimes(2);
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledTimes(2);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
 
       expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
@@ -203,7 +213,9 @@ describe('CreateSLO', () => {
       expect(mockRepository.deleteById).toHaveBeenCalled();
       expect(mockTransformManager.stop).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
-      expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalledTimes(2);
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledTimes(2);
       expect(mockSummaryTransformManager.stop).toHaveBeenCalled();
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
     });

@@ -8,7 +8,7 @@
 import { NEVER } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 
-import { APP_SEARCH_PLUGIN, ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
+import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
 
 import { getSearchResultProvider } from './search_result_provider';
 
@@ -92,18 +92,6 @@ describe('Enterprise Search search provider', () => {
     type: 'Search',
     url: {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=connector_client&service_type=`,
-      prependBasePath: true,
-    },
-  };
-
-  const appSearchResult = {
-    icon: 'logoEnterpriseSearch',
-    id: 'app_search',
-    score: 100,
-    title: 'App Search',
-    type: 'Search',
-    url: {
-      path: `${APP_SEARCH_PLUGIN.URL}`,
       prependBasePath: true,
     },
   };
@@ -268,7 +256,7 @@ describe('Enterprise Search search provider', () => {
         });
       });
     });
-    it('returns results for legacy app search', () => {
+    it('does not return results for legacy app search', () => {
       const searchProvider = getSearchResultProvider(
         {
           canDeployEntSearch: true,
@@ -287,7 +275,7 @@ describe('Enterprise Search search provider', () => {
             {} as any
           )
         ).toBe('(a|)', {
-          a: [appSearchResult],
+          a: [],
         });
       });
     });

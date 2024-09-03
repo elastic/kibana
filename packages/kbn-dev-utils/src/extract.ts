@@ -12,7 +12,7 @@ import Path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
-import Tar from 'tar';
+import * as tar from 'tar';
 import Yauzl, { ZipFile, Entry } from 'yauzl';
 import * as Rx from 'rxjs';
 import { map, mergeMap, takeUntil } from 'rxjs';
@@ -61,7 +61,7 @@ export async function extract({
   await Fs.mkdir(targetDir, { recursive: true });
 
   if (archivePath.endsWith('.tar') || archivePath.endsWith('.tar.gz')) {
-    return await Tar.x({
+    return await tar.extract({
       file: archivePath,
       cwd: targetDir,
       stripComponents,

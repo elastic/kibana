@@ -7,9 +7,9 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
-import { PerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { PerformAnonymizationFieldsBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import {
-  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+  PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
   PromptResponse,
   PromptTypeEnum,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
@@ -50,9 +50,9 @@ interface UseSettingsUpdater {
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
   >;
-  anonymizationFieldsBulkActions: PerformBulkActionRequestBody;
+  anonymizationFieldsBulkActions: PerformAnonymizationFieldsBulkActionRequestBody;
   setAnonymizationFieldsBulkActions: React.Dispatch<
-    React.SetStateAction<PerformBulkActionRequestBody>
+    React.SetStateAction<PerformAnonymizationFieldsBulkActionRequestBody>
   >;
   promptsBulkActions: PromptsPerformBulkActionRequestBody;
   setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
@@ -99,7 +99,7 @@ export const useSettingsUpdater = (
   );
   // Anonymization
   const [anonymizationFieldsBulkActions, setAnonymizationFieldsBulkActions] =
-    useState<PerformBulkActionRequestBody>({});
+    useState<PerformAnonymizationFieldsBulkActionRequestBody>({});
   // Prompts
   const [promptsBulkActions, setPromptsBulkActions] = useState<PromptsPerformBulkActionRequestBody>(
     {}

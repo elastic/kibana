@@ -15,7 +15,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type PlatformErrorResponse = z.infer<typeof PlatformErrorResponse>;
 export const PlatformErrorResponse = z.object({

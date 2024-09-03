@@ -41,6 +41,7 @@ export type SearchEmbeddableState = Pick<
   | 'sampleSize'
   | 'viewMode'
   | 'grid'
+  | 'density'
 > & {
   rows: DataTableRecord[];
   columnsMeta: DataTableColumnsMeta | undefined;

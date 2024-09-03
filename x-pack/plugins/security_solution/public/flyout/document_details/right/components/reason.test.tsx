@@ -33,10 +33,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 const panelContextValue = {
   eventId: 'event id',

@@ -5,4 +5,22 @@
  * 2.0.
  */
 
-export const SYNTHETICS_OVERVIEW_EMBEDDABLE = 'SYNTHETICS_OVERVIEW_EMBEDDABLE';
+import { i18n } from '@kbn/i18n';
+
+export const SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE = 'SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE';
+export const SYNTHETICS_MONITORS_EMBEDDABLE = 'SYNTHETICS_MONITORS_EMBEDDABLE';
+
+export const COMMON_SYNTHETICS_GROUPING = [
+  {
+    id: 'synthetics',
+    getDisplayName: () =>
+      i18n.translate('xpack.synthetics.common.constants.grouping.legacy', {
+        defaultMessage: 'Synthetics',
+      }),
+    getIconType: () => {
+      return 'online';
+    },
+  },
+];
+
+export const ALL_VALUE = '*';

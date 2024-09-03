@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.find('emptyPlaceholder');
 
       await PageObjects.dashboard.switchToEditMode();
-      await dashboardPanelActions.editPanelByTitle();
+      await dashboardPanelActions.clickEdit();
       await PageObjects.timePicker.waitForNoDataPopover();
       await PageObjects.timePicker.ensureHiddenNoDataPopover();
 

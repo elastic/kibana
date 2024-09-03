@@ -6,7 +6,7 @@
   "plugin": {
     "id": "entityManager",
     "configPath": ["xpack", "entityManager"],
-    "requiredPlugins": ["security", "encryptedSavedObjects"],
+    "requiredPlugins": ["security", "encryptedSavedObjects", "licensing"],
     "browser": true,
     "server": true,
     "requiredBundles": []

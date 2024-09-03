@@ -15,17 +15,7 @@ const hasDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/has_data',
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ hasData: boolean }> => {
-    const { context, request } = resources;
-    const coreContext = await context.core;
-
-    const [apmEventClient] = await Promise.all([
-      getApmEventClient(resources),
-      createEntitiesESClient({
-        request,
-        esClient: coreContext.elasticsearch.client.asCurrentUser,
-      }),
-    ]);
-
+    const apmEventClient = await getApmEventClient(resources);
     const hasData = await hasHistoricalAgentData(apmEventClient);
     return { hasData };
   },

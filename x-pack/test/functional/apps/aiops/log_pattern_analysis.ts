@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  describe('log pattern analysis', async function () {
+  describe('log pattern analysis', function () {
     let tabsCount = 1;
 
     afterEach(async () => {
@@ -63,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await aiops.logPatternAnalysisPage.clickFilterInButton(0);
 
-      retrySwitchTab(1, 10);
+      await retrySwitchTab(1, 10);
       tabsCount++;
 
       await aiops.logPatternAnalysisPage.assertDiscoverDocCountExists();
@@ -89,7 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await aiops.logPatternAnalysisPage.clickFilterOutButton(0);
 
-      retrySwitchTab(1, 10);
+      await retrySwitchTab(1, 10);
       tabsCount++;
 
       await aiops.logPatternAnalysisPage.assertDiscoverDocCountExists();

@@ -24,7 +24,7 @@ mockUseGetAlertsGroupAggregationsQuery.mockReturnValue({
   data: groupingSearchResponse,
 });
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_data_view', () => ({
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view', () => ({
   useAlertDataView: jest.fn().mockReturnValue({ dataViews: [{ fields: [] }] }),
 }));
 

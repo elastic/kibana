@@ -7,12 +7,12 @@
 
 import { get, values, first } from 'lodash';
 import * as rt from 'io-ts';
-import {
+import type {
   MetricsAPIRequest,
   MetricsAPISeries,
   MetricsAPIColumn,
   MetricsAPIRow,
-} from '../../../../common/http_api/metrics_api';
+} from '@kbn/metrics-data-access-plugin/common';
 import {
   Bucket,
   BasicMetricValueRT,

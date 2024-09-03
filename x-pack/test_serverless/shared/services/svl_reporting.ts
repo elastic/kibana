@@ -11,8 +11,8 @@ import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
-import { RoleCredentials } from './svl_user_manager';
-import { InternalRequestHeader } from './svl_common_api';
+import { RoleCredentials } from '.';
+import { InternalRequestHeader } from '.';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 

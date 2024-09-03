@@ -27,4 +27,5 @@ export interface EntityServiceListItem {
   environments: string[];
   serviceName: string;
   agentName: AgentName;
+  hasLogMetrics: boolean;
 }

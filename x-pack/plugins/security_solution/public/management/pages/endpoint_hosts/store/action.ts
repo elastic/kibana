@@ -7,9 +7,9 @@
 
 import type { Action } from 'redux';
 import type { DataViewBase } from '@kbn/es-query';
+import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoint';
 import type {
   GetHostPolicyResponse,
-  HostIsolationRequestBody,
   ISOLATION_ACTIONS,
   MetadataListResponse,
 } from '../../../../../common/endpoint/types';
@@ -133,7 +133,7 @@ export interface ServerFailedToReturnEndpointsTotal {
 export type EndpointIsolationRequest = Action<'endpointIsolationRequest'> & {
   payload: {
     type: ISOLATION_ACTIONS;
-    data: HostIsolationRequestBody;
+    data: IsolationRouteRequestBody;
   };
 };
 

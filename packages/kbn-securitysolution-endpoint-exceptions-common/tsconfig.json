@@ -6,5 +6,9 @@
   "exclude": ["target/**/*"],
   "extends": "../../tsconfig.base.json",
   "include": ["**/*.ts"],
-  "kbn_references": ["@kbn/securitysolution-exceptions-common", "@kbn/openapi-common"]
+  "kbn_references": [
+    "@kbn/securitysolution-exceptions-common",
+    "@kbn/openapi-common",
+    "@kbn/zod",
+  ]
 }

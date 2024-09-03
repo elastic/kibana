@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import { type CoreSetup, type Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '../../common/constants';
+
+import {
+  INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
+  CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH,
+} from '../../common/constants';
 import type {
   CspRequestHandlerContext,
   CspServerPluginStart,
@@ -22,6 +26,7 @@ import { defineFindCspBenchmarkRuleRoute } from './benchmark_rules/find/find';
 import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
 import { defineBulkActionCspBenchmarkRulesRoute } from './benchmark_rules/bulk_action/bulk_action';
 import { defineGetCspBenchmarkRulesStatesRoute } from './benchmark_rules/get_states/get_states';
+import { setupCdrDataViews } from '../saved_objects/data_views';
 
 /**
  * 1. Registers routes
@@ -45,6 +50,22 @@ export function setupRoutes({
   defineGetDetectionEngineAlertsStatus(router);
   defineBulkActionCspBenchmarkRulesRoute(router);
   defineGetCspBenchmarkRulesStatesRoute(router);
+
+  core.http.registerOnPreRouting(async (request, response, toolkit) => {
+    if (request.url.pathname.includes(CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH)) {
+      try {
+        const [coreStart, startDeps] = await core.getStartServices();
+        const esClient = coreStart.elasticsearch.client.asInternalUser;
+        const soClient = coreStart.savedObjects.createInternalRepository();
+        const spaces = startDeps.spaces?.spacesService;
+        const dataViews = startDeps.dataViews;
+        await setupCdrDataViews(esClient, soClient, spaces, dataViews, request, logger);
+      } catch (err) {
+        logger.error(`Failed to create CDR data views: ${err}`);
+      }
+    }
+    return toolkit.next();
+  });
 
   core.http.registerRouteHandlerContext<CspRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,

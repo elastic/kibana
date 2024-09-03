@@ -254,7 +254,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response.body[config.serviceKey].fieldFormats.foo.params).to.eql({});
         });
 
-        it('can specify optional fieldFormats attribute when creating an index pattern', async () => {
+        it('can specify optional fieldFormats attribute with count and label when creating an index pattern', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response = await supertestWithoutAuth
             .post(config.path)

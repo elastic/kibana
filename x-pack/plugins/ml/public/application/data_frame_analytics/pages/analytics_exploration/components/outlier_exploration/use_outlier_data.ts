@@ -33,7 +33,7 @@ import {
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
-import { getToastNotifications } from '../../../../../util/dependency_cache';
+import { useMlApiContext, useMlKibana } from '../../../../../contexts/kibana';
 
 import { getIndexData, getIndexFields } from '../../../../common';
 
@@ -45,6 +45,12 @@ export const useOutlierData = (
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: estypes.QueryDslQueryContainer
 ): UseIndexDataReturnType => {
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useMlKibana();
+  const ml = useMlApiContext();
   const needsDestIndexFields =
     dataView !== undefined && dataView.title === jobConfig?.source.index[0];
 
@@ -53,7 +59,7 @@ export const useOutlierData = (
 
     if (jobConfig !== undefined && dataView !== undefined) {
       const resultsField = jobConfig.dest.results_field;
-      const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
+      const { fieldTypes } = getIndexFields(ml, jobConfig, needsDestIndexFields);
       newColumns.push(
         ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField!).sort((a: any, b: any) =>
           sortExplorationResultsFields(a.id, b.id, jobConfig)
@@ -86,7 +92,7 @@ export const useOutlierData = (
   // passed on to `getIndexData`.
   useEffect(() => {
     const options = { didCancel: false };
-    getIndexData(jobConfig, dataGrid, searchQuery, options);
+    getIndexData(ml, jobConfig, dataGrid, searchQuery, options);
     return () => {
       options.didCancel = true;
     };
@@ -95,7 +101,9 @@ export const useOutlierData = (
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
-    () => (dataView !== undefined ? new DataLoader(dataView, getToastNotifications()) : undefined),
+    () => (dataView !== undefined ? new DataLoader(dataView, ml) : undefined),
+    // skip ml API services from deps check
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [dataView]
   );
 
@@ -114,7 +122,7 @@ export const useOutlierData = (
         dataGrid.setColumnCharts(columnChartsData);
       }
     } catch (e) {
-      showDataGridColumnChartErrorMessageToast(e, getToastNotifications());
+      showDataGridColumnChartErrorMessageToast(e, toasts);
     }
   };
 

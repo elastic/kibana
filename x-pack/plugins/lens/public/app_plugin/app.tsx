@@ -471,14 +471,6 @@ export function App({
     [dataViews, uiActions, http, notifications, uiSettings, initialContext, dispatch]
   );
 
-  const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel: _onCancel }) => {
-    setIsSaveModalVisible(true);
-    setShouldCloseAndSaveTextBasedQuery(true);
-    saveAndExit.current = () => {
-      onSave();
-    };
-  }, []);
-
   // remember latest URL based on the configuration
   // url_panel_content has a similar logic
   const shareURLCache = useRef({ params: '', url: '' });
@@ -571,7 +563,6 @@ export function App({
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
           indexPatternService={indexPatternService}
-          onTextBasedSavedAndExit={onTextBasedSavedAndExit}
           getUserMessages={getUserMessages}
           shortUrlService={shortUrlService}
           startServices={coreStart}

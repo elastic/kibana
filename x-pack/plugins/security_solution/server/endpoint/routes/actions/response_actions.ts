@@ -13,6 +13,10 @@ import { stringify } from '../../utils/stringify';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
 import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import type {
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
+} from '../../../../common/api/endpoint';
 import {
   EndpointActionGetFileSchema,
   type ExecuteActionRequestBody,
@@ -50,8 +54,6 @@ import type {
   ResponseActionParametersWithProcessData,
   ResponseActionsExecuteParameters,
   ResponseActionScanParameters,
-  KillProcessRequestBody,
-  SuspendProcessRequestBody,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -284,28 +286,25 @@ export function registerResponseActionRoutes(
       )
     );
 
-  // 8.15 route
-  if (endpointContext.experimentalFeatures.responseActionScanEnabled) {
-    router.versioned
-      .post({
-        access: 'public',
-        path: SCAN_ROUTE,
-        options: { authRequired: true, tags: ['access:securitySolution'] },
-      })
-      .addVersion(
-        {
-          version: '2023-10-31',
-          validate: {
-            request: ScanActionRequestSchema,
-          },
+  router.versioned
+    .post({
+      access: 'public',
+      path: SCAN_ROUTE,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: ScanActionRequestSchema,
         },
-        withEndpointAuthz(
-          { all: ['canWriteScanOperations'] },
-          logger,
-          responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
-        )
-      );
-  }
+      },
+      withEndpointAuthz(
+        { all: ['canWriteScanOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
+      )
+    );
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(

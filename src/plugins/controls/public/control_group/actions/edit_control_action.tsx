@@ -26,7 +26,7 @@ export interface EditControlActionContext {
   embeddable: ControlEmbeddable<DataControlInput>;
 }
 
-export class EditControlAction implements Action<EditControlActionContext> {
+export class EditLegacyEmbeddableControlAction implements Action<EditControlActionContext> {
   public readonly type = ACTION_EDIT_CONTROL;
   public readonly id = ACTION_EDIT_CONTROL;
   public order = 2;

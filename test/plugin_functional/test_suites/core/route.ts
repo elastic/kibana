@@ -23,12 +23,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
               request.write(body[i++]);
             } else {
               clearInterval(intervalId);
-              request.end((err, res) => {
+              void request.end((err, res) => {
                 resolve(res);
               });
             }
           }, interval);
-          request.on('error', (err) => {
+          void request.on('error', (err) => {
             clearInterval(intervalId);
             reject(err);
           });

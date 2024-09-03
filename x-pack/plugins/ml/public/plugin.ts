@@ -57,7 +57,6 @@ import { getMlSharedServices } from './application/services/get_shared_ml_servic
 import { registerManagementSection } from './application/management';
 import type { MlLocatorParams } from './locator';
 import { MlLocatorDefinition, type MlLocator } from './locator';
-import { setDependencyCache } from './application/util/dependency_cache';
 import { registerHomeFeature } from './register_home_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
 import {
@@ -318,12 +317,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     mlApi?: MlApiServices;
     components: { AnomalySwimLane: typeof AnomalySwimLane };
   } {
-    setDependencyCache({
-      docLinks: core.docLinks!,
-      http: core.http,
-      i18n: core.i18n,
-    });
-
     return {
       locator: this.locator,
       elasticModels: this.sharedMlServices?.elasticModels,

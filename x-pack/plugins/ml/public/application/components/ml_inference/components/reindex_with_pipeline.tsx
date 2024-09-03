@@ -29,7 +29,7 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { debounce } from 'lodash';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { isValidIndexName } from '../../../../../common/util/es_utils';
 import { createKibanaDataView, checkIndexExists } from '../retry_create_data_view';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
@@ -82,12 +82,11 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
       application: { capabilities },
       share,
       data,
-      mlServices: {
-        mlApiServices: { getIndices, reindexWithPipeline, hasPrivileges },
-      },
       docLinks: { links },
     },
   } = useMlKibana();
+  const ml = useMlApiContext();
+  const { getIndices, reindexWithPipeline, hasPrivileges } = ml;
 
   const { displayErrorToast } = useToastNotificationService();
 
@@ -124,7 +123,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
   );
 
   const debouncedIndexCheck = debounce(async () => {
-    const checkResp = await checkIndexExists(destinationIndex);
+    const checkResp = await checkIndexExists(destinationIndex, ml);
     if (checkResp.errorMessage !== undefined) {
       displayErrorToast(
         checkResp.errorMessage,
@@ -237,7 +236,11 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
   useEffect(
     function createDiscoverLink() {
       async function createDataView() {
-        const dataViewCreationResult = await createKibanaDataView(destinationIndex, data.dataViews);
+        const dataViewCreationResult = await createKibanaDataView(
+          destinationIndex,
+          data.dataViews,
+          ml
+        );
         if (
           dataViewCreationResult?.success === true &&
           dataViewCreationResult?.dataViewId &&
@@ -251,6 +254,8 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
         createDataView();
       }
     },
+    // Skip ml API services from deps check
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       reindexingTaskId,
       destinationIndex,

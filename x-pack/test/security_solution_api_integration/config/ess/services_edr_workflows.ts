@@ -16,6 +16,7 @@ import {
   SecuritySolutionEndpointDataStreamHelpers,
   SecuritySolutionEndpointRegistryHelpers,
 } from '../../../common/services/security_solution';
+import { SecuritySolutionESSUtils } from '../services/security_solution_ess_utils';
 
 export const services = {
   ...xPackAPIServices,
@@ -26,4 +27,5 @@ export const services = {
   rolesUsersProvider: RolesUsersProvider,
   endpointDataStreamHelpers: SecuritySolutionEndpointDataStreamHelpers,
   endpointRegistryHelpers: SecuritySolutionEndpointRegistryHelpers,
+  securitySolutionUtils: SecuritySolutionESSUtils,
 };

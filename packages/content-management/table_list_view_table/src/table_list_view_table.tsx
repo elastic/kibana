@@ -38,6 +38,10 @@ import type {
 } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { RecentlyAccessed } from '@kbn/recently-accessed';
+import {
+  ContentInsightsProvider,
+  useContentInsightsServices,
+} from '@kbn/content-management-content-insights-public';
 
 import {
   Table,
@@ -54,12 +58,10 @@ import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
 import { sortByRecentlyAccessed } from './components/table_sort_select';
+import { ContentEditorActivityRow } from './components/content_editor_activity_row';
 
 interface ContentEditorConfig
-  extends Pick<
-    OpenContentEditorParams,
-    'isReadonly' | 'onSave' | 'customValidators' | 'showActivityView'
-  > {
+  extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
   enabled?: boolean;
 }
 
@@ -157,6 +159,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   sortColumnChanged: boolean;
   tableFilter: {
     createdBy: string[];
+    favorites: boolean;
   };
 }
 
@@ -168,6 +171,7 @@ export interface URLState {
   };
   filter?: {
     createdBy?: string[];
+    favorites?: boolean;
   };
 
   [key: string]: unknown;
@@ -179,6 +183,7 @@ interface URLQueryParams {
   sort?: string;
   sortdir?: string;
   created_by?: string[];
+  favorites?: 'true';
 
   [key: string]: unknown;
 }
@@ -236,6 +241,12 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
     stateFromURL.filter = { createdBy: [] };
   }
 
+  if (sanitizedParams.favorites === 'true') {
+    stateFromURL.filter.favorites = true;
+  } else {
+    stateFromURL.filter.favorites = false;
+  }
+
   return stateFromURL;
 };
 
@@ -248,7 +259,7 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
 const urlStateSerializer = (updated: {
   s?: string;
   sort?: { field: 'title' | 'updatedAt'; direction: Direction };
-  filter?: { createdBy?: string[] };
+  filter?: { createdBy?: string[]; favorites?: boolean };
 }) => {
   const updatedQueryParams: Partial<URLQueryParams> = {};
 
@@ -269,6 +280,10 @@ const urlStateSerializer = (updated: {
 
   if (updated.filter?.createdBy) {
     updatedQueryParams.created_by = updated.filter.createdBy;
+  }
+
+  if (updated?.filter && 'favorites' in updated.filter) {
+    updatedQueryParams.favorites = updated.filter.favorites ? 'true' : undefined;
   }
 
   return updatedQueryParams;
@@ -354,9 +369,11 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     notifyError,
     DateFormatterComp,
     getTagList,
+    isFavoritesEnabled,
   } = useServices();
 
   const openContentEditor = useOpenContentEditor();
+  const contentInsightsServices = useContentInsightsServices();
 
   const isInRouterContext = useInRouterContext();
 
@@ -400,6 +417,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       sortColumnChanged: !initialSort.isDefault,
       tableFilter: {
         createdBy: [],
+        favorites: false,
       },
     };
   }, [initialPageSize, entityName, recentlyAccessed]);
@@ -552,6 +570,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
             close();
           }),
+        appendRows: contentInsightsServices && (
+          // have to "REWRAP" in the provider here because it will be rendered in a different context
+          <ContentInsightsProvider {...contentInsightsServices}>
+            <ContentEditorActivityRow item={item} />
+          </ContentInsightsProvider>
+        ),
       });
     },
     [
@@ -561,6 +585,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       contentEditor,
       tableItemsRowActions,
       fetchItems,
+      contentInsightsServices,
     ]
   );
 
@@ -589,6 +614,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
                 }
               }}
               searchTerm={searchQuery.text}
+              isFavoritesEnabled={isFavoritesEnabled()}
             />
           );
         },
@@ -697,7 +723,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         name: i18n.translate('contentManagement.tableList.listing.table.actionTitle', {
           defaultMessage: 'Actions',
         }),
-        width: `${32 * actions.length}px`,
+        width: `72px`,
         actions,
       });
     }
@@ -721,6 +747,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     tableItemsRowActions,
     inspectItem,
     entityName,
+    isFavoritesEnabled,
   ]);
 
   const itemsById = useMemo(() => {
@@ -1041,6 +1068,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: {
           filter: {
             createdBy: filter.createdBy ?? [],
+            favorites: filter.favorites ?? false,
           },
         },
       });
@@ -1150,6 +1178,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
           clearTagSelection={clearTagSelection}
           createdByEnabled={createdByEnabled}
+          favoritesEnabled={isFavoritesEnabled()}
         />
 
         {/* Delete modal */}

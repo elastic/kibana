@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import {
-  KibanaSupertestWithCertProvider,
-  KibanaSupertestWithCertWithoutAuthProvider,
-} from '../../../security_solution_endpoint/services/supertest_with_cert';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { SvlCommonApiServiceProvider } from '@kbn/test-suites-serverless/shared/services/svl_common_api';
 import { services as essServices } from '../ess/services_edr_workflows';
+import { SecuritySolutionServerlessSuperTest } from '../services/security_solution_serverless_supertest';
+import { SecuritySolutionServerlessUtils } from '../services/security_solution_serverless_utils';
 
 export const svlServices = {
   ...essServices,
-
-  supertest: KibanaSupertestWithCertProvider,
-  supertestWithoutAuth: KibanaSupertestWithCertWithoutAuthProvider,
+  supertest: SecuritySolutionServerlessSuperTest,
+  securitySolutionUtils: SecuritySolutionServerlessUtils,
+  svlUserManager: commonFunctionalServices.samlAuth,
+  svlCommonApi: SvlCommonApiServiceProvider,
 };

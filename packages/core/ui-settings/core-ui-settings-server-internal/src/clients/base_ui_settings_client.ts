@@ -66,7 +66,7 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   }
 
   isOverridden(key: string) {
-    return this.overrides.hasOwnProperty(key);
+    return Object.hasOwn(this.overrides, key);
   }
 
   isSensitive(key: string): boolean {

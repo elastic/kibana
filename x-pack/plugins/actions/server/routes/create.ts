@@ -63,16 +63,21 @@ export const createActionRoute = (
         access: 'public',
         summary: 'Create a connector',
         tags: ['oas-tag:connectors'],
-        // description:
-        //   'You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
       },
       validate: {
-        params: schema.maybe(
-          schema.object({
-            id: schema.maybe(schema.string()),
-          })
-        ),
-        body: bodySchema,
+        request: {
+          params: schema.maybe(
+            schema.object({
+              id: schema.maybe(schema.string()),
+            })
+          ),
+          body: bodySchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

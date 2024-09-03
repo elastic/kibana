@@ -6,15 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { firstValueFrom } from 'rxjs';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { UnifiedDocViewer, useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
+import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import type { EsDocSearchProps } from '@kbn/unified-doc-viewer-plugin/public/types';
 import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import { SingleDocViewer } from './single_doc_viewer';
+import { createDataViewDataSource } from '../../../../common/data_sources';
 
 export interface DocProps extends EsDocSearchProps {
   /**
@@ -25,10 +28,32 @@ export interface DocProps extends EsDocSearchProps {
 
 export function Doc(props: DocProps) {
   const { dataView } = props;
-  const [reqState, hit] = useEsDocSearch(props);
   const services = useDiscoverServices();
-  const { locator, chrome, docLinks } = services;
+  const { locator, chrome, docLinks, core, profilesManager } = services;
   const indexExistsLink = docLinks.links.apis.indexExists;
+
+  const onBeforeFetch = useCallback(async () => {
+    const solutionNavId = await firstValueFrom(core.chrome.getActiveSolutionNavId$());
+    await profilesManager.resolveRootProfile({ solutionNavId });
+    await profilesManager.resolveDataSourceProfile({
+      dataSource: dataView?.id ? createDataViewDataSource({ dataViewId: dataView.id }) : undefined,
+      dataView,
+      query: { query: '', language: 'kuery' },
+    });
+  }, [profilesManager, core, dataView]);
+
+  const onProcessRecord = useCallback(
+    (record) => {
+      return profilesManager.resolveDocumentProfile({ record });
+    },
+    [profilesManager]
+  );
+
+  const [reqState, record] = useEsDocSearch({
+    ...props,
+    onBeforeFetch,
+    onProcessRecord,
+  });
 
   useEffect(() => {
     setBreadcrumbs({
@@ -117,9 +142,9 @@ export function Doc(props: DocProps) {
           </EuiCallOut>
         )}
 
-        {reqState === ElasticRequestState.Found && hit !== null && dataView && (
+        {reqState === ElasticRequestState.Found && record !== null && dataView && (
           <div data-test-subj="doc-hit">
-            <UnifiedDocViewer hit={hit} dataView={dataView} hideActionsColumn />
+            <SingleDocViewer record={record} dataView={dataView} />
           </div>
         )}
       </EuiPageBody>

@@ -7,7 +7,8 @@
 
 import { WELCOME_CONVERSATION_TITLE } from '@kbn/elastic-assistant';
 import type { Conversation } from '@kbn/elastic-assistant';
-import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
+import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard';
+
 import { DETECTION_RULES_CONVERSATION_ID } from '../../../detections/pages/detection_engine/rules/translations';
 import {
   ALERT_SUMMARY_CONVERSATION_ID,

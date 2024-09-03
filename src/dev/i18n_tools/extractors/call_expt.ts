@@ -286,6 +286,15 @@ export function extractMessageDescriptor(
               break;
           }
         }
+      } else if (typescript.isTemplateExpression(initializer)) {
+        initializer.forEachChild((child) => {
+          if (typescript.isTemplateSpan(child)) {
+            const messageText = initializer.getFullText();
+            throw new Error(
+              `Template literals with variable substitution is not supported. please pass variables via the 'values' object instead. Message ${messageText}`
+            );
+          }
+        });
       }
       // {id: `id`}
       else if (typescript.isNoSubstitutionTemplateLiteral(initializer)) {

@@ -10,7 +10,7 @@ import { EuiBetaBadge, EuiLink, EuiPageHeader, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DEFAULT_LOGS_DATA_VIEW } from '../../../common/constants';
+import { KNOWN_TYPES } from '../../../common/constants';
 import { datasetQualityAppTitle } from '../../../common/translations';
 
 // Allow for lazy loading
@@ -33,9 +33,16 @@ export default function Header() {
       description={
         <FormattedMessage
           id="xpack.datasetQuality.appDescription"
-          defaultMessage="Monitor the data set quality for {logsPattern} data streams that follow the {dsNamingSchemeLink}."
+          defaultMessage="Monitor the data set quality for {types} data streams that follow the {dsNamingSchemeLink}."
           values={{
-            logsPattern: <EuiCode>{DEFAULT_LOGS_DATA_VIEW}</EuiCode>,
+            types: KNOWN_TYPES.map((type, index) => {
+              return (
+                <>
+                  {index > 0 && ', '}
+                  <EuiCode>{type}</EuiCode>
+                </>
+              );
+            }),
             dsNamingSchemeLink: (
               <EuiLink
                 data-test-subj="datasetQualityAppDescriptionDsNamingSchemeLink"

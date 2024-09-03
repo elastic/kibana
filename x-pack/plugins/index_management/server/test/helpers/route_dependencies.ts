@@ -14,6 +14,7 @@ export const routeDependencies: Omit<RouteDependencies, 'router'> = {
     isSecurityEnabled: jest.fn().mockReturnValue(true),
     isLegacyTemplatesEnabled: true,
     isIndexStatsEnabled: true,
+    isSizeAndDocCountEnabled: false,
     isDataStreamStatsEnabled: true,
     enableMappingsSourceFieldSection: true,
     enableTogglingDataRetention: true,

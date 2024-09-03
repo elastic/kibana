@@ -16,8 +16,9 @@ import { monaco } from '../../monaco_imports';
 import type { ESQLWorker } from '../worker/esql_worker';
 import { wrapAsMonacoMessages } from './converters/positions';
 import { getHoverItem } from './hover/hover';
-import { monacoPositionToOffset } from './shared/utils';
+import { monacoPositionToOffset, offsetRangeToMonacoRange } from './shared/utils';
 import { getSignatureHelp } from './signature';
+import { SuggestionRawDefinitionWithMonacoRange } from './types';
 
 export class ESQLAstAdapter {
   constructor(
@@ -66,17 +67,17 @@ export class ESQLAstAdapter {
     model: monaco.editor.ITextModel,
     position: monaco.Position,
     context: monaco.languages.CompletionContext
-  ) {
+  ): Promise<SuggestionRawDefinitionWithMonacoRange[]> {
     const getAstFn = await this.getAstWorker(model);
     const fullText = model.getValue();
     const offset = monacoPositionToOffset(fullText, position);
-    const suggestionEntries = await suggest(fullText, offset, context, getAstFn, this.callbacks);
-    return {
-      suggestions: suggestionEntries.map((suggestion) => ({
-        ...suggestion,
-        range: undefined as unknown as monaco.IRange,
-      })),
-    };
+    const suggestions = await suggest(fullText, offset, context, getAstFn, this.callbacks);
+    for (const s of suggestions) {
+      (s as SuggestionRawDefinitionWithMonacoRange).range = s.rangeToReplace
+        ? offsetRangeToMonacoRange(fullText, s.rangeToReplace)
+        : undefined;
+    }
+    return suggestions;
   }
 
   async codeAction(

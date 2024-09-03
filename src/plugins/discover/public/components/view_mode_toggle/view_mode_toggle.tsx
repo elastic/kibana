@@ -31,7 +31,7 @@ export const DocumentViewModeToggle = ({
   isEsqlMode: boolean;
   prepend?: ReactElement;
   stateContainer: DiscoverStateContainer;
-  setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
+  setDiscoverViewMode: (viewMode: VIEW_MODE) => Promise<VIEW_MODE>;
   patternCount?: number;
   dataView: DataView;
 }) => {
@@ -86,8 +86,7 @@ export const DocumentViewModeToggle = ({
     }
   }, [showPatternAnalysisTab, viewMode, setDiscoverViewMode]);
 
-  const includesNormalTabsStyle =
-    viewMode === VIEW_MODE.AGGREGATED_LEVEL || viewMode === VIEW_MODE.PATTERN_LEVEL || isLegacy;
+  const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL || isLegacy;
 
   const containerPadding = includesNormalTabsStyle ? euiTheme.size.s : 0;
   const containerCss = css`

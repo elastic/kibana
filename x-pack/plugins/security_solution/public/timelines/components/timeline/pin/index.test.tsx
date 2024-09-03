@@ -8,7 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 import { getDefaultAriaLabel, getPinIcon, Pin } from '.';
 
@@ -133,7 +133,7 @@ describe('pin', () => {
     test('the button is disabled for an event when allowUnpinning is true, and timelineType is `template`', () => {
       const isAlert = false;
       const allowUnpinning = true;
-      const timelineType = TimelineType.template;
+      const timelineType = TimelineTypeEnum.template;
       const wrapper = mount(
         <Pin
           allowUnpinning={allowUnpinning}
@@ -152,7 +152,7 @@ describe('pin', () => {
     test('the button is disabled for an alert when allowUnpinning is true, and timelineType is `template`', () => {
       const isAlert = true;
       const allowUnpinning = true;
-      const timelineType = TimelineType.template;
+      const timelineType = TimelineTypeEnum.template;
       const wrapper = mount(
         <Pin
           allowUnpinning={allowUnpinning}
@@ -171,7 +171,7 @@ describe('pin', () => {
     test('the button is disabled for an event when allowUnpinning is false, and timelineType is `template`', () => {
       const isAlert = false;
       const allowUnpinning = false;
-      const timelineType = TimelineType.template;
+      const timelineType = TimelineTypeEnum.template;
       const wrapper = mount(
         <Pin
           allowUnpinning={allowUnpinning}
@@ -190,7 +190,7 @@ describe('pin', () => {
     test('the button is disabled for an alert when allowUnpinning is false, and timelineType is `template`', () => {
       const isAlert = true;
       const allowUnpinning = false;
-      const timelineType = TimelineType.template;
+      const timelineType = TimelineTypeEnum.template;
       const wrapper = mount(
         <Pin
           allowUnpinning={allowUnpinning}

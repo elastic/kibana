@@ -47,6 +47,16 @@ export class EmbeddableConsoleInfo {
     this._dispatch({ type: 'open', payload: content ? { content } : undefined });
   }
 
+  public openEmbeddedConsoleAlternateView() {
+    // Embedded Console is not rendered on the page, nothing to do
+    if (!this._dispatch) return;
+
+    this._dispatch({
+      type: 'open',
+      payload: { alternateView: this._alternateView !== undefined },
+    });
+  }
+
   public registerAlternateView(view: EmbeddedConsoleView | null) {
     this._alternateView = view ?? undefined;
   }

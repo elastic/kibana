@@ -11,16 +11,19 @@ import { type DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-util
 import type { EsSorting, UseDataGridReturnType } from '@kbn/ml-data-grid';
 import { getProcessedFields, INDEX_STATUS } from '@kbn/ml-data-grid';
 
-import { ml } from '../../services/ml_api_service';
-import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { mlJobCapsServiceAnalyticsFactory } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import type { MlApiServices } from '../../services/ml_api_service';
 
 export const getIndexData = async (
+  mlApiServices: MlApiServices,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   dataGrid: UseDataGridReturnType,
   searchQuery: estypes.QueryDslQueryContainer,
   options: { didCancel: boolean }
 ) => {
   if (jobConfig !== undefined) {
+    const newJobCapsServiceAnalytics = mlJobCapsServiceAnalyticsFactory(mlApiServices);
+
     const {
       pagination,
       setErrorMessage,
@@ -47,7 +50,7 @@ export const getIndexData = async (
 
       const { pageIndex, pageSize } = pagination;
       // TODO: remove results_field from `fields` when possible
-      const resp: estypes.SearchResponse = await ml.esSearch({
+      const resp: estypes.SearchResponse = await mlApiServices.esSearch({
         index: jobConfig.dest.index,
         body: {
           fields: ['*'],

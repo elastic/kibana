@@ -42,6 +42,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         getRolesAPIClient: getRolesAPIClientMock,
+        getPrivilegesAPIClient: jest.fn(),
         eventTracker,
       });
 
@@ -63,6 +64,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         getRolesAPIClient: getRolesAPIClientMock,
+        getPrivilegesAPIClient: jest.fn(),
         eventTracker,
       });
     });
@@ -85,6 +87,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         getRolesAPIClient: jest.fn(),
+        getPrivilegesAPIClient: jest.fn(),
         eventTracker,
       });
 

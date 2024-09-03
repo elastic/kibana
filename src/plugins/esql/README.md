@@ -4,7 +4,6 @@
 The editor accepts the following properties:
 - query: This is the **AggregateQuery** query. i.e. (`{esql: from index1 | limit 10}`)
 - onTextLangQueryChange: callback that is called every time the query is updated
-- expandCodeEditor: flag that opens the editor on the expanded mode
 - errors: array of `Error`.
 - warning: A string for visualizing warnings
 - onTextLangQuerySubmit: callback that is called when the user submits the query
@@ -17,8 +16,6 @@ import { TextBasedLangEditor } from '@kbn/esql/public';
  <TextBasedLangEditor
   query={query}
   onTextLangQueryChange={onTextLangQueryChange}
-  expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
-  isCodeEditorExpanded={codeEditorIsExpandedFlag}
   errors={props.textBasedLanguageModeErrors}
   isDisabled={false}
   onTextLangQuerySubmit={onTextLangQuerySubmit}

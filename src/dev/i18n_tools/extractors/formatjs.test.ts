@@ -267,6 +267,14 @@ describe('formatJS Runner', () => {
         }
       `);
     });
+
+    it('throws when template literal has a variable', async () => {
+      await expect(async () =>
+        formatJsFixtureRunner('template_literal_var.ts')
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Error parsing file template_literal_var.ts: Error: Template literals with variable substitution is not supported. please pass variables via the 'values' object instead. Message  \`value passed into literal directly (e: \${e.message})\`]`
+      );
+    });
   });
 
   describe('extraction inside react components', () => {

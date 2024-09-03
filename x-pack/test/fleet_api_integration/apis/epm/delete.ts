@@ -7,13 +7,13 @@
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const fleetAndAgents = getService('fleetAndAgents');
   const requiredPackage = 'elastic_agent';
   const pkgVersion = '0.0.7';
 
@@ -31,11 +31,11 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('delete and force delete scenarios', async () => {
+  describe('delete and force delete scenarios', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
+      await fleetAndAgents.setup();
       await installPackage(requiredPackage, pkgVersion);
     });
     after(async () => {

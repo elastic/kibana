@@ -43,8 +43,13 @@ export const getDefaultProfileState = ({
     );
 
     if (validColumns?.length) {
+      const hasAutoWidthColumn = validColumns.some(({ width }) => !width);
       const columns = validColumns.reduce<DiscoverGridSettings['columns']>(
-        (acc, { name, width }) => (width ? { ...acc, [name]: { width } } : acc),
+        (acc, { name, width }, index) => {
+          // Ensure there's at least one auto width column so the columns fill the grid
+          const skipColumnWidth = !hasAutoWidthColumn && index === validColumns.length - 1;
+          return width && !skipColumnWidth ? { ...acc, [name]: { width } } : acc;
+        },
         undefined
       );
 

@@ -472,6 +472,22 @@
             "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "infra",
+            "id": "def-server.InfraRequestHandlerContext.getMetricsIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getMetricsIndices",
+            "description": [],
+            "signature": [
+              "() => Promise<string>"
+            ],
+            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

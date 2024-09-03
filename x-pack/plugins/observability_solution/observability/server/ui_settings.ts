@@ -238,10 +238,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: true,
     description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage: '{betaLabel} Enable the Hosts view in the Infrastructure app.',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-      },
+      defaultMessage: 'Enable the Hosts view in the Infrastructure app.',
     }),
     schema: schema.boolean(),
   },
@@ -354,7 +351,7 @@ export const uiSettings: Record<string, UiSettings> = {
       },
     }),
     schema: schema.boolean(),
-    value: false,
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
   },
