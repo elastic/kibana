@@ -218,5 +218,9 @@
     "@kbn/config",
     "@kbn/cbor",
     "@kbn/zod",
+    // "@kbn/entityManager-plugin",
+    {
+      "path": "../observability_solution/entity_manager/tsconfig.json"
+    },
   ]
 }

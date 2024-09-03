@@ -45,7 +45,6 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
-import type { EntityManagerServerPluginSetup } from '@kbn/entityManager-plugin';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -70,7 +69,6 @@ export interface SecuritySolutionPluginSetupDependencies {
   osquery: OsqueryPluginSetup;
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   unifiedSearch: UnifiedSearchServerPluginSetup;
-  entityManager: EntityManagerServerPluginSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {
