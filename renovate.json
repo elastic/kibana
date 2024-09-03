@@ -504,7 +504,7 @@
       "matchDepNames": ["dotenv", "playwright-chromium, @playwright/test, "],
       "reviewers": ["team:security-engineering-productivity"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team: Sec Eng Productivity", "release_note:skip", "backport:all-open"],
+      "labels": ["Team: SecuritySolution", "release_note:skip", "backport:all-open"],
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
