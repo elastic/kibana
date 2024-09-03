@@ -337,10 +337,6 @@ export const SettingsEditor = (props: Props) => {
             label={i18n.translate('console.settingsPage.refreshingDataLabel', {
               defaultMessage: 'Refresh frequency',
             })}
-            labelWarning={i18n.translate('console.settingsPage.refreshingDataWarningLabel', {
-              defaultMessage:
-                'Console refreshes autocomplete suggestions by querying Elasticsearch. Use less frequent refreshes to reduce bandwidth costs.',
-            })}
           >
             <EuiSuperSelect
               css={{ minWidth: '220px' }}
