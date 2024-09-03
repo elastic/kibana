@@ -158,7 +158,8 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('@ess @serverless @serverlessQA Indicator match type rules, alert suppression', () => {
+  // NOTE: Add to second quality gate after feature is GA
+  describe('@ess @serverless Indicator match type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -211,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const createdRule = await createRule(supertest, log, rule);
           const alerts = await getOpenAlerts(supertest, log, es, createdRule);
-          expect(alerts.hits.hits.length).toEqual(1);
+          expect(alerts.hits.hits).toHaveLength(1);
 
           // suppression start equal to alert timestamp
           const suppressionStart = alerts.hits.hits[0]._source?.[TIMESTAMP];
@@ -2564,7 +2565,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        describe('with asset criticality', async () => {
+        describe('with asset criticality', () => {
           before(async () => {
             await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
             await kibanaServer.uiSettings.update({

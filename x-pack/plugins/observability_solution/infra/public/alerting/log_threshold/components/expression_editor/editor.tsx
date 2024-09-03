@@ -105,7 +105,10 @@ export const ExpressionEditor: React.FC<
           <Editor {...props} />
         </SourceStatusWrapper>
       ) : (
-        <LogViewProvider logViews={logsShared.logViews.client}>
+        <LogViewProvider
+          logViews={logsShared.logViews.client}
+          initialLogViewReference={props.ruleParams.logView}
+        >
           <SourceStatusWrapper {...props}>
             <Editor {...props} />
           </SourceStatusWrapper>
@@ -190,7 +193,7 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   }, [resolvedLogView]);
 
   const updateThreshold = useCallback(
-    (thresholdParams) => {
+    (thresholdParams: any) => {
       const nextThresholdParams = { ...ruleParams.count, ...thresholdParams };
       setRuleParams('count', nextThresholdParams);
     },

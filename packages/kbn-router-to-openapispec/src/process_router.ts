@@ -12,6 +12,7 @@ import { ALLOWED_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/co
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
 import {
+  getXsrfHeaderForMethod,
   assignToPaths,
   extractContentType,
   extractTags,
@@ -19,6 +20,7 @@ import {
   getPathParameters,
   getVersionedContentTypeString,
   getVersionedHeaderParam,
+  mergeResponseContent,
   prepareRoutes,
 } from './util';
 import type { OperationIdCounter } from './operation_id_counter';
@@ -40,7 +42,10 @@ export const processRouter = (
       const validationSchemas = extractValidationSchemaFromRoute(route);
       const contentType = extractContentType(route.options?.body);
 
-      let parameters: undefined | OpenAPIV3.ParameterObject[] = [];
+      const parameters: OpenAPIV3.ParameterObject[] = [
+        getVersionedHeaderParam(SERVERLESS_VERSION_2023_10_31, [SERVERLESS_VERSION_2023_10_31]),
+        ...getXsrfHeaderForMethod(route.method, route.options),
+      ];
       if (validationSchemas) {
         let pathObjects: OpenAPIV3.ParameterObject[] = [];
         let queryObjects: OpenAPIV3.ParameterObject[] = [];
@@ -52,11 +57,7 @@ export const processRouter = (
         if (reqQuery) {
           queryObjects = converter.convertQuery(reqQuery);
         }
-        parameters = [
-          getVersionedHeaderParam(SERVERLESS_VERSION_2023_10_31, [SERVERLESS_VERSION_2023_10_31]),
-          ...pathObjects,
-          ...queryObjects,
-        ];
+        parameters.push(...pathObjects, ...queryObjects);
       }
 
       const operation: OpenAPIV3.OperationObject = {
@@ -102,18 +103,23 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
     const contentType = extractContentType(route.options?.body);
     return Object.entries(validationSchemas).reduce<OpenAPIV3.ResponsesObject>(
       (acc, [statusCode, schema]) => {
-        const oasSchema = converter.convert(schema.body());
+        const newContent = schema.body
+          ? {
+              [getVersionedContentTypeString(
+                SERVERLESS_VERSION_2023_10_31,
+                schema.bodyContentType ? [schema.bodyContentType] : contentType
+              )]: {
+                schema: converter.convert(schema.body()),
+              },
+            }
+          : undefined;
         acc[statusCode] = {
           ...acc[statusCode],
-          content: {
-            ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
-            [getVersionedContentTypeString(
-              SERVERLESS_VERSION_2023_10_31,
-              schema.bodyContentType ? [schema.bodyContentType] : contentType
-            )]: {
-              schema: oasSchema,
-            },
-          },
+          description: schema.description!,
+          ...mergeResponseContent(
+            ((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
+            newContent
+          ),
         };
         return acc;
       },

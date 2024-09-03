@@ -54,12 +54,11 @@ To use {alert-features} in a {kib} app, you must have the appropriate feature pr
 |=== 
 
 | Action | {kib} privileges
-| Give full access to manage alerts, connectors, and rules in *{stack-manage-app}* or *Discover*
+| Give full access to manage alerts, connectors, and rules in *{stack-manage-app}*
 a|
 * `All` for the *Management > {stack-rules-feature}* feature.
 * `All` for the *Management > Rules Settings* feature.
 * `All` for the *Management > {connectors-feature}* feature.
-* `Read` index privileges for the `.alerts-*` system indices
 
 [NOTE]
 ====
@@ -77,12 +76,11 @@ For {observability} rules, you must have `all` privileges for the appropriate {o
 For Security rules, refer to {security-guide}/detections-permissions-section.html[Detections prerequisites and requirements].
 ====
 
-| Give view-only access to alerts, connectors, and rules in  *{stack-manage-app}* or *Discover*
+| Give view-only access to alerts, connectors, and rules in  *{stack-manage-app}*
 a|
 * `Read` for the *Management > {stack-rules-feature}* feature.
 * `Read` for the *Management > Rules Settings* feature.
 * `Read` for the *Management > {connectors-feature}* feature.
-* `Read` index privileges for the `.alerts-*` system indices
 
 [NOTE]
 ====
@@ -93,12 +91,16 @@ For {observability} rules, you must have `read` privileges for the appropriate {
 For Security rules, refer to {security-guide}/detections-permissions-section.html[Detections prerequisites and requirements].
 ====
 
-| Revoke all access to alerts, connectors, and rules in *{stack-manage-app}* or *Discover*
+| Give view-only access to alerts in *Discover* or *Dashboards*
+a|
+* `Read` index privileges for the `.alerts-*` system indices.
+
+| Revoke all access to alerts, connectors, and rules in *{stack-manage-app}*, *Discover*, or *Dashboards*
 a|
 * `None` for the *Management > {stack-rules-feature}* feature.
 * `None` for the *Management > Rules Settings* feature.
 * `None` for the *Management > {connectors-feature}* feature.
-
+* No index privileges for the `.alerts-*` system indices.
 |===
 
 For more information on configuring roles that provide access to features, go to <<kibana-feature-privileges>>.

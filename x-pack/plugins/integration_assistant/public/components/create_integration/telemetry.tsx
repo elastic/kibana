@@ -102,7 +102,7 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
     ({ connector, integrationSettings, durationMs, error }) => {
       telemetry.reportEvent(TelemetryEventType.IntegrationAssistantGenerationComplete, {
         sessionId: sessionData.current.sessionId,
-        sampleRows: integrationSettings?.logsSampleParsed?.length ?? 0,
+        sampleRows: integrationSettings?.logSamples?.length ?? 0,
         actionTypeId: connector.actionTypeId,
         model: getConnectorModel(connector),
         provider: connector.apiProvider ?? 'unknown',
@@ -120,7 +120,7 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
         integrationName,
         integrationDescription: integrationSettings?.description ?? 'unknown',
         dataStreamName: integrationSettings?.dataStreamName ?? 'unknown',
-        inputType: integrationSettings?.inputType ?? 'unknown',
+        inputTypes: integrationSettings?.inputTypes ?? ['unknown'],
         actionTypeId: connector.actionTypeId,
         model: getConnectorModel(connector),
         provider: connector.apiProvider ?? 'unknown',

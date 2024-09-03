@@ -6,6 +6,8 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
@@ -19,6 +21,7 @@ import { createRule } from './create_rule';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 
 interface ImportRuleOptions {
+  actionsClient: ActionsClient;
   rulesClient: RulesClient;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   importRulePayload: ImportRuleArgs;
@@ -26,6 +29,7 @@ interface ImportRuleOptions {
 }
 
 export const importRule = async ({
+  actionsClient,
   rulesClient,
   importRulePayload,
   prebuiltRuleAssetClient,
@@ -57,13 +61,14 @@ export const importRule = async ({
 
     const updatedRule = await rulesClient.update({
       id: existingRule.id,
-      data: convertRuleResponseToAlertingRule(ruleWithUpdates),
+      data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
     });
     return convertAlertingRuleToRuleResponse(updatedRule);
   }
 
   /* Rule does not exist, so we'll create it */
   return createRule({
+    actionsClient,
     rulesClient,
     mlAuthz,
     rule: ruleToImport,

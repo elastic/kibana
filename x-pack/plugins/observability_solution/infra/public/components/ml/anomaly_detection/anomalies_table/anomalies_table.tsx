@@ -27,10 +27,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { BehaviorSubject } from 'rxjs';
+import { type HostsLocatorParams, HOSTS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
+import { HOST_NAME_FIELD } from '../../../../../common/constants';
+import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { FetcherOptions } from '../../../../hooks/use_fetcher';
 import { datemathToEpochMillis } from '../../../../utils/datemath';
 import { useSorting } from '../../../../hooks/use_sorting';
 import { useMetricsK8sAnomaliesResults } from '../../../../pages/metrics/inventory_view/hooks/use_metrics_k8s_anomalies';
@@ -43,7 +47,7 @@ import type {
 import { PaginationControls } from './pagination';
 import { AnomalySummary } from './annomaly_summary';
 import { AnomalySeverityIndicator } from '../../../logging/log_analysis_results/anomaly_severity_indicator';
-import { useSourceContext } from '../../../../containers/metrics_source';
+import { useMetricsDataViewContext, useSourceContext } from '../../../../containers/metrics_source';
 import { createResultsUrl } from '../flyout_home';
 import {
   useWaffleViewState,
@@ -57,6 +61,7 @@ interface JobOption {
   id: JobType;
   label: string;
 }
+
 const AnomalyActionMenu = ({
   jobId,
   type,
@@ -65,19 +70,28 @@ const AnomalyActionMenu = ({
   influencerField,
   influencers,
   disableShowInInventory,
+  hostName,
+  timeRange,
 }: {
   jobId: string;
   type: string;
   startTime: number;
-  closeFlyout: () => void;
+  closeFlyout?: () => void;
   influencerField: string;
   influencers: string[];
   disableShowInInventory?: boolean;
+  hostName?: string;
+  timeRange: { start: string; end: string };
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   const { onViewChange } = useWaffleViewState();
+  const { metricsView } = useMetricsDataViewContext();
+  const {
+    services: { share },
+  } = useKibanaContextForPlugin();
+  const hostsLocator = share.url.locators.get<HostsLocatorParams>(HOSTS_LOCATOR_ID);
 
   const showInInventory = useCallback(() => {
     const metricTypeMap: { [key in Metric]: SnapshotMetricType } = {
@@ -115,7 +129,7 @@ const AnomalyActionMenu = ({
       time: startTime,
     };
     onViewChange({ attributes: anomalyViewParams });
-    closeFlyout();
+    if (closeFlyout) closeFlyout();
   }, [jobId, onViewChange, startTime, type, influencers, influencerField, closeFlyout]);
 
   const anomaliesUrl = useLinkProps({
@@ -124,7 +138,12 @@ const AnomalyActionMenu = ({
   });
 
   const items = [
-    <EuiContextMenuItem key="openInAnomalyExplorer" icon="popout" {...anomaliesUrl}>
+    <EuiContextMenuItem
+      key="openInAnomalyExplorer"
+      icon="popout"
+      data-test-subj="infraAnomalyFlyoutOpenInAnomalyExplorer"
+      {...anomaliesUrl}
+    >
       <FormattedMessage
         id="xpack.infra.ml.anomalyFlyout.actions.openInAnomalyExplorer"
         defaultMessage="Open in Anomaly Explorer"
@@ -133,37 +152,76 @@ const AnomalyActionMenu = ({
   ];
 
   if (!disableShowInInventory) {
-    items.push(
-      <EuiContextMenuItem key="showInInventory" icon="search" onClick={showInInventory}>
+    const buildFilter = buildCombinedAssetFilter({
+      field: HOST_NAME_FIELD,
+      values: influencers,
+      dataView: metricsView?.dataViewReference,
+    });
+
+    let newFilter: Filter[] = [];
+    if (!Array.isArray(buildFilter)) {
+      newFilter = [buildFilter];
+    }
+
+    const showInHostsItem = !hostName ? (
+      <EuiContextMenuItem
+        key="showAffectedHosts"
+        icon="search"
+        data-test-subj="infraAnomalyFlyoutShowAffectedHosts"
+        href={hostsLocator?.getRedirectUrl({
+          dateRange: {
+            from: timeRange.start,
+            to: timeRange.end,
+          },
+          filters: newFilter,
+        })}
+      >
         <FormattedMessage
-          id="xpack.infra.ml.anomalyFlyout.actions.showInInventory"
-          defaultMessage="Show in Inventory"
+          id="xpack.infra.ml.anomalyFlyout.actions.showAffectedHosts"
+          defaultMessage="Show affected Hosts"
         />
       </EuiContextMenuItem>
+    ) : (
+      <></>
+    );
+
+    items.push(
+      influencerField === HOST_NAME_FIELD ? (
+        showInHostsItem
+      ) : (
+        <EuiContextMenuItem
+          icon="search"
+          data-test-subj="infraAnomalyFlyoutShowInInventory"
+          onClick={showInInventory}
+        >
+          <FormattedMessage
+            id="xpack.infra.ml.anomalyFlyout.actions.showInInventory"
+            defaultMessage="Show in Inventory"
+          />
+        </EuiContextMenuItem>
+      )
     );
   }
 
   return (
-    <>
-      <EuiPopover
-        anchorPosition="downRight"
-        panelPaddingSize="none"
-        button={
-          <EuiButtonIcon
-            data-test-subj="infraAnomalyActionMenuButton"
-            iconType="boxesHorizontal"
-            onClick={handleToggleMenu}
-            aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
-              defaultMessage: 'Open',
-            })}
-          />
-        }
-        isOpen={isOpen}
-        closePopover={close}
-      >
-        <EuiContextMenuPanel items={items} />
-      </EuiPopover>
-    </>
+    <EuiPopover
+      anchorPosition="downRight"
+      panelPaddingSize="none"
+      button={
+        <EuiButtonIcon
+          data-test-subj="infraAnomalyActionMenuButton"
+          iconType="boxesHorizontal"
+          onClick={handleToggleMenu}
+          aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
+            defaultMessage: 'Open',
+          })}
+        />
+      }
+      isOpen={isOpen}
+      closePopover={close}
+    >
+      <EuiContextMenuPanel items={items} />
+    </EuiPopover>
   );
 };
 export const NoAnomaliesFound = () => {
@@ -195,14 +253,14 @@ export const NoAnomaliesFound = () => {
     </div>
   );
 };
-interface Props {
-  closeFlyout(): void;
+export interface Props {
+  closeFlyout?(): void;
   hostName?: string;
   dateRange?: TimeRange;
   // In case the date picker is managed outside this component
   hideDatePicker?: boolean;
   // subject to watch the completition of the request
-  request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>;
+  fetcherOpts?: Pick<FetcherOptions, 'autoFetch' | 'requestObservable$'>;
   hideSelectGroup?: boolean;
 }
 
@@ -216,7 +274,7 @@ export const AnomaliesTable = ({
   hostName,
   dateRange = DEFAULT_DATE_RANGE,
   hideDatePicker = false,
-  request$,
+  fetcherOpts,
   hideSelectGroup,
 }: Props) => {
   const [search, setSearch] = useState('');
@@ -290,8 +348,11 @@ export const AnomaliesTable = ({
         field: (sorting?.field || 'startTime') as SortField,
       },
       defaultPaginationOptions: { pageSize: 10 },
+      search,
+      hostName,
     };
-  }, [getTimeRange, anomalyThreshold, sorting?.direction, sorting?.field]);
+  }, [anomalyThreshold, getTimeRange, hostName, search, sorting?.direction, sorting?.field]);
+
   const {
     metricsHostsAnomalies,
     getMetricsHostsAnomalies,
@@ -300,67 +361,71 @@ export const AnomaliesTable = ({
     fetchNextPage: hostFetchNextPage,
     fetchPreviousPage: hostFetchPrevPage,
     isPendingMetricsHostsAnomalies: hostLoading,
-  } = useMetricsHostsAnomaliesResults(anomalyParams);
+  } = useMetricsHostsAnomaliesResults(anomalyParams, {
+    request$: fetcherOpts?.requestObservable$,
+    active: jobType === 'hosts' && fetcherOpts?.autoFetch,
+  });
   const {
     metricsK8sAnomalies,
     getMetricsK8sAnomalies,
     page: k8sPage,
     changeSortOptions: k8sChangeSort,
     fetchNextPage: k8sFetchNextPage,
-    fetchPreviousPage: k8sPreviousPage,
+    fetchPreviousPage: k8sFetchPrevPage,
     isPendingMetricsK8sAnomalies: k8sLoading,
-  } = useMetricsK8sAnomaliesResults(anomalyParams);
-  const page = useMemo(
-    () => (jobType === 'hosts' ? hostPage : k8sPage),
-    [jobType, hostPage, k8sPage]
-  );
-  const isLoading = useMemo(
-    () => (jobType === 'hosts' ? hostLoading : k8sLoading),
-    [jobType, hostLoading, k8sLoading]
-  );
-  const fetchNextPage = useMemo(
-    () => (jobType === 'hosts' ? hostFetchNextPage : k8sFetchNextPage),
-    [jobType, hostFetchNextPage, k8sFetchNextPage]
-  );
-  const fetchPreviousPage = useMemo(
-    () => (jobType === 'hosts' ? hostFetchPrevPage : k8sPreviousPage),
-    [jobType, hostFetchPrevPage, k8sPreviousPage]
-  );
+  } = useMetricsK8sAnomaliesResults(anomalyParams, {
+    request$: fetcherOpts?.requestObservable$,
+    active: jobType === 'k8s' && fetcherOpts?.autoFetch,
+  });
 
-  const getAnomalies = useMemo(() => {
-    if (jobType === 'hosts') {
-      return getMetricsHostsAnomalies;
-    } else if (jobType === 'k8s') {
-      return getMetricsK8sAnomalies;
-    }
-  }, [jobType, getMetricsK8sAnomalies, getMetricsHostsAnomalies]);
+  const { page, isLoading, fetchNextPage, fetchPreviousPage, results, fetchAnomalies, handleSort } =
+    useMemo(() => {
+      const isHost = jobType === 'hosts';
+      return {
+        page: isHost ? hostPage : k8sPage,
+        isLoading: isHost ? hostLoading : k8sLoading,
+        fetchNextPage: isHost ? hostFetchNextPage : k8sFetchNextPage,
+        fetchPreviousPage: isHost ? hostFetchPrevPage : k8sFetchPrevPage,
+        results: isHost ? metricsHostsAnomalies : metricsK8sAnomalies,
+        fetchAnomalies: isHost ? getMetricsHostsAnomalies : getMetricsK8sAnomalies,
+        handleSort: isHost ? hostChangeSort : k8sChangeSort,
+      };
+    }, [
+      jobType,
+      hostPage,
+      k8sPage,
+      hostLoading,
+      k8sLoading,
+      hostFetchNextPage,
+      k8sFetchNextPage,
+      hostFetchPrevPage,
+      k8sFetchPrevPage,
+      metricsHostsAnomalies,
+      metricsK8sAnomalies,
+      getMetricsHostsAnomalies,
+      getMetricsK8sAnomalies,
+      hostChangeSort,
+      k8sChangeSort,
+    ]);
 
-  const results = useMemo(() => {
-    if (jobType === 'hosts') {
-      return metricsHostsAnomalies;
-    } else {
-      return metricsK8sAnomalies;
-    }
-  }, [jobType, metricsHostsAnomalies, metricsK8sAnomalies]);
+  useEffect(() => {
+    fetchAnomalies();
+  }, [jobType, fetchAnomalies]);
 
   const onSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   }, []);
 
-  const changeJobType = useCallback((selectedOptions) => {
+  const changeJobType = useCallback((selectedOptions: any) => {
     setSelectedJobType(selectedOptions);
     setJobType(selectedOptions[0].id);
   }, []);
 
   const changeSortOptions = useCallback(
     (nextSortOptions: Sort) => {
-      if (jobType === 'hosts') {
-        hostChangeSort(nextSortOptions);
-      } else {
-        k8sChangeSort(nextSortOptions);
-      }
+      handleSort(nextSortOptions);
     },
-    [hostChangeSort, k8sChangeSort, jobType]
+    [handleSort]
   );
 
   useEffect(() => {
@@ -381,7 +446,7 @@ export const AnomaliesTable = ({
     });
   };
 
-  let columns: Array<
+  const columns: Array<
     | EuiTableFieldDataColumnType<MetricsHostsAnomaly>
     | EuiTableActionsColumnType<MetricsHostsAnomaly>
   > = [
@@ -434,6 +499,7 @@ export const AnomaliesTable = ({
       textOnly: true,
       truncateText: true,
       render: (influencers: string[]) => influencers.join(','),
+      'data-test-subj': 'nodeNameRow',
     },
     {
       name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnActionsName', {
@@ -454,6 +520,8 @@ export const AnomaliesTable = ({
                 influencers={anomaly.influencers}
                 startTime={anomaly.startTime}
                 closeFlyout={closeFlyout}
+                hostName={hostName}
+                timeRange={timeRange}
               />
             );
           },
@@ -462,24 +530,9 @@ export const AnomaliesTable = ({
     },
   ];
 
-  columns = hostName
-    ? columns.filter((c) => {
-        if ('field' in c) {
-          return c.field !== 'influencers';
-        }
-        return true;
-      })
+  const filteredColumns = hostName
+    ? columns.filter((c) => !('field' in c && c.field === 'influencers'))
     : columns;
-
-  useEffect(() => {
-    if (getAnomalies) {
-      if (request$) {
-        request$.next(() => getAnomalies(undefined, search, hostName));
-      } else {
-        getAnomalies(undefined, search, hostName);
-      }
-    }
-  }, [getAnomalies, hostName, request$, search]);
 
   return (
     <EuiFlexGroup direction="column">
@@ -530,7 +583,7 @@ export const AnomaliesTable = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBasicTable<MetricsHostsAnomaly>
-          columns={columns}
+          columns={filteredColumns}
           items={results}
           sorting={{ sort: sorting }}
           onChange={onTableChange}

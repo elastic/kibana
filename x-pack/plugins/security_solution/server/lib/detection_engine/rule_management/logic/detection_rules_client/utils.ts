@@ -22,12 +22,12 @@ export const toggleRuleEnabledOnUpdate = async (
   updatedRule: RuleResponse
 ): Promise<{ enabled: boolean }> => {
   if (existingRule.enabled && !updatedRule.enabled) {
-    await rulesClient.disable({ id: existingRule.id });
+    await rulesClient.disableRule({ id: existingRule.id });
     return { enabled: false };
   }
 
   if (!existingRule.enabled && updatedRule.enabled) {
-    await rulesClient.enable({ id: existingRule.id });
+    await rulesClient.enableRule({ id: existingRule.id });
     return { enabled: true };
   }
 

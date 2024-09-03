@@ -11,8 +11,21 @@ import { mount } from 'enzyme';
 import { ExceptionsViewerUtility } from './utility_bar';
 import { TestProviders } from '../../../../common/mock';
 
-// FLAKY: https://github.com/elastic/kibana/issues/185023
-describe.skip('ExceptionsViewerUtility', () => {
+jest.mock('@kbn/i18n-react', () => {
+  const { i18n } = jest.requireActual('@kbn/i18n');
+  i18n.init({ locale: 'en' });
+
+  const originalModule = jest.requireActual('@kbn/i18n-react');
+  const FormattedRelative = jest.fn();
+  FormattedRelative.mockImplementation(() => '20 hours ago');
+
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
+
+describe('ExceptionsViewerUtility', () => {
   it('it renders correct item counts', () => {
     const wrapper = mount(
       <TestProviders>
@@ -55,7 +68,7 @@ describe.skip('ExceptionsViewerUtility', () => {
     );
 
     expect(wrapper.find('[data-test-subj="exceptionsViewerLastUpdated"]').at(0).text()).toEqual(
-      'Updated now'
+      'Updated 20 hours ago'
     );
   });
 });

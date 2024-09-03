@@ -30,7 +30,7 @@ export const RankAggregationSection: React.FC = () => {
               <h2>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.aiSearch.rankAggregationSection.title"
-                  defaultMessage="Use a rank aggregation method"
+                  defaultMessage="Hybrid search"
                 />
               </h2>
             </EuiTitle>
@@ -40,7 +40,7 @@ export const RankAggregationSection: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.aiSearch.rankAggregationSection.description"
-                  defaultMessage="Optional methods for fusing or combining different rankings to achieve better overall ranking performance."
+                  defaultMessage="Combine rankings from different search algorithms for superior overall relevance. For example, combine the results of keyword search and dense or sparse vector search."
                 />
               </p>
             </EuiText>

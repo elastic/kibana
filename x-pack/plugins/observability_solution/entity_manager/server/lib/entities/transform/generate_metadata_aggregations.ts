@@ -7,6 +7,7 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 import { ENTITY_DEFAULT_METADATA_LIMIT } from '../../../../common/constants_entities';
+import { calculateOffset } from '../helpers/calculate_offset';
 
 export function generateHistoryMetadataAggregations(definition: EntityDefinition) {
   if (!definition.metadata) {
@@ -31,14 +32,16 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
     return {};
   }
 
+  const offsetInSeconds = calculateOffset(definition);
+
   return definition.metadata.reduce(
     (aggs, metadata) => ({
       ...aggs,
       [`entity.metadata.${metadata.destination}`]: {
         filter: {
           range: {
-            'event.ingested': {
-              gte: `now-${definition.history.interval.toJSON()}`,
+            '@timestamp': {
+              gte: `now-${offsetInSeconds}s`,
             },
           },
         },

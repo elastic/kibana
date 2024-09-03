@@ -10,6 +10,7 @@ import fetch from 'node-fetch';
 import pRetry from 'p-retry';
 import { Logger } from '../../utils/create_logger';
 import { kibanaHeaders } from '../../shared/client_headers';
+import { getFetchAgent } from '../../../cli/utils/ssl';
 
 export class ApmSynthtraceKibanaClient {
   private readonly logger: Logger;
@@ -34,6 +35,7 @@ export class ApmSynthtraceKibanaClient {
     const response = await fetch(url, {
       method: 'GET',
       headers: kibanaHeaders(),
+      agent: getFetchAgent(url),
     });
 
     const responseJson = await response.json();
@@ -62,6 +64,7 @@ export class ApmSynthtraceKibanaClient {
           method: 'POST',
           headers: kibanaHeaders(),
           body: '{"force":true}',
+          agent: getFetchAgent(url),
         });
 
         if (!res.ok) {
@@ -109,6 +112,7 @@ export class ApmSynthtraceKibanaClient {
           method: 'DELETE',
           headers: kibanaHeaders(),
           body: '{"force":true}',
+          agent: getFetchAgent(url),
         });
 
         if (!res.ok) {

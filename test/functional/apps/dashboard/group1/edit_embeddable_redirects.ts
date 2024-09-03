@@ -36,7 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('redirects via save and return button after edit', async () => {
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.visualize.saveVisualizationAndReturn();
     });
@@ -45,7 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newTitle = 'wowee, looks like I have a new title';
       await PageObjects.header.waitUntilLoadingHasFinished();
       const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: false,
@@ -62,7 +60,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newTitle = 'wowee, my title just got cooler';
       await PageObjects.header.waitUntilLoadingHasFinished();
       const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,
@@ -78,8 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('loses originatingApp connection after save as when redirectToOrigin is false', async () => {
       const newTitle = 'wowee, my title just got cooler again';
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.clickEdit();
+      await dashboardPanelActions.editPanelByTitle('wowee, my title just got cooler');
       await PageObjects.visualize.linkedToOriginatingApp();
       await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,

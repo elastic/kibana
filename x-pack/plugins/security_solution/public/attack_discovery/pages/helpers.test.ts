@@ -87,6 +87,7 @@ describe('helpers', () => {
   describe('showEmptyPrompt', () => {
     it('returns true when isLoading is false and attackDiscoveriesCount is 0', () => {
       const result = showEmptyPrompt({
+        aiConnectorsCount: 1,
         attackDiscoveriesCount: 0,
         isLoading: false,
       });
@@ -94,8 +95,29 @@ describe('helpers', () => {
       expect(result).toBe(true);
     });
 
+    it('returns false when isLoading is false and attackDiscoveriesCount is 0 and aiConnectorsCount is null', () => {
+      const result = showEmptyPrompt({
+        aiConnectorsCount: null,
+        attackDiscoveriesCount: 0,
+        isLoading: false,
+      });
+
+      expect(result).toBe(false);
+    });
+
     it('returns false when isLoading is true', () => {
       const result = showEmptyPrompt({
+        aiConnectorsCount: 1,
+        attackDiscoveriesCount: 0,
+        isLoading: true,
+      });
+
+      expect(result).toBe(false);
+    });
+
+    it('returns false when isLoading is true and aiConnectorsCount is null', () => {
+      const result = showEmptyPrompt({
+        aiConnectorsCount: null,
         attackDiscoveriesCount: 0,
         isLoading: true,
       });
@@ -105,6 +127,17 @@ describe('helpers', () => {
 
     it('returns false when attackDiscoveriesCount is greater than 0', () => {
       const result = showEmptyPrompt({
+        aiConnectorsCount: 1,
+        attackDiscoveriesCount: 4,
+        isLoading: false,
+      });
+
+      expect(result).toBe(false);
+    });
+
+    it('returns false when attackDiscoveriesCount is greater than 0 and aiConnectorsCount is null', () => {
+      const result = showEmptyPrompt({
+        aiConnectorsCount: null,
         attackDiscoveriesCount: 4,
         isLoading: false,
       });

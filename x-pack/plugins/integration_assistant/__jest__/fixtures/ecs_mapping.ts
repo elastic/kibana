@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 export const ecsMappingExpectedResults = {
   mapping: {
     mysql_enterprise: {
@@ -91,7 +92,7 @@ export const ecsMappingExpectedResults = {
           description: 'Ensures the date processor does not receive an array value.',
           lang: 'painless',
           source:
-            'if (ctx.mysql_enterprise.audit.timestamp instanceof ArrayList){\n    ctx.mysql_enterprise.audit.timestamp = ctx.mysql_enterprise.audit.timestamp[0];\n}\n',
+            'if (ctx.mysql_enterprise?.audit?.timestamp != null &&\n    ctx.mysql_enterprise.audit.timestamp instanceof ArrayList){\n    ctx.mysql_enterprise.audit.timestamp = ctx.mysql_enterprise.audit.timestamp[0];\n}\n',
           tag: 'script_convert_array_to_string',
         },
       },
@@ -441,18 +442,23 @@ export const ecsTestState = {
   ecs: 'teststring',
   exAnswer: 'testanswer',
   finalized: false,
+  chunkSize: 30,
   currentPipeline: { test: 'testpipeline' },
   duplicateFields: [],
   missingKeys: [],
   invalidEcsFields: [],
+  finalMapping: { test: 'testmapping' },
+  sampleChunks: [''],
   results: { test: 'testresults' },
-  logFormat: 'testlogformat',
+  samplesFormat: 'testsamplesFormat',
   ecsVersion: 'testversion',
+  chunkMapping: { test1: 'test1' },
+  useFinalMapping: false,
   currentMapping: { test1: 'test1' },
   lastExecutedChain: 'testchain',
   rawSamples: ['{"test1": "test1"}'],
-  samples: ['{ "test1": "test1" }'],
+  prefixedSamples: ['{ "test1": "test1" }'],
   packageName: 'testpackage',
   dataStreamName: 'testDataStream',
-  formattedSamples: '{"test1": "test1"}',
+  combinedSamples: '{"test1": "test1"}',
 };

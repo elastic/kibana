@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useMountedState from 'react-use/lib/useMountedState';
 
 import {
+  DropResult,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -101,7 +102,7 @@ const LinksEditor = ({
   }, [initialLinks]);
 
   const onDragEnd = useCallback(
-    ({ source, destination }) => {
+    ({ source, destination }: DropResult) => {
       if (source && destination) {
         const newList = euiDragDropReorder(orderedLinks, source.index, destination.index).map(
           (link, i) => {
@@ -175,7 +176,12 @@ const LinksEditor = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody
+        // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
+        // `transform: translateZ(0)` workaround for the mask image bug in Chromium.
+        // https://github.com/elastic/eui/pull/7855.
+        css={{ '.euiFlyoutBody__overflow': { transform: 'none' } }}
+      >
         <EuiForm fullWidth>
           <EuiFormRow label={LinksStrings.editor.panelEditor.getLayoutSettingsTitle()}>
             <EuiButtonGroup

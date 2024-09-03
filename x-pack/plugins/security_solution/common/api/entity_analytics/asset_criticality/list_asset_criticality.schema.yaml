@@ -1,19 +1,16 @@
+# ⚠️ Updating this file? Also update the public API docs at https://github.com/elastic/security-docs/tree/main/docs/advanced-entity-analytics/api
 openapi: 3.0.0
 info:
-  version: '1'
+  version: '2023-10-31'
   title: Asset Criticality List Schema
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/asset_criticality/list:
-    post:
+    get:
       x-labels: [ess, serverless]
-      summary: List asset criticality data, filtering and sorting as needed
+      x-codegen-enabled: true
+      operationId: FindAssetCriticalityRecords
+      summary: List Asset Criticality Records
+      description: List asset criticality records, paging, sorting and filtering as needed.
       parameters:
         - name: sort_field
           in: query
@@ -26,7 +23,7 @@ paths:
               - criticality_level
               - \@timestamp
           description: The field to sort by.
-        - name: sort_order
+        - name: sort_direction
           in: query
           required: false
           schema:
@@ -62,31 +59,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssetCriticalityListResponse'
-
-components:
-  schemas:
-    AssetCriticalityListResponse:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: './common.schema.yaml#/components/schemas/AssetCriticalityRecord'
-        page:
-          type: integer
-          minimum: 1
-        per_page:
-          type: integer
-          minimum: 1
-          maximum: 1000
-        total:
-          type: integer
-          minimum: 0
-      required:
-        - records
-        - page
-        - per_page
-        - total
-
-    
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      $ref: './common.schema.yaml#/components/schemas/AssetCriticalityRecord'
+                  page:
+                    type: integer
+                    minimum: 1
+                  per_page:
+                    type: integer
+                    minimum: 1
+                    maximum: 1000
+                  total:
+                    type: integer
+                    minimum: 0
+                required:
+                  - records
+                  - page
+                  - per_page
+                  - total

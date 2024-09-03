@@ -31,8 +31,14 @@ export interface FleetConfigType {
     };
   };
   agentless?: {
+    enabled: boolean;
     api: {
       url: string;
+      tls: {
+        certificate: string;
+        key: string;
+        ca: string;
+      };
     };
   };
   spaceSettings?: Array<{

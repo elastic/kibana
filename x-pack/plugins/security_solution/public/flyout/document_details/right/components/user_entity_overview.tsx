@@ -39,7 +39,7 @@ import { RiskScoreLevel } from '../../../../entity_analytics/components/severity
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-
+import { useKibana } from '../../../../common/lib/kibana';
 import {
   USER_DOMAIN,
   LAST_SEEN,
@@ -80,8 +80,9 @@ export const USER_PREVIEW_BANNER = {
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
   const { eventId, indexName, scopeId } = useDocumentDetailsContext();
   const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
+  const { telemetry } = useKibana().services;
 
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
@@ -104,7 +105,11 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         banner: USER_PREVIEW_BANNER,
       },
     });
-  }, [openPreviewPanel, userName, scopeId]);
+    telemetry.reportDetailsFlyoutOpened({
+      location: scopeId,
+      panel: 'preview',
+    });
+  }, [openPreviewPanel, userName, scopeId, telemetry]);
 
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();

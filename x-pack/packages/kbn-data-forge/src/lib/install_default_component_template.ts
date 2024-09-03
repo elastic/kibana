@@ -36,7 +36,7 @@ export async function installDefaultComponentTemplate(
 ) {
   logger.info('Installing base component template: kbn-data-forge_base');
   await client.cluster.putComponentTemplate({
-    name: `kbn-data-forge_base`,
+    name: `kbn-data-forge@mappings`,
     ...eventIngestedCommonComponentTemplate,
   });
 }

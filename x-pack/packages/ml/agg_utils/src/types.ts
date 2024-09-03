@@ -122,7 +122,7 @@ type SignificantItemTypeKeys = keyof typeof SIGNIFICANT_ITEM_TYPE;
 /**
  * Represents the type of significant item as determined by the SIGNIFICANT_ITEM_TYPE enumeration.
  */
-export type SignificantItemType = typeof SIGNIFICANT_ITEM_TYPE[SignificantItemTypeKeys];
+export type SignificantItemType = (typeof SIGNIFICANT_ITEM_TYPE)[SignificantItemTypeKeys];
 
 /**
  * Represents significant item metadata for a field/value pair.
@@ -180,24 +180,12 @@ interface SignificantItemHistogramItemBase {
 }
 
 /**
- * @deprecated since version 2 of internal log rate analysis REST API endpoint
+ * Represents a data item in a significant term histogram.
  */
-interface SignificantItemHistogramItemV1 extends SignificantItemHistogramItemBase {
-  /** The document count for this item in the significant term context. */
-  doc_count_significant_term: number;
-}
-
-interface SignificantItemHistogramItemV2 extends SignificantItemHistogramItemBase {
+export interface SignificantItemHistogramItem extends SignificantItemHistogramItemBase {
   /** The document count for this histogram item in the significant item context. */
   doc_count_significant_item: number;
 }
-
-/**
- * Represents a data item in a significant term histogram.
- */
-export type SignificantItemHistogramItem =
-  | SignificantItemHistogramItemV1
-  | SignificantItemHistogramItemV2;
 
 /**
  * Represents histogram data for a field/value pair.

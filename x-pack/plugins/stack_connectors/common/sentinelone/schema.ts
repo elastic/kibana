@@ -169,7 +169,7 @@ export const SentinelOneGetRemoteScriptsParamsSchema = schema.object({
 });
 
 export const SentinelOneFetchAgentFilesParamsSchema = schema.object({
-  agentUUID: schema.string({ minLength: 1 }),
+  agentId: schema.string({ minLength: 1 }),
   zipPassCode: schema.string({ minLength: 10 }),
   files: schema.arrayOf(schema.string({ minLength: 1 })),
 });
@@ -187,7 +187,7 @@ export const SentinelOneFetchAgentFilesResponseSchema = schema.object({
 });
 
 export const SentinelOneDownloadAgentFileParamsSchema = schema.object({
-  agentUUID: schema.string({ minLength: 1 }),
+  agentId: schema.string({ minLength: 1 }),
   activityId: schema.string({ minLength: 1 }),
 });
 
@@ -375,6 +375,24 @@ export const SentinelOneExecuteScriptResponseSchema = schema.object({
   ),
 });
 
+export const SentinelOneGetRemoteScriptResultsParamsSchema = schema.object({
+  taskIds: schema.arrayOf(schema.string()),
+});
+
+export const SentinelOneGetRemoteScriptResultsResponseSchema = schema.object(
+  {
+    errors: schema.nullable(schema.arrayOf(schema.object({ type: schema.string() }))),
+    data: schema.any(),
+  },
+  { unknowns: 'allow' }
+);
+
+export const SentinelOneDownloadRemoteScriptResultsParamsSchema = schema.object({
+  taskId: schema.string({ minLength: 1 }),
+});
+
+export const SentinelOneDownloadRemoteScriptResultsResponseSchema = schema.stream();
+
 export const SentinelOneGetRemoteScriptStatusParamsSchema = schema.object(
   {
     parentTaskId: schema.string(),
@@ -388,39 +406,7 @@ export const SentinelOneGetRemoteScriptStatusResponseSchema = schema.object({
     nextCursor: schema.nullable(schema.string()),
   }),
   errors: schema.nullable(schema.arrayOf(schema.object({ type: schema.string() }))),
-  data: schema.arrayOf(
-    schema.object(
-      {
-        agentIsDecommissioned: schema.nullable(schema.boolean()),
-        agentComputerName: schema.nullable(schema.string()),
-        status: schema.nullable(schema.string()),
-        groupName: schema.nullable(schema.string()),
-        initiatedById: schema.nullable(schema.string()),
-        parentTaskId: schema.nullable(schema.string()),
-        updatedAt: schema.nullable(schema.string()),
-        createdAt: schema.nullable(schema.string()),
-        agentIsActive: schema.nullable(schema.boolean()),
-        agentOsType: schema.nullable(schema.string()),
-        agentMachineType: schema.nullable(schema.string()),
-        id: schema.nullable(schema.string()),
-        siteName: schema.nullable(schema.string()),
-        detailedStatus: schema.nullable(schema.string()),
-        siteId: schema.nullable(schema.string()),
-        scriptResultsSignature: schema.nullable(schema.nullable(schema.string())),
-        initiatedBy: schema.nullable(schema.string()),
-        accountName: schema.nullable(schema.string()),
-        groupId: schema.nullable(schema.string()),
-        agentUuid: schema.nullable(schema.string()),
-        accountId: schema.nullable(schema.string()),
-        type: schema.nullable(schema.string()),
-        scriptResultsPath: schema.nullable(schema.string()),
-        scriptResultsBucket: schema.nullable(schema.string()),
-        description: schema.nullable(schema.string()),
-        agentId: schema.nullable(schema.string()),
-      },
-      { unknowns: 'allow' }
-    )
-  ),
+  data: schema.arrayOf(schema.mapOf(schema.string(), schema.any())),
 });
 
 export const SentinelOneBaseFilterSchema = schema.object({
@@ -576,17 +562,9 @@ export const SentinelOneBaseFilterSchema = schema.object({
   alertIds: AlertIds,
 });
 
-export const SentinelOneKillProcessParamsSchema = SentinelOneBaseFilterSchema.extends({
-  processName: schema.string(),
-});
-
 export const SentinelOneIsolateHostParamsSchema = SentinelOneBaseFilterSchema;
 
 export const SentinelOneGetAgentsParamsSchema = SentinelOneBaseFilterSchema;
-
-export const SentinelOneGetRemoteScriptsStatusParams = schema.object({
-  parentTaskId: schema.string(),
-});
 
 export const SentinelOneIsolateHostSchema = schema.object({
   subAction: schema.literal(SUB_ACTION.ISOLATE_HOST),

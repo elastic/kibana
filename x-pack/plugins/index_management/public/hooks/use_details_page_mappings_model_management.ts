@@ -10,8 +10,6 @@ import { ModelDownloadState, TrainedModelStat } from '@kbn/ml-plugin/common/type
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   LATEST_ELSER_VERSION,
-  InferenceServiceSettings,
-  LocalInferenceServiceSettings,
   LATEST_ELSER_MODEL_ID,
   LATEST_E5_MODEL_ID,
   ElserVersion,
@@ -19,13 +17,10 @@ import {
 import { useCallback } from 'react';
 import { AppDependencies, useAppContext } from '../application/app_context';
 import { InferenceToModelIdMap } from '../application/components/mappings_editor/components/document_fields/fields';
+import { isLocalModel } from '../application/components/mappings_editor/lib/utils';
 import { useDispatch } from '../application/components/mappings_editor/mappings_state_context';
 import { DefaultInferenceModels } from '../application/components/mappings_editor/types';
 import { getInferenceEndpoints } from '../application/services/api';
-
-function isLocalModel(model: InferenceServiceSettings): model is LocalInferenceServiceSettings {
-  return Boolean((model as LocalInferenceServiceSettings).service_settings.model_id);
-}
 
 const getCustomInferenceIdMap = (
   models: InferenceAPIConfigResponse[],
@@ -37,11 +32,11 @@ const getCustomInferenceIdMap = (
   const inferenceIdMap = models.reduce<InferenceToModelIdMap>((inferenceMap, model) => {
     const inferenceEntry = isLocalModel(model)
       ? {
-          trainedModelId: model.service_settings.model_id, // third-party models don't have trained model ids
+          trainedModelId: model.service_settings.model_id,
           isDeployable: model.service === Service.elser || model.service === Service.elasticsearch,
-          isDeployed: modelStatsById[model.service_settings.model_id]?.state === 'started',
+          isDeployed: modelStatsById[model.inference_id]?.state === 'started',
           isDownloading: Boolean(downloadStates[model.service_settings.model_id]),
-          modelStats: modelStatsById[model.service_settings.model_id],
+          modelStats: modelStatsById[model.inference_id],
         }
       : {
           trainedModelId: '',
@@ -50,7 +45,7 @@ const getCustomInferenceIdMap = (
           isDownloading: false,
           modelStats: undefined,
         };
-    inferenceMap[model.model_id] = inferenceEntry;
+    inferenceMap[model.inference_id] = inferenceEntry;
     return inferenceMap;
   }, {});
   const defaultInferenceIds = {
@@ -109,7 +104,7 @@ export const useDetailsPageMappingsModelManagement = () => {
         Record<string, TrainedModelStat['deployment_stats'] | undefined>
       >((acc, { model_id: modelId, deployment_stats: stats }) => {
         if (modelId && stats) {
-          acc[modelId] = stats;
+          acc[stats.deployment_id] = stats;
         }
         return acc;
       }, {}) || {};

@@ -29,7 +29,7 @@ export const CHANGE_POINT_TYPES = {
   INDETERMINABLE: 'indeterminable',
 } as const;
 
-export type ChangePointType = typeof CHANGE_POINT_TYPES[keyof typeof CHANGE_POINT_TYPES];
+export type ChangePointType = (typeof CHANGE_POINT_TYPES)[keyof typeof CHANGE_POINT_TYPES];
 
 export const EXCLUDED_CHANGE_POINT_TYPES = new Set<ChangePointType>([
   CHANGE_POINT_TYPES.STATIONARY,

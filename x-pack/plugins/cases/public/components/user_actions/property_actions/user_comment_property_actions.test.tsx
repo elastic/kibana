@@ -32,6 +32,10 @@ describe('UserCommentPropertyActions', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(async () => {
+    await appMock.clearQueryCache();
+  });
+
   it('renders the correct number of actions', async () => {
     appMock.render(<UserCommentPropertyActions {...props} />);
 

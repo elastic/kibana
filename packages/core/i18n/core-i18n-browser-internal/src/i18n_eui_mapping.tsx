@@ -725,6 +725,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFieldPassword.maskPassword': i18n.translate('core.euiFieldPassword.maskPassword', {
       defaultMessage: 'Mask password',
     }),
+    'euiFieldSearch.clearSearchButtonLabel': i18n.translate(
+      'core.euiFieldSearch.clearSearchButtonLabel',
+      { defaultMessage: 'Clear search input' }
+    ),
     'euiFilePicker.removeSelectedAriaLabel': i18n.translate(
       'core.euiFilePicker.removeSelectedAriaLabel',
       {
@@ -1312,9 +1316,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Currently set to {timeTense} {timeValue} {timeUnit}.',
         values: { timeTense, timeValue, timeUnit },
       }),
-    'euiQuickSelect.legendText': i18n.translate('core.euiQuickSelect.legendText', {
-      defaultMessage: 'Quick select a time range',
-    }),
     'euiQuickSelect.nextLabel': i18n.translate('core.euiQuickSelect.nextLabel', {
       defaultMessage: 'Next time window',
     }),
@@ -1339,8 +1340,20 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiRecentlyUsed.legend': i18n.translate('core.euiRecentlyUsed.legend', {
       defaultMessage: 'Recently used date ranges',
     }),
-    'euiRefreshInterval.legend': i18n.translate('core.euiRefreshInterval.legend', {
+    'euiRefreshInterval.toggleLabel': i18n.translate('core.euiRefreshInterval.toggleLabel', {
       defaultMessage: 'Refresh every',
+    }),
+    'euiRefreshInterval.toggleAriaLabel': i18n.translate(
+      'core.euiRefreshInterval.toggleAriaLabel',
+      {
+        defaultMessage: 'Toggle refresh',
+      }
+    ),
+    'euiRefreshInterval.valueAriaLabel': i18n.translate('core.euiRefreshInterval.valueAriaLabel', {
+      defaultMessage: 'Refresh interval value',
+    }),
+    'euiRefreshInterval.unitsAriaLabel': i18n.translate('core.euiRefreshInterval.unitsAriaLabel', {
+      defaultMessage: 'Refresh interval units',
     }),
     'euiRefreshInterval.fullDescriptionOff': ({ optionValue, optionText }: EuiValues) =>
       i18n.translate('core.euiRefreshInterval.fullDescriptionOff', {

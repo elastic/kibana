@@ -26,6 +26,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
 import { PackageInstallProvider } from '../integrations/hooks';
+import { SpaceSettingsContextProvider } from '../../hooks/use_space_settings_context';
 
 import { type FleetStatusProviderProps, useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
 
@@ -213,11 +214,13 @@ export const FleetAppContext: React.FC<{
                     <ReactQueryDevtools initialIsOpen={false} />
                     <UIExtensionsContext.Provider value={extensions}>
                       <FleetStatusProvider defaultFleetStatus={fleetStatus}>
-                        <Router history={history}>
-                          <PackageInstallProvider startServices={startServices}>
-                            <FlyoutContextProvider>{children}</FlyoutContextProvider>
-                          </PackageInstallProvider>
-                        </Router>
+                        <SpaceSettingsContextProvider>
+                          <Router history={history}>
+                            <PackageInstallProvider startServices={startServices}>
+                              <FlyoutContextProvider>{children}</FlyoutContextProvider>
+                            </PackageInstallProvider>
+                          </Router>
+                        </SpaceSettingsContextProvider>
                       </FleetStatusProvider>
                     </UIExtensionsContext.Provider>
                   </QueryClientProvider>
@@ -430,7 +433,6 @@ export const AppRoutes = memo(
             }}
           />
         </Routes>
-
         {flyoutContext.isEnrollmentFlyoutOpen && (
           <EuiPortal>
             <AgentEnrollmentFlyout
@@ -444,7 +446,6 @@ export const AppRoutes = memo(
             />
           </EuiPortal>
         )}
-
         {flyoutContext.isFleetServerFlyoutOpen && (
           <EuiPortal>
             <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />

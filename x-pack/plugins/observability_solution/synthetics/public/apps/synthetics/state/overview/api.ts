@@ -36,6 +36,7 @@ export function toStatusOverviewQueryArgs(
     projects: pageState.projects,
     schedules: pageState.schedules,
     monitorTypes: pageState.monitorTypes,
+    monitorQueryIds: pageState.monitorQueryIds,
     searchFields: [],
   };
 }

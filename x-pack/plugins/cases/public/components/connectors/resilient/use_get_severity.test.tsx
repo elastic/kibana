@@ -19,8 +19,7 @@ jest.mock('./api');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-// FLAKY: https://github.com/elastic/kibana/issues/187456
-describe.skip('useGetSeverity', () => {
+describe('useGetSeverity', () => {
   const { http } = useKibanaMock().services;
   let appMockRender: AppMockRenderer;
 
@@ -31,7 +30,7 @@ describe.skip('useGetSeverity', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getSeverity');
-    const { waitForNextUpdate } = renderHook(
+    const { result, waitFor } = renderHook(
       () =>
         useGetSeverity({
           http,
@@ -40,7 +39,7 @@ describe.skip('useGetSeverity', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => result.current.isSuccess);
 
     expect(spy).toHaveBeenCalledWith({
       http,
@@ -71,7 +70,7 @@ describe.skip('useGetSeverity', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { waitForNextUpdate } = renderHook(
+    const { waitFor } = renderHook(
       () =>
         useGetSeverity({
           http,
@@ -80,8 +79,9 @@ describe.skip('useGetSeverity', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('calls addError when the getSeverity api returns successfully but contains an error', async () => {
@@ -95,7 +95,7 @@ describe.skip('useGetSeverity', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { waitForNextUpdate } = renderHook(
+    const { waitFor } = renderHook(
       () =>
         useGetSeverity({
           http,
@@ -104,7 +104,8 @@ describe.skip('useGetSeverity', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

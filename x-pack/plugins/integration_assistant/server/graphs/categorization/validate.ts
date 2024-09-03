@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { CategorizationState } from '../../types';
+import type { CategorizationBaseNodeParams } from './types';
 import { ECS_EVENT_TYPES_PER_CATEGORY, EVENT_CATEGORIES, EVENT_TYPES } from './constants';
 
 import type { EventCategories } from './constants';
@@ -22,12 +23,15 @@ interface CategorizationError {
   error: string;
 }
 
-export function handleCategorizationValidation(state: CategorizationState): {
-  invalidCategorization: CategorizationError[];
-  lastExecutedChain: string;
-} {
+export function handleCategorizationValidation({
+  state,
+}: CategorizationBaseNodeParams): Partial<CategorizationState> {
+  let previousInvalidCategorization = '';
   const errors: CategorizationError[] = [];
   const pipelineResults = state.pipelineResults as PipelineResult[];
+  if (Object.keys(state.invalidCategorization).length > 0) {
+    previousInvalidCategorization = JSON.stringify(state.invalidCategorization, null, 2);
+  }
 
   // Loops through the pipeline results to find invalid categories and types
   for (const doc of pipelineResults) {
@@ -62,6 +66,7 @@ export function handleCategorizationValidation(state: CategorizationState): {
   }
 
   return {
+    previousInvalidCategorization,
     invalidCategorization: errors,
     lastExecutedChain: 'handleCategorizationValidation',
   };

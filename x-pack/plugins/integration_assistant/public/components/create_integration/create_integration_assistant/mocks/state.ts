@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Pipeline, Docs } from '../../../../../common';
+import type { Pipeline, Docs, SamplesFormat } from '../../../../../common';
 import type { Actions, State } from '../state';
 import type { AIConnector } from '../types';
 
-const result: { pipeline: Pipeline; docs: Docs } = {
+const result: { pipeline: Pipeline; docs: Docs; samplesFormat: SamplesFormat } = {
   pipeline: {
     description: 'Pipeline to process my_integration my_data_stream_title logs',
     processors: [
@@ -389,6 +389,7 @@ const result: { pipeline: Pipeline; docs: Docs } = {
       ],
     },
   ],
+  samplesFormat: { name: 'json' },
 };
 
 const rawSamples = [
@@ -418,8 +419,8 @@ export const mockState: State = {
     dataStreamTitle: 'Mocked Data Stream Title',
     dataStreamName: 'mocked_datastream_name',
     dataStreamDescription: 'Mocked Data Stream Description',
-    inputType: 'filestream',
-    logsSampleParsed: rawSamples,
+    inputTypes: ['filestream'],
+    logSamples: rawSamples,
   },
   isGenerating: false,
   result,

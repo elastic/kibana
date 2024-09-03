@@ -27,6 +27,10 @@ describe('Template fields', () => {
     appMockRenderer = createAppMockRenderer();
   });
 
+  afterEach(async () => {
+    await appMockRenderer.clearQueryCache();
+  });
+
   it('renders template fields correctly', async () => {
     appMockRenderer.render(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>

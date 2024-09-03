@@ -6,7 +6,10 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
+import {
+  CreateEntityDefinitionQuery,
+  createEntityDefinitionQuerySchema,
+} from '@kbn/entities-schema';
 import { SetupRouteOptions } from '../types';
 import {
   canEnableEntityDiscovery,
@@ -19,18 +22,56 @@ import {
 } from '../../lib/auth';
 import { builtInDefinitions } from '../../lib/entities/built_in';
 import { installBuiltInEntityDefinitions } from '../../lib/entities/install_entity_definition';
+import { ERROR_API_KEY_SERVICE_DISABLED } from '../../../common/errors';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
-import { ERROR_API_KEY_SERVICE_DISABLED, ERROR_USER_NOT_AUTHORIZED } from '../../../common/errors';
+import { startTransform } from '../../lib/entities/start_transform';
 
+/**
+ * @openapi
+ * /internal/entities/managed/enablement:
+ *   put:
+ *     description: Enable managed (built-in) entity discovery.
+ *     tags:
+ *       - management
+ *     parameters:
+ *       - in: query
+ *         name: installOnly
+ *         description: If true, the definition transforms will not be started
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *     responses:
+ *       403:
+ *         description: The current user does not have the required permissions to enable entity discovery
+ *       200:
+ *         description: OK - Verify result in response body
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                  type: boolean
+ *                  example: false
+ *                 reason:
+ *                  type: string
+ *                  example: api_key_service_disabled
+ *                 message:
+ *                  type: string
+ *                  example: API key service is not enabled; try configuring `xpack.security.authc.api_key.enabled` in your elasticsearch config
+ */
 export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   router,
   server,
   logger,
 }: SetupRouteOptions<T>) {
-  router.put<unknown, unknown, unknown>(
+  router.put<unknown, CreateEntityDefinitionQuery, unknown>(
     {
-      path: '/internal/api/entities/managed/enablement',
-      validate: false,
+      path: '/internal/entities/managed/enablement',
+      validate: {
+        query: createEntityDefinitionQuerySchema,
+      },
     },
     async (context, req, res) => {
       try {
@@ -49,10 +90,8 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const canEnable = await canEnableEntityDiscovery(esClient);
         if (!canEnable) {
-          return res.ok({
+          return res.forbidden({
             body: {
-              success: false,
-              reason: ERROR_USER_NOT_AUTHORIZED,
               message:
                 'Current Kibana user does not have the required permissions to enable entity discovery',
             },
@@ -62,7 +101,6 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
         const soClient = (await context.core).savedObjects.getClient({
           includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
         });
-
         const existingApiKey = await readEntityDiscoveryAPIKey(server);
 
         if (existingApiKey !== undefined) {
@@ -77,23 +115,29 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
         }
 
         const apiKey = await generateEntityDiscoveryAPIKey(server, req);
-
         if (apiKey === undefined) {
-          throw new Error('could not generate entity discovery API key');
+          return res.customError({
+            statusCode: 500,
+            body: new Error('could not generate entity discovery API key'),
+          });
         }
 
         await saveEntityDiscoveryAPIKey(soClient, apiKey);
 
-        const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
-        const scopedSoClient = server.core.savedObjects.getScopedClient(fakeRequest);
-        const scopedEsClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
-
-        await installBuiltInEntityDefinitions({
+        const installedDefinitions = await installBuiltInEntityDefinitions({
+          esClient,
+          soClient,
           logger,
-          builtInDefinitions,
-          esClient: scopedEsClient,
-          soClient: scopedSoClient,
+          definitions: builtInDefinitions,
         });
+
+        if (!req.query.installOnly) {
+          await Promise.all(
+            installedDefinitions.map((installedDefinition) =>
+              startTransform(esClient, installedDefinition, logger)
+            )
+          );
+        }
 
         return res.ok({ body: { success: true } });
       } catch (err) {

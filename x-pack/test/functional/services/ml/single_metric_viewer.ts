@@ -74,6 +74,10 @@ export function MachineLearningSingleMetricViewerProvider(
       await testSubjects.existOrFail('mlSingleMetricViewerChart');
     },
 
+    async assertChartNotExist() {
+      await testSubjects.missingOrFail('mlSingleMetricViewerChart');
+    },
+
     async assertAnomalyMarkerExist() {
       await testSubjects.existOrFail('mlAnomalyMarker');
     },
@@ -92,9 +96,9 @@ export function MachineLearningSingleMetricViewerProvider(
     },
 
     async ensureAnomalyActionDiscoverButtonClicked() {
-      await retry.tryForTime(3 * 1000, async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.click('mlAnomaliesListRowAction_viewInDiscoverButton');
-        await testSubjects.existOrFail('discoverLayoutResizableContainer');
+        await testSubjects.existOrFail('discoverLayoutResizableContainer', { timeout: 10 * 1000 });
       });
     },
 
@@ -181,7 +185,10 @@ export function MachineLearningSingleMetricViewerProvider(
         `mlSingleMetricViewerEntitySelectionConfigOrder_${entityFieldName}`,
         order
       );
-      await this.assertEntityConfig(entityFieldName, anomalousOnly, sortBy, order);
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.assertEntityConfig(entityFieldName, anomalousOnly, sortBy, order);
+      });
     },
 
     async assertToastMessageExists(dataTestSubj: string) {

@@ -8,7 +8,6 @@
 import { omit, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import {
   BrowserFields,
@@ -20,6 +19,7 @@ import {
   ScheduleUnit,
   SourceType,
   MonitorFields,
+  type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
@@ -27,7 +27,7 @@ import { formatKibanaNamespace } from '../../formatters/private_formatters';
 
 export interface NormalizedProjectProps {
   locations: Locations;
-  privateLocations: PrivateLocationAttributes[];
+  privateLocations: SyntheticsPrivateLocations;
   monitor: ProjectMonitor;
   projectId: string;
   namespace: string;
@@ -124,8 +124,11 @@ const getAlertConfig = (monitor: ProjectMonitor) => {
 
 const ONLY_ONE_ATTEMPT = 1;
 
-export const getMaxAttempts = (retestOnFailure?: boolean) => {
+export const getMaxAttempts = (retestOnFailure?: boolean, maxAttempts?: number) => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
+  if (!retestOnFailure && maxAttempts) {
+    return maxAttempts;
+  }
   if (retestOnFailure) {
     return defaultFields[ConfigKey.MAX_ATTEMPTS];
   } else if (retestOnFailure === false) {
@@ -193,7 +196,7 @@ export const getMonitorLocations = ({
     locations?: string[];
     privateLocations?: string[];
   };
-  allPrivateLocations: PrivateLocationAttributes[];
+  allPrivateLocations: SyntheticsPrivateLocations;
   allPublicLocations: Locations;
 }) => {
   const invalidPublicLocations: string[] = [];
@@ -328,7 +331,7 @@ const getInvalidLocationError = (
   invalidPublic: string[],
   invalidPrivate: string[],
   allPublicLocations: Locations,
-  allPrivateLocations: PrivateLocationAttributes[]
+  allPrivateLocations: SyntheticsPrivateLocations
 ) => {
   const availablePublicMsg =
     allPublicLocations.length === 0

@@ -40,6 +40,7 @@ export const requestDiagnosticsHandler: RequestHandler<
 
     const result = await AgentService.requestDiagnostics(
       esClient,
+      soClient,
       request.params.agentId,
       request.body?.additional_metrics
     );

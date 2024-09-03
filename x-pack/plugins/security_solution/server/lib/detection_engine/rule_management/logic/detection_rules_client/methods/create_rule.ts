@@ -6,6 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../../../common';
 import type {
@@ -20,6 +21,7 @@ import { applyRuleDefaults } from '../mergers/apply_rule_defaults';
 import { validateMlAuth } from '../utils';
 
 interface CreateRuleOptions {
+  actionsClient: ActionsClient;
   rulesClient: RulesClient;
   mlAuthz: MlAuthz;
   rule: RuleCreateProps & { immutable: boolean };
@@ -28,6 +30,7 @@ interface CreateRuleOptions {
 }
 
 export const createRule = async ({
+  actionsClient,
   rulesClient,
   mlAuthz,
   rule,
@@ -39,7 +42,7 @@ export const createRule = async ({
   const ruleWithDefaults = applyRuleDefaults(rule);
 
   const payload = {
-    ...convertRuleResponseToAlertingRule(ruleWithDefaults),
+    ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
     alertTypeId: ruleTypeMappings[rule.type],
     consumer: SERVER_APP_ID,
     enabled: rule.enabled ?? false,

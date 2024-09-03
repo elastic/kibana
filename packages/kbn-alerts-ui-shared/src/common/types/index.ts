@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './rule_types';
 export * from './action_types';
+export * from './alerts_types';
+export * from './rule_types';

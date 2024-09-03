@@ -22,10 +22,11 @@ describe('Case View Page files tab', () => {
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('should render the custom fields correctly', async () => {

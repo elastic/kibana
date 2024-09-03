@@ -5,34 +5,38 @@
  * 2.0.
  */
 
-import { EuiButton, EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../../common/translations';
+import { docLinks } from '../../common/doc_links';
+import { useTrainedModelPageUrl } from '../hooks/use_trained_model_page_url';
 
-interface InferenceEndpointsHeaderProps {
-  setIsInferenceFlyoutVisible: (isVisible: boolean) => void;
-}
+export const InferenceEndpointsHeader: React.FC = () => {
+  const trainedModelPageUrl = useTrainedModelPageUrl();
 
-export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> = ({
-  setIsInferenceFlyoutVisible,
-}) => (
-  <EuiPageTemplate.Header
-    css={{ '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' } }}
-    data-test-subj="allInferenceEndpointsPage"
-    pageTitle={i18n.INFERENCE_ENDPOINT_LABEL}
-    description={i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
-    bottomBorder={true}
-    rightSideItems={[
-      <EuiButton
-        key="newInferenceEndpoint"
-        color="primary"
-        iconType="plusInCircle"
-        data-test-subj="addEndpointButtonForAllInferenceEndpoints"
-        fill
-        onClick={() => setIsInferenceFlyoutVisible(true)}
-      >
-        {i18n.ADD_ENDPOINT_LABEL}
-      </EuiButton>,
-    ]}
-  />
-);
+  return (
+    <EuiPageTemplate.Header
+      data-test-subj="allInferenceEndpointsPage"
+      pageTitle={i18n.INFERENCE_ENDPOINT_LABEL}
+      description={
+        <EuiText>
+          {i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
+          <EuiSpacer size="s" />
+          <EuiLink
+            href={docLinks.createInferenceEndpoint}
+            target="_blank"
+            data-test-subj="learn-how-to-create-inference-endpoints"
+          >
+            {i18n.LEARN_HOW_TO_CREATE_INFERENCE_ENDPOINTS_LINK}
+          </EuiLink>
+        </EuiText>
+      }
+      bottomBorder={true}
+      rightSideItems={[
+        <EuiLink href={trainedModelPageUrl} target="_blank" data-test-subj="view-your-models">
+          {i18n.VIEW_YOUR_MODELS_LINK}
+        </EuiLink>,
+      ]}
+    />
+  );
+};

@@ -33,7 +33,8 @@ export function ApmHeaderActionMenu() {
     capabilities
   );
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
-  const { isEntityManagerEnabled, isEnablementPending } = useEntityManagerEnablementContext();
+  const { isEntityCentricExperienceViewEnabled, isEnablementPending } =
+    useEntityManagerEnablementContext();
 
   function apmHref(path: string) {
     return getLegacyApmHref({ basePath, path, search });
@@ -72,7 +73,7 @@ export function ApmHeaderActionMenu() {
           canReadMlJobs={canReadMlJobs}
         />
       )}
-      {isEntityManagerEnabled ? (
+      {isEntityCentricExperienceViewEnabled ? (
         <AddDataContextMenu />
       ) : (
         <EuiHeaderLink

@@ -5,41 +5,57 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { QueryObserverResult } from '@tanstack/react-query';
 import { Conversation } from '../../../..';
 import { SelectSystemPrompt } from './select_system_prompt';
 
 interface Props {
   conversation: Conversation | undefined;
-  editingSystemPromptId: string | undefined;
+  currentSystemPromptId: string | undefined;
   isSettingsModalVisible: boolean;
   onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   allSystemPrompts: PromptResponse[];
+  refetchConversations?: () => Promise<QueryObserverResult<Record<string, Conversation>, unknown>>;
 }
 
 const SystemPromptComponent: React.FC<Props> = ({
   conversation,
-  editingSystemPromptId,
+  currentSystemPromptId,
   isSettingsModalVisible,
   onSystemPromptSelectionChange,
   setIsSettingsModalVisible,
   allSystemPrompts,
+  refetchConversations,
 }) => {
+  const [isCleared, setIsCleared] = useState(false);
   const selectedPrompt = useMemo(() => {
-    if (editingSystemPromptId !== undefined) {
-      return allSystemPrompts.find((p) => p.id === editingSystemPromptId);
+    if (currentSystemPromptId !== undefined) {
+      setIsCleared(false);
+      return allSystemPrompts.find((p) => p.id === currentSystemPromptId);
     } else {
       return allSystemPrompts.find((p) => p.id === conversation?.apiConfig?.defaultSystemPromptId);
     }
-  }, [allSystemPrompts, conversation?.apiConfig?.defaultSystemPromptId, editingSystemPromptId]);
+  }, [allSystemPrompts, conversation?.apiConfig?.defaultSystemPromptId, currentSystemPromptId]);
 
   const handleClearSystemPrompt = useCallback(() => {
-    if (conversation) {
+    if (currentSystemPromptId === undefined) {
+      setIsCleared(false);
+      onSystemPromptSelectionChange(
+        allSystemPrompts.find((p) => p.id === conversation?.apiConfig?.defaultSystemPromptId)?.id
+      );
+    } else {
+      setIsCleared(true);
       onSystemPromptSelectionChange(undefined);
     }
-  }, [conversation, onSystemPromptSelectionChange]);
+  }, [
+    allSystemPrompts,
+    conversation?.apiConfig?.defaultSystemPromptId,
+    currentSystemPromptId,
+    onSystemPromptSelectionChange,
+  ]);
 
   return (
     <SelectSystemPrompt
@@ -48,8 +64,9 @@ const SystemPromptComponent: React.FC<Props> = ({
       conversation={conversation}
       data-test-subj="systemPrompt"
       isClearable={true}
+      isCleared={isCleared}
+      refetchConversations={refetchConversations}
       isSettingsModalVisible={isSettingsModalVisible}
-      onSystemPromptSelectionChange={onSystemPromptSelectionChange}
       selectedPrompt={selectedPrompt}
       setIsSettingsModalVisible={setIsSettingsModalVisible}
     />

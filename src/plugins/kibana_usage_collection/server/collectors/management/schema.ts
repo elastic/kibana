@@ -14,6 +14,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:excludedDataTiersForRuleExecution': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Non-default value of setting.' },
+    },
+  },
   'securitySolution:defaultThreatIndex': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -477,10 +484,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:aiAssistantLogsIndexPattern': {
-    type: 'keyword',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:aiAssistantResponseLanguage': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },

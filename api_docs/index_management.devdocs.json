@@ -497,9 +497,9 @@
             "(deps: { history: ",
             {
               "pluginId": "@kbn/core-application-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreApplicationBrowserPluginApi",
-              "section": "def-common.ScopedHistory",
+              "section": "def-public.ScopedHistory",
               "text": "ScopedHistory"
             },
             "<unknown>; }) => React.FC<",
@@ -537,9 +537,9 @@
                   "signature": [
                     {
                       "pluginId": "@kbn/core-application-browser",
-                      "scope": "common",
+                      "scope": "public",
                       "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                      "section": "def-common.ScopedHistory",
+                      "section": "def-public.ScopedHistory",
                       "text": "ScopedHistory"
                     },
                     "<unknown>"
@@ -625,8 +625,8 @@
                 "pluginId": "features",
                 "scope": "server",
                 "docId": "kibFeaturesPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
               }
             ],
             "path": "x-pack/plugins/index_management/server/types.ts",
@@ -1028,7 +1028,7 @@
         "label": "IndexManagementConfig",
         "description": [],
         "signature": [
-          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; }"
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableSizeAndDocCount: boolean; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; }"
         ],
         "path": "x-pack/plugins/index_management/server/config.ts",
         "deprecated": false,
@@ -1439,6 +1439,56 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.ComponentTemplateMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "ComponentTemplateMeta",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateMeta.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateMeta.managed_by",
+            "type": "string",
+            "tags": [],
+            "label": "managed_by",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateMeta.package",
+            "type": "Object",
+            "tags": [],
+            "label": "package",
+            "description": [],
+            "signature": [
+              "{ name: string; }"
             ],
             "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
             "deprecated": false,
@@ -2357,6 +2407,145 @@
       },
       {
         "parentPluginId": "indexManagement",
+        "id": "def-common.IndexModule",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexModule",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.number_of_shards",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "number_of_shards",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.codec",
+            "type": "string",
+            "tags": [],
+            "label": "codec",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.routing_partition_size",
+            "type": "number",
+            "tags": [],
+            "label": "routing_partition_size",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.refresh_interval",
+            "type": "string",
+            "tags": [],
+            "label": "refresh_interval",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.load_fixed_bitset_filters_eagerly",
+            "type": "boolean",
+            "tags": [],
+            "label": "load_fixed_bitset_filters_eagerly",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.shard",
+            "type": "Object",
+            "tags": [],
+            "label": "shard",
+            "description": [],
+            "signature": [
+              "{ check_on_startup: boolean | \"checksum\"; }"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.number_of_replicas",
+            "type": "number",
+            "tags": [],
+            "label": "number_of_replicas",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.auto_expand_replicas",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "auto_expand_replicas",
+            "description": [],
+            "signature": [
+              "string | false"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.lifecycle",
+            "type": "Object",
+            "tags": [],
+            "label": "lifecycle",
+            "description": [],
+            "signature": [
+              "LifecycleModule"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.IndexModule.routing",
+            "type": "Object",
+            "tags": [],
+            "label": "routing",
+            "description": [],
+            "signature": [
+              "{ allocation: { enable: \"none\" | \"all\" | \"primaries\" | \"new_primaries\"; }; rebalance: { enable: \"none\" | \"all\" | \"primaries\" | \"replicas\"; }; }"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
         "id": "def-common.IndexSettings",
         "type": "Interface",
         "tags": [],
@@ -2374,7 +2563,15 @@
             "label": "index",
             "description": [],
             "signature": [
-              "Partial<IndexModule> | undefined"
+              "Partial<",
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.IndexModule",
+                "text": "IndexModule"
+              },
+              "> | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false,

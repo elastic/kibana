@@ -14,16 +14,15 @@ import { isRight } from 'fp-ts/lib/Either';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { CORRELATIONS_DETAILS_ALERT_PREVIEW_BUTTON_TEST_ID } from './test_ids';
 import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 import type { DataProvider } from '../../../../../common/types';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
-import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
+import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
-import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
+import { getDataProvider } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { AlertPreviewButton } from '../../../shared/components/alert_preview_button';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
@@ -81,7 +80,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     sorting,
     error,
   } = usePaginatedAlerts(alertIds || []);
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {
@@ -133,7 +132,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
                 <AlertPreviewButton
                   id={row.id as string}
                   indexName={row.index as string}
-                  data-test-subj={CORRELATIONS_DETAILS_ALERT_PREVIEW_BUTTON_TEST_ID}
+                  data-test-subj={`${dataTestSubj}AlertPreviewButton`}
                   scopeId={scopeId}
                 />
               ),
@@ -210,7 +209,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         },
       },
     ],
-    [isPreviewEnabled, scopeId]
+    [isPreviewEnabled, scopeId, dataTestSubj]
   );
 
   return (

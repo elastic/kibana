@@ -81,15 +81,12 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       telemetry: core.analytics,
 
-      // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
-      // Remove `initializeKnowledgeBase` once 'assistantKnowledgeBaseByDefault' feature flag is removed
-      getAIAssistantKnowledgeBaseDataClient: memoize((initializeKnowledgeBase = false) => {
+      getAIAssistantKnowledgeBaseDataClient: memoize(() => {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantKnowledgeBaseDataClient({
           spaceId: getSpaceId(),
           logger: this.logger,
           currentUser,
-          initializeKnowledgeBase,
         });
       }),
 

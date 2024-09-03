@@ -14,14 +14,12 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { FindPacksRequestQuery } from './find_packs.gen';
-import { DefaultSuccessResponse } from '../model/schema/common_attributes.gen';
+import { DefaultSuccessResponse, PackId } from '../model/schema/common_attributes.gen';
 import { CreatePacksRequestBody } from './create_pack.gen';
-import { ReadPacksRequestQuery } from './read_packs.gen';
-import { DeletePacksRequestQuery } from './delete_packs.gen';
-import { UpdatePacksRequestBody, UpdatePacksRequestParams } from './update_packs.gen';
+import { UpdatePacksRequestBody } from './update_packs.gen';
 
 export type OsqueryCreatePacksRequestBody = z.infer<typeof OsqueryCreatePacksRequestBody>;
 export const OsqueryCreatePacksRequestBody = CreatePacksRequestBody;
@@ -32,7 +30,7 @@ export const OsqueryCreatePacksResponse = DefaultSuccessResponse;
 
 export type OsqueryDeletePacksRequestParams = z.infer<typeof OsqueryDeletePacksRequestParams>;
 export const OsqueryDeletePacksRequestParams = z.object({
-  query: DeletePacksRequestQuery,
+  id: PackId,
 });
 export type OsqueryDeletePacksRequestParamsInput = z.input<typeof OsqueryDeletePacksRequestParams>;
 
@@ -51,7 +49,7 @@ export type OsqueryGetPacksDetailsRequestParams = z.infer<
   typeof OsqueryGetPacksDetailsRequestParams
 >;
 export const OsqueryGetPacksDetailsRequestParams = z.object({
-  query: ReadPacksRequestQuery,
+  id: PackId,
 });
 export type OsqueryGetPacksDetailsRequestParamsInput = z.input<
   typeof OsqueryGetPacksDetailsRequestParams
@@ -62,7 +60,7 @@ export const OsqueryGetPacksDetailsResponse = DefaultSuccessResponse;
 
 export type OsqueryUpdatePacksRequestParams = z.infer<typeof OsqueryUpdatePacksRequestParams>;
 export const OsqueryUpdatePacksRequestParams = z.object({
-  query: UpdatePacksRequestParams,
+  id: PackId,
 });
 export type OsqueryUpdatePacksRequestParamsInput = z.input<typeof OsqueryUpdatePacksRequestParams>;
 

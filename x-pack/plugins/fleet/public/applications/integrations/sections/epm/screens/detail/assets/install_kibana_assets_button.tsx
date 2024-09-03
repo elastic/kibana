@@ -54,23 +54,11 @@ export function InstallKibanaAssetsButton({
       isLoading={isLoading}
       onClick={handleClickInstall}
     >
-      {isLoading ? (
-        <FormattedMessage
-          id="xpack.fleet.integrations.installPackage.kibanaAssetsInstallingButtonLabel"
-          defaultMessage="Installing Kibana assets in current space"
-          values={{
-            title,
-          }}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.fleet.integrations.installPackage.kibanaAssetsInstallButtonLabel"
-          defaultMessage="Install Kibana assets in current space"
-          values={{
-            title,
-          }}
-        />
-      )}
+      <FormattedMessage
+        id="xpack.fleet.integrations.installPackage.kibanaAssetsInstallingButtonLabel"
+        defaultMessage="{isLoading, select, true {Installing} other {Install}} Kibana assets in current space"
+        values={{ isLoading }}
+      />
     </EuiButton>
   );
 }

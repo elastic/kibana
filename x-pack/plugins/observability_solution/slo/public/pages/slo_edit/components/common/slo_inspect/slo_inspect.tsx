@@ -65,16 +65,27 @@ function SLOInspect({ slo, disabled }: Props) {
     isFlyoutVisible && isFormValid
   );
 
-  const { data: pipeLineUrl } = useFetcher(async () => {
+  const { data: summaryPipelineUrl } = useFetcher(async () => {
     const ingestPipeLocator = share.url.locators.get<IngestPipelinesListParams>(
       INGEST_PIPELINES_APP_LOCATOR
     );
-    const ingestPipeLineId = inspectSloData?.pipeline?.id;
+    const ingestPipelineId = inspectSloData?.summaryPipeline?.id;
     return ingestPipeLocator?.getUrl({
-      pipelineId: ingestPipeLineId,
+      pipelineId: ingestPipelineId,
       page: INGEST_PIPELINES_PAGES.LIST,
     });
-  }, [inspectSloData?.pipeline?.id, share.url.locators]);
+  }, [inspectSloData?.summaryPipeline?.id, share.url.locators]);
+
+  const { data: rollUpPipelineUrl } = useFetcher(async () => {
+    const ingestPipeLocator = share.url.locators.get<IngestPipelinesListParams>(
+      INGEST_PIPELINES_APP_LOCATOR
+    );
+    const ingestPipelineId = inspectSloData?.rollUpPipeline?.id;
+    return ingestPipeLocator?.getUrl({
+      pipelineId: ingestPipelineId,
+      page: INGEST_PIPELINES_PAGES.LIST,
+    });
+  }, [inspectSloData?.rollUpPipeline?.id, share.url.locators]);
 
   const closeFlyout = () => {
     setIsFlyoutVisible(false);
@@ -154,19 +165,36 @@ function SLOInspect({ slo, disabled }: Props) {
               <EuiSpacer size="s" />
 
               <CodeBlockAccordion
-                id="pipeline"
+                id="rollupPipeline"
                 label={i18n.translate(
-                  'xpack.slo.sLOInspect.codeBlockAccordion.ingestPipelineLabel',
-                  { defaultMessage: 'SLO Ingest pipeline' }
+                  'xpack.slo.sLOInspect.codeBlockAccordion.rollupIngestPipelineLabel',
+                  { defaultMessage: 'Rollup ingest pipeline' }
                 )}
                 extraAction={
                   <EuiButtonIcon
                     iconType="link"
                     data-test-subj="o11ySLOInspectDetailsButton"
-                    href={pipeLineUrl}
+                    href={rollUpPipelineUrl}
                   />
                 }
-                json={inspectSloData.pipeline}
+                json={inspectSloData.rollUpPipeline}
+              />
+              <EuiSpacer size="s" />
+
+              <CodeBlockAccordion
+                id="summaryPipeline"
+                label={i18n.translate(
+                  'xpack.slo.sLOInspect.codeBlockAccordion.summaryIngestPipelineLabel',
+                  { defaultMessage: 'Summary ingest pipeline' }
+                )}
+                extraAction={
+                  <EuiButtonIcon
+                    iconType="link"
+                    data-test-subj="o11ySLOInspectDetailsButton"
+                    href={summaryPipelineUrl}
+                  />
+                }
+                json={inspectSloData.summaryPipeline}
               />
               <EuiSpacer size="s" />
 

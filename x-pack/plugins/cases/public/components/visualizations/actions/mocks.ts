@@ -36,24 +36,27 @@ export const mockLensAttributes = {
   },
 } as unknown as LensSavedObjectAttributes;
 
-export const mockLensApi = {
-  type: 'lens',
-  getSavedVis: () => {},
-  canViewUnderlyingData: () => {},
-  getViewUnderlyingDataArgs: () => {},
-  getFullAttributes: () => {
-    return mockLensAttributes;
-  },
-  panelTitle: new BehaviorSubject('myPanel'),
-  hidePanelTitle: new BehaviorSubject('false'),
-  timeslice$: new BehaviorSubject<[number, number] | undefined>(undefined),
-  timeRange$: new BehaviorSubject<TimeRange | undefined>({
-    from: 'now-24h',
-    to: 'now',
-  }),
-  filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
-  query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
-} as unknown as LensApi;
+export const getMockLensApi = (
+  { from, to = 'now' }: { from: string; to: string } = { from: 'now-24h', to: 'now' }
+): LensApi =>
+  ({
+    type: 'lens',
+    getSavedVis: () => {},
+    canViewUnderlyingData: () => {},
+    getViewUnderlyingDataArgs: () => {},
+    getFullAttributes: () => {
+      return mockLensAttributes;
+    },
+    panelTitle: new BehaviorSubject('myPanel'),
+    hidePanelTitle: new BehaviorSubject('false'),
+    timeslice$: new BehaviorSubject<[number, number] | undefined>(undefined),
+    timeRange$: new BehaviorSubject<TimeRange | undefined>({
+      from,
+      to,
+    }),
+    filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
+    query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
+  } as unknown as LensApi);
 
 export const getMockCurrentAppId$ = () => new BehaviorSubject<string>('securitySolutionUI');
 export const getMockApplications$ = () =>

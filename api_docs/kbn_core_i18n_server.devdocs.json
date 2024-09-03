@@ -11,18 +11,10 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-i18n-server",
-        "id": "def-common.I18nServiceSetup",
+        "id": "def-server.I18nServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "I18nServiceSetup",
@@ -33,7 +25,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-i18n-server",
-            "id": "def-common.I18nServiceSetup.getLocale",
+            "id": "def-server.I18nServiceSetup.getLocale",
             "type": "Function",
             "tags": [],
             "label": "getLocale",
@@ -51,7 +43,7 @@
           },
           {
             "parentPluginId": "@kbn/core-i18n-server",
-            "id": "def-common.I18nServiceSetup.getTranslationFiles",
+            "id": "def-server.I18nServiceSetup.getTranslationFiles",
             "type": "Function",
             "tags": [],
             "label": "getTranslationFiles",
@@ -69,7 +61,7 @@
           },
           {
             "parentPluginId": "@kbn/core-i18n-server",
-            "id": "def-common.I18nServiceSetup.getTranslationHash",
+            "id": "def-server.I18nServiceSetup.getTranslationHash",
             "type": "Function",
             "tags": [],
             "label": "getTranslationHash",
@@ -89,6 +81,14 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

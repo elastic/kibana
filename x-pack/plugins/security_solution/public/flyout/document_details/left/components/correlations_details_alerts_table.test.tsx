@@ -11,7 +11,6 @@ import { TestProviders } from '../../../../common/mock';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
-import { CORRELATIONS_DETAILS_ALERT_PREVIEW_BUTTON_TEST_ID } from './test_ids';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
@@ -23,10 +22,7 @@ jest.mock('../hooks/use_paginated_alerts');
 jest.mock('../../../../common/hooks/use_experimental_features');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 const TEST_ID = 'TEST';
 const alertIds = ['id1', 'id2', 'id3'];
@@ -50,7 +46,7 @@ const renderCorrelationsTable = (panelContext: DocumentDetailsContext) =>
 describe('CorrelationsDetailsAlertsTable', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     jest.mocked(usePaginatedAlerts).mockReturnValue({
       setPagination: jest.fn(),
       setSorting: jest.fn(),
@@ -94,9 +90,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
 
     expect(getByTestId(`${TEST_ID}InvestigateInTimeline`)).toBeInTheDocument();
     expect(getByTestId(`${TEST_ID}Table`)).toBeInTheDocument();
-    expect(
-      queryByTestId(CORRELATIONS_DETAILS_ALERT_PREVIEW_BUTTON_TEST_ID)
-    ).not.toBeInTheDocument();
+    expect(queryByTestId(`${TEST_ID}AlertPreviewButton`)).not.toBeInTheDocument();
 
     expect(jest.mocked(usePaginatedAlerts)).toHaveBeenCalled();
 
@@ -109,16 +103,16 @@ describe('CorrelationsDetailsAlertsTable', () => {
   });
 
   it('renders open preview button when feature flag is on', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     const { getByTestId, getAllByTestId } = renderCorrelationsTable({
       ...mockContextValue,
       isPreviewMode: true,
     });
 
     expect(getByTestId(`${TEST_ID}InvestigateInTimeline`)).toBeInTheDocument();
-    expect(getAllByTestId(CORRELATIONS_DETAILS_ALERT_PREVIEW_BUTTON_TEST_ID).length).toBe(2);
+    expect(getAllByTestId(`${TEST_ID}AlertPreviewButton`).length).toBe(2);
 
-    getAllByTestId(CORRELATIONS_DETAILS_ALERT_PREVIEW_BUTTON_TEST_ID)[0].click();
+    getAllByTestId(`${TEST_ID}AlertPreviewButton`)[0].click();
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: DocumentDetailsPreviewPanelKey,
       params: {

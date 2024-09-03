@@ -10,6 +10,7 @@ import {
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
+  ScopedClusterClientMock,
 } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { UpdateSLOParams } from '@kbn/slo-schema';
@@ -42,6 +43,7 @@ describe('UpdateSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockScopedClusterClient: ScopedClusterClientMock;
   let mockLogger: jest.Mocked<MockedLogger>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let updateSLO: UpdateSLO;
@@ -52,11 +54,13 @@ describe('UpdateSLO', () => {
     mockLogger = loggingSystemMock.createLogger();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     updateSLO = new UpdateSLO(
       mockRepository,
       mockTransformManager,
       mockSummaryTransformManager,
       mockEsClient,
+      mockScopedClusterClient,
       mockLogger,
       'some-space',
       httpServiceMock.createStartContract().basePath
@@ -76,7 +80,7 @@ describe('UpdateSLO', () => {
       expect(mockSummaryTransformManager.start).not.toBeCalled();
 
       expect(mockEsClient.deleteByQuery).not.toBeCalled();
-      expect(mockEsClient.ingest.putPipeline).not.toBeCalled();
+      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).not.toBeCalled();
     }
 
     it('returns early with a fully identical SLO payload', async () => {
@@ -313,10 +317,12 @@ describe('UpdateSLO', () => {
       ).rejects.toThrowError('Transform install error');
 
       expect(mockRepository.save).toHaveBeenCalledWith(originalSlo);
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledTimes(1); // for the sli only
 
       expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
       expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
-      expect(mockEsClient.ingest.deletePipeline).not.toHaveBeenCalled();
       expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
     });
@@ -339,7 +345,7 @@ describe('UpdateSLO', () => {
 
       expect(mockRepository.save).toHaveBeenCalledWith(originalSlo);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
-      expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalled();
+      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();
       expect(mockTransformManager.stop).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
 
@@ -351,7 +357,7 @@ describe('UpdateSLO', () => {
     expect(mockTransformManager.install).toHaveBeenCalled();
     expect(mockTransformManager.start).toHaveBeenCalled();
 
-    expect(mockEsClient.ingest.putPipeline).toHaveBeenCalled();
+    expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalled();
 
     expect(mockSummaryTransformManager.install).toHaveBeenCalled();
     expect(mockSummaryTransformManager.start).toHaveBeenCalled();
@@ -368,7 +374,7 @@ describe('UpdateSLO', () => {
     expect(mockSummaryTransformManager.stop).toHaveBeenCalledWith(summaryTransformId);
     expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(summaryTransformId);
 
-    expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalled();
+    expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();
 
     expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(2);
     expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(

@@ -17,11 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const { dashboardControls, dashboard, header } = getPageObjects([
     'dashboardControls',
-    'timePicker',
     'dashboard',
-    'settings',
-    'console',
-    'common',
     'header',
   ]);
 
@@ -52,6 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        await dashboard.clickDiscardChanges();
       });
 
       it('sort alphabetically - descending', async () => {
@@ -118,6 +115,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('returning to default sort value should remove unsaved changes', async () => {
         await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
         await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      });
+
+      it('can sort numeric options lists suggestions', async () => {
+        await dashboardControls.editExistingControl(controlId);
+        await dashboardControls.controlsEditorSetfield('weightLbs');
+        await dashboardControls.controlEditorSave();
+
+        await dashboardControls.optionsListOpenPopover(controlId);
+        await dashboardControls.optionsListPopoverSetSort({ by: '_key', direction: 'asc' });
+        const sortedSuggestions = Object.keys(
+          (await dashboardControls.optionsListPopoverGetAvailableOptions()).suggestions
+        ).map((key) => parseInt(key, 10));
+        for (let i = 0; i < sortedSuggestions.length - 1; i++) {
+          expect(sortedSuggestions[i]).to.be.lessThan(sortedSuggestions[i + 1]);
+        }
       });
     });
 
@@ -194,6 +206,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
         await dashboardControls.controlEditorSave();
         await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      });
+
+      it('can search numeric options list', async () => {
+        await dashboardControls.editExistingControl(controlId);
+        await dashboardControls.controlsEditorSetfield('weightLbs');
+        await dashboardControls.controlEditorSave();
+
+        await dashboardControls.optionsListOpenPopover(controlId);
+        await dashboardControls.optionsListPopoverSearchForOption('4');
+        expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(0);
+        await dashboardControls.optionsListPopoverSearchForOption('45'); // only supports exact match
+        expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
       });
     });
   });

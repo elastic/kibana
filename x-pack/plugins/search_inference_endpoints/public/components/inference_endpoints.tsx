@@ -5,39 +5,30 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { EuiPageTemplate } from '@elastic/eui';
 
 import { useQueryInferenceEndpoints } from '../hooks/use_inference_endpoints';
 import { TabularPage } from './all_inference_endpoints/tabular_page';
-import { EmptyPromptPage } from './empty_prompt_page';
+import { AddEmptyPrompt } from './empty_prompt/add_empty_prompt';
 import { InferenceEndpointsHeader } from './inference_endpoints_header';
-import { InferenceFlyoutWrapperComponent } from './inference_flyout_wrapper_component';
 
 export const InferenceEndpoints: React.FC = () => {
-  const { inferenceEndpoints } = useQueryInferenceEndpoints();
-  const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
+  const { data } = useQueryInferenceEndpoints();
+
+  const inferenceEndpoints = data || [];
 
   return (
     <>
-      {inferenceEndpoints.length > 0 && (
-        <InferenceEndpointsHeader setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible} />
-      )}
+      {inferenceEndpoints.length > 0 && <InferenceEndpointsHeader />}
       <EuiPageTemplate.Section className="eui-yScroll">
         {inferenceEndpoints.length === 0 ? (
-          <EmptyPromptPage setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible} />
+          <AddEmptyPrompt />
         ) : (
           <TabularPage inferenceEndpoints={inferenceEndpoints} />
         )}
       </EuiPageTemplate.Section>
-      {isInferenceFlyoutVisible && (
-        <InferenceFlyoutWrapperComponent
-          isInferenceFlyoutVisible={isInferenceFlyoutVisible}
-          setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
-          inferenceEndpoints={inferenceEndpoints}
-        />
-      )}
     </>
   );
 };

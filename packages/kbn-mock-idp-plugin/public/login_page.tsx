@@ -139,6 +139,7 @@ export const LoginPage = () => {
               actions={[
                 <EuiButton
                   type="submit"
+                  data-test-subj="loginButton"
                   disabled={!formik.isValid || !isRolesDefined()}
                   isLoading={formik.isSubmitting}
                   fill

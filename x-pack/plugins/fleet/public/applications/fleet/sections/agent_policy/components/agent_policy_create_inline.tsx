@@ -22,14 +22,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
+import { useSpaceSettingsContext } from '../../../../../hooks/use_space_settings_context';
 import type { AgentPolicy, NewAgentPolicy } from '../../../types';
-
 import { sendCreateAgentPolicy, useStartServices, useAuthz } from '../../../hooks';
-
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../common/services/generate_new_agent_policy';
 
 import { agentPolicyFormValidation } from '.';
-
 import { AgentPolicyAdvancedOptionsContent } from './agent_policy_advanced_fields';
 import { AgentPolicyFormSystemMonitoringCheckbox } from './agent_policy_system_monitoring_field';
 
@@ -58,11 +56,13 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
 
   const [isLoading, setIsLoading] = useState(false);
   const isDisabled = !authz.fleet.allAgentPolicies || isLoading;
+  const spaceSettings = useSpaceSettingsContext();
 
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
       name: agentPolicyName,
       has_fleet_server: isFleetServerPolicy,
+      namespace: spaceSettings.defaultNamespace,
     })
   );
 
@@ -76,7 +76,9 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
     [setNewAgentPolicy, newAgentPolicy]
   );
 
-  const validation = agentPolicyFormValidation(newAgentPolicy);
+  const validation = agentPolicyFormValidation(newAgentPolicy, {
+    allowedNamespacePrefixes: spaceSettings.allowedNamespacePrefixes,
+  });
 
   const createAgentPolicy = useCallback(async () => {
     try {

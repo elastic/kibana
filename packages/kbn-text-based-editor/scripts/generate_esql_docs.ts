@@ -20,20 +20,36 @@ import { functions } from '../src/esql_documentation_sections';
 
 function loadFunctionDocs(pathToElasticsearch: string) {
   // Define the directory path
-  const dirPath = path.join(pathToElasticsearch, '/docs/reference/esql/functions/kibana/docs');
+  const definitionsPath = path.join(
+    pathToElasticsearch,
+    '/docs/reference/esql/functions/kibana/definition'
+  );
+  const docsPath = path.join(pathToElasticsearch, '/docs/reference/esql/functions/kibana/docs');
 
   // Read the directory
-  const files = fs.readdirSync(dirPath);
+  const docsFiles = fs.readdirSync(docsPath);
+
+  const ESFunctionDefinitions = fs
+    .readdirSync(definitionsPath)
+    .map((file) => JSON.parse(fs.readFileSync(`${definitionsPath}/${file}`, 'utf-8')));
 
   // Initialize an empty map
   const functionMap = new Map<string, string>();
 
   // Iterate over each file in the directory
-  for (const file of files) {
+  for (const file of docsFiles) {
     // Ensure we only process .md files
     if (path.extname(file) === '.md') {
+      if (
+        !ESFunctionDefinitions.find(
+          (def) => def.name === path.basename(file, '.md') && def.type === 'eval'
+        )
+      ) {
+        // Exclude non-scalar functions (for now)
+        continue;
+      }
       // Read the file content
-      const content = fs.readFileSync(path.join(dirPath, file), 'utf-8');
+      const content = fs.readFileSync(path.join(docsPath, file), 'utf-8');
 
       // Get the function name from the file name by removing the .md extension
       const functionName = path.basename(file, '.md');

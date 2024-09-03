@@ -30,10 +30,7 @@ import { USER_PREVIEW_BANNER } from './user_entity_overview';
 jest.mock('../../../../management/hooks');
 jest.mock('../../../../management/hooks/agents/use_get_agent_status');
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 
@@ -58,7 +55,7 @@ const renderHighlightedFieldsCell = (values: string[], field: string) =>
 describe('<HighlightedFieldsCell />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
   it('should render a basic cell', () => {
@@ -99,7 +96,7 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should open host preview when click on host when feature flag is on', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     const { getByTestId } = renderHighlightedFieldsCell(['test host'], 'host.name');
 
     getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
@@ -114,7 +111,7 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should open user preview when click on user when feature flag is on', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     const { getByTestId } = renderHighlightedFieldsCell(['test user'], 'user.name');
 
     getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();

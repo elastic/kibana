@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { disableNewFeaturesTours } from './navigation';
 import { ServerlessRoleName } from '../support/roles';
 
 // Login as a SOC_MANAGER to properly initialize Security Solution App
 export const initializeDataViews = () => {
   cy.login(ServerlessRoleName.SOC_MANAGER);
-  cy.visit('/app/security/alerts');
+  cy.visit('/app/security/alerts', {
+    onBeforeLoad: (win) => disableNewFeaturesTours(win),
+  });
   cy.getBySel('globalLoadingIndicator').should('exist');
-  cy.getBySel('globalLoadingIndicator').should('not.exist');
+  // In serverless the app sometimes takes a long time to load with this check causing flakiness.
+  cy.getBySel('globalLoadingIndicator', { timeout: 1.5 * 60 * 1000 }).should('not.exist');
   cy.getBySel('manage-alert-detection-rules').should('exist');
 };

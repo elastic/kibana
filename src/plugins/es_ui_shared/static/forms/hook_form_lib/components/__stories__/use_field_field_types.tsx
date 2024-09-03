@@ -42,7 +42,7 @@ const fieldTypeOptions = [
   'toggle',
 ] as const;
 
-type FieldType = typeof fieldTypeOptions[number];
+type FieldType = (typeof fieldTypeOptions)[number];
 
 const fieldConfigBase: FieldConfig<unknown> = {
   label: 'My field',

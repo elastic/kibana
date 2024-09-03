@@ -101,6 +101,7 @@ export type {
   CategorySummaryItem,
   CategorySummaryList,
   PackageInfo,
+  PackageMetadata,
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
@@ -144,6 +145,7 @@ export type {
   EnrollmentSettingsFleetServerPolicy,
   GetEnrollmentSettingsRequest,
   GetEnrollmentSettingsResponse,
+  GetSpaceSettingsResponse,
 } from '../../common/types';
 export {
   entries,

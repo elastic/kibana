@@ -27,7 +27,6 @@ import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loo
 
 export type { AutoRefreshDoneFn };
 
-// TODO: remove!
 export class Timefilter {
   // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
   private enabledUpdated$ = new BehaviorSubject(false);
@@ -41,6 +40,7 @@ export class Timefilter {
   // Denotes whether setTime has been called, can be used to determine if the constructor defaults are being used.
   private _isTimeTouched: boolean = false;
   private _refreshInterval!: RefreshInterval;
+  private _minRefreshInterval: number;
   // Denotes whether the refresh interval defaults were overriden.
   private _isRefreshIntervalTouched: boolean = false;
   private _history: TimeHistoryContract;
@@ -61,7 +61,15 @@ export class Timefilter {
   ) {
     this._history = timeHistory;
     this.timeDefaults = config.timeDefaults;
-    this.refreshIntervalDefaults = config.refreshIntervalDefaults;
+
+    // Initialize 0ms intervals with pause set to true and min value
+    this.refreshIntervalDefaults = {
+      pause:
+        config.refreshIntervalDefaults.value === 0 ? true : config.refreshIntervalDefaults.pause,
+      value: Math.max(config.refreshIntervalDefaults.value, config.minRefreshIntervalDefault),
+    };
+
+    this._minRefreshInterval = config.minRefreshIntervalDefault;
     this._time = config.timeDefaults;
     this.setRefreshInterval(config.refreshIntervalDefaults);
   }
@@ -148,6 +156,10 @@ export class Timefilter {
     return _.clone(this._refreshInterval);
   };
 
+  public getMinRefreshInterval = () => {
+    return this._minRefreshInterval;
+  };
+
   /**
    * Set timefilter refresh interval.
    * @param {Object} refreshInterval
@@ -157,6 +169,16 @@ export class Timefilter {
   public setRefreshInterval = (refreshInterval: Partial<RefreshInterval>) => {
     const prevRefreshInterval = this.getRefreshInterval();
     const newRefreshInterval = { ...prevRefreshInterval, ...refreshInterval };
+
+    if (newRefreshInterval.value === 0) {
+      // override only when explicitly set to 0
+      newRefreshInterval.pause = true;
+    }
+
+    if (newRefreshInterval.value < this._minRefreshInterval) {
+      newRefreshInterval.value = this._minRefreshInterval;
+    }
+
     let shouldUnpauseRefreshLoop =
       newRefreshInterval.pause === false && prevRefreshInterval != null;
     if (prevRefreshInterval?.value > 0 && newRefreshInterval.value <= 0) {

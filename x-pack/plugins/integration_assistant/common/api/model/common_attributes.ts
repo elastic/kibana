@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { ESProcessorItem } from './processor_attributes';
 
@@ -20,6 +20,12 @@ export const PackageName = z.string().min(1);
  */
 export type DataStreamName = z.infer<typeof DataStreamName>;
 export const DataStreamName = z.string().min(1);
+
+/**
+ * String form of the input logsamples.
+ */
+export type LogSamples = z.infer<typeof LogSamples>;
+export const LogSamples = z.array(z.string());
 
 /**
  * String array containing the json raw samples that are used for ecs mapping.
@@ -44,6 +50,37 @@ export const Connector = z.string();
  */
 export type Docs = z.infer<typeof Docs>;
 export const Docs = z.array(z.object({}).passthrough());
+
+/**
+ * The name of the log samples format.
+ */
+export type SamplesFormatName = z.infer<typeof SamplesFormatName>;
+export const SamplesFormatName = z.enum([
+  'ndjson',
+  'json',
+  'csv',
+  'structured',
+  'unstructured',
+  'unsupported',
+]);
+export type SamplesFormatNameEnum = typeof SamplesFormatName.enum;
+export const SamplesFormatNameEnum = SamplesFormatName.enum;
+
+/**
+ * Format of the provided log samples.
+ */
+export type SamplesFormat = z.infer<typeof SamplesFormat>;
+export const SamplesFormat = z.object({
+  name: SamplesFormatName,
+  /**
+   * For some formats, specifies whether the samples can be multiline.
+   */
+  multiline: z.boolean().optional(),
+  /**
+   * For a JSON format, describes how to get to the sample array from the root of the JSON.
+   */
+  json_path: z.array(z.string()).optional(),
+});
 
 /**
  * The pipeline object.
@@ -77,14 +114,14 @@ export const Pipeline = z.object({
  */
 export type InputType = z.infer<typeof InputType>;
 export const InputType = z.enum([
-  'aws_cloudwatch',
-  'aws_s3',
-  'azure_blob_storage',
-  'azure_eventhub',
+  'aws-cloudwatch',
+  'aws-s3',
+  'azure-blob-storage',
+  'azure-eventhub',
   'cel',
   'cloudfoundry',
   'filestream',
-  'gcp_pubsub',
+  'gcp-pubsub',
   'gcs',
   'http_endpoint',
   'journald',
@@ -128,6 +165,10 @@ export const DataStream = z.object({
    * The documents of the dataStream.
    */
   docs: Docs,
+  /**
+   * The format of log samples in this dataStream.
+   */
+  samplesFormat: SamplesFormat,
 });
 
 /**
@@ -163,11 +204,11 @@ export const Integration = z.object({
 export type LangSmithOptions = z.infer<typeof LangSmithOptions>;
 export const LangSmithOptions = z.object({
   /**
-   * The project name to use with tracing.
+   * The project name.
    */
   projectName: z.string(),
   /**
-   * The api key for the project
+   * The apiKey to use for tracing.
    */
   apiKey: z.string(),
 });

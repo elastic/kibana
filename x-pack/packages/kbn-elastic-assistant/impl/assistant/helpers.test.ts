@@ -6,107 +6,13 @@
  */
 
 import {
-  getBlockBotConversation,
   getDefaultConnector,
   getOptionalRequestParams,
   mergeBaseWithPersistedConversations,
 } from './helpers';
-import { enterpriseMessaging } from './use_conversation/sample_conversations';
 import { AIConnector } from '../connectorland/connector_selector';
-const defaultConversation = {
-  id: 'conversation_id',
-  category: 'assistant',
-  theme: {},
-  messages: [],
-  apiConfig: { actionTypeId: '.gen-ai', connectorId: '123' },
-  replacements: {},
-  title: 'conversation_id',
-};
+
 describe('helpers', () => {
-  describe('isAssistantEnabled = false', () => {
-    const isAssistantEnabled = false;
-    it('When no conversation history, return only enterprise messaging', () => {
-      const result = getBlockBotConversation(defaultConversation, isAssistantEnabled);
-      expect(result.messages).toEqual(enterpriseMessaging);
-      expect(result.messages.length).toEqual(1);
-    });
-
-    it('When conversation history and the last message is not enterprise messaging, appends enterprise messaging to conversation', () => {
-      const conversation = {
-        ...defaultConversation,
-        messages: [
-          {
-            role: 'user' as const,
-            content: 'Hello',
-            timestamp: '',
-            presentation: {
-              delay: 0,
-              stream: false,
-            },
-          },
-        ],
-      };
-      const result = getBlockBotConversation(conversation, isAssistantEnabled);
-      expect(result.messages.length).toEqual(2);
-    });
-
-    it('returns the conversation without changes when the last message is enterprise messaging', () => {
-      const conversation = {
-        ...defaultConversation,
-        messages: enterpriseMessaging,
-      };
-      const result = getBlockBotConversation(conversation, isAssistantEnabled);
-      expect(result.messages.length).toEqual(1);
-      expect(result.messages).toEqual(enterpriseMessaging);
-    });
-
-    it('returns the conversation with new enterprise message when conversation has enterprise messaging, but not as the last message', () => {
-      const conversation = {
-        ...defaultConversation,
-        messages: [
-          ...enterpriseMessaging,
-          {
-            role: 'user' as const,
-            content: 'Hello',
-            timestamp: '',
-            presentation: {
-              delay: 0,
-              stream: false,
-            },
-          },
-        ],
-      };
-      const result = getBlockBotConversation(conversation, isAssistantEnabled);
-      expect(result.messages.length).toEqual(3);
-    });
-  });
-
-  describe('isAssistantEnabled = true', () => {
-    const isAssistantEnabled = true;
-    it('when no conversation history, returns the welcome conversation', () => {
-      const result = getBlockBotConversation(defaultConversation, isAssistantEnabled);
-      expect(result.messages.length).toEqual(0);
-    });
-    it('returns a conversation history with the welcome conversation appended', () => {
-      const conversation = {
-        ...defaultConversation,
-        messages: [
-          {
-            role: 'user' as const,
-            content: 'Hello',
-            timestamp: '',
-            presentation: {
-              delay: 0,
-              stream: false,
-            },
-          },
-        ],
-      };
-      const result = getBlockBotConversation(conversation, isAssistantEnabled);
-      expect(result.messages.length).toEqual(1);
-    });
-  });
-
   describe('getDefaultConnector', () => {
     const defaultConnector: AIConnector = {
       actionTypeId: '.gen-ai',
@@ -163,21 +69,8 @@ describe('helpers', () => {
   });
 
   describe('getOptionalRequestParams', () => {
-    it('should return an empty object when alerts is false', () => {
-      const params = {
-        isEnabledRAGAlerts: false, // <-- false
-        alertsIndexPattern: 'indexPattern',
-        size: 10,
-      };
-
-      const result = getOptionalRequestParams(params);
-
-      expect(result).toEqual({});
-    });
-
     it('should return the optional request params when alerts is true', () => {
       const params = {
-        isEnabledRAGAlerts: true,
         alertsIndexPattern: 'indexPattern',
         size: 10,
       };

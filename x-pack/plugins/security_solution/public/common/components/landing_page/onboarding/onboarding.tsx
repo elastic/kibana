@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { AVCResultsBanner2024, useIsStillYear2024 } from '@kbn/avc-banner';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { TogglePanel } from './toggle_panel';
@@ -15,6 +16,7 @@ import { Progress } from './progress_bar';
 import { StepContextProvider } from './context/step_context';
 import { CONTENT_WIDTH } from './helpers';
 import { WelcomeHeader } from './welcome_header';
+import { DataIngestionHubHeader } from './data_ingestion_hub_header';
 import { Footer } from './footer';
 import { useScrollToHash } from './hooks/use_scroll';
 import type { SecurityProductTypes } from './configs';
@@ -24,7 +26,7 @@ import type { StepId } from './types';
 import { useOnboardingStyles } from './styles/onboarding.styles';
 import { useKibana } from '../../../lib/kibana';
 import type { OnboardingHubStepLinkClickedParams } from '../../../lib/telemetry/events/onboarding/types';
-import { AVCResultsBanner2024 } from '../../avc_banner/avc_results_banner_2024';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 interface OnboardingProps {
   indicesExist?: boolean;
@@ -56,7 +58,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
       productTypes?.find((product) => product.product_line === ProductLine.security)?.product_tier,
     [productTypes]
   );
-  const { wrapperStyles, progressSectionStyles, stepsSectionStyles, bannerStyles } =
+  const { wrapperStyles, headerSectionStyles, progressSectionStyles, stepsSectionStyles } =
     useOnboardingStyles();
   const { telemetry, storage } = useKibana().services;
   const onStepLinkClicked = useCallback(
@@ -65,6 +67,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
     },
     [telemetry]
   );
+  const isDataIngestionHubEnabled = useIsExperimentalFeatureEnabled('dataIngestionHubEnabled');
 
   const [showAVCBanner, setShowAVCBanner] = useState(
     storage.get('securitySolution.showAvcBanner') ?? true
@@ -76,15 +79,34 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
 
   useScrollToHash();
 
+  const renderDataIngestionHubHeader = useMemo(
+    () =>
+      isDataIngestionHubEnabled ? (
+        <DataIngestionHubHeader />
+      ) : (
+        <WelcomeHeader productTier={productTier} />
+      ),
+    [isDataIngestionHubEnabled, productTier]
+  );
+
+  const kibanaPageTemplateSectionStyles = useMemo(
+    () => (isDataIngestionHubEnabled ? headerSectionStyles : ''),
+    [headerSectionStyles, isDataIngestionHubEnabled]
+  );
+
   return (
     <div className={wrapperStyles}>
-      {showAVCBanner && (
-        <KibanaPageTemplate.Section paddingSize="none" className={bannerStyles}>
+      {useIsStillYear2024() && showAVCBanner && (
+        <KibanaPageTemplate.Section paddingSize="none">
           <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
         </KibanaPageTemplate.Section>
       )}
-      <KibanaPageTemplate.Section restrictWidth={CONTENT_WIDTH} paddingSize="xl">
-        <WelcomeHeader productTier={productTier} />
+      <KibanaPageTemplate.Section
+        className={kibanaPageTemplateSectionStyles}
+        restrictWidth={CONTENT_WIDTH}
+        paddingSize="xl"
+      >
+        {renderDataIngestionHubHeader}
       </KibanaPageTemplate.Section>
       <KibanaPageTemplate.Section
         restrictWidth={CONTENT_WIDTH}

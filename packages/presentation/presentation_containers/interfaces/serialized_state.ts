@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Reference } from '@kbn/content-management-utils';
-import { MaybePromise } from '@kbn/utility-types';
+import type { Reference } from '@kbn/content-management-utils';
+import type { MaybePromise } from '@kbn/utility-types';
 
 /**
  * A package containing the serialized Embeddable state, with references extracted. When saving Embeddables using any

@@ -7,7 +7,7 @@
 
 import { IRouter } from '@kbn/core/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { IndexDataEnricher } from './services';
@@ -25,6 +25,7 @@ export interface RouteDependencies {
     isSecurityEnabled: () => boolean;
     isLegacyTemplatesEnabled: boolean;
     isIndexStatsEnabled: boolean;
+    isSizeAndDocCountEnabled: boolean;
     isDataStreamStatsEnabled: boolean;
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;

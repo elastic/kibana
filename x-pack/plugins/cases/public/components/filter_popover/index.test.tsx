@@ -25,6 +25,10 @@ describe('FilterPopover ', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('renders button label correctly', async () => {
     appMockRender.render(
       <FilterPopover

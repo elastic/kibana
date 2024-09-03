@@ -7,7 +7,7 @@
  */
 
 import type {
-  InlineScript,
+  Script,
   MappingRuntimeField,
   MappingRuntimeFields,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -52,7 +52,7 @@ export interface MainAggregation extends NamedAggregation {
 }
 
 export interface GroupingRuntimeField extends MappingRuntimeField {
-  script: InlineScript & {
+  script: Script & {
     params: Record<string, any>;
   };
 }

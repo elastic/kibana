@@ -17,6 +17,7 @@ import {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { PluginStartContract as AlertingPluginStart } from '@kbn/alerting-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -30,14 +31,14 @@ import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginSetupContract } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { TelemetryEventsSender } from './telemetry/sender';
-import { UptimeConfig } from '../common/config';
+import { UptimeConfig } from './config';
 import { SyntheticsEsClient } from './lib';
 
 export interface SyntheticsServerSetup {
@@ -63,7 +64,7 @@ export interface SyntheticsServerSetup {
 }
 
 export interface SyntheticsPluginsSetupDependencies {
-  features: PluginSetupContract;
+  features: FeaturesPluginSetup;
   alerting: any;
   observability: ObservabilityPluginSetup;
   usageCollection: UsageCollectionSetup;
@@ -85,6 +86,7 @@ export interface SyntheticsPluginsStartDependencies {
   taskManager: TaskManagerStartContract;
   telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
+  alerting: AlertingPluginStart;
 }
 
 export type UptimeRequestHandlerContext = CustomRequestHandlerContext<{

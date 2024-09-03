@@ -23,6 +23,10 @@ describe('Severity form field', () => {
     appMockRender = createAppMockRenderer();
   });
 
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('renders', async () => {
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
@@ -31,7 +35,7 @@ describe('Severity form field', () => {
     );
 
     expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-severity-selection')).not.toHaveAttribute('disabled');
+    expect(await screen.findByTestId('case-severity-selection')).toBeEnabled();
   });
 
   // default to LOW in this test configuration
@@ -75,6 +79,6 @@ describe('Severity form field', () => {
       </FormTestComponent>
     );
 
-    expect(await screen.findByTestId('case-severity-selection')).toHaveAttribute('disabled');
+    expect(await screen.findByTestId('case-severity-selection')).toBeDisabled();
   });
 });

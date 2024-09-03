@@ -9,6 +9,7 @@ import type { VFC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { getAgentTypeForAgentIdField } from '../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -20,6 +21,7 @@ import {
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
   HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
@@ -27,7 +29,6 @@ import {
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
-import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../common/endpoint/service/response_actions/constants';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from './host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
@@ -51,7 +52,8 @@ interface LinkFieldCellProps {
 const LinkFieldCell: VFC<LinkFieldCellProps> = ({ field, value }) => {
   const { scopeId, eventId, indexName } = useDocumentDetailsContext();
   const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
+  const { telemetry } = useKibana().services;
 
   const goToInsightsEntities = useCallback(() => {
     openLeftPanel({
@@ -74,7 +76,11 @@ const LinkFieldCell: VFC<LinkFieldCellProps> = ({ field, value }) => {
         banner: HOST_PREVIEW_BANNER,
       },
     });
-  }, [openPreviewPanel, value, scopeId]);
+    telemetry.reportDetailsFlyoutOpened({
+      location: scopeId,
+      panel: 'preview',
+    });
+  }, [openPreviewPanel, value, scopeId, telemetry]);
 
   const openUserPreview = useCallback(() => {
     openPreviewPanel({
@@ -85,7 +91,11 @@ const LinkFieldCell: VFC<LinkFieldCellProps> = ({ field, value }) => {
         banner: USER_PREVIEW_BANNER,
       },
     });
-  }, [openPreviewPanel, value, scopeId]);
+    telemetry.reportDetailsFlyoutOpened({
+      location: scopeId,
+      panel: 'preview',
+    });
+  }, [openPreviewPanel, value, scopeId, telemetry]);
 
   const onClick = useMemo(() => {
     if (isPreviewEnabled && field === HOST_NAME_FIELD_NAME) {
@@ -125,25 +135,11 @@ export interface HighlightedFieldsCellProps {
 export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
   values,
   field,
-  originalField,
+  originalField = '',
 }) => {
-  const isSentinelOneAgentIdField = useMemo(
-    () => originalField === RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
-    [originalField]
-  );
-  const isCrowdstrikeAgentIdField = useMemo(
-    () => originalField === RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
-    [originalField]
-  );
   const agentType: ResponseActionAgentType = useMemo(() => {
-    if (isSentinelOneAgentIdField) {
-      return 'sentinel_one';
-    }
-    if (isCrowdstrikeAgentIdField) {
-      return 'crowdstrike';
-    }
-    return 'endpoint';
-  }, [isCrowdstrikeAgentIdField, isSentinelOneAgentIdField]);
+    return getAgentTypeForAgentIdField(originalField);
+  }, [originalField]);
 
   return (
     <>

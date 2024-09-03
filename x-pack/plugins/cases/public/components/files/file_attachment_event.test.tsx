@@ -24,6 +24,10 @@ describe('FileAttachmentEvent', () => {
     appMockRender = createAppMockRenderer();
   });
 
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('renders clickable name', async () => {
     appMockRender.render(
       <FileAttachmentEvent file={basicFileMock as unknown as DownloadableFile} />

@@ -7,7 +7,17 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPopover, EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiIcon,
+  useEuiTheme,
+} from '@elastic/eui';
 import {
   AuthorizationWrapper,
   MissingPrivilegesTooltip,
@@ -24,12 +34,13 @@ import * as i18n from './translations';
 /**
  * List of allowed action type IDs for the integrations assistant.
  */
-const AllowedActionTypeIds = ['.bedrock'];
+const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
 
 interface ConnectorStepProps {
   connector: AIConnector | undefined;
 }
 export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
+  const { euiTheme } = useEuiTheme();
   const { http, notifications } = useKibana().services;
   const { setConnector } = useActions();
   const [connectors, setConnectors] = useState<AIConnector[]>();
@@ -83,6 +94,15 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiText size="s" color="subdued">
+        <EuiFlexGroup direction="row" gutterSize="xs" alignItems="flexStart">
+          <EuiFlexItem grow={false} css={{ margin: euiTheme.size.xxs }}>
+            <EuiIcon type="iInCircle" />
+          </EuiFlexItem>
+          <EuiFlexItem>{i18n.SUPPORTED_MODELS_INFO}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiText>
     </StepContentWrapper>
   );
 });
@@ -114,24 +134,22 @@ const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(({ onConn
   return (
     <EuiPopover
       button={
-        <EuiLink data-test-subj="createConnectorPopoverButton" onClick={openPopover}>
-          {i18n.CREATE_CONNECTOR}
-        </EuiLink>
+        <EuiText size="s">
+          <EuiLink data-test-subj="createConnectorPopoverButton" onClick={openPopover}>
+            {i18n.CREATE_CONNECTOR}
+          </EuiLink>
+        </EuiText>
       }
       isOpen={isOpen}
       closePopover={closePopover}
       data-test-subj="createConnectorPopover"
     >
-      <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={false}>
-          <ConnectorSetup
-            actionTypeIds={AllowedActionTypeIds}
-            onConnectorSaved={onConnectorSavedAndClose}
-            onClose={closePopover}
-            compressed
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <ConnectorSetup
+        actionTypeIds={AllowedActionTypeIds}
+        onConnectorSaved={onConnectorSavedAndClose}
+        onClose={closePopover}
+        compressed
+      />
     </EuiPopover>
   );
 });

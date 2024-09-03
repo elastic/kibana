@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const dataViews = getService('dataViews');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   const expectedData = [
     { x: '97.220.3.248', y: 19755 },
@@ -55,9 +56,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   const checkDiscoverNavigationResult = async () => {
-    await testSubjects.click('embeddablePanelToggleMenuIcon');
-    await testSubjects.click('embeddablePanelMore-mainMenu');
-    await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+    await dashboardPanelActions.clickContextMenuItem(
+      'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER'
+    );
 
     const [, discoverHandle] = await browser.getAllWindowHandles();
     await browser.switchToWindow(discoverHandle);
@@ -71,6 +72,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
     expect(actualDiscoverQueryHits).to.be('14,005');
     expect(await dataViews.isAdHoc()).to.be(true);
+  };
+
+  const waitForPageReady = async () => {
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await retry.waitFor('page ready after refresh', async () => {
+      const queryBarVisible = await testSubjects.exists('globalQueryBar');
+      return queryBarVisible;
+    });
   };
 
   describe('lens ad hoc data view tests', () => {
@@ -222,8 +231,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataViews.isAdHoc()).to.be(true);
 
       await browser.closeCurrentWindow();
+      const [lensHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(lensHandle);
     });
-
     it('should navigate to discover from embeddable correctly', async () => {
       const [lensHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(lensHandle);
@@ -244,6 +254,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'new'
       );
 
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await checkDiscoverNavigationResult();
 
       await browser.closeCurrentWindow();
@@ -253,6 +264,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // adhoc data view should be persisted after refresh
       await browser.refresh();
+      await waitForPageReady();
       await checkDiscoverNavigationResult();
 
       await browser.closeCurrentWindow();

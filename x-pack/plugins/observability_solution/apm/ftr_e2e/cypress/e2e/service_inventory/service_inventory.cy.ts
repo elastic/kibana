@@ -34,7 +34,8 @@ const mainApiRequestsToIntercept = [
 
 const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 
-describe('Service inventory', () => {
+// See details: https://github.com/elastic/kibana/issues/191961
+describe.skip('Service inventory', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;
     synthtrace.index(
@@ -103,7 +104,6 @@ describe('Service inventory', () => {
 
     it('when selecting a different time range and clicking the update button', () => {
       cy.wait(mainAliasNames);
-      cy.getByTestSubj('apmServiceGroupsTourDismissButton').click();
 
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
@@ -124,7 +124,6 @@ describe('Service inventory', () => {
       cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
       cy.contains('Enable fast filter').click();
       cy.get('[data-test-subj="tableSearchInput"]').should('exist');
-      cy.contains('Try it').should('not.exist');
       cy.contains('opbeans-node');
       cy.contains('opbeans-java');
       cy.contains('opbeans-rum');
@@ -137,7 +136,6 @@ describe('Service inventory', () => {
       cy.contains('opbeans-java');
       cy.contains('opbeans-rum');
       cy.contains('Disable fast filter').click();
-      cy.contains('Try it').should('exist');
       cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
     });
   });

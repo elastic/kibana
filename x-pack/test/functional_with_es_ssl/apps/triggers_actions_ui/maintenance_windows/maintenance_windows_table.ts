@@ -20,6 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   let objectRemover: ObjectRemover;
   const browser = getService('browser');
 
+  // Failing: See https://github.com/elastic/kibana/issues/187818
   describe('Maintenance windows table', function () {
     before(async () => {
       objectRemover = await createObjectRemover({ getService });
@@ -33,7 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await objectRemover.removeAll();
     });
 
-    it('should cancel a running maintenance window', async () => {
+    it('should should cancel a running maintenance window', async () => {
       const name = generateUniqueKey();
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name,
@@ -41,10 +42,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       objectRemover.add(createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
       await browser.refresh();
-
-      await retry.try(async () => {
-        await testSubjects.existOrFail('maintenance-windows-table');
-      });
 
       await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
 
@@ -68,7 +65,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list[0].status).to.not.eql('Running');
     });
 
-    it('should archive finished maintenance window', async () => {
+    it('should should archive finished maintenance window', async () => {
       const name = generateUniqueKey();
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name,
@@ -78,10 +75,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       objectRemover.add(createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
       await browser.refresh();
-
-      await retry.try(async () => {
-        await testSubjects.existOrFail('maintenance-windows-table');
-      });
 
       await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
 
@@ -105,7 +98,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list[0].status).to.eql('Archived');
     });
 
-    it('should cancel and archive a running maintenance window', async () => {
+    it('should should cancel and archive a running maintenance window', async () => {
       const name = generateUniqueKey();
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name,
@@ -113,10 +106,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       objectRemover.add(createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
       await browser.refresh();
-
-      await retry.try(async () => {
-        await testSubjects.existOrFail('maintenance-windows-table');
-      });
 
       await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
 
@@ -140,7 +129,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list[0].status).to.eql('Archived');
     });
 
-    it('should unarchive a maintenance window', async () => {
+    it('should should unarchive a maintenance window', async () => {
       const name = generateUniqueKey();
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name,
@@ -150,10 +139,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       objectRemover.add(createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
       await browser.refresh();
-
-      await retry.try(async () => {
-        await testSubjects.existOrFail('maintenance-windows-table');
-      });
 
       await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
 
@@ -215,10 +200,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       objectRemover.add(upcoming.id, 'rules/maintenance_window', 'alerting', true);
       await browser.refresh();
-
-      await retry.try(async () => {
-        await testSubjects.existOrFail('maintenance-windows-table');
-      });
 
       await pageObjects.maintenanceWindows.searchMaintenanceWindows('mw');
 

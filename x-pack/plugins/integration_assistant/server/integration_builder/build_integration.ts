@@ -7,14 +7,16 @@
 
 import AdmZip from 'adm-zip';
 import nunjucks from 'nunjucks';
-import { tmpdir } from 'os';
+import { getDataPath } from '@kbn/utils';
 import { join as joinPath } from 'path';
 import type { DataStream, Integration } from '../../common';
-import { createSync, ensureDirSync, generateUniqueId } from '../util';
+import { createSync, ensureDirSync, generateUniqueId, removeDirSync } from '../util';
 import { createAgentInput } from './agent';
 import { createDataStream } from './data_stream';
 import { createFieldMapping } from './fields';
 import { createPipeline } from './pipeline';
+
+const initialVersion = '1.0.0';
 
 export async function buildPackage(integration: Integration): Promise<Buffer> {
   const templateDir = joinPath(__dirname, '../templates');
@@ -25,9 +27,10 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
     autoescape: false,
   });
 
-  const tmpDir = joinPath(tmpdir(), `integration-assistant-${generateUniqueId()}`);
-  const packageDirectoryName = `${integration.name}-0.1.0`;
-  const packageDir = createDirectories(tmpDir, integration, packageDirectoryName);
+  const workingDir = joinPath(getDataPath(), `integration-assistant-${generateUniqueId()}`);
+  const packageDirectoryName = `${integration.name}-${initialVersion}`;
+  const packageDir = createDirectories(workingDir, integration, packageDirectoryName);
+
   const dataStreamsDir = joinPath(packageDir, 'data_stream');
 
   for (const dataStream of integration.dataStreams) {
@@ -40,17 +43,19 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
     createFieldMapping(integration.name, dataStreamName, specificDataStreamDir, dataStream.docs);
   }
 
-  const zipBuffer = await createZipArchive(tmpDir, packageDirectoryName);
+  const zipBuffer = await createZipArchive(workingDir, packageDirectoryName);
+
+  removeDirSync(workingDir);
   return zipBuffer;
 }
 
 function createDirectories(
-  tmpDir: string,
+  workingDir: string,
   integration: Integration,
   packageDirectoryName: string
 ): string {
-  const packageDir = joinPath(tmpDir, packageDirectoryName);
-  ensureDirSync(tmpDir);
+  const packageDir = joinPath(workingDir, packageDirectoryName);
+  ensureDirSync(workingDir);
   ensureDirSync(packageDir);
   createPackage(packageDir, integration);
   return packageDir;
@@ -86,7 +91,7 @@ function createBuildFile(packageDir: string): void {
 
 function createChangelog(packageDir: string): void {
   const changelogTemplate = nunjucks.render('changelog.yml.njk', {
-    initial_version: '0.1.0',
+    initial_version: initialVersion,
   });
 
   createSync(joinPath(packageDir, 'changelog.yml'), changelogTemplate);
@@ -103,8 +108,8 @@ function createReadme(packageDir: string, integration: Integration) {
   createSync(joinPath(readmeDirPath, 'README.md'), readmeTemplate);
 }
 
-async function createZipArchive(tmpDir: string, packageDirectoryName: string): Promise<Buffer> {
-  const tmpPackageDir = joinPath(tmpDir, packageDirectoryName);
+async function createZipArchive(workingDir: string, packageDirectoryName: string): Promise<Buffer> {
+  const tmpPackageDir = joinPath(workingDir, packageDirectoryName);
   const zip = new AdmZip();
   zip.addLocalFolder(tmpPackageDir, packageDirectoryName);
   const buffer = zip.toBuffer();
@@ -132,7 +137,7 @@ function createPackageManifest(packageDir: string, integration: Integration): vo
     format_version: '3.1.4',
     package_title: integration.title,
     package_name: integration.name,
-    package_version: '0.1.0',
+    package_version: initialVersion,
     package_description: integration.description,
     package_logo: integration.logo,
     package_owner: '@elastic/custom-integrations',

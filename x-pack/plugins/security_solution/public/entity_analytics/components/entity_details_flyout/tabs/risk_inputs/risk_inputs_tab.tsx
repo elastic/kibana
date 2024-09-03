@@ -100,7 +100,7 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
     }),
     []
   );
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const inputColumns: Array<EuiBasicTableColumn<InputAlert>> = useMemo(
     () => [

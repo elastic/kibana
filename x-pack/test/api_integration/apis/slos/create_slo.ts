@@ -29,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
     let createSLOInput: CreateSLOInput;
 
     before(async () => {
+      await slo.createUser();
       await loadTestData(getService);
       await slo.deleteAllSLOs();
     });
@@ -47,12 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('creates a new slo and transforms', async () => {
-      const apiResponse = await supertestAPI
-        .post('/api/observability/slos')
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'foo')
-        .send(createSLOInput)
-        .expect(200);
+      const apiResponse = await slo.create(createSLOInput);
 
       expect(apiResponse.body).property('id');
 
@@ -113,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
         transforms: [
           {
             id: `slo-${id}-1`,
-            authorization: { roles: ['superuser'] },
+            authorization: { roles: ['slo_editor', 'editor'] },
             version: '10.0.0',
             create_time: rollUpTransformResponse.body.transforms[0].create_time,
             source: {
@@ -142,24 +138,15 @@ export default function ({ getService }: FtrProviderContext) {
                   ],
                 },
               },
-              runtime_mappings: {
-                'slo.id': {
-                  type: 'keyword',
-                  script: { source: `emit('${id}')` },
-                },
-                'slo.revision': { type: 'long', script: { source: 'emit(1)' } },
-              },
             },
             dest: {
               index: '.slo-observability.sli-v3.3',
-              pipeline: '.slo-observability.sli.pipeline-v3.3',
+              pipeline: `.slo-observability.sli.pipeline-${id}-1`,
             },
             frequency: '1m',
             sync: { time: { field: '@timestamp', delay: '1m' } },
             pivot: {
               group_by: {
-                'slo.id': { terms: { field: 'slo.id' } },
-                'slo.revision': { terms: { field: 'slo.revision' } },
                 'slo.groupings.tags': { terms: { field: 'tags' } },
                 '@timestamp': { date_histogram: { field: '@timestamp', fixed_interval: '1m' } },
               },
@@ -202,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
         transforms: [
           {
             id: `slo-summary-${id}-1`,
-            authorization: { roles: ['superuser'] },
+            authorization: { roles: ['slo_editor', 'editor'] },
             version: '10.0.0',
             create_time: summaryTransform.body.transforms[0].create_time,
             source: {
@@ -381,12 +368,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('creates instanceId for SLOs with multi groupBy', async () => {
       createSLOInput.groupBy = ['system.network.name', 'event.dataset'];
 
-      const apiResponse = await supertestAPI
-        .post('/api/observability/slos')
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'foo')
-        .send(createSLOInput)
-        .expect(200);
+      const apiResponse = await slo.create(createSLOInput);
 
       expect(apiResponse.body).property('id');
 
@@ -405,12 +387,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('creates instanceId for SLOs with single groupBy', async () => {
       createSLOInput.groupBy = 'system.network.name';
 
-      const apiResponse = await supertestAPI
-        .post('/api/observability/slos')
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'foo')
-        .send(createSLOInput)
-        .expect(200);
+      const apiResponse = await slo.create(createSLOInput);
 
       expect(apiResponse.body).property('id');
 
@@ -427,12 +404,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('creates instanceId for SLOs without groupBy ([])', async () => {
       createSLOInput.groupBy = [];
 
-      const apiResponse = await supertestAPI
-        .post('/api/observability/slos')
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'foo')
-        .send(createSLOInput)
-        .expect(200);
+      const apiResponse = await slo.create(createSLOInput);
 
       expect(apiResponse.body).property('id');
 
@@ -449,12 +421,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('creates instanceId for SLOs without groupBy (["*"])', async () => {
       createSLOInput.groupBy = ['*'];
 
-      const apiResponse = await supertestAPI
-        .post('/api/observability/slos')
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'foo')
-        .send(createSLOInput)
-        .expect(200);
+      const apiResponse = await slo.create(createSLOInput);
 
       expect(apiResponse.body).property('id');
 
@@ -471,12 +438,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('creates instanceId for SLOs without groupBy ("")', async () => {
       createSLOInput.groupBy = '';
 
-      const apiResponse = await supertestAPI
-        .post('/api/observability/slos')
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'foo')
-        .send(createSLOInput)
-        .expect(200);
+      const apiResponse = await slo.create(createSLOInput);
 
       expect(apiResponse.body).property('id');
 

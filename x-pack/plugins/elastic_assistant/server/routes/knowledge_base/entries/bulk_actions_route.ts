@@ -166,9 +166,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           // subscribing to completed$, because it handles both cases when request was completed and aborted.
           // when route is finished by timeout, aborted$ is not getting fired
           request.events.completed$.subscribe(() => abortController.abort());
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient(
-            false
-          );
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
           const spaceId = ctx.elasticAssistant.getSpaceId();
           // Authenticated user null check completed in `performChecks()` above
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser() as AuthenticatedUser;

@@ -3,9 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "include": [
     // add all the folders contains files to be compiled
     "common/**/*",
@@ -77,6 +75,10 @@
     "@kbn/openapi-generator",
     "@kbn/code-editor",
     "@kbn/search-types",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/zod-helpers",
+    "@kbn/openapi-bundler",
+    "@kbn/repo-info",
+    "@kbn/zod"
   ]
 }

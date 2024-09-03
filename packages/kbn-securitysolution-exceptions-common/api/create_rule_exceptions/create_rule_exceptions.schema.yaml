@@ -9,8 +9,6 @@ paths:
       operationId: CreateRuleExceptionListItems
       x-codegen-enabled: true
       summary: Creates rule exception list items
-      tags:
-        - Exceptions API
       parameters:
         - name: id
           in: path

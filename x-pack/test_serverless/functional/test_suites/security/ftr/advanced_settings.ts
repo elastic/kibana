@@ -18,7 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Security advanced settings', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('admin');
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('settings');
     });
 

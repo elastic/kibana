@@ -5,15 +5,14 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { setupFleetAndAgents } from '../../../../fleet_api_integration/apis/agents/services';
 import { generateAgent } from '../../../../fleet_api_integration/helpers';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { deleteIndex, createPackagePolicy } from '../helper';
@@ -21,7 +20,7 @@ import { deleteIndex, createPackagePolicy } from '../helper';
 const INDEX_ARRAY = [
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 ];
 
@@ -35,12 +34,15 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
     describe('STATUS = INDEX_TIMEOUT TEST', () => {
-      setupFleetAndAgents(providerContext);
+      before(async () => {
+        await fleetAndAgents.setup();
+      });
 
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();

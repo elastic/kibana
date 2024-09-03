@@ -17,7 +17,6 @@ export const REFERENCE_URL_FIELD_NAME = 'reference.url';
 export const EVENT_URL_FIELD_NAME = 'event.url';
 export const SIGNAL_RULE_NAME_FIELD_NAME = 'kibana.alert.rule.name';
 export const SIGNAL_STATUS_FIELD_NAME = 'kibana.alert.workflow_status';
-export const SIGNAL_ASSIGNEE_IDS_FIELD_NAME = 'kibana.alert.workflow_assignee_ids';
 export const AGENT_STATUS_FIELD_NAME = 'agent.status';
 export const QUARANTINED_PATH_FIELD_NAME = 'quarantined.path';
 export const REASON_FIELD_NAME = 'kibana.alert.reason';

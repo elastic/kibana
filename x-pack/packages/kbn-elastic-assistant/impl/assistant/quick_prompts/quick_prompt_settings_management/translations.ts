@@ -13,17 +13,18 @@ export const QUICK_PROMPTS_TABLE_COLUMN_NAME = i18n.translate(
   }
 );
 
-export const QUICK_PROMPTS_TABLE_COLUMN_CREATED_AT = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPromptsTable.quickPromptsTableColumnCreatedAt',
+export const QUICK_PROMPTS_TABLE_COLUMN_DATE_UPDATED = i18n.translate(
+  'xpack.elasticAssistant.assistant.quickPromptsTable.quickPromptsTableColumnDateUpdated',
   {
-    defaultMessage: 'Created at',
+    defaultMessage: 'Date updated',
   }
 );
 
-export const QUICK_PROMPTS_TABLE_COLUMN_ACTIONS = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPromptsTable.quickPromptsTableColumnActions',
+export const QUICK_PROMPTS_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.quickPromptsTable.description',
   {
-    defaultMessage: 'Actions',
+    defaultMessage:
+      'Create and manage Quick Prompts. Quick Prompts are shortcuts to common actions.',
   }
 );
 

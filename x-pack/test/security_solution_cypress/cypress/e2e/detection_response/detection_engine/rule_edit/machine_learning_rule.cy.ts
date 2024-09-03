@@ -19,9 +19,9 @@ import {
   SUPPRESS_MISSING_FIELD,
 } from '../../../../screens/rule_details';
 import {
-  executeSetupModuleRequest,
   forceStartDatafeeds,
   forceStopAndCloseJob,
+  setupMlModulesWithRetry,
 } from '../../../../support/machine_learning';
 import { editFirstRule } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
@@ -42,17 +42,7 @@ import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 describe(
   'Machine Learning Detection Rules - Editing',
   {
-    // Skipping in MKI as it depends on feature flag alertSuppressionForMachineLearningRuleEnabled
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForMachineLearningRuleEnabled',
-          ])}`,
-        ],
-      },
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
@@ -71,7 +61,7 @@ describe(
       login();
       deleteAlertsAndRules();
       cy.task('esArchiverLoad', { archiveName: '../auditbeat/hosts', type: 'ftr' });
-      executeSetupModuleRequest({ moduleName: 'security_linux_v3' });
+      setupMlModulesWithRetry({ moduleName: 'security_linux_v3' });
       forceStartDatafeeds({ jobIds: [jobId] });
       cy.task('esArchiverLoad', { archiveName: 'anomalies', type: 'ftr' });
     });

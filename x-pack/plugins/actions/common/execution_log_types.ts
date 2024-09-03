@@ -59,4 +59,4 @@ export const executionLogSortableColumns = [
   'schedule_delay',
 ] as const;
 
-export type ExecutionLogSortFields = typeof executionLogSortableColumns[number];
+export type ExecutionLogSortFields = (typeof executionLogSortableColumns)[number];

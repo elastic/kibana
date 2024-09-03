@@ -1,26 +1,10 @@
 {
   "id": "@kbn/core-saved-objects-browser-internal",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-saved-objects-browser-internal",
-        "id": "def-common.SavedObjectsService",
+        "id": "def-public.SavedObjectsService",
         "type": "Class",
         "tags": [
           "deprecated"
@@ -30,9 +14,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-browser-internal",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSavedObjectsBrowserInternalPluginApi",
-            "section": "def-common.SavedObjectsService",
+            "section": "def-public.SavedObjectsService",
             "text": "SavedObjectsService"
           },
           " implements ",
@@ -40,9 +24,9 @@
           "<void, ",
           {
             "pluginId": "@kbn/core-saved-objects-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-            "section": "def-common.SavedObjectsStart",
+            "section": "def-public.SavedObjectsStart",
             "text": "SavedObjectsStart"
           },
           ">"
@@ -75,7 +59,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-browser-internal",
-            "id": "def-common.SavedObjectsService.setup",
+            "id": "def-public.SavedObjectsService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -91,7 +75,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-browser-internal",
-            "id": "def-common.SavedObjectsService.start",
+            "id": "def-public.SavedObjectsService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -100,17 +84,17 @@
               "({ http }: { http: ",
               {
                 "pluginId": "@kbn/core-http-browser-internal",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserInternalPluginApi",
-                "section": "def-common.InternalHttpStart",
+                "section": "def-public.InternalHttpStart",
                 "text": "InternalHttpStart"
               },
               "; }) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-                "section": "def-common.SavedObjectsStart",
+                "section": "def-public.SavedObjectsStart",
                 "text": "SavedObjectsStart"
               },
               ">"
@@ -121,7 +105,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-browser-internal",
-                "id": "def-common.SavedObjectsService.start.$1",
+                "id": "def-public.SavedObjectsService.start.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ http }",
@@ -132,7 +116,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-saved-objects-browser-internal",
-                    "id": "def-common.SavedObjectsService.start.$1.http",
+                    "id": "def-public.SavedObjectsService.start.$1.http",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "http",
@@ -141,9 +125,9 @@
                       "Omit<",
                       {
                         "pluginId": "@kbn/core-http-browser",
-                        "scope": "common",
+                        "scope": "public",
                         "docId": "kibKbnCoreHttpBrowserPluginApi",
-                        "section": "def-common.HttpSetup",
+                        "section": "def-public.HttpSetup",
                         "text": "HttpSetup"
                       },
                       ", \"staticAssets\"> & { staticAssets: ",
@@ -161,7 +145,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-browser-internal",
-            "id": "def-common.SavedObjectsService.stop",
+            "id": "def-public.SavedObjectsService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -179,6 +163,22 @@
         "initialIsOpen": false
       }
     ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

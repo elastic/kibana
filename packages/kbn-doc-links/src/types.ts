@@ -160,9 +160,11 @@ export interface DocLinks {
     readonly crawlerOverview: string;
     readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
+    readonly e5Model: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;
+    readonly inferenceApiCreate: string;
     readonly ingestionApis: string;
     readonly ingestPipelines: string;
     readonly knnSearch: string;
@@ -180,6 +182,7 @@ export interface DocLinks {
     readonly searchLabs: string;
     readonly searchLabsRepo: string;
     readonly searchTemplates: string;
+    readonly semanticTextField: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
@@ -333,6 +336,7 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
   };
   readonly securitySolution: {
+    readonly aiAssistant: string;
     readonly artifactControl: string;
     readonly avcResults: string;
     readonly trustedApps: string;
@@ -373,6 +377,7 @@ export interface DocLinks {
     readonly percolate: string;
     readonly queryDsl: string;
     readonly queryESQL: string;
+    readonly queryESQLExamples: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -438,6 +443,7 @@ export interface DocLinks {
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
     sloBurnRateRule: string;
+    aiAssistant: string;
   }>;
   readonly alerting: Readonly<{
     guide: string;

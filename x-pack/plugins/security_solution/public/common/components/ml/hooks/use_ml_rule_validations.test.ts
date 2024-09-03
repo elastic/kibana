@@ -40,17 +40,17 @@ describe('useMlRuleValidations', () => {
     expect(result.current).toEqual(expect.objectContaining({ loading: false }));
   });
 
-  it('returns no jobs started when no jobs are started', () => {
+  it('returns "no jobs started" when no jobs are started', () => {
     const { result } = renderHook(() => useMlRuleValidations({ machineLearningJobId }), {
       wrapper: TestProviders,
     });
 
     expect(result.current).toEqual(
-      expect.objectContaining({ noJobsStarted: true, someJobsStarted: false })
+      expect.objectContaining({ noJobsStarted: true, allJobsStarted: false })
     );
   });
 
-  it('returns some jobs started when some jobs are started', () => {
+  it('returns a unique state when only some jobs are started', () => {
     (useInstalledSecurityJobs as jest.Mock).mockReturnValueOnce({
       loading: false,
       jobs: getJobsSummaryResponseMock([
@@ -70,11 +70,11 @@ describe('useMlRuleValidations', () => {
     });
 
     expect(result.current).toEqual(
-      expect.objectContaining({ noJobsStarted: false, someJobsStarted: true })
+      expect.objectContaining({ noJobsStarted: false, allJobsStarted: false })
     );
   });
 
-  it('returns neither "no jobs started" nor "some jobs started" when all jobs are started', () => {
+  it('returns a unique state when all jobs are started', () => {
     (useInstalledSecurityJobs as jest.Mock).mockReturnValueOnce({
       loading: false,
       jobs: getJobsSummaryResponseMock([
@@ -96,7 +96,7 @@ describe('useMlRuleValidations', () => {
     });
 
     expect(result.current).toEqual(
-      expect.objectContaining({ noJobsStarted: false, someJobsStarted: false })
+      expect.objectContaining({ noJobsStarted: false, allJobsStarted: true })
     );
   });
 });

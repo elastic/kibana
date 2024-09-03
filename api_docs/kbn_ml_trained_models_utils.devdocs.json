@@ -18,7 +18,43 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-trained-models-utils",
+        "id": "def-common.isLocalModel",
+        "type": "Function",
+        "tags": [],
+        "label": "isLocalModel",
+        "description": [],
+        "signature": [
+          "(model: ",
+          "InferenceServiceSettings",
+          ") => boolean"
+        ],
+        "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-trained-models-utils",
+            "id": "def-common.isLocalModel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "model",
+            "description": [],
+            "signature": [
+              "InferenceServiceSettings"
+            ],
+            "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/ml-trained-models-utils",
@@ -173,6 +209,19 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-trained-models-utils",
+            "id": "def-common.ModelDefinition.supported",
+            "type": "boolean",
+            "tags": [],
+            "label": "supported",
+            "description": [
+              "Indicates if model version is supported by the cluster"
             ],
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
@@ -459,7 +508,7 @@
         "label": "InferenceAPIConfigResponse",
         "description": [],
         "signature": [
-          "{ model_id: string; task_type: \"sparse_embedding\" | \"text_embedding\"; task_settings: { model?: string | undefined; }; } & ",
+          "{ inference_id: string; task_type: \"sparse_embedding\" | \"text_embedding\"; task_settings: { model?: string | undefined; }; } & ",
           "InferenceServiceSettings"
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
@@ -619,7 +668,7 @@
         "label": "ELASTIC_MODEL_DEFINITIONS",
         "description": [],
         "signature": [
-          "{ [x: string]: ",
+          "{ [x: string]: Omit<",
           {
             "pluginId": "@kbn/ml-trained-models-utils",
             "scope": "common",
@@ -627,7 +676,7 @@
             "section": "def-common.ModelDefinition",
             "text": "ModelDefinition"
           },
-          "; }"
+          ", \"supported\">; }"
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,

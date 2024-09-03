@@ -1,8 +1,6 @@
 get:
   summary: Get the default data view identifier
   operationId: getDefaultDataView
-  description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
   parameters:
@@ -29,8 +27,6 @@ get:
 post:
   summary: Sets the default data view identifier
   operationId: setDefaultDatailView
-  description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
   parameters:
