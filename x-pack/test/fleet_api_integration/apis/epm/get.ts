@@ -122,8 +122,6 @@ export default function (providerContext: FtrProviderContext) {
         await uninstallPackage(testPkgName, testPkgVersion);
         await uninstallPackage('experimental', '0.1.0');
         await uninstallPackage('endpoint', '8.6.1');
-      });
-      after(async () => {
         await removeBundledPackages(log);
       });
       it('Allows the fetching of installed packages', async () => {

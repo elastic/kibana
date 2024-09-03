@@ -53,7 +53,7 @@ export default function (providerContext: FtrProviderContext) {
       await Promise.all(testPkgs.map((pkg) => uninstallPackage(pkg.name, pkg.version)));
     });
 
-    describe('with single integration installation', async () => {
+    describe('with single integration installation', () => {
       it('creates global data views for logs-* and metrics-*', async () => {
         await installPackage(testPkgs[0].name, testPkgs[0].version);
         const dataViews: any[] = await listDataViews();
@@ -71,7 +71,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('with subsequent integration installation', async () => {
+    describe('with subsequent integration installation', () => {
       it('does not recreate managed data views', async () => {
         await installPackage(testPkgs[0].name, testPkgs[0].version);
         const initialDataViews: any[] = await listDataViews();

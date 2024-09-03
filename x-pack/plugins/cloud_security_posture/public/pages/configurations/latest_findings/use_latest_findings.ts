@@ -11,18 +11,18 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
-import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
+import { showErrorToast } from '@kbn/cloud-security-posture';
+import { MAX_FINDINGS_TO_LOAD, buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
-import type { CspBenchmarkRulesStates, CspFinding } from '@kbn/cloud-security-posture-common';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
+import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
-import { showErrorToast } from '../../../common/utils/show_error_toast';
-import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
-import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];

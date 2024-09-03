@@ -419,7 +419,7 @@ export class DataRecognizer {
 
     const jobs: ModuleJob[] = [];
     const datafeeds: ModuleDatafeed[] = [];
-    const kibana: KibanaObjects = {};
+    const kibana: KibanaObjects = Object.create(null);
     // load all of the job configs
     if (isModule(module)) {
       const tempJobs: ModuleJob[] = module.jobs.map((j) => ({
@@ -674,7 +674,7 @@ export class DataRecognizer {
   }
 
   public async dataRecognizerJobsExist(moduleId: string): Promise<JobExistResult> {
-    const results = {} as JobExistResult;
+    const results = Object.create(null) as JobExistResult;
 
     // Load the module with the specified ID and check if the jobs
     // in the module have been created.
@@ -930,7 +930,7 @@ export class DataRecognizer {
     start?: number,
     end?: number
   ): Promise<{ [key: string]: DatafeedResponse }> {
-    const results = {} as { [key: string]: DatafeedResponse };
+    const results = Object.create(null) as { [key: string]: DatafeedResponse };
     for (const datafeed of datafeeds) {
       results[datafeed.id] = await this._startDatafeed(datafeed, start, end);
     }
@@ -1036,7 +1036,9 @@ export class DataRecognizer {
   // creates an empty results object,
   // listing each job/datafeed/savedObject with a save success boolean
   private _createResultsTemplate(moduleConfig: Module): DataRecognizerConfigResponse {
-    const results: DataRecognizerConfigResponse = {} as DataRecognizerConfigResponse;
+    const results: DataRecognizerConfigResponse = Object.create(
+      null
+    ) as DataRecognizerConfigResponse;
     const reducedConfig = {
       jobs: moduleConfig.jobs,
       datafeeds: moduleConfig.datafeeds,
@@ -1061,7 +1063,7 @@ export class DataRecognizer {
       if (Array.isArray(reducedConfig[i])) {
         createResultsItems(reducedConfig[i] as any[], results, i);
       } else {
-        results[i] = {} as any;
+        results[i] = Object.create(null);
         Object.keys(reducedConfig[i]).forEach((k) => {
           createResultsItems((reducedConfig[i] as Module['kibana'])[k] as any[], results[i], k);
         });
@@ -1253,7 +1255,7 @@ export class DataRecognizer {
           );
 
           if (!job.config.analysis_limits) {
-            job.config.analysis_limits = {} as AnalysisLimits;
+            job.config.analysis_limits = Object.create(null) as AnalysisLimits;
           }
 
           job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
@@ -1285,7 +1287,7 @@ export class DataRecognizer {
           // so set the jobs mml to be the max
 
           if (!job.config.analysis_limits) {
-            job.config.analysis_limits = {} as AnalysisLimits;
+            job.config.analysis_limits = Object.create(null) as AnalysisLimits;
           }
 
           job.config.analysis_limits.model_memory_limit = maxMml;

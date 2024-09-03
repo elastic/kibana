@@ -164,7 +164,7 @@ export const dataRecognizerConfigResponse = () =>
   schema.object({
     datafeeds: schema.arrayOf(schema.any()),
     jobs: schema.arrayOf(schema.any()),
-    kibana: schema.any(),
+    kibana: schema.maybe(schema.any()),
   });
 
 export const jobExistsResponse = () =>
