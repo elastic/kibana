@@ -1208,7 +1208,7 @@ export const UnifiedDataTable = ({
         )}
         {canSetExpandedDoc &&
           expandedDoc &&
-          renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
+          renderDocumentView!(expandedDoc, displayedRows, visibleColumns, columnsMeta)}
       </span>
     </UnifiedDataTableContext.Provider>
   );

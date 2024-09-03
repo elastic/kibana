@@ -242,9 +242,14 @@ export const DocViewerTable = ({
     [columns]
   );
 
+  const isShowOnlySelectedFieldsDisabled = useMemo(
+    () => columns?.includes('_source') || selectedFieldNames.length === 0,
+    [selectedFieldNames, columns]
+  );
+
   const shouldShowOnlySelectedFields = useMemo(
-    () => showOnlySelectedFields && selectedFieldNames.length > 0,
-    [showOnlySelectedFields, selectedFieldNames]
+    () => showOnlySelectedFields && !isShowOnlySelectedFieldsDisabled,
+    [showOnlySelectedFields, isShowOnlySelectedFieldsDisabled]
   );
 
   const displayedFieldNames = useMemo(() => {
@@ -489,7 +494,7 @@ export const DocViewerTable = ({
                 description: 'Switch label to show only selected fields in the table',
               })}
               checked={showOnlySelectedFields ?? false}
-              disabled={!selectedFieldNames.length}
+              disabled={isShowOnlySelectedFieldsDisabled}
               onChange={onShowOnlySelectedFieldsChange}
               compressed
               data-test-subj="unifiedDocViewerShowOnlySelectedFieldsSwitch"
