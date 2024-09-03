@@ -103,7 +103,8 @@
     "@kbn/alerting-types",
     "@kbn/babel-register",
     "@kbn/slo-plugin",
-    "@kbn/ebt-tools"
+    "@kbn/ebt-tools",
+    "@kbn/synthetics-plugin"
   ],
   "exclude": ["target/**/*"]
 }
