@@ -75,6 +75,7 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
   return sourceFieldsOptions.length > 0 ? (
     <EuiFormRow
       fullWidth
+      // @ts-expect-error upgrade typescript v5.1.6
       isInvalid={errors.length > 0 && sourceFields !== undefined}
       error={errors}
       label={
@@ -93,6 +94,7 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
           }
         )}
         data-test-subj="sourceFields"
+        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.length > 0 && sourceFields !== undefined}
         selectedOptions={(sourceFields || []).map((f) => ({
           label: f.label,

@@ -33,6 +33,7 @@ type ComboBoxOption = EuiComboBoxOptionOption<RuleCreationValidConsumer>;
 export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
   const { consumers, selectedConsumer, errors = {}, onChange } = props;
 
+  // @ts-expect-error upgrade typescript v5.1.6
   const isInvalid = (errors.consumer?.length || 0) > 0;
 
   const validatedSelectedConsumer = useMemo(() => {

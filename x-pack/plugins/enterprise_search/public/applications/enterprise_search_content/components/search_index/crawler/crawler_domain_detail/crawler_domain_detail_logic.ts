@@ -177,15 +177,20 @@ export const CrawlerDomainDetailLogic = kea<
     domain: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         receiveDomainData: (_, { domain }) => domain,
+        // @ts-expect-error upgrade typescript v5.1.6
         updateCrawlRules: (currentDomain, { crawlRules }) =>
           currentDomain ? { ...currentDomain, crawlRules } : currentDomain,
+        // @ts-expect-error upgrade typescript v5.1.6
         updateEntryPoints: (currentDomain, { entryPoints }) =>
           currentDomain ? { ...currentDomain, entryPoints } : currentDomain,
+        // @ts-expect-error upgrade typescript v5.1.6
         updateSitemaps: (currentDomain, { sitemaps }) =>
           currentDomain ? { ...currentDomain, sitemaps } : currentDomain,
       },
     ],
+    // @ts-expect-error upgrade typescript v5.1.6
     domainId: [props.domainId, { fetchDomainData: (_, { domainId }) => domainId }],
     getLoading: [
       true,
