@@ -272,7 +272,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       const message = error?.body?.message ?? error.toString();
 
       notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.spaces.management.spaceDetails.errorSavingSpaceTitle', {
+        title: i18n.translate('xpack.spaces.management.spaceDetails.errorAssigningRoleTitle', {
           defaultMessage: 'Error assigning role to space: {message}',
           values: { message },
         }),
