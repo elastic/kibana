@@ -7,10 +7,6 @@
 
 import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { buildRouteValidationWithZod } from '@kbn/core-http-server';
@@ -18,6 +14,7 @@ import { ECS_GRAPH_PATH, EcsMappingRequestBody, EcsMappingResponse } from '../..
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getEcsGraph } from '../graphs/ecs';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import { getLLMClass, getLLMType } from '../util/llm';
 import { withAvailability } from './with_availability';
 
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
@@ -47,22 +44,19 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
         const [, { actions: actionsPlugin }] = await getStartServices();
         try {
           const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
-          const connector = req.body.connectorId
-            ? await actionsClient.get({ id: req.body.connectorId })
-            : (await actionsClient.getAll()).filter(
-                (connectorItem) => connectorItem.actionTypeId === '.bedrock'
-              )[0];
+          const connector = await actionsClient.get({ id: req.body.connectorId });
 
           const abortSignal = getRequestAbortedSignal(req.events.aborted$);
-          const isOpenAI = connector.actionTypeId === '.gen-ai';
 
-          const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+          const actionTypeId = connector.actionTypeId;
+          const llmType = getLLMType(actionTypeId);
+          const llmClass = getLLMClass(llmType);
 
           const model = new llmClass({
             actionsClient,
             connectorId: connector.id,
             logger,
-            llmType: isOpenAI ? 'openai' : 'bedrock',
+            llmType,
             model: connector.config?.defaultModel,
             temperature: 0.05,
             maxTokens: 4096,
