@@ -100,19 +100,44 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
   }
 }
 
-const prepareMessages = (messages: Array<{ role: string; content: string[] }>) =>
+const prepareMessages = (
+  messages: Array<{ role: string; content: string | unknown[] }>
+): Array<{ role: string; content?: string; rawContent?: unknown[] }> =>
   messages.reduce((acc, { role, content }) => {
     const lastMessage = acc[acc.length - 1];
 
+    // If there's no last message or the role is different, create a new entry
     if (!lastMessage || lastMessage.role !== role) {
-      acc.push({ role, content });
+      acc.push({ role, ...getNewMessageFormat(content) });
       return acc;
     }
 
     if (lastMessage.role === role) {
-      acc[acc.length - 1].content = lastMessage.content.concat(content);
-      return acc;
+      // If the role is the same, merge the content based on the type
+      if (typeof content === 'string') {
+        if (lastMessage.content) {
+          lastMessage.content += content;
+        } else {
+          acc[acc.length - 1] = { role, content };
+        }
+      } else if (Array.isArray(content)) {
+        if (lastMessage.rawContent) {
+          lastMessage.rawContent = lastMessage.rawContent.concat(content);
+        } else {
+          acc[acc.length - 1] = { role, rawContent: content };
+        }
+      }
     }
 
     return acc;
-  }, [] as Array<{ role: string; content: string[] }>);
+  }, [] as Array<{ role: string; content?: string; rawContent?: unknown[] }>);
+
+// Helper function to format the new message
+const getNewMessageFormat = (content: string | unknown[]) => {
+  if (typeof content === 'string') {
+    return { content };
+  } else if (Array.isArray(content)) {
+    return { rawContent: content };
+  }
+  return {}; // Return an empty object if content is in an unexpected format
+};

@@ -13,7 +13,7 @@ import { Message, MessageRole } from '../../../../common/chat_complete';
 import { createInferenceInternalError } from '../../../../common/errors';
 import { ToolChoiceType, type ToolOptions } from '../../../../common/chat_complete/tools';
 import { InferenceConnectorAdapter } from '../../types';
-import type { BedRockMessage, BedrockToolChoice } from './types';
+import type { BedrockMessage, BedrockToolChoice } from './types';
 import {
   BedrockChunkMember,
   serdeEventstreamIntoObservable,
@@ -97,8 +97,8 @@ const toolsToBedrock = (tools: ToolOptions['tools']) => {
     : undefined;
 };
 
-const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
-  return messages.map<BedRockMessage>((message) => {
+const messagesToBedrock = (messages: Message[]): BedrockMessage[] => {
+  return messages.map<BedrockMessage>((message) => {
     switch (message.role) {
       case MessageRole.User:
         return {

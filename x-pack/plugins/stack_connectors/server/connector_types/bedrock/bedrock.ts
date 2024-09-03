@@ -32,7 +32,7 @@ import type {
   InvokeAIRawActionParams,
   InvokeAIRawActionResponse,
   RunApiLatestResponse,
-  BedRockMessage,
+  BedrockMessage,
   BedrockToolChoice,
 } from '../../../common/bedrock/types';
 import {
@@ -392,16 +392,18 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
   ): Promise<InvokeAIRawActionResponse> {
     const res = await this.runApi(
       {
-        body: JSON.stringify({
-          messages,
-          stop_sequences: stopSequences,
-          system,
-          temperature,
-          max_tokens: maxTokens,
-          tools,
-          tool_choice: toolChoice,
-          anthropic_version: anthropicVersion,
-        }),
+        body: JSON.stringify(
+          formatBedrockBody({
+            messages,
+            stopSequences,
+            system,
+            temperature,
+            maxTokens,
+            tools,
+            toolChoice,
+            anthropicVersion,
+          })
+        ),
         model,
         signal,
         timeout,
@@ -414,6 +416,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
 }
 
 const formatBedrockBody = ({
+  anthropicVersion,
   messages,
   stopSequences,
   temperature = 0,
@@ -422,7 +425,8 @@ const formatBedrockBody = ({
   tools,
   toolChoice,
 }: {
-  messages: BedRockMessage[];
+  anthropicVersion?: string;
+  messages: BedrockMessage[];
   stopSequences?: string[];
   temperature?: number;
   maxTokens?: number;
@@ -431,7 +435,7 @@ const formatBedrockBody = ({
   tools?: Array<{ name: string; description: string }>;
   toolChoice?: BedrockToolChoice;
 }) => ({
-  anthropic_version: 'bedrock-2023-05-31',
+  anthropic_version: anthropicVersion ?? 'bedrock-2023-05-31',
   ...ensureMessageFormat(messages, system),
   max_tokens: maxTokens,
   stop_sequences: stopSequences,
@@ -440,9 +444,9 @@ const formatBedrockBody = ({
   tool_choice: toolChoice,
 });
 
-interface FormattedBedRockMessage {
+interface FormattedBedrockMessage {
   role: string;
-  content: string | BedRockMessage['rawContent'];
+  content: string | BedrockMessage['rawContent'];
 }
 
 /**
@@ -452,15 +456,15 @@ interface FormattedBedRockMessage {
  * @param messages
  */
 const ensureMessageFormat = (
-  messages: BedRockMessage[],
+  messages: BedrockMessage[],
   systemPrompt?: string
 ): {
-  messages: FormattedBedRockMessage[];
+  messages: FormattedBedrockMessage[];
   system?: string;
 } => {
   let system = systemPrompt ? systemPrompt : '';
 
-  const newMessages = messages.reduce<FormattedBedRockMessage[]>((acc, m) => {
+  const newMessages = messages.reduce<FormattedBedrockMessage[]>((acc, m) => {
     if (m.role === 'system') {
       system = `${system.length ? `${system}\n` : ''}${m.content}`;
       return acc;

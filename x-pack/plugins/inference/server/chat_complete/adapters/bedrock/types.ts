@@ -6,18 +6,18 @@
  */
 
 /**
- * BedRock message as expected by the bedrock connector
+ * Bedrock message as expected by the bedrock connector
  */
-export interface BedRockMessage {
+export interface BedrockMessage {
   role: 'user' | 'assistant';
   content?: string;
-  rawContent?: BedRockMessagePart[];
+  rawContent?: BedrockMessagePart[];
 }
 
 /**
  * Bedrock message parts
  */
-export type BedRockMessagePart =
+export type BedrockMessagePart =
   | { type: 'text'; text: string }
   | {
       type: 'tool_use';
