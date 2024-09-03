@@ -53,7 +53,7 @@ export function EntityTypeListBase({
   error,
 }: {
   loading?: boolean;
-  definitions?: EntityTypeDefinition[];
+  definitions?: Array<EntityTypeDefinition & { count: number }>;
   error?: Error;
 }) {
   const router = useInventoryRouter();
@@ -66,8 +66,8 @@ export function EntityTypeListBase({
       {definitions?.map((definition) => {
         return (
           <EntityTypeListItem
-            key={definition.type}
-            href={router.link('/{type}', { path: { type: definition.type } })}
+            key={definition.name}
+            href={router.link('/{type}', { path: { type: definition.name } })}
             icon={definition.icon}
             count={definition.count}
             label={definition.label}

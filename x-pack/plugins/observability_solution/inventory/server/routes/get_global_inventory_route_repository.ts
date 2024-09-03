@@ -6,10 +6,12 @@
  */
 
 import { entitiesRoutes } from './entities/route';
+import { datasetsRoutes } from './datasets/route';
 
 export function getGlobalInventoryServerRouteRepository() {
   return {
     ...entitiesRoutes,
+    ...datasetsRoutes,
   };
 }
 

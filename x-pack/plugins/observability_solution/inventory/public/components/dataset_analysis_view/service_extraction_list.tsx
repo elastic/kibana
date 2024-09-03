@@ -224,7 +224,11 @@ export function ServiceExtractionList({ indexPatterns }: { indexPatterns: string
   return (
     <EuiFlexGroup direction="column">
       {serviceDefinitions.map((definition) => {
-        return <EuiText size="s">{definition.field}</EuiText>;
+        return (
+          <EuiText size="s">
+            {definition.identityFields.map((field) => field.field).join(', ')}
+          </EuiText>
+        );
       })}
     </EuiFlexGroup>
   );

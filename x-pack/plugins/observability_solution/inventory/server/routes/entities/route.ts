@@ -5,105 +5,27 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import * as t from 'io-ts';
-import { keyBy, memoize } from 'lodash';
-import pLimit from 'p-limit';
 import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { kqlQuery } from '@kbn/observability-utils/es/queries/kql_query';
+import * as t from 'io-ts';
+import { memoize } from 'lodash';
 import moment from 'moment';
+import pLimit from 'p-limit';
 import type { Observable } from 'rxjs';
-import { z } from '@kbn/zod';
-import type { Dataset } from '../../../common/datasets';
-import type { EntityDefinition, EntityTypeDefinition } from '../../../common/entities';
+import type {
+  EntityDefinition,
+  EntityTypeDefinition,
+  VirtualEntityDefinition,
+} from '../../../common/entities';
 import { createDatasetMatcher } from '../../../common/utils/create_dataset_matcher';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
-import { getDatasets } from './get_datasets';
 import {
   ExtractServiceDefinitionOutputCompleteEvent,
   extractServiceDefinitions,
 } from './extract_service_definitions';
+import { getDatasets } from '../../lib/datasets/get_datasets';
 
-export const listDatasetsRoute = createInventoryServerRoute({
-  endpoint: 'GET /internal/inventory/datasets',
-  params: z.object({
-    query: z
-      .object({
-        indexPatterns: z.string(),
-      })
-      .optional(),
-  }),
-  options: {
-    tags: ['access:inventory'],
-  },
-  handler: async ({ params, context, logger }): Promise<{ datasets: Dataset[] }> => {
-    const esClient = createObservabilityEsClient({
-      client: (await context.core).elasticsearch.client.asCurrentUser,
-      logger,
-      plugin: 'inventory',
-    });
-
-    const allDatasets = await getDatasets({
-      esClient,
-      indexPatterns: params?.query?.indexPatterns?.split(','),
-    });
-
-    const datasetsByName = keyBy(allDatasets, (dataset) => dataset.name);
-
-    const allNames = Object.keys(datasetsByName);
-
-    const datasetsByIndexName: Record<string, string[]> = {};
-
-    allDatasets.forEach((dataset) => {
-      dataset.indices.forEach((index) => {
-        const trackingDatasets = datasetsByIndexName[index];
-        if (!trackingDatasets) {
-          datasetsByIndexName[index] = [];
-        }
-        datasetsByIndexName[index].push(dataset.name);
-      });
-    });
-
-    const nonRemoteIndexNames = allNames.filter((name) => !name.includes(':'));
-
-    if (nonRemoteIndexNames.length) {
-      const settingsResponse = await esClient.client.indices.getSettings({
-        index: allNames.filter((name) => !name.includes(':')),
-        filter_path: '*.settings.index.creation_date',
-      });
-
-      Object.entries(settingsResponse).forEach(([concreteIndexName, indexState]) => {
-        if (!indexState.settings?.creation_date) {
-          return;
-        }
-        const creationDate = new Date(indexState.settings.creation_date).getTime();
-
-        const datasetNames = datasetsByIndexName[concreteIndexName];
-
-        datasetNames.forEach((datasetName) => {
-          const dataset = datasetsByName[datasetName];
-          if (!dataset) {
-            return;
-          }
-          if (!dataset.creation_date || dataset.creation_date > creationDate) {
-            dataset.creation_date = creationDate;
-          }
-        });
-      });
-    }
-
-    return {
-      datasets: allDatasets.map((dataset) => {
-        return {
-          name: dataset.name,
-          creation_date: dataset.creation_date,
-          type: dataset.type,
-        };
-      }),
-    };
-  },
-});
-
-export const listServiceDefinitionsRoute = createInventoryServerRoute({
+const listServiceDefinitionsRoute = createInventoryServerRoute({
   endpoint: 'POST /internal/inventory/service_definitions',
   options: {
     tags: ['access:inventory'],
@@ -223,12 +145,30 @@ export const listServiceDefinitionsRoute = createInventoryServerRoute({
     return {
       serviceDefinitions: Object.values(serviceDefinitionsByDatasetName)
         .flat()
-        .map((definition) => {
+        .map((definition): VirtualEntityDefinition => {
           return {
-            field: definition.identityFields[0].field,
-            filter: definition.filter,
-            index: definition.indexPatterns,
-            type: 'service',
+            entity: {
+              type: 'service',
+            },
+            definition: {
+              type: 'virtual',
+            },
+            identityFields: definition.identityFields.map((field) => {
+              return { identity: { type: 'virtual' }, ...field };
+            }),
+            indexPatterns: definition.indexPatterns,
+            metadata:
+              definition.metadata?.map((metadataField) => {
+                return {
+                  field: metadataField.destination,
+                  metadata: {
+                    type: 'virtual',
+                  },
+                  type: 'keyword',
+                  limit: metadataField.limit,
+                  source: metadataField.source,
+                };
+              }) ?? [],
           };
         }),
       datasetsWithUncoveredData: datasetsWithUncoveredData
@@ -238,7 +178,7 @@ export const listServiceDefinitionsRoute = createInventoryServerRoute({
   },
 });
 
-export const extractServiceDefinitionsRoute = createInventoryServerRoute({
+const extractServiceDefinitionsRoute = createInventoryServerRoute({
   endpoint: 'POST /internal/inventory/service_definitions/extract',
   options: {
     tags: ['access:inventory'],
@@ -289,20 +229,43 @@ export const extractServiceDefinitionsRoute = createInventoryServerRoute({
   },
 });
 
-export const listEntityTypesRoute = createInventoryServerRoute({
+const listEntityTypesRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entity_types',
   options: {
     tags: ['access:inventory'],
   },
-  handler: async ({ plugins, request }): Promise<{ definitions: EntityTypeDefinition[] }> => {
+  handler: async ({
+    plugins,
+    request,
+  }): Promise<{ definitions: Array<EntityTypeDefinition & { count: number }> }> => {
+    async function fetchEntityDefinitions() {
+      const entityManagerStart = await plugins.entityManager.start();
+      const client = await entityManagerStart.getScopedClient({ request });
+
+      return await client.getEntityDefinitions({
+        page: 1,
+        perPage: 10000,
+      });
+    }
+
+    const { definitions } = await fetchEntityDefinitions();
+
     return {
       definitions: [
+        ...definitions.map((def) => {
+          return {
+            label: def.name,
+            icon: 'folderOpen',
+            name: def.type,
+            count: 0,
+          };
+        }),
         {
           label: i18n.translate('xpack.inventory.entityTypeLabels.datasets', {
             defaultMessage: 'Datasets',
           }),
           icon: 'pipeNoBreaks',
-          type: 'dataset',
+          name: 'dataset',
           count: 0,
         },
       ],
@@ -314,5 +277,4 @@ export const entitiesRoutes = {
   ...listEntityTypesRoute,
   ...listServiceDefinitionsRoute,
   ...extractServiceDefinitionsRoute,
-  ...listDatasetsRoute,
 };

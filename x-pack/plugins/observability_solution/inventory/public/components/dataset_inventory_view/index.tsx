@@ -8,10 +8,9 @@ import {
   CriteriaWithPagination,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiButton,
-  EuiCallOut,
-  EuiComboBox,
   EuiFlexGroup,
+  EuiLink,
+  EuiSearchBar,
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -19,13 +18,15 @@ import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
 import { partition } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { Dataset, DatasetType } from '../../../common/datasets';
 import { createDatasetMatcher } from '../../../common/utils/create_dataset_matcher';
-import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
+import { useInventoryRouter } from '../../hooks/use_inventory_router';
 
-export function DatasetView() {
+export function DatasetInventoryView() {
   const {
+    core: { notifications },
     services: { inventoryAPIClient },
   } = useKibana();
 
@@ -48,9 +49,21 @@ export function DatasetView() {
             pageIndex: 0,
           }));
           return response;
+        })
+        .catch((error) => {
+          if (isRequestAbortedError(error)) {
+            return;
+          }
+
+          notifications.toasts.addError(error, {
+            title: i18n.translate('xpack.inventory.datasetView.failedToFetchDatasets', {
+              defaultMessage: 'Failed to fetch datasets',
+            }),
+          });
+          throw error;
         });
     },
-    [inventoryAPIClient]
+    [inventoryAPIClient, notifications]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<Dataset>>>(() => {
@@ -61,6 +74,20 @@ export function DatasetView() {
           defaultMessage: 'Name',
         }),
         width: '80%',
+        render: (_, { name }) => {
+          return (
+            <EuiLink
+              data-test-subj="inventoryColumnsLink"
+              href={router.link('/dataset/{name}', {
+                path: {
+                  name,
+                },
+              })}
+            >
+              {name}
+            </EuiLink>
+          );
+        },
       },
       {
         field: 'type',
@@ -92,37 +119,16 @@ export function DatasetView() {
         },
       },
     ];
-  }, []);
-
-  const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string }>>([]);
+  }, [router]);
 
   const [searchQuery, setSearchQuery] = useState('');
 
-  const allOptions = useMemo(() => {
-    return (
-      datasetsFetch.value?.datasets.map((dataset) => ({
-        label: dataset.name,
-      })) ?? []
-    );
-  }, [datasetsFetch.value]);
-
-  const displayedOptions = useMemo(() => {
-    const matcher = createDatasetMatcher(searchQuery);
-    if (!searchQuery) {
-      return allOptions;
-    }
-    return allOptions.filter((option) => {
-      const isMatch = matcher.match(option.label);
-      return isMatch;
-    });
-  }, [allOptions, searchQuery]);
-
   const filteredItems = useMemo(() => {
-    if (!datasetsFetch.value?.datasets || !selectedOptions.length) {
-      return [];
+    if (!datasetsFetch.value?.datasets || !searchQuery) {
+      return datasetsFetch.value?.datasets || [];
     }
 
-    const matchers = selectedOptions.map((option) => createDatasetMatcher(option.label));
+    const matchers = [createDatasetMatcher(searchQuery, true)];
 
     const [includeMatchers, excludeMatchers] = partition(
       matchers,
@@ -135,7 +141,7 @@ export function DatasetView() {
         excludeMatchers.every((matcher) => matcher.match(dataset.name))
       );
     });
-  }, [selectedOptions, datasetsFetch.value?.datasets]);
+  }, [datasetsFetch.value?.datasets, searchQuery]);
 
   const visibleItems = useMemo(() => {
     return filteredItems.slice(
@@ -146,36 +152,20 @@ export function DatasetView() {
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiCallOut
-        title={i18n.translate('xpack.inventory.datasetView.analysisCalloutTitle', {
-          defaultMessage: 'Analyze your datasets with AI',
-        })}
-      >
-        <EuiText size="s">
-          {i18n.translate('xpack.inventory.datasetView.analysisCalloutDescription', {
-            defaultMessage:
-              'Use AI to extract services, infrastructure and other entities from your datasets. Automatically create dashboards, SLOs, rules and anomaly detection jobs for your data.',
-          })}
-        </EuiText>
-      </EuiCallOut>
-      <EuiComboBox
-        fullWidth
-        selectedOptions={selectedOptions}
-        onChange={(nextOptions) => {
-          setSelectedOptions(() => nextOptions);
+      <EuiSearchBar
+        query={searchQuery}
+        onChange={({ queryText }) => {
+          setSearchQuery(queryText);
         }}
-        onSearchChange={(nextSearchQuery) => {
-          setSearchQuery(nextSearchQuery);
+        box={{
+          onChange: (event) => {
+            setSearchQuery(event.currentTarget.value);
+          },
+          placeholder: i18n.translate(
+            'xpack.inventory.datasetView.selectDatasetsToOnboardComboBoxLabel',
+            { defaultMessage: 'Filter datasets' }
+          ),
         }}
-        onCreateOption={(createdOption) => {
-          setSelectedOptions((prevOptions) => prevOptions.concat({ label: createdOption }));
-        }}
-        optionMatcher={() => true}
-        options={displayedOptions}
-        placeholder={i18n.translate(
-          'xpack.inventory.datasetView.selectDatasetsToOnboardComboBoxLabel',
-          { defaultMessage: 'Select datasets to onboard' }
-        )}
       />
       <EuiBasicTable<Dataset>
         columns={columns}
@@ -197,28 +187,6 @@ export function DatasetView() {
           }));
         }}
       />
-
-      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
-        <EuiButton
-          iconType="sparkles"
-          color="primary"
-          fill
-          data-test-subj="inventoryDatasetViewRunAiAnalysisButton"
-          disabled={!selectedOptions.length}
-          onClick={() => {
-            router.push('/dataset/analyze', {
-              path: {},
-              query: {
-                indexPatterns: selectedOptions.map((option) => option.label).join(','),
-              },
-            });
-          }}
-        >
-          {i18n.translate('xpack.inventory.datasetView.analyzePatternsButtonLabel', {
-            defaultMessage: 'Analyze patterns',
-          })}
-        </EuiButton>
-      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 }

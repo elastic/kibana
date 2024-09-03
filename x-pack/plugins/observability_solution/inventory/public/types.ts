@@ -9,6 +9,11 @@ import type {
   ObservabilitySharedPluginSetup,
 } from '@kbn/observability-shared-plugin/public';
 import type { InferencePublicStart, InferencePublicSetup } from '@kbn/inference-plugin/public';
+import type {
+  DataViewsPublicPluginStart,
+  DataViewsPublicPluginSetup,
+} from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart, DataPublicPluginSetup } from '@kbn/data-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -17,11 +22,15 @@ export interface ConfigSchema {}
 export interface InventorySetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
   inference: InferencePublicSetup;
+  dataViews: DataViewsPublicPluginSetup;
+  data: DataPublicPluginSetup;
 }
 
 export interface InventoryStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
   inference: InferencePublicStart;
+  dataViews: DataViewsPublicPluginStart;
+  data: DataPublicPluginStart;
 }
 
 export interface InventoryPublicSetup {}

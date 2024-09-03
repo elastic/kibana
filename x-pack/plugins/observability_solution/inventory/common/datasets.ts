@@ -15,3 +15,8 @@ export interface Dataset {
   name: string;
   creation_date: number | null;
 }
+
+export interface DatasetDefinition {
+  properties: Record<string, string | number | boolean>;
+  description: string;
+}

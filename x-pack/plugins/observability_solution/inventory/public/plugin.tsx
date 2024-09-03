@@ -17,7 +17,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
+import { ENTITY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { css } from '@emotion/css';
 import type {
   ConfigSchema,
@@ -50,20 +50,20 @@ export class InventoryPlugin
     const inventoryAPIClient = createCallInventoryAPI(coreSetup);
 
     coreSetup.application.register({
-      id: INVENTORY_APP_ID,
+      id: ENTITY_APP_ID,
       title: i18n.translate('xpack.inventory.appTitle', {
-        defaultMessage: 'Inventory',
+        defaultMessage: 'Entities',
       }),
       euiIconType: 'logoObservability',
-      appRoute: '/app/observability/inventory',
+      appRoute: '/app/observability/entities',
       category: DEFAULT_APP_CATEGORIES.observability,
       visibleIn: ['sideNav'],
       order: 8001,
       deepLinks: [
         {
-          id: 'inventory',
+          id: 'entities',
           title: i18n.translate('xpack.inventory.inventoryDeepLinkTitle', {
-            defaultMessage: 'Inventory',
+            defaultMessage: 'Entities',
           }),
           path: '/',
         },

@@ -11,10 +11,12 @@
       "observabilityShared",
       "entityManager",
       "inference",
-      "dataViews"
+      "dataViews",
+      "data"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "esqlDataGrid"
     ],
     "optionalPlugins": [],
     "extraPublicDirs": []

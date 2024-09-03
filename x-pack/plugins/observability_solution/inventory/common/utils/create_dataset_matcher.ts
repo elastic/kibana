@@ -22,7 +22,9 @@ function createMatcher(pattern: string, greedy: boolean) {
     pattern = pattern.substring(1);
   }
 
-  const regexStr = `^${pattern.replaceAll('.', '\\.').replaceAll('*', '.*')}${greedy ? '' : '$'}`;
+  const regexStr = `^${pattern.replaceAll(/([\[\]\?\.\/\\\$\^])/g, '\\$1').replaceAll('*', '.*')}${
+    greedy ? '' : '$'
+  }`;
 
   const regex = new RegExp(regexStr);
 

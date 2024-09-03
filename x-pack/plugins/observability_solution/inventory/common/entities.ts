@@ -6,15 +6,64 @@
  */
 
 export interface EntityTypeDefinition {
-  type: string;
+  name: string;
   label: string;
   icon: string;
-  count: number;
 }
 
-export interface EntityDefinition {
-  type: string;
+interface ConcreteIdentifyField {
+  identity: {
+    type: 'concrete';
+  };
   field: string;
-  filter?: string;
-  index: string[];
+  value: string;
 }
+
+interface VirtualIdentityField {
+  identity: {
+    type: 'virtual';
+  };
+  field: string;
+  optional?: boolean;
+  source?: string;
+}
+
+export type IdentityField = ConcreteIdentifyField | VirtualIdentityField;
+
+interface VirtualMetadataField {
+  metadata: {
+    type: 'virtual';
+  };
+  field: string;
+  source?: string;
+  type: 'keyword';
+  limit?: number;
+}
+
+type MetadataField = VirtualMetadataField;
+
+export interface VirtualEntityDefinition {
+  definition: {
+    id?: string;
+    type: 'virtual';
+  };
+  entity: {
+    type: string;
+  };
+  indexPatterns: string[];
+  identityFields: IdentityField[];
+  metadata: MetadataField[];
+}
+
+interface ConcreteEntityDefinition {
+  definition: {
+    id: string;
+    type: 'concrete';
+  };
+  entity: {
+    type: string;
+  };
+  identityFields: ConcreteIdentifyField[];
+}
+
+export type EntityDefinition = VirtualEntityDefinition | ConcreteEntityDefinition;

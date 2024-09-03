@@ -62,7 +62,7 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
             <EuiTitle size="xs">
               <h1>
                 {i18n.translate('xpack.inventory.inventoryPageHeaderLabel', {
-                  defaultMessage: 'Inventory',
+                  defaultMessage: 'Entities',
                 })}
               </h1>
             </EuiTitle>

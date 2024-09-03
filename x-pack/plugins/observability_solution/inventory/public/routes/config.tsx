@@ -8,8 +8,12 @@ import * as t from 'io-ts';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
-import { DatasetView } from '../components/dataset_view';
+import { DatasetInventoryView } from '../components/dataset_inventory_view';
 import { DatasetAnalysisView } from '../components/dataset_analysis_view';
+import { DatasetOverview } from '../components/dataset_overview';
+import { DatasetDetailView } from '../components/dataset_detail_view';
+import { DatasetMetricsView } from '../components/dataset_metrics_view';
+import { RedirectTo } from '../components/redirect_to';
 
 /**
  * The array of route definitions to be used when the application
@@ -35,7 +39,30 @@ const inventoryRoutes = {
         }),
       },
       '/dataset': {
-        element: <DatasetView />,
+        element: <DatasetInventoryView />,
+      },
+      '/dataset/{name}': {
+        params: t.type({
+          path: t.type({
+            name: t.string,
+          }),
+        }),
+        element: (
+          <DatasetDetailView>
+            <Outlet />
+          </DatasetDetailView>
+        ),
+        children: {
+          '/dataset/{name}/overview': {
+            element: <DatasetOverview />,
+          },
+          '/dataset/{name}/metrics': {
+            element: <DatasetMetricsView />,
+          },
+          '/dataset/{name}': {
+            element: <RedirectTo path="/dataset/{name}/overview" />,
+          },
+        },
       },
       '/{type}': {
         element: <></>,

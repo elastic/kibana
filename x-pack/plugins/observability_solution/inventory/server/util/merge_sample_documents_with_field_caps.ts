@@ -15,10 +15,7 @@ export function mergeSampleDocumentsWithFieldCaps({
 }: {
   total: number;
   samples: Array<Record<string, unknown[]>>;
-  fieldCaps: Array<{
-    name: string;
-    esTypes?: string[];
-  }>;
+  fieldCaps: Array<{ name: string; esTypes?: string[] }>;
 }): DocumentAnalysis {
   const nonEmptyFields = new Set<string>();
   const fieldValues = new Map<string, Array<string | number | boolean>>();
