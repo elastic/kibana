@@ -14,9 +14,11 @@ const getFeatureIdsForCategories = (
 ) => {
   return features
     .filter((feature) =>
-      categories.includes(
+      feature.category
+        ? categories.includes(
         feature.category.id as 'observability' | 'enterpriseSearch' | 'securitySolution'
       )
+        : false
     )
     .map((feature) => feature.id);
 };
