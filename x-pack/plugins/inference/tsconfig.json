@@ -33,6 +33,7 @@
     "@kbn/es-types",
     "@kbn/field-types",
     "@kbn/expressions-plugin",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/repo-info"
   ]
 }
