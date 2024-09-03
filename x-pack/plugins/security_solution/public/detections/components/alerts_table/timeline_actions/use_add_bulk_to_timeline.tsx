@@ -193,7 +193,14 @@ export const useAddBulkToTimelineAction = ({
   );
 
   const onActionClick: BulkActionsConfig['onClick'] | CustomBulkAction['onClick'] = useCallback(
-    (items: TimelineItem[] | undefined, isAllSelected: boolean, setLoading, clearSelection) => {
+    (
+      items: TimelineItem[] | undefined,
+      isAllSelected: boolean,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setLoading: any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      clearSelection: any
+    ) => {
       if (!items) return;
       /*
        * Trigger actions table passed isAllSelected param

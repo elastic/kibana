@@ -56,7 +56,8 @@ export const useTimelineTypes = ({
   }, [formatUrl, urlSearch]);
 
   const goToTimeline = useCallback(
-    (ev) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ev: any) => {
       ev.preventDefault();
       navigateToUrl(timelineUrl);
     },
@@ -64,7 +65,8 @@ export const useTimelineTypes = ({
   );
 
   const goToTemplateTimeline = useCallback(
-    (ev) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ev: any) => {
       ev.preventDefault();
       navigateToUrl(templateUrl);
     },
@@ -72,7 +74,8 @@ export const useTimelineTypes = ({
   );
 
   const goToNotes = useCallback(
-    (ev) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ev: any) => {
       ev.preventDefault();
       navigateToUrl(notesUrl);
     },
@@ -102,7 +105,7 @@ export const useTimelineTypes = ({
   );
 
   const onFilterClicked = useCallback(
-    (tabId, tabStyle: TimelineTabsStyle) => {
+    (tabId: TimelineType, tabStyle: TimelineTabsStyle) => {
       setTimelineTypes((prevTimelineTypes) => {
         if (prevTimelineTypes !== tabId) {
           setTimelineTypes(tabId);

@@ -44,7 +44,7 @@ DragEffects.displayName = 'DragEffects';
  * writing, there's no hook equivalent for `componentDidCatch`, per
  * https://reactjs.org/docs/hooks-faq.html#do-hooks-cover-all-use-cases-for-classes
  */
-class DragDropErrorBoundary extends React.PureComponent {
+class DragDropErrorBoundary extends React.PureComponent<React.PropsWithChildren> {
   componentDidCatch() {
     this.forceUpdate(); // required for recovery
   }
@@ -156,7 +156,8 @@ const DraggableOnWrapper: React.FC<DraggableWrapperProps> = React.memo(
     );
 
     const RenderClone = useCallback(
-      (provided, snapshot) => (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (provided: any, snapshot: any) => (
         <ConditionalPortal registerProvider={registerProvider}>
           <div
             {...provided.draggableProps}
@@ -178,7 +179,8 @@ const DraggableOnWrapper: React.FC<DraggableWrapperProps> = React.memo(
     );
 
     const DraggableContent = useCallback(
-      (provided, snapshot) => (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (provided: any, snapshot: any) => (
         <ProviderContainer
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -215,7 +217,8 @@ const DraggableOnWrapper: React.FC<DraggableWrapperProps> = React.memo(
     );
 
     const DroppableContent = useCallback(
-      (droppableProvided) => (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (droppableProvided: any) => (
         <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
           <div
             className={DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME}

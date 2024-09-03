@@ -115,7 +115,8 @@ const NonDecoratedIpComponent: React.FC<{
   );
 
   const render = useCallback(
-    (dataProvider, _, snapshot) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (dataProvider: any, _: any, snapshot: any) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProvider} />
@@ -182,7 +183,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
   const openNetworkDetailsSidePanel = useCallback(
-    (e) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (e: any) => {
       e.preventDefault();
       if (onClick) {
         onClick();
@@ -240,7 +242,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   );
 
   const render = useCallback(
-    (_props, _provided, snapshot) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (_props: any, _provided: any, snapshot: any) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProviderProp} />

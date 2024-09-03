@@ -100,7 +100,8 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const narrowDateRange = useCallback(
-    (score, interval) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (score: any, interval: any) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({

@@ -51,7 +51,8 @@ const HostNameComponent: React.FC<Props> = ({
     hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
 
   const openHostDetailsSidePanel = useCallback(
-    (e) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (e: any) => {
       e.preventDefault();
 
       if (onClick) {

@@ -28,7 +28,8 @@ export function VersionsPicker({
   );
 
   const handleChange = useCallback(
-    (changeEvent) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (changeEvent: any) => {
       onChange(changeEvent.target.value as SelectedVersions);
     },
     [onChange]

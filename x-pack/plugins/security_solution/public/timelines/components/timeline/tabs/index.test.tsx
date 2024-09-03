@@ -37,7 +37,9 @@ describe('Timeline', () => {
   describe('esql tab', () => {
     const esqlTabSubj = `timelineTabs-${TimelineTabs.esql}`;
     const defaultProps = {
-      renderCellValue: () => {},
+      renderCellValue: () => {
+        return null;
+      },
       rowRenderers: [],
       timelineId: TimelineId.test,
       timelineType: TimelineTypeEnum.default,

@@ -200,7 +200,7 @@ export const NoteManagementPage = ({
         iconType="error"
         color="danger"
         title={<h2>{i18n.TABLE_ERROR}</h2>}
-        body={<p>{fetchErrorData}</p>}
+        body={<p>{fetchErrorData as React.ReactNode}</p>}
       />
     );
   }

@@ -28,7 +28,7 @@ const PopoverTooltipComponent = ({
 }: PopoverTooltipProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const onClick: EuiIconProps['onClick'] = useCallback(
+  const onClick = useCallback<NonNullable<EuiIconProps['onClick']>>(
     (event) => {
       setIsPopoverOpen(!isPopoverOpen);
       event.stopPropagation();
@@ -36,7 +36,7 @@ const PopoverTooltipComponent = ({
     [isPopoverOpen]
   );
 
-  const onKeyDown: EuiIconProps['onKeyDown'] = useCallback(
+  const onKeyDown = useCallback<NonNullable<EuiIconProps['onKeyDown']>>(
     (event) => {
       if (keys.ENTER === event.key) {
         setIsPopoverOpen(!isPopoverOpen);

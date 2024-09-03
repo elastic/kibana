@@ -54,7 +54,8 @@ const RuleSourceFilterComponent = ({
   ) as EuiSelectableOption[];
 
   const handleSelectableOnChange = useCallback(
-    (newOptions) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (newOptions: any) => {
       const formattedOptions = extractSelected<CoverageOverviewRuleSource>(newOptions);
       onChange(formattedOptions);
     },

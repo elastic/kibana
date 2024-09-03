@@ -21,7 +21,7 @@ export const AnomalyThresholdSlider = ({
   field,
 }: AnomalyThresholdSliderProps) => {
   const threshold = field.value as number;
-  const onThresholdChange: EuiRangeProps['onChange'] = useCallback(
+  const onThresholdChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
     (event) => {
       const thresholdValue = Number(event.currentTarget.value);
       field.setValue(thresholdValue);
