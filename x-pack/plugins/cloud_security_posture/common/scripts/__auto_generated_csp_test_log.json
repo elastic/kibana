@@ -3,7 +3,9 @@
     "filePath": "x-pack/packages/kbn-cloud-security-posture-common/utils/helpers.test.ts",
     "fileName": "helpers.test.ts",
     "directory": "x-pack/packages/kbn-cloud-security-posture",
-    "tags": [],
+    "tags": [
+      "KBN PACKAGE"
+    ],
     "lines": [
       "describe('test helper methods')",
       "  describe('extractErrorMessage Test')",

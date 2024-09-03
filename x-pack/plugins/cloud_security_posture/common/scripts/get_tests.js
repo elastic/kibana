@@ -114,6 +114,10 @@ const getTags = (filePath, testSuits) => {
     tags.push('UT');
   }
 
+  if (filePath.startsWith(KBN_CSP_PACKAGE) || filePath.startsWith(KBN_CSP_PACKAGE_COMMON)) {
+    tags.push('KBN PACKAGE');
+  }
+
   if (testSuits.some((suit) => suit.isSkipped)) {
     tags.push('HAS SKIP');
   }
@@ -306,6 +310,7 @@ const tagShieldsColors = {
   'HAS SKIP': 'yellow',
   'HAS TODO': 'green',
   'API INTEGRATION': 'purple',
+  'KBN PACKAGE': 'blueviolet',
 };
 
 // Generates the Requirement Test Coverage Markdown file using the data in testsLogOutput

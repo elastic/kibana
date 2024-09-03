@@ -9,6 +9,8 @@ You can also check out the dedicated app view, which enables easier search and f
 
 **Total Tests:** 10 | **Skipped:** 0 (0.00%) | **Todo:** 0 (0.00%)
 
+![](https://img.shields.io/badge/KBN-PACKAGE-blueviolet)
+
 <details>
 <summary>Test Details</summary>
 
