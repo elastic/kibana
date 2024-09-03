@@ -2,7 +2,7 @@
 
 This directory tree contains files subject to the Elastic License 2.0. The files subject
 to the Elastic License 2.0 are grouped in this directory to clearly separate them
-from files dual-licensed under the Server Side Public License and the Elastic License 2.0.
+from files triple-licensed under the Elastic License 2.0, the AGPL 3.0, and the SSPL 1.0.
 
 ## Alert Details page feature flags (feature-flag-per-App)
 
