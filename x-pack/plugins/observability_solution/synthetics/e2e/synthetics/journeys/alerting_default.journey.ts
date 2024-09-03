@@ -119,7 +119,6 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.click('.euiForm');
     await page.click('text=To: Email is required for selected email connector');
   });
-
   step('Fill email fields', async () => {
     await page
       .getByTestId('toEmailAddressInput')

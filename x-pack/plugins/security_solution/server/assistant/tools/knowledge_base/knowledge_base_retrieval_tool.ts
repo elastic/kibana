@@ -6,7 +6,7 @@
  */
 
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import { APP_UI_ID } from '../../../../common';

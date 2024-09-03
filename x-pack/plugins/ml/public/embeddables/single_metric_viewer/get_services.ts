@@ -74,7 +74,7 @@ export const getMlServices = async (
   //   its own context or possibly without having a singleton like state at all, since the
   //   way this manages its own state right now doesn't consider React component lifecycles.
   const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
-  const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
+  const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils, mlJobService);
   return {
     anomalyDetectorService,
     anomalyExplorerService,

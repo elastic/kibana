@@ -626,7 +626,7 @@
               },
               "[] | undefined; iconType?: ",
               "IconType",
-              " | undefined; showQueryInput?: boolean | undefined; dataTestSubj?: string | undefined; showSaveQuery?: boolean | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; additionalQueryBarMenuItems?: ",
+              " | undefined; dataTestSubj?: string | undefined; minRefreshInterval?: number | undefined; showSaveQuery?: boolean | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; additionalQueryBarMenuItems?: ",
               "AdditionalQueryBarMenuItems",
               " | undefined; filtersForSuggestions?: ",
               {

@@ -14,7 +14,6 @@ import {
 import { v4 as uuidV4 } from 'uuid';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { enableSecrets, skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -22,6 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   let pkgVersion: string;
 
@@ -196,19 +196,20 @@ export default function (providerContext: FtrProviderContext) {
 
   const TEST_SPACE_ID = 'testspaceoutputs';
 
-  describe('fleet_outputs_crud', async function () {
+  describe('fleet_outputs_crud', function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
 
     let defaultOutputId: string;
     let ESOutputId: string;
     let fleetServerPolicyId: string;
     let fleetServerPolicyWithCustomOutputId: string;
 
+    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async function () {
       await enableSecrets(providerContext);
       await enableOutputSecrets();
@@ -1352,6 +1353,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      // eslint-disable-next-line mocha/no-identical-title
       it('should discard the shipper values when shipper is disabled', async function () {
         await supertest
           .post(`/api/fleet/outputs`)
@@ -1701,6 +1703,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect(400);
         });
 
+        // eslint-disable-next-line mocha/no-identical-title
         it('should return a 400 when deleting a default output ', async function () {
           await supertest
             .delete(`/api/fleet/outputs/${defaultMonitoringOutputId}`)

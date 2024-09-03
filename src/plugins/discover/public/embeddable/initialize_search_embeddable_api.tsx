@@ -171,6 +171,7 @@ export const initializeSearchEmbeddableApi = async (
     comparators: {
       sort: [sort$, (value) => sort$.next(value), (a, b) => deepEqual(a, b)],
       columns: [columns$, (value) => columns$.next(value), (a, b) => deepEqual(a, b)],
+      grid: [grid$, (value) => grid$.next(value), (a, b) => deepEqual(a, b)],
       sampleSize: [
         sampleSize$,
         (value) => sampleSize$.next(value),
@@ -198,7 +199,6 @@ export const initializeSearchEmbeddableApi = async (
         (value) => serializedSearchSource$.next(value),
       ],
       viewMode: [savedSearchViewMode$, (value) => savedSearchViewMode$.next(value)],
-      grid: [grid$, (value) => grid$.next(value)],
       density: [density$, (value) => density$.next(value)],
     },
   };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { monitorAttributes, syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
   ConfigKey,
   MonitorFiltersResult,
@@ -30,7 +30,7 @@ interface AggsResponse {
   projectsAggs: {
     buckets: Buckets;
   };
-  monitorTypeAggs: {
+  monitorTypesAggs: {
     buckets: Buckets;
   };
   monitorIdsAggs: {
@@ -85,7 +85,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
         searchFields: SEARCH_FIELDS,
       });
 
-      const { monitorTypeAggs, tagsAggs, locationsAggs, projectsAggs, monitorIdsAggs } =
+      const { monitorTypesAggs, tagsAggs, locationsAggs, projectsAggs, monitorIdsAggs } =
         (data?.aggregations as AggsResponse) ?? {};
       const allLocationsMap = new Map(allLocations.map((obj) => [obj.id, obj.label]));
 
@@ -114,7 +114,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
             count,
           })) ?? [],
         monitorTypes:
-          monitorTypeAggs?.buckets?.map(({ key, doc_count: count }) => ({
+          monitorTypesAggs?.buckets?.map(({ key, doc_count: count }) => ({
             label: key,
             value: key,
             count,
@@ -129,35 +129,42 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
 const aggs = {
   tagsAggs: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.TAGS}`,
+      field: `${monitorAttributes}.${ConfigKey.TAGS}`,
       size: 10000,
       exclude: [''],
     },
   },
   monitorTypeAggs: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.MONITOR_TYPE}.keyword`,
+      field: `${monitorAttributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
       size: 10000,
       exclude: [''],
     },
   },
   locationsAggs: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.LOCATIONS}.id`,
+      field: `${monitorAttributes}.${ConfigKey.LOCATIONS}.id`,
       size: 10000,
       exclude: [''],
     },
   },
   projectsAggs: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}`,
+      field: `${monitorAttributes}.${ConfigKey.PROJECT_ID}`,
+      size: 10000,
+      exclude: [''],
+    },
+  },
+  monitorTypesAggs: {
+    terms: {
+      field: `${monitorAttributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
       size: 10000,
       exclude: [''],
     },
   },
   monitorIdsAggs: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.MONITOR_QUERY_ID}`,
+      field: `${monitorAttributes}.${ConfigKey.MONITOR_QUERY_ID}`,
       size: 10000,
       exclude: [''],
     },
