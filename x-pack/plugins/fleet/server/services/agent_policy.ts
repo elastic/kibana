@@ -44,7 +44,7 @@ import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-  // PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../constants';
 import type {
@@ -113,6 +113,7 @@ import { isAgentlessEnabled } from './utils/agentless';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
+
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
 
 function normalizeKuery(savedObjectType: string, kuery: string) {
@@ -1112,12 +1113,15 @@ class AgentPolicyService {
 
     if (agentPolicy?.supports_agentless) {
       try {
+        // Deleting agentless deployment
         await agentlessAgentService.deleteAgentlessAgent(id);
         logger.debug(
-          `[Agentless API] Successfully deleted agentless policy  with single agent policy with id ${id}`
+          `[Agentless API] Successfully deleted agentless deployment  with single agent policy with id ${id}`
         );
       } catch (error) {
-        logger.error(`[Agentless API] Error deleting agentless agent for policy with id ${id}`);
+        logger.error(
+          `[Agentless API] Error deleting agentless deployment for single agent policy id ${id} and agentless agent id ${agentlessAgent?.id}`
+        );
         logger.error(error);
       }
     }
@@ -1137,16 +1141,15 @@ class AgentPolicyService {
         this.packagePoliciesWithSingleAndMultiplePolicies(packagePolicies);
 
       if (packagePoliciesToDelete.length > 0) {
-        // Todo: Uncomment after Agentless Deletion agent is working
-        // await packagePolicyService.delete(
-        //   soClient,
-        //   esClient,
-        //   packagePoliciesToDelete.map((p) => p.id),
-        //   {
-        //     force: options?.force,
-        //     skipUnassignFromAgentPolicies: true,
-        //   }
-        // );
+        await packagePolicyService.delete(
+          soClient,
+          esClient,
+          packagePoliciesToDelete.map((p) => p.id),
+          {
+            force: options?.force,
+            skipUnassignFromAgentPolicies: true,
+          }
+        );
         logger.debug(
           `Deleted package policies with single agent policy with ids ${packagePoliciesToDelete
             .map((policy) => policy.id)
@@ -1155,19 +1158,18 @@ class AgentPolicyService {
       }
 
       if (policiesWithMultipleAP.length > 0) {
-        // Todo: Uncomment  after Agentless Deletion agent is working
-        // await packagePolicyService.bulkUpdate(
-        //   soClient,
-        //   esClient,
-        //   policiesWithMultipleAP.map((policy) => {
-        //     const newPolicyIds = policy.policy_ids.filter((policyId) => policyId !== id);
-        //     return {
-        //       ...policy,
-        //       policy_id: newPolicyIds[0],
-        //       policy_ids: newPolicyIds,
-        //     };
-        //   })
-        // );
+        await packagePolicyService.bulkUpdate(
+          soClient,
+          esClient,
+          policiesWithMultipleAP.map((policy) => {
+            const newPolicyIds = policy.policy_ids.filter((policyId) => policyId !== id);
+            return {
+              ...policy,
+              policy_id: newPolicyIds[0],
+              policy_ids: newPolicyIds,
+            };
+          })
+        );
         logger.debug(
           `Updated package policies with multiple agent policies with ids ${policiesWithMultipleAP
             .map((policy) => policy.id)
@@ -1176,20 +1178,19 @@ class AgentPolicyService {
       }
     }
 
-    // Todo: Uncomment after Agentless Deletion agent is working
-    // if (agentPolicy.is_preconfigured && !options?.force) {
-    //   await soClient.create(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, {
-    //     id: String(id),
-    //   });
-    // }
+    if (agentPolicy.is_preconfigured && !options?.force) {
+      await soClient.create(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, {
+        id: String(id),
+      });
+    }
 
-    // await soClient.delete(savedObjectType, id);
-    // await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
-    //   spaceId: soClient.getCurrentNamespace(),
-    // });
+    await soClient.delete(savedObjectType, id);
+    await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
+      spaceId: soClient.getCurrentNamespace(),
+    });
 
-    // // cleanup .fleet-policies docs on delete
-    // await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
+    // cleanup .fleet-policies docs on delete
+    await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
 
     logger.debug(`Deleted agent policy ${id}`);
     return {

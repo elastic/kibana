@@ -143,20 +143,22 @@ class AgentlessAgentService {
 
   public async deleteAgentlessAgent(agentlessPolicyId: string) {
     const logger = appContextService.getLogger();
-    logger.debug(`Start deleting agentless agent for agent policy - ${agentlessPolicyId}`);
+    logger.debug(
+      `[Agentless API] Start deleting agentless agent for agent policy - ${agentlessPolicyId}`
+    );
 
     if (!isAgentlessApiEnabled) {
       logger.error(
-        'Agentless API is not supported. Deleting agentless agent is not supported in non-cloud or non-serverless environments'
+        '[Agentless API] Agentless API is not supported. Deleting agentless agent is not supported in non-cloud or non-serverless environments'
       );
     }
 
     const agentlessConfig = appContextService.getConfig()?.agentless;
     if (!agentlessConfig) {
-      logger.error('kibana.yml is currently missing Agentless API configuration');
+      logger.error('[Agentless API] kibana.yml is currently missing Agentless API configuration');
     }
 
-    logger.debug(`Deleting agentless agent with TLS config with certificate`);
+    logger.debug(`[Agentless API] Deleting agentless agent with TLS config with certificate`);
 
     const tlsConfig = new SslConfig(
       sslSchema.validate({
@@ -182,7 +184,7 @@ class AgentlessAgentService {
     };
 
     logger.debug(
-      `Deleting agentless agent with request config ${JSON.stringify({
+      `[Agentless API] Deleting agentless agent with request config ${JSON.stringify({
         ...requestConfig,
         httpsAgent: {
           ...requestConfig.httpsAgent,
@@ -198,21 +200,23 @@ class AgentlessAgentService {
 
     const response = await axios(requestConfig).catch((error: AxiosError) => {
       if (!axios.isAxiosError(error)) {
-        logger.error(`Deleting agentless failed with an error ${error}`);
+        logger.error(`[Agentless API] Deleting agentless failed with an error ${error}`);
       }
       if (error.response) {
         logger.error(
-          `DELETE Agentless Agent Response Error: ${error.response.status} - ${error.response.statusText} Deleting agentless agent failed for agent policy id ${agentlessPolicyId}.`
+          `[Agentless API] DELETE Agentless Agent Response Error: ${error.response.status} - ${error.response.statusText} Deleting agentless agent failed for agent policy id ${agentlessPolicyId}.`
         );
       } else if (error.request) {
         logger.error(
-          `Deleting agentless failed to receive a response from the Agentless API ${JSON.stringify(
+          `[Agentless API] Deleting agentless failed to receive a response from the Agentless API ${JSON.stringify(
             error.cause
           )}`
         );
       } else {
         logger.error(
-          `Deleting agentless failed to delete the request ${JSON.stringify(error.cause)}`
+          `[Agentless API] Deleting agentless failed to delete the request ${JSON.stringify(
+            error.cause
+          )}`
         );
       }
     });
