@@ -14,9 +14,10 @@ export KIBANA_BUILD_ID
 
 .buildkite/scripts/download_build_artifacts.sh
 
-export DISABLE_CI_STATS_SHIPPING=true
+echo "--- Upload Existing Artifacts"
+buildkite-agent artifact upload "./*.tar.gz;./*.zip;./*.deb;./*.rpm"
 
 # .buildkite/scripts/build_kibana.sh
 # .buildkite/scripts/build_kibana_plugins.sh
 # .buildkite/scripts/post_build_kibana_plugins.sh
-.buildkite/scripts/post_build_kibana.sh
+#.buildkite/scripts/post_build_kibana.sh
