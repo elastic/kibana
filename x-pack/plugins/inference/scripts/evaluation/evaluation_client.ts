@@ -12,17 +12,25 @@ import { withoutOutputUpdateEvents } from '../../common/output/without_output_up
 import type { EvaluationResult } from './types';
 
 export interface InferenceEvaluationClient {
-  evaluate: (input: string, criteria: string[]) => Promise<EvaluationResult>;
+  getEvaluationConnectorId: () => string;
+  evaluate: (options: {
+    input: string;
+    criteria?: string[];
+    system?: string;
+  }) => Promise<EvaluationResult>;
   getResults: () => EvaluationResult[];
   onResult: (cb: (result: EvaluationResult) => void) => () => void;
+  output: OutputAPI;
 }
 
 export function createInferenceEvaluationClient({
   connectorId,
+  evaluationConnectorId,
   suite,
   outputApi,
 }: {
   connectorId: string;
+  evaluationConnectorId: string;
   suite?: Mocha.Suite;
   outputApi: OutputAPI;
 }): InferenceEvaluationClient {
@@ -57,22 +65,31 @@ export function createInferenceEvaluationClient({
   const results: EvaluationResult[] = [];
 
   return {
-    evaluate: async (input, criteria) => {
+    output: outputApi,
+    getEvaluationConnectorId: () => evaluationConnectorId,
+    evaluate: async ({ input, criteria = [], system }) => {
       const evaluation = await lastValueFrom(
         outputApi('evaluate', {
           connectorId,
-          system: `You are a helpful, respected assistant for evaluating task
+          system: withAdditionalSystemContext(
+            `You are a helpful, respected assistant for evaluating task
             inputs and outputs in the Elastic Platform.
 
             Your goal is to verify whether the output of a task
             succeeded, given the criteria.
 
-            For each criterion, calculate a score. Explain your score, by
+            For each criterion, calculate a *score* between 0 (criterion fully failed)
+            and 1 (criterion fully succeeded), Fractional results (e.g. 0.5) are allowed,
+            if only part of the criterion succeeded. Explain your *reasoning* for the score, by
             describing what the assistant did right, and describing and
             quoting what the assistant did wrong, where it could improve,
-            and what the root cause was in case of a failure.`,
+            and what the root cause was in case of a failure.
+            `,
+            system
+          ),
 
-          input: `## Criteria
+          input: `
+            ## Criteria
 
             ${criteria
               .map((criterion, index) => {
@@ -98,7 +115,7 @@ export function createInferenceEvaluationClient({
                     score: {
                       type: 'number',
                       description:
-                        'A score between 0 (criterion failed) or 1 (criterion succeeded). Fractional results (e.g. 0.5) are allowed, if part of the criterion succeeded',
+                        'The score you calculated for the criterion, between 0 (criterion fully failed) and 1 (criterion fully succeeded).',
                     },
                     reasoning: {
                       type: 'string',
@@ -120,7 +137,7 @@ export function createInferenceEvaluationClient({
       const scores = scoredCriteria.map(({ index, score, reasoning }) => {
         return {
           criterion: criteria[index],
-          score,
+          score: score,
           reasoning,
         };
       });
@@ -151,3 +168,14 @@ export function createInferenceEvaluationClient({
     },
   };
 }
+
+const withAdditionalSystemContext = (system: string, additionalContext?: string): string => {
+  if (!additionalContext) {
+    return system;
+  }
+
+  return [
+    system,
+    `Here is some additional context that should help you for your evaluation:` + additionalContext,
+  ].join('\n\n');
+};

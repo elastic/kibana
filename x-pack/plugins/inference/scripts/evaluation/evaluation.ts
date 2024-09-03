@@ -87,12 +87,15 @@ function runEvaluations() {
             connectorId: connector.connectorId,
           });
 
+          const evaluationConnectorId = evaluationConnector.connectorId || connector.connectorId;
+
           const evaluationClient = createInferenceEvaluationClient({
             connectorId: connector.connectorId,
+            evaluationConnectorId,
             outputApi: (id, parameters) =>
               chatClient.output(id, {
                 ...parameters,
-                connectorId: evaluationConnector.connectorId || connector.connectorId,
+                connectorId: evaluationConnectorId,
               }) as any,
             suite: mocha.suite,
           });

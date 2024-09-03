@@ -8,9 +8,12 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
-import { lastValueFrom } from 'rxjs';
+import { mapValues, pick } from 'lodash';
+import { firstValueFrom, lastValueFrom, filter } from 'rxjs';
 import { naturalLanguageToEsql } from '../../../../server/tasks/nl_to_esql';
 import { chatClient, evaluationClient, logger } from '../../services';
+import { loadDocuments } from '../../../../server/tasks/nl_to_esql/load_documents';
+import { isOutputCompleteEvent } from '../../../../common';
 
 interface TestCase {
   title: string;
@@ -25,18 +28,8 @@ interface Section {
   tests: TestCase[];
 }
 
-async function evaluateEsqlQuery({
-  question,
-  expected,
-  criteria = [],
-}: {
-  question: string;
-  expected?: string;
-  criteria?: string[];
-}): Promise<void> {
-  logger.debug(`Evaluation: ${question}`);
-
-  const generateEvent = await lastValueFrom(
+const callNaturalLanguageToEsql = async (question: string) => {
+  return await lastValueFrom(
     naturalLanguageToEsql({
       client: {
         output: chatClient.output,
@@ -51,11 +44,115 @@ async function evaluateEsqlQuery({
       },
     })
   );
+};
 
-  logger.debug(`Received response: ${generateEvent.content}`);
+const expectedQueryCriteria = (expected: string) => {
+  return `The answer provides a ES|QL query that is functionally equivalent to:
 
-  const evaluation = await evaluationClient.evaluate(
-    `# Question
+          """esql
+          ${expected}
+          """
+
+          It's OK if column names are slightly different, or if the used functions or operators are different,
+          as long as the expected end result is the same.`;
+};
+
+const retrieveUsedCommands = async ({
+  question,
+  answer,
+  esqlDescription,
+}: {
+  question: string;
+  answer: string;
+  esqlDescription: string;
+}) => {
+  const commandsListOutput = await firstValueFrom(
+    evaluationClient
+      .output('retrieve_commands', {
+        connectorId: evaluationClient.getEvaluationConnectorId(),
+        system: `
+      You are a helpful, respected Elastic ES|QL assistant.
+
+      Your role is to enumerate the list of ES|QL commands and functions that were used
+      on a question and its answer.
+
+      Only return each command or function once, even if they were used multiple times.
+
+      The following extract of the ES|QL documentation lists all the commands and functions available:
+
+      ${esqlDescription}
+    `,
+        input: `
+      # Question
+      ${question}
+
+      # Answer
+      ${answer}
+      `,
+        schema: {
+          type: 'object',
+          properties: {
+            commands: {
+              description:
+                'The list of commands that were used in the provided ES|QL question and answer',
+              type: 'array',
+              items: { type: 'string' },
+            },
+            functions: {
+              description:
+                'The list of functions that were used in the provided ES|QL question and answer',
+              type: 'array',
+              items: { type: 'string' },
+            },
+          },
+          required: ['commands', 'functions'],
+        } as const,
+      })
+      .pipe(filter(isOutputCompleteEvent))
+  );
+
+  const output = commandsListOutput.output;
+
+  const keywords = [
+    ...(output.commands ?? []),
+    ...(output.functions ?? []),
+    'SYNTAX',
+    'OVERVIEW',
+    'OPERATORS',
+  ].map((keyword) => keyword.toUpperCase());
+
+  return keywords;
+};
+
+async function evaluateEsqlQuery({
+  question,
+  expected,
+  criteria = [],
+}: {
+  question: string;
+  expected?: string;
+  criteria?: string[];
+}): Promise<void> {
+  logger.debug(`Evaluation: ${question}`);
+
+  const generateEvent = await callNaturalLanguageToEsql(question);
+  const answer = generateEvent.content!;
+
+  logger.debug(`Received response: ${answer}`);
+
+  const [systemMessage, esqlDocs] = await loadDocuments();
+
+  const usedCommands = await retrieveUsedCommands({
+    question,
+    answer,
+    esqlDescription: systemMessage,
+  });
+
+  const requestedDocumentation = mapValues(pick(esqlDocs, usedCommands), ({ data }) => data);
+
+  const evaluation = await evaluationClient.evaluate({
+    input: `
+    # Question
 
     ${question}
 
@@ -64,22 +161,16 @@ async function evaluateEsqlQuery({
     ${generateEvent.content}
 
     `,
-    [
-      ...(expected
-        ? [
-            `Returns a ES|QL query that is functionally equivalent to:
+    criteria: [...(expected ? [expectedQueryCriteria(expected)] : []), ...criteria],
+    system: `
+    The assistant was asked to generate an ES|QL query based on the question from the user.
 
-            """esql
-            ${expected}
-            """
+    Here is the documentation about the commands and function that are being used
+    in the ES|QL queries present in the question and the answer.
 
-            It's OK if column names are slightly different, or if the used functions or operators are different,
-            as long as the expected end result is the same.`,
-          ]
-        : []),
-      ...criteria,
-    ]
-  );
+    ${Object.values(requestedDocumentation).join('\n\n')}
+    `,
+  });
 
   expect(evaluation.passed).to.be(true);
 }
