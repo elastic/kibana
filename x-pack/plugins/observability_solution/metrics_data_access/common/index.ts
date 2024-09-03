@@ -29,10 +29,10 @@ export {
   ItemTypeRT,
   SnapshotMetricTypeRT,
   ESSumBucketAggRT,
-  ESDerivativeAggRT,
-  ESBasicMetricAggRT,
   SnapshotMetricTypeKeys,
   ESTermsWithAggregationRT,
+  isDerivativeAgg,
+  isBasicMetricAgg,
 } from './inventory_models/types';
 
 export type {

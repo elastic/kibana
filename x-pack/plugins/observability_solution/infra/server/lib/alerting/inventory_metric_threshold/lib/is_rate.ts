@@ -9,9 +9,9 @@ import { has } from 'lodash';
 import {
   MetricsUIAggregation,
   ESSumBucketAggRT,
-  ESDerivativeAggRT,
-  ESBasicMetricAggRT,
   ESTermsWithAggregationRT,
+  isBasicMetricAgg,
+  isDerivativeAgg,
 } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 
@@ -21,8 +21,8 @@ export const isMetricRate = (metric: MetricsUIAggregation | undefined): boolean 
   }
   const values = Object.values(metric);
   return (
-    values.some((agg) => ESDerivativeAggRT.is(agg)) &&
-    values.some((agg) => ESBasicMetricAggRT.is(agg) && has(agg, 'max'))
+    values.some((agg) => isDerivativeAgg(agg)) &&
+    values.some((agg) => isBasicMetricAgg(agg) && has(agg, 'max'))
   );
 };
 

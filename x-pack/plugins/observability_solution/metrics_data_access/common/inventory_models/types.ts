@@ -235,23 +235,28 @@ export type TSVBMetricModelCreator = (
   interval: string
 ) => TSVBMetricModel;
 
-export const ESBasicMetricAggRT = rt.record(
-  rt.string,
-  rt.union([
-    rt.undefined,
-    rt.type({
-      field: rt.string,
-    }),
-  ])
-);
+export const isBasicMetricAgg = (
+  agg: unknown
+): agg is Record<string, undefined | Pick<estypes.AggregationsMetricAggregationBase, 'field'>> => {
+  if (agg && typeof agg === 'object' && Object.keys(agg).length !== 0) {
+    for (const key in agg) {
+      if (Object.hasOwn(agg, key)) {
+        return !!(
+          agg[key as keyof typeof agg] === undefined ||
+          (agg[key as keyof typeof agg] as estypes.AggregationsMetricAggregationBase).field
+        );
+      }
+    }
+  }
 
-export const ESDerivativeAggRT = rt.type({
-  derivative: rt.type({
-    buckets_path: rt.string,
-    gap_policy: rt.keyof({ skip: null, insert_zeros: null }),
-    unit: rt.string,
-  }),
-});
+  return false;
+};
+
+export const isDerivativeAgg = (
+  agg: unknown
+): agg is Pick<estypes.AggregationsAggregationContainer, 'derivative'> => {
+  return !!(agg as estypes.AggregationsAggregationContainer).derivative;
+};
 
 export const ESSumBucketAggRT = rt.type({
   sum_bucket: rt.type({
