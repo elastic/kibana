@@ -9,10 +9,4 @@
 export { extractControlsReferences, injectControlsReferences } from './controls_references';
 export { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
 
-export {
-  extractReferences,
-  injectReferences,
-  serializeReferences,
-  deserializeReferences,
-  convertSavedObjectAttributesToReferences,
-} from './saved_visualization_references';
+export { extractReferences, injectReferences } from './saved_visualization_references';

@@ -21,10 +21,6 @@ import { urlFor } from '../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 
-/** @deprecated
- * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
- * used within the visualize editor.
- */
 export const createVisEmbeddableFromObject =
   (deps: VisualizeEmbeddableFactoryDeps) =>
   async (

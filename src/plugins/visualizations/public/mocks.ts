@@ -75,6 +75,7 @@ const createInstance = async () => {
       application: applicationServiceMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
       spaces: spacesPluginMock.createStartContract(),
+      getAttributeService: jest.fn(),
       savedObjectsClient: coreMock.createStart().savedObjects.client,
       savedObjects: savedObjectsPluginMock.createStartContract(),
       savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),

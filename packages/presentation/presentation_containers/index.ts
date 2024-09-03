@@ -26,19 +26,13 @@ export {
   type CanExpandPanels,
 } from './interfaces/panel_management';
 export {
-  canTrackContentfulRender,
-  type TrackContentfulRender,
-  type TracksQueryPerformance,
-} from './interfaces/performance_trackers';
-export {
   apiIsPresentationContainer,
-  combineCompatibleChildrenApis,
   getContainerParentFromAPI,
   listenForCompatibleApi,
+  combineCompatibleChildrenApis,
   type PanelPackage,
   type PresentationContainer,
 } from './interfaces/presentation_container';
-export { apiPublishesSettings, type PublishesSettings } from './interfaces/publishes_settings';
 export {
   apiHasSerializableState,
   type HasSerializableState,
@@ -46,3 +40,8 @@ export {
   type SerializedPanelState,
 } from './interfaces/serialized_state';
 export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';
+export {
+  canTrackContentfulRender,
+  type TrackContentfulRender,
+  type TracksQueryPerformance,
+} from './interfaces/performance_trackers';
