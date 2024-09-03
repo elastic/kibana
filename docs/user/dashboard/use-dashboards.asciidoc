@@ -46,7 +46,7 @@ image::images/dashboard-global-time-range.png[Time range menu with multiple time
 
 . Enter the time range you want to view, then *Apply* it.
 
-**To change the time range on a panel-level filters:**
+**To view and edit the time range applied to a specific panel:**
 
 When a custom filter is active for a single panel, it is indicated in the panel's header.
 
