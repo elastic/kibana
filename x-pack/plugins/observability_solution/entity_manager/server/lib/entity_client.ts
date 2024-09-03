@@ -19,7 +19,6 @@ export class EntityClient {
   constructor(
     private options: {
       esClient: ElasticsearchClient;
-      internalEsClient: ElasticsearchClient;
       soClient: SavedObjectsClientContract;
       logger: Logger;
     }
@@ -81,7 +80,7 @@ export class EntityClient {
     includeState?: boolean;
   }) {
     const definitions = await findEntityDefinitions({
-      esClient: this.options.internalEsClient,
+      esClient: this.options.esClient,
       soClient: this.options.soClient,
       page,
       perPage,
