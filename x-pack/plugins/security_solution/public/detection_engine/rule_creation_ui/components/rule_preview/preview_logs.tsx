@@ -7,10 +7,11 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { Fragment, useMemo } from 'react';
-import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion, EuiCode, EuiCodeBlock } from '@elastic/eui';
+import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion, EuiCodeBlock } from '@elastic/eui';
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
-
+import { FormattedDate } from '../../../../common/components/formatted_date';
+import { OptimizedAccordion } from './optimizied_accordion';
 interface PreviewLogsProps {
   logs: RulePreviewLogs[];
   hasNoiseWarning: boolean;
@@ -121,34 +122,65 @@ const LogAccordion: FC<PropsWithChildren<LogAccordionProps>> = ({ logs, isError,
 };
 
 const RequestsAccordion: FC<{ logs: RulePreviewLogs[] }> = ({ logs }) => {
+  const AccordionContent = useMemo(
+    () => (
+      <>
+        <EuiSpacer size="m" />
+        {logs.map((log, key) => (
+          <>
+            <OptimizedAccordion
+              key={key}
+              buttonContent={
+                <>
+                  {`Rule execution started at`}{' '}
+                  <FormattedDate value={log.startedAt} fieldName="startedAt" />{' '}
+                  {`[${log.duration}ms]`}
+                </>
+              }
+              id={`ruleExecution=${key}`}
+              css={`
+                padding-left: 20px;
+              `}
+            >
+              {(log?.requests ?? []).map((request, key1) => (
+                <div
+                  css={`
+                    padding-left: 20px;
+                  `}
+                >
+                  <EuiSpacer size="l" />
+                  {request?.description ?? null}{' '}
+                  {request?.duration ? `[${request.duration}ms]` : null}
+                  <EuiSpacer size="s" />
+                  <EuiCodeBlock
+                    key={`${key}-${key1}`}
+                    language="json"
+                    isCopyable
+                    overflowHeight={300}
+                    isVirtualized
+                  >
+                    {request.request}
+                  </EuiCodeBlock>
+                </div>
+              ))}
+            </OptimizedAccordion>
+            <EuiSpacer size="s" />
+          </>
+        ))}
+      </>
+    ),
+    [logs]
+  );
+
   return (
     <>
       {logs.length > 0 ? (
-        <EuiAccordion
+        <OptimizedAccordion
           id={'previewLoggedRequestsAccordion'}
           buttonContent={'Preview logged requests'}
         >
-          <EuiSpacer size="m" />
-          {logs.map((log, key) => (
-            <>
-              <EuiAccordion
-                key={key}
-                buttonContent={`Rule execution started at ${log.startedAt}`}
-                id={`ruleExecution=${key}`}
-                css={`
-                  padding-left: 20px;
-                `}
-              >
-                {(log?.requests ?? []).map((request, key1) => (
-                  <EuiCodeBlock key={`${key}-${key1}`} language="json" isCopyable>
-                    {request.request}
-                  </EuiCodeBlock>
-                ))}
-              </EuiAccordion>
-              <EuiSpacer size="s" />
-            </>
-          ))}
-        </EuiAccordion>
+          {AccordionContent}
+        </OptimizedAccordion>
       ) : null}
       <EuiSpacer size="m" />
     </>

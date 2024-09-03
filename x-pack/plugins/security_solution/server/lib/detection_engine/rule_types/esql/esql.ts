@@ -120,11 +120,11 @@ export const esqlExecutor = async ({
         requestParams: esqlRequest,
       });
 
-      const esqlSearchDuration = makeFloatString(performance.now() - esqlSignalSearchStart);
-      result.searchAfterTimes.push(esqlSearchDuration);
+      const esqlSearchDuration = performance.now() - esqlSignalSearchStart;
+      result.searchAfterTimes.push(makeFloatString(esqlSearchDuration));
 
       if (isLoggedRequestsEnabled && loggedRequests[0]) {
-        loggedRequests[0].duration = performance.now() - esqlSignalSearchStart;
+        loggedRequests[0].duration = Math.round(esqlSearchDuration);
       }
 
       ruleExecutionLogger.debug(`ES|QL query request took: ${esqlSearchDuration}ms`);
