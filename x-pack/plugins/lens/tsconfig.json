@@ -114,6 +114,8 @@
     "@kbn/es-types",
     "@kbn/esql-datagrid",
     "@kbn/core-capabilities-common",
+    "@kbn/core-application-browser",
+    "@kbn/core-chrome-browser",
   ],
   "exclude": ["target/**/*"]
 }
