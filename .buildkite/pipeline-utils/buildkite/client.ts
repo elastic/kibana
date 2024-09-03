@@ -246,7 +246,8 @@ export class BuildkiteClient {
       throw new Error(`No ${buildState} builds for ${pipelineSlug} pipeline and ${branch} found`);
     }
     // return the latest build
-    return builds[1];
+    console.log(JSON.stringify(builds[0]));
+    return builds[0];
   };
 
   getJobStatus = (build: Build, job: Job): { success: boolean; state: JobState } => {
