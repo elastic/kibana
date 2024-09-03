@@ -4366,10 +4366,10 @@ components:
       type: array
     RuleResponse:
       anyOf:
-        - $ref: '#/components/schemas/ThresholdRule'
         - $ref: '#/components/schemas/EqlRule'
         - $ref: '#/components/schemas/QueryRule'
         - $ref: '#/components/schemas/SavedQueryRule'
+        - $ref: '#/components/schemas/ThresholdRule'
         - $ref: '#/components/schemas/ThreatMatchRule'
         - $ref: '#/components/schemas/MachineLearningRule'
         - $ref: '#/components/schemas/NewTermsRule'
