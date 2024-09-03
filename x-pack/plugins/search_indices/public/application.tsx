@@ -15,14 +15,15 @@ import { QueryClientProvider } from '@tanstack/react-query';
 
 import { UsageTrackerContextProvider } from './contexts/usage_tracker_context';
 import { initQueryClient } from './services/query_client';
-import { SearchIndicesServicesContext } from './types';
+import { SearchIndicesServicesContext, SearchIndicesServicesContextDeps } from './types';
+import { Router } from '@kbn/shared-ux-router';
 
 export const renderApp = async (
-  App: React.FC<{}>,
   core: CoreStart,
-  services: Partial<SearchIndicesServicesContext>,
+  services: SearchIndicesServicesContextDeps,
   element: HTMLElement
 ) => {
+  const { SearchIndicesRouter } = await import('./search_indices_router');
   const queryClient = initQueryClient(core.notifications.toasts);
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
@@ -30,7 +31,9 @@ export const renderApp = async (
         <UsageTrackerContextProvider usageCollection={services.usageCollection}>
           <I18nProvider>
             <QueryClientProvider client={queryClient}>
-              <App />
+              <Router history={services.history}>
+                <SearchIndicesRouter />
+              </Router>
             </QueryClientProvider>
           </I18nProvider>
         </UsageTrackerContextProvider>

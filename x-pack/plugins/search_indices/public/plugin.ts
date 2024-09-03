@@ -12,6 +12,7 @@ import type {
   SearchIndicesPluginSetup,
   SearchIndicesPluginStart,
   SearchIndicesServicesContext,
+  SearchIndicesServicesContextDeps,
 } from './types';
 
 export class SearchIndicesPlugin
@@ -28,13 +29,12 @@ export class SearchIndicesPlugin
       }),
       async mount({ element, history }) {
         const { renderApp } = await import('./application');
-        const { ElasticsearchStartPage } = await import('./components/start/start_page');
         const [coreStart, depsStart] = await core.getStartServices();
-        const startDeps: Partial<SearchIndicesServicesContext> = {
+        const startDeps: SearchIndicesServicesContextDeps = {
           ...depsStart,
           history,
         };
-        return renderApp(ElasticsearchStartPage, coreStart, startDeps, element);
+        return renderApp(coreStart, startDeps, element);
       },
     });
 

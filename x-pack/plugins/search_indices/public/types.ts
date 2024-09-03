@@ -7,6 +7,7 @@
 
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { IndexManagementPluginSetup } from '@kbn/index-management';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -27,6 +28,10 @@ export interface SearchIndicesAppPluginStartDependencies {
   usageCollection?: UsageCollectionStart;
 }
 
+export interface SearchIndicesServicesContextDeps {
+  history: AppMountParameters['history'];
+  usageCollection?: UsageCollectionStart;
+}
 export type SearchIndicesServicesContext = CoreStart &
   SearchIndicesAppPluginStartDependencies & {
     history: AppMountParameters['history'];
