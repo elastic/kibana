@@ -668,7 +668,7 @@ export function dataFrameAnalyticsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { analyticsIds, allSpaces } = request.body;
-          const results: { [id: string]: { exists: boolean } } = {};
+          const results: { [id: string]: { exists: boolean } } = Object.create(null);
           for (const id of analyticsIds) {
             try {
               const body = allSpaces

@@ -17,7 +17,7 @@ import { APP } from '..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { renderApp } from './render';
-import { SearchSessionsConfigSchema } from '../../../../../config';
+import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 
 export class SearchSessionsMgmtApp {
   constructor(

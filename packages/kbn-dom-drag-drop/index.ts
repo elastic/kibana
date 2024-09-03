@@ -14,6 +14,7 @@ export {
   type DraggingIdentifier,
   type DragDropAction,
   type DropOverlayWrapperProps,
+  type DroppableProps,
   Draggable,
   Droppable,
   useDragDropContext,

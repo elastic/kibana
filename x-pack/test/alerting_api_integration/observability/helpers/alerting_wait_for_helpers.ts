@@ -34,7 +34,7 @@ export async function waitForRuleStatus({
   logger: ToolingLog;
 }): Promise<Record<string, any>> {
   const ruleResponse = await retry<Record<string, any>>({
-    test: async () => {
+    testFn: async () => {
       const response = await supertest.get(`/api/alerting/rule/${id}`);
       const { execution_status: executionStatus } = response.body || {};
       const { status } = executionStatus || {};
@@ -74,7 +74,7 @@ export async function waitForDocumentInIndex<T>({
   retryDelay?: number;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
   return await retry<SearchResponse<T, Record<string, AggregationsAggregate>>>({
-    test: async () => {
+    testFn: async () => {
       const response = await esClient.search<T>({
         index: indexName,
         rest_total_hits_as_int: true,
@@ -112,7 +112,7 @@ export async function waitForAlertInIndex<T>({
   logger: ToolingLog;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
   return await retry<SearchResponse<T, Record<string, AggregationsAggregate>>>({
-    test: async () => {
+    testFn: async () => {
       const response = await esClient.search<T>({
         index: indexName,
         body: {

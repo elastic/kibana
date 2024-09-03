@@ -47,6 +47,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
 
   const isManaged = Boolean(packagePolicy.is_managed);
   const agentPolicyIsManaged = Boolean(agentPolicy?.is_managed);
+  const isOrphanedPolicy = !agentPolicy && packagePolicy.policy_ids.length === 0;
 
   const isAddAgentVisible = showAddAgent && agentPolicy && !agentPolicyIsManaged;
 
@@ -87,12 +88,18 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       : []),
     <EuiContextMenuItem
       data-test-subj="PackagePolicyActionsEditItem"
-      disabled={!canWriteIntegrationPolicies || !agentPolicy}
+      disabled={!canWriteIntegrationPolicies || (!agentPolicy && !isOrphanedPolicy)}
       icon="pencil"
-      href={`${getHref('edit_integration', {
-        policyId: agentPolicy?.id ?? '',
-        packagePolicyId: packagePolicy.id,
-      })}${from ? `?from=${from}` : ''}`}
+      href={`${
+        isOrphanedPolicy
+          ? getHref('integration_policy_edit', {
+              packagePolicyId: packagePolicy.id,
+            })
+          : getHref('edit_integration', {
+              policyId: agentPolicy?.id ?? '',
+              packagePolicyId: packagePolicy.id,
+            })
+      }${from ? `?from=${from}` : ''}`}
       key="packagePolicyEdit"
     >
       <FormattedMessage

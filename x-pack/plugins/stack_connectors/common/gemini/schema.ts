@@ -57,16 +57,24 @@ export const RunActionRawResponseSchema = schema.any();
 
 export const InvokeAIActionParamsSchema = schema.object({
   messages: schema.any(),
+  systemInstruction: schema.maybe(schema.string()),
   model: schema.maybe(schema.string()),
   temperature: schema.maybe(schema.number()),
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
   tools: schema.maybe(schema.arrayOf(schema.any())),
+  toolConfig: schema.maybe(
+    schema.object({
+      mode: schema.oneOf([schema.literal('AUTO'), schema.literal('ANY'), schema.literal('NONE')]),
+      allowedFunctionNames: schema.maybe(schema.arrayOf(schema.string())),
+    })
+  ),
 });
 
 export const InvokeAIRawActionParamsSchema = schema.object({
   messages: schema.any(),
+  systemInstruction: schema.maybe(schema.string()),
   model: schema.maybe(schema.string()),
   temperature: schema.maybe(schema.number()),
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),
