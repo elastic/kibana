@@ -33,10 +33,7 @@ export const WorkpadRoute = () => {
     <Route
       path={['/workpad/:id/page/:pageNumber', '/workpad/:id']}
       exact={false}
-      // @ts-expect-error - TODO: broken with @types/react@18
-      children={(route: WorkpadRouteProps) => {
-        return <WorkpadRouteComponent route={route} />;
-      }}
+      component={WorkpadRouteComponent}
     />
   );
 };
@@ -83,10 +80,7 @@ export const ExportWorkpadRoute = () => {
   return (
     <Route
       path={'/export/workpad/pdf/:id/page/:pageNumber'}
-      // @ts-expect-error - TODO: broken with @types/react@18
-      children={(route: WorkpadRouteProps) => {
-        return <ExportWorkpadRouteComponent route={route} />;
-      }}
+      component={ExportWorkpadRouteComponent}
     />
   );
 };
