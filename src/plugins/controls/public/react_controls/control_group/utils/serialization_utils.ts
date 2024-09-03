@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
+
+import { SerializedPanelState } from '@kbn/presentation-containers';
 import { ControlGroupRuntimeState, ControlGroupSerializedState } from '../types';
 
 export const deserializeControlGroup = (
@@ -20,9 +21,9 @@ export const deserializeControlGroup = (
   const references = state.references ?? [];
   references.forEach((reference) => {
     const referenceName = reference.name;
-    const panelId = referenceName.substring('controlGroup_'.length, referenceName.lastIndexOf(':'));
-    if (panels[panelId]) {
-      panels[panelId].dataViewId = reference.id;
+    const { controlId } = parseReferenceName(referenceName);
+    if (panels[controlId]) {
+      panels[controlId].dataViewId = reference.id;
     }
   });
 
