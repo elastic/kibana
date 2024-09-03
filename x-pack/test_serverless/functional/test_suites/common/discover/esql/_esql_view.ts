@@ -50,10 +50,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    after(async () => {
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     describe('ES|QL in Discover', () => {

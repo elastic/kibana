@@ -51,8 +51,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await PageObjects.common.navigateToApp('discover');
     });
 
     after(async () => {
