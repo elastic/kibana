@@ -63,6 +63,7 @@ function toggleDisabledFeatures(
   activeSpace: Space
 ) {
   const disabledFeatureKeys = withSpaceSolutionDisabledFeatures(
+    features,
     activeSpace.disabledFeatures,
     activeSpace.solution
   );

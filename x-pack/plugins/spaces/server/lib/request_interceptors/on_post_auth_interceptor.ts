@@ -106,7 +106,9 @@ export function initSpacesOnPostAuthRequestInterceptor({
         }
       }
 
+      const allFeatures = features.getKibanaFeatures();
       const disabledFeatureKeys = withSpaceSolutionDisabledFeatures(
+        allFeatures,
         space.disabledFeatures,
         space.solution
       );
@@ -116,8 +118,6 @@ export function initSpacesOnPostAuthRequestInterceptor({
       const appId = path.split('/', 3)[2];
       if (appId !== 'kibana' && space && disabledFeatureKeys.length > 0) {
         log.debug(`Verifying application is available: "${appId}"`);
-
-        const allFeatures = features.getKibanaFeatures();
 
         const isRegisteredApp = allFeatures.some((feature) => feature.app.includes(appId));
         if (isRegisteredApp) {
