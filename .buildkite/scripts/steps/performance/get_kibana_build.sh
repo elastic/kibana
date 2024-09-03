@@ -14,6 +14,8 @@ export KIBANA_BUILD_ID
 
 .buildkite/scripts/download_build_artifacts.sh
 
+export DISABLE_CI_STATS_SHIPPING=true
+
 # .buildkite/scripts/build_kibana.sh
 # .buildkite/scripts/build_kibana_plugins.sh
 # .buildkite/scripts/post_build_kibana_plugins.sh
