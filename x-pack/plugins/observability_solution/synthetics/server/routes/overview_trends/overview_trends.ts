@@ -37,7 +37,7 @@ interface TrendAggs {
   };
 }
 
-export const getTimeRangeFilter = (schedule: string, numChecks = 50) =>
+export const getIntervalForCheckCount = (schedule: string, numChecks = 50) =>
   Number(schedule) * numChecks;
 
 export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -61,7 +61,7 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
         { configId, locationId, schedule }
       ) => {
         if (!acc[configId]) {
-          acc[configId] = { locations: [locationId], interval: getTimeRangeFilter(schedule) };
+          acc[configId] = { locations: [locationId], interval: getIntervalForCheckCount(schedule) };
         } else {
           acc[configId].locations.push(locationId);
         }
