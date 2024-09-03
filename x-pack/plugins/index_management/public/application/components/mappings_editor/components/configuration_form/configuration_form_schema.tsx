@@ -148,6 +148,7 @@ export const configurationFormSchema: FormSchema = {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldLabel', {
         defaultMessage: 'Date formats',
       }),
+      // @ts-ignore - broken type with @types/react18
       helpText: () => (
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldHelpText"

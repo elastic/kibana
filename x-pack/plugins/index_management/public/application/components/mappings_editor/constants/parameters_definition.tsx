@@ -344,6 +344,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     fieldConfig: {
       defaultValue: '', // Needed for FieldParams typing
       label: nullValueLabel,
+      // @ts-ignore - broken type with @types/react18
       helpText: () => (
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.parameters.geoPointNullValueHelpText"
@@ -388,6 +389,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     fieldConfig: {
       defaultValue: '',
       label: nullValueLabel,
+      // @ts-ignore - broken type with @types/react18
       helpText: () => (
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.parameters.pointNullValueHelpText"
@@ -572,7 +574,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.localeLabel', {
         defaultMessage: 'Locale',
       }),
-      helpText: () => (
+      helpText: (
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.parameters.localeHelpText"
           defaultMessage="Separate the language, country, and variant, use {hyphen} or {underscore}. A maximum of 2 separators is allowed. Example: {locale}."
@@ -799,6 +801,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     schema: t.string,
   },
   index_options: {
+    // @ts-ignore - broken type with @types/react18
     fieldConfig: {
       ...indexOptionsConfig,
       defaultValue: 'positions',
@@ -806,6 +809,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     schema: t.string,
   },
   index_options_keyword: {
+    // @ts-ignore - broken type with @types/react18
     fieldConfig: {
       ...indexOptionsConfig,
       defaultValue: 'docs',
@@ -813,6 +817,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     schema: t.string,
   },
   index_options_flattened: {
+    // @ts-ignore - broken type with @types/react18
     fieldConfig: {
       ...indexOptionsConfig,
       defaultValue: 'docs',
