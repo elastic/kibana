@@ -138,12 +138,7 @@ export const mountWithProvider = async (
   }
 ) => {
   const { mountArgs, lensStore, deps } = getMountWithProviderParams(component, store, options);
-
-  // let instance: ReactWrapper = {} as ReactWrapper;
-
-  // await act(async () => {
   const instance = mount(mountArgs.component, mountArgs.options);
-  // });
   return { instance, lensStore, deps };
 };
 

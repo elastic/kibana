@@ -38,7 +38,10 @@ Object {
           "savedObjectId": "1234",
           "state": Object {
             "datasourceStates": Object {
-              "testDatasource": "datasource",
+              "testDatasource": Object {
+                "isLoading": false,
+                "state": Object {},
+              },
             },
             "filters": Array [
               Object {
