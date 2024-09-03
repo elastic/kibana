@@ -29,7 +29,7 @@ export const DashboardLink: React.FC<Props> = ({
     },
   } = useKibana();
   const onClick = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       if (dashboardUrl) {
         navigateToUrl(dashboardUrl);

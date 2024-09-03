@@ -51,7 +51,7 @@ import {
 } from './components/discover_container';
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
-import { ConfigSchema, ExperimentalFeatures } from '../common/config';
+import type { ConfigSchema, ExperimentalFeatures } from '../server/config';
 import {
   DataSourceProfileService,
   DocumentProfileService,
@@ -306,13 +306,13 @@ export class DiscoverPlugin
     const rootProfileService = new RootProfileService();
     const dataSourceProfileService = new DataSourceProfileService();
     const documentProfileService = new DocumentProfileService();
-    const experimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
+    const enabledExperimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
 
     registerProfileProviders({
       rootProfileService,
       dataSourceProfileService,
       documentProfileService,
-      experimentalProfileIds,
+      enabledExperimentalProfileIds,
     });
 
     return { rootProfileService, dataSourceProfileService, documentProfileService };

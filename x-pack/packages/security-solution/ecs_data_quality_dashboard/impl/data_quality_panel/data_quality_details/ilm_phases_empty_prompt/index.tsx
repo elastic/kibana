@@ -15,6 +15,11 @@ import {
   HOT_DESCRIPTION,
   UNMANAGED_DESCRIPTION,
   WARM_DESCRIPTION,
+  HOT,
+  WARM,
+  FROZEN,
+  COLD,
+  UNMANAGED,
 } from '../../translations';
 import * as i18n from './translations';
 
@@ -41,17 +46,17 @@ const IlmPhasesEmptyPromptComponent: React.FC = () => {
 
         <Ul>
           <Li>
-            <strong>{i18n.HOT}</strong>
+            <strong>{HOT}</strong>
             {': '}
             {HOT_DESCRIPTION}
           </Li>
           <Li>
-            <strong>{i18n.WARM}</strong>
+            <strong>{WARM}</strong>
             {': '}
             {WARM_DESCRIPTION}
           </Li>
           <Li>
-            <strong>{i18n.UNMANAGED}</strong>
+            <strong>{UNMANAGED}</strong>
             {': '}
             {UNMANAGED_DESCRIPTION}
           </Li>
@@ -71,12 +76,12 @@ const IlmPhasesEmptyPromptComponent: React.FC = () => {
 
         <Ul>
           <Li>
-            <strong>{i18n.COLD}</strong>
+            <strong>{COLD}</strong>
             {': '}
             {COLD_DESCRIPTION}
           </Li>
           <Li>
-            <strong>{i18n.FROZEN}</strong>
+            <strong>{FROZEN}</strong>
             {': '}
             {FROZEN_DESCRIPTION}
           </Li>

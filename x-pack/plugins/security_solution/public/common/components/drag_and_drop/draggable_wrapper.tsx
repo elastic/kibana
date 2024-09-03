@@ -95,7 +95,7 @@ type RenderFunctionProp = (
   state: DraggableStateSnapshot
 ) => React.ReactNode;
 
-interface Props {
+export interface DraggableWrapperProps {
   dataProvider: DataProvider;
   fieldType?: string;
   isAggregatable?: boolean;
@@ -128,7 +128,7 @@ export const getStyle = (
   };
 };
 
-const DraggableOnWrapper: React.FC<Props> = React.memo(
+const DraggableOnWrapper: React.FC<DraggableWrapperProps> = React.memo(
   ({ dataProvider, render, scopeId, truncate, hideTopN }) => {
     const [providerRegistered, setProviderRegistered] = useState(false);
     const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
@@ -265,7 +265,7 @@ const DraggableOnWrapper: React.FC<Props> = React.memo(
 );
 DraggableOnWrapper.displayName = 'DraggableOnWrapper';
 
-export const DraggableWrapper: React.FC<Props> = React.memo(
+export const DraggableWrapper: React.FC<DraggableWrapperProps> = React.memo(
   ({ dataProvider, isDraggable = false, render, scopeId, truncate, hideTopN }) => {
     const content = useMemo(
       () => (

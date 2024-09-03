@@ -20,6 +20,10 @@ export const alertDetailsContextRt = t.intersection([
     alert_started_at: t.string,
   }),
   t.partial({
+    // alert fields used for log rate analysis
+    alert_rule_parameter_time_size: t.string,
+    alert_rule_parameter_time_unit: t.string,
+
     // apm fields
     'service.name': t.string,
     'service.environment': t.string,

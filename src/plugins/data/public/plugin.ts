@@ -14,7 +14,7 @@ import {
   IStorageWrapper,
   createStartServicesGetter,
 } from '@kbn/kibana-utils-plugin/public';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
