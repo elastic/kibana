@@ -6361,6 +6361,21 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.HOSTS_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "HOSTS_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"HOSTS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/hosts_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.HostsLocator",
         "type": "Type",
         "tags": [],
