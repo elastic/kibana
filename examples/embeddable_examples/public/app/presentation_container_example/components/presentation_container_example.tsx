@@ -13,13 +13,14 @@ import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { getParentApi } from '../parent_api';
 import { AddButton } from './add_button';
+import { TopNav } from './top_nav';
 
 export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActionsStart }) => {
-  const parentApi = useMemo(() => {
+  const { parentApi, componentApi } = useMemo(() => {
     return getParentApi();
   }, []);
 
-  const panels = useStateFromPublishingSubject(parentApi.panels$);
+  const panels = useStateFromPublishingSubject(componentApi.panels$);
 
   return (
     <div>
@@ -44,6 +45,10 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
 
       <EuiSpacer />
 
+      <TopNav onSave={componentApi.onSave} />
+
+      <EuiSpacer size="s" />
+
       {panels.map(({ id, type }) => {
         return (
           <div key={id} style={{ height: '200' }}>
@@ -53,7 +58,7 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
               getParentApi={() => parentApi}
               hidePanelChrome={false}
               onApiAvailable={(api) => {
-                parentApi.setChild(id, api);
+                componentApi.setChild(id, api);
               }}
             />
             <EuiSpacer size="s" />

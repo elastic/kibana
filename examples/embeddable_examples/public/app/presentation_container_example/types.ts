@@ -13,24 +13,22 @@ import {
   HasRuntimeChildState,
   PresentationContainer,
   SerializedPanelState,
+  HasSaveNotification,
 } from '@kbn/presentation-containers';
 import {
   PublishesPanelTitle,
   PublishesTimeRange,
   PublishesViewMode,
-  PublishingSubject,
 } from '@kbn/presentation-publishing';
 
 export type ParentApi = PresentationContainer &
   CanAddNewPanel &
+  HasSaveNotification &
   HasSerializedChildState &
   HasRuntimeChildState &
   PublishesViewMode &
   Pick<PublishesPanelTitle, 'hidePanelTitle'> &
-  PublishesTimeRange & {
-    setChild: (id: string, api: unknown) => void;
-    panels$: PublishingSubject<Array<{ id: string; type: string }>>;
-  };
+  PublishesTimeRange;
 
 export interface LastSavedState {
   timeRange: TimeRange;
