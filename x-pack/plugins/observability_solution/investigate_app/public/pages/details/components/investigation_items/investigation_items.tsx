@@ -18,13 +18,12 @@ import { InvestigationItemsList } from '../investigation_items_list/investigatio
 import { InvestigationSearchBar } from '../investigation_search_bar/investigation_search_bar';
 
 export interface Props {
-  investigationId: string;
   investigation: GetInvestigationResponse;
 }
 
-export function InvestigationItems({ investigationId, investigation }: Props) {
+export function InvestigationItems({ investigation }: Props) {
   const { data: items, refetch } = useFetchInvestigationItems({
-    investigationId,
+    investigationId: investigation.id,
     initialItems: investigation.items,
   });
   const renderableItems = useRenderItems({ items, params: investigation.params });
@@ -34,12 +33,12 @@ export function InvestigationItems({ investigationId, investigation }: Props) {
     useDeleteInvestigationItem();
 
   const onAddItem = async (item: Item) => {
-    await addInvestigationItem({ investigationId, item });
+    await addInvestigationItem({ investigationId: investigation.id, item });
     refetch();
   };
 
   const onDeleteItem = async (itemId: string) => {
-    await deleteInvestigationItem({ investigationId, itemId });
+    await deleteInvestigationItem({ investigationId: investigation.id, itemId });
     refetch();
   };
 

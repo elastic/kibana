@@ -18,13 +18,13 @@ import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
-import { EnabledFeatures } from './enabled_features';
 import { ManageSpacePage } from './manage_space_page';
 import type { SolutionView, Space } from '../../../common/types/latest';
 import { EventTracker } from '../../analytics';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
+import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
+import { EnabledFeatures } from '../components/enabled_features';
 
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712
@@ -98,6 +98,8 @@ describe('ManageSpacePage', () => {
     nameInput.simulate('change', { target: { value: 'New Space Name' } });
     descriptionInput.simulate('change', { target: { value: 'some description' } });
 
+    updateSpace(wrapper, false, 'oblt');
+
     const createButton = wrapper.find('button[data-test-subj="save-space-button"]');
     createButton.simulate('click');
     await Promise.resolve();
@@ -110,7 +112,76 @@ describe('ManageSpacePage', () => {
       color: '#AA6556',
       imageUrl: '',
       disabledFeatures: [],
+      solution: 'oblt',
     });
+  });
+
+  it('validates the form (name, initials, solution view...)', async () => {
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    const wrapper = mountWithIntl(
+      <ManageSpacePage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        eventTracker={eventTracker}
+        allowFeatureVisibility
+        allowSolutionVisibility
+      />
+    );
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+    });
+
+    const createButton = wrapper.find('button[data-test-subj="save-space-button"]');
+    createButton.simulate('click');
+    await Promise.resolve();
+
+    {
+      const errors = wrapper.find('div.euiFormErrorText').map((node) => node.text());
+      expect(errors).toEqual([
+        'Enter a name.',
+        'Enter a URL identifier.',
+        'Enter initials.',
+        'Select one solution.',
+      ]);
+
+      expect(spacesManager.createSpace).not.toHaveBeenCalled();
+
+      const nameInput = wrapper.find('input[name="name"]');
+      nameInput.simulate('change', { target: { value: 'New Space Name' } });
+    }
+
+    createButton.simulate('click');
+    await Promise.resolve();
+
+    {
+      const errors = wrapper.find('div.euiFormErrorText').map((node) => node.text());
+      expect(errors).toEqual(['Select one solution.']); // requires solution view to be set
+    }
+
+    updateSpace(wrapper, false, 'oblt');
+
+    createButton.simulate('click');
+    await Promise.resolve();
+
+    {
+      const errors = wrapper.find('div.euiFormErrorText').map((node) => node.text());
+      expect(errors).toEqual([]); // no more errors
+    }
+
+    expect(spacesManager.createSpace).toHaveBeenCalled();
   });
 
   it('shows solution view select when visible', async () => {

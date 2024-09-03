@@ -140,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:check-deleted-files-task',
         'fleet:reassign_action:retry',
         'fleet:request_diagnostics:retry',
+        'fleet:setup:upgrade_managed_package_policies',
         'fleet:unenroll-inactive-agents-task',
         'fleet:unenroll_action:retry',
         'fleet:update_agent_tags:retry',

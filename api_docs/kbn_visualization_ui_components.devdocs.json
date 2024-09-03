@@ -727,6 +727,41 @@
       },
       {
         "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.hasIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "hasIcon",
+        "description": [
+          "\nIcon checking logic. It makes sure an icon has actual content."
+        ],
+        "signature": [
+          "(icon: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-visualization-ui-components/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.hasIcon.$1",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/util.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
         "id": "def-public.IconSelect",
         "type": "Function",
         "tags": [],
@@ -950,6 +985,64 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.iconSortCriteria",
+        "type": "Function",
+        "tags": [],
+        "label": "iconSortCriteria",
+        "description": [
+          "\nSorting criteria for icons sets. It makes sure empty icon is always on top."
+        ],
+        "signature": [
+          "(a: { value: T; label: string; icon?: ",
+          "IconType",
+          " | T | undefined; shouldRotate?: boolean | undefined; }, b: { value: T; label: string; icon?: ",
+          "IconType",
+          " | T | undefined; shouldRotate?: boolean | undefined; }) => number"
+        ],
+        "path": "packages/kbn-visualization-ui-components/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.iconSortCriteria.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "a",
+            "description": [],
+            "signature": [
+              "{ value: T; label: string; icon?: ",
+              "IconType",
+              " | T | undefined; shouldRotate?: boolean | undefined; }"
+            ],
+            "path": "packages/kbn-visualization-ui-components/util.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.iconSortCriteria.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "b",
+            "description": [],
+            "signature": [
+              "{ value: T; label: string; icon?: ",
+              "IconType",
+              " | T | undefined; shouldRotate?: boolean | undefined; }"
+            ],
+            "path": "packages/kbn-visualization-ui-components/util.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -2347,6 +2440,46 @@
         "description": [],
         "signature": [
           "\"dashed\" | \"solid\" | \"dotted\""
+        ],
+        "path": "packages/kbn-visualization-ui-components/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.sharedSetOfIcons",
+        "type": "Array",
+        "tags": [],
+        "label": "sharedSetOfIcons",
+        "description": [
+          "\nThis is the minimal icons set.\nSo far it is computed from Reference line and Metric chart icons.\nNeeds to consider annotation icons set too in the future."
+        ],
+        "signature": [
+          "{ value: ",
+          {
+            "pluginId": "@kbn/visualization-ui-components",
+            "scope": "public",
+            "docId": "kibKbnVisualizationUiComponentsPluginApi",
+            "section": "def-public.SharedSetOfIcons",
+            "text": "SharedSetOfIcons"
+          },
+          "; label: string; icon?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; shouldRotate?: boolean | undefined; }[]"
+        ],
+        "path": "packages/kbn-visualization-ui-components/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.SharedSetOfIcons",
+        "type": "Type",
+        "tags": [],
+        "label": "SharedSetOfIcons",
+        "description": [],
+        "signature": [
+          "\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"empty\" | \"flag\" | \"heart\" | \"mapMarker\" | \"starEmpty\""
         ],
         "path": "packages/kbn-visualization-ui-components/types.ts",
         "deprecated": false,
