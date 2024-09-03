@@ -48,10 +48,14 @@ info:
 
     ```
   license:
-    name: Elastic License 2.0
-    url: 'https://www.elastic.co/licensing/elastic-license'
+    name: Attribution-NonCommercial-NoDerivatives 4.0 International
+    url: 'https://creativecommons.org/licenses/by-nc-nd/4.0/'
   title: Kibana Serverless APIs
   version: 1.0.2
+  x-feedbackLink:
+    label: Feedback
+    url: >-
+      https://github.com/elastic/docs-content/issues/new?assignees=&labels=feedback%2Ccommunity&projects=&template=api-feedback.yaml&title=%5BFeedback%5D%3A+
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:
@@ -879,37 +883,6 @@ paths:
       summary: Create agent action
       tags:
         - Elastic Agent actions
-  '/agents/{agentId}/actions/{actionId}/cancel':
-    parameters:
-      - in: path
-        name: agentId
-        required: true
-        schema:
-          type: string
-      - in: path
-        name: actionId
-        required: true
-        schema:
-          type: string
-    post:
-      operationId: agent-action-cancel
-      parameters:
-        - $ref: '#/components/parameters/Fleet_kbn_xsrf'
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  item:
-                    $ref: '#/components/schemas/Fleet_agent_action'
-          description: OK
-        '400':
-          $ref: '#/components/responses/Fleet_error'
-      summary: Cancel agent action
-      tags:
-        - Elastic Agent actions
   '/agents/{agentId}/reassign':
     parameters:
       - in: path
@@ -1228,6 +1201,32 @@ paths:
         '400':
           $ref: '#/components/responses/Fleet_error'
       summary: Get agent action status
+      tags:
+        - Elastic Agent actions
+  '/agents/actions/{actionId}/cancel':
+    parameters:
+      - in: path
+        name: actionId
+        required: true
+        schema:
+          type: string
+    post:
+      operationId: agent-action-cancel
+      parameters:
+        - $ref: '#/components/parameters/Fleet_kbn_xsrf'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/Fleet_agent_action'
+          description: OK
+        '400':
+          $ref: '#/components/responses/Fleet_error'
+      summary: Cancel agent action
       tags:
         - Elastic Agent actions
   /agents/bulk_reassign:
@@ -2190,6 +2189,7 @@ paths:
                               - maxExecutableActions
                               - maxAlerts
                               - maxQueuedActions
+                              - ruleExecution
                             type: string
                         required:
                           - reason
@@ -2261,6 +2261,7 @@ paths:
                           - maxExecutableActions
                           - maxAlerts
                           - maxQueuedActions
+                          - ruleExecution
                         nullable: true
                         type: string
                     required:
@@ -2367,6 +2368,7 @@ paths:
                                         - maxExecutableActions
                                         - maxAlerts
                                         - maxQueuedActions
+                                        - ruleExecution
                                       nullable: true
                                       type: string
                                   required:
@@ -3322,6 +3324,7 @@ paths:
                               - maxExecutableActions
                               - maxAlerts
                               - maxQueuedActions
+                              - ruleExecution
                             type: string
                         required:
                           - reason
@@ -3393,6 +3396,7 @@ paths:
                           - maxExecutableActions
                           - maxAlerts
                           - maxQueuedActions
+                          - ruleExecution
                         nullable: true
                         type: string
                     required:
@@ -3499,6 +3503,7 @@ paths:
                                         - maxExecutableActions
                                         - maxAlerts
                                         - maxQueuedActions
+                                        - ruleExecution
                                       nullable: true
                                       type: string
                                   required:
@@ -4425,6 +4430,7 @@ paths:
                               - maxExecutableActions
                               - maxAlerts
                               - maxQueuedActions
+                              - ruleExecution
                             type: string
                         required:
                           - reason
@@ -4496,6 +4502,7 @@ paths:
                           - maxExecutableActions
                           - maxAlerts
                           - maxQueuedActions
+                          - ruleExecution
                         nullable: true
                         type: string
                     required:
@@ -4602,6 +4609,7 @@ paths:
                                         - maxExecutableActions
                                         - maxAlerts
                                         - maxQueuedActions
+                                        - ruleExecution
                                       nullable: true
                                       type: string
                                   required:
@@ -5592,6 +5600,7 @@ paths:
                               - maxExecutableActions
                               - maxAlerts
                               - maxQueuedActions
+                              - ruleExecution
                             type: string
                         required:
                           - reason
@@ -5663,6 +5672,7 @@ paths:
                           - maxExecutableActions
                           - maxAlerts
                           - maxQueuedActions
+                          - ruleExecution
                         nullable: true
                         type: string
                     required:
@@ -5769,6 +5779,7 @@ paths:
                                         - maxExecutableActions
                                         - maxAlerts
                                         - maxQueuedActions
+                                        - ruleExecution
                                       nullable: true
                                       type: string
                                   required:
@@ -11709,6 +11720,32 @@ components:
                 type: number
       description: Generic Error
   schemas:
+    Connectors_auth_type:
+      description: |
+        The type of authentication to use: basic, SSL, or none.
+      enum:
+        - webhook-authentication-basic
+        - webhook-authentication-ssl
+      nullable: true
+      title: Authentication type
+      type: string
+    Connectors_ca:
+      description: >
+        A base64 encoded version of the certificate authority file that the
+        connector can trust to sign and validate certificates. This option is
+        available for all authentication types.
+      title: Certificate authority
+      type: string
+    Connectors_cert_type:
+      description: >
+        If the `authType` is `webhook-authentication-ssl`, specifies whether the
+        certificate authentication data is in a CRT and key file format or a PFX
+        file format.
+      enum:
+        - ssl-crt-key
+        - ssl-pfx
+      title: Certificate type
+      type: string
     Connectors_config_properties_bedrock:
       description: Defines properties for connectors when type is `.bedrock`.
       properties:
@@ -11729,6 +11766,12 @@ components:
       description: Defines properties for connectors when type is `.cases-webhook`.
       type: object
       properties:
+        authType:
+          $ref: '#/components/schemas/Connectors_auth_type'
+        ca:
+          $ref: '#/components/schemas/Connectors_ca'
+        certType:
+          $ref: '#/components/schemas/Connectors_cert_type'
         createCommentJson:
           description: >
             A JSON payload sent to the create comment URL to create a case
@@ -11816,11 +11859,7 @@ components:
           example: 'https://example.com/issue/{{{external.system.id}}}'
           type: string
         hasAuth:
-          default: true
-          description: >-
-            If true, a username and password for login type authentication must
-            be provided.
-          type: boolean
+          $ref: '#/components/schemas/Connectors_has_auth'
         headers:
           description: >
             A set of key-value pairs sent as headers with the request URLs for
@@ -11859,6 +11898,8 @@ components:
             hostname to the allowed hosts.
           example: 'https://example.com/issue/{{{external.system.ID}}}'
           type: string
+        verificationMode:
+          $ref: '#/components/schemas/Connectors_verification_mode'
         viewIncidentUrl:
           description: >
             The URL to view the case in the external system. You can use
@@ -12434,33 +12475,13 @@ components:
       description: Defines properties for connectors when type is `.webhook`.
       properties:
         authType:
-          description: |
-            The type of authentication to use: basic, SSL, or none.
-          enum:
-            - webhook-authentication-basic
-            - webhook-authentication-ssl
-          nullable: true
-          type: string
+          $ref: '#/components/schemas/Connectors_auth_type'
         ca:
-          description: >
-            A base64 encoded version of the certificate authority file that the
-            connector can trust to sign and validate certificates. This option
-            is available for all authentication types.
-          type: string
+          $ref: '#/components/schemas/Connectors_ca'
         certType:
-          description: >
-            If the `authType` is `webhook-authentication-ssl`, specifies whether
-            the certificate authentication data is in a CRT and key file format
-            or a PFX file format.
-          enum:
-            - ssl-crt-key
-            - ssl-pfx
-          type: string
+          $ref: '#/components/schemas/Connectors_cert_type'
         hasAuth:
-          description: >
-            If `true`, a user name and password must be provided for login type
-            authentication.
-          type: boolean
+          $ref: '#/components/schemas/Connectors_has_auth'
         headers:
           description: A set of key-value pairs sent as headers with the request.
           nullable: true
@@ -12479,21 +12500,7 @@ components:
             setting, add the hostname to the allowed hosts.
           type: string
         verificationMode:
-          default: full
-          description: >
-            Controls the verification of certificates. Use `full` to validate
-            that the certificate has an issue date within the `not_before` and
-            `not_after` dates, chains to a trusted certificate authority (CA),
-            and has a hostname or IP address that matches the names within the
-            certificate. Use `certificate` to validate the certificate and
-            verify that it is signed by a trusted authority; this option does
-            not check the certificate hostname. Use `none` to skip certificate
-            validation.
-          enum:
-            - certificate
-            - full
-            - none
-          type: string
+          $ref: '#/components/schemas/Connectors_verification_mode'
       title: Connector request properties for a Webhook connector
       type: object
     Connectors_config_properties_xmatters:
@@ -14086,6 +14093,12 @@ components:
         - secrets
       title: Create xMatters connector request
       type: object
+    Connectors_crt:
+      description: >-
+        If `authType` is `webhook-authentication-ssl` and `certType` is
+        `ssl-crt-key`, it is a base64 encoded version of the CRT or CERT file.
+      title: Certificate
+      type: string
     Connectors_features:
       description: |
         The feature that uses the connector.
@@ -14098,6 +14111,13 @@ components:
         - siem
         - uptime
       type: string
+    Connectors_has_auth:
+      default: true
+      description: >-
+        If true, a username and password for login type authentication must be
+        provided.
+      title: Has authentication
+      type: boolean
     Connectors_is_deprecated:
       description: Indicates whether the connector type is deprecated.
       example: false
@@ -14118,6 +14138,18 @@ components:
       description: Indicates whether the connector is used for system actions.
       example: false
       type: boolean
+    Connectors_key:
+      description: >-
+        If `authType` is `webhook-authentication-ssl` and `certType` is
+        `ssl-crt-key`, it is a base64 encoded version of the KEY file.
+      title: Certificate key
+      type: string
+    Connectors_pfx:
+      description: >-
+        If `authType` is `webhook-authentication-ssl` and `certType` is
+        `ssl-pfx`, it is a base64 encoded version of the PFX or P12 file.
+      title: Personal information exchange
+      type: string
     Connectors_referenced_by_count:
       description: >
         Indicates the number of saved objects that reference the connector. If
@@ -14143,15 +14175,23 @@ components:
       title: Connector secrets properties for Webhook - Case Management connector
       type: object
       properties:
+        crt:
+          $ref: '#/components/schemas/Connectors_crt'
+        key:
+          $ref: '#/components/schemas/Connectors_key'
         password:
-          description: >-
+          description: >
             The password for HTTP basic authentication. If `hasAuth` is set to
-            `true`, this property is required.
+            `true` and and `authType` is `webhook-authentication-basic`, this
+            property is required.
           type: string
+        pfx:
+          $ref: '#/components/schemas/Connectors_pfx'
         user:
-          description: >-
+          description: >
             The username for HTTP basic authentication. If `hasAuth` is set to
-            `true`, this property is required.
+            `true` and `authType` is `webhook-authentication-basic`, this
+            property is required.
           type: string
     Connectors_secrets_properties_d3security:
       description: Defines secrets for connectors when type is `.d3security`.
@@ -14367,16 +14407,9 @@ components:
       description: Defines secrets for connectors when type is `.webhook`.
       properties:
         crt:
-          description: >-
-            If `authType` is `webhook-authentication-ssl` and `certType` is
-            `ssl-crt-key`, it is a base64 encoded version of the CRT or CERT
-            file.
-          type: string
+          $ref: '#/components/schemas/Connectors_crt'
         key:
-          description: >-
-            If `authType` is `webhook-authentication-ssl` and `certType` is
-            `ssl-crt-key`, it is a base64 encoded version of the KEY file.
-          type: string
+          $ref: '#/components/schemas/Connectors_key'
         password:
           description: >
             The password for HTTP basic authentication or the passphrase for the
@@ -14384,10 +14417,7 @@ components:
             is `webhook-authentication-basic`, this property is required.
           type: string
         pfx:
-          description: >-
-            If `authType` is `webhook-authentication-ssl` and `certType` is
-            `ssl-pfx`, it is a base64 encoded version of the PFX or P12 file.
-          type: string
+          $ref: '#/components/schemas/Connectors_pfx'
         user:
           description: >
             The username for HTTP basic authentication. If `hasAuth` is set to
@@ -14759,6 +14789,22 @@ components:
         - config
         - name
         - secrets
+    Connectors_verification_mode:
+      default: full
+      description: >
+        Controls the verification of certificates. Use `full` to validate that
+        the certificate has an issue date within the `not_before` and
+        `not_after` dates, chains to a trusted certificate authority (CA), and
+        has a hostname or IP address that matches the names within the
+        certificate. Use `certificate` to validate the certificate and verify
+        that it is signed by a trusted authority; this option does not check the
+        certificate hostname. Use `none` to skip certificate validation.
+      enum:
+        - certificate
+        - full
+        - none
+      title: Verification mode
+      type: string
     Data_views_400_response:
       title: Bad request
       type: object
@@ -19020,10 +19066,25 @@ tags:
   - name: Fleet uninstall tokens
   - description: Machine learning
     name: ml
-  - description: >-
-      Manage Kibana saved objects, including dashboards, visualizations, and
-      more.
+  - description: >
+      Export sets of saved objects that you want to import into {kib}, resolve
+      import errors, and rotate an encryption key for encrypted saved objects
+      with the saved objects APIs.
+
+
+      To manage a specific type of saved object, use the corresponding APIs.
+
+      For example, use:
+
+
+      [Data views](../group/endpoint-data-views)
+
+
+      Warning: Do not write documents directly to the `.kibana` index. When you
+      write directly to the `.kibana` index, the data becomes corrupted and
+      permanently breaks future Kibana versions.
     name: saved objects
+    x-displayName: Saved objects
   - description: 'SLO APIs enable you to define, manage and track service-level objectives'
     name: slo
   - name: system

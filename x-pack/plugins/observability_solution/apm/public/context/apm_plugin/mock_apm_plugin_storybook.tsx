@@ -128,6 +128,13 @@ const mockApmPluginContext = {
   observabilityAIAssistant: {
     service: { setScreenContext: () => noop },
   },
+  share: {
+    url: {
+      locators: {
+        get: jest.fn(),
+      },
+    },
+  },
 } as unknown as ApmPluginContextValue;
 
 export function MockApmPluginStorybook({
