@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
   const kbnServer = getService('kibanaServer');
 
-  describe.only('dashboard time to visualize security', () => {
+  describe('dashboard time to visualize security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kbnServer.importExport.load(
