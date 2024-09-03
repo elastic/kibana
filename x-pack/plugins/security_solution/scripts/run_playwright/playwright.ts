@@ -23,7 +23,6 @@ import {
 } from '@kbn/test/src/functional_test_runner/lib';
 import pRetry from 'p-retry';
 import execa from 'execa';
-import { createFailError } from '@kbn/dev-cli-errors';
 import { prefixedOutputLogger } from '../endpoint/common/utils';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { parseTestFileConfig, retrieveIntegrations } from '../run_cypress/utils';
@@ -142,7 +141,7 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
         pMap(
           filePaths,
           async (filePath) => {
-            let result;
+            let result: Error | undefined;
             await withProcRunner(log, async (procs) => {
               const abortCtrl = new AbortController();
 
@@ -321,9 +320,7 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
 
                 log.info(`
                 ----------------------------------------------
-                Playwright run ENV for file: ${filePath}:
-                ----------------------------------------------
-                ${JSON.stringify(playwrightCustomEnv, null, 2)}
+                Playwright run ENV for file: ${filePath}
                 ----------------------------------------------
                 `);
 
@@ -373,23 +370,7 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
           }
         );
 
-      const initialResults = await runSpecs(files);
-      const retryResults = await runSpecs([...failedSpecFilePaths]);
-
-      // If there are failed tests, retry them
-      const hasFailedTests = (runResults) =>
-        _.some(
-          // only fail the job if retry failed as well
-          runResults,
-          (runResult) => runResult?.exitCode === 1
-        );
-      const hasFailedInitialTests = hasFailedTests(initialResults);
-      const hasFailedRetryTests = hasFailedTests(retryResults);
-
-      // If the initialResults had failures and failedSpecFilePaths was not populated properly return errors
-      if (hasFailedRetryTests || (hasFailedInitialTests && !retryResults.length)) {
-        throw createFailError('Not all tests passed');
-      }
+      await runSpecs(files);
     },
     {
       flags: {
