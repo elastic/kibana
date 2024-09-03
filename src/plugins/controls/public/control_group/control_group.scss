@@ -46,7 +46,7 @@ $controlMinWidth: $euiSize * 14;
 
   .controlFrame__draggable {
     cursor: grabbing;
-    height: $euiButtonHeight;
+    height: $euiButtonHeightSmall;
     align-items: center;
     border-radius: $euiBorderRadius;
     font-weight: $euiFontWeightSemiBold;

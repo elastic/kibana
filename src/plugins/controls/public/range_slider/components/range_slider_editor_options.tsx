@@ -23,11 +23,7 @@ export const RangeSliderEditorOptions = ({
 
   return (
     <>
-      <EuiFormRow
-        fullWidth
-        label={RangeSliderStrings.editor.getStepTitle()}
-        display="rowCompressed"
-      >
+      <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
         <EuiFieldNumber
           value={step}
           onChange={(event) => {
