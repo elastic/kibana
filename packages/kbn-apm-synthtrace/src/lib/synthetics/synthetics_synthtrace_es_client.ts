@@ -7,11 +7,12 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ESDocumentWithOperation, SyntheticsMonitorDocument } from '@kbn/apm-synthtrace-client';
-import { pipeline, Readable, Transform } from 'stream';
+import { SyntheticsMonitorDocument } from '@kbn/apm-synthtrace-client';
+import { pipeline, Readable } from 'stream';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
+import { getRoutingTransform } from '../shared/data_stream_get_routing_transform';
 
 export type SyntheticsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
@@ -30,7 +31,7 @@ function syntheticsPipeline() {
     return pipeline(
       base,
       getSerializeTransform<SyntheticsMonitorDocument>(),
-      getRoutingTransform(),
+      getRoutingTransform('synthetics'),
       (err: unknown) => {
         if (err) {
           throw err;
@@ -38,23 +39,4 @@ function syntheticsPipeline() {
       }
     );
   };
-}
-
-function getRoutingTransform() {
-  return new Transform({
-    objectMode: true,
-    transform(document: ESDocumentWithOperation<SyntheticsMonitorDocument>, encoding, callback) {
-      if (
-        'data_stream.type' in document &&
-        'data_stream.dataset' in document &&
-        'data_stream.namespace' in document
-      ) {
-        document._index = `${document['data_stream.type']}-${document['data_stream.dataset']}-${document['data_stream.namespace']}`;
-      } else {
-        throw new Error('Cannot determine index for event');
-      }
-
-      callback(null, document);
-    },
-  });
 }
