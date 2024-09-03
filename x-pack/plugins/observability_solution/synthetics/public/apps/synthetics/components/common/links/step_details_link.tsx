@@ -43,6 +43,7 @@ export const StepDetailsLinkIcon = ({
         iconType="apmTrace"
         href={stepDetailsLink}
       >
+        {/* @ts-ignore - @types/react18 error, might be a legit bug */}
         {label ?? VIEW_DETAILS}
       </EuiButtonEmpty>
     );
