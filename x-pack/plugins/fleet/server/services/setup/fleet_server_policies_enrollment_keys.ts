@@ -55,6 +55,10 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
     }
   );
 
+  if (!outdatedAgentPolicyIds.length) {
+    return;
+  }
+
   if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {
     return scheduleDeployAgentPoliciesTask(
       appContextService.getTaskManagerStart()!,

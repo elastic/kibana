@@ -593,7 +593,7 @@ class AgentPolicyService {
     });
 
     if (options.withAgentCount || withPackagePolicies) {
-      pMap(
+      await pMap(
         agentPolicies,
         async (agentPolicy) => {
           if (withPackagePolicies) {
