@@ -598,7 +598,7 @@ class AgentPolicyService {
         async (agentPolicy) => {
           if (withPackagePolicies) {
             agentPolicy.package_policies =
-              (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
+              (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
           }
           if (options.withAgentCount) {
             await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
