@@ -3,7 +3,7 @@ info:
   title: File Info Schema
   version: '2023-10-31'
 paths:
-  /api/endpoint/action/{action_id}/file/{file_id}`:
+  /api/endpoint/action/{action_id}/file/{file_id}:
     get:
       summary: Get file information
       operationId: EndpointFileInfo
