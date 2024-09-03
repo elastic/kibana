@@ -226,7 +226,9 @@ describe('convertToPercentileColumns', () => {
     if (expected === null) {
       expect(convertToPercentileColumns(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
-      expect(convertToPercentileColumns(...input)).toEqual(expected.map(expect.objectContaining));
+      expect(convertToPercentileColumns(...input)).toEqual(
+        expected.map((el) => (el === null ? null : expect.objectContaining(el)))
+      );
     } else {
       expect(convertToPercentileColumns(...input)).toEqual(expect.objectContaining(expected));
     }

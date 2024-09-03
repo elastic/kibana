@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-indices",
+  "owner": "@elastic/search-kibana",
+  "plugin": {
+    "id": "searchIndices",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchIndices"
+    ],
+    "requiredPlugins": [
+      "share",
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "console",
+      "usageCollection",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+    ]
+  }
+}

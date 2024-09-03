@@ -300,7 +300,7 @@
             "label": "stop",
             "description": [],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "x-pack/plugins/task_manager/server/plugin.ts",
             "deprecated": false,
@@ -1464,7 +1464,13 @@
               "\nAn optional definition of the cost associated with running the task."
             ],
             "signature": [
-              "TaskCost",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskCost",
+                "text": "TaskCost"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
@@ -1624,6 +1630,18 @@
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.TaskCost",
+        "type": "Enum",
+        "tags": [],
+        "label": "TaskCost",
+        "description": [],
+        "path": "x-pack/plugins/task_manager/server/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "taskManager",
         "id": "def-server.TaskErrorSource",

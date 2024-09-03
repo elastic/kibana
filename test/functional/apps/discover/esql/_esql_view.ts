@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     enableESQL: true,
   };
 
-  describe('discover esql view', async function () {
+  describe('discover esql view', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
@@ -321,6 +321,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await inspector.open();
           retries = retries + 1;
           const requestNames = await inspector.getRequestNames();
+          expect(requestNames).to.contain('Table');
+          expect(requestNames).to.contain('Visualization');
+        });
+      });
+
+      describe('with slow queries', () => {
+        it('should show only one entry in inspector for table/visualization', async function () {
+          await PageObjects.discover.selectTextBaseLang();
+          const testQuery = `from kibana_sample_data_flights | limit 10`;
+          await monacoEditor.setCodeEditorValue(testQuery);
+
+          await browser.execute(() => {
+            window.ELASTIC_ESQL_DELAY_SECONDS = 5;
+          });
+          await testSubjects.click('querySubmitButton');
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await browser.execute(() => {
+            window.ELASTIC_ESQL_DELAY_SECONDS = undefined;
+          });
+
+          await inspector.open();
+          const requestNames = (await inspector.getRequestNames()).split(',');
+          const requestTotalTime = await inspector.getRequestTotalTime();
+          expect(requestTotalTime).to.be.greaterThan(5000);
+          expect(requestNames.length).to.be(2);
           expect(requestNames).to.contain('Table');
           expect(requestNames).to.contain('Visualization');
         });

@@ -2,5 +2,9 @@
   "name": "@kbn/entities-schema",
   "private": true,
   "version": "1.0.0",
-  "license": "Elastic License 2.0"
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "openapi:generate": "node scripts/generate",
+    "openapi:serve": "node scripts/serve_oas_ui"
+  }
 }

@@ -50,6 +50,7 @@ import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
 import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
+import { ESQLMenuPopover } from './esql_menu_popover';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type {
@@ -151,6 +152,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   query?: Query | QT;
   refreshInterval?: number;
+  minRefreshInterval?: number;
   screenTitle?: string;
   showQueryInput?: boolean;
   showAddFilter?: boolean;
@@ -502,6 +504,7 @@ export const QueryBarTopRow = React.memo(
           end={props.dateRangeTo}
           isPaused={props.isRefreshPaused}
           refreshInterval={props.refreshInterval}
+          refreshMinInterval={props.minRefreshInterval}
           onTimeChange={onTimeChange}
           onRefresh={onRefresh}
           onRefreshChange={props.onRefreshChange}
@@ -621,22 +624,17 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderDataViewsPicker() {
-      if (!props.dataViewPickerComponentProps) return;
-      let textBasedLanguage;
-      if (Boolean(isQueryLangSelected)) {
-        const query = props.query as AggregateQuery;
-        textBasedLanguage = getAggregateQueryMode(query);
+      if (props.dataViewPickerComponentProps && !Boolean(isQueryLangSelected)) {
+        return (
+          <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
+            <DataViewPicker
+              {...props.dataViewPickerComponentProps}
+              trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
+              isDisabled={props.isDisabled}
+            />
+          </EuiFlexItem>
+        );
       }
-      return (
-        <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
-          <DataViewPicker
-            {...props.dataViewPickerComponentProps}
-            trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
-            textBasedLanguage={textBasedLanguage}
-            isDisabled={props.isDisabled}
-          />
-        </EuiFlexItem>
-      );
     }
 
     function renderAddButton() {
@@ -770,12 +768,12 @@ export const QueryBarTopRow = React.memo(
                 padding: ${isQueryLangSelected && !props.disableExternalPadding
                   ? euiTheme.size.s
                   : 0};
-                padding-bottom: 0;
               `}
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap
             >
               {props.dataViewPickerOverride || renderDataViewsPicker()}
+              {Boolean(isQueryLangSelected) && <ESQLMenuPopover />}
               <EuiFlexItem
                 grow={!shouldShowDatePickerAsBadge()}
                 style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}

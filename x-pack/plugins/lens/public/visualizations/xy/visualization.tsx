@@ -109,8 +109,6 @@ import {
 } from './visualization_helpers';
 import { getAxesConfiguration, groupAxesByType } from './axes_configuration';
 import type { XYByValueAnnotationLayerConfig, XYState } from './types';
-import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
-import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import { createAnnotationActions } from './annotations/actions';
@@ -130,6 +128,8 @@ import {
   XY_X_WRONG_DATA_TYPE,
   XY_Y_WRONG_DATA_TYPE,
 } from '../../user_messages_ids';
+import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel/annotations_panel';
+import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel/reference_line_panel';
 
 const XY_ID = 'lnsXY';
 
@@ -704,14 +704,14 @@ export const getXyVisualization = ({
       paletteService,
     };
 
-    const darkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />
     ) : isAnnotationsLayer(layer) ? (
       <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />
     ) : (
-      <DataDimensionEditor {...allProps} darkMode={darkMode} />
+      <DataDimensionEditor {...allProps} isDarkMode={isDarkMode} />
     );
 
     return dimensionEditor;

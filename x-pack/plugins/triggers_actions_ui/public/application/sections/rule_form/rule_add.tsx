@@ -37,6 +37,7 @@ import { hasShowActionsCapability } from '../../lib/capabilities';
 import RuleAddFooter from './rule_add_footer';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../../../common/constants';
 import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { DEFAULT_RULE_INTERVAL, MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
@@ -77,7 +78,7 @@ const RuleAdd = <
 }: RuleAddProps<Params, MetaData>) => {
   const onSaveHandler = onSave ?? reloadRules;
   const [metadata, setMetadata] = useState(initialMetadata);
-  const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
+  const onChangeMetaData = useCallback((newMetadata: any) => setMetadata(newMetadata), []);
 
   const initialRule: InitialRule = useMemo(() => {
     return {
@@ -253,11 +254,13 @@ const RuleAdd = <
 
   async function onSaveRule(): Promise<Rule | undefined> {
     try {
+      const { flapping, ...restRule } = rule;
       const newRule = await createRule({
         http,
         rule: {
-          ...rule,
+          ...restRule,
           ...(selectableConsumer && selectedConsumer ? { consumer: selectedConsumer } : {}),
+          ...(IS_RULE_SPECIFIC_FLAPPING_ENABLED ? { flapping } : {}),
         } as CreateRuleBody,
       });
       toasts.addSuccess(

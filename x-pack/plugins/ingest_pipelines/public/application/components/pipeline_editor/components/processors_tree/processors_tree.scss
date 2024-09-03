@@ -14,10 +14,11 @@
     height: 2px;
 
     &--visible {
-      &:hover {
-        background-color: $euiColorPrimary;
-      }
       visibility: visible;
+    }
+
+    &--visible:hover {
+      background-color: $euiColorPrimary;
     }
 
     &--unavailable {

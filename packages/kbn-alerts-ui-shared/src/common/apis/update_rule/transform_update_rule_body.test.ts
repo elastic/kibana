@@ -52,6 +52,10 @@ const ruleToUpdate: UpdateRuleBody<RuleTypeParams> = {
   alertDelay: {
     active: 10,
   },
+  flapping: {
+    lookBackWindow: 10,
+    statusChangeThreshold: 10,
+  },
 };
 
 describe('transformUpdateRuleBody', () => {
@@ -98,6 +102,10 @@ describe('transformUpdateRuleBody', () => {
       },
       tags: [],
       throttle: null,
+      flapping: {
+        look_back_window: 10,
+        status_change_threshold: 10,
+      },
     });
   });
 });

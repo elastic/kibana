@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import type { CategorizationState } from '../../types';
-import { modifySamples, formatSamples } from '../../util/samples';
+import type { CategorizationGraphParams, CategorizationBaseNodeParams } from './types';
+import { prefixSamples, formatSamples } from '../../util/samples';
 import { handleCategorization } from './categorization';
 import { handleValidatePipeline } from '../../util/graph';
 import { handleCategorizationValidation } from './validate';
@@ -105,8 +101,8 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
   },
 };
 
-function modelInput(state: CategorizationState): Partial<CategorizationState> {
-  const samples = modifySamples(state);
+function modelInput({ state }: CategorizationBaseNodeParams): Partial<CategorizationState> {
+  const samples = prefixSamples(state);
   const formattedSamples = formatSamples(samples);
   const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
   return {
@@ -122,7 +118,7 @@ function modelInput(state: CategorizationState): Partial<CategorizationState> {
   };
 }
 
-function modelOutput(state: CategorizationState): Partial<CategorizationState> {
+function modelOutput({ state }: CategorizationBaseNodeParams): Partial<CategorizationState> {
   return {
     finalized: true,
     lastExecutedChain: 'modelOutput',
@@ -133,14 +129,14 @@ function modelOutput(state: CategorizationState): Partial<CategorizationState> {
   };
 }
 
-function validationRouter(state: CategorizationState): string {
+function validationRouter({ state }: CategorizationBaseNodeParams): string {
   if (Object.keys(state.currentProcessors).length === 0) {
     return 'categorization';
   }
   return 'validateCategorization';
 }
 
-function chainRouter(state: CategorizationState): string {
+function chainRouter({ state }: CategorizationBaseNodeParams): string {
   if (Object.keys(state.errors).length > 0) {
     return 'errors';
   }
@@ -157,27 +153,26 @@ function chainRouter(state: CategorizationState): string {
   return END;
 }
 
-export async function getCategorizationGraph(
-  client: IScopedClusterClient,
-  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
-) {
+export async function getCategorizationGraph({ client, model }: CategorizationGraphParams) {
   const workflow = new StateGraph({
     channels: graphState,
   })
-    .addNode('modelInput', modelInput)
-    .addNode('modelOutput', modelOutput)
+    .addNode('modelInput', (state: CategorizationState) => modelInput({ state }))
+    .addNode('modelOutput', (state: CategorizationState) => modelOutput({ state }))
     .addNode('handleCategorization', (state: CategorizationState) =>
-      handleCategorization(state, model)
+      handleCategorization({ state, model })
     )
     .addNode('handleValidatePipeline', (state: CategorizationState) =>
-      handleValidatePipeline(state, client)
+      handleValidatePipeline({ state, client })
     )
-    .addNode('handleCategorizationValidation', handleCategorizationValidation)
+    .addNode('handleCategorizationValidation', (state: CategorizationState) =>
+      handleCategorizationValidation({ state })
+    )
     .addNode('handleInvalidCategorization', (state: CategorizationState) =>
-      handleInvalidCategorization(state, model)
+      handleInvalidCategorization({ state, model })
     )
-    .addNode('handleErrors', (state: CategorizationState) => handleErrors(state, model))
-    .addNode('handleReview', (state: CategorizationState) => handleReview(state, model))
+    .addNode('handleErrors', (state: CategorizationState) => handleErrors({ state, model }))
+    .addNode('handleReview', (state: CategorizationState) => handleReview({ state, model }))
     .addEdge(START, 'modelInput')
     .addEdge('modelOutput', END)
     .addEdge('modelInput', 'handleValidatePipeline')
@@ -185,16 +180,24 @@ export async function getCategorizationGraph(
     .addEdge('handleInvalidCategorization', 'handleValidatePipeline')
     .addEdge('handleErrors', 'handleValidatePipeline')
     .addEdge('handleReview', 'handleValidatePipeline')
-    .addConditionalEdges('handleValidatePipeline', validationRouter, {
-      categorization: 'handleCategorization',
-      validateCategorization: 'handleCategorizationValidation',
-    })
-    .addConditionalEdges('handleCategorizationValidation', chainRouter, {
-      modelOutput: 'modelOutput',
-      errors: 'handleErrors',
-      invalidCategorization: 'handleInvalidCategorization',
-      review: 'handleReview',
-    });
+    .addConditionalEdges(
+      'handleValidatePipeline',
+      (state: CategorizationState) => validationRouter({ state }),
+      {
+        categorization: 'handleCategorization',
+        validateCategorization: 'handleCategorizationValidation',
+      }
+    )
+    .addConditionalEdges(
+      'handleCategorizationValidation',
+      (state: CategorizationState) => chainRouter({ state }),
+      {
+        modelOutput: 'modelOutput',
+        errors: 'handleErrors',
+        invalidCategorization: 'handleInvalidCategorization',
+        review: 'handleReview',
+      }
+    );
 
   const compiledCategorizationGraph = workflow.compile();
   return compiledCategorizationGraph;

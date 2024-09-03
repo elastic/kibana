@@ -118,6 +118,7 @@ import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
+import { UnenrollInactiveAgentsTask } from './tasks/unenroll_inactive_agents_task';
 import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
@@ -129,6 +130,7 @@ import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
 import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
 import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
 import { registerIntegrationFieldsExtractor } from './services/register_integration_fields_extractor';
+import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/managed_package_policies';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -178,6 +180,8 @@ export interface FleetAppContext {
   messageSigningService: MessageSigningServiceInterface;
   auditLogger?: AuditLogger;
   uninstallTokenService: UninstallTokenServiceInterface;
+  unenrollInactiveAgentsTask: UnenrollInactiveAgentsTask;
+  taskManagerStart?: TaskManagerStartContract;
 }
 
 export type FleetSetupContract = void;
@@ -266,6 +270,7 @@ export class FleetPlugin
   private fleetUsageSender?: FleetUsageSender;
   private checkDeletedFilesTask?: CheckDeletedFilesTask;
   private fleetMetricsTask?: FleetMetricsTask;
+  private unenrollInactiveAgentsTask?: UnenrollInactiveAgentsTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -593,8 +598,15 @@ export class FleetPlugin
     registerRoutes(fleetAuthzRouter, config);
 
     this.telemetryEventsSender.setup(deps.telemetry);
+    // Register task
+    registerUpgradeManagedPackagePoliciesTask(deps.taskManager);
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
+    this.unenrollInactiveAgentsTask = new UnenrollInactiveAgentsTask({
       core,
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
@@ -644,12 +656,15 @@ export class FleetPlugin
       bulkActionsResolver: this.bulkActionsResolver!,
       messageSigningService,
       uninstallTokenService,
+      unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
+      taskManagerStart: plugins.taskManager,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
     this.bulkActionsResolver?.start(plugins.taskManager).catch(() => {});
     this.fleetUsageSender?.start(plugins.taskManager).catch(() => {});
     this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    this.unenrollInactiveAgentsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
     startFleetUsageLogger(plugins.taskManager).catch(() => {});
     this.fleetMetricsTask
       ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)

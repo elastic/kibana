@@ -10,7 +10,7 @@ import https from 'https';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 
-import type { AxiosError } from 'axios';
+import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
@@ -22,7 +22,7 @@ import { appContextService } from '../app_context';
 
 import { listEnrollmentApiKeys } from '../api_keys';
 import { listFleetServerHosts } from '../fleet_server_host';
-import { prependAgentlessApiBasePathToEndpoint } from '../utils/agentless';
+import { prependAgentlessApiBasePathToEndpoint, isAgentlessApiEnabled } from '../utils/agentless';
 
 class AgentlessAgentService {
   public async createAgentlessAgent(
@@ -33,8 +33,10 @@ class AgentlessAgentService {
     const logger = appContextService.getLogger();
     logger.debug(`Creating agentless agent ${agentlessAgentPolicy.id}`);
 
-    if (!appContextService.getCloud()?.isCloudEnabled) {
-      logger.error('Creating agentless agent not supported in non-cloud environments');
+    if (!isAgentlessApiEnabled) {
+      logger.error(
+        'Creating agentless agent not supported in non-cloud or non-serverless environments'
+      );
       throw new AgentlessAgentCreateError('Agentless agent not supported');
     }
     if (!agentlessAgentPolicy.supports_agentless) {
@@ -69,13 +71,12 @@ class AgentlessAgentService {
       })
     );
 
-    const requestConfig = {
+    const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
       data: {
         policy_id: policyId,
         fleet_url: fleetUrl,
         fleet_token: fleetToken,
-        stack_version: appContextService.getKibanaVersion(),
       },
       method: 'POST',
       headers: {
@@ -88,6 +89,11 @@ class AgentlessAgentService {
         ca: tlsConfig.certificateAuthorities,
       }),
     };
+
+    const cloudSetup = appContextService.getCloud();
+    if (!cloudSetup?.isServerlessEnabled) {
+      requestConfig.data.stack_version = appContextService.getKibanaVersion();
+    }
 
     logger.debug(
       `Creating agentless agent with request config ${JSON.stringify({
