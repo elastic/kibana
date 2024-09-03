@@ -164,7 +164,7 @@ const sharedPieDonutOptions: Omit<PartitionChartMeta, 'id'> = {
   },
   sortPriority: 6,
   description: i18n.translate('xpack.lens.pie.visualizationDescription', {
-    defaultMessage: 'Display proportions of a whole in a circular format.',
+    defaultMessage: 'Display parts of a whole in a circular format.',
   }),
 };
 
@@ -216,7 +216,7 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     },
     sortPriority: 11,
     description: i18n.translate('xpack.lens.treemap.visualizationDescription', {
-      defaultMessage: 'Use nested rectangles to show proportionality.',
+      defaultMessage: 'Use nested rectangles to show proportions and hierarchy.',
     }),
   },
   mosaic: {
@@ -235,7 +235,7 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     },
     sortPriority: 13,
     description: i18n.translate('xpack.lens.mosaic.visualizationDescription', {
-      defaultMessage: 'Show proportions of categorical data via rectangles.',
+      defaultMessage: 'Show proportions of categorical data with rectangles.',
     }),
   },
 };

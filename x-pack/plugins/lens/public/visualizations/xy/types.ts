@@ -182,7 +182,7 @@ export type State = XYState;
 const barShared = {
   sortPriority: 1,
   description: i18n.translate('xpack.lens.bar.visualizationDescription', {
-    defaultMessage: 'Compare categories or groups of data via bars.',
+    defaultMessage: 'Compare categories or groups of data with bars.',
   }),
 };
 
@@ -286,7 +286,7 @@ export const visualizationSubtypes: VisualizationType[] = [
     }),
     sortPriority: 2,
     description: i18n.translate('xpack.lens.line.visualizationDescription', {
-      defaultMessage: 'Reveal variations in data over time or categorically.',
+      defaultMessage: 'Reveal variations in data over time.',
     }),
   },
 ];
