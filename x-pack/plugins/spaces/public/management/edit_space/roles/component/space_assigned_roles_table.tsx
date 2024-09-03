@@ -46,17 +46,21 @@ interface ISpaceAssignedRolesTableProps {
   onClickRowRemoveAction: (role: Role) => void;
 }
 
+const isRoleReserved = (role: Role) => {
+  return role.metadata?._reserved;
+};
+const isRoleAssignedToAll = (role: Role) => {
+  return role.kibana.reduce((acc, cur) => {
+    return cur.spaces.includes('*') || acc;
+  }, false);
+};
+
 /**
  * @description checks if the passed role qualifies as one that can
  * be edited by a user with sufficient permissions
  */
 export const isEditableRole = (role: Role) => {
-  return !(
-    role.metadata?._reserved ||
-    role.kibana.reduce((acc, cur) => {
-      return cur.spaces.includes('*') || acc;
-    }, false)
-  );
+  return !(isRoleReserved(role) || isRoleAssignedToAll(role));
 };
 
 const getTableColumns = ({
@@ -458,9 +462,30 @@ export const SpaceAssignedRolesTable = ({
 
   const selection: EuiTableSelectionType<Role> = {
     selected: selectedRoles,
-    selectable: (role: Role) => isEditableRole(role),
-    selectableMessage: (selectable: boolean, role: Role) =>
-      !selectable ? `${role.name} is reserved` : `Select ${role.name}`,
+    selectable: (role) => isEditableRole(role),
+    selectableMessage: (_selectable, role) => {
+      if (isRoleReserved(role)) {
+        return i18n.translate(
+          'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.isReserved',
+          {
+            defaultMessage: 'Can not select a role that is reserved',
+          }
+        );
+      }
+      if (isRoleAssignedToAll(role)) {
+        return i18n.translate(
+          'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.isRoleAssignedToAll',
+          {
+            defaultMessage: 'Can not select a role that is assigned to all spaces',
+          }
+        );
+      }
+
+      return i18n.translate(
+        'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.selectRole',
+        { defaultMessage: `Select ${role.name}` }
+      );
+    },
     onSelectionChange,
   };
 
