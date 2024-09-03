@@ -36,4 +36,5 @@ export function applyFipsOverrides(vars: any) {
 
     vars.esTestCluster.serverArgs = newServerArgs;
   }
+  return vars;
 }
