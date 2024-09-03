@@ -26,12 +26,8 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       onSubmit={[Function]}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         error="A title is required"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
           <Memo(MemoizedFormattedMessage)
@@ -39,7 +35,6 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
             id="savedObjects.saveModal.titleLabel"
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           data-test-subj="savedObjectTitle"
@@ -55,11 +50,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         />
       </EuiFormRow>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         label={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="Description"
@@ -77,7 +68,6 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
             />
           </EuiText>
         }
-        labelType="label"
       >
         <EuiTextArea
           data-test-subj="savedObjectDescription"
@@ -150,12 +140,8 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       onSubmit={[Function]}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         error="A title is required"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
           <Memo(MemoizedFormattedMessage)
@@ -163,7 +149,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
             id="savedObjects.saveModal.titleLabel"
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           data-test-subj="savedObjectTitle"
@@ -179,11 +164,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         />
       </EuiFormRow>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         label={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="Description"
@@ -201,7 +182,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
             />
           </EuiText>
         }
-        labelType="label"
       >
         <EuiTextArea
           data-test-subj="savedObjectDescription"
@@ -274,12 +254,8 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       onSubmit={[Function]}
     >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         error="A title is required"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
         label={
           <Memo(MemoizedFormattedMessage)
@@ -287,7 +263,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
             id="savedObjects.saveModal.titleLabel"
           />
         }
-        labelType="label"
       >
         <EuiFieldText
           data-test-subj="savedObjectTitle"
@@ -303,11 +278,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         />
       </EuiFormRow>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         label={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="Description"
@@ -325,7 +296,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
             />
           </EuiText>
         }
-        labelType="label"
       >
         <EuiTextArea
           data-test-subj="savedObjectDescription"
@@ -402,12 +372,8 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
       >
         <EuiFlexItem>
           <EuiFormRow
-            describedByIds={Array []}
-            display="row"
             error="A title is required"
             fullWidth={true}
-            hasChildLabel={true}
-            hasEmptyLabelSpace={false}
             isInvalid={false}
             label={
               <Memo(MemoizedFormattedMessage)
@@ -415,7 +381,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
                 id="savedObjects.saveModal.titleLabel"
               />
             }
-            labelType="label"
           >
             <EuiFieldText
               data-test-subj="savedObjectTitle"
@@ -431,11 +396,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
             />
           </EuiFormRow>
           <EuiFormRow
-            describedByIds={Array []}
-            display="row"
             fullWidth={true}
-            hasChildLabel={true}
-            hasEmptyLabelSpace={false}
             label={
               <Memo(MemoizedFormattedMessage)
                 defaultMessage="Description"
@@ -453,7 +414,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
                 />
               </EuiText>
             }
-            labelType="label"
           >
             <EuiTextArea
               data-test-subj="savedObjectDescription"
