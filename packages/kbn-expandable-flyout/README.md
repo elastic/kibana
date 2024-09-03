@@ -89,9 +89,11 @@ _where `myPanels` is a list of all the panels that can be rendered in the flyout
 The expandable flyout now offers a way for users to change some of the flyout's UI properties. These are done via a gear icon in the top right corner of the flyout, to the left of the close icon.
 
 The gear icon can be hidden by setting the `hideSettings` property to `true` in the flyout's custom props.
+The `typeDisabled` property allows to disable the push/overlay toggle.
 ```typescript
 flyoutCustomProps?: {
   hideSettings?: boolean;
+  typeDisabled?: boolean,
 };
 ```
 

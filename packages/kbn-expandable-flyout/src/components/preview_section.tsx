@@ -16,7 +16,7 @@ import {
   EuiSplitPanel,
   transparentize,
 } from '@elastic/eui';
-import React from 'react';
+import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { has } from 'lodash';
 import {
@@ -79,91 +79,89 @@ interface PreviewSectionProps {
  * Preview section of the expanded flyout rendering one or multiple panels.
  * Will display a back and close button in the header for the previous and close feature respectively.
  */
-export const PreviewSection: React.FC<PreviewSectionProps> = ({
-  component,
-  leftPosition,
-  banner,
-}: PreviewSectionProps) => {
-  const { euiTheme } = useEuiTheme();
-  const { closePreviewPanel, previousPreviewPanel } = useExpandableFlyoutApi();
+export const PreviewSection: React.FC<PreviewSectionProps> = memo(
+  ({ component, leftPosition, banner }: PreviewSectionProps) => {
+    const { euiTheme } = useEuiTheme();
+    const { closePreviewPanel, previousPreviewPanel } = useExpandableFlyoutApi();
 
-  const left = leftPosition + 4;
+    const left = leftPosition + 4;
 
-  const closeButton = (
-    <EuiFlexItem grow={false}>
-      <EuiButtonIcon
-        iconType="cross"
-        onClick={() => closePreviewPanel()}
-        data-test-subj={PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID}
-        aria-label={CLOSE_BUTTON}
-      />
-    </EuiFlexItem>
-  );
-  const header = (
-    <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+    const closeButton = (
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="arrowLeft"
-          iconSide="left"
-          onClick={() => previousPreviewPanel()}
-          data-test-subj={PREVIEW_SECTION_BACK_BUTTON_TEST_ID}
-          aria-label={BACK_BUTTON}
-        >
-          {BACK_BUTTON}
-        </EuiButtonEmpty>
+        <EuiButtonIcon
+          iconType="cross"
+          onClick={() => closePreviewPanel()}
+          data-test-subj={PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID}
+          aria-label={CLOSE_BUTTON}
+        />
       </EuiFlexItem>
-      {closeButton}
-    </EuiFlexGroup>
-  );
+    );
+    const header = (
+      <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType="arrowLeft"
+            iconSide="left"
+            onClick={() => previousPreviewPanel()}
+            data-test-subj={PREVIEW_SECTION_BACK_BUTTON_TEST_ID}
+            aria-label={BACK_BUTTON}
+          >
+            {BACK_BUTTON}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        {closeButton}
+      </EuiFlexGroup>
+    );
 
-  return (
-    <div
-      css={css`
-        position: absolute;
-        top: 8px;
-        bottom: 8px;
-        right: 4px;
-        left: ${left}px;
-        z-index: 1000;
-      `}
-    >
-      <EuiSplitPanel.Outer
+    return (
+      <div
         css={css`
-          margin: ${euiTheme.size.xs};
-          box-shadow: 0 0 16px 0px ${transparentize(euiTheme.colors.mediumShade, 0.5)};
+          position: absolute;
+          top: 8px;
+          bottom: 8px;
+          right: 4px;
+          left: ${left}px;
+          z-index: 1000;
         `}
-        data-test-subj={PREVIEW_SECTION_TEST_ID}
-        className="eui-fullHeight"
       >
-        {isPreviewBanner(banner) && (
+        <EuiSplitPanel.Outer
+          css={css`
+            margin: ${euiTheme.size.xs};
+            box-shadow: 0 0 16px 0px ${transparentize(euiTheme.colors.mediumShade, 0.5)};
+          `}
+          data-test-subj={PREVIEW_SECTION_TEST_ID}
+          className="eui-fullHeight"
+        >
+          {isPreviewBanner(banner) && (
+            <EuiSplitPanel.Inner
+              grow={false}
+              color={banner.backgroundColor}
+              paddingSize="xs"
+              data-test-subj={`${PREVIEW_SECTION_TEST_ID}BannerPanel`}
+            >
+              <EuiText
+                textAlign="center"
+                color={banner.textColor}
+                size="xs"
+                data-test-subj={`${PREVIEW_SECTION_TEST_ID}BannerText`}
+              >
+                {banner.title}
+              </EuiText>
+            </EuiSplitPanel.Inner>
+          )}
           <EuiSplitPanel.Inner
             grow={false}
-            color={banner.backgroundColor}
-            paddingSize="xs"
-            data-test-subj={`${PREVIEW_SECTION_TEST_ID}BannerPanel`}
+            paddingSize="s"
+            data-test-subj={PREVIEW_SECTION_HEADER_TEST_ID}
           >
-            <EuiText
-              textAlign="center"
-              color={banner.textColor}
-              size="xs"
-              data-test-subj={`${PREVIEW_SECTION_TEST_ID}BannerText`}
-            >
-              {banner.title}
-            </EuiText>
+            {header}
           </EuiSplitPanel.Inner>
-        )}
-        <EuiSplitPanel.Inner
-          grow={false}
-          paddingSize="s"
-          data-test-subj={PREVIEW_SECTION_HEADER_TEST_ID}
-        >
-          {header}
-        </EuiSplitPanel.Inner>
-        {component}
-      </EuiSplitPanel.Outer>
-    </div>
-  );
-};
+          {component}
+        </EuiSplitPanel.Outer>
+      </div>
+    );
+  }
+);
 
 PreviewSection.displayName = 'PreviewSection';

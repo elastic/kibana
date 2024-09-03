@@ -250,3 +250,30 @@ export const ExpandedPushVsOverlay: Story<void> = () => {
     </TestProvider>
   );
 };
+
+export const DisableTypeSelection: Story<void> = () => {
+  const state: State = {
+    byId: {
+      memory: {
+        right: {
+          id: 'right',
+        },
+        left: {
+          id: 'left',
+        },
+        preview: undefined,
+      },
+    },
+  };
+
+  return (
+    <TestProvider state={state}>
+      <ExpandableFlyout
+        registeredPanels={registeredPanels}
+        flyoutCustomProps={{
+          pushVsOverlay: { disabled: true, tooltip: 'This option is disabled' },
+        }}
+      />
+    </TestProvider>
+  );
+};

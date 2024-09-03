@@ -14,7 +14,7 @@ import { ExpandableFlyout } from '.';
 import {
   LEFT_SECTION_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
-  RENDER_MENU_BUTTON_TEST_ID,
+  SETTINGS_MENU_BUTTON_TEST_ID,
   RIGHT_SECTION_TEST_ID,
 } from './components/test_ids';
 import { type State } from './state';
@@ -154,6 +154,6 @@ describe('ExpandableFlyout', () => {
       </TestProvider>
     );
 
-    expect(getByTestId(RENDER_MENU_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 });

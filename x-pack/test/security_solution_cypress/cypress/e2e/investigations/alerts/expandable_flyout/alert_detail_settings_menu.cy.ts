@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import {
+  expandAlertAtIndexExpandableFlyout,
+  expandAlertInTimelineAtIndexExpandableFlyout,
+} from '../../../../tasks/expandable_flyout/common';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -16,12 +19,12 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   clickOnPushModeOption,
   openRenderMenu,
-} from '../../../../tasks/expandable_flyout/alert_detail_render_menu';
+} from '../../../../tasks/expandable_flyout/alert_detail_settings_menu';
 import {
   DOCUMENT_DETAILS_FLYOUT_FLYOUT_TYPE_BUTTON_GROUP,
   DOCUMENT_DETAILS_FLYOUT_OVERLAY_OPTION,
   DOCUMENT_DETAILS_FLYOUT_PUSH_OPTION,
-} from '../../../../screens/expandable_flyout/alert_detail_render_menu';
+} from '../../../../screens/expandable_flyout/alert_detail_settings_menu';
 import { investigateFirstAlertInTimeline } from '../../../../tasks/alerts';
 import { TIMELINE_FLYOUT } from '../../../../screens/timeline';
 
@@ -69,7 +72,7 @@ describe('Alert details expandable flyout', { tags: ['@ess', '@serverless'] }, (
 
   it('should not allow user to switch between push and overlay modes for flyout opened from timeline', () => {
     investigateFirstAlertInTimeline();
-    cy.get(TIMELINE_FLYOUT).within(() => expandAlertAtIndexExpandableFlyout());
+    cy.get(TIMELINE_FLYOUT).within(() => expandAlertInTimelineAtIndexExpandableFlyout());
     openRenderMenu();
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_OVERLAY_OPTION).should(

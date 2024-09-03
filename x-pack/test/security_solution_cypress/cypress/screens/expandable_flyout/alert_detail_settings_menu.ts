@@ -7,14 +7,14 @@
 
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
-export const DOCUMENT_DETAILS_FLYOUT_RENDER_MENU_BUTTON =
-  getDataTestSubjectSelector('renderMenuButton');
+export const DOCUMENT_DETAILS_FLYOUT_SETTINGS_MENU_BUTTON =
+  getDataTestSubjectSelector('settingsMenuButton');
 export const DOCUMENT_DETAILS_FLYOUT_FLYOUT_TYPE_BUTTON_GROUP = getDataTestSubjectSelector(
-  'renderMenuFlyoutTypeButtonGroup'
+  'settingsMenuFlyoutTypeButtonGroup'
 );
 export const DOCUMENT_DETAILS_FLYOUT_OVERLAY_OPTION = getDataTestSubjectSelector(
-  'renderMenuFlyoutTypeButtonGroupOverlayOption'
+  'settingsMenuFlyoutTypeButtonGroupOverlayOption'
 );
 export const DOCUMENT_DETAILS_FLYOUT_PUSH_OPTION = getDataTestSubjectSelector(
-  'renderMenuFlyoutTypeButtonGroupPushOption'
+  'settingsMenuFlyoutTypeButtonGroupPushOption'
 );

@@ -7,14 +7,14 @@
 
 import {
   DOCUMENT_DETAILS_FLYOUT_PUSH_OPTION,
-  DOCUMENT_DETAILS_FLYOUT_RENDER_MENU_BUTTON,
-} from '../../screens/expandable_flyout/alert_detail_render_menu';
+  DOCUMENT_DETAILS_FLYOUT_SETTINGS_MENU_BUTTON,
+} from '../../screens/expandable_flyout/alert_detail_settings_menu';
 
 /**
  * Open the render menu in the flyout's header
  */
 export const openRenderMenu = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_RENDER_MENU_BUTTON).click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_SETTINGS_MENU_BUTTON).click();
 };
 
 /**

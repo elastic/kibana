@@ -190,7 +190,10 @@ export const TimelineFlyout = memo(() => {
       customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
       onClose={onClose}
       flyoutCustomProps={{
-        hideSettings: true,
+        pushVsOverlay: {
+          disabled: true,
+          tooltip: 'Push mode is not supported in Timeline',
+        },
       }}
     />
   );

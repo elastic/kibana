@@ -18,12 +18,17 @@ export const PREVIEW_SECTION_BACK_BUTTON_TEST_ID = 'previewSectionBackButton';
 
 export const PREVIEW_SECTION_HEADER_TEST_ID = 'previewSectionHeader';
 
-export const RENDER_MENU_BUTTON_TEST_ID = 'renderMenuButton';
+export const SETTINGS_MENU_BUTTON_TEST_ID = 'settingsMenuButton';
 
-export const RENDER_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID = 'renderMenuFlyoutTypeButtonGroup';
+export const SETTINGS_MENU_FLYOUT_TYPE_TITLE_TEST_ID = 'settingsMenuFlyoutTypeTitle';
 
-export const RENDER_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID =
-  'renderMenuFlyoutTypeButtonGroupOverlayOption';
+export const SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID =
+  'settingsMenuFlyoutTypeInformationIcon';
 
-export const RENDER_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID =
-  'renderMenuFlyoutTypeButtonGroupPushOption';
+export const SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID = 'settingsMenuFlyoutTypeButtonGroup';
+
+export const SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID =
+  'settingsMenuFlyoutTypeButtonGroupOverlayOption';
+
+export const SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID =
+  'settingsMenuFlyoutTypeButtonGroupPushOption';
