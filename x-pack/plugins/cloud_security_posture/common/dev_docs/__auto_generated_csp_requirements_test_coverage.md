@@ -2,7 +2,7 @@
 
 <!-- This file is auto-generated. Any changes will be overwritten. -->This document provides a summary of the requirements test coverage for Cloud Security Posture.
 
-You can also check out the dedicated app view, which enables easier search and filter functionalities. This app needs to be updated manually, so it might not always be up to date.
+You can also check out the dedicated app view, which enables easier search and filter functionalities.
 [Requirement test coverage app](https://vxgs2c.csb.app/)
 
 ## Directory: x-pack/packages/kbn-cloud-security-posture
