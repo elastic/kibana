@@ -10,6 +10,7 @@
     "sourceRoot": "../../../../packages/kbn-screenshotting-server/src",
     "stripInternal": false,
     "types": [
+      "jest",
       "node"
     ]
   },
