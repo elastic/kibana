@@ -34,14 +34,23 @@ describe('SuggestionsSelect', () => {
 
     expect(await screen.findByRole('combobox')).toBeInTheDocument();
   });
-  it('renders without calling the API initially', async () => {
-    render(<Example />);
+  it('renders without calling the API when not initializing', async () => {
+    render(<Example isInitializing={false} />);
 
     // Ensure the combobox is rendered
     expect(await screen.findByRole('combobox')).toBeInTheDocument();
 
     // Check that useFetcher is not called on initial render
     expect(callApi).not.toHaveBeenCalled();
+  });
+  it('renders and calls the API when initializing', async () => {
+    render(<Example isInitializing={true} />);
+
+    // Ensure the combobox is rendered
+    expect(await screen.findByRole('combobox')).toBeInTheDocument();
+
+    // Check that useFetcher is not called on initial render
+    expect(callApi).toHaveBeenCalledTimes(1);
   });
   it('calls the API after search value changes', async () => {
     const component = render(<Example />);
