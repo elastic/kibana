@@ -39,14 +39,13 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *           type: boolean
  *           default: false
  *     responses:
- *       403:
- *         description: The current user does not have the required permissions to enable entity discovery
  *       200:
  *         description: OK - Verify result in response body
  *         content:
  *           application/json:
  *             schema:
  *               type: object
+ *               required: success
  *               properties:
  *                 success:
  *                  type: boolean
@@ -57,6 +56,8 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *                 message:
  *                  type: string
  *                  example: API key service is not enabled; try configuring `xpack.security.authc.api_key.enabled` in your elasticsearch config
+ *       403:
+ *         description: The current user does not have the required permissions to enable entity discovery
  */
 export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
   endpoint: 'PUT /internal/entities/managed/enablement',

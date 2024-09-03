@@ -33,6 +33,7 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *           application/json:
  *             schema:
  *               type: object
+ *               required: enabled
  *               properties:
  *                 enabled:
  *                  type: boolean

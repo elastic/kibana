@@ -29,17 +29,18 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *           type: boolean
  *           default: false
  *     responses:
- *       403:
- *         description: The current user does not have the required permissions to disable entity discovery
  *       200:
  *         description: Built-in entity discovery successfully disabled
  *         content:
  *           application/json:
  *             schema:
  *               type: object
+ *               required: success
  *               properties:
  *                 success:
  *                  type: boolean
+ *       403:
+ *         description: The current user does not have the required permissions to disable entity discovery
  */
 export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
   endpoint: 'DELETE /internal/entities/managed/enablement',

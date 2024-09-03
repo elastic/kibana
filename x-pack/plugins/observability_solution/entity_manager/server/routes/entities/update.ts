@@ -23,7 +23,7 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
 /**
  * @openapi
  * /internal/entities/definition:
- *   put:
+ *   patch:
  *     description: Update an entity definition.
  *     tags:
  *       - definitions

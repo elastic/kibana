@@ -45,7 +45,7 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *       409:
  *         description: An entity definition with this ID already exists
  *       400:
- *         description: The entity definition cannot be installed; see the error for more details
+ *         description: The entity definition cannot be installed; see the error for more details but commonly due to validation failures of the definition ID or metrics format
  */
 export const createEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/definition',
