@@ -12,6 +12,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common';
+import type { RedirectToProps } from '@kbn/dashboard-plugin/public/dashboard_container/types';
 import { SecurityPageName } from '../../../common';
 import { useCapabilities, useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_NAME } from '../../../common/constants';
@@ -30,7 +31,7 @@ const DashboardToolBarComponent = ({
 
   const { navigateTo, getAppUrl } = useNavigation();
   const redirectTo = useCallback(
-    ({ destination, id }) => {
+    ({ destination, id }: RedirectToProps & { id?: string }) => {
       if (destination === 'listing') {
         navigateTo({ deepLinkId: SecurityPageName.dashboards });
       }

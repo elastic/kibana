@@ -69,7 +69,7 @@ export function newJobLineChartProvider({ asCurrentUser }: IScopedClusterClient)
 function processSearchResults(resp: any, fields: string[]): ProcessedResults {
   const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);
 
-  const tempResults: Record<DtrIndex, Result[]> = {};
+  const tempResults: Record<DtrIndex, Result[]> = Object.create(null);
   fields.forEach((f, i) => (tempResults[i] = []));
 
   aggregationsByTime.forEach((dataForTime: any) => {
@@ -166,7 +166,10 @@ function getSearchJsonFromConfig(
 
   json.body.query = query;
 
-  const aggs: Record<number, Record<string, { field: string; percents?: string[] }>> = {};
+  const aggs: Record<
+    number,
+    Record<string, { field: string; percents?: string[] }>
+  > = Object.create(null);
 
   aggFieldNamePairs.forEach(({ agg, field }, i) => {
     if (field !== null && field !== EVENT_RATE_FIELD_ID) {
