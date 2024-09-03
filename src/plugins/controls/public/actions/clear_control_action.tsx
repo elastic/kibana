@@ -9,24 +9,24 @@
 import React, { SyntheticEvent } from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
+import { i18n } from '@kbn/i18n';
+import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
+  EmbeddableApiContext,
+  HasParentApi,
+  HasType,
+  HasUniqueId,
   apiCanAccessViewMode,
   apiHasParentApi,
   apiHasType,
   apiHasUniqueId,
   apiIsOfType,
-  EmbeddableApiContext,
-  HasParentApi,
-  HasType,
-  HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { ACTION_CLEAR_CONTROL } from '.';
-import { CanClearSelections, isClearableControl } from '../../types';
-import { ControlGroupStrings } from '../control_group_strings';
-import { CONTROL_GROUP_TYPE } from '../types';
+import { CONTROL_GROUP_TYPE } from '..';
+import { CanClearSelections, isClearableControl } from '../types';
 
 export type ClearControlActionApi = HasType &
   HasUniqueId &
@@ -72,7 +72,9 @@ export class ClearControlAction implements Action<EmbeddableApiContext> {
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return ControlGroupStrings.floatingActions.getClearButtonTitle();
+    return i18n.translate('controls.controlGroup.floatingActions.clearTitle', {
+      defaultMessage: 'Clear',
+    });
   }
 
   public getIconType({ embeddable }: EmbeddableApiContext) {

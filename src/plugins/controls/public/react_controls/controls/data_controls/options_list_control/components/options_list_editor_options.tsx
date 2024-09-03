@@ -19,8 +19,8 @@ import {
 import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';
 import { CustomOptionsComponentProps } from '../../types';
 import { DEFAULT_SEARCH_TECHNIQUE } from '../constants';
-import { OptionsListControlState } from '../types';
 import { OptionsListStrings } from '../options_list_strings';
+import { OptionsListControlState } from '../types';
 
 const selectionOptions = [
   {

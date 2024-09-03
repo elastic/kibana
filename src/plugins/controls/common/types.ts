@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
-
 export type ControlWidth = 'small' | 'medium' | 'large';
 export type ControlStyle = 'twoLine' | 'oneLine';
 
@@ -21,22 +18,3 @@ export interface ParentIgnoreSettings {
   ignoreTimerange?: boolean;
   ignoreValidations?: boolean;
 }
-
-export type ControlInput = EmbeddableInput & {
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  timeslice?: TimeSlice;
-  controlStyle?: ControlStyle;
-  ignoreParentSettings?: ParentIgnoreSettings;
-};
-
-export type DataControlInput = ControlInput & {
-  fieldName: string;
-  dataViewId: string;
-};
-
-export type ControlInputTransform = (
-  newState: Partial<ControlInput>,
-  controlType: string
-) => Partial<ControlInput>;

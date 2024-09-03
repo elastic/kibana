@@ -29,12 +29,11 @@ import {
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { ParentIgnoreSettings } from '../..';
-import { ControlInputTransform } from '../../../common';
 import { ControlGroupChainingSystem } from '../../../common/control_group/types';
 import { ControlStyle } from '../../types';
 import { DefaultControlState } from '../controls/types';
 import { ControlFetchContext } from './control_fetch/control_fetch';
+import { ParentIgnoreSettings } from '../../../common';
 
 export interface ControlPanelsState<ControlState extends ControlPanelState = ControlPanelState> {
   [panelId: string]: ControlState;
@@ -67,7 +66,7 @@ export type ControlGroupApi = PresentationContainer &
     allowExpensiveQueries$: PublishingSubject<boolean>;
     untilInitialized: () => Promise<void>;
     openAddDataControlFlyout: (options?: {
-      controlInputTransform?: ControlInputTransform;
+      // controlInputTransform?: ControlInputTransform;
       onSave?: () => void;
     }) => void;
     labelPosition: PublishingSubject<ControlStyle>;

@@ -7,20 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ControlWidth, ControlInputTransform } from './types';
+export type { ParentIgnoreSettings, ControlWidth, ControlStyle } from './types';
 
 // Control Group exports
 export {
   CONTROL_GROUP_TYPE,
-  type ControlsPanels,
-  type ControlGroupInput,
-  type ControlPanelState,
   type ControlGroupTelemetry,
-  type RawControlGroupAttributes,
-  type PersistableControlGroupInput,
-  type SerializableControlGroupInput,
   type ControlGroupChainingSystem,
-  persistableControlGroupInputKeys,
 } from './control_group/types';
 export {
   rawControlGroupAttributesToControlGroupInput,
