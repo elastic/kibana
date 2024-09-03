@@ -15,7 +15,7 @@ export const MODEL_DEPLOYED = i18n.translate(
 );
 
 export const MODEL_STARTING = i18n.translate(
-  'xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelNotDeployed',
+  'xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelStarting',
   {
     defaultMessage: 'Model starting',
   }
