@@ -16,12 +16,13 @@ import { customFieldsConfigurationMock } from '../../containers/mock';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 
 import { CaseFormFields } from '.';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('../../containers/user_profiles/api');
 
 describe('CaseFormFields', () => {
+  let user: UserEvent;
   let appMock: AppMockRenderer;
   const onSubmit = jest.fn();
   const formDefaultValue = { tags: [] };
@@ -30,8 +31,21 @@ describe('CaseFormFields', () => {
     configurationCustomFields: [],
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     appMock = createAppMockRenderer();
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -116,22 +130,22 @@ describe('CaseFormFields', () => {
     );
 
     const caseTitle = await screen.findByTestId('caseTitle');
-    await userEvent.click(within(caseTitle).getByTestId('input'));
-    await userEvent.paste('Case with Template 1');
+    await user.click(within(caseTitle).getByTestId('input'));
+    await user.paste('Case with Template 1');
 
     const caseDescription = await screen.findByTestId('caseDescription');
-    await userEvent.click(within(caseDescription).getByTestId('euiMarkdownEditorTextArea'));
-    await userEvent.paste('This is a case description');
+    await user.click(within(caseDescription).getByTestId('euiMarkdownEditorTextArea'));
+    await user.paste('This is a case description');
 
     const caseTags = await screen.findByTestId('caseTags');
-    await userEvent.click(within(caseTags).getByRole('combobox'));
-    await userEvent.paste('template-1');
-    await userEvent.keyboard('{enter}');
+    await user.click(within(caseTags).getByRole('combobox'));
+    await user.paste('template-1');
+    await user.keyboard('{enter}');
 
     const caseCategory = await screen.findByTestId('caseCategory');
-    await userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
+    await user.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
 
-    await userEvent.click(await screen.findByText('Submit'));
+    await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -161,7 +175,7 @@ describe('CaseFormFields', () => {
       </FormTestComponent>
     );
 
-    await userEvent.click(await screen.findByText('Submit'));
+    await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -197,15 +211,15 @@ describe('CaseFormFields', () => {
       `${textField.key}-${textField.type}-create-custom-field`
     );
 
-    await userEvent.clear(textCustomField);
-    await userEvent.click(textCustomField);
-    await userEvent.paste('My text test value 1');
+    await user.clear(textCustomField);
+    await user.click(textCustomField);
+    await user.paste('My text test value 1');
 
-    await userEvent.click(
+    await user.click(
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
-    await userEvent.click(await screen.findByText('Submit'));
+    await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -243,7 +257,7 @@ describe('CaseFormFields', () => {
 
     expect(await screen.findByTestId('caseCustomFields')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByText('Submit'));
+    await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -276,13 +290,13 @@ describe('CaseFormFields', () => {
 
     const assigneesComboBox = await screen.findByTestId('createCaseAssigneesComboBox');
 
-    await userEvent.click(await within(assigneesComboBox).findByTestId('comboBoxToggleListButton'));
+    await user.click(await within(assigneesComboBox).findByTestId('comboBoxToggleListButton'));
 
     await waitForEuiPopoverOpen();
 
-    await userEvent.click(screen.getByText(`${userProfiles[0].user.full_name}`));
+    await user.click(screen.getByText(`${userProfiles[0].user.full_name}`));
 
-    await userEvent.click(await screen.findByText('Submit'));
+    await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -315,7 +329,7 @@ describe('CaseFormFields', () => {
       </FormTestComponent>
     );
 
-    await userEvent.click(await screen.findByText('Submit'));
+    await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(

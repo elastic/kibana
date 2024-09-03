@@ -138,7 +138,7 @@ describe('Drag and drop reordering', () => {
         });
       },
       cancelByKeyboard: async () => {
-        await user.keyboard('{esc}');
+        await user.keyboard('{Escape}');
         act(() => {
           jest.runAllTimers();
         });
