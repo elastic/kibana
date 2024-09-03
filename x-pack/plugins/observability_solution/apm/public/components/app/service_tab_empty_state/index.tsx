@@ -25,7 +25,7 @@ import defaultImgSrc from '../../../assets/service_tab_empty_state/service_tab_e
 export interface ServiceTabEmptyStateProps {
   title: string;
   content: string;
-  imgSrc: string | null;
+  imgSrc?: string;
   dismissable?: boolean;
   onDissmiss?: () => void;
 }
