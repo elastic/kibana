@@ -81,7 +81,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
     tourStepProps,
     actions,
     tourState,
-    selectedTab
+    currentView
   );
 
   const { done, error, retry } = useDataInit();
