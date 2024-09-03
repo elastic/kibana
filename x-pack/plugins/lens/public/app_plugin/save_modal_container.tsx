@@ -22,6 +22,7 @@ import { getFromPreloaded } from '../state_management/init_middleware/load_initi
 import { Simplify, VisualizeEditorContext } from '../types';
 import { redirectToDashboard } from './save_modal_container_helpers';
 import { LensSerializedState } from '../react_embeddable/types';
+import { isLegacyEditorEmbeddable } from './app_helpers';
 
 type ExtraProps = Simplify<
   Pick<LensAppProps, 'initialInput'> &
@@ -88,12 +89,7 @@ export function SaveModalContainer({
     savedObjectId = lastKnownDoc.savedObjectId;
   }
 
-  if (
-    !lastKnownDoc?.title &&
-    initialContext &&
-    'isEmbeddable' in initialContext &&
-    initialContext.isEmbeddable
-  ) {
+  if (!lastKnownDoc?.title && isLegacyEditorEmbeddable(initialContext)) {
     title = i18n.translate('xpack.lens.app.convertedLabel', {
       defaultMessage: '{title} (converted)',
       values: {
@@ -337,6 +333,28 @@ export const runSaveLensVisualization = async (
       timeRange: saveProps.panelTimeRange,
     });
 
+    let savedObjectId: string | undefined;
+    try {
+      savedObjectId = newDoc.attributes
+        ? await attributeService.saveToLibrary(
+            newDoc.attributes,
+            newDoc.attributes.references || [],
+            newDoc.savedObjectId
+          )
+        : undefined;
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.lens.app.saveVisualization.errorNotificationText', {
+          defaultMessage: `An error occurred while saving. Error: {errorMessage}`,
+          values: {
+            errorMessage: error.message,
+          },
+        }),
+      });
+      // trigger a reject to jump to the final catch clause
+      throw error;
+    }
+
     const shouldNavigateBackToOrigin = saveProps.returnToOrigin && redirectToOrigin;
     const hasRedirect = shouldNavigateBackToOrigin || saveProps.dashboardId;
 
@@ -348,8 +366,11 @@ export const runSaveLensVisualization = async (
       });
     }
 
-    if (shouldNavigateBackToOrigin) {
-      redirectToOrigin({ state: newDoc.attributes, isCopied: saveProps.newCopyOnSave });
+    if (shouldNavigateBackToOrigin && savedObjectId) {
+      redirectToOrigin({
+        state: { savedObjectId },
+        isCopied: saveProps.newCopyOnSave,
+      });
       return;
     }
     if (saveProps.dashboardId) {
@@ -362,43 +383,6 @@ export const runSaveLensVisualization = async (
       });
       return;
     }
-    // const newInput = stateTransfer;
-    // // let newInput = (await attributeService.wrapAttributes(
-    // //   docToSave,
-    // //   options.saveToLibrary,
-    // //   originalInput
-    // // )) as LensEmbeddableInput;
-    // const newDoc = {
-    //   ...docToSave,
-    //   timeRange: saveProps.panelTimeRange ?? docToSave.timeRange,
-    // };
-    // if (saveProps.panelTimeRange) {
-    //   newInput = {
-    //     ...newInput,
-    //     timeRange: saveProps.panelTimeRange,
-    //   };
-    // }
-    // if (saveProps.returnToOrigin && redirectToOrigin) {
-    //   // disabling the validation on app leave because the document has been saved.
-    //   onAppLeave?.((actions) => {
-    //     return actions.default();
-    //   });
-    //   redirectToOrigin({ input: newDoc, isCopied: saveProps.newCopyOnSave });
-    //   return;
-    // } else if (saveProps.dashboardId) {
-    //   // disabling the validation on app leave because the document has been saved.
-    //   onAppLeave?.((actions) => {
-    //     return actions.default();
-    //   });
-    //   redirectToDashboard({
-    //     embeddableInput: newDoc,
-    //     dashboardId: saveProps.dashboardId,
-    //     stateTransfer,
-    //     originatingApp: props.originatingApp,
-    //     getOriginatingPath: props.getOriginatingPath,
-    //   });
-    //   return;
-    // }
 
     notifications.toasts.addSuccess(
       i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
@@ -409,12 +393,8 @@ export const runSaveLensVisualization = async (
       })
     );
 
-    if (newDoc.savedObjectId && newDoc.savedObjectId !== originalSavedObjectId) {
-      chrome.recentlyAccessed.add(
-        getFullPath(newDoc.savedObjectId),
-        docToSave.title,
-        newDoc.savedObjectId
-      );
+    if (savedObjectId && savedObjectId !== originalSavedObjectId) {
+      chrome.recentlyAccessed.add(getFullPath(savedObjectId), docToSave.title, savedObjectId);
 
       // remove editor state so the connection is still broken after reload
       stateTransfer.clearEditorState?.(APP_ID);
@@ -422,15 +402,10 @@ export const runSaveLensVisualization = async (
         switchDatasource?.();
         application.navigateToApp('lens', { path: '/' });
       } else {
-        redirectTo?.(newDoc.savedObjectId);
+        redirectTo?.(savedObjectId);
       }
       return { isLinkedToOriginatingApp: false };
     }
-
-    // const newDoc = {
-    //   ...docToSave,
-    //   ...newInput,
-    // };
 
     return {
       persistedDoc: newDoc.attributes,

@@ -54,6 +54,7 @@ export const isLensEqual = (
         }
       })()
     : isEqual(doc1.state.visualization, doc2.state.visualization);
+
   if (!visualizationStateIsEqual) {
     return false;
   }
@@ -68,16 +69,14 @@ export const isLensEqual = (
 
   if (datasourcesEqual) {
     // equal so far, so actually check
-    datasourcesEqual = availableDatasourceTypes1
-      .map((type) =>
-        datasourceMap[type].isEqual(
-          doc1.state.datasourceStates[type],
-          [...doc1.references, ...(doc1.state.internalReferences || [])],
-          doc2.state.datasourceStates[type],
-          [...doc2.references, ...(doc2.state.internalReferences || [])]
-        )
+    datasourcesEqual = availableDatasourceTypes1.every((type) =>
+      datasourceMap[type].isEqual(
+        doc1.state.datasourceStates[type],
+        doc1.references.concat(doc1.state.internalReferences || []),
+        doc2.state.datasourceStates[type],
+        doc2.references.concat(doc2.state.internalReferences || [])
       )
-      .every((res) => res);
+    );
   }
 
   if (!datasourcesEqual) {

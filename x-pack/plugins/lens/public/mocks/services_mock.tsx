@@ -33,6 +33,7 @@ import { mockDataPlugin } from './data_plugin_mock';
 import { getLensInspectorService } from '../lens_inspector_service';
 import { LensDocument, SavedObjectIndexStore } from '../persistence';
 import { LensAttributesService } from '../lens_attribute_service';
+import { mockDatasourceStates } from './store_mocks';
 
 const startMock = coreMock.createStart();
 
@@ -43,9 +44,7 @@ export const defaultDoc: LensDocument = {
   state: {
     query: { query: 'test', language: 'kuery' },
     filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
-    datasourceStates: {
-      testDatasource: 'datasource',
-    },
+    datasourceStates: mockDatasourceStates(),
     visualization: {},
   },
   references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],

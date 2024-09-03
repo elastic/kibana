@@ -41,6 +41,7 @@ import { LensSerializedState } from '..';
 import { cloneDeep } from 'lodash';
 import { createMockedField, createMockedIndexPattern } from '../datasources/form_based/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
+import faker from 'faker';
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('@kbn/core/public');
 jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
@@ -59,7 +60,7 @@ jest.mock('lodash', () => {
 const sessionIdSubject = new Subject<string>();
 
 describe('Lens App', () => {
-  const defaultSavedObjectId: string = '1234';
+  const defaultSavedObjectId: string = faker.random.uuid();
 
   function createMockFrame(): jest.Mocked<EditorFrameInstance> {
     return {
@@ -497,19 +498,21 @@ describe('Lens App', () => {
   describe('persistence', () => {
     it('passes query and indexPatterns to TopNavMenu', async () => {
       const { instance, lensStore, services } = await mountWith({ preloadedState: {} });
-      const document = {
+      const query = { query: 'fake query', language: 'kuery' };
+      const document = getLensDocumentMock({
         savedObjectId: defaultSavedObjectId,
         state: {
-          query: 'fake query',
-          filters: [{ query: { match_phrase: { src: 'test' } } }],
+          ...defaultDoc.state,
+          query,
+          filters: [{ query: { match_phrase: { src: 'test' } }, meta: {} }],
         },
         references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-      } as unknown as LensDocument;
+      });
 
-      act(() => {
-        lensStore.dispatch(
+      await act(async () => {
+        await lensStore.dispatch(
           setState({
-            query: 'fake query' as unknown as Query,
+            query,
             persistedDoc: document,
           })
         );
@@ -518,7 +521,7 @@ describe('Lens App', () => {
 
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: 'fake query',
+          query,
           indexPatterns: [
             {
               id: 'mockip',
@@ -544,6 +547,7 @@ describe('Lens App', () => {
         {}
       );
     });
+
     describe('save buttons', () => {
       interface SaveProps {
         newCopyOnSave: boolean;
@@ -589,24 +593,21 @@ describe('Lens App', () => {
         const services = makeDefaultServicesForApp();
         services.attributeService.saveToLibrary = jest
           .fn()
-          .mockImplementation(async ({ savedObjectId }) => ({
-            savedObjectId: savedObjectId || 'aaa',
-          }));
+          .mockImplementation(async ({ savedObjectId }) => savedObjectId || defaultSavedObjectId);
         services.attributeService.loadFromLibrary = jest.fn().mockResolvedValue({
-          metaInfo: {
-            sharingSavedObjectProps: {
-              outcome: 'exactMatch',
-            },
+          sharingSavedObjectProps: {
+            outcome: 'exactMatch',
           },
           attributes: {
-            savedObjectId: initialSavedObjectId ?? 'aaa',
+            savedObjectId: initialSavedObjectId ?? defaultSavedObjectId,
             references: [],
             state: {
-              query: 'fake query',
+              query: { query: 'fake query', language: 'kuery' },
               filters: [],
             },
           },
-        } as jest.ResolvedValue<Document>);
+          managed: false,
+        });
 
         const { frame, instance, lensStore } = await mountWith({
           services,
@@ -619,7 +620,7 @@ describe('Lens App', () => {
         });
         expect(getButton(instance).disableButton).toEqual(false);
         await act(async () => {
-          testSave(instance, { ...saveProps });
+          await testSave(instance, { ...saveProps });
         });
         return { props, services, instance, frame, lensStore };
       }
@@ -752,13 +753,19 @@ describe('Lens App', () => {
         });
         expect(services.attributeService.saveToLibrary).toHaveBeenCalledWith(
           expect.objectContaining({
-            savedObjectId: undefined,
             title: 'hello there',
           }),
-          true,
+          // from mocks
+          [
+            {
+              id: 'mockip',
+              name: 'mockip',
+              type: 'index-pattern',
+            },
+          ],
           undefined
         );
-        expect(props.redirectTo).toHaveBeenCalledWith('aaa');
+        expect(props.redirectTo).toHaveBeenCalledWith(defaultSavedObjectId);
         expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
           "Saved 'hello there'"
         );
@@ -783,26 +790,28 @@ describe('Lens App', () => {
           newTitle: 'hello there',
         });
         expect(services.chrome.recentlyAccessed.add).toHaveBeenCalledWith(
-          '/app/lens#/edit/aaa',
+          `/app/lens#/edit/${defaultSavedObjectId}`,
           'hello there',
-          'aaa'
+          defaultSavedObjectId
         );
       });
 
       it('saves the latest doc as a copy', async () => {
+        const doc = getLensDocumentMock();
         const { props, services, instance } = await save({
-          initialSavedObjectId: defaultSavedObjectId,
+          initialSavedObjectId: doc.savedObjectId,
           newCopyOnSave: true,
           newTitle: 'hello there',
-          preloadedState: { persistedDoc: getLensDocumentMock() },
+          preloadedState: { persistedDoc: doc },
         });
         expect(services.attributeService.saveToLibrary).toHaveBeenCalledWith(
           expect.objectContaining({
             title: 'hello there',
           }),
-          true,
-          undefined
+          [{ id: 'mockip', name: 'mockip', type: 'index-pattern' }],
+          doc.savedObjectId
         );
+        // new copy gets a new SO id
         expect(props.redirectTo).toHaveBeenCalledWith(defaultSavedObjectId);
         await act(async () => {
           instance.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
@@ -818,15 +827,16 @@ describe('Lens App', () => {
           initialSavedObjectId: defaultSavedObjectId,
           newCopyOnSave: false,
           newTitle: 'hello there',
-          preloadedState: { persistedDoc: getLensDocumentMock() },
+          preloadedState: {
+            persistedDoc: getLensDocumentMock({ savedObjectId: defaultSavedObjectId }),
+          },
         });
         expect(services.attributeService.saveToLibrary).toHaveBeenCalledWith(
           expect.objectContaining({
-            savedObjectId: defaultSavedObjectId,
             title: 'hello there',
           }),
-          true,
-          { id: '5678', savedObjectId: defaultSavedObjectId }
+          [{ id: 'mockip', name: 'mockip', type: 'index-pattern' }],
+          defaultSavedObjectId
         );
         expect(props.redirectTo).not.toHaveBeenCalled();
         await act(async () => {
@@ -879,14 +889,13 @@ describe('Lens App', () => {
         });
         expect(services.attributeService.saveToLibrary).toHaveBeenCalledWith(
           expect.objectContaining({
-            savedObjectId: undefined,
             title: 'hello there',
           }),
-          true,
+          [{ id: 'mockip', name: 'mockip', type: 'index-pattern' }],
           undefined
         );
         expect(props.redirectToOrigin).toHaveBeenCalledWith({
-          input: { savedObjectId: 'aaa' },
+          state: { savedObjectId: defaultSavedObjectId },
           isCopied: false,
         });
       });
@@ -905,7 +914,7 @@ describe('Lens App', () => {
           newCopyOnSave: false,
           newTitle: 'hello there2',
           preloadedState: {
-            persistedDoc: getLensDocumentMock(),
+            persistedDoc: getLensDocumentMock({ savedObjectId: defaultSavedObjectId }),
             filters: [pinned, unpinned],
           },
         });
@@ -914,12 +923,11 @@ describe('Lens App', () => {
 
         expect(services.attributeService.saveToLibrary).toHaveBeenCalledWith(
           expect.objectContaining({
-            savedObjectId: defaultSavedObjectId,
             title: 'hello there2',
             state: expect.objectContaining({ filters: expectedFilters }),
           }),
-          true,
-          { id: '5678', savedObjectId: defaultSavedObjectId }
+          [{ id: 'mockip', name: 'mockip', type: 'index-pattern' }],
+          defaultSavedObjectId
         );
       });
 
@@ -1657,7 +1665,9 @@ describe('Lens App', () => {
           ...localDoc,
           state: {
             ...localDoc.state,
-            datasourceStates: { testDatasource: {} },
+            datasourceStates: {
+              testDatasource: 'datasource',
+            },
             visualization: {},
           },
         },
@@ -1670,9 +1680,9 @@ describe('Lens App', () => {
       };
 
       const customProps = makeDefaultProps();
-      customProps.datasourceMap.testDatasource.isEqual = () => true; // if this returns false, the documents won't be accounted equal
+      customProps.datasourceMap.testDatasource.isEqual = jest.fn().mockReturnValue(true); // if this returns false, the documents won't be accounted equal
 
-      await mountWith({ preloadedState, props: customProps });
+      await mountWithRTL({ preloadedState, props: customProps });
 
       const lastCallArg = customProps.onAppLeave.mock.lastCall![0];
       lastCallArg?.({ default: defaultLeave, confirm: confirmLeave });
@@ -1711,7 +1721,7 @@ describe('Lens App', () => {
         },
       },
       preloadedState: {
-        persistedDoc: getLensDocumentMock(),
+        persistedDoc: getLensDocumentMock({ savedObjectId: defaultSavedObjectId }),
         sharingSavedObjectProps: {
           outcome: 'conflict',
           aliasTargetId: '2',
@@ -1719,7 +1729,7 @@ describe('Lens App', () => {
       },
     });
     expect(services.spaces?.ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
-      currentObjectId: '1234',
+      currentObjectId: defaultSavedObjectId,
       objectNoun: 'Lens visualization',
       otherObjectId: '2',
       otherObjectPath: '#/edit/2?_g=test',
