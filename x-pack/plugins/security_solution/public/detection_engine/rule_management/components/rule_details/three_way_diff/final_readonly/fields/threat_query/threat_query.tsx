@@ -20,7 +20,7 @@ const i18nLabels = {
   filters: ruleDetailsI18n.THREAT_FILTERS_FIELD_LABEL,
 };
 
-interface ThreatQueryReadOnlyProps {
+export interface ThreatQueryReadOnlyProps {
   threatQuery: InlineKqlQuery;
   dataSource: DiffableAllFields['data_source'];
 }

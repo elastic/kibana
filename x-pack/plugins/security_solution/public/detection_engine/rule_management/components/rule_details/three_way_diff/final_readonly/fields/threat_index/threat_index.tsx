@@ -10,7 +10,7 @@ import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import { ThreatIndex } from '../../../../rule_definition_section';
 
-interface ThreatIndexReadOnlyProps {
+export interface ThreatIndexReadOnlyProps {
   threatIndex: string[];
 }
 

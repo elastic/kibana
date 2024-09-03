@@ -11,7 +11,7 @@ import type { ThreatMapping } from '../../../../../../../../../common/api/detect
 import { ThreatMapping as ThreatMappingComponent } from '../../../../rule_definition_section';
 import * as ruleDetailsI18n from '../../../../translations';
 
-interface ThreatMappingReadOnlyProps {
+export interface ThreatMappingReadOnlyProps {
   threatMapping: ThreatMapping;
 }
 

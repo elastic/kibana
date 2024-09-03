@@ -11,7 +11,7 @@ import type { SeverityMapping } from '../../../../../../../../../common/api/dete
 import * as ruleDetailsI18n from '../../../../translations';
 import { SeverityMappingItem } from '../../../../rule_about_section';
 
-interface SeverityMappingReadOnlyProps {
+export interface SeverityMappingReadOnlyProps {
   severityMapping: SeverityMapping;
 }
 

@@ -12,7 +12,7 @@ import type { RiskScoreMapping } from '../../../../../../../../../common/api/det
 import * as ruleDetailsI18n from '../../../../translations';
 import { RiskScoreMappingItem } from '../../../../rule_about_section';
 
-interface RiskScoreMappingReadProps {
+export interface RiskScoreMappingReadProps {
   riskScoreMapping: RiskScoreMapping;
 }
 

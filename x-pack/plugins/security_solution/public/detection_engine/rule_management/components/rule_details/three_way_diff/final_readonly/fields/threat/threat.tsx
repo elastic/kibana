@@ -11,7 +11,7 @@ import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as ruleDetailsI18n from '../../../../translations';
 import { Threat } from '../../../../rule_about_section';
 
-interface ThreatReadOnlyProps {
+export interface ThreatReadOnlyProps {
   threat: Threats;
 }
 
