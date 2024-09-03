@@ -14,7 +14,7 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import { D3SecurityConfigSchema, D3SecuritySecretsSchema } from '../../../common/d3security/schema';
+import { D3SecurityConfigSchema, D3SecuritySecretsSchema } from './schema';
 import { renderParameterTemplates } from './render';
 import { D3SecurityConnector } from './d3security';
 import { D3_SECURITY_CONNECTOR_ID, D3_SECURITY_TITLE } from '../../../common/d3security/constants';

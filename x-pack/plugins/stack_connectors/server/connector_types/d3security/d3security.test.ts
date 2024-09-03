@@ -10,7 +10,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { D3_SECURITY_CONNECTOR_ID } from '../../../common/d3security/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { D3SecurityRunActionResponseSchema } from '../../../common/d3security/schema';
+import { D3SecurityRunActionResponseSchema } from './schema';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 describe('D3SecurityConnector', () => {

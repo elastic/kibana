@@ -6,7 +6,7 @@
  */
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { configSchema, ConfigSchema } from './config';
-import { SlackApiParamsSchema } from '../common/slack_api/schema';
+import { SlackApiParamsSchema } from './connector_types/slack_api/schema';
 
 export { ParamsSchema as SlackParamsSchema } from './connector_types/slack';
 export { ParamsSchema as EmailParamsSchema } from './connector_types/email';

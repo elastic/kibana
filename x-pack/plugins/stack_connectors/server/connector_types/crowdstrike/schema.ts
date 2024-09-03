@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { SUB_ACTION } from './constants';
+import { type TypeOf, schema } from '@kbn/config-schema';
+import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 
 // Connector schema
 export const CrowdstrikeConfigSchema = schema.object({
@@ -261,3 +261,22 @@ export const CrowdstrikeHostActionsSchema = schema.object({
 });
 
 export const CrowdstrikeActionParamsSchema = schema.oneOf([CrowdstrikeHostActionsSchema]);
+
+export type CrowdstrikeConfig = TypeOf<typeof CrowdstrikeConfigSchema>;
+export type CrowdstrikeSecrets = TypeOf<typeof CrowdstrikeSecretsSchema>;
+
+export type CrowdstrikeBaseApiResponse = TypeOf<typeof CrowdstrikeBaseApiResponseSchema>;
+export type RelaxedCrowdstrikeBaseApiResponse = TypeOf<
+  typeof RelaxedCrowdstrikeBaseApiResponseSchema
+>;
+
+export type CrowdstrikeGetAgentsParams = Partial<TypeOf<typeof CrowdstrikeGetAgentsParamsSchema>>;
+export type CrowdstrikeGetAgentsResponse = TypeOf<typeof CrowdstrikeGetAgentsResponseSchema>;
+export type CrowdstrikeGetAgentOnlineStatusResponse = TypeOf<
+  typeof CrowdstrikeGetAgentOnlineStatusResponseSchema
+>;
+export type CrowdstrikeGetTokenResponse = TypeOf<typeof CrowdstrikeGetTokenResponseSchema>;
+
+export type CrowdstrikeHostActionsParams = TypeOf<typeof CrowdstrikeHostActionsParamsSchema>;
+
+export type CrowdstrikeActionParams = TypeOf<typeof CrowdstrikeActionParamsSchema>;

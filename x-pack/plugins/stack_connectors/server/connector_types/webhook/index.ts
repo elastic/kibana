@@ -37,7 +37,7 @@ import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_hea
 import { isOk, promiseResult, Result } from '../lib/result_type';
 import { ConfigSchema, ParamsSchema } from './schema';
 import { buildConnectorAuth } from '../../../common/auth/utils';
-import { SecretConfigurationSchema } from '../../../common/auth/schema';
+import { SecretConfigurationSchema } from '../auth/schema';
 
 export const ConnectorTypeId = '.webhook';
 

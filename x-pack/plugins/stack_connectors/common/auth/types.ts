@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
-  AuthConfiguration,
-  authTypeSchema,
-  hasAuthSchema,
-  SecretConfigurationSchema,
-} from './schema';
-
-export type HasAuth = TypeOf<typeof hasAuthSchema>;
-export type AuthTypeName = TypeOf<typeof authTypeSchema>;
-export type SecretsConfigurationType = TypeOf<typeof SecretConfigurationSchema>;
-export type CAType = TypeOf<typeof AuthConfiguration.ca>;
-export type VerificationModeType = TypeOf<typeof AuthConfiguration.verificationMode>;
+export type {
+  HasAuth,
+  AuthTypeName,
+  SecretsConfigurationType,
+  CAType,
+  VerificationModeType,
+} from '../../server/connector_types/auth/schema';

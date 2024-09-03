@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { type TypeOf, schema } from '@kbn/config-schema';
 
 // Connector schema
 export const TinesConfigSchema = schema.object({ url: schema.string() });
@@ -44,3 +44,14 @@ export const TinesRunActionParamsSchema = schema.object({
   body: schema.string(),
 });
 export const TinesRunActionResponseSchema = schema.object({}, { unknowns: 'ignore' });
+
+export type TinesConfig = TypeOf<typeof TinesConfigSchema>;
+export type TinesSecrets = TypeOf<typeof TinesSecretsSchema>;
+export type TinesRunActionParams = TypeOf<typeof TinesRunActionParamsSchema>;
+export type TinesRunActionResponse = TypeOf<typeof TinesRunActionResponseSchema>;
+export type TinesStoriesActionParams = void;
+export type TinesStoryObject = TypeOf<typeof TinesStoryObjectSchema>;
+export type TinesStoriesActionResponse = TypeOf<typeof TinesStoriesActionResponseSchema>;
+export type TinesWebhooksActionParams = TypeOf<typeof TinesWebhooksActionParamsSchema>;
+export type TinesWebhooksActionResponse = TypeOf<typeof TinesWebhooksActionResponseSchema>;
+export type TinesWebhookObject = TypeOf<typeof TinesWebhookObjectSchema>;

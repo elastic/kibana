@@ -12,10 +12,7 @@ import {
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { CROWDSTRIKE_CONNECTOR_ID, CROWDSTRIKE_TITLE } from '../../../common/crowdstrike/constants';
-import {
-  CrowdstrikeConfigSchema,
-  CrowdstrikeSecretsSchema,
-} from '../../../common/crowdstrike/schema';
+import { CrowdstrikeConfigSchema, CrowdstrikeSecretsSchema } from './schema';
 import { CrowdstrikeConfig, CrowdstrikeSecrets } from '../../../common/crowdstrike/types';
 import { CrowdstrikeConnector } from './crowdstrike';
 

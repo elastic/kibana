@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { TheHiveSeverity, TheHiveTLP, SUB_ACTION } from './constants';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { TheHiveSeverity, TheHiveTLP, SUB_ACTION } from '../../../common/thehive/constants';
 
 export const TheHiveConfigSchema = schema.object({
   url: schema.string(),
@@ -184,3 +184,15 @@ export const TheHiveFailureResponseSchema = schema.object(
   },
   { unknowns: 'ignore' }
 );
+
+export type TheHiveConfig = TypeOf<typeof TheHiveConfigSchema>;
+export type TheHiveSecrets = TypeOf<typeof TheHiveSecretsSchema>;
+
+export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
+export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
+export type ExecutorSubActionCreateAlertParams = TypeOf<
+  typeof ExecutorSubActionCreateAlertParamsSchema
+>;
+
+export type TheHiveFailureResponse = TypeOf<typeof TheHiveFailureResponseSchema>;
+export type GetIncidentResponse = TypeOf<typeof TheHiveIncidentResponseSchema>;

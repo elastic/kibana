@@ -13,7 +13,7 @@ import {
   TinesStoriesActionParamsSchema,
   TinesWebhooksActionParamsSchema,
   TinesRunActionParamsSchema,
-} from '../../../common/tines/schema';
+} from './schema';
 import type {
   TinesConfig,
   TinesSecrets,
@@ -24,7 +24,7 @@ import type {
   TinesWebhooksActionResponse,
   TinesWebhookObject,
   TinesStoryObject,
-} from '../../../common/tines/types';
+} from './schema';
 import {
   TinesStoriesApiResponseSchema,
   TinesWebhooksApiResponseSchema,

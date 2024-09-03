@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { TinesStoryObjectSchema } from '../../../common/tines/schema';
+import { TinesStoryObjectSchema } from './schema';
 
 // Tines response base schema
 export const TinesBaseApiResponseSchema = schema.object(

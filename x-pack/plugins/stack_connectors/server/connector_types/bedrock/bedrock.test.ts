@@ -14,7 +14,7 @@ import {
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
   StreamingResponseSchema,
-} from '../../../common/bedrock/schema';
+} from './schema';
 import {
   BEDROCK_CONNECTOR_ID,
   DEFAULT_BEDROCK_MODEL,

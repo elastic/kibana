@@ -21,11 +21,7 @@ import type {
   SlackApiParams,
   SlackApiSecrets,
 } from '../../../common/slack_api/types';
-import {
-  SlackApiSecretsSchema,
-  SlackApiParamsSchema,
-  SlackApiConfigSchema,
-} from '../../../common/slack_api/schema';
+import { SlackApiSecretsSchema, SlackApiParamsSchema, SlackApiConfigSchema } from './schema';
 import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
 import { api } from './api';

@@ -5,33 +5,18 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
-  ConfigSchema,
-  DashboardActionParamsSchema,
-  DashboardActionResponseSchema,
-  SecretsSchema,
-  RunActionParamsSchema,
-  RunActionResponseSchema,
-  RunActionRawResponseSchema,
-  RunApiResponseSchema,
-  InvokeAIActionParamsSchema,
-  InvokeAIActionResponseSchema,
-  InvokeAIRawActionParamsSchema,
-  InvokeAIRawActionResponseSchema,
-  StreamingResponseSchema,
-} from './schema';
-
-export type Config = TypeOf<typeof ConfigSchema>;
-export type Secrets = TypeOf<typeof SecretsSchema>;
-export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
-export type RunApiResponse = TypeOf<typeof RunApiResponseSchema>;
-export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
-export type RunActionRawResponse = TypeOf<typeof RunActionRawResponseSchema>;
-export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
-export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
-export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
-export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
-export type InvokeAIRawActionParams = TypeOf<typeof InvokeAIRawActionParamsSchema>;
-export type InvokeAIRawActionResponse = TypeOf<typeof InvokeAIRawActionResponseSchema>;
-export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;
+export type {
+  Config,
+  Secrets,
+  RunActionParams,
+  RunApiResponse,
+  RunActionResponse,
+  RunActionRawResponse,
+  DashboardActionParams,
+  DashboardActionResponse,
+  InvokeAIActionParams,
+  InvokeAIActionResponse,
+  InvokeAIRawActionParams,
+  InvokeAIRawActionResponse,
+  StreamingResponse,
+} from '../../server/connector_types/gemini/schema';

@@ -5,29 +5,28 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { Mutable } from 'utility-types';
-import {
-  SentinelOneBaseApiResponseSchema,
-  SentinelOneConfigSchema,
-  SentinelOneExecuteScriptParamsSchema,
-  SentinelOneGetAgentsParamsSchema,
-  SentinelOneGetAgentsResponseSchema,
-  SentinelOneGetRemoteScriptsParamsSchema,
-  SentinelOneGetRemoteScriptsResponseSchema,
-  SentinelOneGetRemoteScriptStatusParamsSchema,
-  SentinelOneIsolateHostParamsSchema,
-  SentinelOneSecretsSchema,
-  SentinelOneActionParamsSchema,
-  SentinelOneFetchAgentFilesParamsSchema,
-  SentinelOneFetchAgentFilesResponseSchema,
-  SentinelOneDownloadAgentFileParamsSchema,
-  SentinelOneGetActivitiesParamsSchema,
-  SentinelOneGetActivitiesResponseSchema,
-  SentinelOneExecuteScriptResponseSchema,
-  SentinelOneGetRemoteScriptResultsParamsSchema,
-  SentinelOneDownloadRemoteScriptResultsParamsSchema,
-} from './schema';
+export type {
+  SentinelOneConfig,
+  SentinelOneSecrets,
+  SentinelOneBaseApiResponse,
+  SentinelOneGetAgentsParams,
+  SentinelOneGetAgentsResponse,
+  SentinelOneExecuteScriptParams,
+  SentinelOneExecuteScriptResponse,
+  SentinelOneGetRemoteScriptStatusParams,
+  SentinelOneGetRemoteScriptResultsParams,
+  SentinelOneDownloadRemoteScriptResultsParams,
+  SentinelOneGetRemoteScriptsParams,
+  SentinelOneGetRemoteScriptsResponse,
+  SentinelOneFetchAgentFilesParams,
+  SentinelOneFetchAgentFilesResponse,
+  SentinelOneDownloadAgentFileParams,
+  SentinelOneActivityRecord,
+  SentinelOneGetActivitiesParams,
+  SentinelOneGetActivitiesResponse,
+  SentinelOneIsolateHostParams,
+  SentinelOneActionParams,
+} from '../../server/connector_types/sentinelone/schema';
 
 interface SentinelOnePagination {
   pagination: {
@@ -41,19 +40,6 @@ interface SentinelOneErrors {
 }
 
 export type SentinelOneOsType = 'linux' | 'macos' | 'windows';
-
-export type SentinelOneConfig = TypeOf<typeof SentinelOneConfigSchema>;
-export type SentinelOneSecrets = TypeOf<typeof SentinelOneSecretsSchema>;
-
-export type SentinelOneBaseApiResponse = TypeOf<typeof SentinelOneBaseApiResponseSchema>;
-
-export type SentinelOneGetAgentsParams = Partial<TypeOf<typeof SentinelOneGetAgentsParamsSchema>>;
-export type SentinelOneGetAgentsResponse = TypeOf<typeof SentinelOneGetAgentsResponseSchema>;
-
-export type SentinelOneExecuteScriptParams = TypeOf<typeof SentinelOneExecuteScriptParamsSchema>;
-export type SentinelOneExecuteScriptResponse = TypeOf<
-  typeof SentinelOneExecuteScriptResponseSchema
->;
 
 export interface SentinelOneRemoteScriptExecutionStatus {
   accountId: string;
@@ -96,19 +82,11 @@ export interface SentinelOneRemoteScriptExecutionStatus {
   updatedAt: string;
 }
 
-export type SentinelOneGetRemoteScriptStatusParams = TypeOf<
-  typeof SentinelOneGetRemoteScriptStatusParamsSchema
->;
-
 export interface SentinelOneGetRemoteScriptStatusApiResponse
   extends SentinelOnePagination,
     SentinelOneErrors {
   data: SentinelOneRemoteScriptExecutionStatus[];
 }
-
-export type SentinelOneGetRemoteScriptResultsParams = TypeOf<
-  typeof SentinelOneGetRemoteScriptResultsParamsSchema
->;
 
 export interface SentinelOneGetRemoteScriptResults {
   download_links: Array<{
@@ -125,46 +103,3 @@ export interface SentinelOneGetRemoteScriptResults {
 export interface SentinelOneGetRemoteScriptResultsApiResponse extends SentinelOneErrors {
   data: SentinelOneGetRemoteScriptResults;
 }
-
-export type SentinelOneDownloadRemoteScriptResultsParams = TypeOf<
-  typeof SentinelOneDownloadRemoteScriptResultsParamsSchema
->;
-
-export type SentinelOneGetRemoteScriptsParams = TypeOf<
-  typeof SentinelOneGetRemoteScriptsParamsSchema
->;
-
-export type SentinelOneGetRemoteScriptsResponse = TypeOf<
-  typeof SentinelOneGetRemoteScriptsResponseSchema
->;
-
-export type SentinelOneFetchAgentFilesParams = Mutable<
-  TypeOf<typeof SentinelOneFetchAgentFilesParamsSchema>
->;
-export type SentinelOneFetchAgentFilesResponse = TypeOf<
-  typeof SentinelOneFetchAgentFilesResponseSchema
->;
-
-export type SentinelOneDownloadAgentFileParams = Mutable<
-  TypeOf<typeof SentinelOneDownloadAgentFileParamsSchema>
->;
-
-export type SentinelOneActivityRecord<TData = unknown> = Omit<
-  TypeOf<typeof SentinelOneGetActivitiesResponseSchema>['data'][number],
-  'data'
-> & {
-  data: TData;
-};
-
-export type SentinelOneGetActivitiesParams = TypeOf<typeof SentinelOneGetActivitiesParamsSchema>;
-
-export type SentinelOneGetActivitiesResponse<TData = unknown> = Omit<
-  TypeOf<typeof SentinelOneGetActivitiesResponseSchema>,
-  'data'
-> & { data: Array<SentinelOneActivityRecord<TData>> };
-
-export type SentinelOneIsolateHostParams = Partial<
-  Mutable<TypeOf<typeof SentinelOneIsolateHostParamsSchema>>
->;
-
-export type SentinelOneActionParams = TypeOf<typeof SentinelOneActionParamsSchema>;

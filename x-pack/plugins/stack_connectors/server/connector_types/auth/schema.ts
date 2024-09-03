@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { schema } from '@kbn/config-schema';
-import { AuthType, SSLCertType } from './constants';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { AuthType, SSLCertType } from '../../../common/auth/constants';
 
 export const authTypeSchema = schema.maybe(
   schema.oneOf(
@@ -33,16 +33,16 @@ export const AuthConfiguration = {
   ),
 };
 
-export const SecretConfiguration = {
+export const SecretConfiguration = schema.object({
   user: schema.nullable(schema.string()),
   password: schema.nullable(schema.string()),
   crt: schema.nullable(schema.string()),
   key: schema.nullable(schema.string()),
   pfx: schema.nullable(schema.string()),
-};
+});
 
 export const SecretConfigurationSchemaValidation = {
-  validate: (secrets: any) => {
+  validate: (secrets: TypeOf<typeof SecretConfiguration>) => {
     // user and password must be set together (or not at all)
     if (!secrets.password && !secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
     if (secrets.password && secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
@@ -55,7 +55,13 @@ export const SecretConfigurationSchemaValidation = {
   },
 };
 
-export const SecretConfigurationSchema = schema.object(
-  SecretConfiguration,
+export const SecretConfigurationSchema = SecretConfiguration.extends(
+  {},
   SecretConfigurationSchemaValidation
 );
+
+export type HasAuth = TypeOf<typeof hasAuthSchema>;
+export type AuthTypeName = TypeOf<typeof authTypeSchema>;
+export type SecretsConfigurationType = TypeOf<typeof SecretConfigurationSchema>;
+export type CAType = TypeOf<typeof AuthConfiguration.ca>;
+export type VerificationModeType = TypeOf<typeof AuthConfiguration.verificationMode>;

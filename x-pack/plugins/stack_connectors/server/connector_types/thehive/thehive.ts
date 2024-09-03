@@ -16,7 +16,7 @@ import {
   TheHiveAddCommentResponseSchema,
   TheHiveCreateAlertResponseSchema,
   ExecutorSubActionCreateAlertParamsSchema,
-} from '../../../common/thehive/schema';
+} from './schema';
 import type {
   TheHiveConfig,
   TheHiveSecrets,

@@ -12,10 +12,7 @@ import {
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { SENTINELONE_CONNECTOR_ID, SENTINELONE_TITLE } from '../../../common/sentinelone/constants';
-import {
-  SentinelOneConfigSchema,
-  SentinelOneSecretsSchema,
-} from '../../../common/sentinelone/schema';
+import { SentinelOneConfigSchema, SentinelOneSecretsSchema } from './schema';
 import { SentinelOneConfig, SentinelOneSecrets } from '../../../common/sentinelone/types';
 import { SentinelOneConnector } from './sentinelone';
 import { renderParameterTemplates } from './render';
