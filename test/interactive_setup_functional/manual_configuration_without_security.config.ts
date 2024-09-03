@@ -25,6 +25,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
+
     testFiles: [require.resolve('./tests/manual_configuration_without_security')],
 
     junit: {

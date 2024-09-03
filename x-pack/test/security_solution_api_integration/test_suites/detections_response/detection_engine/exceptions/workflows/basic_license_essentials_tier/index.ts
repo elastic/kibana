@@ -6,7 +6,7 @@
  */
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
-export default function ({ loadTestFile, getService }: FtrProviderContext) {
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Detection Engine - Exception workflows APIs', function () {
     loadTestFile(require.resolve('./exception_comments_ess'));
     loadTestFile(require.resolve('./exception_comments_serverless'));

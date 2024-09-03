@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body).property('signature');
       });
 
-      it('should returns a correct license type `basic`', async function () {
+      it('returns a correct license type', async () => {
         const response = await supertest.get('/api/licensing/info').expect(200);
 
         expect(response.body.license.type).to.be('basic');
