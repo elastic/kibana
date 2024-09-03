@@ -15,7 +15,7 @@ import {
 import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import * as t from 'io-ts';
-import { mergeWith, uniq } from 'lodash';
+import { isEmpty, mergeWith, uniq } from 'lodash';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
 import { offsetRt } from '../../../common/comparison_rt';
@@ -78,6 +78,9 @@ import {
   ServiceTransactionTypesResponse,
 } from './get_service_transaction_types';
 import { getThroughput, ServiceThroughputResponse } from './get_throughput';
+import { getServiceEntitySummary } from '../entities/get_service_entity_summary';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { createEntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -294,17 +297,39 @@ const serviceAgentRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ServiceAgentResponse> => {
-    const apmEventClient = await getApmEventClient(resources);
+    const { context, request } = resources;
+    const coreContext = await context.core;
+
+    const [apmEventClient, entitiesESClient] = await Promise.all([
+      getApmEventClient(resources),
+      createEntitiesESClient({
+        request,
+        esClient: coreContext.elasticsearch.client.asCurrentUser,
+      }),
+    ]);
     const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
-    return getServiceAgent({
-      serviceName,
-      apmEventClient,
-      start,
-      end,
-    });
+    const [apmServiceAgent, serviceEntitySummary] = await Promise.all([
+      getServiceAgent({
+        serviceName,
+        apmEventClient,
+        start,
+        end,
+      }),
+      getServiceEntitySummary({
+        end,
+        start,
+        serviceName,
+        entitiesESClient,
+        environment: ENVIRONMENT_ALL.value,
+      }),
+    ]);
+
+    return isEmpty(apmServiceAgent)
+      ? { agentName: serviceEntitySummary?.agentName }
+      : apmServiceAgent;
   },
 });
 
