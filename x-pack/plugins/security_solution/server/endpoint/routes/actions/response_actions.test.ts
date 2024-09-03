@@ -78,7 +78,6 @@ import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server
 import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
 import { ResponseActionsClientError } from '../../services/actions/clients/errors';
 import type { EndpointAppContext } from '../../types';
-import type { ExperimentalFeatures } from '../../../../common';
 
 jest.mock('../../services', () => {
   const realModule = jest.requireActual('../../services');
@@ -135,13 +134,6 @@ describe('Response actions', () => {
 
     const docGen = new EndpointDocGenerator();
 
-    const setFeatureFlag = (ff: Partial<ExperimentalFeatures>) => {
-      endpointContext.experimentalFeatures = {
-        ...endpointContext.experimentalFeatures,
-        ...ff,
-      };
-    };
-
     beforeEach(() => {
       // instantiate... everything
       const mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -173,8 +165,6 @@ describe('Response actions', () => {
         ...startContract,
         licenseService,
       });
-
-      setFeatureFlag({ responseActionScanEnabled: true });
 
       // add the host isolation route handlers to routerMock
       registerResponseActionRoutes(routerMock, endpointContext);
