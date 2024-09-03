@@ -44,6 +44,14 @@ export interface MlClient
     p: MlInferTrainedModelRequest,
     options?: TransportRequestOptionsWithMeta
   ) => Promise<estypes.MlInferTrainedModelResponse>;
+  /**
+   * Changes client to the current user
+   */
+  asCurrentUser(): MlClient;
+  /**
+   * Change client to the internal user
+   */
+  asInternalUser(): MlClient;
 }
 
 export type MlClientParams =

@@ -290,7 +290,7 @@ export function trainedModelsRoutes(
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const body = await mlClient.getTrainedModelsStats({
+          const body = await mlClient.asCurrentUser().getTrainedModelsStats({
             size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
           });
           return response.ok({
