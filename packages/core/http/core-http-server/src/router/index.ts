@@ -29,6 +29,8 @@ export type {
   KibanaRequestRouteOptions,
   KibanaRequestState,
   KibanaRouteOptions,
+  RouteSecurityGetter,
+  InternalRouteSecurity,
 } from './request';
 export type { RequestHandlerWrapper, RequestHandler } from './request_handler';
 export type { RequestHandlerContextBase } from './request_handler_context';
@@ -53,7 +55,15 @@ export type {
   RouteContentType,
   SafeRouteMethod,
   RouteAccess,
+  AuthzDisabled,
+  AuthzEnabled,
+  RouteAuthz,
+  RouteAuthc,
+  AuthcDisabled,
+  AuthcEnabled,
+  RouteSecurity,
 } from './route';
+
 export { validBodyOutput } from './route';
 export type {
   RouteValidationFunction,

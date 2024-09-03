@@ -600,3 +600,10 @@ export type {
 };
 
 export type { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
+export type {
+  AuthzDisabled,
+  AuthzEnabled,
+  RouteAuthz,
+  RouteSecurity,
+  RouteSecurityGetter,
+} from '@kbn/core-http-server';

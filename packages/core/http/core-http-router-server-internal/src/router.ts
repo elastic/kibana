@@ -29,6 +29,7 @@ import type {
 } from '@kbn/core-http-server';
 import { isZod } from '@kbn/zod';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
+import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
@@ -144,10 +145,17 @@ export interface RouterOptions {
 export interface InternalRegistrarOptions {
   isVersioned: boolean;
 }
+/** @internal */
+export type VersionedRouteConfig<P, Q, B, M extends RouteMethod> = Omit<
+  RouteConfig<P, Q, B, M>,
+  'security'
+> & {
+  security?: RouteSecurityGetter;
+};
 
 /** @internal */
 export type InternalRegistrar<M extends Method, C extends RequestHandlerContextBase> = <P, Q, B>(
-  route: RouteConfig<P, Q, B, M>,
+  route: RouteConfig<P, Q, B, M> | VersionedRouteConfig<P, Q, B, M>,
   handler: RequestHandler<P, Q, B, C, M>,
   internalOpts?: InternalRegistrarOptions
 ) => ReturnType<RouteRegistrar<M, C>>;
@@ -186,11 +194,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     const buildMethod =
       <Method extends RouteMethod>(method: Method) =>
       <P, Q, B>(
-        route: RouteConfig<P, Q, B, Method>,
+        route: RouteConfig<P, Q, B, Method> | VersionedRouteConfig<P, Q, B, Method>,
         handler: RequestHandler<P, Q, B, Context, Method>,
         internalOptions: { isVersioned: boolean } = { isVersioned: false }
       ) => {
-        route = prepareRouteConfigValidation(route);
+        route = prepareRouteConfigValidation(route as RouteConfig<P, Q, B, Method>);
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
         this.routes.push({
@@ -204,6 +212,8 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           method,
           path: getRouteFullPath(this.routerPath, route.path),
           options: validOptions(method, route),
+          // // TODO: [Authz] Implement validation in https://github.com/elastic/kibana/issues/191713
+          security: route.security,
           /** Below is added for introspection */
           validationSchemas: route.validate,
           isVersioned: internalOptions.isVersioned,

@@ -23,6 +23,7 @@ import type {
   VersionedRouteConfig,
   IKibanaResponse,
   RouteConfigOptions,
+  RouteSecurityGetter,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
 import type { Method, VersionedRouterRoute } from './types';
@@ -97,6 +98,7 @@ export class CoreVersionedRoute implements VersionedRoute {
         validate: passThroughValidation,
         // @ts-expect-error upgrade typescript v5.1.6
         options: this.getRouteConfigOptions(),
+        security: this.getSecurity,
       },
       this.requestHandler,
       { isVersioned: true }
@@ -122,6 +124,18 @@ export class CoreVersionedRoute implements VersionedRoute {
     return this.handlers.size ? '[' + [...this.handlers.keys()].join(', ') + ']' : '<none>';
   }
 
+  private getVersion(req: KibanaRequest): ApiVersion | undefined {
+    let version;
+    const maybeVersion = readVersion(req, this.enableQueryVersion);
+    if (!maybeVersion && (this.isPublic || this.useDefaultStrategyForPath)) {
+      version = this.getDefaultVersion();
+    } else {
+      version = maybeVersion;
+    }
+
+    return version;
+  }
+
   private requestHandler = async (
     ctx: RequestHandlerContextBase,
     originalReq: KibanaRequest,
@@ -134,14 +148,8 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
     const req = originalReq as Mutable<KibanaRequest>;
-    let version: undefined | ApiVersion;
+    const version = this.getVersion(req);
 
-    const maybeVersion = readVersion(req, this.enableQueryVersion);
-    if (!maybeVersion && (this.isPublic || this.useDefaultStrategyForPath)) {
-      version = this.getDefaultVersion();
-    } else {
-      version = maybeVersion;
-    }
     if (!version) {
       return res.badRequest({
         body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
@@ -246,7 +254,9 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     this.validateVersion(options.version);
+    // TODO: [Authz] Implement validation for versioned route in https://github.com/elastic/kibana/issues/191712
     options = prepareVersionedRouteValidation(options);
+
     this.handlers.set(options.version, {
       fn: handler,
       options,
@@ -257,4 +267,10 @@ export class CoreVersionedRoute implements VersionedRoute {
   public getHandlers(): Array<{ fn: RequestHandler; options: Options }> {
     return [...this.handlers.values()];
   }
+
+  public getSecurity: RouteSecurityGetter = (req: KibanaRequest) => {
+    const version = this.getVersion(req)!;
+
+    return this.handlers.get(version)?.options.security;
+  };
 }

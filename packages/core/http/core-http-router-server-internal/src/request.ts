@@ -35,6 +35,7 @@ import {
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+  ELASTIC_HTTP_VERSION_QUERY_PARAM,
 } from '@kbn/core-http-common';
 import { RouteValidator } from './validator';
 import { isSafeMethod } from './route';
@@ -73,13 +74,49 @@ export class CoreKibanaRequest<
     withoutSecretHeaders: boolean = true
   ) {
     let requestParts: { params: P; query: Q; body: B };
-    if (routeSchemas === undefined || isFakeRawRequest(req)) {
-      requestParts = { query: {} as Q, params: {} as P, body: {} as B };
+
+    if (isFakeRawRequest(req)) {
+      requestParts = {
+        query: {} as Q,
+        params: {} as P,
+        body: {} as B,
+      };
+
+      return new CoreKibanaRequest(
+        req,
+        requestParts.params,
+        requestParts.query,
+        requestParts.body,
+        withoutSecretHeaders
+      );
+    }
+
+    const rawParts = sanitizeRequest(req);
+
+    if (routeSchemas === undefined) {
+      requestParts = {
+        query: {
+          [ELASTIC_HTTP_VERSION_QUERY_PARAM]: (rawParts.query as Record<string, unknown>)[
+            ELASTIC_HTTP_VERSION_QUERY_PARAM
+          ],
+        } as Q,
+        params: {} as P,
+        body: {} as B,
+      };
     } else {
       const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
-      const rawParts = sanitizeRequest(req);
-      requestParts = CoreKibanaRequest.validate(rawParts, routeValidator);
+      requestParts = CoreKibanaRequest.validate<P, Q, B>(rawParts, routeValidator);
+
+      if ((rawParts.query as Record<string, unknown>)[ELASTIC_HTTP_VERSION_QUERY_PARAM]) {
+        requestParts.query = {
+          ...requestParts.query,
+          [ELASTIC_HTTP_VERSION_QUERY_PARAM]: (rawParts.query as Record<string, unknown>)[
+            ELASTIC_HTTP_VERSION_QUERY_PARAM
+          ],
+        };
+      }
     }
+
     return new CoreKibanaRequest(
       req,
       requestParts.params,
@@ -256,6 +293,7 @@ export class CoreKibanaRequest<
         true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
       access: this.getAccess(request),
       tags: request.route?.settings?.tags || [],
+      security: ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.security,
       timeout: {
         payload: payloadTimeout,
         idleSocket: socketTimeout === 0 ? undefined : socketTimeout,
@@ -368,6 +406,7 @@ function isCompleted(request: Request) {
  */
 function sanitizeRequest(req: Request): { query: unknown; params: unknown; body: unknown } {
   const { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __, ...query } = req.query ?? {};
+
   return {
     query,
     params: req.params,

@@ -5,8 +5,20 @@
  * 2.0.
  */
 
-import type { HttpServiceSetup, Logger } from '@kbn/core/server';
+import type {
+  HttpServiceSetup,
+  Logger,
+  RouteSecurity,
+  RouteSecurityGetter,
+} from '@kbn/core/server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+
+const isRouteSecurityGetter = (
+  security?: RouteSecurityGetter | RecursiveReadonly<RouteSecurity>
+): security is RouteSecurityGetter => {
+  return typeof security === 'function';
+};
 
 export function initAPIAuthorization(
   http: HttpServiceSetup,
@@ -17,6 +29,21 @@ export function initAPIAuthorization(
     // if we aren't using RBAC for this request, just continue
     if (!mode.useRbacForRequest(request)) {
       return toolkit.next();
+    }
+
+    const security = isRouteSecurityGetter(request.route.options.security)
+      ? request.route.options.security(request)
+      : request.route.options.security;
+
+    if (security) {
+      // TODO: [Authz] Implement in https://github.com/elastic/kibana/issues/191713
+      // eslint-disable-next-line no-console
+      console.log(
+        isRouteSecurityGetter(request.route.options.security)
+          ? 'Versioned Route Security:'
+          : 'Route Security:',
+        security
+      );
     }
 
     const tags = request.route.options.tags;

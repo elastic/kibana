@@ -35,7 +35,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
 > & {
   options?: Omit<
     RouteConfigOptions<Method>,
-    'access' | 'description' | 'deprecated' | 'discontinued'
+    'access' | 'description' | 'deprecated' | 'discontinued' | 'security'
   >;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
@@ -337,6 +337,8 @@ export interface AddVersionOpts<P, Q, B> {
    * @public
    */
   validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
+
+  security?: Exclude<RouteConfigOptions<RouteMethod>['security'], undefined>;
 }
 
 /**

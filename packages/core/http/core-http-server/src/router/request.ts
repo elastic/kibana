@@ -13,8 +13,11 @@ import type { Observable } from 'rxjs';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
-import type { RouteMethod, RouteConfigOptions } from './route';
+import type { RouteMethod, RouteConfigOptions, RouteSecurity } from './route';
 import type { Headers } from './headers';
+
+export type RouteSecurityGetter = (request: KibanaRequest) => RouteSecurity | undefined;
+export type InternalRouteSecurity = RouteSecurity | RouteSecurityGetter;
 
 /**
  * @public
@@ -22,6 +25,7 @@ import type { Headers } from './headers';
 export interface KibanaRouteOptions extends RouteOptionsApp {
   xsrfRequired: boolean;
   access: 'internal' | 'public';
+  security?: InternalRouteSecurity;
 }
 
 /**
@@ -40,8 +44,12 @@ export interface KibanaRequestState extends RequestApplicationState {
  * @public
  */
 export type KibanaRequestRouteOptions<Method extends RouteMethod> = Method extends 'get' | 'options'
-  ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
-  : Required<RouteConfigOptions<Method>>;
+  ? Required<Omit<RouteConfigOptions<Method>, 'body' | 'security'>> & {
+      security?: InternalRouteSecurity;
+    }
+  : Required<Omit<RouteConfigOptions<Method>, 'security'>> & {
+      security?: InternalRouteSecurity;
+    };
 
 /**
  * Request specific route information exposed to a handler.
