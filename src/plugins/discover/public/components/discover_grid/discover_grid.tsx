@@ -15,7 +15,7 @@ import {
 import { useProfileAccessor } from '../../context_awareness';
 import { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
 
-interface DiscoverGridProps extends UnifiedDataTableProps {
+export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
 }
 
