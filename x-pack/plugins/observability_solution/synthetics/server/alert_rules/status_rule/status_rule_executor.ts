@@ -104,8 +104,6 @@ export class StatusRuleExecutor {
   }
 
   async getMonitors() {
-    this.logger.info(`[StatusRuleExecutor] getMonitors ruleName=${this.ruleName}`, this.params);
-
     const baseFilter = !this.hasCustomCondition
       ? `${monitorAttributes}.${AlertConfigKey.STATUS_ENABLED}: true`
       : '';
@@ -449,12 +447,12 @@ export const getDoesMonitorMeetLocationThreshold = ({
   const getMatchingLocationsWithDownThresholdWithXChecks = (
     matches: AlertStatusMetaDataCodec[]
   ) => {
-    return matches.filter((config) => config.checks.downWithinXChecks >= downThreshold);
+    return matches.filter((config) => (config.checks?.downWithinXChecks ?? 1) >= downThreshold);
   };
   const getMatchingLocationsWithDownThresholdWithinTimeWindow = (
     matches: AlertStatusMetaDataCodec[]
   ) => {
-    return matches.filter((config) => config.checks.down >= downThreshold);
+    return matches.filter((config) => (config.checks?.down ?? 1) >= downThreshold);
   };
   if (useTimeWindow) {
     const matchingLocationsWithDownThreshold =

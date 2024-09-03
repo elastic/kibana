@@ -37,7 +37,7 @@ export interface AlertStatusMetaDataCodec {
   locationId: string;
   timestamp: string;
   ping: OverviewPing;
-  checks: {
+  checks?: {
     downWithinXChecks: number;
     down: number;
   };

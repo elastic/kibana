@@ -74,8 +74,12 @@ export const registerSyntheticsStatusCheckRule = (
       );
 
       const { numberOfLocations, numberOfChecks } = getConditionType(params.condition);
+      const missingChecks = Object.entries(downConfigs).filter(([, { checks }]) => !checks);
+      if (missingChecks.length) {
+        const stophere = true;
+      }
 
-      statusRule.handleDownMonitorThresholdAlert({
+      await statusRule.handleDownMonitorThresholdAlert({
         downConfigs,
       });
 
