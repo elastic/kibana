@@ -95,11 +95,11 @@ async function getHoverItemForFunction(
     if (hoveredArg && hoveredArg.paramType === 'named' && hoveredArg.type === 'literal') {
       const hasMatch = TIME_SYSTEM_PARAMS.find((p) => p.startsWith(hoveredArg.text));
       if (hasMatch) {
-        Object.entries(TIME_SYSTEM_DESCRIPTIONS).forEach(([key, value]) => {
-          contents.push({
-            value: `**${key}**: ${value}`,
-          });
-        });
+        contents.push(
+          ...Object.entries(TIME_SYSTEM_DESCRIPTIONS).map(([key, value]) => ({
+            value: `\n**${key}**: ${value}`,
+          }))
+        );
       }
     }
 
