@@ -405,9 +405,8 @@ function getTopSuggestion(
     );
 
   return (
-    suggestions.find((s) => s.changeType === 'unchanged') || // switching to vis that doesn't change anything is the best option
-    suggestions.find((s) => s.changeType === 'reduced') || // switching to vis that reduces data model if possible
-    suggestions.find((s) => s.keptLayerIds.some((id) => id === layerId)) || // switching to vis that at least keeps the chosen layer
+    suggestions.find((s) => s.changeType === 'unchanged' || s.changeType === 'reduced') ||
+    suggestions.find((s) => s.keptLayerIds.some((id) => id === layerId)) ||
     suggestions[0]
   );
 }
