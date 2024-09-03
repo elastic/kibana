@@ -22,6 +22,7 @@ import { asyncForEach } from '@kbn/std';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Module } from '../../../../common/types/modules';
 import { useDashboardService } from '../../services/dashboard_service';
+import { useMlKibana } from '../../contexts/kibana';
 import { LABELS, type LabelId } from './overview_tab_content';
 import type { KibanaAssetType } from './flyout';
 
@@ -31,34 +32,73 @@ interface Props {
 }
 
 export const KibanaTabContent: FC<Props> = ({ module, selectedKibanaSubTab }) => {
-  const [dashboardUrls, setDashboardUrls] = useState<Record<string, string>>({});
+  const [kibanaAssetUrls, setKibanaAssetUrls] = useState<Record<string, string>>({});
   const dashboardService = useDashboardService();
+  const {
+    services: { application, share },
+  } = useMlKibana();
 
   useEffect(
-    function setUpDashboardUrls() {
+    function setUpUrls() {
       const dashboards = module.kibana?.dashboard ?? [];
       const dashboardIds = dashboards.map(({ id }) => id);
-      const urls = {};
+      const savedSearchIds = (module.kibana?.search ?? []).map(({ id }) => id);
+      const visualizationIds = (module.kibana?.visualization ?? []).map(({ id }) => id);
+      const allUrls: Record<string, string> = {};
 
-      async function getDashboardUrls() {
-        const result = await dashboardService.fetchDashboardsById(dashboardIds);
+      async function getUrls() {
+        if (dashboards.length > 0) {
+          const result = await dashboardService.fetchDashboardsById(dashboardIds);
 
-        await asyncForEach(result, async ({ id }) => {
-          const url = await dashboardService.getDashboardUrl(id, ViewMode.VIEW);
-          if (url) {
-            urls[id] = url;
+          await asyncForEach(result, async ({ id }) => {
+            const url = await dashboardService.getDashboardUrl(id, ViewMode.VIEW);
+            if (url) {
+              allUrls[id] = url;
+            }
+          });
+        }
+
+        if (savedSearchIds.length > 0) {
+          const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+          if (discoverLocator) {
+            await asyncForEach(savedSearchIds, async (id) => {
+              const url = await discoverLocator.getRedirectUrl({
+                savedSearchId: id,
+              });
+              if (url) {
+                allUrls[id] = url;
+              }
+            });
           }
-        });
+        }
 
-        if (Object.keys(urls).length > 0) {
-          setDashboardUrls(urls);
+        if (visualizationIds.length > 0) {
+          await asyncForEach(visualizationIds, async (id) => {
+            const url = application.getUrlForApp('visualize#', {
+              path: `edit/${id}`,
+            });
+
+            if (url) {
+              allUrls[id] = url;
+            }
+          });
+        }
+
+        if (Object.keys(allUrls).length > 0) {
+          setKibanaAssetUrls(allUrls);
         }
       }
-      if (dashboards.length > 0) {
-        getDashboardUrls();
-      }
+      getUrls();
     },
-    [dashboardService, module.kibana?.dashboard]
+    [
+      dashboardService,
+      module.kibana?.dashboard,
+      share?.url.locators,
+      module.kibana?.discover,
+      module.kibana?.search,
+      module.kibana?.visualization,
+      application,
+    ]
   );
 
   return (
@@ -106,8 +146,8 @@ export const KibanaTabContent: FC<Props> = ({ module, selectedKibanaSubTab }) =>
                       >
                         <EuiText size="m">
                           <p>
-                            {dashboardUrls && dashboardUrls[id] ? (
-                              <EuiLink href={dashboardUrls[id]} target="_blank">
+                            {kibanaAssetUrls && kibanaAssetUrls[id] ? (
+                              <EuiLink href={kibanaAssetUrls[id]} target="_blank">
                                 {title}
                               </EuiLink>
                             ) : (
