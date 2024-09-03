@@ -51,7 +51,7 @@ export interface MonitorSummaryData {
   configId: string;
   dateFormat: string;
   tz: string;
-  checks: {
+  checks?: {
     downWithinXChecks: number;
     down: number;
   };
@@ -68,7 +68,7 @@ export const getMonitorSummary = ({
   downThreshold,
   dateFormat,
   statusMessage,
-  checks,
+  checks = { downWithinXChecks: 1, down: 1 },
   numberOfLocations,
   numberOfChecks,
 }: MonitorSummaryData): MonitorSummaryStatusRule => {
@@ -253,7 +253,7 @@ export const getReasonMessageForTimeWindow = ({
 }: {
   name: string;
   location: string;
-  status: string;
+  status?: string;
   timestamp: string;
   downThreshold: number;
   numberOfLocations: number;

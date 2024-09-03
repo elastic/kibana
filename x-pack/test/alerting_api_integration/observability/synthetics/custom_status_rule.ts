@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      // await server.savedObjects.cleanStandardList();
+      await server.savedObjects.cleanStandardList();
     });
 
     describe('NumberOfChecks', () => {
@@ -278,7 +278,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(alert).to.have.property('kibana.alert.status', 'recovered');
       });
 
-      let downDocs;
+      let downDocs: any[] = [];
 
       it('should be down again', async () => {
         downDocs = await ruleHelper.makeSummaries({
@@ -367,7 +367,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should update message after being down from another location', async function () {
-        const docs = await ruleHelper.makeSummaries({
+        await ruleHelper.makeSummaries({
           monitor,
           location: {
             id: pvtLoc.id,
@@ -454,7 +454,6 @@ export default function ({ getService }: FtrProviderContext) {
             name: monitor.name,
             location: 'Dev Service',
             timestamp: moment(docs[4]['@timestamp']).format('LLL'),
-            numberOfChecks: 5,
             downThreshold: 5,
             numberOfLocations: 1,
             timeWindow: { unit: 'm', size: 10 },
