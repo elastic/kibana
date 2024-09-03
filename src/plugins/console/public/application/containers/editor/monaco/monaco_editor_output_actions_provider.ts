@@ -20,7 +20,7 @@ import {
 import type { AdjustedParsedRequest } from './types';
 
 const DEBOUNCE_HIGHLIGHT_WAIT_MS = 200;
-const OFFSET_EDITOR_ACTIONS = 10;
+const OFFSET_EDITOR_ACTIONS = 1;
 
 export class MonacoEditorOutputActionsProvider {
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
@@ -94,7 +94,7 @@ export class MonacoEditorOutputActionsProvider {
           range: selectedRange,
           options: {
             isWholeLine: true,
-            className: SELECTED_REQUESTS_CLASSNAME,
+            blockClassName: SELECTED_REQUESTS_CLASSNAME,
           },
         },
       ]);
@@ -127,12 +127,12 @@ export class MonacoEditorOutputActionsProvider {
     const selectedRequests: AdjustedParsedRequest[] = [];
     for (const [index, parsedRequest] of parsedRequests.entries()) {
       const requestStartLineNumber = getRequestStartLineNumber(parsedRequest, model);
-      const requestEndLineNumber = getRequestEndLineNumber(
+      const requestEndLineNumber = getRequestEndLineNumber({
         parsedRequest,
+        nextRequest: parsedRequests.at(index + 1),
         model,
-        index,
-        parsedRequests
-      );
+        startLineNumber,
+      });
       if (requestStartLineNumber > endLineNumber) {
         // request is past the selection, no need to check further requests
         break;
@@ -157,13 +157,26 @@ export class MonacoEditorOutputActionsProvider {
   }
 
   public async getParsedOutput(): Promise<string> {
-    const selectedRequests = await this.getSelectedParsedOutput();
+    const model = this.editor.getModel();
+
+    if (!model) {
+      return '';
+    }
 
     let selectedRequestsString = '';
+    const selectedRequests = await this.getSelectedParsedOutput();
+
     for (const request of selectedRequests) {
-      for (const data of request.data || []) {
-        selectedRequestsString += JSON.stringify(data, null, 2) + '\n';
-      }
+      const dataString = model
+        .getValueInRange({
+          startLineNumber: request.startLineNumber,
+          startColumn: 1,
+          endLineNumber: request.endLineNumber,
+          endColumn: model.getLineMaxColumn(request.endLineNumber),
+        })
+        .trim();
+
+      selectedRequestsString += dataString + '\n';
     }
 
     return selectedRequestsString;

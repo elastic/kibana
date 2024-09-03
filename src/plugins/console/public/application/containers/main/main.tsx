@@ -6,38 +6,88 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
   EuiPageTemplate,
   EuiSplitPanel,
-  EuiHorizontalRule,
+  useEuiTour,
   EuiButtonEmpty,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { downloadFileAs } from '@kbn/share-plugin/public';
+import { getConsoleTourStepProps } from './get_console_tour_step_props';
+import { useServicesContext } from '../../contexts';
 import { MAIN_PANEL_LABELS } from './i18n';
 import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
-import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
+import { Config } from '../config';
+import {
+  TopNavMenu,
+  SomethingWentWrongCallout,
+  HelpPopover,
+  ShortcutsPopover,
+  ConsoleTourStep,
+  ConsoleTourStepProps,
+} from '../../components';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
-import { SHELL_TAB_ID } from './tab_ids';
 import { useEditorReadContext } from '../../contexts';
+import { getTourSteps } from './get_tour_steps';
+import {
+  SHELL_TAB_ID,
+  CONFIG_TAB_ID,
+  EDITOR_TOUR_STEP,
+  TOUR_STORAGE_KEY,
+  INITIAL_TOUR_CONFIG,
+  FILES_TOUR_STEP,
+  EXPORT_FILE_NAME,
+} from './constants';
 
 interface MainProps {
   isEmbeddable?: boolean;
 }
 
-const EXPORT_FILE_NAME = 'console_export';
-
 export function Main({ isEmbeddable = false }: MainProps) {
   const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isFullscreenOpen, setIsFullScreen] = useState(false);
+
+  const { docLinks } = useServicesContext();
+
+  const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
+  const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
+  const [tourStepProps, actions, tourState] = useEuiTour(getTourSteps(docLinks), initialTourState);
+
+  useEffect(() => {
+    localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(tourState));
+  }, [tourState]);
+
+  const consoleTourStepProps: ConsoleTourStepProps[] = getConsoleTourStepProps(
+    tourStepProps,
+    actions,
+    tourState,
+    selectedTab
+  );
 
   const { done, error, retry } = useDataInit();
 
   const { currentTextObject } = useEditorReadContext();
+
+  const toggleFullscreen = () => {
+    const isEnabled = !isFullscreenOpen;
+
+    setIsFullScreen(isEnabled);
+
+    if (isEnabled) {
+      document.querySelector('#consoleRoot')?.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   if (error) {
     return (
@@ -46,6 +96,26 @@ export function Main({ isEmbeddable = false }: MainProps) {
       </EuiPageTemplate.EmptyPrompt>
     );
   }
+
+  const shortcutsButton = (
+    <NavIconButton
+      iconType="keyboard"
+      onClick={() => setIsShortcutsOpen(!isShortcutsOpen)}
+      ariaLabel={MAIN_PANEL_LABELS.shortcutsButton}
+      dataTestSubj="consoleShortcutsButton"
+      toolTipContent={MAIN_PANEL_LABELS.shortcutsButton}
+    />
+  );
+
+  const helpButton = (
+    <NavIconButton
+      iconType="questionInCircle"
+      onClick={() => setIsHelpOpen(!isHelpOpen)}
+      ariaLabel={MAIN_PANEL_LABELS.helpButton}
+      dataTestSubj="consoleHelpButton"
+      toolTipContent={MAIN_PANEL_LABELS.helpButton}
+    />
+  );
 
   return (
     <div id="consoleRoot">
@@ -70,41 +140,63 @@ export function Main({ isEmbeddable = false }: MainProps) {
                       selectedTab,
                       setSelectedTab,
                     })}
+                    tourStepProps={consoleTourStepProps}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    iconType="download"
-                    onClick={() =>
-                      downloadFileAs(EXPORT_FILE_NAME, {
-                        content: currentTextObject?.text,
-                        type: 'txt',
-                      })
-                    }
-                    size="xs"
-                    dataTestSubj="consoleExportFileButton"
-                  >
-                    {MAIN_PANEL_LABELS.exportFileButton}
-                  </EuiButtonEmpty>
+                  <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
+                    <EuiButtonEmpty
+                      iconType="download"
+                      onClick={() =>
+                        downloadFileAs(EXPORT_FILE_NAME, {
+                          content: currentTextObject?.text,
+                          type: 'txt',
+                        })
+                      }
+                      size="xs"
+                      dataTestSubj="consoleExportFileButton"
+                    >
+                      {MAIN_PANEL_LABELS.exportFileButton}
+                    </EuiButtonEmpty>
+                  </ConsoleTourStep>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <NavIconButton
-                    iconType="keyboard"
-                    onClick={() => {}}
-                    ariaLabel={MAIN_PANEL_LABELS.shortcutsButton}
-                    dataTestSubj="consoleShortcutsButton"
-                    toolTipContent={MAIN_PANEL_LABELS.shortcutsButton}
+                  <ShortcutsPopover
+                    button={shortcutsButton}
+                    isOpen={isShortcutsOpen}
+                    closePopover={() => setIsShortcutsOpen(false)}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <NavIconButton
-                    iconType="questionInCircle"
-                    onClick={() => {}}
-                    ariaLabel={MAIN_PANEL_LABELS.helpButton}
-                    dataTestSubj="consoleHelpButton"
-                    toolTipContent={MAIN_PANEL_LABELS.helpButton}
+                  <HelpPopover
+                    button={helpButton}
+                    isOpen={isHelpOpen}
+                    closePopover={() => setIsHelpOpen(false)}
+                    resetTour={() => {
+                      setIsHelpOpen(false);
+                      actions.resetTour();
+                    }}
                   />
                 </EuiFlexItem>
+                {isEmbeddable && (
+                  <EuiFlexItem grow={false}>
+                    <NavIconButton
+                      iconType={isFullscreenOpen ? 'fullScreenExit' : 'fullScreen'}
+                      onClick={toggleFullscreen}
+                      ariaLabel={
+                        isFullscreenOpen
+                          ? MAIN_PANEL_LABELS.closeFullscrenButton
+                          : MAIN_PANEL_LABELS.openFullscrenButton
+                      }
+                      dataTestSubj="consoleToggleFullscreenButton"
+                      toolTipContent={
+                        isFullscreenOpen
+                          ? MAIN_PANEL_LABELS.closeFullscrenButton
+                          : MAIN_PANEL_LABELS.openFullscrenButton
+                      }
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
@@ -112,16 +204,28 @@ export function Main({ isEmbeddable = false }: MainProps) {
               {selectedTab === SHELL_TAB_ID && (
                 <Editor loading={!done} setEditorInstance={() => {}} />
               )}
+
+              {selectedTab === CONFIG_TAB_ID && <Config editorInstance={null} />}
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
-              <EuiButtonEmpty onClick={() => {}} iconType="editorCodeBlock" size="xs" color="text">
+              <EuiButtonEmpty
+                onClick={() => setSelectedTab(CONFIG_TAB_ID)}
+                iconType="editorCodeBlock"
+                size="xs"
+                color="text"
+              >
                 {MAIN_PANEL_LABELS.variablesButton}
               </EuiButtonEmpty>
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {/* Empty container for Editor Tour Step */}
+      <ConsoleTourStep tourStepProps={consoleTourStepProps[EDITOR_TOUR_STEP - 1]}>
+        <div />
+      </ConsoleTourStep>
     </div>
   );
 }

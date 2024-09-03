@@ -23,9 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
-    });
-    beforeEach(async () => {
-      await PageObjects.console.closeHelpIfExists();
+      await PageObjects.console.skipTourIfExists();
     });
 
     it('should show the default request', async () => {
@@ -62,6 +60,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1000, 1100);
       const afterSize = await editor.getSize();
       expect(initialSize.width).to.be.greaterThan(afterSize.width);
+    });
+
+    it('should allow clearing the input editor', async () => {
+      await PageObjects.console.monaco.enterText('GET _all');
+
+      // Check current input is not empty
+      const input = await PageObjects.console.monaco.getEditorText();
+      expect(input).to.not.be.empty();
+
+      // Clear the output
+      await PageObjects.console.clickClearInput();
+
+      // Check that after clearing the input, the editor is empty
+      expect(await PageObjects.console.monaco.getEditorText()).to.be.empty();
     });
 
     it('should return statusCode 400 to unsupported HTTP verbs', async () => {
@@ -131,7 +143,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await PageObjects.console.closeHelpIfExists();
         await PageObjects.console.monaco.clearEditorText();
       });
 

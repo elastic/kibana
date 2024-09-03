@@ -20,7 +20,7 @@ interface QueryParams {
 
 interface SetInitialValueParams {
   /** The text value that is initially in the console editor. */
-  initialTextValue?: string;
+  localStorageValue?: string;
   /** The function that sets the state of the value in the console editor. */
   setValue: (value: string) => void;
   /** The toasts service. */
@@ -44,7 +44,7 @@ export const readLoadFromParam = () => {
  * @param params The {@link SetInitialValueParams} to use.
  */
 export const useSetInitialValue = (params: SetInitialValueParams) => {
-  const { initialTextValue, setValue, toasts } = params;
+  const { localStorageValue, setValue, toasts } = params;
 
   useEffect(() => {
     const loadBufferFromRemote = async (url: string) => {
@@ -60,7 +60,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
         if (parsedURL.origin === 'https://www.elastic.co') {
           const resp = await fetch(parsedURL);
           const data = await resp.text();
-          setValue(`${initialTextValue}\n\n${data}`);
+          setValue(`${localStorageValue}\n\n${data}`);
         } else {
           toasts.addWarning(
             i18n.translate('console.monaco.loadFromDataUnrecognizedUrlErrorMessage', {
@@ -106,11 +106,11 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     if (loadFromParam) {
       loadBufferFromRemote(loadFromParam);
     } else {
-      setValue(initialTextValue || DEFAULT_INPUT_VALUE);
+      setValue(localStorageValue || DEFAULT_INPUT_VALUE);
     }
 
     return () => {
       window.removeEventListener('hashchange', onHashChange);
     };
-  }, [initialTextValue, setValue, toasts]);
+  }, [localStorageValue, setValue, toasts]);
 };

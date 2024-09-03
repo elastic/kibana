@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const SHELL_TAB_ID = 'shell';
-export const HISTORY_TAB_ID = 'history';
-export const CONFIG_TAB_ID = 'config';
+export { Config } from './config';

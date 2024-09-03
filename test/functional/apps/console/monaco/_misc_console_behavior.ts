@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
-      await PageObjects.console.closeHelpIfExists();
+      await PageObjects.console.skipTourIfExists();
     });
 
     beforeEach(async () => {
@@ -34,6 +34,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           tabOpened = false;
           await browser.switchTab(0);
         }
+      });
+
+      it('can open and close Shortcuts popover', async () => {
+        // The popover should initially be closed
+        expect(await PageObjects.console.isShortcutsPopoverOpen()).to.be(false);
+
+        // Opening the popover
+        await PageObjects.console.clickShortcutsIcon();
+        expect(await PageObjects.console.isShortcutsPopoverOpen()).to.be(true);
+
+        // Closing the popover
+        await PageObjects.console.clickShortcutsIcon();
+        expect(await PageObjects.console.isShortcutsPopoverOpen()).to.be(false);
       });
 
       it('should execute the request when Ctrl+Enter is pressed', async () => {
@@ -132,19 +145,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('customizable font size', () => {
       // flaky
-      it.skip('should allow the font size to be customized', async () => {
+      it('should allow the font size to be customized', async () => {
+        await PageObjects.console.openConfig();
         await PageObjects.console.setFontSizeSetting(20);
+        await PageObjects.console.openConsole();
+
         await retry.try(async () => {
           // the settings are not applied synchronously, so we retry for a time
           expect(await PageObjects.console.monaco.getFontSize()).to.be('20px');
         });
 
+        await PageObjects.console.openConfig();
         await PageObjects.console.setFontSizeSetting(24);
+        await PageObjects.console.openConsole();
+
         await retry.try(async () => {
           // the settings are not applied synchronously, so we retry for a time
           expect(await PageObjects.console.monaco.getFontSize()).to.be('24px');
         });
       });
+    });
+
+    it('can open and close Help popover', async () => {
+      // The popover should initially be closed
+      expect(await PageObjects.console.isHelpPopoverOpen()).to.be(false);
+
+      // Opening the popover
+      await PageObjects.console.clickHelpIcon();
+      expect(await PageObjects.console.isHelpPopoverOpen()).to.be(true);
+
+      // Closing the popover
+      await PageObjects.console.clickHelpIcon();
+      expect(await PageObjects.console.isHelpPopoverOpen()).to.be(false);
     });
 
     describe('invalid requests', () => {
