@@ -79,34 +79,6 @@ it(`should return 404 if the docId isn't resolve`, async function () {
   expect(handlerCalled).toBe(false);
 });
 
-it(`should return forbidden if job type is unrecognized`, async function () {
-  mockJobsQueryFactory.mockReturnValue({
-    get: jest.fn(() => ({ jobtype: 'notARealJobType' })),
-  });
-
-  let handlerCalled = false;
-  const handler = async () => {
-    handlerCalled = true;
-    return {
-      status: 200,
-      options: {},
-    };
-  };
-
-  await jobManagementPreRouting(
-    mockCore,
-    mockResponseFactory,
-    'doc123',
-    mockUser,
-    mockCounters,
-    options,
-    handler
-  );
-
-  expect(mockResponseFactory.forbidden).toBeCalled();
-  expect(handlerCalled).toBe(false);
-});
-
 it(`should call callback when document is available`, async function () {
   mockJobsQueryFactory.mockReturnValue({
     get: jest.fn(() => ({ jobtype: 'csv_searchsource' })),

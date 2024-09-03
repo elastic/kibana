@@ -6,6 +6,7 @@
   background-color: $euiFormBackgroundColor !important;
 
   border-radius: 0 $euiBorderRadius $euiBorderRadius 0 !important;
+
   &--roundedBorders {
     border-radius: $euiBorderRadius !important;
   }
@@ -16,10 +17,7 @@
 
     .controlPanel--label {
       @include euiTextTruncate;
-      background-color: transparent;
-      border-radius: $euiBorderRadius;
-      margin-left: 0 !important;
-      padding-left: 0 !important;
+      padding: 0;
     }
   }
 
@@ -36,4 +34,8 @@
       padding-left: $euiSizeM;
     }
   }
+}
+
+.controlFrame__dragHandle {
+  line-height: 0; // Vertically center the grab handle
 }

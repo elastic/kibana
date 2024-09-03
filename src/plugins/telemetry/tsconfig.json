@@ -11,6 +11,7 @@
     "../../../typings/**/*",
     "schema/oss_plugins.json",
     "schema/oss_root.json",
+    "schema/kbn_packages.json"
   ],
   "kbn_references": [
     "@kbn/core",

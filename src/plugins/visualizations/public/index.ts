@@ -19,7 +19,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { TypesService } from './vis_types/types_service';
 export {
   apiHasVisualizeConfig,
-  VISUALIZE_EMBEDDABLE_TYPE,
   VIS_EVENT_TO_TRIGGER,
   COMMON_VISUALIZATION_GROUPING,
 } from './embeddable';
@@ -38,12 +37,13 @@ export type {
   VisualizationClient,
   SerializableAttributes,
 } from './vis_types';
+export type { VisualizeEditorInput } from './react_embeddable/types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
-export type { VisualizeInput, VisualizeEmbeddable, HasVisualizeConfig } from './embeddable';
 export type { SchemaConfig } from '../common/types';
 export { updateOldState } from './legacy/vis_update_state';
+export type { VisualizeInput, VisualizeEmbeddable, HasVisualizeConfig } from './embeddable';
 export type { PersistedState } from './persisted_state';
 export type {
   ISavedVis,
@@ -63,6 +63,7 @@ export {
   LegendSize,
   LegendSizeToPixels,
   DEFAULT_LEGEND_SIZE,
+  VISUALIZE_EMBEDDABLE_TYPE,
 } from '../common/constants';
 export type { SavedVisState, VisParams, Dimension } from '../common';
 export { prepareLogTable, XYCurveTypes } from '../common';
