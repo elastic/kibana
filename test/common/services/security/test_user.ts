@@ -81,16 +81,6 @@ export class TestUser extends FtrService {
 export async function createTestUserService(ctx: FtrProviderContext, role: Role, user: User) {
   const log = ctx.getService('log');
   const config = ctx.getService('config');
-
-  log.info('KURT');
-  log.info(JSON.stringify(config.get('esTestCluster.serverArgs')));
-  log.info(
-    !config
-      .get('esTestCluster.serverArgs')
-      .some((arg: string) => arg === 'xpack.security.enabled=false')
-  );
-  log.info(!config.get('security.disableTestUser'));
-
   const enabled =
     !config
       .get('esTestCluster.serverArgs')
@@ -98,7 +88,7 @@ export async function createTestUserService(ctx: FtrProviderContext, role: Role,
     !config.get('security.disableTestUser');
 
   if (enabled) {
-    log.info('===============creating roles and users===============');
+    log.debug('===============creating roles and users===============');
 
     // create the defined roles (need to map array to create roles)
     for (const [name, definition] of Object.entries(config.get('security.roles'))) {
@@ -135,7 +125,7 @@ export async function createTestUserService(ctx: FtrProviderContext, role: Role,
     }
 
     // create test_user with username and pwd
-    log.info(`default roles = ${config.get('security.defaultRoles')}`);
+    log.debug(`default roles = ${config.get('security.defaultRoles')}`);
     await user.create(TEST_USER_NAME, {
       password: TEST_USER_PASSWORD,
       roles: config.get('security.defaultRoles'),
