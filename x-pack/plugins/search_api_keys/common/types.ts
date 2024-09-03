@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export interface UserStartPrivilegesResponse {
-  privileges: {
-    canCreateApiKeys: boolean;
-  };
+export interface APIKeyCreationResponse {
+  api_key: string;
+  encoded: string;
+  name: string;
+  expiration?: number;
 }

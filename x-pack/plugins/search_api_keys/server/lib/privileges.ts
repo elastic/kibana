@@ -8,29 +8,39 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 
-import type { UserStartPrivilegesResponse } from '../../common/types';
-
 export async function fetchUserStartPrivileges(
   client: ElasticsearchClient,
   logger: Logger
-): Promise<UserStartPrivilegesResponse> {
+): Promise<boolean> {
   try {
     const securityCheck = await client.security.hasPrivileges({
-      cluster: ['manage_api_key'],
+      cluster: ['manage_own_api_key'],
     });
 
-    return {
-      privileges: {
-        canCreateApiKeys: securityCheck?.cluster?.manage_api_key ?? false,
-      },
-    };
+    return securityCheck?.cluster?.manage_own_api_key ?? false;
   } catch (e) {
-    logger.error(`Error checking user privileges for searchIndices elasticsearch start`);
+    logger.error(`Error checking user privileges for search API Keys`);
     logger.error(e);
-    return {
-      privileges: {
-        canCreateApiKeys: false,
+    return false;
+  }
+}
+
+export async function fetchClusterHasApiKeys(
+  client: ElasticsearchClient,
+  logger: Logger
+): Promise<boolean> {
+  try {
+    const clusterApiKeys = await client.security.queryApiKeys({
+      query: {
+        term: {
+          invalidated: false,
+        },
       },
-    };
+    });
+    return clusterApiKeys.api_keys.length > 0;
+  } catch (e) {
+    logger.error(`Error checking cluster for existing valid API keys`);
+    logger.error(e);
+    return true;
   }
 }

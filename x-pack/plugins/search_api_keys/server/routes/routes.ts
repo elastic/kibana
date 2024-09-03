@@ -8,29 +8,55 @@
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
-import { fetchUserStartPrivileges } from '../lib/privileges';
+import { fetchClusterHasApiKeys, fetchUserStartPrivileges } from '../lib/privileges';
+import { createAPIKey } from '../lib/create_key';
+
+const BASE_PATH = '/internal/search_api_keys';
 
 export function registerRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
-      path: '/internal/search_api_keys/create',
+      path: `${BASE_PATH}/create`,
       validate: {},
       options: {
         access: 'internal',
       },
     },
     async (context, _request, response) => {
-      const core = await context.core;
-      const client = core.elasticsearch.client.asCurrentUser;
-      const body = await fetchUserStartPrivileges(client, logger);
+      try {
+        const core = await context.core;
+        const client = core.elasticsearch.client.asCurrentUser;
+        const clusterHasApiKeys = await fetchClusterHasApiKeys(client, logger);
 
-      if (body.privileges.canCreateApiKeys) {
+        if (clusterHasApiKeys) {
+          return response.customError({
+            body: { message: 'Project already has API keys' },
+            statusCode: 400,
+          });
+        }
+
+        const canCreateApiKeys = await fetchUserStartPrivileges(client, logger);
+
+        if (!canCreateApiKeys) {
+          return response.customError({
+            body: { message: 'User does not have required privileges' },
+            statusCode: 403,
+          });
+        }
+
+        const apiKey = await createAPIKey('Onboarding API Key', client, logger);
+
         return response.ok({
-          body: { apiKey: '123456789' },
+          body: apiKey,
           headers: { 'content-type': 'application/json' },
         });
-      } else {
-        throw new Error('Unauthorized');
+      } catch (e) {
+        logger.error(`Error creating API Key`);
+        logger.error(e);
+        return response.customError({
+          body: { message: e.message },
+          statusCode: 500,
+        });
       }
     }
   );
