@@ -8,11 +8,16 @@
 
 import React, { useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { EuiBadge, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import { unsavedChanges } from '../unsaved_changes';
+import { TimeRange } from '@kbn/es-query';
 
 interface Props {
+  dataLoading: boolean;
+  onReload: () => void;
   onSave: () => Promise<void>;
+  setTimeRange: (timeRange: TimeRange) => void;
+  timeRange: TimeRange | undefined;
 }
 
 export function TopNav(props: Props) {
@@ -32,36 +37,57 @@ export function TopNav(props: Props) {
   }, [props.parentApi]);*/
   
   return (
-    <EuiFlexGroup>
-      {hasUnsavedChanges && (
-        <>
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        <EuiSuperDatePicker
+          isLoading={props.dataLoading}
+          start={props.timeRange?.from}
+          end={props.timeRange?.to}
+          onTimeChange={({ start, end }) => {
+            props.setTimeRange({
+              from: start,
+              to: end,
+            });
+          }}
+          onRefresh={() => {
+            props.onReload();
+          }}
+        />
+      </EuiFlexItem>
+      
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup>
+          {hasUnsavedChanges && (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">Unsaved changes</EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  disabled={isSaving}
+                  onClick={async () => {
+                    
+                  }}
+                >
+                  Reset
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              
+            </>
+          )}
           <EuiFlexItem grow={false}>
-            <EuiBadge color="warning">Unsaved changes</EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
+            <EuiButton
               disabled={isSaving}
               onClick={async () => {
-                
+                setIsSaving(true);
+                await props.onSave();
+                if (isMounted()) setIsSaving(false);
               }}
             >
-              Reset
-            </EuiButtonEmpty>
+              Save
+            </EuiButton>
           </EuiFlexItem>
-          
-        </>
-      )}
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          disabled={isSaving}
-          onClick={async () => {
-            setIsSaving(true);
-            await props.onSave();
-            if (isMounted()) setIsSaving(false);
-          }}
-        >
-          Save
-        </EuiButton>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

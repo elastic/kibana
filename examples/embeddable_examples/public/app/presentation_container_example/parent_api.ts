@@ -95,6 +95,9 @@ export function getParentApi() {
           [id]: api,
         });
       },
+      setTimeRange: (timeRange: TimeRange) => {
+        timeRange$.next(timeRange);
+      }
     },
     parentApi: {
       addNewPanel: async ({ panelType, initialState }: PanelPackage) => {

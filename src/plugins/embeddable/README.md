@@ -11,6 +11,44 @@ Rather than an inheritance-based system with classes, imperative APIs are plain 
 #### Internal state management
 Each embeddable manages its own state. This is because the embeddable system allows a page to render a registry of embeddable types that can change over time. This makes it untenable for a single page to manage state for every type of embeddable. The page is only responsible for persisting and providing the last persisted state to the embeddable on startup.
 
+```
+  /**
+   * The page renders the embeddable with ReactEmbeddableRenderer component
+   * On mount, ReactEmbeddableRenderer component calls pageApi.getSerializedStateForChild() to get the last persisted embeddable state.
+   * ReactEmbeddableRenderer passes the last persisted embeddable state to the embeddable factory.
+   * ReactEmbeddableRender passes the embeddableApi to the page by calling onApiAvailable with the API returned from the embeddable factory.
+   */
+  [embeddableApi, setEmbeddableApi] = useState<DefaultEmbeddableApi | undefined>();
+  <ReactEmbeddableRenderer
+    type={type}
+    maybeId={id}
+    getParentApi={() => {
+      getSerializedStateForChild: (embeddableId: string) => {
+        return persistenceLayer.loadState(id);
+      }
+    }}
+    hidePanelChrome={false}
+    onApiAvailable={(api) => {
+      setEmbeddableApi(api);
+    }}
+  />
+
+  /**
+   * On save, the page persists the current embeddable state.
+   * The embeddable manages its own state and returns the current state when requested.
+   * The page does not need to know about the internal details of the embeddable state.
+   */
+  <EuiButton
+    onClick={async () => {
+      if (embeddableApi) {
+        persistenceLayer.saveState(await embeddableApi.serializeState());
+      }
+    }}
+  >
+    Save
+  </EuiButton>
+```
+
 ### Key concepts
 
 #### Publishing package

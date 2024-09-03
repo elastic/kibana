@@ -43,11 +43,11 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
         </p>
       </EuiCallOut>
 
-      <EuiSpacer />
+      <EuiSpacer size="m" />
 
       <TopNav onSave={componentApi.onSave} />
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
       {panels.map(({ id, type }) => {
         return (
