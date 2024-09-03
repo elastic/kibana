@@ -86,7 +86,7 @@ export class RoleValidator {
           }
         )
       );
-    } else if (!role.name.match(NAME_REGEX)) {
+    } else if (this.buildFlavor !== 'serverless' && !role.name.match(NAME_REGEX)) {
       return invalid(
         i18n.translate(
           'xpack.security.management.editRole.validateRole.nameAllowedCharactersWarningMessage',
