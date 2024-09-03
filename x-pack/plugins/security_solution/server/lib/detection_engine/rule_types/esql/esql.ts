@@ -29,7 +29,7 @@ import { rowToDocument } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 
-import type { RunOpts, SignalSource, CreateQueryRuleAdditionalOptions } from '../types';
+import type { RunOpts, SignalSource, CreateRuleAdditionalOptions } from '../types';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
@@ -72,7 +72,7 @@ export const esqlExecutor = async ({
   version: string;
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
-  scheduleNotificationResponseActionsService?: CreateQueryRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService?: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
 }) => {
   const ruleParams = completeRule.ruleParams;
   /**

@@ -164,14 +164,11 @@ export interface ScheduleNotificationActions {
   responseActions: RuleResponseAction[];
 }
 
-// TODO TC: Rename - it's not about QueryRule anymore
-export interface CreateQueryRuleAdditionalOptions {
+export interface CreateRuleAdditionalOptions {
   scheduleNotificationResponseActionsService?: (params: ScheduleNotificationActions) => void;
 }
 
-export interface CreateQueryRuleOptions
-  extends CreateRuleOptions,
-    CreateQueryRuleAdditionalOptions {
+export interface CreateQueryRuleOptions extends CreateRuleOptions, CreateRuleAdditionalOptions {
   id: typeof QUERY_RULE_TYPE_ID | typeof SAVED_QUERY_RULE_TYPE_ID;
   name: 'Custom Query Rule' | 'Saved Query Rule';
 }

@@ -11,14 +11,10 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EsqlRuleParams } from '../../rule_schema';
 import { esqlExecutor } from './esql';
-import type {
-  CreateRuleOptions,
-  SecurityAlertType,
-  CreateQueryRuleAdditionalOptions,
-} from '../types';
+import type { CreateRuleOptions, SecurityAlertType, CreateRuleAdditionalOptions } from '../types';
 
 export const createEsqlAlertType = (
-  createOptions: CreateRuleOptions & CreateQueryRuleAdditionalOptions
+  createOptions: CreateRuleOptions & CreateRuleAdditionalOptions
 ): SecurityAlertType<EsqlRuleParams, {}, {}, 'default'> => {
   const { version, experimentalFeatures, licensing, scheduleNotificationResponseActionsService } =
     createOptions;

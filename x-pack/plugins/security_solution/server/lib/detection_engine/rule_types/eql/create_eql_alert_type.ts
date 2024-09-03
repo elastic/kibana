@@ -15,7 +15,7 @@ import type {
   CreateRuleOptions,
   SecurityAlertType,
   SignalSourceHit,
-  CreateQueryRuleAdditionalOptions,
+  CreateRuleAdditionalOptions,
 } from '../types';
 import { validateIndexPatterns } from '../utils';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
@@ -23,7 +23,7 @@ import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 
 export const createEqlAlertType = (
-  createOptions: CreateRuleOptions & CreateQueryRuleAdditionalOptions
+  createOptions: CreateRuleOptions & CreateRuleAdditionalOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
   const { experimentalFeatures, version, licensing, scheduleNotificationResponseActionsService } =
     createOptions;

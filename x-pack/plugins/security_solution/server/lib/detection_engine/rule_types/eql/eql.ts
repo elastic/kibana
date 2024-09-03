@@ -27,7 +27,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
   WrapSuppressedHits,
-  CreateQueryRuleAdditionalOptions,
+  CreateRuleAdditionalOptions,
 } from '../types';
 import {
   addToSearchAfterReturn,
@@ -68,7 +68,7 @@ interface EqlExecutorParams {
   alertWithSuppression: SuppressedAlertService;
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
-  scheduleNotificationResponseActionsService?: CreateQueryRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService?: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
 }
 
 export const eqlExecutor = async ({

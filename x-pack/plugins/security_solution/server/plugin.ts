@@ -78,7 +78,7 @@ import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitor
 import { createRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import type {
-  CreateQueryRuleAdditionalOptions,
+  CreateRuleAdditionalOptions,
   CreateRuleOptions,
 } from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
@@ -311,7 +311,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       analytics: core.analytics,
     };
 
-    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
+    const queryRuleAdditionalOptions: CreateRuleAdditionalOptions = {
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
         endpointAppContextService: this.endpointAppContextService,
         osqueryCreateActionService: plugins.osquery.createActionService,
