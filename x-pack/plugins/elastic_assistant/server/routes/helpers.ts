@@ -28,6 +28,7 @@ import { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
 import { ESQL_RESOURCE } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
@@ -284,6 +285,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
+  inference: InferenceServerStart;
   conversationId?: string;
   context: AwaitedProperties<
     Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
@@ -311,6 +313,7 @@ export const langChainExecute = async ({
   connectorId,
   context,
   actionsClient,
+  inference,
   request,
   logger,
   conversationId,
@@ -376,6 +379,7 @@ export const langChainExecute = async ({
     connectorId,
     esClient,
     esStore,
+    inference,
     isStream,
     llmType: getLlmType(actionTypeId),
     langChainMessages,

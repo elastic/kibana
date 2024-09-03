@@ -85,6 +85,7 @@ export const postActionsConnectorExecuteRoute = (
 
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
+          const inference = ctx.elasticAssistant.inference;
           const actionsClient = await actions.getActionsClientWithRequest(request);
 
           const conversationsDataClient =
@@ -117,6 +118,7 @@ export const postActionsConnectorExecuteRoute = (
             context: ctx,
             getElser,
             logger,
+            inference,
             messages: (newMessage ? [newMessage] : messages) ?? [],
             onLlmResponse,
             onNewReplacements,

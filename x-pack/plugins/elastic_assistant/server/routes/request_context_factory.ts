@@ -79,6 +79,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         return appContextService.getRegisteredFeatures(pluginName);
       },
 
+      inference: startPlugins.inference,
+
       telemetry: core.analytics,
 
       getAIAssistantKnowledgeBaseDataClient: memoize(() => {

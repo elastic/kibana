@@ -47,6 +47,7 @@
     "@kbn/security-plugin",
     "@kbn/apm-utils",
     "@kbn/std",
+    "@kbn/inference-plugin"
   ],
   "exclude": [
     "target/**/*",
