@@ -13,18 +13,24 @@ import {
   IndicesDataStreamsStatsDataStreamsStatsItem,
   SecurityHasPrivilegesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { MeteringStats } from '../../../lib/types';
 import { deserializeDataStream, deserializeDataStreamList } from '../../../../common/lib';
 import { EnhancedDataStreamFromEs } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
+interface MeteringStatsResponse {
+  datastreams: MeteringStats[];
+}
 const enhanceDataStreams = ({
   dataStreams,
   dataStreamsStats,
+  meteringStats,
   dataStreamsPrivileges,
 }: {
   dataStreams: IndicesDataStream[];
   dataStreamsStats?: IndicesDataStreamsStatsDataStreamsStatsItem[];
+  meteringStats?: MeteringStats[];
   dataStreamsPrivileges?: SecurityHasPrivilegesResponse;
 }): EnhancedDataStreamFromEs[] => {
   return dataStreams.map((dataStream) => {
@@ -51,6 +57,14 @@ const enhanceDataStreams = ({
       }
     }
 
+    if (meteringStats) {
+      const datastreamMeteringStats = meteringStats.find((s) => s.name === dataStream.name);
+      if (datastreamMeteringStats) {
+        enhancedDataStream.metering_size_in_bytes = datastreamMeteringStats.size_in_bytes;
+        enhancedDataStream.metering_doc_count = datastreamMeteringStats.num_docs;
+      }
+    }
+
     return enhancedDataStream;
   });
 };
@@ -67,6 +81,13 @@ const getDataStreamsStats = (client: IScopedClusterClient, name = '*') => {
     name,
     expand_wildcards: 'all',
     human: true,
+  });
+};
+
+const getMeteringStats = (client: IScopedClusterClient) => {
+  return client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>({
+    method: 'GET',
+    path: `/_metering/stats`,
   });
 };
 
@@ -99,9 +120,13 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
 
         let dataStreamsStats;
         let dataStreamsPrivileges;
+        let meteringStats;
 
         if (includeStats && config.isDataStreamStatsEnabled !== false) {
           ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client));
+        }
+        if (includeStats && config.isSizeAndDocCountEnabled !== false) {
+          ({ datastreams: meteringStats } = await getMeteringStats(client));
         }
 
         if (config.isSecurityEnabled() && dataStreams.length > 0) {
@@ -114,6 +139,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         const enhancedDataStreams = enhanceDataStreams({
           dataStreams,
           dataStreamsStats,
+          meteringStats,
           dataStreamsPrivileges,
         });
 

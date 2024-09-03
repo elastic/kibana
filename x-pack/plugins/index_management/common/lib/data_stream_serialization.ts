@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { DataStream, EnhancedDataStreamFromEs, Health, DataRetention } from '../types';
 
 export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs): DataStream {
@@ -19,12 +20,15 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     store_size: storageSize,
     store_size_bytes: storageSizeBytes,
     maximum_timestamp: maxTimeStamp,
+    metering_size_in_bytes: meteringStorageSizeBytes,
+    metering_doc_count: meteringDocsCount,
     _meta,
     privileges,
     hidden,
     lifecycle,
     next_generation_managed_by: nextGenerationManagedBy,
   } = dataStreamFromEs;
+  const meteringStorageSize = new ByteSizeValue(meteringStorageSizeBytes ?? 0).toString();
 
   return {
     name,
@@ -54,6 +58,9 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     storageSize,
     storageSizeBytes,
     maxTimeStamp,
+    meteringStorageSize,
+    meteringStorageSizeBytes,
+    meteringDocsCount,
     _meta,
     privileges,
     hidden,

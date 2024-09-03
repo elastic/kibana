@@ -60,10 +60,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   const {
     core: { getUrlForApp, executionContext },
     plugins: { isFleetEnabled },
-    config,
   } = useAppContext();
-
-  const { enableDataStreamStats: isDataStreamStatsEnabled } = config;
 
   useExecutionContext(executionContext, {
     type: 'application',
@@ -149,37 +146,35 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           </EuiText>
         </EuiFlexItem>
 
-        {isDataStreamStatsEnabled && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  label={i18n.translate(
-                    'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel',
-                    {
-                      defaultMessage: 'Include stats',
-                    }
-                  )}
-                  checked={isIncludeStatsChecked}
-                  onChange={(e) => setIsIncludeStatsChecked(e.target.checked)}
-                  data-test-subj="includeStatsSwitch"
-                />
-              </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={i18n.translate(
+                  'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel',
+                  {
+                    defaultMessage: 'Include stats',
+                  }
+                )}
+                checked={isIncludeStatsChecked}
+                onChange={(e) => setIsIncludeStatsChecked(e.target.checked)}
+                data-test-subj="includeStatsSwitch"
+              />
+            </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchToolTip',
-                    {
-                      defaultMessage: 'Including stats can increase reload times',
-                    }
-                  )}
-                  position="top"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchToolTip',
+                  {
+                    defaultMessage: 'Including stats can increase reload times',
+                  }
+                )}
+                position="top"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <FilterListButton<DataStreamFilterName> filters={filters} onChange={setFilters} />
         </EuiFlexItem>
