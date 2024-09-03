@@ -58,9 +58,9 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
       },
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
-        license: 'trial',
+        license,
         ssl,
-        serverArgs: [`xpack.license.self_generated.type=trial`, `xpack.security.enabled=true`],
+        serverArgs: [`xpack.license.self_generated.type=${license}`],
       },
       kbnTestServer: {
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),

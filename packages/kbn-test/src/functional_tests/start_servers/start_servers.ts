@@ -15,6 +15,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
+import { applyFipsOverrides } from '../lib/fips_overrides';
 import { readConfigFile } from '../../functional_test_runner';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
@@ -27,46 +28,12 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
   const reportTime = getTimeReporter(log, 'scripts/functional_tests_server');
 
   await withProcRunner(log, async (procs) => {
-    const extendedSettingsOverrides = (vars: any) => {
-      if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
-        vars.esTestCluster.license = 'trial';
-
-        const skipTags = vars.suiteTags?.exclude ?? [];
-        skipTags.push('skipFIPS');
-        vars.suiteTags = {
-          ...vars.suiteTags,
-          exclude: skipTags,
-        };
-
-        vars.security = {
-          ...vars.security,
-          defaultRoles: ['superuser', 'kibana_admin', 'system_indices_superuser'],
-        };
-
-        const newServerArgs = vars.esTestCluster.serverArgs.filter(
-          (arg: string) => arg !== 'xpack.security.enabled=false'
-        );
-        newServerArgs.push('xpack.security.enabled=true');
-
-        const selfTypedBasicLicenseIndex = newServerArgs.indexOf(
-          `xpack.license.self_generated.type=basic`
-        );
-        if (selfTypedBasicLicenseIndex > -1) {
-          newServerArgs[selfTypedBasicLicenseIndex] = `xpack.license.self_generated.type=trial`;
-        }
-
-        vars.esTestCluster.serverArgs = newServerArgs;
-      }
-
-      return vars;
-    };
-
     const config = await readConfigFile(
       log,
       options.esVersion,
       options.config,
       {},
-      extendedSettingsOverrides
+      applyFipsOverrides
     );
 
     const shutdownEs = await runElasticsearch({

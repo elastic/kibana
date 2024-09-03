@@ -20,7 +20,7 @@ export default async function ({ readConfigFile }) {
 
     esTestCluster: {
       ...commonConfig.get('esTestCluster'),
-      serverArgs: [`xpack.security.enabled=${process.env.ES_SECURITY_ENABLED ? 'true' : 'true'}`],
+      serverArgs: [`xpack.security.enabled=${process.env.ES_SECURITY_ENABLED ? 'true' : 'false'}`],
     },
 
     kbnTestServer: {

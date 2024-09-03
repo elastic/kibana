@@ -22,6 +22,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...withoutTlsConfig.getAll(),
+
     testFiles: [require.resolve('./tests/manual_configuration')],
 
     servers: {

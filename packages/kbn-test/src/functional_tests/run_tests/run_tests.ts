@@ -13,6 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
+import { applyFipsOverrides } from '../lib/fips_overrides';
 import { readConfigFile } from '../../functional_test_runner';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
@@ -67,46 +68,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         log.write(`--- [${progress}] Running ${Path.relative(REPO_ROOT, path)}`);
       }
 
-      const extendedSettingsOverrides = (vars: any) => {
-        if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
-          vars.esTestCluster.license = 'trial';
-
-          const skipTags = vars.suiteTags?.exclude ?? [];
-          skipTags.push('skipFIPS');
-          vars.suiteTags = {
-            ...vars.suiteTags,
-            exclude: skipTags,
-          };
-
-          vars.security = {
-            ...vars.security,
-            defaultRoles: ['superuser', 'kibana_admin', 'system_indices_superuser'],
-          };
-
-          const newServerArgs = vars.esTestCluster.serverArgs.filter(
-            (arg: string) => arg !== 'xpack.security.enabled=false'
-          );
-          newServerArgs.push('xpack.security.enabled=true');
-
-          const selfTypedBasicLicenseIndex = newServerArgs.indexOf(
-            `xpack.license.self_generated.type=basic`
-          );
-          if (selfTypedBasicLicenseIndex > -1) {
-            newServerArgs[selfTypedBasicLicenseIndex] = `xpack.license.self_generated.type=trial`;
-          }
-
-          vars.esTestCluster.serverArgs = newServerArgs;
-        }
-
-        return vars;
-      };
-
       const config = await readConfigFile(
         log,
         options.esVersion,
         path,
         settingOverrides,
-        extendedSettingsOverrides
+        applyFipsOverrides
       );
 
       const hasTests = await checkForEnabledTestsInFtrConfig({
