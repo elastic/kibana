@@ -74,7 +74,7 @@ export const parseJSONArray = (
  * @returns The truncated array with no more than MaxLogsSampleRows.
  * @template T - The type of elements in the array.
  */
-function _truncateLogSample<T>(array: T[]): T[] {
+function selectFromLogsSample<T>(array: T[]): T[] {
   const numElements = Math.min(MaxLogsSampleRows, array.length);
   partialShuffleArray(array, 1, numElements);
   return array.slice(0, numElements);
@@ -165,7 +165,7 @@ const parseLogsContent = (fileContent: string): ParseLogsResult => {
           return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
         }
 
-        const logSamples = _truncateLogSample(fileLines);
+        const logSamples = selectFromLogsSample(fileLines);
 
         return {
           samplesFormat: undefined,
@@ -186,7 +186,7 @@ const parseLogsContent = (fileContent: string): ParseLogsResult => {
     return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
   }
 
-  const logSamples = _truncateLogSample(parsedContent).map((line) => JSON.stringify(line));
+  const logSamples = selectFromLogsSample(parsedContent).map((line) => JSON.stringify(line));
   return { samplesFormat, logSamples, isTruncated: parsedContent.length !== logSamples.length };
 };
 
