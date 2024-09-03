@@ -7,8 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { pick } from 'lodash';
 import React from 'react';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { GridItem } from '../grid_item';
 

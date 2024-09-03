@@ -118,7 +118,7 @@ export function InvestigationDetailsPage() {
           ],
         }}
       >
-        <InvestigationDetails investigationId={investigationId} user={user.value} />
+        <InvestigationDetails user={user.value} />
       </ObservabilityPageTemplate>
     </InvestigationProvider>
   );
