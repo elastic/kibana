@@ -151,11 +151,11 @@ export function Main({ isEmbeddable = false }: MainProps) {
                       onClick={() =>
                         downloadFileAs(EXPORT_FILE_NAME, {
                           content: inputEditorValue,
-                          type: 'txt',
+                          type: 'text/plain',
                         })
                       }
                       size="xs"
-                      dataTestSubj="consoleExportFileButton"
+                      data-test-subj="consoleExportFileButton"
                     >
                       {MAIN_PANEL_LABELS.exportFileButton}
                     </EuiButtonEmpty>

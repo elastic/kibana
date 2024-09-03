@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 import expect from '@kbn/expect';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { existsSync, readFileSync, unlinkSync } from 'fs';
+import { resolve } from 'path';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -205,6 +208,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(actualResponse).to.contain('parsing_exception');
           expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
         });
+      });
+    });
+
+    describe('import/export file', () => {
+      it('can export input as file', async () => {
+        await PageObjects.console.monaco.enterText('GET _search');
+        await PageObjects.console.clickExportFileButton();
+
+        // Wait for download to trigger
+        const downloadPath = path.resolve(
+          REPO_ROOT,
+          `target/functional-tests/downloads/console_export.tsx`
+        );
+        await retry.try(async () => {
+          const fileExists = existsSync(downloadPath);
+          expect(fileExists).to.be(true);
+        });
+
+        // Verify the downloaded file content
+        const fileContent = readFileSync(downloadPath, 'utf8');
+        expect(fileContent).to.be('GET _search');
+
+        // Clean up downloaded file
+        unlinkSync(downloadPath);
       });
     });
   });
