@@ -48,7 +48,7 @@ image::images/dashboard-global-time-range.png[Time range menu with multiple time
 
 **To view and edit the time range applied to a specific panel:**
 
-When a custom filter is active for a single panel, it is indicated in the panel's header.
+When a custom time range is active for a single panel, it is indicated in the panel's header.
 
 To edit it, click the filter. You can then adjust and apply the updated **Time range**.
 
@@ -156,7 +156,7 @@ When you download visualization panels with multiple layers, each layer produces
 
 **View the time range on specific panels:**
 
-When a custom filter is active for a single panel, it is indicated in the panel's header.
+When a custom time range is active for a single panel, it is indicated in the panel's header.
 
 You can view it in more details and edit it by clicking the filter.
 
