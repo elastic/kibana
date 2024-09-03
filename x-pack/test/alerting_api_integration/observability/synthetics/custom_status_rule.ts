@@ -9,6 +9,7 @@ import moment from 'moment';
 import { StatusRuleParams } from '@kbn/synthetics-plugin/common/rules/status_rule';
 import {
   getReasonMessage,
+  getReasonMessageForTimeWindow,
   getUngroupedReasonMessage,
 } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/message_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -140,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         condition: {
           window: {
             numberOfLocations: 2,
-            numberOfChecks: 5,
+            numberOfChecks: 1,
           },
           groupBy: 'locationId',
           downThreshold: 1,
@@ -192,6 +193,35 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
+      const statusConfigs = [
+        {
+          checks: {
+            down: 1,
+            downWithinXChecks: 1,
+          },
+          ping: {
+            observer: {
+              geo: {
+                name: 'Dev Service',
+              },
+            },
+          },
+        },
+        {
+          checks: {
+            down: 1,
+            downWithinXChecks: 1,
+          },
+          ping: {
+            observer: {
+              geo: {
+                name: 'Dev Service 2',
+              },
+            },
+          },
+        },
+      ];
+
       it('should trigger down alert based on location threshold with two locations down', async () => {
         await ruleHelper.makeSummaries({
           monitor,
@@ -219,36 +249,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(alert).to.have.property('kibana.alert.status', 'active');
 
         const reasonMessage = getUngroupedReasonMessage({
-          statusConfigs: [
-            {
-              checks: {
-                down: 1,
-                downWithinXChecks: 2,
-              },
-              ping: {
-                observer: {
-                  geo: {
-                    name: 'Dev Service',
-                  },
-                },
-              },
-            },
-            {
-              checks: {
-                down: 1,
-                downWithinXChecks: 1,
-              },
-              ping: {
-                observer: {
-                  geo: {
-                    name: 'Dev Service 2',
-                  },
-                },
-              },
-            },
-          ],
+          statusConfigs,
           monitorName: monitor.name,
-          params: params,
+          params,
         });
 
         expect(alert['kibana.alert.reason']).to.eql(reasonMessage);
@@ -274,8 +277,10 @@ export default function ({ getService }: FtrProviderContext) {
         expect(alert).to.have.property('kibana.alert.status', 'recovered');
       });
 
+      let downDocs;
+
       it('should be down again', async () => {
-        await ruleHelper.makeSummaries({
+        downDocs = await ruleHelper.makeSummaries({
           monitor,
           downChecks: 1,
         });
@@ -287,9 +292,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         const alert: any = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'active');
-        expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" is down from 2 locations (Dev Service, Dev Service 2). Alert when monitor is down from 2 locations.`
-        );
+        const reasonMessage = getUngroupedReasonMessage({
+          statusConfigs,
+          monitorName: monitor.name,
+          params,
+        });
+        expect(alert['kibana.alert.reason']).to.eql(reasonMessage);
       });
 
       let pvtLoc: any = {};
@@ -316,11 +324,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(alert).to.have.property('kibana.alert.status', 'recovered');
       });
 
-      it('creates a custom rule with 50% location threshold', async () => {
-        const params: StatusRuleParams = {
+      it('creates a custom rule with 1 location threshold', async () => {
+        params = {
           condition: {
             window: {
               numberOfLocations: 1,
+              numberOfChecks: 1,
             },
             groupBy: 'locationId',
             downThreshold: 1,
@@ -340,12 +349,24 @@ export default function ({ getService }: FtrProviderContext) {
         const alert: any = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'active');
         expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" is down from 1 location (Dev Service). Alert when monitor is down from 1 location.`
+          getReasonMessage({
+            name: monitor.name,
+            location: 'Dev Service',
+            timestamp: moment(downDocs[0]['@timestamp']).format('LLL'),
+            status: 'down',
+            numberOfChecks: 1,
+            downThreshold: 1,
+            numberOfLocations: 1,
+            checks: {
+              downWithinXChecks: 1,
+              down: 1,
+            },
+          })
         );
       });
 
       it('should update message after being down from another location', async function () {
-        await ruleHelper.makeSummaries({
+        const docs = await ruleHelper.makeSummaries({
           monitor,
           location: {
             id: pvtLoc.id,
@@ -362,7 +383,19 @@ export default function ({ getService }: FtrProviderContext) {
           const alert: any = response.hits.hits?.[0]._source;
           expect(alert).to.have.property('kibana.alert.status', 'active');
           expect(alert['kibana.alert.reason']).to.eql(
-            `Monitor "${monitor.name}" is down from 2 locations (Dev Service, ${pvtLoc.label}). Alert when monitor is down from 1 location.`
+            getReasonMessage({
+              name: monitor.name,
+              location: 'Dev Service',
+              timestamp: moment(downDocs[0]['@timestamp']).format('LLL'),
+              status: 'down',
+              numberOfChecks: 1,
+              downThreshold: 1,
+              numberOfLocations: 1,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            })
           );
         });
       });
@@ -387,6 +420,7 @@ export default function ({ getService }: FtrProviderContext) {
                 unit: 'm',
                 size: 10,
               },
+              numberOfLocations: 1,
             },
             groupBy: 'locationId',
             downThreshold: 5,
@@ -415,16 +449,22 @@ export default function ({ getService }: FtrProviderContext) {
         const alert: any = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'active');
         expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" from Dev Service is down. Checked at ${moment(
-            docs[4]['@timestamp']
-          ).format('LLL')}. Alert when 5 checks are down within the last 1 minute.`
+          getReasonMessageForTimeWindow({
+            name: monitor.name,
+            location: 'Dev Service',
+            timestamp: moment(docs[4]['@timestamp']).format('LLL'),
+            numberOfChecks: 5,
+            downThreshold: 5,
+            numberOfLocations: 1,
+            timeWindow: { unit: 'm', size: 10 },
+          })
         );
       });
 
       it('should trigger recovered alert', async function () {
         docs = await ruleHelper.makeSummaries({
           monitor,
-          upChecks: 1,
+          upChecks: 10,
         });
 
         const response = await ruleHelper.waitForStatusAlert({

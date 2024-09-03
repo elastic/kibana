@@ -156,7 +156,7 @@ export const parseArrayFilters = ({
     getSavedObjectKqlFilter({ field: 'locations.id', values: locationFilter }),
     getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules }),
     getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds }),
-    getSavedObjectKqlFilter({ field: 'config_id', values: monitorQueryIds }),
+    getSavedObjectKqlFilter({ field: 'config_id', values: configIds }),
   ]
     .filter((f) => !!f)
     .join(' AND ');

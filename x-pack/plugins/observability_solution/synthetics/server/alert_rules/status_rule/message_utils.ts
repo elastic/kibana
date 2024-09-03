@@ -8,6 +8,7 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { getConditionType, StatusRuleParams, TimeWindow } from '../../../common/rules/status_rule';
 import { AlertStatusMetaDataCodec } from './queries/query_monitor_status_alert';
 import { getTimeUnitLabel } from '../common';
 import { ALERT_REASON_MSG } from '../action_variables';
@@ -24,10 +25,6 @@ import {
 } from '../../../common/field_names';
 import { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
-import {
-  getConditionType,
-  StatusRuleParams,
-} from '@kbn/synthetics-plugin/common/rules/status_rule';
 
 export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule) => ({
   [MONITOR_ID]: monitorSummary.monitorId,
@@ -164,7 +161,7 @@ export const getUngroupedReasonMessage = ({
         defaultMessage: `Monitor "{name}" is {status}{locationDetails}. Alert when down => {threshold} {threshold, plural, one {time} other {times}} {condition} from at least {numberOfLocations} {numberOfLocations, plural, one {location} other {locations}}.`,
         values: {
           name: monitorName,
-          status: status,
+          status,
           threshold: downThreshold,
           numberOfLocations,
           condition: isChecksBased
@@ -181,7 +178,7 @@ export const getUngroupedReasonMessage = ({
                   defaultMessage: 'within the last {time} {unit}',
                   values: {
                     time: timeWindow.size,
-                    unit: getTimeUnitLabel(timeWindow.unit, timeWindow.size),
+                    unit: getTimeUnitLabel(timeWindow),
                   },
                 }
               ),
@@ -241,6 +238,40 @@ export const getReasonMessage = ({
       numberOfLocations,
       downChecks: checks?.downWithinXChecks ?? 1,
       numberOfChecks,
+    },
+  });
+};
+
+export const getReasonMessageForTimeWindow = ({
+  name,
+  location,
+  timestamp,
+  downThreshold,
+  numberOfLocations,
+  timeWindow,
+  status = DOWN_LABEL,
+}: {
+  name: string;
+  location: string;
+  status: string;
+  timestamp: string;
+  downThreshold: number;
+  numberOfLocations: number;
+  timeWindow: TimeWindow;
+}) => {
+  const checkedAt = moment(timestamp).format('LLL');
+
+  return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.timeBased', {
+    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Alert when {downThreshold} checks are down within the last {size} {unitLabel} from at least {numberOfLocations} {numberOfLocations, plural, one {location} other {locations}}.`,
+    values: {
+      name,
+      status,
+      location,
+      checkedAt,
+      downThreshold,
+      unitLabel: getTimeUnitLabel(timeWindow),
+      numberOfLocations,
+      size: timeWindow.size,
     },
   });
 };

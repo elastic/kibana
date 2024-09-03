@@ -23,11 +23,17 @@ export const TimeWindowSchema = schema.object({
 export const NumberOfChecksSchema = schema.object({
   numberOfChecks: schema.number({
     defaultValue: 5,
+    min: 1,
+    max: 100,
   }),
 });
 
 export const numberOfLocationsSchema = schema.object({
-  numberOfLocations: schema.number(),
+  numberOfLocations: schema.number({
+    defaultValue: 1,
+    min: 1,
+    max: 100,
+  }),
 });
 
 export const StatusRuleConditionSchema = schema.object({

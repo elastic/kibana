@@ -11,20 +11,19 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { queryFilterMonitors } from './queries/filter_monitors';
 import { MonitorSummaryStatusRule, StatusRuleExecutorOptions } from './types';
 import {
   getAlertDetailsUrl,
   getFullViewInAppMessage,
   getRelativeViewInAppUrl,
-  getTimeUnitLabel,
   getViewInAppUrl,
 } from '../common';
 import {
   DOWN_LABEL,
   getMonitorAlertDocument,
   getMonitorSummary,
+  getReasonMessageForTimeWindow,
   getUngroupedReasonMessage,
 } from './message_utils';
 import {
@@ -138,10 +137,6 @@ export class StatusRuleExecutor {
   async getDownChecks(prevDownConfigs: StatusConfigs = {}): Promise<AlertOverviewStatus> {
     await this.init();
     const { enabledMonitorQueryIds } = await this.getMonitors();
-    this.logger.info(
-      `[StatusRuleExecutor] found monitors ${this.monitors.length} ruleName=${this.ruleName}`,
-      enabledMonitorQueryIds
-    );
 
     const { maxPeriod, monitorLocationIds, monitorLocationMap } = processMonitors(this.monitors);
 
@@ -250,12 +245,6 @@ export class StatusRuleExecutor {
     );
     const groupBy = this.params?.condition?.groupBy ?? 'locationId';
 
-    this.logger.info(
-      `[StatusRuleExecutor] handleDownMonitorThresholdAlert found downConfigs ${Object.entries(downConfigs).length
-      } ruleName=${this.ruleName}`,
-      downConfigs
-    );
-
     if (groupBy === 'locationId' && numberOfLocations === 1) {
       Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
         const doesMonitorMeetLocationThreshold = getDoesMonitorMeetLocationThreshold({
@@ -308,14 +297,11 @@ export class StatusRuleExecutor {
     }
   };
 
-  getMonitorDownSummary({
-    statusConfig,
-
-  }: {
-    statusConfig: AlertStatusMetaDataCodec;
-  }) {
+  getMonitorDownSummary({ statusConfig }: { statusConfig: AlertStatusMetaDataCodec }) {
     const { ping, configId, locationId, checks } = statusConfig;
-    const { numberOfChecks, downThreshold, numberOfLocations, } = getConditionType(this.params.condition);
+    const { numberOfChecks, downThreshold, numberOfLocations } = getConditionType(
+      this.params.condition
+    );
 
     const baseSummary = getMonitorSummary({
       monitorInfo: ping,
@@ -333,24 +319,15 @@ export class StatusRuleExecutor {
     const condition = this.params.condition;
     if (condition?.window && 'time' in condition.window) {
       const time = condition.window.time;
-      const { unit, size } = time;
-      const checkedAt = moment(baseSummary.timestamp).format('LLL');
-      baseSummary.reason = i18n.translate(
-        'xpack.synthetics.alertRules.monitorStatus.reasonMessage.timeBased',
-        {
-          defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Alert when {downThreshold} checks are down within the last {size} {unitLabel} from at least {numberOfLocations} {numberOfLocations, plural, one {location} other {locations}}.`,
-          values: {
-            name: baseSummary.monitorName,
-            status: baseSummary.status,
-            location: baseSummary.locationName,
-            checkedAt,
-            downThreshold,
-            unitLabel: getTimeUnitLabel(unit, size),
-            numberOfLocations,
-            size,
-          },
-        }
-      );
+      baseSummary.reason = getReasonMessageForTimeWindow({
+        name: baseSummary.monitorName,
+        status: DOWN_LABEL,
+        location: baseSummary.locationNames,
+        downThreshold,
+        timeWindow: time,
+        timestamp: baseSummary.timestamp,
+        numberOfLocations,
+      });
     }
 
     return baseSummary;

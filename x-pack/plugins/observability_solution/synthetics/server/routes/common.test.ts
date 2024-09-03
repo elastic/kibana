@@ -14,7 +14,7 @@ describe('common utils', () => {
       configIds: ['1 4', '2 6', '5'],
     });
     expect(filters.filtersStr).toMatchInlineSnapshot(
-      `" (synthetics-monitor.attributes.config_id: (\\"1 4\\" OR \\"2 6\\" OR \\"5\\"))"`
+      `"synthetics-monitor.attributes.config_id:(\\"1 4\\" OR \\"2 6\\" OR \\"5\\")"`
     );
   });
   it('tests parseArrayFilters with tags and configIds', () => {
@@ -23,7 +23,7 @@ describe('common utils', () => {
       tags: ['tag1', 'tag2'],
     });
     expect(filters.filtersStr).toMatchInlineSnapshot(
-      `" (synthetics-monitor.attributes.tags: (\\"tag1\\" OR \\"tag2\\")) AND  (synthetics-monitor.attributes.config_id: (\\"1\\" OR \\"2\\"))"`
+      `"synthetics-monitor.attributes.tags:(\\"tag1\\" OR \\"tag2\\") AND synthetics-monitor.attributes.config_id:(\\"1\\" OR \\"2\\")"`
     );
   });
   it('tests parseArrayFilters with all options', () => {
@@ -37,7 +37,7 @@ describe('common utils', () => {
       schedules: ['schedule1', 'schedule2'],
     });
     expect(filters.filtersStr).toMatchInlineSnapshot(
-      `" (synthetics-monitor.attributes.tags: (\\"tag1\\" OR \\"tag2\\")) AND  (synthetics-monitor.attributes.project_id: (\\"project1\\" OR \\"project2\\")) AND  (synthetics-monitor.attributes.type: (\\"type1\\" OR \\"type2\\")) AND  (synthetics-monitor.attributes.schedule.number: (\\"schedule1\\" OR \\"schedule2\\")) AND  (synthetics-monitor.attributes.id: (\\"query1\\" OR \\"query2\\")) AND  (synthetics-monitor.attributes.config_id: (\\"1\\" OR \\"2\\"))"`
+      `"synthetics-monitor.attributes.tags:(\\"tag1\\" OR \\"tag2\\") AND synthetics-monitor.attributes.project_id:(\\"project1\\" OR \\"project2\\") AND synthetics-monitor.attributes.type:(\\"type1\\" OR \\"type2\\") AND synthetics-monitor.attributes.schedule.number:(\\"schedule1\\" OR \\"schedule2\\") AND synthetics-monitor.attributes.id:(\\"query1\\" OR \\"query2\\") AND synthetics-monitor.attributes.config_id:(\\"1\\" OR \\"2\\")"`
     );
   });
 });

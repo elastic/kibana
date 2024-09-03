@@ -359,7 +359,8 @@ export const SyntheticsRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityUpt
   shouldWrite: true,
 };
 
-export function getTimeUnitLabel(timeUnit: TimeWindow['unit'], timeValue: TimeWindow['size'] = 1) {
+export function getTimeUnitLabel(timeWindow: TimeWindow) {
+  const { size: timeValue = 1, unit: timeUnit } = timeWindow;
   switch (timeUnit) {
     case 's':
       return i18n.translate('xpack.synthetics.timeUnits.secondLabel', {
