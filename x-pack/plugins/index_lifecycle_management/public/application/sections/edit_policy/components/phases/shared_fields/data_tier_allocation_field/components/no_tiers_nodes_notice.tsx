@@ -30,7 +30,10 @@ export const NoTiersAvailableUsingNodeAttributesNotice: FunctionComponent = () =
         )}
       </p>
 
-      <p>{nodeAllocationMigrationGuidance}</p>
+      {
+        // @ts-ignore - TODO broken types with @types/react18, seems like a legit runtime bug
+        nodeAllocationMigrationGuidance
+      }
     </EuiCallOut>
   );
 };

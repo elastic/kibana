@@ -26,7 +26,10 @@ const i18nTexts = {
           )}
         </p>
 
-        {nodeAllocationMigrationGuidance}
+        {
+          // @ts-ignore - TODO broken types with @types/react18, seems like a legit runtime bug
+          nodeAllocationMigrationGuidance
+        }
       </>
     ),
     cold: (
@@ -38,7 +41,10 @@ const i18nTexts = {
           )}
         </p>
 
-        {nodeAllocationMigrationGuidance}
+        {
+          // @ts-ignore - TODO broken types with @types/react18, seems like a legit runtime bug
+          nodeAllocationMigrationGuidance
+        }
       </>
     ),
   },

@@ -323,6 +323,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
       fieldNotices={renderInfoCallout()}
       fullWidth
     >
+      {/* @ts-ignore - TODO broken types with @types/react18, seems like a legit runtime bug*/}
       {isDisabledDueToLicense ? <div /> : renderField}
     </DescribedFormRow>
   );

@@ -126,7 +126,7 @@ export const MetricExpression = ({
   }, [customMetricTabOpen, metric, customMetric, firstFieldOption]);
 
   const onChangeTab = useCallback(
-    (id) => {
+    (id: string) => {
       if (id === 'metric-popover-custom') {
         setCustomMetricTabOpen(true);
         onChange('custom');
@@ -139,7 +139,7 @@ export const MetricExpression = ({
   );
 
   const onAggregationChange = useCallback(
-    (e) => {
+    (e: any) => {
       const value = e.target.value;
       const aggValue: SnapshotCustomAggregation = SnapshotCustomAggregationRT.is(value)
         ? value
@@ -166,7 +166,7 @@ export const MetricExpression = ({
 
   const debouncedOnChangeCustom = debounce(onChangeCustom, 500);
   const onLabelChange = useCallback(
-    (e) => {
+    (e: any) => {
       setFieldDisplayedCustomLabel(e.target.value);
       const newCustomMetric = {
         ...customMetric,

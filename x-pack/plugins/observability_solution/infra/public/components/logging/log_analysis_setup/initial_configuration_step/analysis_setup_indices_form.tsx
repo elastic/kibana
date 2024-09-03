@@ -58,7 +58,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   );
 
   const changeDatasetFilter = useCallback(
-    (indexName: string, datasetFilter) => {
+    (indexName: string, datasetFilter: any) => {
       onChangeSelectedIndices(
         indices.map((index) => {
           return index.name === indexName ? { ...index, datasetFilter } : index;
