@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 import { investigationItemResponseSchema } from './investigation_item';
-import { itemSchema } from '../schema/investigation_item';
+import { itemSchema } from '../schema';
 
 const updateInvestigationItemParamsSchema = t.type({
   path: t.type({

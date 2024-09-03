@@ -21,6 +21,10 @@ export async function updateInvestigationItem(
     throw new Error('Item not found');
   }
 
+  if (item.type !== params.type) {
+    throw new Error('Cannot change item type');
+  }
+
   if (item.createdBy !== user.username) {
     throw new Error('User does not have permission to update item');
   }
