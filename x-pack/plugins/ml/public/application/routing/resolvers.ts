@@ -7,9 +7,10 @@
 
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 import { loadMlServerInfo } from '../services/ml_server_info';
+import type { MlApiServices } from '../services/ml_api_service';
 
 export interface Resolvers {
-  [name: string]: () => Promise<any>;
+  [name: string]: (mlApiServices: MlApiServices) => Promise<any>;
 }
 export type ResolverResults =
   | {

@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type RuleExecutionMetrics = z.infer<typeof RuleExecutionMetrics>;
 export const RuleExecutionMetrics = z.object({

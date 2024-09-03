@@ -54,6 +54,7 @@
     "@kbn/rollup",
     "@kbn/ml-error-utils",
     "@kbn/unsaved-changes-prompt",
+    "@kbn/shared-ux-table-persist",
   ],
   "exclude": ["target/**/*"]
 }

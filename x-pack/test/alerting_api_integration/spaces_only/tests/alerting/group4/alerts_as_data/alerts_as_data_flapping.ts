@@ -39,7 +39,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         query: { match_all: {} },
         conflicts: 'proceed',
       });
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
     });
 
     // These are the same tests from x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group1/event_log.ts

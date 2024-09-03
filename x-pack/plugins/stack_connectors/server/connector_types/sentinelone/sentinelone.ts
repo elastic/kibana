@@ -8,6 +8,7 @@
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { Stream } from 'stream';
 import type {
   SentinelOneConfig,
@@ -157,77 +158,94 @@ export class SentinelOneConnector extends SubActionConnector<
     });
   }
 
-  public async fetchAgentFiles({
-    files,
-    agentUUID,
-    zipPassCode,
-  }: SentinelOneFetchAgentFilesParams) {
-    const agent = await this.getAgents({ uuid: agentUUID });
-    const agentId = agent.data[0]?.id;
-
+  public async fetchAgentFiles(
+    { files, agentId, zipPassCode }: SentinelOneFetchAgentFilesParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ) {
     if (!agentId) {
-      throw new Error(`No agent found in SentinelOne for UUID [${agentUUID}]`);
+      throw new Error(`'agentId' parameter is required`);
     }
 
-    return this.sentinelOneApiRequest({
-      url: `${this.urls.agents}/${agentId}/actions/fetch-files`,
-      method: 'post',
-      data: {
+    return this.sentinelOneApiRequest(
+      {
+        url: `${this.urls.agents}/${agentId}/actions/fetch-files`,
+        method: 'post',
         data: {
-          password: zipPassCode,
-          files,
+          data: {
+            password: zipPassCode,
+            files,
+          },
         },
+        responseSchema: SentinelOneFetchAgentFilesResponseSchema,
       },
-      responseSchema: SentinelOneFetchAgentFilesResponseSchema,
-    });
+      connectorUsageCollector
+    );
   }
 
-  public async downloadAgentFile({ agentUUID, activityId }: SentinelOneDownloadAgentFileParams) {
-    const agent = await this.getAgents({ uuid: agentUUID });
-    const agentId = agent.data[0]?.id;
-
+  public async downloadAgentFile(
+    { agentId, activityId }: SentinelOneDownloadAgentFileParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ) {
     if (!agentId) {
-      throw new Error(`No agent found in SentinelOne for UUID [${agentUUID}]`);
+      throw new Error(`'agentId' parameter is required`);
     }
 
-    return this.sentinelOneApiRequest({
-      url: `${this.urls.agents}/${agentId}/uploads/${activityId}`,
-      method: 'get',
-      responseType: 'stream',
-      responseSchema: SentinelOneDownloadAgentFileResponseSchema,
-    });
+    return this.sentinelOneApiRequest(
+      {
+        url: `${this.urls.agents}/${agentId}/uploads/${activityId}`,
+        method: 'get',
+        responseType: 'stream',
+        responseSchema: SentinelOneDownloadAgentFileResponseSchema,
+      },
+      connectorUsageCollector
+    );
   }
 
-  public async getActivities(queryParams?: SentinelOneGetActivitiesParams) {
-    return this.sentinelOneApiRequest({
-      url: this.urls.activities,
-      method: 'get',
-      params: queryParams,
-      responseSchema: SentinelOneGetActivitiesResponseSchema,
-    });
+  public async getActivities(
+    queryParams?: SentinelOneGetActivitiesParams,
+    connectorUsageCollector?: ConnectorUsageCollector
+  ) {
+    return this.sentinelOneApiRequest(
+      {
+        url: this.urls.activities,
+        method: 'get',
+        params: queryParams,
+        responseSchema: SentinelOneGetActivitiesResponseSchema,
+      },
+      connectorUsageCollector!
+    );
   }
 
-  public async executeScript({ filter, script }: SentinelOneExecuteScriptParams) {
+  public async executeScript(
+    { filter, script }: SentinelOneExecuteScriptParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ) {
     if (!filter.ids && !filter.uuids) {
       throw new Error(`A filter must be defined; either 'ids' or 'uuids'`);
     }
 
-    return this.sentinelOneApiRequest({
-      url: this.urls.remoteScriptsExecute,
-      method: 'post',
-      data: {
+    return this.sentinelOneApiRequest(
+      {
+        url: this.urls.remoteScriptsExecute,
+        method: 'post',
         data: {
-          outputDestination: 'SentinelCloud',
-          ...script,
+          data: {
+            outputDestination: 'SentinelCloud',
+            ...script,
+          },
+          filter,
         },
-        filter,
+        responseSchema: SentinelOneExecuteScriptResponseSchema,
       },
-      responseSchema: SentinelOneExecuteScriptResponseSchema,
-    });
+      connectorUsageCollector
+    );
   }
 
-  public async isolateHost({ alertIds, ...payload }: SentinelOneIsolateHostParams) {
-    const response = await this.getAgents(payload);
+  public async isolateHost(
+    { alertIds, ...payload }: SentinelOneIsolateHostParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ) {
+    const response = await this.getAgents(payload, connectorUsageCollector);
 
     if (response.data.length === 0) {
       const errorMessage = 'No agents found';
@@ -243,20 +261,26 @@ export class SentinelOneConnector extends SubActionConnector<
 
     const agentId = response.data[0].id;
 
-    return this.sentinelOneApiRequest({
-      url: this.urls.isolateHost,
-      method: 'post',
-      data: {
-        filter: {
-          ids: agentId,
+    return this.sentinelOneApiRequest(
+      {
+        url: this.urls.isolateHost,
+        method: 'post',
+        data: {
+          filter: {
+            ids: agentId,
+          },
         },
+        responseSchema: SentinelOneIsolateHostResponseSchema,
       },
-      responseSchema: SentinelOneIsolateHostResponseSchema,
-    });
+      connectorUsageCollector
+    );
   }
 
-  public async releaseHost({ alertIds, ...payload }: SentinelOneIsolateHostParams) {
-    const response = await this.getAgents(payload);
+  public async releaseHost(
+    { alertIds, ...payload }: SentinelOneIsolateHostParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ) {
+    const response = await this.getAgents(payload, connectorUsageCollector);
 
     if (response.data.length === 0) {
       throw new Error('No agents found');
@@ -268,57 +292,76 @@ export class SentinelOneConnector extends SubActionConnector<
 
     const agentId = response.data[0].id;
 
-    return this.sentinelOneApiRequest({
-      url: this.urls.releaseHost,
-      method: 'post',
-      data: {
-        filter: {
-          ids: agentId,
+    return this.sentinelOneApiRequest(
+      {
+        url: this.urls.releaseHost,
+        method: 'post',
+        data: {
+          filter: {
+            ids: agentId,
+          },
         },
+        responseSchema: SentinelOneIsolateHostResponseSchema,
       },
-      responseSchema: SentinelOneIsolateHostResponseSchema,
-    });
+      connectorUsageCollector
+    );
   }
 
   public async getAgents(
-    payload: SentinelOneGetAgentsParams
+    payload: SentinelOneGetAgentsParams,
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<SentinelOneGetAgentsResponse> {
-    return this.sentinelOneApiRequest({
-      url: this.urls.agents,
-      params: {
-        ...payload,
+    return this.sentinelOneApiRequest(
+      {
+        url: this.urls.agents,
+        params: {
+          ...payload,
+        },
+        responseSchema: SentinelOneGetAgentsResponseSchema,
       },
-      responseSchema: SentinelOneGetAgentsResponseSchema,
-    });
+      connectorUsageCollector
+    );
   }
 
   public async getRemoteScriptStatus(
-    payload: SentinelOneGetRemoteScriptStatusParams
+    payload: SentinelOneGetRemoteScriptStatusParams,
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<SentinelOneGetRemoteScriptStatusApiResponse> {
-    return this.sentinelOneApiRequest({
-      url: this.urls.remoteScriptStatus,
-      params: {
-        parent_task_id: payload.parentTaskId,
+    return this.sentinelOneApiRequest(
+      {
+        url: this.urls.remoteScriptStatus,
+        params: {
+          parent_task_id: payload.parentTaskId,
+        },
+        responseSchema: SentinelOneGetRemoteScriptStatusResponseSchema,
       },
-      responseSchema: SentinelOneGetRemoteScriptStatusResponseSchema,
-    }) as unknown as SentinelOneGetRemoteScriptStatusApiResponse;
+      connectorUsageCollector
+    ) as unknown as SentinelOneGetRemoteScriptStatusApiResponse;
   }
 
-  public async getRemoteScriptResults({
-    taskIds,
-  }: SentinelOneGetRemoteScriptResultsParams): Promise<SentinelOneGetRemoteScriptResultsApiResponse> {
-    return this.sentinelOneApiRequest({
-      url: this.urls.remoteScriptsResults,
-      method: 'post',
-      data: { data: { taskIds } },
-      responseSchema: SentinelOneGetRemoteScriptResultsResponseSchema,
-    }) as unknown as SentinelOneGetRemoteScriptResultsApiResponse;
+  public async getRemoteScriptResults(
+    { taskIds }: SentinelOneGetRemoteScriptResultsParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<SentinelOneGetRemoteScriptResultsApiResponse> {
+    return this.sentinelOneApiRequest(
+      {
+        url: this.urls.remoteScriptsResults,
+        method: 'post',
+        data: { data: { taskIds } },
+        responseSchema: SentinelOneGetRemoteScriptResultsResponseSchema,
+      },
+      connectorUsageCollector
+    ) as unknown as SentinelOneGetRemoteScriptResultsApiResponse;
   }
 
-  public async downloadRemoteScriptResults({
-    taskId,
-  }: SentinelOneDownloadRemoteScriptResultsParams): Promise<Stream> {
-    const scriptResultsInfo = await this.getRemoteScriptResults({ taskIds: [taskId] });
+  public async downloadRemoteScriptResults(
+    { taskId }: SentinelOneDownloadRemoteScriptResultsParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<Stream> {
+    const scriptResultsInfo = await this.getRemoteScriptResults(
+      { taskIds: [taskId] },
+      connectorUsageCollector
+    );
 
     this.logger.debug(
       () => `script results for taskId [${taskId}]:\n${JSON.stringify(scriptResultsInfo)}`
@@ -337,26 +380,33 @@ export class SentinelOneConnector extends SubActionConnector<
       throw new Error(`Download URL for script results of task id [${taskId}] not found`);
     }
 
-    const downloadConnection = await this.request({
-      url: fileUrl,
-      method: 'get',
-      responseType: 'stream',
-      responseSchema: SentinelOneDownloadRemoteScriptResultsResponseSchema,
-    });
+    const downloadConnection = await this.request(
+      {
+        url: fileUrl,
+        method: 'get',
+        responseType: 'stream',
+        responseSchema: SentinelOneDownloadRemoteScriptResultsResponseSchema,
+      },
+      connectorUsageCollector
+    );
 
     return downloadConnection.data;
   }
 
   private async sentinelOneApiRequest<R extends SentinelOneBaseApiResponse>(
-    req: SubActionRequestParams<R>
+    req: SubActionRequestParams<R>,
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<R> {
-    const response = await this.request<R>({
-      ...req,
-      params: {
-        ...req.params,
-        APIToken: this.secrets.token,
+    const response = await this.request<R>(
+      {
+        ...req,
+        params: {
+          ...req.params,
+          APIToken: this.secrets.token,
+        },
       },
-    });
+      connectorUsageCollector
+    );
 
     return response.data;
   }
@@ -384,15 +434,19 @@ export class SentinelOneConnector extends SubActionConnector<
   }
 
   public async getRemoteScripts(
-    payload: SentinelOneGetRemoteScriptsParams
+    payload: SentinelOneGetRemoteScriptsParams,
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<SentinelOneGetRemoteScriptsResponse> {
-    return this.sentinelOneApiRequest({
-      url: this.urls.remoteScripts,
-      params: {
-        limit: API_MAX_RESULTS,
-        ...payload,
+    return this.sentinelOneApiRequest(
+      {
+        url: this.urls.remoteScripts,
+        params: {
+          limit: API_MAX_RESULTS,
+          ...payload,
+        },
+        responseSchema: SentinelOneGetRemoteScriptsResponseSchema,
       },
-      responseSchema: SentinelOneGetRemoteScriptsResponseSchema,
-    });
+      connectorUsageCollector
+    );
   }
 }
