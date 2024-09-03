@@ -59,7 +59,7 @@ export class DatasetQualityServerPlugin implements Plugin {
     });
 
     // Setup Data Telemetry Service
-    this.dataTelemetryService.setup(core.analytics);
+    this.dataTelemetryService.setup(core.analytics, plugins.taskManager);
 
     return {};
   }
@@ -68,7 +68,7 @@ export class DatasetQualityServerPlugin implements Plugin {
     this.logger.debug('dataset_quality: Started');
 
     // Start Data Telemetry Service
-    this.dataTelemetryService.start(plugins.telemetry, core).catch((error) => {
+    this.dataTelemetryService.start(plugins.telemetry, core, plugins.taskManager).catch((error) => {
       this.logger.error(`[Data Telemetry Service]: ${error}`);
     });
 

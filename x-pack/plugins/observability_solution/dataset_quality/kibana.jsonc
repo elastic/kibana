@@ -23,7 +23,8 @@
       "fieldFormats",
       "dataViews",
       "lens",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "taskManager"
     ],
     "optionalPlugins": ["telemetry"],
     "requiredBundles": ["unifiedHistogram", "discover"],

@@ -6,12 +6,18 @@
  */
 
 import {
+  ConcreteTaskInstance,
+  TaskInstance,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import {
   Subject,
-  timer,
   from,
   delay,
   filter,
   tap,
+  take,
   takeUntil,
   exhaustMap,
   switchMap,
@@ -29,9 +35,11 @@ import {
   NON_LOG_SIGNALS,
   EXCLUDE_ELASTIC_LOGS,
   MAX_STREAMS_TO_REPORT,
-  STARTUP_DELAY,
-  TELEMETRY_INTERVAL,
   LOGS_DATASET_INDEX_PATTERNS,
+  LOGS_DATA_TELEMETRY_TASK_TYPE,
+  TELEMETRY_TASK_INTERVAL,
+  LOGS_DATA_TELEMETRY_TASK_ID,
+  TELEMETRY_TASK_TIMEOUT,
 } from './constants';
 import {
   getAllIndices,
@@ -60,39 +68,116 @@ export class DataTelemetryService {
   private isOptedIn?: boolean = true; // Assume true until the first check
   private esClient?: ElasticsearchClient;
 
+  private run$ = from(this.isTelemetryOptedIn()).pipe(
+    takeUntil(this.stop$),
+    tap((isOptedIn) => {
+      if (!isOptedIn) {
+        this.logTelemetryNotOptedIn();
+        this.isInProgress = false;
+      } else {
+        this.isInProgress = true;
+      }
+    }),
+    filter((isOptedIn) => isOptedIn),
+    exhaustMap(() => this.collectAndSend()),
+    tap(() => (this.isInProgress = false))
+  );
+
   constructor(logger: Logger) {
     this.logger = logger;
   }
 
-  public setup(analytics: AnalyticsServiceSetup) {
+  public setup(analytics: AnalyticsServiceSetup, taskManager: TaskManagerSetupContract) {
     this.analytics = analytics;
+    this.registerTask(taskManager);
   }
 
-  public async start(telemetryStart?: TelemetryPluginStart, core?: CoreStart) {
+  public async start(
+    telemetryStart?: TelemetryPluginStart,
+    core?: CoreStart,
+    taskManager?: TaskManagerStartContract
+  ) {
     this.telemetryStart = telemetryStart;
     this.esClient = core?.elasticsearch.client.asInternalUser;
 
-    this.logger.debug(`[Logs Data Telemetry] Starting the service`);
-    timer(STARTUP_DELAY, TELEMETRY_INTERVAL)
-      .pipe(
-        takeUntil(this.stop$),
-        tap(() => (this.isInProgress = true)),
-        switchMap(() => from(this.isTelemetryOptedIn())),
-        tap((isOptedIn) => {
-          if (!isOptedIn) {
-            this.logTelemetryNotOptedIn();
-            this.isInProgress = false;
-          }
-        }),
-        filter((isOptedIn) => isOptedIn),
-        exhaustMap(() => this.collectAndSend()),
-        tap(() => (this.isInProgress = false))
-      )
-      .subscribe();
+    if (taskManager) {
+      this.scheduleTask(taskManager).then((taskInstance) => {
+        if (taskInstance) {
+          this.logger.debug(`Task ${taskInstance.id} scheduled.`);
+        }
+      });
+    }
   }
 
   public stop() {
     this.stop$.next();
+  }
+
+  private registerTask(taskManager: TaskManagerSetupContract) {
+    const service = this;
+    taskManager.registerTaskDefinitions({
+      [LOGS_DATA_TELEMETRY_TASK_TYPE]: {
+        title: 'Logs Data Telemetry',
+        description:
+          'This task collects data telemetry for logs data and sends it to the telemetry service.',
+        timeout: `${TELEMETRY_TASK_TIMEOUT}m`,
+        maxAttempts: 1, // Do not retry
+
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+          return {
+            // Perform the work of the task. The return value should fit the TaskResult interface.
+            async run() {
+              const { state } = taskInstance;
+              service.logger.debug(`[Logs Data Telemetry] Running task`);
+
+              try {
+                service.run$.pipe(take(1)).subscribe({
+                  complete: () => {
+                    service.logger.debug(`[Logs Data Telemetry] Task completed`);
+                  },
+                });
+
+                return { state };
+              } catch (e) {
+                service.logger.error(e);
+              }
+
+              return { state };
+            },
+            async cancel() {
+              service.logger.debug(`[Logs Data Telemetry] Task cancelled`);
+            },
+          };
+        },
+      },
+    });
+  }
+
+  private async scheduleTask(taskManager: TaskManagerStartContract): Promise<TaskInstance | null> {
+    try {
+      const taskInstance = await taskManager.ensureScheduled({
+        id: LOGS_DATA_TELEMETRY_TASK_ID,
+        taskType: LOGS_DATA_TELEMETRY_TASK_TYPE,
+        schedule: {
+          interval: `${TELEMETRY_TASK_INTERVAL}m`,
+        },
+        params: {},
+        state: {},
+        scope: ['logs'],
+      });
+
+      this.logger?.debug(
+        `Task ${LOGS_DATA_TELEMETRY_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}.`
+      );
+
+      return taskInstance;
+    } catch (e) {
+      this.logger?.error(
+        `Failed to schedule task ${LOGS_DATA_TELEMETRY_TASK_ID} with interval ${TELEMETRY_TASK_INTERVAL}. ${e?.message}`
+      );
+
+      return null;
+    }
   }
 
   public async isTelemetryOptedIn() {

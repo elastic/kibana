@@ -11,6 +11,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { ElasticsearchClient, type Logger } from '@kbn/core/server';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { DataTelemetryEvent } from './types';
 import {
@@ -55,6 +56,48 @@ describe('DataTelemetryService', () => {
   let mockAnalyticsSetup: jest.Mocked<AnalyticsServiceSetup>;
   let mockTelemetryStart: jest.Mocked<TelemetryPluginStart>;
   let mockLogger: jest.Mocked<Logger>;
+  let mockTaskManagerSetup: ReturnType<typeof taskManagerMock.createSetup>;
+  let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
+
+  describe('Data Telemetry Task', () => {
+    beforeEach(async () => {
+      const mocks = setupMocks();
+      mockEsClient = mocks.mockEsClient;
+      mockLogger = mocks.mockLogger;
+      mockAnalyticsSetup = mocks.mockAnalyticsSetup;
+      mockTelemetryStart = mocks.mockTelemetryStart;
+      mockTaskManagerSetup = mocks.taskManagerSetup;
+      mockTaskManagerStart = mocks.taskManagerStart;
+
+      service = new DataTelemetryService(mockLogger);
+      service.setup(mockAnalyticsSetup, mockTaskManagerSetup);
+      await service.start(
+        mockTelemetryStart,
+        {
+          elasticsearch: { client: { asInternalUser: mockEsClient } },
+        } as any,
+        mockTaskManagerStart
+      );
+    });
+
+    afterEach(() => {
+      jest.clearAllTimers();
+      jest.clearAllMocks();
+    });
+
+    it('should trigger task runner run method', async () => {
+      const taskDefinitions = mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0];
+      const taskType = Object.keys(taskDefinitions)[0];
+      const taskRunner = taskDefinitions[taskType].createTaskRunner({ taskInstance: {} as any });
+
+      jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
+      const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
+      await taskRunner.run();
+
+      // Assert collectAndSend is called
+      expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
+    });
+  });
 
   describe('Docs Info', () => {
     beforeEach(async () => {
@@ -63,12 +106,18 @@ describe('DataTelemetryService', () => {
       mockLogger = mocks.mockLogger;
       mockAnalyticsSetup = mocks.mockAnalyticsSetup;
       mockTelemetryStart = mocks.mockTelemetryStart;
+      mockTaskManagerSetup = mocks.taskManagerSetup;
+      mockTaskManagerStart = mocks.taskManagerStart;
 
       service = new DataTelemetryService(mockLogger);
-      service.setup(mockAnalyticsSetup);
-      await service.start(mockTelemetryStart, {
-        elasticsearch: { client: { asInternalUser: mockEsClient } },
-      } as any);
+      service.setup(mockAnalyticsSetup, mockTaskManagerSetup);
+      await service.start(
+        mockTelemetryStart,
+        {
+          elasticsearch: { client: { asInternalUser: mockEsClient } },
+        } as any,
+        mockTaskManagerStart
+      );
 
       jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
     });
@@ -211,7 +260,7 @@ describe('DataTelemetryService', () => {
       mockTelemetryStart = mocks.mockTelemetryStart;
 
       service = new DataTelemetryService(mockLogger);
-      service.setup(mockAnalyticsSetup);
+      service.setup(mockAnalyticsSetup, mockTaskManagerSetup);
       await service.start(mockTelemetryStart, {
         elasticsearch: { client: { asInternalUser: mockEsClient } },
       } as any);
@@ -312,7 +361,17 @@ function setupMocks() {
     getIsOptedIn: jest.fn().mockResolvedValue(true),
   } as unknown as jest.Mocked<TelemetryPluginStart>;
 
-  return { mockEsClient, mockLogger, mockAnalyticsSetup, mockTelemetryStart };
+  const taskManagerSetup = taskManagerMock.createSetup();
+  const taskManagerStart = taskManagerMock.createStart();
+
+  return {
+    mockEsClient,
+    mockLogger,
+    mockAnalyticsSetup,
+    mockTelemetryStart,
+    taskManagerSetup,
+    taskManagerStart,
+  };
 }
 
 const MOCK_INDICES = {

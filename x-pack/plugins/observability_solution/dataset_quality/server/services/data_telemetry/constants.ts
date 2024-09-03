@@ -9,8 +9,13 @@ import { DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from '@kbn/telemetry-plugin/serve
 
 import { DatasetIndexPattern } from './types';
 
+export const LOGS_DATA_TELEMETRY_TASK_TYPE = 'logs-data-telemetry';
+export const LOGS_DATA_TELEMETRY_TASK_ID = 'logs-data-telemetry:collect-and-report-task';
+
 export const STARTUP_DELAY = 10 * 60 * 60 * 1000; // 10 hours
 export const TELEMETRY_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
+export const TELEMETRY_TASK_INTERVAL = 24 * 60; // 24 hours (in minutes)
+export const TELEMETRY_TASK_TIMEOUT = 18 * 60; // 18 hours (in minutes)
 
 export const BREATHE_DELAY_SHORT = 1000; // 1 seconds
 export const BREATHE_DELAY_MEDIUM = 5 * 1000; // 5 seconds
