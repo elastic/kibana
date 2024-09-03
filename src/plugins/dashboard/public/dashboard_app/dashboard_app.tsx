@@ -190,18 +190,21 @@ export function DashboardApp({
     getScreenshotContext,
   ]);
 
-  useMemo(() => {
-    if (!dashboardAPI || !savedDashboardId) return;
-    dashboardAPI.expandedPanelId.subscribe(() => {
+  useEffect(() => {
+    if (!dashboardAPI) return;
+    dashboardAPI?.expandedPanelId.subscribe(() => {
       const expandedPanel = dashboardAPI.expandedPanelId.value;
-      // if state changes don't happen, we still want to update the URL when the expandedPanelId changes
-      const newHistory = history.replace({
-        pathname:
-          expandedPanel !== history.location.pathname
-            ? `${history.location.pathname}/${dashboardAPI.expandedPanelId.value}${history.location.search}`
-            : `/${history.location.search}`,
-      });
-      return newHistory;
+      if (expandedPanel) {
+        return history.replace({
+          pathname: `${createDashboardEditUrl(dashboardAPI.savedObjectId.value)}/${expandedPanel}`,
+          search: history.location.search,
+        });
+      } else {
+        return history.replace({
+          pathname: createDashboardEditUrl(dashboardAPI.savedObjectId.value),
+          search: history.location.search,
+        });
+      }
     });
   }, [dashboardAPI, history, savedDashboardId]);
 
@@ -215,7 +218,7 @@ export function DashboardApp({
       dashboardAPI,
     });
     return () => stopWatchingAppStateInUrl();
-  }, [dashboardAPI, getScopedHistory, history, kbnUrlStateStorage, savedDashboardId, uiSettings]);
+  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
 
   const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);
 
