@@ -13,6 +13,7 @@ import {
   DataLoadingState,
   type SortOrder,
   renderCustomToolbar,
+  type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
@@ -71,20 +72,22 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     setActiveColumns(columns);
   }, []);
 
-  const renderDocumentView = useCallback(
-    (
-      hit: DataTableRecord,
-      displayedRows: DataTableRecord[],
-      displayedColumns: string[],
-      customColumnsMeta?: DataTableColumnsMeta
-    ) => (
+  const renderDocumentView: UnifiedDataTableProps['renderDocumentView'] = useCallback(
+    ({
+      hit,
+      displayedRows,
+      columns: selectedColumns,
+      columnsMeta: customColumnsMeta,
+      displayedColumns,
+    }) => (
       <RowViewer
         dataView={props.dataView}
         notifications={props.core.notifications}
         hit={hit}
         hits={displayedRows}
-        columns={displayedColumns}
+        columns={selectedColumns}
         columnsMeta={customColumnsMeta}
+        displayedColumns={displayedColumns} // with an added time field column
         flyoutType={props.flyoutType ?? 'push'}
         onRemoveColumn={(column) => {
           setActiveColumns(activeColumns.filter((c) => c !== column));

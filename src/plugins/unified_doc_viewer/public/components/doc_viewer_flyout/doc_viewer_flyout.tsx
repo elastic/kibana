@@ -54,6 +54,7 @@ export interface UnifiedDocViewerFlyoutProps {
   isEsqlQuery: boolean;
   columns: string[];
   columnsMeta?: DataTableColumnsMeta;
+  displayedColumns?: string[]; // columns that are currently displayed in the grid (a time field might be added to the selected `columns`)
   hit: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
@@ -90,6 +91,7 @@ export function UnifiedDocViewerFlyout({
   dataView,
   columns,
   columnsMeta,
+  displayedColumns,
   onFilter,
   onClose,
   onRemoveColumn,
@@ -180,6 +182,7 @@ export function UnifiedDocViewerFlyout({
       <UnifiedDocViewer
         columns={columns}
         columnsMeta={columnsMeta}
+        displayedColumns={displayedColumns}
         dataView={dataView}
         filter={onFilter}
         hit={actualHit}
@@ -195,6 +198,7 @@ export function UnifiedDocViewerFlyout({
       addColumn,
       columns,
       columnsMeta,
+      displayedColumns,
       dataView,
       hits,
       isEsqlQuery,

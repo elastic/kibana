@@ -42,6 +42,7 @@ export interface DocViewRenderProps {
       esType?: DatatableColumnMeta['esType'];
     }
   >;
+  displayedColumns?: string[]; // columns that are currently displayed in the grid (a time field might be added to the selected `columns`)
   query?: Query | AggregateQuery;
   textBasedHits?: DataTableRecord[];
   hideActionsColumn?: boolean;

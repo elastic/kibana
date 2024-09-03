@@ -123,6 +123,7 @@ const updatePageSize = (newPageSize: number, storage: Storage) => {
 export const DocViewerTable = ({
   columns,
   columnsMeta,
+  displayedColumns,
   hit,
   dataView,
   textBasedHits,
@@ -237,14 +238,14 @@ export const DocViewerTable = ({
     ]
   );
 
-  const selectedFieldNames = useMemo(
-    () => columns?.filter((column) => column !== '_source') || [],
-    [columns]
+  const fieldsFromDisplayedColumns = useMemo(
+    () => (displayedColumns || columns)?.filter((column) => column !== '_source') || [],
+    [displayedColumns, columns]
   );
 
   const isShowOnlySelectedFieldsDisabled = useMemo(
-    () => columns?.includes('_source') || selectedFieldNames.length === 0,
-    [selectedFieldNames, columns]
+    () => columns?.includes('_source') || !columns?.length,
+    [columns]
   );
 
   const shouldShowOnlySelectedFields = useMemo(
@@ -254,7 +255,7 @@ export const DocViewerTable = ({
 
   const displayedFieldNames = useMemo(() => {
     if (shouldShowOnlySelectedFields) {
-      return selectedFieldNames;
+      return fieldsFromDisplayedColumns;
     }
     return Object.keys(flattened).sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
@@ -263,7 +264,7 @@ export const DocViewerTable = ({
       const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
       return nameA.localeCompare(nameB);
     });
-  }, [selectedFieldNames, flattened, shouldShowOnlySelectedFields, mapping]);
+  }, [fieldsFromDisplayedColumns, flattened, shouldShowOnlySelectedFields, mapping]);
 
   const { pinnedItems, restItems, allFields } = useMemo(
     () =>

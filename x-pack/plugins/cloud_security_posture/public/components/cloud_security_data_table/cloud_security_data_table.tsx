@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import _ from 'lodash';
 import {
   DataGridDensity,
   UnifiedDataTableSettings,
   UnifiedDataTableSettingsColumn,
   useColumns,
+  UnifiedDataTable,
+  DataLoadingState,
+  type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
@@ -167,8 +169,10 @@ export const CloudSecurityDataTable = ({
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
-  const renderDocumentView = (hit: DataTableRecord) =>
-    flyoutComponent(hit, () => setExpandedDoc(undefined));
+  const renderDocumentView: UnifiedDataTableProps['renderDocumentView'] = useCallback(
+    ({ hit }) => flyoutComponent(hit, () => setExpandedDoc(undefined)),
+    [flyoutComponent, setExpandedDoc]
+  );
 
   // services needed for unified-data-table package
   const {

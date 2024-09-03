@@ -46,6 +46,7 @@ export class DocViewerTab extends React.Component<Props, State> {
       !isEqual(nextProps.renderProps.hit.raw.highlight, this.props.renderProps.hit.raw.highlight) ||
       nextProps.id !== this.props.id ||
       !isEqual(nextProps.renderProps.columns, this.props.renderProps.columns) ||
+      !isEqual(nextProps.renderProps.displayedColumns, this.props.renderProps.displayedColumns) ||
       nextProps.renderProps.decreaseAvailableHeightBy !==
         this.props.renderProps.decreaseAvailableHeightBy ||
       nextState.hasError

@@ -619,7 +619,7 @@ describe('UnifiedDataTable', () => {
       flattened: { test: jest.fn() },
     };
     const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
-    const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
+    const renderDocumentViewMock = jest.fn(({ hit }: { hit: DataTableRecord }) => (
       <div data-test-subj="test-document-view">{hit.id}</div>
     ));
 
