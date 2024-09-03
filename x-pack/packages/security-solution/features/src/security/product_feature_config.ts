@@ -79,27 +79,16 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
 
   [ProductFeatureSecurityKey.endpointArtifactManagement]: {
     subFeatureIds: [
+      SecuritySubFeatureId.hostIsolationExceptions,
       SecuritySubFeatureId.trustedApplications,
       SecuritySubFeatureId.blocklist,
       SecuritySubFeatureId.eventFilters,
     ],
-    subFeaturesPrivileges: [
-      {
-        id: 'host_isolation_exceptions_all',
-        api: [`${APP_ID}-accessHostIsolationExceptions`, `${APP_ID}-writeHostIsolationExceptions`],
-        ui: ['accessHostIsolationExceptions', 'writeHostIsolationExceptions'],
-      },
-      {
-        id: 'host_isolation_exceptions_read',
-        api: [`${APP_ID}-accessHostIsolationExceptions`],
-        ui: ['accessHostIsolationExceptions'],
-      },
-    ],
+    subFeaturesPrivileges: [],
   },
 
   [ProductFeatureSecurityKey.endpointResponseActions]: {
     subFeatureIds: [
-      SecuritySubFeatureId.hostIsolationExceptions,
       SecuritySubFeatureId.responseActionsHistory,
       SecuritySubFeatureId.hostIsolation,
       SecuritySubFeatureId.processOperations,
@@ -112,6 +101,16 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
         id: 'host_isolation_all',
         api: [`${APP_ID}-writeHostIsolation`],
         ui: ['writeHostIsolation'],
+      },
+      {
+        id: 'host_isolation_exceptions_all',
+        api: [`${APP_ID}-accessHostIsolationExceptions`, `${APP_ID}-writeHostIsolationExceptions`],
+        ui: ['accessHostIsolationExceptions', 'writeHostIsolationExceptions'],
+      },
+      {
+        id: 'host_isolation_exceptions_read',
+        api: [`${APP_ID}-accessHostIsolationExceptions`],
+        ui: ['accessHostIsolationExceptions'],
       },
     ],
   },
