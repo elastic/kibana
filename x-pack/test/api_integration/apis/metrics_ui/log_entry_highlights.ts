@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('highlights built-in message column', async () => {
-          const esInfo = await es.info();
+          const esInfo = (await es.info()).body;
           const highlightTerms = 'message of document 0';
           const { body } = await supertest
             .post(LOG_ENTRIES_HIGHLIGHTS_PATH)
