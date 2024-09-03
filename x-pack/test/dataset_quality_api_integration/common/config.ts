@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { LogLevel, LogsSynthtraceEsClient, createLogger } from '@kbn/apm-synthtrace';
+import {
+  LogLevel,
+  LogsSynthtraceEsClient,
+  SyntheticsSynthtraceEsClient,
+  createLogger,
+} from '@kbn/apm-synthtrace';
 import { createDatasetQualityUsers } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users';
 import {
   DATASET_QUALITY_TEST_PASSWORD,
@@ -72,6 +77,9 @@ export interface CreateTest {
     logSynthtraceEsClient: (
       context: InheritedFtrProviderContext
     ) => Promise<LogsSynthtraceEsClient>;
+    syntheticsSynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => SyntheticsSynthtraceEsClient;
     datasetQualityApiClient: (context: InheritedFtrProviderContext) => DatasetQualityApiClient;
     packageService: ({ getService }: FtrProviderContext) => ReturnType<typeof PackageService>;
   };
@@ -129,6 +137,12 @@ export function createTestConfig(
         registry: RegistryProvider,
         logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
           new LogsSynthtraceEsClient({
+            client: context.getService('es'),
+            logger: createLogger(LogLevel.info),
+            refreshAfterIndex: true,
+          }),
+        syntheticsSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+          new SyntheticsSynthtraceEsClient({
             client: context.getService('es'),
             logger: createLogger(LogLevel.info),
             refreshAfterIndex: true,
