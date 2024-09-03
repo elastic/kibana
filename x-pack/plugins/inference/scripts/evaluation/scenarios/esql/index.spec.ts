@@ -181,6 +181,15 @@ const buildTestDefinitions = (): Section[] => {
       title: 'ES|QL query generation',
       tests: [
         {
+          title: 'Generates a query to show the volume of logs over time',
+          question: `From the "kibana_sample_data_logs" index, show me the volume of logs per day over the last 10 days
+      Assume the following fields:
+      - @timestamp`,
+          expected: `FROM kibana_sample_data_logs
+          | WHERE @timestamp > NOW() - 10 days
+          | STATS volume = COUNT(*) BY BUCKET(@timestamp, 1 day)`,
+        },
+        {
           title: 'Generates a query to show the top 10 domains by doc count',
           question: `For standard Elastic ECS compliant packetbeat data view (\`packetbeat-*\`),
       show me the top 10 unique destination.domain with the most docs.

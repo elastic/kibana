@@ -79,7 +79,7 @@ is 10000.
 
 ### Grouping functions
 
-BUCKET: Creates groups of values - buckets - out of a datetime or numeric input
+BUCKET: Creates groups of values out of a datetime or numeric input.
 
 ### Aggregation functions
 
