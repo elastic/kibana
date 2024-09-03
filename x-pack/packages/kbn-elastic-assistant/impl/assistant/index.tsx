@@ -456,7 +456,7 @@ const AssistantComponent: React.FC<Props> = ({
           overflow: hidden;
         `}
       >
-        <CommentContainer>
+        <CommentContainer data-test-subj="assistantChat">
           <EuiFlexGroup
             css={css`
               overflow: hidden;

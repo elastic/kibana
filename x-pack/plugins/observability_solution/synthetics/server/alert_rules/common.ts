@@ -359,8 +359,9 @@ export const syntheticsRuleTypeFieldMap = {
   ...legacyExperimentalFieldMap,
 };
 
-export const SyntheticsRuleTypeAlertDefinition: IRuleTypeAlerts = {
+export const SyntheticsRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityUptimeAlert> = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
   mappings: { fieldMap: syntheticsRuleTypeFieldMap },
   useLegacyAlerts: true,
+  shouldWrite: true,
 };

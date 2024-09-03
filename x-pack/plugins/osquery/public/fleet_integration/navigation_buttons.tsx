@@ -14,7 +14,7 @@ import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kiba
 
 interface NavigationButtonsProps {
   isDisabled?: boolean;
-  agentPolicyId?: string | undefined;
+  agentPolicyId?: string | null;
 }
 
 const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
@@ -36,7 +36,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
   );
 
   const liveQueryClick = useCallback(
-    (event) => {
+    (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
         navigateToApp(PLUGIN_ID, {
@@ -54,7 +54,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
   });
 
   const packsClick = useCallback(
-    (event) => {
+    (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
         navigateToApp(PLUGIN_ID, {
