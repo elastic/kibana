@@ -18,7 +18,6 @@ const configSchema = schema.object({
       options: { defaultValue: schema.contextRef('serverless') },
     }),
   }),
-  firehoseQuickStartCardVisible: schema.boolean({ defaultValue: false }),
 });
 
 export type ObservabilityOnboardingConfig = TypeOf<typeof configSchema>;
@@ -28,7 +27,6 @@ export const config: PluginConfigDescriptor<ObservabilityOnboardingConfig> = {
   exposeToBrowser: {
     ui: true,
     serverless: true,
-    firehoseQuickStartCardVisible: true,
   },
   schema: configSchema,
 };

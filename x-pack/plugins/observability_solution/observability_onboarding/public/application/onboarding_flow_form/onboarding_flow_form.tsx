@@ -94,8 +94,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   const {
     services: {
-      context: { isServerless },
-      config: { firehoseQuickStartCardVisible },
+      context: { isServerless, isCloud },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const customMargin = useCustomMargin();
@@ -143,12 +142,11 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   );
   const virtualSearchResults = useVirtualSearchResults();
   /**
-   * Firehose quick start flow should only be available on
-   * Serverless and it should replace the current Firehose
-   * onboarding card in the search result.
+   * Cloud deployments have the new Firehose quick start
+   * flow enabled, so the ond card 'epr:awsfirehose' should
+   * not show up in the search results.
    */
-  const searchExcludePackageIdList =
-    isServerless && firehoseQuickStartCardVisible ? ['epr:awsfirehose'] : [];
+  const searchExcludePackageIdList = isCloud ? ['epr:awsfirehose'] : [];
 
   let isSelectingCategoryWithKeyboard: boolean = false;
 

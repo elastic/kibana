@@ -16,7 +16,6 @@ export function useVirtualSearchResults(): CustomCard[] {
     services: {
       application,
       context: { isCloud },
-      config: { firehoseQuickStartCardVisible },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
@@ -77,6 +76,11 @@ export function useVirtualSearchResults(): CustomCard[] {
       integration: '',
       isCollectionCard: false,
     },
-    ...(isCloud && firehoseQuickStartCardVisible ? [firehoseQuickstartCard] : []),
+    /**
+     * The new Firehose card should only be visible on Cloud
+     * as Firehose integration requires additional proxy,
+     * which is not available for on-prem customers.
+     */
+    ...(isCloud ? [firehoseQuickstartCard] : []),
   ];
 }
