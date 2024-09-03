@@ -51,6 +51,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
   const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isFullscreenOpen, setIsFullScreen] = useState(false);
 
   const { docLinks } = useServicesContext();
 
@@ -65,10 +66,23 @@ export function Main({ isEmbeddable = false }: MainProps) {
   const consoleTourStepProps: ConsoleTourStepProps[] = getConsoleTourStepProps(
     tourStepProps,
     actions,
-    tourState
+    tourState,
+    selectedTab
   );
 
   const { done, error, retry } = useDataInit();
+
+  const toggleFullscreen = () => {
+    const isEnabled = !isFullscreenOpen;
+
+    setIsFullScreen(isEnabled);
+
+    if (isEnabled) {
+      document.querySelector('#consoleRoot')?.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   if (error) {
     return (
@@ -147,9 +161,31 @@ export function Main({ isEmbeddable = false }: MainProps) {
                     button={helpButton}
                     isOpen={isHelpOpen}
                     closePopover={() => setIsHelpOpen(false)}
-                    resetTour={() => actions.resetTour()}
+                    resetTour={() => {
+                      setIsHelpOpen(false);
+                      actions.resetTour();
+                    }}
                   />
                 </EuiFlexItem>
+                {isEmbeddable && (
+                  <EuiFlexItem grow={false}>
+                    <NavIconButton
+                      iconType={isFullscreenOpen ? 'fullScreenExit' : 'fullScreen'}
+                      onClick={toggleFullscreen}
+                      ariaLabel={
+                        isFullscreenOpen
+                          ? MAIN_PANEL_LABELS.closeFullscrenButton
+                          : MAIN_PANEL_LABELS.openFullscrenButton
+                      }
+                      dataTestSubj="consoleToggleFullscreenButton"
+                      toolTipContent={
+                        isFullscreenOpen
+                          ? MAIN_PANEL_LABELS.closeFullscrenButton
+                          : MAIN_PANEL_LABELS.openFullscrenButton
+                      }
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
