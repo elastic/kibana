@@ -11,6 +11,7 @@
  * rescheduling, middleware application, etc.
  */
 
+import { Observable } from 'rxjs';
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
@@ -63,7 +64,6 @@ export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
 export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
-export const CONSISTENT_SCHEDULING_GAP_THRESHOLD = 10000;
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -110,6 +110,7 @@ type Opts = {
   usageCounter?: UsageCounter;
   eventLoopDelayConfig: EventLoopDelayConfig;
   allowReadingInvalidState: boolean;
+  pollIntervalConfiguration$: Observable<number>;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -161,6 +162,7 @@ export class TaskManagerRunner implements TaskRunner {
   private usageCounter?: UsageCounter;
   private eventLoopDelayConfig: EventLoopDelayConfig;
   private readonly taskValidator: TaskValidator;
+  private consistentSchedulingGapThreshold: number = 0;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -185,6 +187,7 @@ export class TaskManagerRunner implements TaskRunner {
     usageCounter,
     eventLoopDelayConfig,
     allowReadingInvalidState,
+    pollIntervalConfiguration$,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -202,6 +205,11 @@ export class TaskManagerRunner implements TaskRunner {
       logger: this.logger,
       definitions: this.definitions,
       allowReadingInvalidState,
+    });
+    pollIntervalConfiguration$.subscribe((pollInterval) => {
+      // Let's only perform consistent scheduling for tasks that were picked up
+      // within ${pollInterval}ms of its runtime (no delay)
+      this.consistentSchedulingGapThreshold = pollInterval;
     });
   }
 
@@ -642,7 +650,7 @@ export class TaskManagerRunner implements TaskRunner {
             new Date(
               Math.max(
                 intervalFromDate(
-                  Date.now() - originalRunAt.getTime() < CONSISTENT_SCHEDULING_GAP_THRESHOLD
+                  Date.now() - originalRunAt.getTime() < this.consistentSchedulingGapThreshold
                     ? originalRunAt
                     : startedAt!,
                   reschedule?.interval ?? schedule?.interval

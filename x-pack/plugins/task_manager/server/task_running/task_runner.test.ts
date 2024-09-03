@@ -9,6 +9,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
+import { BehaviorSubject } from 'rxjs';
 import {
   createTaskRunError,
   TaskErrorSource,
@@ -2447,6 +2448,7 @@ describe('TaskManagerRunner', () => {
         warn_threshold: 5000,
       },
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
+      pollIntervalConfiguration$: new BehaviorSubject(3000),
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {
