@@ -33,7 +33,7 @@ export class RolesAPIClient {
   };
 
   public bulkUpdateRoles = async ({ rolesUpdate }: { rolesUpdate: Role[] }) => {
-    await this.http.post('/api/security/roles', {
+    return await this.http.post('/api/security/roles', {
       body: JSON.stringify({
         roles: rolesUpdate.reduce((transformed, value) => {
           transformed[value.name] = this.transformRoleForSave(copyRole(value));

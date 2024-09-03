@@ -32,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type RawKibanaPrivileges } from '@kbn/security-authorization-core';
 import type { Role } from '@kbn/security-plugin-types-common';
+import type { BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public/src/roles/roles_api_client';
 import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import { KibanaPrivilegeTable, PrivilegeFormCalculator } from '@kbn/security-ui-components';
 
@@ -44,7 +45,7 @@ interface PrivilegesRolesFormProps {
   space: Space;
   features: KibanaFeature[];
   closeFlyout: () => void;
-  onSaveCompleted: () => void;
+  onSaveCompleted: (response: BulkUpdateRoleResponse) => void;
   defaultSelected?: Role[];
   storeDispatch: EditSpaceStore['dispatch'];
   spacesClientsInvocator: EditSpaceServices['invokeClient'];
@@ -256,17 +257,16 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       });
 
       await spacesClientsInvocator((clients) =>
-        clients.rolesClient
-          .bulkUpdateRoles({ rolesUpdate: updatedRoles })
-          .then(setAssigningToRole.bind(null, false))
+        clients.rolesClient.bulkUpdateRoles({ rolesUpdate: updatedRoles }).then((response) => {
+          setAssigningToRole(false);
+          onSaveCompleted(response);
+        })
       );
 
       storeDispatch({
         type: 'update_roles',
         payload: updatedRoles,
       });
-
-      onSaveCompleted();
     } catch (error) {
       console.error('Could not assign role to space!', error); // eslint-disable-line no-console
       const message = error?.body?.message ?? error.toString();

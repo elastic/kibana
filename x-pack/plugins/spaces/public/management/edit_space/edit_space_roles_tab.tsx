@@ -63,18 +63,32 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
               {...{
                 space,
                 features,
-                onSaveCompleted: () => {
-                  notifications.toasts.addSuccess(
-                    i18n.translate(
-                      'xpack.spaces.management.spaceDetails.roles.assignmentSuccessMsg',
-                      {
-                        defaultMessage: `Selected roles have been assigned to the {spaceName} space`,
-                        values: {
-                          spaceName: space.name,
-                        },
+                onSaveCompleted: (response) => {
+                  const { updated, errors } = response;
+
+                  if (updated) {
+                    notifications.toasts.addSuccess(
+                      i18n.translate(
+                        'xpack.spaces.management.spaceDetails.roles.assignmentSuccessMsg',
+                        {
+                          defaultMessage: `Selected roles have been assigned to the {spaceName} space`,
+                          values: {
+                            spaceName: space.name,
+                          },
+                        }
+                      )
+                    );
+                  }
+
+                  if (errors) {
+                    for (const roleName in errors) {
+                      if (Object.prototype.hasOwnProperty.call(errors, roleName)) {
+                        notifications.toasts.addError(new Error(JSON.stringify(errors[roleName])), {
+                          title: `Error updating ${roleName}`,
+                        });
                       }
-                    )
-                  );
+                    }
+                  }
                   overlayRef.close();
                 },
                 closeFlyout: () => overlayRef.close(),
@@ -127,18 +141,32 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
       });
 
       await invokeClient((clients) => {
-        return clients.rolesClient.bulkUpdateRoles({ rolesUpdate: updateDoc }).then(() =>
-          notifications.toasts.addSuccess(
-            i18n.translate('xpack.spaces.management.spaceDetails.roles.removalSuccessMsg', {
-              defaultMessage:
-                'Removed {count, plural, one {role} other {{count} roles}} from {spaceName} space',
-              values: {
-                spaceName: space.name,
-                count: updateDoc.length,
-              },
-            })
-          )
-        );
+        return clients.rolesClient.bulkUpdateRoles({ rolesUpdate: updateDoc }).then((response) => {
+          const { updated, errors } = response;
+
+          if (updated) {
+            notifications.toasts.addSuccess(
+              i18n.translate('xpack.spaces.management.spaceDetails.roles.removalSuccessMsg', {
+                defaultMessage:
+                  'Removed {count, plural, one {role} other {{count} roles}} from {spaceName} space',
+                values: {
+                  spaceName: space.name,
+                  count: updateDoc.length,
+                },
+              })
+            );
+          }
+
+          if (errors) {
+            for (const roleName in errors) {
+              if (Object.prototype.hasOwnProperty.call(errors, roleName)) {
+                notifications.toasts.addError(new Error(JSON.stringify(errors[roleName])), {
+                  title: `Error updating ${roleName}`,
+                });
+              }
+            }
+          }
+        });
       });
 
       dispatch({ type: 'remove_roles', payload: updateDoc });

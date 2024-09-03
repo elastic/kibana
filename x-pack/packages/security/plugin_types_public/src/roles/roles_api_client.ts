@@ -11,10 +11,16 @@ export interface RolePutPayload {
   createOnly?: boolean;
 }
 
+export interface BulkUpdateRoleResponse {
+  created?: string[];
+  updated?: string[];
+  errors?: Record<string, { type: string; reason: string }>;
+}
+
 export interface RolesAPIClient {
   getRoles: () => Promise<Role[]>;
   getRole: (roleName: string) => Promise<Role>;
   deleteRole: (roleName: string) => Promise<void>;
   saveRole: (payload: RolePutPayload) => Promise<void>;
-  bulkUpdateRoles: (payload: { rolesUpdate: Role[] }) => Promise<void>;
+  bulkUpdateRoles: (payload: { rolesUpdate: Role[] }) => Promise<BulkUpdateRoleResponse>;
 }
