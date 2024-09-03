@@ -15,6 +15,7 @@ import type {
   DiffableAllFields,
 } from '../../../../../../../../../common/api/detection_engine';
 import { Query, SavedQueryName, Filters } from '../../../../rule_definition_section';
+import * as ruleDetailsI18n from '../../../../translations';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { useGetSavedQuery } from '../../../../../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import { getQueryLanguageLabel } from '../../../../helpers';
@@ -41,7 +42,7 @@ export function SavedKqlQueryReadOnly({ kqlQuery, dataSource, ruleType }: SavedQ
       description: <SavedQueryName savedQueryName={savedQuery.attributes.title} />,
     },
     {
-      title: descriptionStepI18n.SAVED_QUERY_LANGUAGE_LABEL,
+      title: ruleDetailsI18n.SAVED_QUERY_LANGUAGE_LABEL,
       description: getQueryLanguageLabel(savedQuery.attributes.query.language),
     },
   ];

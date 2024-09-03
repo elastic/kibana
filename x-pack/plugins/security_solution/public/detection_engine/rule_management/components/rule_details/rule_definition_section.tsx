@@ -458,7 +458,7 @@ const prepareDefinitionSectionListItems = (
       {
         title: (
           <span data-test-subj="savedQueryLanguagePropertyTitle">
-            {descriptionStepI18n.SAVED_QUERY_LANGUAGE_LABEL}
+            {i18n.SAVED_QUERY_LANGUAGE_LABEL}
           </span>
         ),
         description: (
@@ -544,7 +544,7 @@ const prepareDefinitionSectionListItems = (
         {
           title: (
             <span data-test-subj="customQueryLanguagePropertyTitle">
-              {descriptionStepI18n.QUERY_LANGUAGE_LABEL}
+              {i18n.QUERY_LANGUAGE_LABEL}
             </span>
           ),
           description: (
@@ -677,7 +677,7 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="threatQueryLanguagePropertyTitle">
-          {descriptionStepI18n.THREAT_QUERY_LANGUAGE_LABEL}
+          {i18n.THREAT_QUERY_LANGUAGE_LABEL}
         </span>
       ),
       description: (

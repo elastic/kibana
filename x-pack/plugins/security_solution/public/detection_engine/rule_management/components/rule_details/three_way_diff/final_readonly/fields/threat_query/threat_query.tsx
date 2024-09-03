@@ -16,7 +16,7 @@ import { InlineKqlQueryReadOnly } from '../kql_query/inline_kql_query';
 
 const i18nLabels = {
   query: descriptionStepI18n.THREAT_QUERY_LABEL,
-  language: descriptionStepI18n.THREAT_QUERY_LANGUAGE_LABEL,
+  language: ruleDetailsI18n.THREAT_QUERY_LANGUAGE_LABEL,
   filters: ruleDetailsI18n.THREAT_FILTERS_FIELD_LABEL,
 };
 

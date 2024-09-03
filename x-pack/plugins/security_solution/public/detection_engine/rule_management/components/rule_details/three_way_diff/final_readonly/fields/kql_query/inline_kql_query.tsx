@@ -15,12 +15,13 @@ import type {
   InlineKqlQuery,
 } from '../../../../../../../../../common/api/detection_engine';
 import { Query, Filters } from '../../../../rule_definition_section';
+import * as ruleDetailsI18n from '../../../../translations';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { getQueryLanguageLabel } from '../../../../helpers';
 
 const defaultI18nLabels = {
   query: descriptionStepI18n.QUERY_LABEL,
-  language: descriptionStepI18n.QUERY_LANGUAGE_LABEL,
+  language: ruleDetailsI18n.QUERY_LANGUAGE_LABEL,
   filters: descriptionStepI18n.FILTERS_LABEL,
 };
 
