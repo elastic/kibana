@@ -32,7 +32,7 @@ import type {
   InvokeAIRawActionParams,
   InvokeAIRawActionResponse,
   RunApiLatestResponse,
-  BedRockMessage,
+  BedrockMessage,
   BedrockToolChoice,
 } from '../../../common/bedrock/types';
 import {
@@ -422,7 +422,7 @@ const formatBedrockBody = ({
   tools,
   toolChoice,
 }: {
-  messages: BedRockMessage[];
+  messages: BedrockMessage[];
   stopSequences?: string[];
   temperature?: number;
   maxTokens?: number;
@@ -442,7 +442,7 @@ const formatBedrockBody = ({
 
 interface FormattedBedRockMessage {
   role: string;
-  content: string | BedRockMessage['rawContent'];
+  content: string | BedrockMessage['rawContent'];
 }
 
 /**
@@ -452,7 +452,7 @@ interface FormattedBedRockMessage {
  * @param messages
  */
 const ensureMessageFormat = (
-  messages: BedRockMessage[],
+  messages: BedrockMessage[],
   systemPrompt?: string
 ): {
   messages: FormattedBedRockMessage[];
