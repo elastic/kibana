@@ -36,7 +36,7 @@ interface Props {
   customLinkId?: string;
 }
 
-const filtersEmptyState: Filter[] = [{ key: '', value: '' }];
+const filtersEmptyState: Filter[] = [{ key: '', value: '', isInitializing: true }];
 
 export function CreateEditCustomLinkFlyout({
   onClose,

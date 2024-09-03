@@ -29,9 +29,9 @@ export function FiltersSection({
   onChangeFilters: (filters: Filter[]) => void;
 }) {
   const onChangeFilter = (key: Filter['key'], value: Filter['value'], idx: number) => {
-    const newFilters = [...filters];
-    newFilters[idx] = { key, value };
-    onChangeFilters(newFilters);
+    const updatedFilters = filters.map((filter) => ({ ...filter, isInitializing: false }));
+    updatedFilters[idx] = { key, value, isInitializing: true };
+    onChangeFilters(updatedFilters);
   };
 
   const onRemoveFilter = (idx: number) => {
@@ -42,14 +42,15 @@ export function FiltersSection({
     // if there is only one item left it should not be removed
     // but reset to empty
     if (isEmpty(newFilters)) {
-      onChangeFilters([{ key: '', value: '' }]);
+      onChangeFilters([{ key: '', value: '', isInitializing: true }]);
     } else {
       onChangeFilters(newFilters);
     }
   };
 
   const handleAddFilter = () => {
-    onChangeFilters([...filters, { key: '', value: '' }]);
+    const updatedFilters = filters.map((filter) => ({ ...filter, isInitializing: false }));
+    onChangeFilters([...updatedFilters, { key: '', value: '', isInitializing: true }]);
   };
 
   return (
@@ -72,7 +73,7 @@ export function FiltersSection({
       <EuiSpacer size="s" />
 
       {filters.map((filter, idx) => {
-        const { key, value } = filter;
+        const { key, value, isInitializing } = filter;
         const filterId = `filter-${idx}`;
         const selectOptions = getSelectOptions(filters, key);
         return (
@@ -109,6 +110,7 @@ export function FiltersSection({
                   isInvalid={!isEmpty(key) && isEmpty(value)}
                   start={moment().subtract(24, 'h').toISOString()}
                   end={moment().toISOString()}
+                  isInitializing={isInitializing}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

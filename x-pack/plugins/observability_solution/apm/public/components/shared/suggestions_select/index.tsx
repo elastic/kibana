@@ -7,7 +7,7 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { throttle } from 'lodash';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 interface SuggestionsSelectProps {
@@ -18,6 +18,7 @@ interface SuggestionsSelectProps {
   start: string;
   end: string;
   onChange: (value?: string) => void;
+  isInitializing: boolean;
   isClearable?: boolean;
   isInvalid?: boolean;
   placeholder: string;
@@ -34,6 +35,7 @@ export function SuggestionsSelect({
   start,
   end,
   onChange,
+  isInitializing,
   placeholder,
   isInvalid,
   dataTestSubj,
@@ -52,22 +54,23 @@ export function SuggestionsSelect({
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (!searchValue) {
-        return { terms: [] }; // Return empty data on initial render
-      }
-      return callApmApi('GET /internal/apm/suggestions', {
-        params: {
-          query: {
-            fieldName,
-            fieldValue: searchValue,
-            start,
-            end,
-            serviceName,
+      if (isInitializing || searchValue) {
+        return callApmApi('GET /internal/apm/suggestions', {
+          params: {
+            query: {
+              fieldName,
+              fieldValue: searchValue,
+              start,
+              end,
+              serviceName,
+            },
           },
-        },
-      });
+        }); // Return empty data on initial render
+      } else {
+        return { terms: [] };
+      }
     },
-    [fieldName, searchValue, start, end, serviceName],
+    [fieldName, searchValue, start, end, serviceName, isInitializing],
     { preservePreviousData: false }
   );
 
