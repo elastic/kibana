@@ -9,6 +9,7 @@ import { from, of, Observable, concatMap, delay, map, toArray, forkJoin } from '
 import {
   MappingPropertyBase,
   IndicesGetMappingResponse,
+  IndicesStatsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { DataStreamFieldStatsPerNamespace, DatasetIndexPattern } from './types';
@@ -88,37 +89,34 @@ export function getAllIndices({
 }
 
 /**
- * Retrieves and adds the mapping of the index if it is not already present.
+ * Retrieves the mappings at once and adds to the indices info.
  */
 export function addMappingsToIndices({
   esClient,
   dataStreamsInfo,
+  logsIndexPatterns,
   breatheDelay,
 }: {
   esClient: ElasticsearchClient;
   dataStreamsInfo: IndexBasicInfo[];
+  logsIndexPatterns: DatasetIndexPattern[];
   breatheDelay: number;
 }): Observable<IndexBasicInfo[]> {
-  return from(dataStreamsInfo).pipe(
+  return from(
+    esClient.indices.getMapping({
+      index: logsIndexPatterns.map((pattern) => pattern.pattern),
+    })
+  ).pipe(
     delay(breatheDelay),
-    concatMap((info) =>
-      info.mapping
-        ? of(info)
-        : of(info).pipe(
-            concatMap(() =>
-              getIndexMapping({
-                esClient,
-                indexName: info.name,
-                latestIndex: info.latestIndex,
-              })
-            ),
-            map((mapping) => {
-              info.mapping = mapping;
-              return info;
-            })
-          )
-    ),
-    toArray()
+    map((mappings) => {
+      return dataStreamsInfo.map((info) => {
+        const indexMapping = mappings[info.latestIndex ?? info.name];
+        if (indexMapping) {
+          info.mapping = { [info.latestIndex ?? info.name]: indexMapping };
+        }
+        return info;
+      });
+    })
   );
 }
 
@@ -220,11 +218,24 @@ export function getIndexBasicStats({
   esClient: ElasticsearchClient;
   indices: IndexBasicInfo[];
   breatheDelay: number;
-}) {
-  return from(indices).pipe(
-    delay(breatheDelay),
-    concatMap((info) => from(getIndexStats(esClient, info))),
-    toArray()
+}): Observable<DataStreamStatsPerNamespace[]> {
+  const indexNames = indices.map((info) => info.name);
+
+  return from(
+    esClient.indices.stats({
+      index: indexNames,
+    })
+  ).pipe(
+    concatMap((allIndexStats) => {
+      return from(getFailureStoreStats({ esClient, indexName: indexNames[0] })).pipe(
+        delay(breatheDelay),
+        map((allFailureStoreStats) => {
+          return indices.map((info) =>
+            getIndexStats(allIndexStats.indices, allFailureStoreStats, info)
+          );
+        })
+      );
+    })
   );
 }
 
@@ -316,22 +327,6 @@ async function getIndicesInfoForPattern({
   });
 }
 
-async function getIndexMapping({
-  esClient,
-  indexName,
-  latestIndex,
-}: {
-  esClient: ElasticsearchClient;
-  indexName: string;
-  latestIndex?: string;
-}): Promise<IndicesGetMappingResponse> {
-  const resp = await esClient.indices.getMapping({
-    index: latestIndex ?? indexName,
-  });
-
-  return resp;
-}
-
 /**
  * Retrieves the namespace of index.
  *
@@ -345,43 +340,13 @@ function getIndexNamespace(indexInfo: IndexBasicInfo) {
   return (dataStreamMapping?.properties?.namespace as { value?: string })?.value;
 }
 
-export async function getIndexStats(
-  esClient: ElasticsearchClient,
-  info: IndexBasicInfo
-): Promise<DataStreamStatsPerNamespace> {
-  const stats = await esClient.indices.stats({
-    index: info.name,
-  });
-
-  const failureStoreStats = info.isDataStream
-    ? await getFailureStoreStats({ esClient, indexName: info.name })
-    : { docCount: 0, indexCount: 0 };
-
-  const totalDocs = stats._all.primaries?.docs?.count;
-  const totalSize = stats._all.primaries?.store?.size_in_bytes;
-  const totalIndices = Object.keys(stats.indices ?? []).length;
-
-  return {
-    patternName: info.patternName,
-    namespace: info.namespace,
-    totalDocuments: totalDocs ?? 0,
-    totalSize: totalSize ?? 0,
-    totalIndices,
-    failureStoreDocuments: failureStoreStats.docCount,
-    failureStoreIndices: failureStoreStats.indexCount,
-    meta: info.meta,
-    mapping: info.mapping,
-    stats,
-  };
-}
-
 async function getFailureStoreStats({
   esClient,
   indexName,
 }: {
   esClient: ElasticsearchClient;
   indexName: string;
-}): Promise<{ docCount: number; indexCount: number }> {
+}): Promise<IndicesStatsResponse['indices']> {
   try {
     // TODO: Use the failure store API when it is available
     const resp = await esClient.transport.request<ReturnType<typeof esClient.indices.stats>>({
@@ -392,14 +357,57 @@ async function getFailureStoreStats({
       },
     });
 
-    const docCount = resp._all.primaries?.docs?.count ?? 0;
-    const indexCount = Object.keys(resp.indices ?? []).length;
-
-    return { docCount, indexCount };
+    return (await resp).indices;
   } catch (e) {
     // Failure store API may not be available
-    return { docCount: 0, indexCount: 0 };
+    return {};
   }
+}
+
+export function getIndexStats(
+  allIndexStats: IndicesStatsResponse['indices'],
+  allFailureStoreStats: IndicesStatsResponse['indices'],
+  info: IndexBasicInfo
+): DataStreamStatsPerNamespace {
+  let totalDocs = 0;
+  let totalSize = 0;
+  let totalIndices = 0;
+  const indexStats: IndicesStatsResponse['indices'] = {};
+  let failureStoreDocs = 0;
+  let failureStoreIndices = 0;
+  const failureStoreStats: IndicesStatsResponse['indices'] = {};
+  Object.entries(allIndexStats ?? {}).forEach(([indexName, stats]) => {
+    if (indexName.includes(info.name)) {
+      totalDocs += stats.primaries?.docs?.count ?? 0;
+      totalSize += stats.primaries?.store?.size_in_bytes ?? 0;
+      totalIndices++;
+
+      indexStats[indexName] = stats;
+    }
+  });
+
+  Object.entries(allFailureStoreStats ?? {}).forEach(([indexName, stats]) => {
+    if (indexName.includes(info.name)) {
+      failureStoreDocs += stats.primaries?.docs?.count ?? 0;
+      failureStoreIndices++;
+
+      failureStoreStats[indexName] = stats;
+    }
+  });
+
+  return {
+    patternName: info.patternName,
+    namespace: info.namespace,
+    totalDocuments: totalDocs,
+    totalSize,
+    totalIndices,
+    failureStoreDocuments: failureStoreDocs,
+    failureStoreIndices,
+    meta: info.meta,
+    mapping: info.mapping,
+    indexStats,
+    failureStoreStats,
+  };
 }
 
 function getFieldStats(
@@ -410,9 +418,9 @@ function getFieldStats(
 
   // Loop through each index and get the number of fields and gather how many documents have that field
   const resourceFieldCounts: Record<string, number> = {};
-  const indexNames = Object.keys(stats.stats.indices ?? {});
+  const indexNames = Object.keys(stats.indexStats ?? {});
   for (const backingIndex of indexNames) {
-    const indexStats = stats.stats.indices?.[backingIndex];
+    const indexStats = stats.indexStats?.[backingIndex];
     const indexMapping = stats.mapping?.[backingIndex]?.mappings;
     if (!indexMapping) {
       continue;

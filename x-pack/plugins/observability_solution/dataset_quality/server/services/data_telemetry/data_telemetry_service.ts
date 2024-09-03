@@ -123,6 +123,7 @@ export class DataTelemetryService {
           return addMappingsToIndices({
             esClient: this.esClient!,
             dataStreamsInfo: dataStreamsAndIndicesInfo,
+            logsIndexPatterns: LOGS_DATASET_INDEX_PATTERNS,
             breatheDelay: BREATHE_DELAY_MEDIUM,
           });
         }),

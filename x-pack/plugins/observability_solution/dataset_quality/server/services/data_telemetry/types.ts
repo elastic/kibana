@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IndicesGetMappingResponse,
   IndicesStatsResponse,
   Metadata,
@@ -37,7 +37,8 @@ export interface DataStreamStatsPerNamespace {
   failureStoreIndices: number;
   meta?: Metadata;
   mapping?: IndicesGetMappingResponse;
-  stats: IndicesStatsResponse;
+  indexStats: IndicesStatsResponse['indices'];
+  failureStoreStats: IndicesStatsResponse['indices'];
 }
 
 export interface DataStreamFieldStatsPerNamespace extends DataStreamStatsPerNamespace {
