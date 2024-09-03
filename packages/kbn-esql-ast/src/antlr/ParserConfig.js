@@ -5,11 +5,11 @@ if (!Parser) {
 }
 
 export default class ParserConfig extends Parser {
-  constructor(input) {
-    super(input);
+  constructor(...args) {
+    super(...args);
   }
 
-  devVersion() {
+  isDevVersion() {
     return false;
   }
 }
