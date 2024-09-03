@@ -35,7 +35,7 @@ describe('ConnectorsDropdown', () => {
 
   beforeAll(() => {
     wrapper = mount(<ConnectorsDropdown {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
   });
 
@@ -300,7 +300,7 @@ describe('ConnectorsDropdown', () => {
 
   test('it disables the dropdown', () => {
     const newWrapper = mount(<ConnectorsDropdown {...props} disabled={true} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
     expect(
@@ -310,7 +310,7 @@ describe('ConnectorsDropdown', () => {
 
   test('it loading correctly', () => {
     const newWrapper = mount(<ConnectorsDropdown {...props} isLoading={true} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
     expect(
@@ -320,7 +320,7 @@ describe('ConnectorsDropdown', () => {
 
   test('it selects the correct connector', () => {
     const newWrapper = mount(<ConnectorsDropdown {...props} selectedConnector={'servicenow-1'} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
     expect(
@@ -350,7 +350,7 @@ describe('ConnectorsDropdown', () => {
           ]}
         />,
         {
-          wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+          wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
         }
       )
     ).not.toThrowError();

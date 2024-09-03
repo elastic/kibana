@@ -123,7 +123,7 @@ export interface PackagePolicyResponseExtension {
 export interface EndpointAgentTamperProtectionExtension {
   package: string;
   view: 'endpoint-agent-tamper-protection';
-  Component: LazyExoticComponent<ComponentType<PropsWithChildren>>;
+  Component: LazyExoticComponent<ComponentType<PropsWithChildren<{}>>>;
 }
 
 export interface PliAuthBlockExtension {

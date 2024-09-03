@@ -88,7 +88,7 @@ describe('usePersistentControls', () => {
     });
     const usePersistentControls = getPersistentControlsHook(tableId);
     const { result } = renderHook(() => usePersistentControls(), {
-      wrapper: ({ children }: React.PropsWithChildren) => (
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
         <TestProviders store={store}>{children}</TestProviders>
       ),
     });

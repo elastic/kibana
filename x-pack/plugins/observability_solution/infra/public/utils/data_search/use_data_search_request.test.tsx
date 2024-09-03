@@ -34,7 +34,7 @@ describe('useDataSearch hook', () => {
           parseResponses: noopParseResponse,
         }),
       {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <KibanaContextProvider>{children}</KibanaContextProvider>
         ),
       }
@@ -81,7 +81,7 @@ describe('useDataSearch hook', () => {
           parseResponses: noopParseResponse,
         }),
       {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <KibanaContextProvider>{children}</KibanaContextProvider>
         ),
       }
@@ -152,7 +152,7 @@ describe('useDataSearch hook', () => {
           parseResponses: noopParseResponse,
         }),
       {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <KibanaContextProvider>{children}</KibanaContextProvider>
         ),
       }

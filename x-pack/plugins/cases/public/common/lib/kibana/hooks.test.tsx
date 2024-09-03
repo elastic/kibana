@@ -15,7 +15,7 @@ describe('hooks', () => {
   describe('useApplicationCapabilities', () => {
     it('should return the correct capabilities', async () => {
       const { result } = renderHook<
-        React.PropsWithChildren,
+        React.PropsWithChildren<{}>,
         ReturnType<typeof useApplicationCapabilities>
       >(() => useApplicationCapabilities(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,

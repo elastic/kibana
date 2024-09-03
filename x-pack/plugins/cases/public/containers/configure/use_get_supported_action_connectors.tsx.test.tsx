@@ -27,7 +27,7 @@ describe('useConnectors', () => {
   it('fetches connectors', async () => {
     const spy = jest.spyOn(api, 'getSupportedActionConnectors');
     const { waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => <TestProviders>{children}</TestProviders>,
     });
 
     await waitForNextUpdate();
@@ -45,7 +45,7 @@ describe('useConnectors', () => {
     });
 
     const { waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => <TestProviders>{children}</TestProviders>,
     });
     await waitForNextUpdate();
 
@@ -57,7 +57,7 @@ describe('useConnectors', () => {
     useApplicationCapabilitiesMock().actions = { crud: false, read: false };
 
     const { result, waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => <TestProviders>{children}</TestProviders>,
     });
 
     await waitForNextUpdate();
@@ -71,7 +71,7 @@ describe('useConnectors', () => {
     useApplicationCapabilitiesMock().actions = { crud: true, read: true };
 
     const { result, waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }: React.PropsWithChildren) => (
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
         <TestProviders permissions={noConnectorsCasePermission()}>{children}</TestProviders>
       ),
     });

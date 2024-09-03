@@ -26,7 +26,7 @@ jest.mock('../../../../alerting/use_alert_prefill', () => ({
 
 const renderUseMetricsExplorerStateHook = () =>
   renderHook(() => useMetricsExplorerState(), {
-    wrapper: ({ children }: React.PropsWithChildren) => (
+    wrapper: ({ children }: React.PropsWithChildren<{}>) => (
       <MetricsExplorerOptionsContainer>{children}</MetricsExplorerOptionsContainer>
     ),
   });

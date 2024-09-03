@@ -33,7 +33,7 @@ describe('usePluginConfig()', () => {
       },
     };
     const { result } = renderHook(() => usePluginConfig(), {
-      wrapper: ({ children }: React.PropsWithChildren) => {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         return (
           <PluginConfigProvider value={config as InfraConfig}>{children}</PluginConfigProvider>
         );

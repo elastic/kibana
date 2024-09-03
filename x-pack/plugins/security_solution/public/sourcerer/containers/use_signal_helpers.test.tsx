@@ -72,7 +72,7 @@ describe('useSignalHelpers', () => {
     const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders store={store}>{children}</TestProviders>
         ),
       });
@@ -103,7 +103,7 @@ describe('useSignalHelpers', () => {
     const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders store={store}>{children}</TestProviders>
         ),
       });
@@ -136,7 +136,7 @@ describe('useSignalHelpers', () => {
     const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders store={store}>{children}</TestProviders>
         ),
       });
@@ -172,7 +172,7 @@ describe('useSignalHelpers', () => {
     const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders store={store}>{children}</TestProviders>
         ),
       });

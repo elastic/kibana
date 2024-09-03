@@ -24,14 +24,14 @@ describe('Mapping', () => {
 
   test('it shows mapping form group', () => {
     const wrapper = mount(<Mapping {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
     expect(wrapper.find('[data-test-subj="static-mappings"]').first().exists()).toBe(true);
   });
 
   test('correctly maps fields', () => {
     const wrapper = mount(<Mapping {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
     expect(wrapper.find('[data-test-subj="field-mapping-source"] code').first().text()).toBe(
       'title'
@@ -43,7 +43,7 @@ describe('Mapping', () => {
 
   test('displays the title correctly', () => {
     const wrapper = mount(<Mapping {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
     expect(wrapper.find('[data-test-subj="field-mapping-text"] h4').first().text()).toBe(
       'ServiceNow ITSM field mappings'
@@ -52,7 +52,7 @@ describe('Mapping', () => {
 
   test('displays the description correctly', () => {
     const wrapper = mount(<Mapping {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
     expect(wrapper.find('[data-test-subj="field-mapping-desc"]').first().text()).toBe(
       'Map Case fields to ServiceNow ITSM fields when pushing data to ServiceNow ITSM. Field mappings require an established connection to ServiceNow ITSM.'
@@ -61,7 +61,7 @@ describe('Mapping', () => {
 
   test('displays connection warning when isLoading: false and mappings: []', () => {
     const wrapper = mount(<Mapping {...{ ...props, mappings: [] }} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
     expect(wrapper.find('[data-test-subj="field-mapping-desc"]').first().text()).toBe(
       'Failed to retrieve mappings for ServiceNow ITSM.'

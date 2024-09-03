@@ -25,7 +25,7 @@ describe('FieldMappingRow', () => {
 
   beforeAll(() => {
     wrapper = mount(<FieldMapping {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
   });
 
@@ -39,7 +39,7 @@ describe('FieldMappingRow', () => {
 
   test('it does not render without mappings', () => {
     const newWrapper = mount(<FieldMapping {...props} mappings={[]} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
     expect(
       newWrapper

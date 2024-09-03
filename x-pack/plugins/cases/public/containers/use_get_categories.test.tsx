@@ -25,7 +25,7 @@ describe('useGetCategories', () => {
   it('calls getCategories api', async () => {
     const spyOnGetCategories = jest.spyOn(api, 'getCategories');
     const { waitForNextUpdate } = renderHook(() => useGetCategories(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => <TestProviders>{children}</TestProviders>,
     });
 
     await waitForNextUpdate();
@@ -46,7 +46,7 @@ describe('useGetCategories', () => {
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
     const { waitForNextUpdate } = renderHook(() => useGetCategories(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => <TestProviders>{children}</TestProviders>,
     });
 
     await waitForNextUpdate();

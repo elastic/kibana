@@ -39,7 +39,7 @@ const mockStorage = {
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
-const wrapper: FunctionComponent<React.PropsWithChildren> = ({ children }) => (
+const wrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) => (
   <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
     {children}
   </QueryClientProvider>

@@ -37,7 +37,7 @@ const mockServices = {
 
 const render = async ({ dataViewId }: { dataViewId: string }) => {
   const hookResult = renderHook(() => useDataView({ index: dataViewId }), {
-    wrapper: ({ children }: React.PropsWithChildren) => (
+    wrapper: ({ children }: React.PropsWithChildren<{}>) => (
       <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
     ),
   });

@@ -34,7 +34,7 @@ describe('UserActionCopyLink ', () => {
 
   beforeAll(() => {
     wrapper = mount(<UserActionCopyLink {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
   });
 

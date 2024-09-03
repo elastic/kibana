@@ -25,7 +25,7 @@ describe('ClosureOptions', () => {
 
   beforeAll(() => {
     wrapper = mount(<ClosureOptions {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
   });
 

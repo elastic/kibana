@@ -30,7 +30,7 @@ describe('Configuration button', () => {
 
   beforeAll(() => {
     wrapper = mount(<ConfigureCaseButton {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
   });
 
@@ -61,7 +61,7 @@ describe('Configuration button', () => {
         msgTooltip={msgTooltip}
       />,
       {
-        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 
@@ -87,7 +87,7 @@ describe('Configuration button', () => {
         msgTooltip={<>{msgTooltip}</>}
       />,
       {
-        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 

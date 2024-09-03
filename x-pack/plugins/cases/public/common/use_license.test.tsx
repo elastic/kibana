@@ -19,7 +19,7 @@ describe('useLicense', () => {
           return useLicense();
         },
         {
-          wrapper: ({ children }: React.PropsWithChildren) => (
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
             <TestProviders>{children}</TestProviders>
           ),
         }
@@ -34,7 +34,7 @@ describe('useLicense', () => {
           return useLicense();
         },
         {
-          wrapper: ({ children }: React.PropsWithChildren) => (
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
             <TestProviders>{children}</TestProviders>
           ),
         }
@@ -53,7 +53,7 @@ describe('useLicense', () => {
           return useLicense();
         },
         {
-          wrapper: ({ children }: React.PropsWithChildren) => (
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
             <TestProviders license={license}>{children}</TestProviders>
           ),
         }
@@ -72,7 +72,7 @@ describe('useLicense', () => {
           return useLicense();
         },
         {
-          wrapper: ({ children }: React.PropsWithChildren) => (
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
             <TestProviders license={license}>{children}</TestProviders>
           ),
         }
@@ -93,7 +93,7 @@ describe('useLicense', () => {
           return useLicense();
         },
         {
-          wrapper: ({ children }: React.PropsWithChildren) => (
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
             <TestProviders license={license}>{children}</TestProviders>
           ),
         }
@@ -112,7 +112,7 @@ describe('useLicense', () => {
           return useLicense();
         },
         {
-          wrapper: ({ children }: React.PropsWithChildren) => (
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
             <TestProviders license={license}>{children}</TestProviders>
           ),
         }
@@ -133,7 +133,7 @@ describe('useLicense', () => {
           return useLicense();
         },
         {
-          wrapper: ({ children }: React.PropsWithChildren) => (
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
             <TestProviders license={license}>{children}</TestProviders>
           ),
         }
@@ -152,7 +152,7 @@ describe('useLicense', () => {
           return useLicense();
         },
         {
-          wrapper: ({ children }: React.PropsWithChildren) => (
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
             <TestProviders license={license}>{children}</TestProviders>
           ),
         }
@@ -173,7 +173,7 @@ describe('useLicense', () => {
           return useLicense();
         },
         {
-          wrapper: ({ children }: React.PropsWithChildren) => (
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
             <TestProviders license={license}>{children}</TestProviders>
           ),
         }
@@ -192,7 +192,7 @@ describe('useLicense', () => {
           return useLicense();
         },
         {
-          wrapper: ({ children }: React.PropsWithChildren) => (
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
             <TestProviders license={license}>{children}</TestProviders>
           ),
         }
@@ -213,7 +213,7 @@ describe('useLicense', () => {
           return useLicense();
         },
         {
-          wrapper: ({ children }: React.PropsWithChildren) => (
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
             <TestProviders license={license}>{children}</TestProviders>
           ),
         }

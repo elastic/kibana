@@ -24,7 +24,7 @@ describe('ClosureOptionsRadio', () => {
 
   beforeAll(() => {
     wrapper = mount(<ClosureOptionsRadio {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
   });
 
@@ -48,7 +48,7 @@ describe('ClosureOptionsRadio', () => {
 
   test('it disables the close by user radio button', () => {
     const newWrapper = mount(<ClosureOptionsRadio {...props} disabled={true} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
     expect(newWrapper.find('input[id="close-by-user"]').prop('disabled')).toEqual(true);
@@ -56,7 +56,7 @@ describe('ClosureOptionsRadio', () => {
 
   test('it disables correctly the close by pushing radio button', () => {
     const newWrapper = mount(<ClosureOptionsRadio {...props} disabled={true} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
     expect(newWrapper.find('input[id="close-by-pushing"]').prop('disabled')).toEqual(true);
@@ -66,7 +66,7 @@ describe('ClosureOptionsRadio', () => {
     const newWrapper = mount(
       <ClosureOptionsRadio {...props} closureTypeSelected={'close-by-pushing'} />,
       {
-        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
     expect(newWrapper.find('input[id="close-by-pushing"]').prop('checked')).toEqual(true);

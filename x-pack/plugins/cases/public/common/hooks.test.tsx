@@ -28,7 +28,7 @@ describe('hooks', () => {
 
     it('returns true if it is the main application', () => {
       const { result } = renderHook(() => useIsMainApplication(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -40,7 +40,7 @@ describe('hooks', () => {
       useApplicationMock.mockReturnValue({ appId: 'testAppId', appTitle: 'Test app' });
 
       const { result } = renderHook(() => useIsMainApplication(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });

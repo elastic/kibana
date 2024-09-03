@@ -45,7 +45,7 @@ describe('useVisualizationResponse', () => {
   });
   it('should get result by visualization id', () => {
     const { result } = renderHook(() => useVisualizationResponse({ visualizationId }), {
-      wrapper: ({ children }: React.PropsWithChildren) => (
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
         <TestProviders store={mockStore}>{children}</TestProviders>
       ),
     });

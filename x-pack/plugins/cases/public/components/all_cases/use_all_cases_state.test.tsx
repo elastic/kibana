@@ -59,7 +59,9 @@ describe('useAllCasesQueryParams', () => {
 
   it('returns default state with empty URL and local storage', () => {
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
@@ -80,7 +82,9 @@ describe('useAllCasesQueryParams', () => {
     localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     expect(result.current.queryParams).toMatchObject(existingLocalStorageValues.queryParams);
@@ -99,7 +103,9 @@ describe('useAllCasesQueryParams', () => {
     localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     expect(result.current.filterOptions).toMatchObject(existingLocalStorageValues.filterOptions);
@@ -109,7 +115,9 @@ describe('useAllCasesQueryParams', () => {
     mockLocation.search = stringifyUrlParams({ page: 2, perPage: 15 });
 
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     expect(result.current.queryParams).toMatchObject({
@@ -125,7 +133,9 @@ describe('useAllCasesQueryParams', () => {
     });
 
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     expect(result.current.filterOptions).toMatchObject({
@@ -144,7 +154,9 @@ describe('useAllCasesQueryParams', () => {
     mockLocation.search = nonDefaultUrlParams.toString();
 
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     expect(result.current.filterOptions).toMatchObject({
@@ -159,7 +171,9 @@ describe('useAllCasesQueryParams', () => {
     })}&foo=bar&foo=baz&test=my-test`;
 
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     act(() => {
@@ -197,7 +211,9 @@ describe('useAllCasesQueryParams', () => {
     };
 
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     act(() => {
@@ -238,7 +254,9 @@ describe('useAllCasesQueryParams', () => {
     localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     expect(result.current.queryParams).toMatchObject({
@@ -265,7 +283,9 @@ describe('useAllCasesQueryParams', () => {
     localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     expect(result.current.filterOptions).toMatchObject({ severity: ['high'], status: ['open'] });
@@ -283,7 +303,9 @@ describe('useAllCasesQueryParams', () => {
     localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
     renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     expect(mockReplace).toHaveBeenCalledWith({
@@ -303,7 +325,9 @@ describe('useAllCasesQueryParams', () => {
     localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
     const { rerender } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     rerender();
@@ -328,7 +352,9 @@ describe('useAllCasesQueryParams', () => {
     localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
     renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     expect(mockReplace).toHaveBeenCalledTimes(0);
@@ -341,7 +367,9 @@ describe('useAllCasesQueryParams', () => {
     });
 
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
@@ -364,7 +392,9 @@ describe('useAllCasesQueryParams', () => {
     localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     expect(result.current.queryParams).toStrictEqual({
@@ -376,7 +406,9 @@ describe('useAllCasesQueryParams', () => {
 
   it('updates the query params correctly', () => {
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     act(() => {
@@ -394,7 +426,9 @@ describe('useAllCasesQueryParams', () => {
 
   it('updates URL when updating the query params', () => {
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     act(() => {
@@ -410,7 +444,9 @@ describe('useAllCasesQueryParams', () => {
 
   it('updates the local storage when updating the query params', () => {
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     act(() => {
@@ -431,7 +467,9 @@ describe('useAllCasesQueryParams', () => {
 
   it('updates the filter options correctly', () => {
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     act(() => {
@@ -447,7 +485,9 @@ describe('useAllCasesQueryParams', () => {
 
   it('updates the URL when updating the filter options', () => {
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     act(() => {
@@ -461,7 +501,9 @@ describe('useAllCasesQueryParams', () => {
 
   it('updates the local storage when updating the filter options', () => {
     const { result } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     act(() => {
@@ -496,7 +538,9 @@ describe('useAllCasesQueryParams', () => {
     }));
 
     renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     const localStorageState = JSON.parse(localStorage.getItem(LS_KEY) ?? '{}');
@@ -516,7 +560,9 @@ describe('useAllCasesQueryParams', () => {
     const lsSpy = jest.spyOn(Storage.prototype, 'setItem');
 
     renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     // first call is the initial call made by useLocalStorage
@@ -532,7 +578,9 @@ describe('useAllCasesQueryParams', () => {
     const lsSpy = jest.spyOn(Storage.prototype, 'setItem');
 
     const { rerender } = renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     rerender();
@@ -559,7 +607,9 @@ describe('useAllCasesQueryParams', () => {
     localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
     renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     // first call is the initial call made by useLocalStorage
@@ -580,7 +630,9 @@ describe('useAllCasesQueryParams', () => {
     const lsSpy = jest.spyOn(Storage.prototype, 'setItem');
 
     renderHook(() => useAllCasesState(), {
-      wrapper: ({ children }: React.PropsWithChildren) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     // first call is the initial call made by useLocalStorage
@@ -597,7 +649,7 @@ describe('useAllCasesQueryParams', () => {
       localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
       const { result } = renderHook(() => useAllCasesState(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -611,7 +663,7 @@ describe('useAllCasesQueryParams', () => {
       mockLocation.search = stringifyUrlParams({ perPage: 1000 });
 
       const { result } = renderHook(() => useAllCasesState(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -631,7 +683,7 @@ describe('useAllCasesQueryParams', () => {
       localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
       const { result } = renderHook(() => useAllCasesState(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -644,7 +696,7 @@ describe('useAllCasesQueryParams', () => {
       mockLocation.search = stringifyUrlParams({ sortOrder: 'foobar' });
 
       const { result } = renderHook(() => useAllCasesState(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -656,7 +708,7 @@ describe('useAllCasesQueryParams', () => {
   describe('Modal', () => {
     it('returns default state with empty URL and local storage', () => {
       const { result } = renderHook(() => useAllCasesState(true), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -667,7 +719,7 @@ describe('useAllCasesQueryParams', () => {
 
     it('updates the query params correctly', () => {
       const { result } = renderHook(() => useAllCasesState(true), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -687,7 +739,7 @@ describe('useAllCasesQueryParams', () => {
 
     it('updates the filter options correctly', () => {
       const { result } = renderHook(() => useAllCasesState(true), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -705,7 +757,7 @@ describe('useAllCasesQueryParams', () => {
 
     it('does not update the URL when changing the state of the table', () => {
       const { result } = renderHook(() => useAllCasesState(true), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -719,7 +771,7 @@ describe('useAllCasesQueryParams', () => {
 
     it('does not update the local storage when changing the state of the table', () => {
       const { result } = renderHook(() => useAllCasesState(true), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -746,7 +798,7 @@ describe('useAllCasesQueryParams', () => {
       localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
       renderHook(() => useAllCasesState(true), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -761,7 +813,7 @@ describe('useAllCasesQueryParams', () => {
       });
 
       const { result } = renderHook(() => useAllCasesState(true), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -782,7 +834,7 @@ describe('useAllCasesQueryParams', () => {
       localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
 
       const { result } = renderHook(() => useAllCasesState(true), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -798,7 +850,7 @@ describe('useAllCasesQueryParams', () => {
       });
 
       renderHook(() => useAllCasesState(true), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });

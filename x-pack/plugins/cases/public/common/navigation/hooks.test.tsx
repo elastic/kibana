@@ -37,7 +37,7 @@ describe('hooks', () => {
       const { result } = renderHook(
         () => useCasesNavigation({ deepLinkId: CasesDeepLinkId.cases }),
         {
-          wrapper: ({ children }: React.PropsWithChildren) => (
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
             <TestProviders>{children}</TestProviders>
           ),
         }
@@ -56,7 +56,7 @@ describe('hooks', () => {
       const { result } = renderHook(
         () => useCasesNavigation({ deepLinkId: CasesDeepLinkId.cases }),
         {
-          wrapper: ({ children }: React.PropsWithChildren) => (
+          wrapper: ({ children }: React.PropsWithChildren<{}>) => (
             <TestProviders>{children}</TestProviders>
           ),
         }
@@ -74,7 +74,7 @@ describe('hooks', () => {
   describe('useAllCasesNavigation', () => {
     it('it calls getAppUrl with correct arguments', () => {
       const { result } = renderHook(() => useAllCasesNavigation(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -88,7 +88,7 @@ describe('hooks', () => {
 
     it('it calls navigateToAllCases with correct arguments', () => {
       const { result } = renderHook(() => useAllCasesNavigation(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -104,7 +104,7 @@ describe('hooks', () => {
   describe('useCreateCaseNavigation', () => {
     it('it calls getAppUrl with correct arguments', () => {
       const { result } = renderHook(() => useCreateCaseNavigation(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -122,7 +122,7 @@ describe('hooks', () => {
 
     it('it calls navigateToAllCases with correct arguments', () => {
       const { result } = renderHook(() => useCreateCaseNavigation(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -138,7 +138,7 @@ describe('hooks', () => {
   describe('useConfigureCasesNavigation', () => {
     it('it calls getAppUrl with correct arguments', () => {
       const { result } = renderHook(() => useConfigureCasesNavigation(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -156,7 +156,7 @@ describe('hooks', () => {
 
     it('it calls navigateToAllCases with correct arguments', () => {
       const { result } = renderHook(() => useConfigureCasesNavigation(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -172,7 +172,7 @@ describe('hooks', () => {
   describe('useCaseViewNavigation', () => {
     it('it calls getAppUrl with correct arguments', () => {
       const { result } = renderHook(() => useCaseViewNavigation(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });
@@ -190,7 +190,7 @@ describe('hooks', () => {
 
     it('it calls navigateToAllCases with correct arguments', () => {
       const { result } = renderHook(() => useCaseViewNavigation(), {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       });

@@ -36,7 +36,7 @@ describe('UserActionTimestamp ', () => {
 
   beforeAll(() => {
     wrapper = mount(<UserActionTimestamp {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
   });
 
@@ -51,7 +51,7 @@ describe('UserActionTimestamp ', () => {
 
   it('it shows only the created time when the updated time is missing', async () => {
     const newWrapper = mount(<UserActionTimestamp createdAt="2020-09-06T14:40:59.889Z" />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
     expect(

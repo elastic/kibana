@@ -86,7 +86,7 @@ describe('source/index.tsx', () => {
     it('sets field data for data view', async () => {
       await act(async () => {
         const { waitForNextUpdate, result } = renderHook<
-          PropsWithChildren,
+          PropsWithChildren<{}>,
           { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
           wrapper: TestProviders,
@@ -107,7 +107,7 @@ describe('source/index.tsx', () => {
       let indexFieldsSearch: IndexFieldSearch;
       await act(async () => {
         const { waitForNextUpdate, result } = renderHook<
-          PropsWithChildren,
+          PropsWithChildren<{}>,
           { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
           wrapper: TestProviders,
@@ -136,7 +136,7 @@ describe('source/index.tsx', () => {
       let indexFieldsSearch: IndexFieldSearch;
       await act(async () => {
         const { waitForNextUpdate, result } = renderHook<
-          PropsWithChildren,
+          PropsWithChildren<{}>,
           { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
           wrapper: TestProviders,

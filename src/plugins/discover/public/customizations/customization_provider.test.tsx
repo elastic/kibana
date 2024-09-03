@@ -65,7 +65,7 @@ describe('useDiscoverCustomization', () => {
   it('should provide customization', () => {
     const customization: DiscoverCustomization = { id: 'top_nav' };
     const wrapper = renderHook(() => useDiscoverCustomization('top_nav'), {
-      wrapper: ({ children }: React.PropsWithChildren) => {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         const service = createCustomizationService();
         service.set(customization);
         return (
@@ -99,7 +99,7 @@ describe('useDiscoverCustomization', () => {
 
   it('should provide undefined if customization is not found', () => {
     const wrapper = renderHook(() => useDiscoverCustomization('top_nav'), {
-      wrapper: ({ children }: React.PropsWithChildren) => {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         const service = createCustomizationService();
         return (
           <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
@@ -114,7 +114,7 @@ describe('useDiscoverCustomization$', () => {
   it('should provide customization$', () => {
     const customization: DiscoverCustomization = { id: 'top_nav' };
     const wrapper = renderHook(() => useDiscoverCustomization$('top_nav'), {
-      wrapper: ({ children }: React.PropsWithChildren) => {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         const service = createCustomizationService();
         service.set(customization);
         return (
@@ -159,7 +159,7 @@ describe('useDiscoverCustomization$', () => {
 
   it('should provide undefined if customization is not found', () => {
     const wrapper = renderHook(() => useDiscoverCustomization$('top_nav'), {
-      wrapper: ({ children }: React.PropsWithChildren) => {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         const service = createCustomizationService();
         return (
           <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>

@@ -42,7 +42,7 @@ describe('Connectors', () => {
 
   beforeAll(() => {
     wrapper = mount(<Connectors {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
   });
 
@@ -92,7 +92,7 @@ describe('Connectors', () => {
         selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
-        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 
@@ -119,7 +119,7 @@ describe('Connectors', () => {
         selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
-        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren>,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 

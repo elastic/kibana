@@ -19,7 +19,7 @@ const useQuerySpy = jest.spyOn(ReactQuery, 'useQuery');
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
-const wrapper: FunctionComponent<React.PropsWithChildren> = ({ children }) => (
+const wrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 

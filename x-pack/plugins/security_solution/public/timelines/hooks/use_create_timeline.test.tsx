@@ -44,7 +44,7 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       }
@@ -63,7 +63,7 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       }
@@ -109,7 +109,7 @@ describe('useCreateTimeline', () => {
           onClick,
         }),
       {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       }
@@ -129,7 +129,7 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       }
@@ -152,7 +152,7 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }: React.PropsWithChildren) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders>{children}</TestProviders>
         ),
       }
