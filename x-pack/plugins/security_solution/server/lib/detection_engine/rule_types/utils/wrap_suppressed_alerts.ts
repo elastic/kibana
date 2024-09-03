@@ -108,7 +108,7 @@ export const wrapSuppressedAlerts = ({
     }
 
     const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
-    console.error('INSTANCE ID', instanceId);
+    console.error('suppressed alerts INSTANCE ID', instanceId);
     return {
       _id: id,
       _index: '',
@@ -174,6 +174,8 @@ export const wrapSuppressedSequenceAlerts = ({
     if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
       return [];
     }
+
+    console.error('CALLING WITHIN WRAP SUPPRESSED SEQUENCE ALERTS');
     // The "building block" alerts start out as regular BaseFields.
     // We'll add the group ID and index fields
     // after creating the shell alert later on
@@ -196,7 +198,7 @@ export const wrapSuppressedSequenceAlerts = ({
     );
 
     const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
-    console.error('INSTANCE ID', instanceId);
+    console.error('sequence alert INSTANCE ID', instanceId);
 
     // The ID of each building block alert depends on all of the other building blocks as well,
     // so we generate the IDs after making all the BaseFields

@@ -27,7 +27,10 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
-import { ALERT_GROUP_ID } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import {
+  ALERT_GROUP_ID,
+  ALERT_ORIGINAL_TIME,
+} from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
@@ -86,14 +89,15 @@ const augmentAlerts = <T>({
 };
 
 const mapAlertsToBulkCreate = <T>(alerts: Array<{ _id: string; _source: T }>) => {
-  const sourceNoId = (alertSource) => {
-    if (Object.hasOwn(alertSource, '_id')) {
-      const { _id, _index, _source, ...source } = alertSource;
-      return { ..._source, ...source };
-    }
-    return alertSource;
-  };
-  return alerts.flatMap((alert) => [{ create: { _id: alert._id } }, sourceNoId(alert._source)]); //sourceNoId(alert._source)]);
+  // const sourceNoId = (alertSource) => {
+  //   if (Object.hasOwn(alertSource, '_id')) {
+  //     const { _id, _index, _source, ...source } = alertSource;
+  //     return { ..._source, ...source };
+  //   }
+  //   return alertSource;
+  // };
+  // return alerts.flatMap((alert) => [{ create: { _id: alert._id } }, sourceNoId(alert._source)]); //sourceNoId(alert._source)]);
+  return alerts.flatMap((alert) => [{ create: { _id: alert._id } }, alert._source]);
 };
 
 /**
@@ -382,9 +386,13 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               buildingBlockAlerts
             ) => {
               try {
+                // console.error(
+                //   'ALERT WITH SUPPRESSION INSTANCE IDS',
+                //   alerts.map((doc) => doc._source[ALERT_INSTANCE_ID])
+                // );
                 console.error(
-                  'ALERT WITH SUPPRESSION INSTANCE IDS',
-                  alerts.map((doc) => doc._source[ALERT_INSTANCE_ID])
+                  'ALERT WITH SUPPRESSION original times',
+                  alerts.map((doc) => doc._source[ALERT_ORIGINAL_TIME])
                 );
                 const ruleDataClientWriter = await ruleDataClient.getWriter({
                   namespace: options.spaceId,
@@ -553,6 +561,9 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                       },
                       {
                         doc: {
+                          // see if this is where the original time
+                          // is not being set correctly
+                          // when suppressing on per rule exec.
                           ...getUpdatedSuppressionBoundaries(
                             existingAlert,
                             alert,

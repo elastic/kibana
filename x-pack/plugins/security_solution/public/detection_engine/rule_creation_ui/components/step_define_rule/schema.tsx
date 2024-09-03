@@ -135,7 +135,6 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['eqlOptions', 'queryBar'],
   },
   queryBar: {
-    fieldsToValidateOnChange: ['queryBar', 'groupByFields'],
     validations: [
       {
         validator: (
@@ -657,7 +656,7 @@ export const schema: FormSchema<DefineStepRule> = {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
           const needsValidation = isSuppressionRuleConfiguredWithGroupBy(formData.ruleType);
-
+          console.error('DO WE NEED VALIDATION', needsValidation);
           if (!needsValidation) {
             return;
           }
@@ -670,18 +669,6 @@ export const schema: FormSchema<DefineStepRule> = {
               }
             ),
           })(...args);
-        },
-      },
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData, value }] = args;
-          const groupByLength = (value as string[]).length;
-          const needsValidation = isEqlRule(formData.ruleType) && groupByLength > 0;
-          if (!needsValidation) {
-            return;
-          }
         },
       },
     ],

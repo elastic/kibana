@@ -5,7 +5,7 @@
   "rule_id": "rule-id-eql-1",
   "enabled": true,
   "index": ["auditbeat*", "packetbeat*"],
-  "interval": "30s",
+  "interval": "2m",
   "query": "sequence with maxspan=10m [any where agent.type == \"auditbeat\"] [any where event.category == \"network_traffic\"]",
   "meta": {
     "anything_you_want_ui_related_or_otherwise": {
@@ -16,7 +16,7 @@
   },
   "risk_score": 99,
   "to": "now",
-  "from": "now-90s",
+  "from": "now-5m",
   "severity": "high",
   "type": "eql",
   "language": "eql",
@@ -55,7 +55,6 @@
   "references": ["http://www.example.com/some-article-about-attack"],
   "alert_suppression": {
     "group_by": ["agent.name"],
-    "duration": { "value": 5, "unit": "h" },
     "missing_fields_strategy": "suppress"
   },
   "version": 1

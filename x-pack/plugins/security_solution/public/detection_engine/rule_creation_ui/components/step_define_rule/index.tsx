@@ -481,7 +481,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   /** Suppression fields are generally disabled if either:
    * - License is insufficient (i.e. less than platinum)
-   * - An EQL Sequence is used
    * - ML Field information is not available
    */
   const areSuppressionFieldsDisabled =

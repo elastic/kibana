@@ -33,6 +33,7 @@ import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
+import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
@@ -219,11 +220,6 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
   // refactor the below into a separate function
   const suppressibleWrappedDocs = wrapSuppressedHits(suppressibleSequences, buildReasonMessage);
 
-  console.error(
-    'SUPPRESSIBLE WRAPPED instance ids',
-    suppressibleWrappedDocs.map((doc) => doc._source[ALERT_INSTANCE_ID])
-  );
-
   // once we have wrapped thing similarly to
   // build alert group from sequence,
   // we can pass down the suppressibleWrappeDocs (our sequence alerts)
@@ -233,6 +229,11 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
   const [sequenceAlerts, buildingBlockAlerts] = partition(
     suppressibleWrappedDocs,
     (signal) => signal._source[ALERT_BUILDING_BLOCK_TYPE] == null
+  );
+
+  console.error(
+    'SUPPRESSIBLE WRAPPED original time',
+    sequenceAlerts.map((doc) => doc._source[ALERT_ORIGINAL_TIME])
   );
 
   // the code in executeBulkCreateAlerts should

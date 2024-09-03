@@ -160,6 +160,7 @@ export const buildAlert = (
     riskScoreOverride: number;
   }
 ): BaseFieldsLatest => {
+  // console.error('build alert caller: ', buildAlert.caller);
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = docs.reduce(
@@ -191,10 +192,20 @@ export const buildAlert = (
 
   const params = completeRule.ruleParams;
 
+  console.error(
+    'WHAT ARE DOCS ORIGINAL TIMES before',
+    docs.map((doc) => doc._source[TIMESTAMP])
+  );
+
   const originalTime = getValidDateFromDoc({
     doc: docs[0],
     primaryTimestamp: TIMESTAMP,
   });
+
+  console.error(
+    'WHAT ARE DOCS ORIGINAL TIMES after',
+    docs.map((doc) => doc._source[TIMESTAMP])
+  );
 
   const timestamp = alertTimestampOverride?.toISOString() ?? new Date().toISOString();
 
@@ -205,6 +216,8 @@ export const buildAlert = (
     basePath: publicBaseUrl,
     spaceId,
   });
+
+  console.error('WHAT IS ORIGINAL TIME', originalTime?.toISOString());
 
   return {
     [TIMESTAMP]: timestamp,
