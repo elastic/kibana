@@ -19,7 +19,7 @@ import type {
 } from './types';
 import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../../common/constants';
 import {
@@ -438,7 +438,10 @@ export const getAllCloudAccountsStats = async (
   logger: Logger
 ): Promise<CloudSecurityAccountsStats[]> => {
   try {
-    const indices = [LATEST_FINDINGS_INDEX_DEFAULT_NS, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS];
+    const indices = [
+      LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+    ];
     const [findingIndex, vulnerabilitiesIndex] = await Promise.all(
       indices.map(async (index) => ({
         exists: await esClient.indices.exists({
