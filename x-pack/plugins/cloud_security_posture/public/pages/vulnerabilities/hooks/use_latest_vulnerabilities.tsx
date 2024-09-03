@@ -22,7 +22,6 @@ import { VULNERABILITY_FIELDS } from '../../../common/constants';
 import { CspVulnerabilityFinding } from '../../../../common/schemas';
 import {
   CDR_VULNERABILITIES_INDEX_PATTERN,
-  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
 } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
@@ -92,7 +91,7 @@ export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {
    * the last loaded record to be used as a from parameter to fetch the next chunk of data.
    */
   return useInfiniteQuery(
-    [CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, options],
+    [CDR_VULNERABILITIES_INDEX_PATTERN, options],
     async ({ pageParam }) => {
       const {
         rawResponse: { hits },
