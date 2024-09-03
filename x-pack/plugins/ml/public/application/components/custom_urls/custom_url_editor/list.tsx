@@ -29,7 +29,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { parseUrlState } from '@kbn/ml-url-state';
 
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
@@ -73,6 +73,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
       data: { dataViews },
     },
   } = useMlKibana();
+  const ml = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
 
@@ -160,7 +161,14 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
 
     if (index < customUrls.length) {
       try {
-        const testUrl = await getTestUrl(job, customUrl, timefieldName, undefined, isPartialDFAJob);
+        const testUrl = await getTestUrl(
+          ml,
+          job,
+          customUrl,
+          timefieldName,
+          undefined,
+          isPartialDFAJob
+        );
         openCustomUrlWindow(testUrl, customUrl, http.basePath.get());
       } catch (error) {
         displayErrorToast(
