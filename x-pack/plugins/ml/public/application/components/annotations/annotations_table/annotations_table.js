@@ -564,7 +564,7 @@ class AnnotationsTableUI extends Component {
                 );
           },
           enabled: (annotation) => isTimeSeriesViewJob(this.getJob(annotation.job_id)),
-          icon: 'visLine',
+          icon: 'singleMetricViewer',
           type: 'icon',
           onClick: (annotation) => this.openSingleMetricView(annotation),
           'data-test-subj': `mlAnnotationsActionOpenInSingleMetricViewer`,
