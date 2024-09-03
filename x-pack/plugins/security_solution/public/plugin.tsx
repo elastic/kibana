@@ -17,7 +17,7 @@ import type {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '@kbn/core/public';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
@@ -204,81 +204,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins): PluginStart {
     this.services.start(core, plugins);
-
-    if (plugins.fleet) {
-      const { registerExtension } = plugins.fleet;
-      const registerOptions: FleetUiExtensionGetterOptions = {
-        coreStart: core,
-        depsStart: plugins,
-        services: {
-          upsellingService: this.contract.upsellingService,
-        },
-      };
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-policy-edit',
-        Component: getLazyEndpointPolicyEditExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-policy-response',
-        Component: getLazyEndpointPolicyResponseExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-generic-errors-list',
-        Component: getLazyEndpointGenericErrorsListExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-policy-create',
-        Component: getLazyEndpointPolicyCreateExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-policy-create-multi-step',
-        Component: LazyEndpointPolicyCreateMultiStepExtension,
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-detail-custom',
-        Component: getLazyEndpointPackageCustomExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-detail-assets',
-        Component: LazyEndpointCustomAssetsExtension,
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'endpoint-agent-tamper-protection',
-        Component: getLazyEndpointAgentTamperProtectionExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'cloud_security_posture',
-        view: 'pli-auth-block',
-        Component: getLazyCloudSecurityPosturePliAuthBlockExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'cribl',
-        view: 'package-policy-replace-define-step',
-        Component: LazyCustomCriblExtension,
-      });
-    }
-
-    // Not using await to prevent blocking start execution
-    this.registerAppLinks(core, plugins);
-
+    this.registerFleetExtensions(core, plugins);
+    this.updatePluginVisible(core);
+    this.registerAppLinks(core, plugins); // Not awaiting to prevent blocking start execution
     return this.contract.getStartContract(core);
   }
 
@@ -404,13 +332,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   /**
    * Registers deepLinks and appUpdater for appLinks using license.
    */
-  async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
+  private async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const {
       appLinks: initialAppLinks,
       getFilteredLinks,
       solutionAppLinksSwitcher,
     } = await this.lazyApplicationLinks();
     const { license$ } = plugins.licensing;
+    const { capabilities } = core.application;
     const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
 
     registerDeepLinksUpdater(this.appUpdater$, isSolutionNavigationEnabled$);
@@ -425,7 +354,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const linksPermissions: LinksPermissions = {
           experimentalFeatures: this.experimentalFeatures,
           upselling: upsellingService,
-          capabilities: core.application.capabilities,
+          capabilities,
           uiSettingsClient: core.uiSettings,
           ...(license.type != null && { license }),
         };
@@ -434,6 +363,99 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const filteredLinks = await getFilteredLinks(core, plugins);
     appLinks$.next(filteredLinks);
+  }
+
+  /**
+   * Checks if the plugin is visible based on the user's capabilities and updates the plugin using appUpdater$ accordingly.
+   */
+  private updatePluginVisible(core: CoreStart) {
+    const { capabilities } = core.application;
+
+    // The plugin should only be disabled when both SIEM (main Security) and Security Cases features are "none".
+    if (!capabilities.siem?.show && !capabilities.securitySolutionCases?.read_cases) {
+      this.appUpdater$.next(() => ({
+        visibleIn: [],
+        status: AppStatus.inaccessible,
+      }));
+    }
+  }
+
+  /**
+   * Registers Fleet extensions.
+   */
+  private registerFleetExtensions(core: CoreStart, plugins: StartPlugins) {
+    if (!plugins.fleet) {
+      return;
+    }
+
+    const { registerExtension } = plugins.fleet;
+    const registerOptions: FleetUiExtensionGetterOptions = {
+      coreStart: core,
+      depsStart: plugins,
+      services: {
+        upsellingService: this.contract.upsellingService,
+      },
+    };
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-policy-edit',
+      Component: getLazyEndpointPolicyEditExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-policy-response',
+      Component: getLazyEndpointPolicyResponseExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-generic-errors-list',
+      Component: getLazyEndpointGenericErrorsListExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-policy-create',
+      Component: getLazyEndpointPolicyCreateExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-policy-create-multi-step',
+      Component: LazyEndpointPolicyCreateMultiStepExtension,
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-detail-custom',
+      Component: getLazyEndpointPackageCustomExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-detail-assets',
+      Component: LazyEndpointCustomAssetsExtension,
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'endpoint-agent-tamper-protection',
+      Component: getLazyEndpointAgentTamperProtectionExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'cloud_security_posture',
+      view: 'pli-auth-block',
+      Component: getLazyCloudSecurityPosturePliAuthBlockExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'cribl',
+      view: 'package-policy-replace-define-step',
+      Component: LazyCustomCriblExtension,
+    });
   }
 
   // Lazy loaded dependencies

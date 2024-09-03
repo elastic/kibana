@@ -21,7 +21,6 @@ import {
 import type { BaseKibanaFeatureConfig } from '../types';
 import {
   APP_ID,
-  APP_UI_ID,
   SERVER_APP_ID,
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
@@ -41,9 +40,6 @@ const SECURITY_RULE_TYPES = [
   NEW_TERMS_RULE_TYPE_ID,
 ];
 
-// List of apps IDs that are considered part of Security Solution
-const app = [APP_UI_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'];
-
 export const getSecurityBaseKibanaFeature = ({
   savedObjects,
 }: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
@@ -56,7 +52,7 @@ export const getSecurityBaseKibanaFeature = ({
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  app,
+  app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -64,7 +60,7 @@ export const getSecurityBaseKibanaFeature = ({
   alerting: SECURITY_RULE_TYPES,
   privileges: {
     all: {
-      app,
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [
         APP_ID,
@@ -95,7 +91,7 @@ export const getSecurityBaseKibanaFeature = ({
       ui: ['show', 'crud'],
     },
     read: {
-      app,
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [APP_ID, 'lists-read', 'rac', 'cloud-security-posture-read', 'cloud-defend-read'],
       savedObject: {
