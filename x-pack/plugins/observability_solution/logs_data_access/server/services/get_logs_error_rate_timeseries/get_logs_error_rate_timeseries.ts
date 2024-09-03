@@ -34,7 +34,7 @@ type LogErrorsAggregation = ReturnType<typeof getLogErrorsAggregation>;
 const getAPMLogErrorsAggregation = () => ({
   terms: {
     field: ERROR_LOG_LEVEL,
-    include: ['error'],
+    include: ['error', 'ERROR'],
   },
 });
 
