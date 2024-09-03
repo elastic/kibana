@@ -84,7 +84,24 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       SecuritySubFeatureId.blocklist,
       SecuritySubFeatureId.eventFilters,
     ],
-    subFeaturesPrivileges: [],
+  },
+
+  // Endpoint Complete Tier:
+  // Allows access to create/update HIEs
+  [ProductFeatureSecurityKey.endpointHostIsolationExceptions]: {
+    subFeatureIds: [SecuritySubFeatureId.hostIsolationExceptions],
+    subFeaturesPrivileges: [
+      {
+        id: 'host_isolation_exceptions_all',
+        api: [`${APP_ID}-accessHostIsolationExceptions`, `${APP_ID}-writeHostIsolationExceptions`],
+        ui: ['accessHostIsolationExceptions', 'writeHostIsolationExceptions'],
+      },
+      {
+        id: 'host_isolation_exceptions_read',
+        api: [`${APP_ID}-accessHostIsolationExceptions`],
+        ui: ['accessHostIsolationExceptions'],
+      },
+    ],
   },
 
   [ProductFeatureSecurityKey.endpointResponseActions]: {
@@ -116,10 +133,13 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
   },
 
   // Product features without RBAC
+  // Endpoint/Osquery PLIs
   [ProductFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
   [ProductFeatureSecurityKey.endpointProtectionUpdates]: {},
   [ProductFeatureSecurityKey.endpointAgentTamperProtection]: {},
   [ProductFeatureSecurityKey.externalRuleActions]: {},
   [ProductFeatureSecurityKey.cloudSecurityPosture]: {},
+
+  // Security PLIs
   [ProductFeatureSecurityKey.integrationAssistant]: {},
 };
