@@ -51,7 +51,7 @@ import {
 } from './components/discover_container';
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
-import { ConfigSchema, ExperimentalFeatures } from '../common/config';
+import type { ConfigSchema, ExperimentalFeatures } from '../server/config';
 import {
   DataSourceProfileService,
   DocumentProfileService,
