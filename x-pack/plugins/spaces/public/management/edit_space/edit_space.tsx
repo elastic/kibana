@@ -109,6 +109,7 @@ export const EditSpace: FC<PageProps> = ({
     getSpaceInfo().catch(handleApiError);
   }, [spaceId, spacesManager]);
 
+  // Load roles to show the count of assigned roles as a badge in the "Assigned roles" tab title
   useEffect(() => {
     if (!spaceId) {
       return;

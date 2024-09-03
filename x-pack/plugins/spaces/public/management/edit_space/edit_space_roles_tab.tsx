@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -27,9 +27,32 @@ interface Props {
 }
 
 export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOnly }) => {
-  const { dispatch, state } = useEditSpaceStore();
+  const { dispatch, state } = useEditSpaceStore(); // no loading state because roles have already been loaded
   const services = useEditSpaceServices();
   const { getUrlForApp, overlays, theme, i18n: i18nStart, notifications, invokeClient } = services;
+
+  // Roles are already loaded in app state, refresh them when user navigates to this tab
+  useEffect(() => {
+    const getRoles = async () => {
+      await invokeClient(async (clients) => {
+        let result: Role[] = [];
+        try {
+          result = await clients.spacesManager.getRolesForSpace(space.id);
+
+          dispatch({ type: 'update_roles', payload: result });
+        } catch (error) {
+          console.error(error); // eslint-disable-line no-console
+
+          const message = error?.body?.message ?? error.toString();
+          notifications.toasts.addError(error, {
+            title: message,
+          });
+        }
+      });
+    };
+
+    getRoles();
+  }, [dispatch, invokeClient, space.id, notifications.toasts]);
 
   const showRolesPrivilegeEditor = useCallback(
     (defaultSelected?: Role[]) => {

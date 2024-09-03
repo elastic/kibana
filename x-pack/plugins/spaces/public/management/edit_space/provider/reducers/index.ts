@@ -33,9 +33,11 @@ export const createSpaceRolesReducer: Reducer<IEditSpaceStoreState, IDispatchAct
 
   switch (action.type) {
     case 'update_roles': {
-      action.payload.forEach((role) => {
-        _state.roles.set(role.name, role);
-      });
+      if (action.payload) {
+        action.payload.forEach((role) => {
+          _state.roles.set(role.name, role);
+        });
+      }
 
       return _state;
     }
