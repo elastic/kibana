@@ -84,7 +84,7 @@ export function usePackagePolicySteps({
   );
 
   const updateSelectedPolicyTab = useCallback(
-    (currentTab) => {
+    (currentTab: any) => {
       setSelectedPolicyTab(currentTab);
       setPolicyValidation(currentTab, newAgentPolicy);
     },
