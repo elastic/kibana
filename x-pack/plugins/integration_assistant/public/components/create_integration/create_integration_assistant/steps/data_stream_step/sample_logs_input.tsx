@@ -64,16 +64,32 @@ export const parseJSONArray = (
   return { errorNoArrayFound: true, entries: [], pathToEntries: [] };
 };
 
-/**
- * Parse the logs sample file content (json or ndjson) and return the parsed logs sample
- */
-const parseLogsContent = (
-  fileContent: string
-): {
-  error?: string;
-  logSamples: string[];
+interface ParseLogsErrorResult {
+  error: string;
+}
+
+interface ParseLogsSuccessResult {
+  // Format of the samples, if able to be determined.
   samplesFormat?: SamplesFormat;
-} => {
+  // The parsed log samples. If samplesFormat is (ND)JSON, these are JSON strings.
+  logSamples: string[];
+}
+
+type ParseLogsResult = ParseLogsErrorResult | ParseLogsSuccessResult;
+
+/**
+ * Parse the logs sample file content and return the parsed logs sample.
+ *
+ * This function will return an error message if the file content is not valid, that is:
+ *  - it is too large to parse (the memory required is 2-3x of the file size); or
+ *  - it looks like a JSON format, but there is no array; or
+ *  - it looks like (ND)JSON format, but the items are not JSON dictionaries.
+ *
+ * Otherwise it is guaranteed to parse and return (possibly empty) `logSamples` array.
+ * If the file content is (ND)JSON, it will additionally fill out the `samplesFormat`
+ * field with name 'json' or 'ndjson'; otherwise it will be undefined.
+ */
+const parseLogsContent = (fileContent: string): ParseLogsResult => {
   let parsedContent: unknown[];
   let samplesFormat: SamplesFormat;
 
@@ -90,31 +106,37 @@ const parseLogsContent = (
       samplesFormat = { name: 'ndjson', multiline: false };
     }
   } catch (parseNDJSONError) {
+    if (parseNDJSONError instanceof RangeError) {
+      return { error: i18n.LOGS_SAMPLE_ERROR.TOO_LARGE_TO_PARSE };
+    }
     try {
       const { entries, pathToEntries, errorNoArrayFound } = parseJSONArray(fileContent);
       if (errorNoArrayFound) {
-        return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY, logSamples: [] };
+        return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY };
       }
       parsedContent = entries;
       samplesFormat = { name: 'json', json_path: pathToEntries };
     } catch (parseJSONError) {
+      if (parseJSONError instanceof RangeError) {
+        return { error: i18n.LOGS_SAMPLE_ERROR.TOO_LARGE_TO_PARSE };
+      }
       try {
         parsedContent = parseNDJSON(fileContent, true);
         samplesFormat = { name: 'ndjson', multiline: true };
       } catch (parseMultilineNDJSONError) {
+        if (parseMultilineNDJSONError instanceof RangeError) {
+          return { error: i18n.LOGS_SAMPLE_ERROR.TOO_LARGE_TO_PARSE };
+        }
         return {
           logSamples: fileContent.split('\n').filter((line) => line.trim() !== ''),
+          samplesFormat: undefined, // Signifies that the format is unknown.
         };
       }
     }
   }
 
-  if (parsedContent.length === 0) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY, logSamples: [] };
-  }
-
   if (parsedContent.some((log) => !isPlainObject(log))) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT, logSamples: [] };
+    return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT };
   }
 
   const logSamples = parsedContent.map((log) => JSON.stringify(log));
@@ -133,50 +155,84 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
 
   const onChangeLogsSample = useCallback(
     (files: FileList | null) => {
-      const logsSampleFile = files?.[0];
-      if (logsSampleFile == null) {
-        setSampleFileError(undefined);
-        setIntegrationSettings({
-          ...integrationSettings,
-          logSamples: undefined,
-          samplesFormat: undefined,
-        });
+      if (!files) {
         return;
       }
 
+      setSampleFileError(undefined);
+      setIntegrationSettings({
+        ...integrationSettings,
+        logSamples: undefined,
+        samplesFormat: undefined,
+      });
+
+      const logsSampleFile = files[0];
       const reader = new FileReader();
+
+      reader.onloadstart = function () {
+        setIsParsing(true);
+      };
+
+      reader.onloadend = function () {
+        setIsParsing(false);
+      };
+
       reader.onload = function (e) {
         const fileContent = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsText` to load the file.
-        if (fileContent == null) {
-          return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
-        }
-        let samples;
-        const { error, logSamples, samplesFormat } = parseLogsContent(fileContent);
-        setIsParsing(false);
-        samples = logSamples;
 
-        if (error) {
-          setSampleFileError(error);
-          setIntegrationSettings({
-            ...integrationSettings,
-            logSamples: undefined,
-            samplesFormat: undefined,
-          });
+        if (fileContent == null) {
+          setSampleFileError(i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ);
           return;
         }
 
-        if (samples.length > MaxLogsSampleRows) {
-          samples = samples.slice(0, MaxLogsSampleRows);
+        if (fileContent === '' && e.loaded > 100000) {
+          // V8-based browsers can't handle large files and return an empty string
+          // instead of an error; see https://stackoverflow.com/a/61316641
+          setSampleFileError(i18n.LOGS_SAMPLE_ERROR.TOO_LARGE_TO_PARSE);
+          return;
+        }
+
+        const result = parseLogsContent(fileContent);
+
+        if ('error' in result) {
+          setSampleFileError(result.error);
+          return;
+        }
+
+        const { logSamples: possiblyLargeLogSamples, samplesFormat } = result;
+
+        if (possiblyLargeLogSamples.length === 0) {
+          setSampleFileError(i18n.LOGS_SAMPLE_ERROR.EMPTY);
+          return;
+        }
+
+        let logSamples;
+        if (possiblyLargeLogSamples.length > MaxLogsSampleRows) {
+          logSamples = possiblyLargeLogSamples.slice(0, MaxLogsSampleRows);
           notifications?.toasts.addInfo(i18n.LOGS_SAMPLE_TRUNCATED(MaxLogsSampleRows));
+        } else {
+          logSamples = possiblyLargeLogSamples;
         }
 
         setIntegrationSettings({
           ...integrationSettings,
-          logSamples: samples,
+          logSamples,
           samplesFormat,
         });
       };
-      setIsParsing(true);
+
+      const handleReaderError = function () {
+        const message = reader.error?.message;
+        if (message) {
+          setSampleFileError(i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ_WITH_REASON(message));
+        } else {
+          setSampleFileError(i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ);
+        }
+      };
+
+      reader.onerror = handleReaderError;
+      reader.onabort = handleReaderError;
+
       reader.readAsText(logsSampleFile);
     },
     [integrationSettings, setIntegrationSettings, notifications?.toasts, setIsParsing]
