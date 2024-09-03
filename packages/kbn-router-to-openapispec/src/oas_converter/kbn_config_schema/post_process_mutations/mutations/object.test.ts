@@ -11,13 +11,10 @@ import { joi2JsonInternal } from '../../parse';
 import { processObject } from './object';
 
 test.each([
-  [
-    schema.object({}),
-    { type: 'object', properties: {}, additionalProperties: false, required: [] },
-  ],
+  [schema.object({}), { type: 'object', properties: {}, additionalProperties: false }],
   [
     schema.object({ never: schema.never() }),
-    { type: 'object', properties: {}, additionalProperties: false, required: [] },
+    { type: 'object', properties: {}, additionalProperties: false },
   ],
   [
     schema.object(

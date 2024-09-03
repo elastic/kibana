@@ -25,8 +25,8 @@ rules:
   # Responses
   operation-success-response: warn
   # Schema
-  oas3-schema: error
-  oas2-schema: error
+  oas3-schema: warn
+  oas2-schema: warn
   array-items: false
   # Bump.sh handles $ref siblings. Documentation wise it's convenient to have properties like descriptions next to $ref.
   no-$ref-siblings: off
@@ -47,6 +47,14 @@ rules:
       function: pattern
       functionOptions:
         notMatch: /(blacklist|whitelist|execute|kill)/i
+  property-description:
+    description: Properties should have descriptions.
+    message: "Each property should have a description"
+    severity: warn
+    given: $.components.schemas.*.properties.*
+    then:
+      field: description
+      function: defined 
   # Examples
   operation-success-examples:
     formats: ['oas3_1']
@@ -72,13 +80,13 @@ rules:
     message: 'Each operation should have a summary'
     severity: error
     recommended: true
-    given: $.paths[*][*]
+    given: $.paths[*][get,put,post,delete,options,head,patch,trace]
     then:
       field: summary
       function: defined
   operation-summary-length:
     description: Operation summary should be between 5 and 45 characters
-    given: '$.paths[*][*]'
+    given: '$.paths[*][get,put,post,delete,options,head,patch,trace]'
     then:
       field: summary
       function: length

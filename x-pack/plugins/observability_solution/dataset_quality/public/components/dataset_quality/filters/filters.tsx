@@ -10,12 +10,33 @@ import { EuiSuperDatePicker } from '@elastic/eui';
 import { UI_SETTINGS } from '@kbn/data-service';
 import { TimePickerQuickRange } from '@kbn/observability-shared-plugin/public/hooks/use_quick_time_ranges';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useDatasetQualityFilters } from '../../../hooks/use_dataset_quality_filters';
 import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
 import { FilterBar } from './filter_bar';
 import { IntegrationsSelector } from './integrations_selector';
 import { NamespacesSelector } from './namespaces_selector';
 import { QualitiesSelector } from './qualities_selector';
+import { Selector } from './selector';
+
+const typesLabel = i18n.translate('xpack.datasetQuality.types.label', {
+  defaultMessage: 'Types',
+});
+
+const typesSearchPlaceholder = i18n.translate(
+  'xpack.datasetQuality.selector.types.search.placeholder',
+  {
+    defaultMessage: 'Filter types',
+  }
+);
+
+const typesNoneMatching = i18n.translate('xpack.datasetQuality.selector.types.noneMatching', {
+  defaultMessage: 'No types found',
+});
+
+const typesNoneAvailable = i18n.translate('xpack.datasetQuality.selector.types.noneAvailable', {
+  defaultMessage: 'No types available',
+});
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -29,9 +50,11 @@ export default function Filters() {
     integrations,
     namespaces,
     qualities,
+    types,
     onIntegrationsChange,
     onNamespacesChange,
     onQualitiesChange,
+    onTypesChange,
     selectedQuery,
     onQueryChange,
   } = useDatasetQualityFilters();
@@ -64,6 +87,14 @@ export default function Filters() {
           isLoading={isLoading}
           integrations={integrations}
           onIntegrationsChange={onIntegrationsChange}
+        />
+        <Selector
+          label={typesLabel}
+          searchPlaceholder={typesSearchPlaceholder}
+          noneMatchingMessage={typesNoneMatching}
+          noneAvailableMessage={typesNoneAvailable}
+          options={types}
+          onOptionsChange={onTypesChange}
         />
         <NamespacesSelector
           isLoading={isLoading}

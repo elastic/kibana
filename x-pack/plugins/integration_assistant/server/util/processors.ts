@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { safeLoad } from 'js-yaml';
 import { join as joinPath } from 'path';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { deepCopy } from './util';
@@ -43,6 +43,6 @@ function createAppendProcessors(processors: SimplifiedProcessors): ESProcessorIt
   });
   const template = env.getTemplate('append.yml.njk');
   const renderedTemplate = template.render({ processors });
-  const appendProcessors = load(renderedTemplate) as ESProcessorItem[];
+  const appendProcessors = safeLoad(renderedTemplate) as ESProcessorItem[];
   return appendProcessors;
 }
