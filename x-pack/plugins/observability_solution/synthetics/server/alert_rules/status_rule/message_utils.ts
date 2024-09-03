@@ -8,6 +8,8 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { AlertStatusMetaDataCodec } from './queries/query_monitor_status_alert';
+import { getTimeUnitLabel } from '../common';
 import { ALERT_REASON_MSG } from '../action_variables';
 import { MonitorSummaryStatusRule } from './types';
 import {
@@ -22,6 +24,10 @@ import {
 } from '../../../common/field_names';
 import { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
+import {
+  getConditionType,
+  StatusRuleParams,
+} from '@kbn/synthetics-plugin/common/rules/status_rule';
 
 export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule) => ({
   [MONITOR_ID]: monitorSummary.monitorId,
@@ -121,6 +127,83 @@ export const getMonitorSummary = ({
     monitorTags: monitorInfo.tags,
     locationNames: monitorInfo.observer?.geo?.name!,
   };
+};
+
+export const getUngroupedReasonMessage = ({
+  statusConfigs,
+  monitorName,
+  params,
+  status = DOWN_LABEL,
+}: {
+  statusConfigs: AlertStatusMetaDataCodec[];
+  monitorName: string;
+  status?: string;
+  params: StatusRuleParams;
+}) => {
+  const { isChecksBased, numberOfChecks, timeWindow, downThreshold, numberOfLocations } =
+    getConditionType(params.condition);
+
+  if (statusConfigs.length === 1) {
+    const locNames = statusConfigs.map((c) => c.ping.observer.geo?.name!);
+    return i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location.ungrouped',
+      {
+        defaultMessage: `Monitor "{name}" is {status} from {locName}. Alert when down {threshold} {threshold, plural, one {time} other {times}}.`,
+        values: {
+          locName: locNames[0],
+          name: monitorName,
+          status,
+          threshold: downThreshold,
+        },
+      }
+    );
+  } else {
+    return i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location.ungrouped.multiple',
+      {
+        defaultMessage: `Monitor "{name}" is {status}{locationDetails}. Alert when down => {threshold} {threshold, plural, one {time} other {times}} {condition} from at least {numberOfLocations} {numberOfLocations, plural, one {location} other {locations}}.`,
+        values: {
+          name: monitorName,
+          status: status,
+          threshold: downThreshold,
+          numberOfLocations,
+          condition: isChecksBased
+            ? i18n.translate(
+                'xpack.synthetics.alertRules.monitorStatus.reasonMessage.condition.latestChecks',
+                {
+                  defaultMessage: 'within the last {checks} checks',
+                  values: { checks: numberOfChecks },
+                }
+              )
+            : i18n.translate(
+                'xpack.synthetics.alertRules.monitorStatus.reasonMessage.condition.timeWindow',
+                {
+                  defaultMessage: 'within the last {time} {unit}',
+                  values: {
+                    time: timeWindow.size,
+                    unit: getTimeUnitLabel(timeWindow.unit, timeWindow.size),
+                  },
+                }
+              ),
+          locationDetails: statusConfigs
+            .map((c) => {
+              return i18n.translate(
+                'xpack.synthetics.alertRules.monitorStatus.reasonMessage.locationDetails',
+                {
+                  defaultMessage:
+                    ' {downCount} {downCount, plural, one {time} other {times}} from {locName}',
+                  values: {
+                    locName: c.ping.observer.geo?.name,
+                    downCount: isChecksBased ? c.checks?.downWithinXChecks : c.checks?.down,
+                  },
+                }
+              );
+            })
+            .join(' | '),
+        },
+      }
+    );
+  }
 };
 
 export const getReasonMessage = ({

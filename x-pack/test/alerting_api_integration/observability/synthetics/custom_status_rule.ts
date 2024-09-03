@@ -7,7 +7,10 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { StatusRuleParams } from '@kbn/synthetics-plugin/common/rules/status_rule';
-import { getReasonMessage } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/message_utils';
+import {
+  getReasonMessage,
+  getUngroupedReasonMessage,
+} from '@kbn/synthetics-plugin/server/alert_rules/status_rule/message_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SyntheticsRuleHelper } from './synthetics_rule_helper';
 
@@ -133,18 +136,17 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('NumberOfLocations', () => {
       let ruleId = '';
-
-      it('creates a custom rule with location threshold', async () => {
-        const params: StatusRuleParams = {
-          condition: {
-            window: {
-              numberOfLocations: 2,
-              numberOfChecks: 5,
-            },
-            groupBy: 'locationId',
-            downThreshold: 1,
+      const params: StatusRuleParams = {
+        condition: {
+          window: {
+            numberOfLocations: 2,
+            numberOfChecks: 5,
           },
-        };
+          groupBy: 'locationId',
+          downThreshold: 1,
+        },
+      };
+      it('creates a custom rule with location threshold', async () => {
         const rule = await ruleHelper.createCustomStatusRule({
           params,
           name: 'When down from 2 locations',
@@ -215,9 +217,41 @@ export default function ({ getService }: FtrProviderContext) {
         });
         const alert: any = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'active');
-        expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" is down from 2 locations (Dev Service, Dev Service 2). Alert when monitor is down from 2 locations.`
-        );
+
+        const reasonMessage = getUngroupedReasonMessage({
+          statusConfigs: [
+            {
+              checks: {
+                down: 1,
+                downWithinXChecks: 2,
+              },
+              ping: {
+                observer: {
+                  geo: {
+                    name: 'Dev Service',
+                  },
+                },
+              },
+            },
+            {
+              checks: {
+                down: 1,
+                downWithinXChecks: 1,
+              },
+              ping: {
+                observer: {
+                  geo: {
+                    name: 'Dev Service 2',
+                  },
+                },
+              },
+            },
+          ],
+          monitorName: monitor.name,
+          params: params,
+        });
+
+        expect(alert['kibana.alert.reason']).to.eql(reasonMessage);
       });
 
       it('should trigger recovered alert', async () => {

@@ -19,6 +19,7 @@ import { SyntheticsServerSetup } from '../../types';
 import { AlertStatusMetaDataCodec } from './queries/query_monitor_status_alert';
 
 describe('StatusRuleExecutor', () => {
+  // @ts-ignore
   Date.now = jest.fn(() => new Date('2024-05-13T12:33:37.000Z'));
 
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
@@ -67,13 +68,12 @@ describe('StatusRuleExecutor', () => {
 
   const statusRule = new StatusRuleExecutor(serverMock, monitorClient, {
     params: {},
-    spaceId: 'default',
     services: {
       uiSettingsClient,
       savedObjectsClient: soClient,
       scopedClusterClient: { asCurrentUser: mockEsClient },
     },
-  });
+  } as any);
 
   describe('DefaultRule', () => {
     it('should only query enabled monitors', async () => {
@@ -479,7 +479,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 0, downWithinXChecks: 1 },
           locationId: 'us_central_qa',
-          ping: {},
+          ping: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -488,7 +488,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
       ];
       const res = getDoesMonitorMeetLocationThreshold({
         matchesByLocation,
-        locationThreshold: 1,
+        locationsThreshold: 1,
         downThreshold: 1,
         useTimeWindow: false,
       });
@@ -500,7 +500,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 1 },
           locationId: 'us_central_qa',
-          ping: {},
+          ping: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -521,7 +521,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 1 },
           locationId: 'us_central_qa',
-          ping: {},
+          ping: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -542,7 +542,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 1 },
           locationId: 'us_central_qa',
-          ping: {},
+          ping: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -551,7 +551,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 1 },
           locationId: 'us_central',
-          ping: {},
+          ping: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -574,7 +574,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 0, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
-          ping: {},
+          ping: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -595,7 +595,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
-          ping: {},
+          ping: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -616,7 +616,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
-          ping: {},
+          ping: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -637,7 +637,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
-          ping: {},
+          ping: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -646,7 +646,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
         {
           checks: { down: 1, downWithinXChecks: 1 },
           locationId: 'us_central',
-          ping: {},
+          ping: testPing,
           configId: 'id1',
           monitorQueryId: 'test',
           status: 'down',
@@ -748,4 +748,4 @@ const testPing = {
       name: 'Test location',
     },
   },
-};
+} as any;
