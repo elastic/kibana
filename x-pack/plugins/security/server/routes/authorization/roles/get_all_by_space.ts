@@ -53,15 +53,22 @@ export function defineGetAllRolesBySpaceRoutes({
                 logger
               )
             )
-            .filter(
-              (role) =>
+            .filter((role) => {
+              return (
                 !(hideReservedRoles && role.metadata?._reserved) &&
-                role.kibana.some(
-                  (privilege) =>
+                role.kibana.some((privilege) => {
+                  const privilegeInSpace =
                     privilege.spaces.includes(request.params.spaceId) ||
-                    privilege.spaces.includes(ALL_SPACES_ID)
-                )
-            )
+                    privilege.spaces.includes(ALL_SPACES_ID);
+                  const hasBasePrivilege = privilege.base.length;
+                  const hasFeaturePrivilege = Object.values(privilege.feature).some(
+                    (featureList) => featureList.length
+                  );
+
+                  return privilegeInSpace && (hasBasePrivilege || hasFeaturePrivilege);
+                })
+              );
+            })
             .sort(compareRolesByName),
         });
       } catch (error) {
