@@ -392,16 +392,22 @@ function getTopSuggestion(
     mainPalette,
     dataViews: framePublicAPI.dataViews,
   });
-  const suggestions = unfilteredSuggestions.filter((suggestion) => {
-    // don't use extended versions of current data table on switching between visualizations
-    // to avoid confusing the user.
-    const subtypes = getVisualizationSubtypes(newVisualization, suggestion.visualizationState);
-    return suggestion.changeType !== 'extended' && subtypes.includes(subVisualizationId);
-  });
+  const suggestions = unfilteredSuggestions
+    .filter((suggestion) => {
+      // don't use extended versions of current data table on switching between visualizations
+      // to avoid confusing the user.
+
+      const subtypes = getVisualizationSubtypes(newVisualization, suggestion.visualizationState);
+      return suggestion.changeType !== 'extended' && subtypes.includes(subVisualizationId);
+    })
+    .sort((a) =>
+      newVisualization.getVisualizationTypeId(a.visualizationState) === subVisualizationId ? -1 : 1
+    );
 
   return (
-    suggestions.find((s) => s.changeType === 'unchanged' || s.changeType === 'reduced') ||
-    suggestions.find((s) => s.keptLayerIds.some((id) => id === layerId)) ||
+    suggestions.find((s) => s.changeType === 'unchanged') || // switching to vis that doesn't change anything is the best option
+    suggestions.find((s) => s.changeType === 'reduced') || // switching to vis that reduces data model if possible
+    suggestions.find((s) => s.keptLayerIds.some((id) => id === layerId)) || // switching to vis that at least keeps the chosen layer
     suggestions[0]
   );
 }
