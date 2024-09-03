@@ -124,3 +124,32 @@ set_git_merge_base() {
 
   export GITHUB_PR_MERGE_BASE
 }
+
+docker_with_retry () {
+  cmd=$1
+  shift
+  args=("$@")
+  attempt=0
+  max_retries=5
+  sleep_time=15
+
+  while true
+  do
+    attempt=$((attempt+1))
+
+    if [ $attempt -gt $max_retries ]
+    then
+      echo "Docker $cmd retries exceeded, aborting."
+      exit 1
+    fi
+
+    if docker "$cmd" "${args[@]}"
+    then
+      echo "Docker $cmd successful."
+      break
+    else
+      echo "Docker $cmd unsuccessful, attempt '$attempt'... Retrying in $sleep_time"
+      sleep $sleep_time
+    fi
+  done
+}
