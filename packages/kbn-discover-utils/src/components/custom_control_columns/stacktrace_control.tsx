@@ -14,8 +14,8 @@ import {
   RowControlProps,
   RowControlRowProps,
 } from './types';
-import { getStacktraceFields } from '../../utils';
 import { LogDocument } from '../../data_types';
+import { getStacktraceFields } from '../../utils/get_stack_trace_fields';
 
 /**
  * Stacktrace control factory function.
@@ -59,6 +59,7 @@ const Stacktrace = ({
     <Control
       data-test-subj="docTableStacktraceExist"
       label={stacktraceAvailableControlButton}
+      tooltipContent={stacktraceAvailableControlButton}
       iconType="apmTrace"
       onClick={undefined}
       {...props}
@@ -68,6 +69,7 @@ const Stacktrace = ({
       disabled
       data-test-subj="docTableStacktraceDoesNotExist"
       label={stacktraceNotAvailableControlButton}
+      tooltipContent={stacktraceNotAvailableControlButton}
       iconType="apmTrace"
       onClick={undefined}
       {...props}

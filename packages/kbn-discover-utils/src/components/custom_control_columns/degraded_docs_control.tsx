@@ -71,11 +71,13 @@ const DegradedDocs = ({
   const isDegradedDocumentExists = DEGRADED_DOCS_FIELDS.some((field) => field in record.raw);
 
   if (!enabled) {
+    const codeSample = 'FROM logs-* METADATA _ignored';
+
     const tooltipContent = (
       <div>
         {degradedDocButtonLabelWhenDisabled}
         <EuiSpacer size="s" />
-        <EuiCode>FROM logs-* METADATA _ignored</EuiCode>
+        <EuiCode>{codeSample}</EuiCode>
       </div>
     );
 
@@ -83,7 +85,8 @@ const DegradedDocs = ({
       <Control
         disabled
         data-test-subj="docTableDegradedDocDisabled"
-        label={tooltipContent}
+        tooltipContent={tooltipContent}
+        label={`${degradedDocButtonLabelWhenDisabled} ${codeSample}`}
         iconType="indexClose"
         onClick={undefined}
         {...props}
@@ -95,6 +98,7 @@ const DegradedDocs = ({
     <Control
       data-test-subj="docTableDegradedDocExist"
       color="danger"
+      tooltipContent={degradedDocButtonLabelWhenPresent}
       label={degradedDocButtonLabelWhenPresent}
       iconType="indexClose"
       onClick={undefined}
@@ -104,6 +108,7 @@ const DegradedDocs = ({
     <Control
       data-test-subj="docTableDegradedDocDoesNotExist"
       color="text"
+      tooltipContent={degradedDocButtonLabelWhenNotPresent}
       label={degradedDocButtonLabelWhenNotPresent}
       iconType="indexClose"
       onClick={undefined}

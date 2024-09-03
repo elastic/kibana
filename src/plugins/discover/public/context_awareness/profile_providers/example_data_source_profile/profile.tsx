@@ -86,6 +86,7 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
                 <Control
                   data-test-subj={`exampleLogsControl_${iconType}`}
                   label={`Example ${iconType}`}
+                  tooltipContent={`Example ${iconType}`}
                   iconType={iconType}
                   onClick={() => {
                     alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);

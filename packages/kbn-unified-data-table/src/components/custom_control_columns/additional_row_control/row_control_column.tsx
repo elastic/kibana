@@ -29,10 +29,18 @@ export const RowControlCell = ({
 
   const Control: React.FC<RowControlProps> = useMemo(
     () =>
-      ({ 'data-test-subj': dataTestSubj, color, disabled, label, iconType, onClick }) => {
+      ({
+        'data-test-subj': dataTestSubj,
+        color,
+        disabled,
+        iconType,
+        label,
+        onClick,
+        tooltipContent,
+      }) => {
         return (
           <DataTableRowControl size={Size.normal}>
-            <EuiToolTip content={label} delay="long">
+            <EuiToolTip content={tooltipContent} delay="long">
               <EuiButtonIcon
                 data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
                 disabled={disabled}

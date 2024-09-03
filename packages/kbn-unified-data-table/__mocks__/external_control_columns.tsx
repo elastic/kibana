@@ -127,6 +127,7 @@ export const mockRowAdditionalLeadingControls = ['visBarVerticalStacked', 'heart
         <Control
           data-test-subj={`exampleRowControl-${iconType}`}
           label={`Example ${iconType}`}
+          tooltipContent={`Example ${iconType}`}
           iconType={iconType}
           onClick={() => {
             alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);

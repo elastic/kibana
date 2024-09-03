@@ -19,9 +19,10 @@ export interface RowControlProps {
   'data-test-subj'?: string;
   color?: EuiButtonIconProps['color'];
   disabled?: boolean;
-  label: React.ReactNode;
+  label: string;
   iconType: IconType;
   onClick: ((props: RowControlRowProps) => void) | undefined;
+  tooltipContent: React.ReactNode;
 }
 
 export type RowControlComponent = FC<RowControlProps>;
