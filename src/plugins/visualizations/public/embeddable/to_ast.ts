@@ -9,7 +9,7 @@
 import type { ExpressionFunctionKibana } from '@kbn/data-plugin/public';
 import { ExpressionAstExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
-import type { VisToExpressionAst } from '../../types';
+import type { VisToExpressionAst } from '../types';
 
 /**
  * Creates an ast expression for a visualization based on kibana context (query, filters, timerange)

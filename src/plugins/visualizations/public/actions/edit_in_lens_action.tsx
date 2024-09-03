@@ -29,7 +29,7 @@ import { apiHasVisualizeConfig, HasVisualizeConfig } from '../legacy/embeddable'
 import {
   apiHasExpressionVariables,
   HasExpressionVariables,
-} from '../legacy/embeddable/interfaces/has_expression_variables';
+} from '../embeddable/interfaces/has_expression_variables';
 import {
   getApplication,
   getCapabilities,

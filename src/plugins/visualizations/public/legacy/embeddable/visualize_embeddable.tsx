@@ -47,11 +47,11 @@ import VisualizationError from '../../components/visualization_error';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { SerializedVis, Vis } from '../../vis';
 import { getApplication, getExecutionContext, getExpressions, getUiActions } from '../../services';
-import { VIS_EVENT_TO_TRIGGER } from './events';
+import { VIS_EVENT_TO_TRIGGER } from '../../embeddable/events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../../utils/saved_visualize_utils';
 import { VisSavedObject } from '../../types';
-import { toExpressionAst } from './to_ast';
+import { toExpressionAst } from '../../embeddable/to_ast';
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;

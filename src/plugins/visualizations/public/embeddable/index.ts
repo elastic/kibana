@@ -7,3 +7,4 @@
  */
 
 export { getVisualizeEmbeddableFactory } from './visualize_embeddable';
+export { VIS_EVENT_TO_TRIGGER } from './events';
