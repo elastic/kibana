@@ -22,6 +22,10 @@ const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
   return [...Array(steps).keys()].map(logFn.invert).map((d) => (isNaN(d) ? 0 : Math.round(d)));
 };
 
+const calculateDefaultDuration = (value: number) => {
+  return value === 0 ? 1 : value;
+};
+
 export const fetchDurationHistogramRangeSteps = async ({
   chartType,
   apmEventClient,
@@ -47,10 +51,14 @@ export const fetchDurationHistogramRangeSteps = async ({
   const steps = 100;
 
   if (durationMinOverride && durationMaxOverride) {
+    // these values should never be 0, so if they are we set them to 1
+    const durationMin = calculateDefaultDuration(durationMinOverride);
+    const durationMax = calculateDefaultDuration(durationMaxOverride);
+
     return {
-      durationMin: durationMinOverride,
-      durationMax: durationMaxOverride,
-      rangeSteps: getHistogramRangeSteps(durationMinOverride, durationMaxOverride, steps),
+      durationMin,
+      durationMax,
+      rangeSteps: getHistogramRangeSteps(durationMin, durationMax, steps),
     };
   }
 
@@ -100,8 +108,9 @@ export const fetchDurationHistogramRangeSteps = async ({
     return { rangeSteps: [] };
   }
 
-  const durationMin = resp.aggregations.duration_min.value;
-  const durationMax = resp.aggregations.duration_max.value * 2;
+  // these values should never be 0, so if they are we set them to 1
+  const durationMin = calculateDefaultDuration(resp.aggregations.duration_min.value);
+  const durationMax = calculateDefaultDuration(resp.aggregations.duration_max.value * 2);
 
   return {
     durationMin,
