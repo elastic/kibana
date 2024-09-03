@@ -176,10 +176,8 @@ export const getMetricsViewInAppUrlWithSpaceId = ({
   metricsExplorerLocator?: LocatorPublic<MetricsExplorerLocatorParams>;
   additionalContext?: AdditionalContext;
 }) => {
-  const flattenedContext = additionalContext && flattenObject(additionalContext);
-
   const fields = {
-    ...flattenedContext,
+    ...flattenAdditionalContext(additionalContext),
     [TIMESTAMP]: timestamp,
   };
 
