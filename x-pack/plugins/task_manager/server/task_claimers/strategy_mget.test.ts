@@ -19,6 +19,7 @@ import {
   ConcreteTaskInstanceVersion,
   TaskPriority,
   TaskCost,
+  PartialConcreteTaskInstance,
 } from '../task';
 import { SearchOpts, StoreOpts } from '../task_store';
 import { asTaskClaimEvent, TaskEvent } from '../task_events';
@@ -177,8 +178,8 @@ describe('TaskClaiming', () => {
       for (let i = 0; i < hits.length; i++) {
         store.msearch.mockResolvedValueOnce({ docs: hits[i], versionMap: versionMaps[i] });
         store.getDocVersions.mockResolvedValueOnce(versionMaps[i]);
-        const oneBulkResult = hits[i].map((hit) => asOk(hit));
-        store.bulkUpdate.mockResolvedValueOnce(oneBulkResult);
+        const oneBulkResult = hits[i].map((hit) => getPartialUpdateResult(hit));
+        store.bulkPartialUpdate.mockResolvedValueOnce(oneBulkResult);
         const oneBulkGetResult = hits[i].map((hit) => asOk(hit));
         store.bulkGet.mockResolvedValueOnce(oneBulkGetResult);
       }
@@ -352,8 +353,8 @@ describe('TaskClaiming', () => {
       store.bulkGet.mockResolvedValueOnce(
         [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2]].map(asOk)
       );
-      store.bulkUpdate.mockResolvedValueOnce(
-        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2]].map(asOk)
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2]].map(getPartialUpdateResult)
       );
 
       const taskClaiming = new TaskClaiming({
@@ -401,36 +402,39 @@ describe('TaskClaiming', () => {
         'task:id-5',
         'task:id-6',
       ]);
-      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(store.bulkUpdate).toHaveBeenCalledWith(
-        [
-          {
-            ...fetchedTasks[0],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[1],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[2],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkPartialUpdate).toHaveBeenCalledWith([
+        {
+          id: fetchedTasks[0].id,
+          version: fetchedTasks[0].version,
+          scheduledAt: fetchedTasks[0].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          scheduledAt: fetchedTasks[1].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[2].id,
+          version: fetchedTasks[2].version,
+          scheduledAt: fetchedTasks[2].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3']);
 
       expect(result.stats).toEqual({
@@ -458,8 +462,10 @@ describe('TaskClaiming', () => {
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
 
       store.bulkGet.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
-      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
-      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[0], fetchedTasks[1]].map(asOk));
+      store.bulkPartialUpdate.mockResolvedValueOnce([fetchedTasks[2]].map(getPartialUpdateResult));
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1]].map(getPartialUpdateResult)
+      );
 
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
@@ -499,35 +505,31 @@ describe('TaskClaiming', () => {
         seq_no_primary_term: true,
       });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkUpdate).toHaveBeenCalledTimes(2);
-      expect(store.bulkUpdate).toHaveBeenNthCalledWith(
-        1,
-        [
-          {
-            ...fetchedTasks[2],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
-      expect(store.bulkUpdate).toHaveBeenNthCalledWith(
-        2,
-        [
-          {
-            ...fetchedTasks[0],
-            status: 'unrecognized',
-          },
-          {
-            ...fetchedTasks[1],
-            status: 'unrecognized',
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(2);
+      expect(store.bulkPartialUpdate).toHaveBeenNthCalledWith(1, [
+        {
+          id: fetchedTasks[2].id,
+          version: fetchedTasks[2].version,
+          scheduledAt: fetchedTasks[2].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
+      expect(store.bulkPartialUpdate).toHaveBeenNthCalledWith(2, [
+        {
+          id: fetchedTasks[0].id,
+          version: fetchedTasks[0].version,
+          status: 'unrecognized',
+        },
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          status: 'unrecognized',
+        },
+      ]);
       expect(store.bulkGet).toHaveBeenCalledWith(['id-3']);
 
       expect(result.stats).toEqual({
@@ -555,8 +557,8 @@ describe('TaskClaiming', () => {
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
 
       store.bulkGet.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
-      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
-      store.bulkUpdate.mockResolvedValueOnce([
+      store.bulkPartialUpdate.mockResolvedValueOnce([fetchedTasks[2]].map(getPartialUpdateResult));
+      store.bulkPartialUpdate.mockResolvedValueOnce([
         asOk(fetchedTasks[0]),
         // @ts-expect-error
         asErr({
@@ -608,35 +610,31 @@ describe('TaskClaiming', () => {
         seq_no_primary_term: true,
       });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkUpdate).toHaveBeenCalledTimes(2);
-      expect(store.bulkUpdate).toHaveBeenNthCalledWith(
-        1,
-        [
-          {
-            ...fetchedTasks[2],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
-      expect(store.bulkUpdate).toHaveBeenNthCalledWith(
-        2,
-        [
-          {
-            ...fetchedTasks[0],
-            status: 'unrecognized',
-          },
-          {
-            ...fetchedTasks[1],
-            status: 'unrecognized',
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(2);
+      expect(store.bulkPartialUpdate).toHaveBeenNthCalledWith(1, [
+        {
+          id: fetchedTasks[2].id,
+          version: fetchedTasks[2].version,
+          scheduledAt: fetchedTasks[2].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
+      expect(store.bulkPartialUpdate).toHaveBeenNthCalledWith(2, [
+        {
+          id: fetchedTasks[0].id,
+          version: fetchedTasks[0].version,
+          status: 'unrecognized',
+        },
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          status: 'unrecognized',
+        },
+      ]);
       expect(store.bulkGet).toHaveBeenCalledWith(['id-3']);
 
       expect(result.stats).toEqual({
@@ -664,8 +662,8 @@ describe('TaskClaiming', () => {
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
 
       store.bulkGet.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
-      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
-      store.bulkUpdate.mockRejectedValueOnce(new Error('Oh no'));
+      store.bulkPartialUpdate.mockResolvedValueOnce([fetchedTasks[2]].map(getPartialUpdateResult));
+      store.bulkPartialUpdate.mockRejectedValueOnce(new Error('Oh no'));
 
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
@@ -710,35 +708,31 @@ describe('TaskClaiming', () => {
       });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
       expect(store.bulkGet).toHaveBeenCalledWith(['id-3']);
-      expect(store.bulkUpdate).toHaveBeenCalledTimes(2);
-      expect(store.bulkUpdate).toHaveBeenNthCalledWith(
-        1,
-        [
-          {
-            ...fetchedTasks[2],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
-      expect(store.bulkUpdate).toHaveBeenNthCalledWith(
-        2,
-        [
-          {
-            ...fetchedTasks[0],
-            status: 'unrecognized',
-          },
-          {
-            ...fetchedTasks[1],
-            status: 'unrecognized',
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(2);
+      expect(store.bulkPartialUpdate).toHaveBeenNthCalledWith(1, [
+        {
+          id: fetchedTasks[2].id,
+          version: fetchedTasks[2].version,
+          scheduledAt: fetchedTasks[2].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
+      expect(store.bulkPartialUpdate).toHaveBeenNthCalledWith(2, [
+        {
+          id: fetchedTasks[0].id,
+          version: fetchedTasks[0].version,
+          status: 'unrecognized',
+        },
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          status: 'unrecognized',
+        },
+      ]);
 
       expect(result.stats).toEqual({
         tasksClaimed: 1,
@@ -795,7 +789,7 @@ describe('TaskClaiming', () => {
       });
       expect(store.getDocVersions).not.toHaveBeenCalled();
       expect(store.bulkGet).not.toHaveBeenCalled();
-      expect(store.bulkUpdate).not.toHaveBeenCalled();
+      expect(store.bulkPartialUpdate).not.toHaveBeenCalled();
 
       expect(result.stats).toEqual({
         tasksClaimed: 0,
@@ -821,7 +815,9 @@ describe('TaskClaiming', () => {
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
 
       store.bulkGet.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
-      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[1], fetchedTasks[2]].map(getPartialUpdateResult)
+      );
 
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
@@ -861,28 +857,29 @@ describe('TaskClaiming', () => {
         seq_no_primary_term: true,
       });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(store.bulkUpdate).toHaveBeenCalledWith(
-        [
-          {
-            ...fetchedTasks[1],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[2],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkPartialUpdate).toHaveBeenCalledWith([
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          scheduledAt: fetchedTasks[1].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[2].id,
+          version: fetchedTasks[2].version,
+          scheduledAt: fetchedTasks[2].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
       expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
 
       expect(result.stats).toEqual({
@@ -911,7 +908,9 @@ describe('TaskClaiming', () => {
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
 
       store.bulkGet.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
-      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[1], fetchedTasks[2]].map(getPartialUpdateResult)
+      );
 
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
@@ -951,28 +950,29 @@ describe('TaskClaiming', () => {
         seq_no_primary_term: true,
       });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(store.bulkUpdate).toHaveBeenCalledWith(
-        [
-          {
-            ...fetchedTasks[1],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[2],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkPartialUpdate).toHaveBeenCalledWith([
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          scheduledAt: fetchedTasks[1].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[2].id,
+          version: fetchedTasks[2].version,
+          scheduledAt: fetchedTasks[2].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
       expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
 
       expect(result.stats).toEqual({
@@ -1001,7 +1001,9 @@ describe('TaskClaiming', () => {
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
 
       store.bulkGet.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
-      store.bulkUpdate.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[1], fetchedTasks[2]].map(getPartialUpdateResult)
+      );
 
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
@@ -1041,28 +1043,29 @@ describe('TaskClaiming', () => {
         seq_no_primary_term: true,
       });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(store.bulkUpdate).toHaveBeenCalledWith(
-        [
-          {
-            ...fetchedTasks[1],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[2],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkPartialUpdate).toHaveBeenCalledWith([
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          scheduledAt: fetchedTasks[1].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[2].id,
+          version: fetchedTasks[2].version,
+          scheduledAt: fetchedTasks[2].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
       expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
 
       expect(result.stats).toEqual({
@@ -1095,8 +1098,10 @@ describe('TaskClaiming', () => {
       store.bulkGet.mockResolvedValueOnce(
         [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[4]].map(asOk)
       );
-      store.bulkUpdate.mockResolvedValueOnce(
-        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[4]].map(asOk)
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[4]].map(
+          getPartialUpdateResult
+        )
       );
 
       const taskClaiming = new TaskClaiming({
@@ -1144,44 +1149,49 @@ describe('TaskClaiming', () => {
         'task:id-5',
         'task:id-6',
       ]);
-      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(store.bulkUpdate).toHaveBeenCalledWith(
-        [
-          {
-            ...fetchedTasks[0],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[1],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[2],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[4],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkPartialUpdate).toHaveBeenCalledWith([
+        {
+          id: fetchedTasks[0].id,
+          version: fetchedTasks[0].version,
+          scheduledAt: fetchedTasks[0].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          scheduledAt: fetchedTasks[1].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[2].id,
+          version: fetchedTasks[2].version,
+          scheduledAt: fetchedTasks[2].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[4].id,
+          version: fetchedTasks[4].version,
+          scheduledAt: fetchedTasks[4].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-5']);
 
       expect(result.stats).toEqual({
@@ -1208,8 +1218,10 @@ describe('TaskClaiming', () => {
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
       store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
-      store.bulkUpdate.mockResolvedValueOnce(
-        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[3]].map(asOk)
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[3]].map(
+          getPartialUpdateResult
+        )
       );
       store.bulkGet.mockResolvedValueOnce([
         asOk(fetchedTasks[0]),
@@ -1270,44 +1282,49 @@ describe('TaskClaiming', () => {
         'task:id-3',
         'task:id-4',
       ]);
-      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(store.bulkUpdate).toHaveBeenCalledWith(
-        [
-          {
-            ...fetchedTasks[0],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[1],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[2],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[3],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkPartialUpdate).toHaveBeenCalledWith([
+        {
+          id: fetchedTasks[0].id,
+          version: fetchedTasks[0].version,
+          scheduledAt: fetchedTasks[0].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          scheduledAt: fetchedTasks[1].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[2].id,
+          version: fetchedTasks[2].version,
+          scheduledAt: fetchedTasks[2].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[3].id,
+          version: fetchedTasks[3].version,
+          scheduledAt: fetchedTasks[3].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
 
       expect(result.stats).toEqual({
@@ -1334,8 +1351,10 @@ describe('TaskClaiming', () => {
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
       store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
-      store.bulkUpdate.mockResolvedValueOnce(
-        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[3]].map(asOk)
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[3]].map(
+          getPartialUpdateResult
+        )
       );
       store.bulkGet.mockRejectedValueOnce(new Error('oh no'));
 
@@ -1373,44 +1392,49 @@ describe('TaskClaiming', () => {
         'task:id-3',
         'task:id-4',
       ]);
-      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(store.bulkUpdate).toHaveBeenCalledWith(
-        [
-          {
-            ...fetchedTasks[0],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[1],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[2],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[3],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkPartialUpdate).toHaveBeenCalledWith([
+        {
+          id: fetchedTasks[0].id,
+          version: fetchedTasks[0].version,
+          scheduledAt: fetchedTasks[0].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          scheduledAt: fetchedTasks[1].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[2].id,
+          version: fetchedTasks[2].version,
+          scheduledAt: fetchedTasks[2].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[3].id,
+          version: fetchedTasks[3].version,
+          scheduledAt: fetchedTasks[3].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
     });
 
@@ -1428,16 +1452,16 @@ describe('TaskClaiming', () => {
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
       store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
-      store.bulkUpdate.mockResolvedValueOnce([
-        asOk(fetchedTasks[0]),
+      store.bulkPartialUpdate.mockResolvedValueOnce([
+        getPartialUpdateResult(fetchedTasks[0]),
         // @ts-expect-error
         asErr({
           type: 'task',
           id: fetchedTasks[1].id,
           error: new Error('Oh no'),
         }),
-        asOk(fetchedTasks[2]),
-        asOk(fetchedTasks[3]),
+        getPartialUpdateResult(fetchedTasks[2]),
+        getPartialUpdateResult(fetchedTasks[3]),
       ]);
       store.bulkGet.mockResolvedValueOnce([
         asOk(fetchedTasks[0]),
@@ -1492,44 +1516,49 @@ describe('TaskClaiming', () => {
         'task:id-3',
         'task:id-4',
       ]);
-      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(store.bulkUpdate).toHaveBeenCalledWith(
-        [
-          {
-            ...fetchedTasks[0],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[1],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[2],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[3],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkPartialUpdate).toHaveBeenCalledWith([
+        {
+          id: fetchedTasks[0].id,
+          version: fetchedTasks[0].version,
+          scheduledAt: fetchedTasks[0].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          scheduledAt: fetchedTasks[1].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[2].id,
+          version: fetchedTasks[2].version,
+          scheduledAt: fetchedTasks[2].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[3].id,
+          version: fetchedTasks[3].version,
+          scheduledAt: fetchedTasks[3].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-3', 'id-4']);
 
       expect(result.stats).toEqual({
@@ -1556,7 +1585,7 @@ describe('TaskClaiming', () => {
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
       store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
-      store.bulkUpdate.mockRejectedValueOnce(new Error('oh no'));
+      store.bulkPartialUpdate.mockRejectedValueOnce(new Error('oh no'));
       store.bulkGet.mockResolvedValueOnce([]);
 
       const taskClaiming = new TaskClaiming({
@@ -1593,44 +1622,49 @@ describe('TaskClaiming', () => {
         'task:id-3',
         'task:id-4',
       ]);
-      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(store.bulkUpdate).toHaveBeenCalledWith(
-        [
-          {
-            ...fetchedTasks[0],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[1],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[2],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-          {
-            ...fetchedTasks[3],
-            attempts: 1,
-            ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
-          },
-        ],
-        { validate: false, excludeLargeFields: true }
-      );
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkPartialUpdate).toHaveBeenCalledWith([
+        {
+          id: fetchedTasks[0].id,
+          version: fetchedTasks[0].version,
+          scheduledAt: fetchedTasks[0].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          scheduledAt: fetchedTasks[1].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[2].id,
+          version: fetchedTasks[2].version,
+          scheduledAt: fetchedTasks[2].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[3].id,
+          version: fetchedTasks[3].version,
+          scheduledAt: fetchedTasks[3].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
       expect(store.bulkGet).not.toHaveBeenCalled();
     });
 
@@ -1880,13 +1914,13 @@ describe('TaskClaiming', () => {
           doc = { ...doc, retryAt: null };
           return asOk(doc);
         });
-        taskStore.bulkUpdate.mockResolvedValueOnce(updatedDocs);
+        taskStore.bulkPartialUpdate.mockResolvedValueOnce(updatedDocs);
         taskStore.bulkGet.mockResolvedValueOnce(updatedDocs);
       }
 
       taskStore.msearch.mockResolvedValue({ docs: [], versionMap: new Map() });
       taskStore.getDocVersions.mockResolvedValue(new Map());
-      taskStore.bulkUpdate.mockResolvedValue([]);
+      taskStore.bulkPartialUpdate.mockResolvedValue([]);
       taskStore.bulkGet.mockResolvedValue([]);
 
       const taskClaiming = new TaskClaiming({
@@ -1966,6 +2000,17 @@ describe('TaskClaiming', () => {
 
 function generateFakeTasks(count: number = 1) {
   return _.times(count, (index) => mockInstance({ id: `task:id-${index}` }));
+}
+
+function getPartialUpdateResult(task: ConcreteTaskInstance) {
+  return asOk({
+    id: task.id,
+    version: task.version,
+    scheduledAt: task.runAt,
+    ownerId: 'test-test',
+    retryAt: task.runAt,
+    status: 'claiming',
+  } as PartialConcreteTaskInstance);
 }
 
 function mockInstance(instance: Partial<ConcreteTaskInstance> = {}) {
