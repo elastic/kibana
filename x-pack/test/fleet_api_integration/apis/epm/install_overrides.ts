@@ -21,7 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   const deletePackage = async (pkg: string, version: string) =>
     supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
 
-  describe('installs packages that include settings and mappings overrides', async () => {
+  describe('installs packages that include settings and mappings overrides', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
