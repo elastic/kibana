@@ -12,15 +12,13 @@ import {
   ElasticsearchSupertestProvider,
 } from './services';
 
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
     services: {
-      ...commonFunctionalServices,
+      ...commonConfig.get('services'),
       supertest: createKibanaSupertestProvider(),
       supertestWithoutAuth: KibanaSupertestWithoutAuthProvider,
       esSupertest: ElasticsearchSupertestProvider,
