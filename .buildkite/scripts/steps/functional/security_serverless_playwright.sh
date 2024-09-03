@@ -9,8 +9,6 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "---SERVERLESS - Security Solution Playwright Tests"
 
-export PLAYWRIGHT_BROWSERS_PATH=0
-
 cd x-pack/test/security_solution_playwright
 
 set +e
