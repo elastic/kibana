@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-// Same as the plugin id defined by Security Solution
+// The Security Solution ID used for the catalog, cases, and API actions
 export const APP_ID = 'securitySolution' as const;
+// The ID of Security Solution UI plugin registered in Kibana
+export const APP_UI_ID = 'securitySolutionUI' as const;
 export const SERVER_APP_ID = 'siem' as const;
 
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
