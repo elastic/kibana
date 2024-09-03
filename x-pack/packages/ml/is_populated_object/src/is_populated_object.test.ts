@@ -45,4 +45,8 @@ describe('isPopulatedObject', () => {
       ])
     ).toBe(false);
   });
+  it('does not allow an object with a required attribute in the prototype ', () => {
+    const testObject = { attribute: 'value', __proto__: { otherAttribute: 'value' } };
+    expect(isPopulatedObject(testObject, ['otherAttribute'])).toBe(false);
+  });
 });
