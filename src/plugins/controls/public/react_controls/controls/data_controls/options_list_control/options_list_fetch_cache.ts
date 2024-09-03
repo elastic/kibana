@@ -51,6 +51,7 @@ export class OptionsListFetchCache {
       runPastTimeout,
       selectedOptions,
       searchTechnique,
+      ignoreValidations,
       field: { name: fieldName },
       dataView: { title: dataViewTitle },
     } = request;
@@ -67,6 +68,7 @@ export class OptionsListFetchCache {
       query,
       sort,
       searchTechnique,
+      ignoreValidations,
       runPastTimeout,
       dataViewTitle,
       searchString: searchString ?? '',
@@ -119,4 +121,8 @@ export class OptionsListFetchCache {
       return result;
     }
   }
+
+  public clearCache = () => {
+    this.cache.reset();
+  };
 }

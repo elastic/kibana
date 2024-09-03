@@ -40,16 +40,16 @@ interface GetExecutorServicesOpts {
 }
 
 export interface ExecutorServices {
-  dataViews: DataViewsContract;
   ruleMonitoringService: PublicRuleMonitoringService;
   ruleResultService: PublicRuleResultService;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   wrappedScopedClusterClient: WrappedScopedClusterClient;
-  wrappedSearchSourceClient: WrappedSearchSourceClient;
+  getDataViews: () => Promise<DataViewsContract>;
+  getWrappedSearchSourceClient: () => Promise<WrappedSearchSourceClient>;
 }
 
-export const getExecutorServices = async (opts: GetExecutorServicesOpts) => {
+export const getExecutorServices = (opts: GetExecutorServicesOpts) => {
   const { context, abortController, fakeRequest, logger, ruleData, ruleTaskTimeout } = opts;
 
   const wrappedClientOptions = {
@@ -66,34 +66,35 @@ export const getExecutorServices = async (opts: GetExecutorServicesOpts) => {
     scopedClusterClient,
   });
 
-  const searchSourceClient = await withAlertingSpan('alerting:get-search-source-client', () =>
-    context.data.search.searchSource.asScoped(fakeRequest)
-  );
-  const wrappedSearchSourceClient = wrapSearchSourceClient({
-    ...wrappedClientOptions,
-    searchSourceClient,
-  });
-
   const savedObjectsClient = context.savedObjects.getScopedClient(fakeRequest, {
     includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'action'],
   });
 
-  const dataViews = await await withAlertingSpan('alerting:get-data-views-factory', () =>
-    context.dataViews.dataViewsServiceFactory(
-      savedObjectsClient,
-      scopedClusterClient.asInternalUser
-    )
-  );
-
   const uiSettingsClient = context.uiSettings.asScopedToClient(savedObjectsClient);
 
   return {
-    dataViews,
     ruleMonitoringService: opts.ruleMonitoringService.getLastRunMetricsSetters(),
     ruleResultService: opts.ruleResultService.getLastRunSetters(),
     savedObjectsClient,
     uiSettingsClient,
     wrappedScopedClusterClient,
-    wrappedSearchSourceClient,
+    getDataViews: async () => {
+      const dataViews = await withAlertingSpan('alerting:get-data-views-factory', () =>
+        context.dataViews.dataViewsServiceFactory(
+          savedObjectsClient,
+          scopedClusterClient.asInternalUser
+        )
+      );
+      return dataViews;
+    },
+    getWrappedSearchSourceClient: async () => {
+      const searchSourceClient = await withAlertingSpan('alerting:get-search-source-client', () =>
+        context.data.search.searchSource.asScoped(fakeRequest)
+      );
+      return wrapSearchSourceClient({
+        ...wrappedClientOptions,
+        searchSourceClient,
+      });
+    },
   };
 };

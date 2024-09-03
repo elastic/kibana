@@ -1,7 +1,7 @@
 get:
   summary: List agent policies
   tags:
-    - Agent policies
+    - Elastic Agent policies
   responses:
     '200':
       description: OK
@@ -32,6 +32,7 @@ get:
     - $ref: ../components/parameters/page_size.yaml
     - $ref: ../components/parameters/page_index.yaml
     - $ref: ../components/parameters/kuery.yaml
+    - $ref: ../components/parameters/format.yaml
     - schema:
         type: boolean
       in: query
@@ -47,7 +48,7 @@ get:
 post:
   summary: Create agent policy
   tags:
-    - Agent policies
+    - Elastic Agent policies
   responses:
     '200':
       description: OK

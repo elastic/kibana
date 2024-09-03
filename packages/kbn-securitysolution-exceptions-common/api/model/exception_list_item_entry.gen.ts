@@ -15,7 +15,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import { ListId, ListType } from '@kbn/securitysolution-lists-common/api/model/list_common.gen';
@@ -59,14 +59,17 @@ export const ExceptionListItemEntryExists = z.object({
   operator: ExceptionListItemEntryOperator,
 });
 
-export type ExceptionListItemEntryNestedEntryItem = z.infer<
-  typeof ExceptionListItemEntryNestedEntryItem
->;
-export const ExceptionListItemEntryNestedEntryItem = z.union([
+const ExceptionListItemEntryNestedEntryItemInternal = z.union([
   ExceptionListItemEntryMatch,
   ExceptionListItemEntryMatchAny,
   ExceptionListItemEntryExists,
 ]);
+
+export type ExceptionListItemEntryNestedEntryItem = z.infer<
+  typeof ExceptionListItemEntryNestedEntryItemInternal
+>;
+export const ExceptionListItemEntryNestedEntryItem =
+  ExceptionListItemEntryNestedEntryItemInternal as z.ZodType<ExceptionListItemEntryNestedEntryItem>;
 
 export type ExceptionListItemEntryNested = z.infer<typeof ExceptionListItemEntryNested>;
 export const ExceptionListItemEntryNested = z.object({
@@ -85,8 +88,7 @@ export const ExceptionListItemEntryMatchWildcard = z.object({
   operator: ExceptionListItemEntryOperator,
 });
 
-export type ExceptionListItemEntry = z.infer<typeof ExceptionListItemEntry>;
-export const ExceptionListItemEntry = z.discriminatedUnion('type', [
+const ExceptionListItemEntryInternal = z.discriminatedUnion('type', [
   ExceptionListItemEntryMatch,
   ExceptionListItemEntryMatchAny,
   ExceptionListItemEntryList,
@@ -94,6 +96,10 @@ export const ExceptionListItemEntry = z.discriminatedUnion('type', [
   ExceptionListItemEntryNested,
   ExceptionListItemEntryMatchWildcard,
 ]);
+
+export type ExceptionListItemEntry = z.infer<typeof ExceptionListItemEntryInternal>;
+export const ExceptionListItemEntry =
+  ExceptionListItemEntryInternal as z.ZodType<ExceptionListItemEntry>;
 
 export type ExceptionListItemEntryArray = z.infer<typeof ExceptionListItemEntryArray>;
 export const ExceptionListItemEntryArray = z.array(ExceptionListItemEntry);

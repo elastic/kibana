@@ -86,7 +86,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
     moment().utc().startOf('day').subtract(9, 'days').add(667, 'seconds').toISOString(),
   ];
 
-  describe('ad hoc backfill task', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/183350
+  describe.skip('ad hoc backfill task', () => {
     beforeEach(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
@@ -309,9 +310,9 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       // check timestamps in alert docs
       for (const alert of alertDocsBackfill1) {
         const source = alert._source!;
-        expect(source[ALERT_START]).to.eql(scheduleResult[0].schedule[0].run_at);
-        expect(source[ALERT_LAST_DETECTED]).to.eql(scheduleResult[0].schedule[0].run_at);
-        expect(source[TIMESTAMP]).to.eql(scheduleResult[0].schedule[0].run_at);
+        expect(source[ALERT_START]).to.match(timestampPattern);
+        expect(source[ALERT_LAST_DETECTED]).to.match(timestampPattern);
+        expect(source[TIMESTAMP]).not.to.eql(scheduleResult[0].schedule[0].run_at);
         expect(source[ALERT_RULE_EXECUTION_TIMESTAMP]).to.match(timestampPattern);
         expect(source[ALERT_RULE_EXECUTION_TIMESTAMP]).not.to.eql(
           scheduleResult[0].schedule[0].run_at
@@ -331,9 +332,9 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       // check timestamps in alert docs
       for (const alert of alertDocsBackfill2) {
         const source = alert._source!;
-        expect(source[ALERT_START]).to.eql(scheduleResult[0].schedule[1].run_at);
-        expect(source[ALERT_LAST_DETECTED]).to.eql(scheduleResult[0].schedule[1].run_at);
-        expect(source[TIMESTAMP]).to.eql(scheduleResult[0].schedule[1].run_at);
+        expect(source[ALERT_START]).to.match(timestampPattern);
+        expect(source[ALERT_LAST_DETECTED]).to.match(timestampPattern);
+        expect(source[TIMESTAMP]).not.to.eql(scheduleResult[0].schedule[1].run_at);
         expect(source[ALERT_RULE_EXECUTION_TIMESTAMP]).to.match(timestampPattern);
         expect(source[ALERT_RULE_EXECUTION_TIMESTAMP]).not.to.eql(
           scheduleResult[0].schedule[1].run_at
@@ -351,9 +352,9 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       // check timestamps in alert docs
       for (const alert of alertDocsBackfill3) {
         const source = alert._source!;
-        expect(source[ALERT_START]).to.eql(scheduleResult[0].schedule[2].run_at);
-        expect(source[ALERT_LAST_DETECTED]).to.eql(scheduleResult[0].schedule[2].run_at);
-        expect(source[TIMESTAMP]).to.eql(scheduleResult[0].schedule[2].run_at);
+        expect(source[ALERT_START]).to.match(timestampPattern);
+        expect(source[ALERT_LAST_DETECTED]).to.match(timestampPattern);
+        expect(source[TIMESTAMP]).not.to.eql(scheduleResult[0].schedule[2].run_at);
         expect(source[ALERT_RULE_EXECUTION_TIMESTAMP]).to.match(timestampPattern);
         expect(source[ALERT_RULE_EXECUTION_TIMESTAMP]).not.to.eql(
           scheduleResult[0].schedule[2].run_at

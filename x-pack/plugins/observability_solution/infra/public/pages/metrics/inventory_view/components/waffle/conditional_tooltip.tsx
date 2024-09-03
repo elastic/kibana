@@ -66,7 +66,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   const dataNode = first(nodes);
   const metrics = (dataNode && dataNode.metrics) || [];
   return (
-    <div style={{ minWidth: 200 }} data-test-subj={`conditionalTooltipContent-${node.name}`}>
+    <div style={{ minWidth: 220 }} data-test-subj={`conditionalTooltipContent-${node.name}`}>
       <div
         style={{
           borderBottom: `${euiTheme.border.thin}`,

@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiAvatar,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,37 +15,35 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { InvestigationNote } from '@kbn/investigate-plugin/common';
-import React from 'react';
+import { GetInvestigationResponse, InvestigationNoteResponse } from '@kbn/investigation-shared';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import React, { useState } from 'react';
+import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
+import { useFetchInvestigationNotes } from '../../../../hooks/use_fetch_investigation_notes';
 import { useTheme } from '../../../../hooks/use_theme';
+import { Note } from './note';
 import { ResizableTextInput } from './resizable_text_input';
-import { TimelineMessage } from './timeline_message';
 
 export interface Props {
-  notes: InvestigationNote[];
-  addNote: (note: string) => Promise<void>;
-  deleteNote: (id: string) => Promise<void>;
+  investigation: GetInvestigationResponse;
+  user: AuthenticatedUser;
 }
 
-export function InvestigationNotes({ notes, addNote, deleteNote }: Props) {
+export function InvestigationNotes({ investigation, user }: Props) {
   const theme = useTheme();
-  const [note, setNote] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
+  const [noteInput, setNoteInput] = useState('');
 
-  function submit() {
-    if (note.trim() === '') {
-      return;
-    }
+  const { data: notes, refetch } = useFetchInvestigationNotes({
+    investigationId: investigation.id,
+    initialNotes: investigation.notes,
+  });
+  const { mutateAsync: addInvestigationNote, isLoading: isAdding } = useAddInvestigationNote();
 
-    setLoading(false);
-    addNote(note)
-      .then(() => {
-        setNote('');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }
+  const onAddNote = async (content: string) => {
+    await addInvestigationNote({ investigationId: investigation.id, note: { content } });
+    refetch();
+    setNoteInput('');
+  };
 
   const panelClassName = css`
     background-color: ${theme.colors.lightShade};
@@ -65,13 +62,14 @@ export function InvestigationNotes({ notes, addNote, deleteNote }: Props) {
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>
         <EuiFlexGroup direction="column" gutterSize="m">
-          {notes.map((currNote: InvestigationNote) => {
+          {notes?.map((currNote: InvestigationNoteResponse) => {
             return (
-              <TimelineMessage
+              <Note
                 key={currNote.id}
-                icon={<EuiAvatar name={currNote.createdBy.username} size="s" />}
+                investigationId={investigation.id}
                 note={currNote}
-                onDelete={() => deleteNote(currNote.id)}
+                disabled={currNote.createdBy !== user.username}
+                onUpdateOrDeleteCompleted={() => refetch()}
               />
             );
           })}
@@ -89,13 +87,13 @@ export function InvestigationNotes({ notes, addNote, deleteNote }: Props) {
               placeholder={i18n.translate('xpack.investigateApp.investigationNotes.placeholder', {
                 defaultMessage: 'Add a note to the investigation',
               })}
-              disabled={loading}
-              value={note}
+              disabled={isAdding}
+              value={noteInput}
               onChange={(value) => {
-                setNote(value);
+                setNoteInput(value);
               }}
               onSubmit={() => {
-                submit();
+                onAddNote(noteInput.trim());
               }}
             />
           </EuiFormRow>
@@ -104,15 +102,15 @@ export function InvestigationNotes({ notes, addNote, deleteNote }: Props) {
             <EuiButton
               data-test-subj="investigateAppInvestigationNotesAddButton"
               fullWidth
-              color="text"
+              color="primary"
               aria-label={i18n.translate('xpack.investigateApp.investigationNotes.addButtonLabel', {
                 defaultMessage: 'Add',
               })}
-              disabled={loading || note.trim() === ''}
-              isLoading={loading}
+              disabled={isAdding || noteInput.trim() === ''}
+              isLoading={isAdding}
               size="m"
               onClick={() => {
-                submit();
+                onAddNote(noteInput.trim());
               }}
             >
               {i18n.translate('xpack.investigateApp.investigationNotes.addButtonLabel', {

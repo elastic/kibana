@@ -20,5 +20,6 @@
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/core",
     "@kbn/logging",
+    "@kbn/zod",
   ]
 }

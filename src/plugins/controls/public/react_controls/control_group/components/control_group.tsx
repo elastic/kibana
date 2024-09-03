@@ -7,6 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { BehaviorSubject } from 'rxjs';
 import {
   DndContext,
@@ -24,14 +25,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingChart,
-  EuiPanel,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ControlStyle } from '../../..';
 import { ControlsInOrder } from '../init_controls_manager';
@@ -114,12 +108,20 @@ export function ControlGroup({
     );
   }, [hasUnappliedSelections, applySelections]);
 
+  if (controlsInOrder.length === 0) {
+    return null;
+  }
+
   return (
     <EuiPanel
+      css={css`
+        display: ${isInitialized ? 'none' : 'default'};
+      `}
       borderRadius="m"
       paddingSize="none"
       color={draggingId ? 'success' : 'transparent'}
       className="controlsWrapper"
+      data-test-subj="controls-group-wrapper"
     >
       <EuiFlexGroup
         gutterSize="s"
@@ -127,7 +129,6 @@ export function ControlGroup({
         responsive={false}
         data-test-subj="controls-group"
       >
-        {!isInitialized && <EuiLoadingChart />}
         <EuiFlexItem>
           <DndContext
             onDragStart={({ active }) => setDraggingId(`${active.id}`)}
@@ -167,7 +168,7 @@ export function ControlGroup({
             </DragOverlay>
           </DndContext>
         </EuiFlexItem>
-        {isInitialized && !autoApplySelections && (
+        {!autoApplySelections && (
           <EuiFlexItem grow={false} className="controlGroup--endButtonGroup">
             {hasUnappliedSelections ? (
               ApplyButtonComponent

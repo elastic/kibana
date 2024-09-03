@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
+import { useEuiTablePersist, DEFAULT_PAGE_SIZE_OPTIONS } from '@kbn/shared-ux-table-persist';
 import { useAppContext } from '../../../../app_context';
 
 export interface Props {
@@ -25,11 +26,6 @@ export interface Props {
   onDeletePolicyClick: (policyName: string) => void;
   onExecutePolicyClick: (policyName: string) => void;
 }
-
-const pagination = {
-  initialPageSize: 50,
-  pageSizeOptions: [25, 50, 100],
-};
 
 export const PoliciesTable: FunctionComponent<Props> = ({
   policies,
@@ -160,6 +156,20 @@ export const PoliciesTable: FunctionComponent<Props> = ({
     },
   ];
 
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<SerializedEnrichPolicy>({
+    tableId: 'enrichPolicies',
+    initialPageSize: 50,
+    initialSort: {
+      field: 'name',
+      direction: 'asc',
+    },
+  });
+
+  const pagination = {
+    pageSize,
+    pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
+  };
+
   return (
     <EuiInMemoryTable
       data-test-subj="enrichPoliciesTable"
@@ -168,7 +178,8 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       columns={columns}
       search={search}
       pagination={pagination}
-      sorting={true}
+      sorting={sorting}
+      onTableChange={onTableChange}
     />
   );
 };

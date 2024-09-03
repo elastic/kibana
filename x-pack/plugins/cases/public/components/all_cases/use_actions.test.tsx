@@ -28,13 +28,16 @@ import {
 jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');
 
-// FLAKY: https://github.com/elastic/kibana/issues/188361
-describe.skip('useActions', () => {
+describe('useActions', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('renders column actions', async () => {

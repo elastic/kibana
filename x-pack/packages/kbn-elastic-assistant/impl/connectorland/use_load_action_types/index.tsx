@@ -7,7 +7,6 @@
 
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import type { UserProfile } from '@kbn/security-plugin/common';
 import type { ServerError } from '@kbn/cases-plugin/public/types';
 import { loadActionTypes } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -62,5 +61,3 @@ export const useLoadActionTypes = ({
     }
   );
 };
-
-export type UseSuggestUserProfiles = UseQueryResult<UserProfile[], ServerError>;

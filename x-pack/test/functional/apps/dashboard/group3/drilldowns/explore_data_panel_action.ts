@@ -29,19 +29,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       'change default index pattern to verify action navigates to correct index pattern',
       async () => {
         await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash*' });
+        await dashboard.navigateToApp();
+        await dashboard.preserveCrossAppState();
       }
     );
 
-    before('start on Dashboard landing page', async () => {
-      await dashboard.navigateToApp();
-      await dashboard.preserveCrossAppState();
-    });
-
-    after('set back default index pattern', async () => {
+    after('set back default index pattern and clean-up custom time range on panel', async () => {
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-    });
-
-    after('clean-up custom time range on panel', async () => {
       await dashboard.navigateToApp();
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
 

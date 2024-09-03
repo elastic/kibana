@@ -25,7 +25,6 @@ jest.mock('../../control_factory_registry', () => ({
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../../common';
 import { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditor } from './data_control_editor';
-import { DataControlEditorState } from './open_data_control_editor';
 import {
   getMockedOptionsListControlFactory,
   getMockedRangeSliderControlFactory,
@@ -57,7 +56,6 @@ mockDataViews.get = jest.fn().mockResolvedValue(mockDataView);
 
 const dashboardApi = {
   timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
-  lastUsedDataViewId$: new BehaviorSubject<string>(mockDataView.id!),
 };
 const controlGroupApi = {
   parentApi: dashboardApi,
@@ -68,8 +66,14 @@ const controlGroupApi = {
 describe('Data control editor', () => {
   const mountComponent = async ({
     initialState,
+    controlId,
+    controlType,
+    initialDefaultPanelTitle,
   }: {
-    initialState?: Partial<DataControlEditorState>;
+    initialState?: Partial<DefaultDataControlState>;
+    controlId?: string;
+    controlType?: string;
+    initialDefaultPanelTitle?: string;
   }) => {
     mockDataViews.get = jest.fn().mockResolvedValue(mockDataView);
 
@@ -78,11 +82,14 @@ describe('Data control editor', () => {
         <DataControlEditor
           onCancel={() => {}}
           onSave={() => {}}
-          parentApi={controlGroupApi}
+          controlGroupApi={controlGroupApi}
           initialState={{
-            dataViewId: dashboardApi.lastUsedDataViewId$.getValue(),
+            dataViewId: mockDataView.id,
             ...initialState,
           }}
+          controlId={controlId}
+          controlType={controlType}
+          initialDefaultPanelTitle={initialDefaultPanelTitle}
           services={{ dataViews: mockDataViews }}
         />
       </I18nProvider>
@@ -238,11 +245,11 @@ describe('Data control editor', () => {
       test('auto-fills input with the default title', async () => {
         const controlEditor = await mountComponent({
           initialState: {
-            controlType: 'optionsList',
-            controlId: 'testId',
             fieldName: 'machine.os.raw',
-            defaultPanelTitle: 'OS',
           },
+          controlType: 'optionsList',
+          controlId: 'testId',
+          initialDefaultPanelTitle: 'OS',
         });
         const titleInput = await controlEditor.findByTestId('control-editor-title-input');
         expect(titleInput.getAttribute('value')).toBe('OS');
@@ -252,11 +259,11 @@ describe('Data control editor', () => {
       test('auto-fills input with the custom title', async () => {
         const controlEditor = await mountComponent({
           initialState: {
-            controlType: 'optionsList',
-            controlId: 'testId',
             fieldName: 'machine.os.raw',
             title: 'Custom title',
           },
+          controlType: 'optionsList',
+          controlId: 'testId',
         });
         const titleInput = await controlEditor.findByTestId('control-editor-title-input');
         expect(titleInput.getAttribute('value')).toBe('Custom title');
@@ -267,10 +274,10 @@ describe('Data control editor', () => {
     test('selects the provided control type', async () => {
       const controlEditor = await mountComponent({
         initialState: {
-          controlType: 'rangeSlider',
-          controlId: 'testId',
           fieldName: 'bytes',
         },
+        controlType: 'rangeSlider',
+        controlId: 'testId',
       });
 
       expect(controlEditor.getByTestId('create__optionsList')).toBeEnabled();
