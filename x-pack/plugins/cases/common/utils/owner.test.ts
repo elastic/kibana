@@ -35,39 +35,24 @@ describe('owner utils', () => {
   });
 
   describe('getOwnerFromRuleConsumerProducer', () => {
-    it('returns observability owner correctly', () => {
-      for (const consumer of [
-        AlertConsumers.OBSERVABILITY,
-        AlertConsumers.APM,
-        AlertConsumers.INFRASTRUCTURE,
-        AlertConsumers.LOGS,
-        AlertConsumers.SLO,
-        AlertConsumers.UPTIME,
-        AlertConsumers.MONITORING,
-      ]) {
-        const owner = getOwnerFromRuleConsumerProducer(consumer);
+    const owners = Object.values(OWNER_INFO).map((item) => ({
+      id: item.id,
+      validRuleConsumers: item.validRuleConsumers,
+    }));
 
-        expect(owner).toBe(OWNER_INFO.observability.id);
+    it.each(owners)('returns owner %s correctly for consumer', (owner) => {
+      for (const consumer of owner.validRuleConsumers ?? []) {
+        const result = getOwnerFromRuleConsumerProducer(consumer);
+
+        expect(result).toBe(owner.id);
       }
     });
 
-    it('returns security solution owner correctly', () => {
-      for (const consumer of [AlertConsumers.SIEM]) {
-        const owner = getOwnerFromRuleConsumerProducer(consumer);
+    it.each(owners)('returns owner %s correctly for producer', (owner) => {
+      for (const producer of owner.validRuleConsumers ?? []) {
+        const result = getOwnerFromRuleConsumerProducer(undefined, producer);
 
-        expect(owner).toBe(OWNER_INFO.securitySolution.id);
-      }
-    });
-
-    it('returns cases owner correctly', () => {
-      for (const consumer of [
-        AlertConsumers.ML,
-        AlertConsumers.STACK_ALERTS,
-        AlertConsumers.EXAMPLE,
-      ]) {
-        const owner = getOwnerFromRuleConsumerProducer(consumer);
-
-        expect(owner).toBe(OWNER_INFO.cases.id);
+        expect(result).toBe(owner.id);
       }
     });
 
@@ -75,6 +60,15 @@ describe('owner utils', () => {
       const owner = getOwnerFromRuleConsumerProducer();
 
       expect(owner).toBe(OWNER_INFO.cases.id);
+    });
+
+    it('returns owner as per consumer when both values are passed ', () => {
+      const owner = getOwnerFromRuleConsumerProducer(
+        AlertConsumers.SIEM,
+        AlertConsumers.OBSERVABILITY
+      );
+
+      expect(owner).toBe(OWNER_INFO.securitySolution.id);
     });
   });
 });

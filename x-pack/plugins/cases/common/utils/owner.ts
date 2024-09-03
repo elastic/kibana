@@ -16,11 +16,11 @@ export const getCaseOwnerByAppId = (currentAppId?: string) =>
 
 export const getOwnerFromRuleConsumerProducer = (consumer?: string, producer?: string): Owner => {
   for (const value of Object.values(OWNER_INFO)) {
-    const foundedConsumer = value.validRuleConsumers?.find(
+    const foundConsumer = value.validRuleConsumers?.find(
       (validConsumer) => validConsumer === consumer || validConsumer === producer
     );
 
-    if (foundedConsumer) {
+    if (foundConsumer) {
       return value.id;
     }
   }

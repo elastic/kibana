@@ -36,13 +36,8 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
   templateToSelect,
   onTemplateChange,
 }) => {
-  const [selectedTemplate, onSelectTemplate] = useState<string>();
+  const [selectedTemplate, onSelectTemplate] = useState<string>(templateToSelect?.key ?? '');
   const isSmallScreen = useIsWithinMaxBreakpoint('s');
-
-  if (templateToSelect && !selectedTemplate) {
-    onSelectTemplate(templateToSelect.key);
-    onTemplateChange({ key: templateToSelect.key, caseFields: templateToSelect.caseFields });
-  }
 
   const options: EuiSelectOption[] = templates.map((template) => ({
     text: template.name,

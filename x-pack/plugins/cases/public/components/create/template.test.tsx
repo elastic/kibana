@@ -13,7 +13,7 @@ import { createAppMockRenderer } from '../../common/mock';
 import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplateSelector } from './templates';
 
-describe('CustomFields', () => {
+describe('TemplateSelector', () => {
   let appMockRender: AppMockRenderer;
   const onTemplateChange = jest.fn();
 
@@ -50,6 +50,8 @@ describe('CustomFields', () => {
       />
     );
 
+    expect(onTemplateChange).not.toHaveBeenCalled();
+
     userEvent.selectOptions(
       await screen.findByTestId('create-case-template-select'),
       selectedTemplate.key
@@ -75,12 +77,7 @@ describe('CustomFields', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(onTemplateChange).toHaveBeenCalledWith({
-        caseFields: templateToSelect.caseFields,
-        key: templateToSelect.key,
-      });
-    });
+    expect(await screen.findByText(templateToSelect.name)).toBeInTheDocument();
   });
 
   it('updates selected template correctly', async () => {
@@ -96,12 +93,7 @@ describe('CustomFields', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(onTemplateChange).toHaveBeenCalledWith({
-        caseFields: templateToSelect.caseFields,
-        key: templateToSelect.key,
-      });
-    });
+    expect(await screen.findByText(templateToSelect.name)).toBeInTheDocument();
 
     userEvent.selectOptions(
       await screen.findByTestId('create-case-template-select'),
