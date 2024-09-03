@@ -108,6 +108,7 @@ export function InternalDashboardTopNav({
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
   const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
   const managed = dashboard.select((state) => state.componentState.managed);
+  const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const query = dashboard.select((state) => state.explicitInput.query);
@@ -149,12 +150,12 @@ export function InternalDashboardTopNav({
     const subscription = getChromeIsVisible$().subscribe((visible) => setIsChromeVisible(visible));
     if (lastSavedId && title) {
       chromeRecentlyAccessed.add(
-        getFullEditPath(lastSavedId, viewMode === ViewMode.EDIT),
+        getFullEditPath(lastSavedId, viewMode === ViewMode.EDIT, expandedPanelId),
         title,
         lastSavedId
       );
       dashboardRecentlyAccessed.add(
-        getFullEditPath(lastSavedId, viewMode === ViewMode.EDIT),
+        getFullEditPath(lastSavedId, viewMode === ViewMode.EDIT, expandedPanelId),
         title,
         lastSavedId
       );
@@ -168,6 +169,7 @@ export function InternalDashboardTopNav({
     viewMode,
     title,
     dashboardRecentlyAccessed,
+    expandedPanelId,
   ]);
 
   /**

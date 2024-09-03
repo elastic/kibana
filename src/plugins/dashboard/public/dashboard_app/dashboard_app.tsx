@@ -190,21 +190,32 @@ export function DashboardApp({
     getScreenshotContext,
   ]);
 
+  useMemo(() => {
+    if (!dashboardAPI || !savedDashboardId) return;
+    dashboardAPI.expandedPanelId.subscribe(() => {
+      const expandedPanel = dashboardAPI.expandedPanelId.value;
+      // if state changes don't happen, we still want to update the URL when the expandedPanelId changes
+      const newHistory = history.replace({
+        pathname:
+          expandedPanel !== history.location.pathname
+            ? `${history.location.pathname}/${dashboardAPI.expandedPanelId.value}${history.location.search}`
+            : `/${history.location.search}`,
+      });
+      return newHistory;
+    });
+  }, [dashboardAPI, history, savedDashboardId]);
+
   /**
    * When the dashboard container is created, or re-created, start syncing dashboard state with the URL
    */
   useEffect(() => {
     if (!dashboardAPI) return;
-    if (!dashboardAPI || !savedDashboardId) return;
-    dashboardAPI.expandedPanelId.subscribe(() => {
-      const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
-        kbnUrlStateStorage,
-        dashboardAPI,
-        savedDashboardId,
-      });
-      return () => stopWatchingAppStateInUrl();
+    const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
+      kbnUrlStateStorage,
+      dashboardAPI,
     });
-  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
+    return () => stopWatchingAppStateInUrl();
+  }, [dashboardAPI, getScopedHistory, history, kbnUrlStateStorage, savedDashboardId, uiSettings]);
 
   const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);
 

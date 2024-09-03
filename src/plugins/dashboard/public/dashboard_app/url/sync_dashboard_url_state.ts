@@ -11,9 +11,8 @@ import { debounceTime } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
 
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { replaceUrlHashQuery, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 
-import { QueryState } from '@kbn/data-plugin/public';
 import {
   DashboardPanelMap,
   SharedDashboardState,
@@ -23,12 +22,7 @@ import {
 import { DashboardAPI } from '../../dashboard_container';
 import { pluginServices } from '../../services/plugin_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
-import {
-  DASHBOARD_APP_ID,
-  DASHBOARD_STATE_STORAGE_KEY,
-  GLOBAL_STATE_STORAGE_KEY,
-  createDashboardEditUrl,
-} from '../../dashboard_constants';
+import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
 import { SavedDashboardPanel } from '../../../common/content_management';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management/lib/load_dashboard_state';
 
@@ -95,32 +89,10 @@ export const loadAndRemoveDashboardState = (
 export const startSyncingDashboardUrlState = ({
   kbnUrlStateStorage,
   dashboardAPI,
-  savedDashboardId,
 }: {
   kbnUrlStateStorage: IKbnUrlStateStorage;
   dashboardAPI: DashboardAPI;
-  savedDashboardId: string;
 }) => {
-  const {
-    application: { getUrlForApp, navigateToUrl },
-    settings: { uiSettings },
-  } = pluginServices.getServices();
-
-  const { viewMode, expandedPanelId } = dashboardAPI;
-
-  // if state changes don't happen, we still want to update the URL when the expandedPanelId changes
-  const useHash = uiSettings.get('state:storeInSessionStorage'); // use hash
-
-  let url = getUrlForApp(DASHBOARD_APP_ID, {
-    path: `#${createDashboardEditUrl(
-      savedDashboardId,
-      viewMode.value === 'edit',
-      expandedPanelId.value
-    )}`,
-  });
-  const globalStateInUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) || {};
-  url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, globalStateInUrl, { useHash }, url);
-  navigateToUrl(url);
   const appStateSubscription = kbnUrlStateStorage
     .change$(DASHBOARD_STATE_STORAGE_KEY)
     .pipe(debounceTime(10)) // debounce URL updates so react has time to unsubscribe when changing URLs
