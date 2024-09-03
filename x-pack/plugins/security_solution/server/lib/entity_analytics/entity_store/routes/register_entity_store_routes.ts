@@ -6,12 +6,8 @@
  */
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { initEntityStoreRoute } from './init';
+import { initEntityStoreRoute } from './init.route';
 
-export const registerEntityStoreRoutes = ({
-  router,
-  getStartServices,
-  logger,
-}: EntityAnalyticsRoutesDeps) => {
+export const registerEntityStoreRoutes = ({ router, logger }: EntityAnalyticsRoutesDeps) => {
   initEntityStoreRoute(router, logger);
 };

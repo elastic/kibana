@@ -26,7 +26,7 @@ export class EntityStoreDataClient {
         curl -H 'Content-Type: application/json' \
             -X POST \
             -H 'kbn-xsrf: true' \
-            -H 'elastic-api-version: 1' \
+            -H 'elastic-api-version: 2023-10-31' \
             http:///elastic:changeme@localhost:5601/api/entity_store/engines/host/init
     */
   public async init(entityType: EntityType): Promise<InitEntityStoreResponse> {

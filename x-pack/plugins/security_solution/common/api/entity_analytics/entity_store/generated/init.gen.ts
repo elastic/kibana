@@ -23,7 +23,7 @@ import {
   BooleanFromString,
 } from '@kbn/zod-helpers';
 
-import { EntityType, EngineDescriptor } from '../common.gen';
+import { EntityType, EngineDescriptor } from './common.gen';
 
 export type InitEntityStoreRequestParams = z.infer<typeof InitEntityStoreRequestParams>;
 export const InitEntityStoreRequestParams = z.object({

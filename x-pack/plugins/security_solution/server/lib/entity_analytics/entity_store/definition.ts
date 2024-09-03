@@ -1,8 +1,13 @@
-// HOST
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
-import { DEFAULT_INDEX_PATTERN } from '@kbn/security-solution-plugin/common/constants';
+import { entityDefinitionSchema, type EntityDefinition } from '@kbn/entities-schema';
 
-const entityDefinitionHost = {
+export const HOST_ENTITY_DEFINITION: EntityDefinition = entityDefinitionSchema.parse({
   id: 'ea_host_entity_store',
   name: 'EA Host Store',
   type: 'node',
@@ -25,9 +30,9 @@ const entityDefinitionHost = {
     interval: '1m',
   },
   version: '1.0.0',
-};
+});
 
-const entityDefinitionUser = {
+export const USER_ENTITY_DEFINITION: EntityDefinition = entityDefinitionSchema.parse({
   id: 'ea_user_entity_store',
   name: 'EA User Store',
   type: 'node',
@@ -49,7 +54,7 @@ const entityDefinitionUser = {
     interval: '1m',
   },
   version: '1.0.0',
-};
+});
 
 /*
 https://github.com/elastic/security-team/issues/10102

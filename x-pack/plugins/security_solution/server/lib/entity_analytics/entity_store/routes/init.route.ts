@@ -25,8 +25,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 export const initEntityStoreRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger,
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  logger: Logger
 ) => {
   router.versioned
     .post({
@@ -50,7 +49,11 @@ export const initEntityStoreRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const body: InitEntityStoreResponse = undefined;
+          const secSol = await context.securitySolution;
+
+          const body: InitEntityStoreResponse = await secSol
+            .getEntityStoreDataClient()
+            .init(request.params.entityType);
 
           return response.ok({ body });
         } catch (e) {
