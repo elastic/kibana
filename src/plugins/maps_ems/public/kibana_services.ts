@@ -8,7 +8,7 @@
 
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
-import type { MapConfig } from '../config';
+import type { MapConfig } from '../server/config';
 import { LICENSE_CHECK_ID } from '../common';
 
 let kibanaVersion: string;

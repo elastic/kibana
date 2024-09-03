@@ -928,7 +928,10 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/observability_solution/**/*.{ts,tsx}'],
+      files: [
+        'x-pack/plugins/observability_solution/**/*.{ts,tsx}',
+        'x-pack/packages/observability/**/*.{ts,tsx}',
+      ],
       rules: {
         'react-hooks/exhaustive-deps': [
           'error',
@@ -944,6 +947,7 @@ module.exports = {
         'x-pack/plugins/aiops/**/*.tsx',
         'x-pack/plugins/observability_solution/**/*.tsx',
         'src/plugins/ai_assistant_management/**/*.tsx',
+        'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
@@ -1363,6 +1367,27 @@ module.exports = {
         'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
+      },
+    },
+    {
+      files: [
+        'test/{accessibility,*functional*}/apps/**/*.{js,ts}',
+        'test/*api_integration*/**/*.{js,ts}',
+        'x-pack/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
+        'x-pack/test/*api_integration*/**/*.{js,ts}',
+        'x-pack/test_serverless/{functional,api_integration}/test_suites/**/*.{js,ts}',
+      ],
+      extends: ['plugin:mocha/recommended'],
+      plugins: ['mocha'],
+      env: {
+        mocha: true,
+      },
+      rules: {
+        'mocha/no-mocha-arrows': 'off',
+        'mocha/no-exports': 'off',
+        'mocha/no-setup-in-describe': 'off',
+        'mocha/no-nested-tests': 'off',
+        'mocha/no-skipped-tests': 'off',
       },
     },
     {

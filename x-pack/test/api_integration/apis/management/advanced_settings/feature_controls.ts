@@ -111,7 +111,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expectResponse(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password);
-        expectTelemetryResponse(telemetryResult, true);
+        await expectTelemetryResponse(telemetryResult, true);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -143,7 +143,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expect403(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password);
-        expectTelemetryResponse(telemetryResult, false);
+        await expectTelemetryResponse(telemetryResult, false);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -217,7 +217,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expectResponse(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password, space1Id);
-        expectTelemetryResponse(telemetryResult, true);
+        await expectTelemetryResponse(telemetryResult, true);
       });
 
       it(`user_1 can only save telemetry in space_2`, async () => {
@@ -225,7 +225,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expect403(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password, space2Id);
-        expectTelemetryResponse(telemetryResult, true);
+        await expectTelemetryResponse(telemetryResult, true);
       });
 
       it(`user_1 can't save either settings or telemetry in space_3`, async () => {
@@ -233,7 +233,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expect403(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password, space3Id);
-        expectTelemetryResponse(telemetryResult, false);
+        await expectTelemetryResponse(telemetryResult, false);
       });
     });
   });

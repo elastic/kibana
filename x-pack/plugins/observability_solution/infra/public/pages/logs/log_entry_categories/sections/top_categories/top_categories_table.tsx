@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { Criteria, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback } from 'react';
@@ -14,6 +14,7 @@ import useSet from 'react-use/lib/useSet';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import {
+  categoriesSortRT,
   LogEntryCategory,
   LogEntryCategoryDataset,
   LogEntryCategoryHistogram,
@@ -51,8 +52,10 @@ export const TopCategoriesTable = euiStyled(
     }, [sortOptions]);
 
     const handleTableChange = useCallback(
-      ({ sort = {} }) => {
-        changeSortOptions(sort);
+      ({ sort }: Criteria<LogEntryCategory>) => {
+        if (categoriesSortRT.is(sort)) {
+          changeSortOptions(sort);
+        }
       },
       [changeSortOptions]
     );

@@ -10,7 +10,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { XyPublicConfig } from '../config';
+import type { XyPublicConfig } from '../server/config';
 import { setUISettings, setPalettesService, setDataViewsStart } from './services';
 
 import { visTypesDefinitions } from './vis_types';

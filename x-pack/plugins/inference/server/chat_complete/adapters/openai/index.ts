@@ -21,60 +21,30 @@ import {
   Message,
   MessageRole,
 } from '../../../../common/chat_complete';
+import type { ToolOptions } from '../../../../common/chat_complete/tools';
 import { createTokenLimitReachedError } from '../../../../common/chat_complete/errors';
 import { createInferenceInternalError } from '../../../../common/errors';
-import { InferenceConnectorAdapter } from '../../types';
-import { eventSourceStreamIntoObservable } from '../event_source_stream_into_observable';
+import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
+import type { InferenceConnectorAdapter } from '../../types';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ connector, actionsClient, system, messages, toolChoice, tools }) => {
-    const openAIMessages = messagesToOpenAI({ system, messages });
-
-    const toolChoiceForOpenAI =
-      typeof toolChoice === 'string'
-        ? toolChoice
-        : toolChoice
-        ? {
-            function: {
-              name: toolChoice.function,
-            },
-            type: 'function' as const,
-          }
-        : undefined;
-
+  chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
     const stream = true;
 
     const request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string } = {
       stream,
-      messages: openAIMessages,
+      messages: messagesToOpenAI({ system, messages }),
+      tool_choice: toolChoiceToOpenAI(toolChoice),
+      tools: toolsToOpenAI(tools),
       temperature: 0,
-      tool_choice: toolChoiceForOpenAI,
-      tools: tools
-        ? Object.entries(tools).map(([toolName, { description, schema }]) => {
-            return {
-              type: 'function',
-              function: {
-                name: toolName,
-                description,
-                parameters: (schema ?? {
-                  type: 'object' as const,
-                  properties: {},
-                }) as unknown as Record<string, unknown>,
-              },
-            };
-          })
-        : undefined,
     };
 
     return from(
-      actionsClient.execute({
-        actionId: connector.id,
-        params: {
-          subAction: 'stream',
-          subActionParams: {
-            body: JSON.stringify(request),
-            stream,
-          },
+      executor.invoke({
+        subAction: 'stream',
+        subActionParams: {
+          body: JSON.stringify(request),
+          stream,
         },
       })
     ).pipe(
@@ -106,6 +76,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         const delta = chunk.choices[0].delta;
 
         return {
+          type: ChatCompletionEventType.ChatCompletionChunk,
           content: delta.content ?? '',
           tool_calls:
             delta.tool_calls?.map((toolCall) => {
@@ -118,12 +89,44 @@ export const openAIAdapter: InferenceConnectorAdapter = {
                 index: toolCall.index,
               };
             }) ?? [],
-          type: ChatCompletionEventType.ChatCompletionChunk,
         };
       })
     );
   },
 };
+
+function toolsToOpenAI(tools: ToolOptions['tools']): OpenAI.ChatCompletionCreateParams['tools'] {
+  return tools
+    ? Object.entries(tools).map(([toolName, { description, schema }]) => {
+        return {
+          type: 'function',
+          function: {
+            name: toolName,
+            description,
+            parameters: (schema ?? {
+              type: 'object' as const,
+              properties: {},
+            }) as unknown as Record<string, unknown>,
+          },
+        };
+      })
+    : undefined;
+}
+
+function toolChoiceToOpenAI(
+  toolChoice: ToolOptions['toolChoice']
+): OpenAI.ChatCompletionCreateParams['tool_choice'] {
+  return typeof toolChoice === 'string'
+    ? toolChoice
+    : toolChoice
+    ? {
+        function: {
+          name: toolChoice.function,
+        },
+        type: 'function' as const,
+      }
+    : undefined;
+}
 
 function messagesToOpenAI({
   system,
