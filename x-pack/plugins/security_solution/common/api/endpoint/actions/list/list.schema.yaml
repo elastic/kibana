@@ -7,7 +7,7 @@ paths:
     get:
       summary: Get response actions
       operationId: EndpointGetActionsList
-      description: Get a list of all response actions requests.
+      description: Get a list of all response actions.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       parameters:
