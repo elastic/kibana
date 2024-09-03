@@ -119,16 +119,6 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
         api: [`${APP_ID}-writeHostIsolation`],
         ui: ['writeHostIsolation'],
       },
-      {
-        id: 'host_isolation_exceptions_all',
-        api: [`${APP_ID}-accessHostIsolationExceptions`, `${APP_ID}-writeHostIsolationExceptions`],
-        ui: ['accessHostIsolationExceptions', 'writeHostIsolationExceptions'],
-      },
-      {
-        id: 'host_isolation_exceptions_read',
-        api: [`${APP_ID}-accessHostIsolationExceptions`],
-        ui: ['accessHostIsolationExceptions'],
-      },
     ],
   },
 
