@@ -19,8 +19,8 @@ export const services = {
   kibanaServer: KibanaServerProvider,
   esArchiver: EsArchiverProvider,
   retry: RetryService,
-  supertestWithoutAuth: SupertestWithoutAuthProvider,
   samlAuth: SamlAuthProvider,
   supertest: KibanaSupertestProvider,
   esSupertest: ElasticsearchSupertestProvider,
+  supertestWithoutAuth: SupertestWithoutAuthProvider,
 };

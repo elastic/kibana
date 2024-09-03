@@ -29,3 +29,4 @@ import { SamlAuthProvider } from './services/saml_auth/saml_auth_provider';
 export type SamlAuthProviderType = ProvidedType<typeof SamlAuthProvider>;
 
 export type { FtrProviderContext } from './services/ftr_provider_context';
+export { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './services/supertest';
