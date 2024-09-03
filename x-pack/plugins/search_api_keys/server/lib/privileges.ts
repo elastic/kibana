@@ -13,11 +13,13 @@ export async function fetchUserStartPrivileges(
   logger: Logger
 ): Promise<boolean> {
   try {
+    // relying on manage cluster privilege to check if user can create API keys
+    // and can also have permissions for index monitoring
     const securityCheck = await client.security.hasPrivileges({
-      cluster: ['manage_own_api_key'],
+      cluster: ['manage'],
     });
 
-    return securityCheck?.cluster?.manage_own_api_key ?? false;
+    return securityCheck?.cluster?.manage ?? false;
   } catch (e) {
     logger.error(`Error checking user privileges for search API Keys`);
     logger.error(e);
