@@ -12,6 +12,7 @@ import {
   getReasonMessageForTimeWindow,
   getUngroupedReasonMessage,
 } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/message_utils';
+import { AlertStatusMetaDataCodec } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/queries/query_monitor_status_alert';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SyntheticsRuleHelper } from './synthetics_rule_helper';
 
@@ -137,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('NumberOfLocations', () => {
       let ruleId = '';
-      const params: StatusRuleParams = {
+      let params: StatusRuleParams = {
         condition: {
           window: {
             numberOfLocations: 2,
@@ -220,7 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         },
-      ];
+      ] as AlertStatusMetaDataCodec[];
 
       it('should trigger down alert based on location threshold with two locations down', async () => {
         await ruleHelper.makeSummaries({
