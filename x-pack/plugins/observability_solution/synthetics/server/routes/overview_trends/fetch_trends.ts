@@ -9,7 +9,8 @@ import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/types';
 
 export const getFetchTrendsQuery = (
   configId: string,
-  locationIds: string[]
+  locationIds: string[],
+  interval: number
 ): MsearchMultisearchBody => ({
   size: 0,
   query: {
@@ -48,7 +49,7 @@ export const getFetchTrendsQuery = (
         {
           range: {
             '@timestamp': {
-              gte: 'now-9h',
+              gte: `now-${interval}m`,
               lte: 'now',
             },
           },
@@ -68,16 +69,17 @@ export const getFetchTrendsQuery = (
           },
           aggs: {
             last_50: {
-              top_hits: {
-                size: 50,
-                sort: [
-                  {
-                    '@timestamp': {
-                      order: 'desc',
-                    },
+              histogram: {
+                field: '@timestamp',
+                interval: interval * 1000,
+                min_doc_count: 1,
+              },
+              aggs: {
+                max: {
+                  avg: {
+                    field: 'monitor.duration.us',
                   },
-                ],
-                _source: ['monitor.duration.us'],
+                },
               },
             },
             stats: {

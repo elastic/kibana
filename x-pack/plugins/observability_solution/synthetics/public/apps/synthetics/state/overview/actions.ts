@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createAction } from '@reduxjs/toolkit';
-import { TrendKey, TrendTable } from '../../../../../common/types';
+import { TrendRequest, TrendTable } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';
 
 import type {
@@ -39,4 +39,6 @@ export const refreshOverviewTrends = createAsyncAction<void, TrendTable, any>(
   'refreshOverviewTrendStats'
 );
 
-export const trendStatsBatch = createAsyncAction<TrendKey[], TrendTable, any>('batchTrendStats');
+export const trendStatsBatch = createAsyncAction<TrendRequest[], TrendTable, any>(
+  'batchTrendStats'
+);

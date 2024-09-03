@@ -7,7 +7,7 @@
 
 import { ObjectType, schema } from '@kbn/config-schema';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { TrendKey } from '../../../common/types';
+import { TrendRequest } from '../../../common/types';
 import { getFetchTrendsQuery } from './fetch_trends';
 import { SyntheticsRestApiRouteFactory } from '../types';
 
@@ -20,17 +20,9 @@ interface TrendAggs {
           buckets: Array<{
             key: string;
             last_50: {
-              hits: {
-                hits: Array<{
-                  _source: {
-                    monitor: {
-                      duration: {
-                        us: number;
-                      };
-                    };
-                  };
-                }>;
-              };
+              buckets: Array<{
+                max: { value: number };
+              }>;
             };
             stats: {};
             median: {
@@ -45,6 +37,9 @@ interface TrendAggs {
   };
 }
 
+export const getTimeRangeFilter = (schedule: string, numChecks = 50) =>
+  Number(schedule) * numChecks;
+
 export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.OVERVIEW_TRENDS,
@@ -53,22 +48,31 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
       schema.object({
         configId: schema.string(),
         locationId: schema.string(),
+        schedule: schema.string(),
       })
     ) as unknown as ObjectType,
   },
   handler: async (routeContext) => {
     const esClient = routeContext.syntheticsEsClient;
-    const body = routeContext.request.body as TrendKey[];
-    const configs = body.reduce((acc: Record<string, string[]>, { configId, locationId }) => {
-      if (!acc[configId]) {
-        acc[configId] = [locationId];
-      } else {
-        acc[configId].push(locationId);
-      }
-      return acc;
-    }, {});
+    const body = routeContext.request.body as TrendRequest[];
+    const configs = body.reduce(
+      (
+        acc: Record<string, { locations: string[]; interval: number }>,
+        { configId, locationId, schedule }
+      ) => {
+        if (!acc[configId]) {
+          acc[configId] = { locations: [locationId], interval: getTimeRangeFilter(schedule) };
+        } else {
+          acc[configId].locations.push(locationId);
+        }
+        return acc;
+      },
+      {}
+    );
 
-    const requests = Object.keys(configs).map((key) => getFetchTrendsQuery(key, configs[key]));
+    const requests = Object.keys(configs).map((key) =>
+      getFetchTrendsQuery(key, configs[key].locations, configs[key].interval)
+    );
     const results = await esClient.msearch(requests);
 
     let main = {};
@@ -80,9 +84,12 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
           ret[key + location.key] = {
             configId: key,
             locationId: location.key,
-            data: location.last_50.hits.hits
-              .reverse()
-              .map((hit: any, x: number) => ({ x, y: hit._source.monitor.duration.us })),
+            data: location.last_50.buckets.map(
+              (durationBucket: { max: { value: number } }, x: number) => ({
+                x,
+                y: durationBucket.max.value,
+              })
+            ),
             ...location.stats,
             median: location.median.values['50.0'],
           };

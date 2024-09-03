@@ -18,7 +18,7 @@ import {
   EuiAutoSizer,
   EuiAutoSize,
 } from '@elastic/eui';
-import type { TrendKey } from '../../../../../../../common/types';
+import type { TrendRequest } from '../../../../../../../common/types';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
 import { AddToDashboard } from '../../../common/components/add_to_dashboard';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
@@ -93,11 +93,15 @@ export const OverviewGrid = memo(() => {
 
   useEffect(() => {
     if (monitorsSortedByStatus.length && maxItem) {
-      const batch: TrendKey[] = [];
+      const batch: TrendRequest[] = [];
       const chunk = monitorsSortedByStatus.slice(0, (maxItem + 1) * ROW_COUNT);
       for (const item of chunk) {
         if (trendData[item.configId + item.location.id] === undefined) {
-          batch.push({ configId: item.configId, locationId: item.location.id });
+          batch.push({
+            configId: item.configId,
+            locationId: item.location.id,
+            schedule: item.schedule,
+          });
         }
       }
       if (batch.length) dispatch(trendStatsBatch.get(batch));

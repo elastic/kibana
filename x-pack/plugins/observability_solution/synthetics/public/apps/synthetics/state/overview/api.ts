@@ -13,7 +13,7 @@ import {
   OverviewStatus,
   OverviewStatusCodec,
 } from '../../../../../common/runtime_types';
-import type { TrendKey, TrendTable } from '../../../../../common/types';
+import type { TrendRequest, TrendTable } from '../../../../../common/types';
 import { apiService } from '../../../../utils/api_service';
 import type { MonitorOverviewPageState } from './models';
 
@@ -60,5 +60,5 @@ export const fetchOverviewStatus = async (
   return apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, params, OverviewStatusCodec);
 };
 
-export const fetchOverviewTrendStats = async (monitors: TrendKey[]): Promise<TrendTable> =>
+export const fetchOverviewTrendStats = async (monitors: TrendRequest[]): Promise<TrendTable> =>
   monitors.length ? apiService.post(SYNTHETICS_API_URLS.OVERVIEW_TRENDS, monitors) : {};

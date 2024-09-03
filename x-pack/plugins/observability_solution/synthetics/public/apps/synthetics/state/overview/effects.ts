@@ -8,7 +8,7 @@
 import { debounce, call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
 import type { TrendTable } from '../../../../../common/types';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { selectOverviewTrends } from './selectors';
+import { selectOverviewState, selectOverviewTrends } from './selectors';
 import {
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,
@@ -16,6 +16,7 @@ import {
   trendStatsBatch,
 } from './actions';
 import { fetchMonitorOverview, fetchOverviewTrendStats as trendsApi } from './api';
+import { MonitorOverviewState } from '.';
 
 export function* fetchMonitorOverviewEffect() {
   yield debounce(
@@ -52,17 +53,28 @@ export function* fetchOverviewTrendStats() {
   yield takeEvery(trendStatsBatch.get, fetchTrendEffect);
 }
 
-export function* refreshTrends(): Generator<unknown, void, TrendTable> {
+export function* refreshTrends(): Generator<unknown, void, any> {
   const existingTrends: TrendTable = yield select(selectOverviewTrends);
+  const overviewState: MonitorOverviewState = yield select(selectOverviewState);
+
   let acc = {};
   const keys = Object.keys(existingTrends);
   while (keys.length) {
     const chunk = keys
       .splice(0, keys.length < 10 ? keys.length : 40)
-      .filter((key: string) => existingTrends[key] !== null)
+      .filter(
+        (key: string) =>
+          existingTrends[key] !== null &&
+          overviewState.data.monitors.some(
+            ({ configId }) => configId === existingTrends[key]!.configId
+          )
+      )
       .map((key: string) => ({
         configId: existingTrends[key]!.configId,
         locationId: existingTrends[key]!.locationId,
+        schedule: overviewState.data.monitors.find(
+          ({ configId }) => configId === existingTrends[key]!.configId
+        )!.schedule,
       }));
     if (chunk.length) {
       const res = yield call(trendsApi, chunk);

@@ -10,6 +10,8 @@ export interface TrendKey {
   locationId: string;
 }
 
+export type TrendRequest = TrendKey & { schedule: string };
+
 export interface TrendDatum {
   x: number;
   y: number;
