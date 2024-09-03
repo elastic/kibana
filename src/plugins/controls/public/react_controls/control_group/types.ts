@@ -72,7 +72,7 @@ export type ControlGroupApi = PresentationContainer &
     asyncResetUnsavedChanges: () => Promise<void>;
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
     openAddDataControlFlyout: (options?: {
-      controlInputTransform?: ControlStateTransform;
+      controlStateTransform?: ControlStateTransform;
       onSave?: () => void;
     }) => void;
     untilInitialized: () => Promise<void>;
