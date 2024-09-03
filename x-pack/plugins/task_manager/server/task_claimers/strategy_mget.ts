@@ -220,14 +220,14 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
         if (SavedObjectsErrorHelpers.isConflictError(error)) {
           conflicts++;
         } else {
-          logger.warn(
+          logger.error(
             `Saved Object error updating task ${id}:${type} during claim: ${error.error}`,
             logMeta
           );
           bulkUpdateErrors++;
         }
       } else {
-        logger.warn(`Error updating task ${id}:${type} during claim: ${error.message}`, logMeta);
+        logger.error(`Error updating task ${id}:${type} during claim: ${error.message}`, logMeta);
         bulkUpdateErrors++;
       }
     }
@@ -241,7 +241,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       acc.push(task.value);
     } else {
       const { id, type, error } = task.error;
-      logger.warn(`Error getting full task ${id}:${type} during claim: ${error.message}`, logMeta);
+      logger.error(`Error getting full task ${id}:${type} during claim: ${error.message}`, logMeta);
       bulkGetErrors++;
     }
     return acc;

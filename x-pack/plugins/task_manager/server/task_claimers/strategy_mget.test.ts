@@ -1215,7 +1215,7 @@ describe('TaskClaiming', () => {
         'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 1; removed: 0;',
         { tags: ['claimAvailableTasksMget'] }
       );
-      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+      expect(taskManagerLogger.error).toHaveBeenCalledWith(
         'Error getting full task id-2:task during claim: Oh no',
         { tags: ['claimAvailableTasksMget'] }
       );
@@ -1421,7 +1421,7 @@ describe('TaskClaiming', () => {
         'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 1; getErrors: 0; removed: 0;',
         { tags: ['claimAvailableTasksMget'] }
       );
-      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+      expect(taskManagerLogger.error).toHaveBeenCalledWith(
         'Error updating task id-2:task during claim: Oh no',
         { tags: ['claimAvailableTasksMget'] }
       );
