@@ -38,39 +38,39 @@ export function ServiceTabContent({ children, tabName }: ServiceTabContentProps)
   const displayEmptyStateOnly = tabName !== 'overview';
   const displaySearchBar = tabName === 'service-map';
 
+  if (!hasOnlyLogsSignal) {
+    return <>{children}</>;
+  }
+
+  if (displayEmptyStateOnly) {
+    return (
+      <>
+        {displaySearchBar && <SearchBar showTimeComparison={true} />}
+        <ServiceTabEmptyState
+          title={emptyStateContent[tabName].title}
+          content={emptyStateContent[tabName].content}
+          imgSrc={emptyStateContent[tabName].imgSrc ?? null}
+        />
+      </>
+    );
+  }
+
   return (
     <>
-      {hasOnlyLogsSignal ? (
+      {!dismissedLogsOnlyEmptyState && (
         <>
-          {displayEmptyStateOnly ? (
-            <>
-              {displaySearchBar && <SearchBar showTimeComparison={true} />}
-              <ServiceTabEmptyState
-                title={emptyStateContent[tabName].title}
-                content={emptyStateContent[tabName].content}
-                imgSrc={emptyStateContent[tabName].imgSrc ?? null}
-              />
-            </>
-          ) : (
-            <>
-              {!dismissedLogsOnlyEmptyState && (
-                <ServiceTabEmptyState
-                  title={emptyStateContent[tabName].title}
-                  content={emptyStateContent[tabName].content}
-                  imgSrc={emptyStateContent[tabName].imgSrc ?? null}
-                  dismissable={true}
-                  onDissmiss={() => setdismissedLogsOnlyEmptyState(true)}
-                />
-              )}
-              <EuiSpacer size="m" />
-
-              {children}
-            </>
-          )}
+          <ServiceTabEmptyState
+            title={emptyStateContent[tabName].title}
+            content={emptyStateContent[tabName].content}
+            imgSrc={emptyStateContent[tabName].imgSrc ?? null}
+            dismissable={true}
+            onDissmiss={() => setdismissedLogsOnlyEmptyState(true)}
+          />
+          <EuiSpacer size="m" />
         </>
-      ) : (
-        <>{children}</>
       )}
+
+      {children}
     </>
   );
 }
