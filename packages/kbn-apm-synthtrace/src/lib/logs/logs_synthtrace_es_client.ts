@@ -10,6 +10,7 @@ import { Client } from '@elastic/elasticsearch';
 import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
 import { pipeline, Readable, Transform } from 'stream';
 import { LogDocument } from '@kbn/apm-synthtrace-client/src/lib/logs';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
@@ -24,6 +25,7 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       pipeline: logsPipeline(),
     });
     this.dataStreams = ['logs-*-*'];
+    this.indices = ['cloud-logs-*-*'];
   }
 
   async createIndexTemplate(name: IndexTemplateName) {
@@ -38,6 +40,23 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       this.logger.info(`Index template successfully created: ${name}`);
     } catch (err) {
       this.logger.error(`Index template creation failed: ${name} - ${err.message}`);
+    }
+  }
+
+  async createIndex(index: string, mappings?: MappingTypeMapping) {
+    try {
+      const isIndexExisting = await this.client.indices.exists({ index });
+
+      if (isIndexExisting) {
+        this.logger.info(`Index already exists: ${index}`);
+        return;
+      }
+
+      await this.client.indices.create({ index, mappings });
+
+      this.logger.info(`Index successfully created: ${index}`);
+    } catch (err) {
+      this.logger.error(`Index creation failed: ${index} - ${err.message}`);
     }
   }
 }

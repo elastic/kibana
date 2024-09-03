@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.pressKeys(browser.keys.TAB);
       await browser.pressKeys(browser.keys.SPACE);
       await browser.pressKeys(browser.keys.TAB);
-      const tableTab = await testSubjects.find('docViewerTab-doc_view_table');
+      const tableTab = await testSubjects.find('docViewerTab-doc_view_logs_overview');
       const activeElement = await find.activeElement();
       expect(await tableTab.getAttribute('data-test-subj')).to.eql(
         await activeElement.getAttribute('data-test-subj')

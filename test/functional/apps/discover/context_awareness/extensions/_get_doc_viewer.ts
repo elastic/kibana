@@ -10,10 +10,11 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover } = getPageObjects(['common', 'discover']);
+  const { common, discover, header } = getPageObjects(['common', 'discover', 'header']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
+  const browser = getService('browser');
 
   describe('extension getDocViewer', () => {
     describe('ES|QL mode', () => {
@@ -60,6 +61,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
         await dataGrid.clickDocViewerTab('doc_view_logs_overview');
         await testSubjects.existOrFail('unifiedDocViewLogsOverviewHeader');
+
+        // check Surrounding docs page
+        const [, surroundingActionEl] = await dataGrid.getRowActions();
+        await surroundingActionEl.click();
+        await header.waitUntilLoadingHasFinished();
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
+
+        await dataGrid.clickRowToggle({ isAnchorRow: true });
+        await testSubjects.existOrFail('docViewerTab-doc_view_table');
+        await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
+        await dataGrid.clickDocViewerTab('doc_view_logs_overview');
+        await testSubjects.existOrFail('unifiedDocViewLogsOverviewHeader');
+
+        // check Single doc page
+        const [singleDocActionEl] = await dataGrid.getRowActions();
+        await singleDocActionEl.click();
+        await header.waitUntilLoadingHasFinished();
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.existOrFail('docViewerTab-doc_view_table');
+        await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
+        await dataGrid.clickDocViewerTab('doc_view_logs_overview');
+        await testSubjects.existOrFail('unifiedDocViewLogsOverviewHeader');
       });
 
       it('should not render logs overview tab for non-logs data source', async () => {
@@ -69,6 +95,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataViews.switchTo('my-example-metrics');
         await discover.waitUntilSearchingHasFinished();
         await dataGrid.clickRowToggle();
+        await testSubjects.existOrFail('docViewerTab-doc_view_table');
+        await testSubjects.missingOrFail('docViewerTab-doc_view_logs_overview');
+
+        // check Surrounding docs page
+        const [, surroundingActionEl] = await dataGrid.getRowActions();
+        await surroundingActionEl.click();
+        await header.waitUntilLoadingHasFinished();
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
+
+        await dataGrid.clickRowToggle({ isAnchorRow: true });
+        await testSubjects.existOrFail('docViewerTab-doc_view_table');
+        await testSubjects.missingOrFail('docViewerTab-doc_view_logs_overview');
+
+        // check Single doc page
+        const [singleDocActionEl] = await dataGrid.getRowActions();
+        await singleDocActionEl.click();
+        await header.waitUntilLoadingHasFinished();
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
+
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.missingOrFail('docViewerTab-doc_view_logs_overview');
       });

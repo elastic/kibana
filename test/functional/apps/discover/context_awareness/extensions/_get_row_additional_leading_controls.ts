@@ -10,9 +10,11 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover } = getPageObjects(['common', 'discover']);
+  const { common, discover, header } = getPageObjects(['common', 'discover', 'header']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
+  const dataGrid = getService('dataGrid');
+  const browser = getService('browser');
 
   describe('extension getRowAdditionalLeadingControls', () => {
     describe('ES|QL mode', () => {
@@ -50,12 +52,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
         await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
         await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_menuControl');
+
+        // check Surrounding docs page
+        await dataGrid.clickRowToggle();
+        const [, surroundingActionEl] = await dataGrid.getRowActions();
+        await surroundingActionEl.click();
+        await header.waitUntilLoadingHasFinished();
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_menuControl');
       });
 
       it('should not render logs controls for non-logs data source', async () => {
         await common.navigateToApp('discover');
         await dataViews.switchTo('my-example-metrics');
         await discover.waitUntilSearchingHasFinished();
+        await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_menuControl');
+
+        // check Surrounding docs page
+        await dataGrid.clickRowToggle();
+        const [, surroundingActionEl] = await dataGrid.getRowActions();
+        await surroundingActionEl.click();
+        await header.waitUntilLoadingHasFinished();
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
+
         await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
         await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_menuControl');
       });

@@ -11,16 +11,18 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, unifiedFieldList } = getPageObjects([
+  const { common, discover, unifiedFieldList, header } = getPageObjects([
     'common',
     'discover',
     'unifiedFieldList',
+    'header',
   ]);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
   const queryBar = getService('queryBar');
+  const browser = getService('browser');
 
   describe('extension getCellRenderers', () => {
     before(async () => {
@@ -80,8 +82,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.submitQuery();
         await discover.waitUntilSearchingHasFinished();
         await unifiedFieldList.clickFieldListItemAdd('log.level');
-        const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        const logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
+        let firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+        let logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
+        expect(await logLevelBadge.getVisibleText()).to.be('debug');
+        expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
+          'rgba(190, 207, 227, 1)'
+        );
+
+        // check Surrounding docs page
+        await dataGrid.clickRowToggle();
+        const [, surroundingActionEl] = await dataGrid.getRowActions();
+        await surroundingActionEl.click();
+        await header.waitUntilLoadingHasFinished();
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
+
+        firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+        logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
         expect(await logLevelBadge.getVisibleText()).to.be('debug');
         expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
           'rgba(190, 207, 227, 1)'
@@ -97,7 +114,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.submitQuery();
         await discover.waitUntilSearchingHasFinished();
         await unifiedFieldList.clickFieldListItemAdd('log.level');
-        const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+        let firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+        expect(await firstCell.getVisibleText()).to.be('debug');
+        await testSubjects.missingOrFail('*logLevelBadgeCell-');
+
+        // check Surrounding docs page
+        await dataGrid.clickRowToggle();
+        const [, surroundingActionEl] = await dataGrid.getRowActions();
+        await surroundingActionEl.click();
+        await header.waitUntilLoadingHasFinished();
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
+
+        firstCell = await dataGrid.getCellElementExcludingControlColumns(1, 1);
         expect(await firstCell.getVisibleText()).to.be('debug');
         await testSubjects.missingOrFail('*logLevelBadgeCell-');
       });
