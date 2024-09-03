@@ -15,7 +15,7 @@ import { StringOrNull } from '../../../../..';
 
 interface Props {
   name: StringOrNull;
-  id: StringOrNull;
+  id: string;
   timerange: { from: number; to: number };
 }
 
@@ -25,20 +25,16 @@ export function HostLink({ name, id, timerange }: Props) {
   const assetDetailsLocator =
     services.share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
-  const isLinkable = !!id && !!assetDetailsLocator;
-
-  const href = isLinkable
-    ? assetDetailsLocator.getRedirectUrl({
-        assetType: 'host',
-        assetId: id,
-        assetDetails: {
-          dateRange: {
-            from: new Date(timerange.from).toISOString(),
-            to: new Date(timerange.to).toISOString(),
-          },
-        },
-      })
-    : undefined;
+  const href = assetDetailsLocator?.getRedirectUrl({
+    assetType: 'host',
+    assetId: id,
+    assetDetails: {
+      dateRange: {
+        from: new Date(timerange.from).toISOString(),
+        to: new Date(timerange.to).toISOString(),
+      },
+    },
+  });
 
   return (
     <>
