@@ -98,7 +98,7 @@ export function ServiceTabEmptyState({
                 <EuiLink
                   href={learnMoreLink.href}
                   target="_blank"
-                  data-test-subj="infraHostsTableWithoutSystemMetricsPopoverTroubleshootingLink"
+                  data-test-subj="ServiceTabEmptyStateLearnMoreButton"
                   external
                 >
                   {learnMoreLink.label}
