@@ -16,7 +16,7 @@ lexer grammar esql_lexer;
 }
 
 options {
-  superClass=LexerConfig;
+  superClass=lexer_config;
   caseInsensitive=true;
 }
 

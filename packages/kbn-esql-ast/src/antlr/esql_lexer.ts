@@ -20,9 +20,9 @@ import {
  * 2.0.
  */
 
-import LexerConfig from './LexerConfig.js';
+import lexer_config from './lexer_config.js';
 
-export default class esql_lexer extends LexerConfig {
+export default class esql_lexer extends lexer_config {
 	public static readonly DISSECT = 1;
 	public static readonly DROP = 2;
 	public static readonly ENRICH = 3;

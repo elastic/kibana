@@ -16,7 +16,7 @@ parser grammar esql_parser;
 }
 
 options {
-  superClass=ParserConfig;
+  superClass=parser_config;
   tokenVocab=esql_lexer;
 }
 

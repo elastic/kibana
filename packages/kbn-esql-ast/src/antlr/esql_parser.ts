@@ -25,9 +25,9 @@ type int = number;
  * 2.0.
  */
 
-import ParserConfig from './ParserConfig.js';
+import parser_config from './parser_config.js';
 
-export default class esql_parser extends ParserConfig {
+export default class esql_parser extends parser_config {
 	public static readonly DISSECT = 1;
 	public static readonly DROP = 2;
 	public static readonly ENRICH = 3;
