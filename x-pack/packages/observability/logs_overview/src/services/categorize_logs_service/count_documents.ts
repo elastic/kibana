@@ -9,7 +9,7 @@ import { getSampleProbability } from '@kbn/ml-random-sampler-utils';
 import { ISearchGeneric } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
 import { fromPromise } from 'xstate5';
-import { LogsCategorizationParams } from './types';
+import { LogCategorizationParams } from './types';
 import { createCategorizationQuery } from './queries';
 
 export const countDocuments = ({ search }: { search: ISearchGeneric }) =>
@@ -18,8 +18,8 @@ export const countDocuments = ({ search }: { search: ISearchGeneric }) =>
       documentCount: number;
       samplingProbability: number;
     },
-    LogsCategorizationParams
-  >(async ({ input: { index, end, start, timeField, messageField }, signal }) => {
+    LogCategorizationParams
+  >(async ({ input: { index, endTimestamp, startTimestamp, timeField, messageField }, signal }) => {
     const { rawResponse: totalHitsResponse } = await lastValueFrom(
       search(
         {
@@ -27,7 +27,7 @@ export const countDocuments = ({ search }: { search: ISearchGeneric }) =>
             index,
             size: 0,
             track_total_hits: true,
-            query: createCategorizationQuery(messageField, timeField, start, end),
+            query: createCategorizationQuery(messageField, timeField, startTimestamp, endTimestamp),
           },
         },
         { abortSignal: signal }

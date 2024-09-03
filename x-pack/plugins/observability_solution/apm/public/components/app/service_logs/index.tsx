@@ -9,11 +9,11 @@ import React, { useMemo } from 'react';
 import { LogCategories } from '@kbn/observability-logs-overview';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { CONTAINER_ID, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
-// import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useKibana } from '../../../context/kibana_context/use_kibana';
-// import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 // import { useFetcher } from '../../../hooks/use_fetcher';
-// import { useTimeRange } from '../../../hooks/use_time_range';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 export function ServiceLogs() {
@@ -26,7 +26,11 @@ export function ServiceLogs() {
       settings: uiSettings,
     },
   } = useKibana();
-  // const { serviceName } = useApmServiceContext();
+  const { serviceName } = useApmServiceContext();
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useAnyOfApmParams('/services/{serviceName}/logs');
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const logCategoriesDependencies = useMemo(
     () => ({
@@ -41,10 +45,6 @@ export function ServiceLogs() {
   if (typeof logCategoriesDependencies.charts === 'undefined') {
     return null;
   }
-
-  // const {
-  //   query: { environment, kuery, rangeFrom, rangeTo },
-  // } = useAnyOfApmParams('/services/{serviceName}/logs', '/logs-services/{serviceName}/logs');
 
   // const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -67,6 +67,8 @@ export function ServiceLogs() {
   //   [environment, kuery, serviceName, start, end]
   // );
 
+  // TODO: filter by service name and environment
+  // TODO: filter by time
   return <LogCategories dependencies={logCategoriesDependencies} />;
 
   // return (

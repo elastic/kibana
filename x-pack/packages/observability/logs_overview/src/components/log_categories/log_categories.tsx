@@ -5,43 +5,60 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ISearchGeneric } from '@kbn/search-types';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import { useMachine } from '@xstate5/react';
-import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo } from 'react';
+import { LogsSourceConfiguration, normalizeLogsSource } from '../../../utils/logs_source';
 import {
   categorizeLogsService,
   createCategorizeLogsServiceImplementations,
 } from '../../services/categorize_logs_service';
-import { LogCategoriesLoadingContent } from './logs_categories_loading_content';
+import { LogCategoriesLoadingContent } from './log_categories_loading_content';
 import {
   LogCategoriesResultContent,
   LogCategoriesResultContentDependencies,
-} from './logs_categories_result_content';
+} from './log_categories_result_content';
 
-interface LogCategoriesProps {
+export interface LogCategoriesProps {
   dependencies: LogCategoriesDependencies;
+  logsSource: LogsSourceConfiguration;
+  // The time range could be made optional if we want to support an internal
+  // time range picker
+  timeRange: {
+    start: string;
+    end: string;
+  };
 }
 
 export type LogCategoriesDependencies = LogCategoriesResultContentDependencies & {
   search: ISearchGeneric;
 };
 
-export const LogCategories: React.FC<LogCategoriesProps> = ({ dependencies }) => {
+export const LogCategories: React.FC<LogCategoriesProps> = ({
+  dependencies,
+  logsSource,
+  timeRange,
+}) => {
+  const categorizeLogsServiceInput = useMemo(() => {
+    const normalizedLogsSource = normalizeLogsSource(logsSource);
+    return {
+      index: normalizedLogsSource.indexName,
+      startTimestamp: timeRange.start,
+      endTimestamp: timeRange.end,
+      timeField: normalizedLogsSource.timestampField,
+      messageField: normalizedLogsSource.messageField,
+    };
+  }, [logsSource, timeRange.end, timeRange.start]);
+
   const [categorizeLogsServiceState, sendToCategorizeLogsService] = useMachine(
     categorizeLogsService.provide(
       createCategorizeLogsServiceImplementations({ search: dependencies.search })
     ),
     {
       inspect: consoleInspector,
-      input: {
-        index: 'logs-*-*',
-        start: '2024-12-01T00:00:00.000Z',
-        end: '2024-12-03T00:00:00.000Z',
-        timeField: '@timestamp',
-        messageField: 'message',
-      },
+      input: categorizeLogsServiceInput,
     }
   );
 

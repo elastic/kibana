@@ -10,10 +10,10 @@ export interface CategorizeLogsServiceDependencies {
   search: ISearchGeneric;
 }
 
-export interface LogsCategorizationParams {
-  start: string;
-  end: string;
+export interface LogCategorizationParams {
+  endTimestamp: string;
   index: string;
-  timeField: string;
   messageField: string;
+  startTimestamp: string;
+  timeField: string;
 }

@@ -10,7 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import { fromPromise } from 'xstate5';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { z } from '@kbn/zod';
-import { LogsCategorizationParams } from './types';
+import { LogCategorizationParams } from './types';
 import { createCategorizationRequestParams } from './queries';
 import { LogCategory, LogCategoryChange } from '../../types';
 
@@ -22,7 +22,7 @@ export const categorizeDocuments = ({ search }: { search: ISearchGeneric }) =>
     {
       categories: LogCategory[];
     },
-    LogsCategorizationParams & {
+    LogCategorizationParams & {
       samplingProbability: number;
       ignoredQueries?: string[];
       minDocsPerCategory?: number;
@@ -31,8 +31,8 @@ export const categorizeDocuments = ({ search }: { search: ISearchGeneric }) =>
     async ({
       input: {
         index,
-        end,
-        start,
+        endTimestamp,
+        startTimestamp,
         timeField,
         messageField,
         samplingProbability,

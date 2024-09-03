@@ -9,12 +9,12 @@ import { MachineImplementationsFrom, assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '../../../utils/xstate5_utils';
 import { categorizeDocuments } from './categorize_documents';
 import { countDocuments } from './count_documents';
-import { CategorizeLogsServiceDependencies, LogsCategorizationParams } from './types';
+import { CategorizeLogsServiceDependencies, LogCategorizationParams } from './types';
 import { LogCategory } from '../../types';
 
 export const categorizeLogsService = setup({
   types: {
-    input: {} as LogsCategorizationParams,
+    input: {} as LogCategorizationParams,
     output: {} as {
       categories: LogCategory[];
       documentCount: number;
@@ -23,7 +23,7 @@ export const categorizeLogsService = setup({
     context: {} as {
       categories: LogCategory[];
       documentCount: number;
-      parameters: LogsCategorizationParams;
+      parameters: LogCategorizationParams;
       samplingProbability: number;
       error?: Error;
     },
