@@ -87,7 +87,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
-      await dashboardPanelActions.expectNotLinkedToLibrary('Artistpreviouslyknownaslens Copy');
+      await dashboardPanelActions.expectNotLinkedToLibrary(
+        'Artistpreviouslyknownaslens Copy',
+        true
+      );
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -111,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-      await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal');
+      await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal', true);
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
@@ -133,7 +136,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
-      await dashboardPanelActions.expectNotLinkedToLibrary('Artistpreviouslyknownaslens Copy');
+      await dashboardPanelActions.expectNotLinkedToLibrary(
+        'Artistpreviouslyknownaslens Copy',
+        true
+      );
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
@@ -146,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-      await dashboardPanelActions.expectLinkedToLibrary('New by ref Lens from Modal');
+      await dashboardPanelActions.expectLinkedToLibrary('New by ref Lens from Modal', true);
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -161,7 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
-      await dashboardPanelActions.expectLinkedToLibrary('Artistpreviouslyknownaslens by ref');
+      await dashboardPanelActions.expectLinkedToLibrary('Artistpreviouslyknownaslens by ref', true);
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -185,7 +191,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-      await dashboardPanelActions.expectLinkedToLibrary('New Lens by ref from Modal');
+      await dashboardPanelActions.expectLinkedToLibrary('New Lens by ref from Modal', true);
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
@@ -207,7 +213,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
-      await dashboardPanelActions.expectLinkedToLibrary('Artistpreviouslyknownaslens by ref 2');
+      await dashboardPanelActions.expectLinkedToLibrary(
+        'Artistpreviouslyknownaslens by ref 2',
+        true
+      );
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(2);

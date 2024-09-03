@@ -121,7 +121,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('save as and uncheck return to origin switch', () => {
         it('should cut the originator and stay in maps application', async () => {
-          await maps.saveMap('Clone 2 of map embeddable example');
+          await maps.saveMap('Clone 2 of map embeddable example', false);
           await maps.waitForLayersToLoad();
           await testSubjects.missingOrFail('mapSaveAndReturnButton');
           await testSubjects.existOrFail('mapSaveButton');
