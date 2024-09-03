@@ -385,7 +385,7 @@ export class DataGridService extends FtrService {
 
   public async getHeaderFields(): Promise<string[]> {
     const result = await this.find.allByCssSelector(
-      '.euiDataGridHeaderCell__button > .euiDataGridHeaderCell__content'
+      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) > .euiDataGridHeaderCell__content'
     );
 
     const textArr = [];
