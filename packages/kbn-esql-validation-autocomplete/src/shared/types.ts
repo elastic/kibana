@@ -28,7 +28,7 @@ export interface ESQLCallbacks {
     {},
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }
   >;
-  getPreferences?: () => Promise<{ histogramMaxBars: number }>;
+  getPreferences?: () => Promise<{ histogramBarTarget: number }>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

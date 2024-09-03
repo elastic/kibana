@@ -93,7 +93,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     uiSettings,
   } = kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
-  const histogramMaxBars = uiSettings?.get('histogram:maxBars');
+  const histogramBarTarget = uiSettings?.get('histogram:barTarget');
   const [code, setCode] = useState<string>(query.esql ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
@@ -365,7 +365,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       },
       getPreferences: async () => {
         return {
-          histogramMaxBars,
+          histogramBarTarget,
         };
       },
     };
@@ -382,7 +382,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     abortController,
     indexManagementApiService,
     fieldsMetadata,
-    histogramMaxBars,
+    histogramBarTarget,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -508,8 +508,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   const suggestionProvider = useMemo(
-    () => ESQLLang.getSuggestionProvider?.(esqlCallbacks, { histogramMaxBars }),
-    [esqlCallbacks, histogramMaxBars]
+    () => ESQLLang.getSuggestionProvider?.(esqlCallbacks, { histogramBarTarget }),
+    [esqlCallbacks, histogramBarTarget]
   );
 
   const hoverProvider = useMemo(() => ESQLLang.getHoverProvider?.(esqlCallbacks), [esqlCallbacks]);

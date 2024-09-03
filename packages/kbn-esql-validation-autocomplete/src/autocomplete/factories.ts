@@ -31,8 +31,8 @@ const allFunctions = statsAggregationFunctionDefinitions
 
 export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];
 
-export const getAddDateHistogramSnippet = (histogramMaxBars = 1000) => {
-  return `BUCKET($0, ${histogramMaxBars}, ?t_start, ?t_end)`;
+export const getAddDateHistogramSnippet = (histogramBarTarget = 50) => {
+  return `BUCKET($0, ${histogramBarTarget}, ?t_start, ?t_end)`;
 };
 
 export const TRIGGER_SUGGESTION_COMMAND = {

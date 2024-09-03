@@ -1572,9 +1572,9 @@ async function getOptionArgsSuggestions(
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMaps: GetFieldsMapFn,
   getPolicyMetadata: GetPolicyMetadataFn,
-  getPreferences?: () => Promise<{ histogramMaxBars: number } | undefined>
+  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
 ) {
-  let preferences: { histogramMaxBars: number } | undefined;
+  let preferences: { histogramBarTarget: number } | undefined;
   if (getPreferences) {
     preferences = await getPreferences();
   }
@@ -1782,7 +1782,7 @@ async function getOptionArgsSuggestions(
                   defaultMessage: 'Add date histogram',
                 }
               ),
-              text: getAddDateHistogramSnippet(preferences?.histogramMaxBars),
+              text: getAddDateHistogramSnippet(preferences?.histogramBarTarget),
               asSnippet: true,
               kind: 'Issue',
               detail: i18n.translate(
