@@ -1,10 +1,9 @@
 .controlPanel {
   width: 100%;
   max-inline-size: 100% !important;
-  height: $euiFormControlCompressedHeight;
+  height: $euiButtonHeightSmall;
   box-shadow: none !important;
   background-color: $euiFormBackgroundColor !important;
-
   border-radius: 0 $euiBorderRadius $euiBorderRadius 0 !important;
 
   &--roundedBorders {
@@ -18,11 +17,7 @@
     .controlPanel--label {
       @include euiTextTruncate;
       padding: 0;
-      background-color: transparent;
-      border-radius: $euiBorderRadius;
-      margin-left: 0 !important;
-      padding-left: 0 !important;
-      height: $euiFormControlCompressedHeight;
+      height: $euiButtonHeightSmall;
     }
   }
 

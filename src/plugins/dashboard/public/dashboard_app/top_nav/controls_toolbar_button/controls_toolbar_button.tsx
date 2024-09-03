@@ -57,7 +57,6 @@ export function ControlsToolbarButton({
               closePopover={closePopover}
             />,
           ]}
-          compressed
         />
       )}
     </ToolbarPopover>
