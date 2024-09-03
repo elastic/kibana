@@ -45,7 +45,7 @@ const tryItNowButton = {
 };
 
 const learnMoreLink = {
-  label: i18n.translate('xpack.apm..serviceTabEmptyState.learnMoreLinkLabel', {
+  label: i18n.translate('xpack.apm.serviceTabEmptyState.learnMoreLinkLabel', {
     defaultMessage: 'Learn more',
   }),
   href: 'https://www.elastic.co/observability/application-performance-monitoring',
