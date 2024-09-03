@@ -215,9 +215,7 @@ describe('AlertsHistogramPanel', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('label.euiFormControlLayout__prepend').first().text()).toEqual(
-        'Stack by'
-      );
+      expect(wrapper.find('.euiFormControlLayout__prepend').first().text()).toEqual('Stack by');
     });
 
     test('it prepends a custom stack by label when `stackByLabel` is provided', () => {
@@ -229,9 +227,7 @@ describe('AlertsHistogramPanel', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('label.euiFormControlLayout__prepend').first().text()).toEqual(
-        stackByLabel
-      );
+      expect(wrapper.find('.euiFormControlLayout__prepend').first().text()).toEqual(stackByLabel);
     });
   });
 
