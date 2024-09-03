@@ -20,7 +20,7 @@ import { createSearchEmbeddableFactory } from './embeddable';
 import { initializeLocatorServices } from './locator';
 import { registerSampleData } from './sample_data';
 import { getUiSettings } from './ui_settings';
-import { ConfigSchema } from '../common/config';
+import type { ConfigSchema } from './config';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>

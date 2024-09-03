@@ -72,5 +72,16 @@ export const compareTypesWithLiterals = (
   if (b === 'string') {
     return isStringType(a);
   }
+
+  // In Elasticsearch function definitions, time_literal and time_duration are used
+  // time_duration is seconds/min/hour interval
+  // date_period is day/week/month/year interval
+  // time_literal includes time_duration and date_period
+  // So they are equivalent AST's 'timeInterval' (a date unit constant: e.g. 1 year, 15 month)
+  if (a === 'time_literal' || a === 'time_duration') return b === 'timeInterval';
+  if (b === 'time_literal' || b === 'time_duration') return a === 'timeInterval';
+  if (a === 'time_literal') return b === 'time_duration';
+  if (b === 'time_literal') return a === 'time_duration';
+
   return false;
 };
