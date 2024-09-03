@@ -9,13 +9,13 @@ import type { RiskEngineDataClient } from "./risk_engine_data_client";
 
 const createRiskEngineDataClientMock = () =>
   ({
-    cleanupRiskEngine: jest.fn(),
     disableLegacyRiskEngine: jest.fn(),
     disableRiskEngine: jest.fn(),
     enableRiskEngine: jest.fn(),
     getConfiguration: jest.fn(),
     getStatus: jest.fn(),
     init: jest.fn(),
+    tearDown: jest.fn(),
   } as unknown as jest.Mocked<RiskEngineDataClient>);
 
 export const riskEngineDataClientMock = {

@@ -12,7 +12,9 @@ import {
   requestContextMock,
   requestMock,
 } from "../../../detection_engine/routes/__mocks__";
+import { riskEnginePrivilegesMock } from "./risk_engine_privileges.mock";
 import { riskEngineDataClientMock } from "../risk_engine_data_client.mock";
+import { riskEngineCleanupRoute } from "./delete";
 
 describe("risk engine cleanup route", () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -46,56 +48,93 @@ describe("risk engine cleanup route", () => {
     });
   };
   describe("invokes the risk engine cleanup route", () => {
+    beforeEach(() => {
+      getStartServicesMock = jest.fn().mockResolvedValue([
+        {},
+        {
+          taskManager: mockTaskManagerStart,
+          security:
+            riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
+        },
+      ]);
+      riskEngineCleanupRoute(server.router, getStartServicesMock);
+    });
+
     it("should call the router with the correct route and handler", async () => {
       const request = buildRequest();
       await server.inject(request, context);
       expect(mockRiskEngineDataClient.tearDown).toHaveBeenCalled();
     });
+
+    it("returns a 200 when cleanup is successful", async () => {
+      const request = buildRequest();
+      const response = await server.inject(request, context);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ success: true });
+    });
+
+    it("returns a 500 when cleanup is unsuccessful", async () => {
+      mockRiskEngineDataClient.tearDown.mockImplementation(() => {
+        throw new Error("Error tearing down");
+      });
+      const request = buildRequest();
+      const response = await server.inject(request, context);
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({
+        full_error: "{}",
+        message: "Error tearing down",
+        status_code: 500,
+      });
+    });
+
+    // it("returns a 500 when ")
+  });
+  describe("when task manager is unavailable", () => {
+    beforeEach(() => {
+      getStartServicesMock = jest.fn().mockResolvedValue([
+        {},
+        {
+          security:
+            riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
+        },
+      ]);
+      riskEngineCleanupRoute(server.router, getStartServicesMock);
+    });
+
+    it("returns a 400 when task manager is unavailable", async () => {
+      const request = buildRequest();
+      const response = await server.inject(request, context);
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        message:
+          "Task Manager is unavailable, but is required by the risk engine. Please enable the taskManager plugin and try again.",
+        status_code: 400,
+      });
+    });
   });
 
-  // it('should return a 403 response if the user does not have the required privilege', async () => {
-  //     const router = {
-  //         delete: jest.fn(),
-  //     };
+  describe("when user does not have the required privileges", () => {
+    beforeEach(() => {
+      getStartServicesMock = jest.fn().mockResolvedValue([
+        {},
+        {
+          taskManager: mockTaskManagerStart,
+          security:
+            riskEnginePrivilegesMock.createMockSecurityStartWithNoRiskEngineAccess(),
+        },
+      ]);
+      riskEngineCleanupRoute(server.router, getStartServicesMock);
+    });
 
-  //     const getStartServices = jest.fn().mockResolvedValue([{ savedObjects: {} }, {}, {}]);
-
-  //     const handler = riskEngineCleanupRoute(router, getStartServices);
-
-  //     const request = {
-  //         headers: {},
-  //     };
-
-  //     const response = await handler(request);
-
-  //     expect(response.status).toBe(403);
-  //     expect(response.payload).toEqual({
-  //         message: 'User does not have the required privilege to perform this action.',
-  //     });
-  // });
-
-  // it('should return a 500 response if the task manager is unavailable', async () => {
-  //     const router = {
-  //         delete: jest.fn(),
-  //     };
-
-  //     const getStartServices = jest.fn().mockResolvedValue([{ savedObjects: {} }, {}, {}]);
-
-  //     const handler = riskEngineCleanupRoute(router, getStartServices);
-
-  //     const request = {
-  //         headers: {
-  //             authorization: 'Bearer token',
-  //         },
-  //     };
-
-  //     const response = await handler(request);
-
-  //     expect(response.status).toBe(500);
-  //     expect(response.payload).toEqual({
-  //         message: 'Task manager is unavailable. Please try again later.',
-  //     });
-  // });
-
-  // // Add more test cases here...
+    it("returns a 403 when user does not have the required privileges", async () => {
+      const request = buildRequest();
+      const response = await server.inject(request, context);
+      expect(response.status).toBe(403);
+      expect(response.body).toEqual({
+        message:
+          "User is missing risk engine privileges.  Missing cluster privileges: manage_index_templates, manage_transform.",
+        status_code: 403,
+      });
+    });
+  });
 });

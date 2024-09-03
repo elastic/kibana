@@ -12,6 +12,7 @@ import { withRiskEnginePrivilegeCheck } from "../risk_engine_privileges";
 import {
   RISK_ENGINE_INSTALLATION_AND_DATA_CLEANUP_URL,
   APP_ID,
+  API_VERSIONS,
 } from "../../../../../common/constants";
 import type { EntityAnalyticsRoutesDeps } from "../../types";
 import { RiskEngineAuditActions } from "../audit";
@@ -31,7 +32,7 @@ export const riskEngineCleanupRoute = (
       },
     })
     .addVersion(
-      { version: "1", validate: {} },
+      { version: API_VERSIONS.public.v1, validate: {} },
       withRiskEnginePrivilegeCheck(
         getStartServices,
         async (
