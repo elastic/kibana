@@ -8,14 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import { GetInvestigationResponse, InvestigationItem, Item } from '@kbn/investigation-shared';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { isEqual } from 'lodash';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useAddInvestigationItem } from '../../../hooks/use_add_investigation_item';
+import { useAddInvestigationNote } from '../../../hooks/use_add_investigation_note';
 import { useDeleteInvestigationItem } from '../../../hooks/use_delete_investigation_item';
+import { useDeleteInvestigationNote } from '../../../hooks/use_delete_investigation_note';
 import { useFetchInvestigation } from '../../../hooks/use_fetch_investigation';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useUpdateInvestigation } from '../../../hooks/use_update_investigation';
-import { useAddInvestigationNote } from '../../../hooks/use_add_investigation_note';
-import { useDeleteInvestigationNote } from '../../../hooks/use_delete_investigation_note';
 import { useUpdateInvestigationNote } from '../../../hooks/use_update_investigation_note';
 
 export type RenderedInvestigationItem = InvestigationItem & {
@@ -80,6 +81,10 @@ export function InvestigationProvider({
     id: initialInvestigation.id,
     initialInvestigation,
   });
+
+  const cache = useRef<
+    Record<string, { globalParams: GlobalWidgetParameters; item: RenderedInvestigationItem }>
+  >({});
 
   const { mutateAsync: addInvestigationNote, isLoading: isAddingNote } = useAddInvestigationNote();
   const { mutateAsync: updateInvestigationNote, isLoading: isUpdatingNote } =
@@ -163,12 +168,17 @@ export function InvestigationProvider({
             });
           }
 
+          const cacheItem = cache.current?.[item.id];
+          if (cacheItem && isEqual(cacheItem.globalParams, globalParams)) {
+            return cacheItem.item;
+          }
+
           const data = await itemDefinition.generate({
             itemParams: item.params,
             globalParams,
           });
 
-          return Promise.resolve({
+          const renderedItem = {
             ...item,
             loading: false,
             element: itemDefinition.render({
@@ -176,7 +186,14 @@ export function InvestigationProvider({
               globalParams,
               itemParams: item.params,
             }),
-          });
+          };
+
+          cache.current[item.id] = {
+            globalParams,
+            item: renderedItem,
+          };
+
+          return renderedItem;
         })
       );
     }
