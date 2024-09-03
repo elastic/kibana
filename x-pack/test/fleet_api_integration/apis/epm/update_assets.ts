@@ -34,7 +34,7 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('updates all assets when updating a package to a different version', async () => {
+  describe('updates all assets when updating a package to a different version', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
