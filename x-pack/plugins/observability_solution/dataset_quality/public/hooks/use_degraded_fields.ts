@@ -82,7 +82,11 @@ export function useDegradedFields() {
     [expandedDegradedField, service]
   );
 
-  const degradedFieldValues = useSelector(service, (state) => state.context.degradedFieldValues);
+  const degradedFieldValues = useSelector(service, (state) =>
+    state.matches('initializing.initializeFixItFlow.ignoredValues.done')
+      ? state.context.degradedFieldValues
+      : undefined
+  );
 
   const isDegradedFieldsValueLoading = useSelector(service, (state) => {
     return !state.matches('initializing.initializeFixItFlow.ignoredValues.done');
