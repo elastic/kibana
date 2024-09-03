@@ -9,7 +9,7 @@ import type { AggregationOptionsByType, AggregationResultOf } from '@kbn/es-type
 import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
 import { getBucketSizeFromTimeRangeAndBucketCount } from '../../utils';
-import { LOG_LEVEL } from '../../es_fields';
+import { ERROR_LOG_LEVEL, LOG_LEVEL } from '../../es_fields';
 import { existsQuery, kqlQuery } from '../../utils/es_queries';
 
 export interface LogsErrorRateTimeseries {
@@ -30,11 +30,21 @@ const getLogErrorsAggregation = () => ({
 });
 
 type LogErrorsAggregation = ReturnType<typeof getLogErrorsAggregation>;
+
+const getAPMLogErrorsAggregation = () => ({
+  terms: {
+    field: ERROR_LOG_LEVEL,
+    include: ['error'],
+  },
+});
+
+type APMLogErrorsAggregation = ReturnType<typeof getAPMLogErrorsAggregation>;
+
 interface LogsErrorRateTimeseriesHistogram {
   timeseries: AggregationResultOf<
     {
       date_histogram: AggregationOptionsByType['date_histogram'];
-      aggs: { logErrors: LogErrorsAggregation };
+      aggs: { logErrors: LogErrorsAggregation; APMLogErrors: APMLogErrorsAggregation };
     },
     {}
   >;
@@ -106,6 +116,7 @@ export function createGetLogErrorRateTimeseries() {
               },
               aggs: {
                 logErrors: getLogErrorsAggregation(),
+                APMlogErrors: getAPMLogErrorsAggregation(),
               },
             },
           },
@@ -119,10 +130,12 @@ export function createGetLogErrorRateTimeseries() {
     return buckets
       ? buckets.reduce<LogsErrorRateTimeseriesReturnType>((acc, bucket) => {
           const timeseries = bucket.timeseries.buckets.map((timeseriesBucket) => {
-            const logErrorCount = timeseriesBucket.logErrors.buckets[0]?.doc_count;
+            const logErrorCount = timeseriesBucket.logErrors.buckets[0]?.doc_count || 0;
+            const APMLogErrorsCount = timeseriesBucket.APMLogErrors?.buckets[0]?.doc_count || 0;
+            const totalErrorsCount = logErrorCount + APMLogErrorsCount;
             return {
               x: timeseriesBucket.key,
-              y: logErrorCount ? logErrorCount : null,
+              y: totalErrorsCount,
             };
           });
 
