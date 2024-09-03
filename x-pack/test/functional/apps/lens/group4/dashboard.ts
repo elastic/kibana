@@ -239,8 +239,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('save lens panel to embeddable library', async () => {
       const newTitle = 'lnsPieVis - copy';
-      await panelActions.saveToLibrary('lnsPieVis - copy', 'lnsPieVis');
-      await panelActions.expectLinkedToLibrary(newTitle);
+      await panelActions.legacySaveToLibrary('lnsPieVis - copy', 'lnsPieVis');
+      await panelActions.expectLinkedToLibrary(newTitle, true);
 
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');

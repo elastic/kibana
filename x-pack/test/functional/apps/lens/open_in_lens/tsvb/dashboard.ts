@@ -89,7 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickVisType('metrics');
       await testSubjects.click('visualizesaveAndReturnButton');
-      await panelActions.saveToLibrary(visTitle);
+      await panelActions.legacySaveToLibrary(visTitle);
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
@@ -107,7 +107,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
 
-      await panelActions.openContextMenu();
       await panelActions.clickEdit();
 
       await visualize.navigateToLensFromAnotherVisualization();
@@ -126,7 +125,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const titles = await dashboard.getPanelTitles();
       expect(titles[0]).to.be(`${visTitle} (converted)`);
 
-      await dashboardPanelActions.expectNotLinkedToLibrary(titles[0]);
+      await dashboardPanelActions.expectNotLinkedToLibrary(titles[0], true);
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.removePanel();
     });

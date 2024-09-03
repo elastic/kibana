@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle('Custom title');
         await dashboardCustomizePanel.clickSaveButton();
-        await dashboardPanelActions.saveToLibrary(getVisTitle(true));
+        await dashboardPanelActions.legacySaveToLibrary(getVisTitle(true));
         await retry.tryForTime(500, async () => {
           // need to surround in 'retry' due to delays in HTML updates causing the title read to be behind
           const [newPanelTitle] = await dashboard.getPanelTitles();
@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle('');
         await dashboardCustomizePanel.clickSaveButton();
-        await dashboardPanelActions.saveToLibrary(getVisTitle(true));
+        await dashboardPanelActions.legacySaveToLibrary(getVisTitle(true));
         await retry.tryForTime(500, async () => {
           // need to surround in 'retry' due to delays in HTML updates causing the title read to be behind
           const [newPanelTitle] = await dashboard.getPanelTitles();

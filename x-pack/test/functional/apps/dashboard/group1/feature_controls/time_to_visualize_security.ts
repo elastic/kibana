@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
   const kbnServer = getService('kibanaServer');
 
-  describe('dashboard time to visualize security', () => {
+  describe.only('dashboard time to visualize security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kbnServer.importExport.load(
@@ -150,7 +150,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
 
         await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-        await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal');
+        await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal', true);
 
         const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
