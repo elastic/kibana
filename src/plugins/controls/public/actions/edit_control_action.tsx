@@ -48,12 +48,12 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    const { isCompatible } = await import('./compatibility_check');
+    const { isCompatible } = await import('./edit_control_action_compatibility_check');
     return isCompatible(embeddable);
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
-    const { compatibilityCheck } = await import('./compatibility_check');
+    const { compatibilityCheck } = await import('./edit_control_action_compatibility_check');
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
     await embeddable.onEdit();
   }

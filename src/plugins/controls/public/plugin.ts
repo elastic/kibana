@@ -33,7 +33,7 @@ import { registerControlGroupEmbeddable } from './react_controls/control_group/r
 import { registerOptionsListControl } from './react_controls/controls/data_controls/options_list_control/register_options_list_control';
 import { registerRangeSliderControl } from './react_controls/controls/data_controls/range_slider/register_range_slider_control';
 import { registerTimeSliderControl } from './react_controls/controls/timeslider_control/register_timeslider_control';
-import { EditControlAction } from './react_controls/actions/edit_control_action/edit_control_action';
+import { EditControlAction } from './actions/edit_control_action';
 export class ControlsPlugin
   implements
     Plugin<

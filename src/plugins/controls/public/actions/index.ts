@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TimeSlider } from './time_slider';
-export { TimeSliderPrepend } from './time_slider_prepend';
+export const ACTION_EDIT_CONTROL = 'editLegacyEmbeddableControl';
+export const ACTION_CLEAR_CONTROL = 'clearControl';
+export const ACTION_DELETE_CONTROL = 'deleteControl';
