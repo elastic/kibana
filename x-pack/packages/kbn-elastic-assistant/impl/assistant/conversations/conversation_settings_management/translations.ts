@@ -56,13 +56,6 @@ export const CONVERSATIONS_TABLE_COLUMN_UPDATED_AT = i18n.translate(
   }
 );
 
-export const CONVERSATIONS_TABLE_COLUMN_ACTIONS = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSettings.column.actions',
-  {
-    defaultMessage: 'Actions',
-  }
-);
-
 export const CONVERSATIONS_FLYOUT_DEFAULT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.conversationSettings.flyout.defaultTitle',
   {

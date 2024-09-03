@@ -16,12 +16,11 @@ import { SignalTypes } from '../../../../../../common/entities/types';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
-import { isLogsSignal } from '../../../../../utils/get_signal_type';
 import { truncate, unit } from '../../../../../utils/style';
 import { ApmRoutes } from '../../../../routing/apm_route_config';
 import { PopoverTooltip } from '../../../popover_tooltip';
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
-import { OTHER_SERVICE_NAME, MaxGroupsMessage } from '../max_groups_message';
+import { MaxGroupsMessage, OTHER_SERVICE_NAME } from '../max_groups_message';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
@@ -46,8 +45,6 @@ export function ServiceLink({
 
   const serviceLink = isMobileAgentName(agentName)
     ? '/mobile-services/{serviceName}/overview'
-    : isLogsSignal(signalTypes)
-    ? '/logs-services/{serviceName}/overview'
     : '/services/{serviceName}/overview';
 
   if (serviceName === OTHER_SERVICE_NAME) {

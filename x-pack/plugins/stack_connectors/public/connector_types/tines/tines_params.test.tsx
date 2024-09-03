@@ -467,6 +467,50 @@ describe('TinesParamsFields renders', () => {
           webhookUrl
         );
       });
+
+      it('should render webhook url fallback when stories request has error', () => {
+        const errorMessage = 'something broke';
+        mockUseSubActionStories.mockReturnValueOnce({
+          isLoading: false,
+          response: { stories: [story] },
+          error: new Error(errorMessage),
+        });
+
+        const wrapper = mountWithIntl(
+          <TinesParamsFields
+            actionParams={{}}
+            errors={emptyErrors}
+            editAction={mockEditAction}
+            index={index}
+            executionMode={ActionConnectorMode.ActionForm}
+          />
+        );
+
+        expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test-subj="tines-webhookUrlInput"]').exists()).toBe(true);
+      });
+
+      it('should render webhook url fallback when webhooks request has error', () => {
+        const errorMessage = 'something broke';
+        mockUseSubActionWebhooks.mockReturnValueOnce({
+          isLoading: false,
+          response: { webhooks: [webhook] },
+          error: new Error(errorMessage),
+        });
+
+        const wrapper = mountWithIntl(
+          <TinesParamsFields
+            actionParams={{}}
+            errors={emptyErrors}
+            editAction={mockEditAction}
+            index={index}
+            executionMode={ActionConnectorMode.ActionForm}
+          />
+        );
+
+        expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test-subj="tines-webhookUrlInput"]').exists()).toBe(true);
+      });
     });
 
     describe('subActions error', () => {

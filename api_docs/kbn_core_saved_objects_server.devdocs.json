@@ -10594,16 +10594,16 @@
                 "path": "packages/core/usage-data/core-usage-data-server-internal/src/saved_objects/core_usage_stats.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
                 "plugin": "taskManager",
                 "path": "x-pack/plugins/task_manager/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "actions",
@@ -13336,6 +13336,8 @@
         ],
         "signature": [
           "MappingProperty",
+          " & ",
+          "MappingPropertyBase",
           " & { dynamic?: false | \"strict\" | undefined; properties?: Record<string, ",
           "MappingProperty",
           "> | undefined; }"

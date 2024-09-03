@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, ChangeEventHandler } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -46,7 +46,10 @@ function MetricAggParamEditor({
     [metricAggs, agg.type.name]
   );
   const options = useAvailableOptions(aggFilter, filteredMetrics, DEFAULT_OPTIONS);
-  const onChange = useCallback((ev) => setValue(ev.target.value), [setValue]);
+  const onChange = useCallback<ChangeEventHandler<HTMLSelectElement>>(
+    (e) => setValue(e.target.value),
+    [setValue]
+  );
 
   return (
     <EuiFormRow

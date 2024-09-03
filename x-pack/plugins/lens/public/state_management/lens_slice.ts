@@ -620,6 +620,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         const {
           datasourceState: syncedDatasourceState,
           visualizationState: syncedVisualizationState,
+          frame,
         } = syncLinkedDimensions(
           currentState,
           visualizationMap,
@@ -627,7 +628,11 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           payload.datasourceId
         );
 
-        state.visualization.state = syncedVisualizationState;
+        const visualization = visualizationMap[state.visualization.activeId!];
+
+        state.visualization.state =
+          visualization.onDatasourceUpdate?.(syncedVisualizationState, frame) ??
+          syncedVisualizationState;
         state.datasourceStates[payload.datasourceId].state = syncedDatasourceState;
       })
       .addCase(updateVisualizationState, (state, { payload }) => {
@@ -1227,14 +1232,14 @@ function syncLinkedDimensions(
   const linkedDimensions = activeVisualization.getLinkedDimensions?.(visualizationState);
   const frame = selectFramePublicAPI({ lens: state }, datasourceMap);
 
-  const getDimensionGroups = (layerId: string) =>
-    activeVisualization.getConfiguration({
-      state: visualizationState,
-      layerId,
-      frame,
-    }).groups;
-
   if (linkedDimensions) {
+    const getDimensionGroups = (layerId: string) =>
+      activeVisualization.getConfiguration({
+        state: visualizationState,
+        layerId,
+        frame,
+      }).groups;
+
     const idAssuredLinks = linkedDimensions.map((link) => ({
       ...link,
       to: { ...link.to, columnId: link.to.columnId ?? generateId() },
@@ -1276,5 +1281,5 @@ function syncLinkedDimensions(
     });
   }
 
-  return { datasourceState, visualizationState };
+  return { datasourceState, visualizationState, frame };
 }

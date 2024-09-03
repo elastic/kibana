@@ -39,7 +39,6 @@ import {
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
-  INIT_ROUTE,
   ISOLATE_HOST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
@@ -64,7 +63,6 @@ import type {
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
-import { InitActionRequestSchema } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/init';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -291,6 +289,26 @@ export function registerResponseActionRoutes(
   router.versioned
     .post({
       access: 'public',
+      path: SCAN_ROUTE,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: ScanActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteScanOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
+      )
+    );
+
+  router.versioned
+    .post({
+      access: 'public',
       path: INIT_ROUTE,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     })
@@ -307,29 +325,6 @@ export function registerResponseActionRoutes(
         responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'init')
       )
     );
-
-  // 8.15 route
-  if (endpointContext.experimentalFeatures.responseActionScanEnabled) {
-    router.versioned
-      .post({
-        access: 'public',
-        path: SCAN_ROUTE,
-        options: { authRequired: true, tags: ['access:securitySolution'] },
-      })
-      .addVersion(
-        {
-          version: '2023-10-31',
-          validate: {
-            request: ScanActionRequestSchema,
-          },
-        },
-        withEndpointAuthz(
-          { all: ['canWriteScanOperations'] },
-          logger,
-          responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
-        )
-      );
-  }
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -362,12 +357,13 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       );
     }
 
-    const agentType = command === 'execute' ? 'crowdstrike' : req.body.agent_type || 'endpoint';
     const coreContext = await context.core;
     const user = coreContext.security.authc.getCurrentUser();
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
     const connectorActions = (await context.actions).getActionsClient();
+    const agentType = command === 'execute' ? 'crowdstrike' : req.body.agent_type || 'endpoint';
+
     const responseActionsClient: ResponseActionsClient = getResponseActionsClient(agentType, {
       esClient,
       casesClient,
