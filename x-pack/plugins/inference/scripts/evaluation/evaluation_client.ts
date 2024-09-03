@@ -137,7 +137,7 @@ export function createInferenceEvaluationClient({
       const scores = scoredCriteria.map(({ index, score, reasoning }) => {
         return {
           criterion: criteria[index],
-          score: score,
+          score,
           reasoning,
         };
       });
