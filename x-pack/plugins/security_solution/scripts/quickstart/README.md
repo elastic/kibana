@@ -1,6 +1,6 @@
 # Quickstart for Developers
 
-The tools in this folder are designed to make it fast and easy to build scripts to create detection rules, exceptions, value lists, and source data for testing.
+These tools make it fast and easy to create detection rules, exceptions, value lists, and source data for testing.
 
 ## Usage
 
@@ -23,7 +23,7 @@ Extracting data-generating logic into reusable modules that other people will ac
 
 ### Data
 
-Functions to create documents with various properties. Initially only has a function to create a document with an arbitrary number of fields and arbitrary amount of data in each field, but should be extended with more functions to create sets of documents with specific relationships such as X total documents with Y number of unique hosts etc.
+Functions to create documents with various properties. This initial implementation has a function to create a document with an arbitrary number of fields and arbitrary amount of data in each field, but should be extended with more functions to create sets of documents with specific relationships such as X total documents with Y number of unique hosts etc.
 
 ### Entity Analytics
 
