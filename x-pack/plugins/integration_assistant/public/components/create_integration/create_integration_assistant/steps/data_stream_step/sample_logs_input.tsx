@@ -207,16 +207,6 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         logSamples: undefined,
         samplesFormat: undefined,
       });
-      if (!files) {
-        return;
-      }
-
-      setSampleFileError(undefined);
-      setIntegrationSettings({
-        ...integrationSettings,
-        logSamples: undefined,
-        samplesFormat: undefined,
-      });
 
       const logsSampleFile = files[0];
       const reader = new FileReader();
