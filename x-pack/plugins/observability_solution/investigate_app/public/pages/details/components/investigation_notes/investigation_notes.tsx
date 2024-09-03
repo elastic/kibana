@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiAvatar,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,41 +15,34 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { InvestigationNote } from '@kbn/investigate-plugin/common';
+import { GetInvestigationResponse, InvestigationNoteResponse } from '@kbn/investigation-shared';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import React, { useState } from 'react';
 import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
-import { useDeleteInvestigationNote } from '../../../../hooks/use_delete_investigation_note';
 import { useFetchInvestigationNotes } from '../../../../hooks/use_fetch_investigation_notes';
 import { useTheme } from '../../../../hooks/use_theme';
+import { Note } from './note';
 import { ResizableTextInput } from './resizable_text_input';
-import { TimelineMessage } from './timeline_message';
 
 export interface Props {
-  investigationId: string;
-  initialNotes: InvestigationNote[];
+  investigation: GetInvestigationResponse;
+  user: AuthenticatedUser;
 }
 
-export function InvestigationNotes({ investigationId, initialNotes }: Props) {
+export function InvestigationNotes({ investigation, user }: Props) {
   const theme = useTheme();
   const [noteInput, setNoteInput] = useState('');
 
   const { data: notes, refetch } = useFetchInvestigationNotes({
-    investigationId,
-    initialNotes,
+    investigationId: investigation.id,
+    initialNotes: investigation.notes,
   });
   const { mutateAsync: addInvestigationNote, isLoading: isAdding } = useAddInvestigationNote();
-  const { mutateAsync: deleteInvestigationNote, isLoading: isDeleting } =
-    useDeleteInvestigationNote();
 
   const onAddNote = async (content: string) => {
-    await addInvestigationNote({ investigationId, note: { content } });
+    await addInvestigationNote({ investigationId: investigation.id, note: { content } });
     refetch();
     setNoteInput('');
-  };
-
-  const onDeleteNote = async (noteId: string) => {
-    await deleteInvestigationNote({ investigationId, noteId });
-    refetch();
   };
 
   const panelClassName = css`
@@ -62,22 +54,22 @@ export function InvestigationNotes({ investigationId, initialNotes }: Props) {
       <EuiSplitPanel.Inner className={panelClassName}>
         <EuiTitle size="xs">
           <h2>
-            {i18n.translate('xpack.investigateApp.investigationNotes.investigationTimelineHeader', {
-              defaultMessage: 'Investigation timeline',
+            {i18n.translate('xpack.investigateApp.investigationNotes.header', {
+              defaultMessage: 'Notes',
             })}
           </h2>
         </EuiTitle>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>
         <EuiFlexGroup direction="column" gutterSize="m">
-          {notes?.map((currNote: InvestigationNote) => {
+          {notes?.map((currNote: InvestigationNoteResponse) => {
             return (
-              <TimelineMessage
+              <Note
                 key={currNote.id}
-                icon={<EuiAvatar name={currNote.createdBy} size="s" />}
+                investigationId={investigation.id}
                 note={currNote}
-                onDelete={() => onDeleteNote(currNote.id)}
-                isDeleting={isDeleting}
+                disabled={currNote.createdBy !== user.username}
+                onUpdateOrDeleteCompleted={() => refetch()}
               />
             );
           })}
@@ -110,7 +102,7 @@ export function InvestigationNotes({ investigationId, initialNotes }: Props) {
             <EuiButton
               data-test-subj="investigateAppInvestigationNotesAddButton"
               fullWidth
-              color="text"
+              color="primary"
               aria-label={i18n.translate('xpack.investigateApp.investigationNotes.addButtonLabel', {
                 defaultMessage: 'Add',
               })}
