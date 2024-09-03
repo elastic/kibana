@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
+import { SamplesFormat } from '../../../common';
 import type { LogFormatDetectionState } from '../../types';
 import { EX_ANSWER_LOG_TYPE } from './constants';
 import { handleLogFormatDetection } from './detection';
-import { SamplesFormat } from '../../../common';
+import type { LogDetectionBaseNodeParams, LogDetectionGraphParams } from './types';
 
 const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
   lastExecutedChain: {
@@ -47,7 +44,7 @@ const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
   },
 };
 
-function modelInput(state: LogFormatDetectionState): Partial<LogFormatDetectionState> {
+function modelInput({ state }: LogDetectionBaseNodeParams): Partial<LogFormatDetectionState> {
   return {
     exAnswer: JSON.stringify(EX_ANSWER_LOG_TYPE, null, 2),
     finalized: false,
@@ -55,7 +52,7 @@ function modelInput(state: LogFormatDetectionState): Partial<LogFormatDetectionS
   };
 }
 
-function modelOutput(state: LogFormatDetectionState): Partial<LogFormatDetectionState> {
+function modelOutput({ state }: LogDetectionBaseNodeParams): Partial<LogFormatDetectionState> {
   return {
     finalized: true,
     lastExecutedChain: 'modelOutput',
@@ -66,7 +63,7 @@ function modelOutput(state: LogFormatDetectionState): Partial<LogFormatDetection
   };
 }
 
-function logFormatRouter(state: LogFormatDetectionState): string {
+function logFormatRouter({ state }: LogDetectionBaseNodeParams): string {
   // if (state.samplesFormat === LogFormat.STRUCTURED) {
   //   return 'structured';
   // }
@@ -79,30 +76,32 @@ function logFormatRouter(state: LogFormatDetectionState): string {
   return 'unsupported';
 }
 
-export async function getLogFormatDetectionGraph(
-  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
-) {
+export async function getLogFormatDetectionGraph({ model }: LogDetectionGraphParams) {
   const workflow = new StateGraph({
     channels: graphState,
   })
-    .addNode('modelInput', modelInput)
-    .addNode('modelOutput', modelOutput)
+    .addNode('modelInput', (state: LogFormatDetectionState) => modelInput({ state }))
+    .addNode('modelOutput', (state: LogFormatDetectionState) => modelOutput({ state }))
     .addNode('handleLogFormatDetection', (state: LogFormatDetectionState) =>
-      handleLogFormatDetection(state, model)
+      handleLogFormatDetection({ state, model })
     )
-    // .addNode('handleKVGraph', (state: LogFormatDetectionState) => getCompiledKvGraph(state, model))
-    // .addNode('handleUnstructuredGraph', (state: LogFormatDetectionState) => getCompiledUnstructuredGraph(state, model))
-    // .addNode('handleCsvGraph', (state: LogFormatDetectionState) => getCompiledCsvGraph(state, model))
+    // .addNode('handleKVGraph', (state: LogFormatDetectionState) => getCompiledKvGraph({state, model}))
+    // .addNode('handleUnstructuredGraph', (state: LogFormatDetectionState) => getCompiledUnstructuredGraph({state, model}))
+    // .addNode('handleCsvGraph', (state: LogFormatDetectionState) => getCompiledCsvGraph({state, model}))
     .addEdge(START, 'modelInput')
     .addEdge('modelInput', 'handleLogFormatDetection')
     .addEdge('modelOutput', END)
-    .addConditionalEdges('handleLogFormatDetection', logFormatRouter, {
-      // TODO: Add structured, unstructured, csv nodes
-      // structured: 'handleKVGraph',
-      // unstructured: 'handleUnstructuredGraph',
-      // csv: 'handleCsvGraph',
-      unsupported: 'modelOutput',
-    });
+    .addConditionalEdges(
+      'handleLogFormatDetection',
+      (state: LogFormatDetectionState) => logFormatRouter({ state }),
+      {
+        // TODO: Add structured, unstructured, csv nodes
+        // structured: 'handleKVGraph',
+        // unstructured: 'handleUnstructuredGraph',
+        // csv: 'handleCsvGraph',
+        unsupported: 'modelOutput',
+      }
+    );
 
   const compiledLogFormatDetectionGraph = workflow.compile();
 
