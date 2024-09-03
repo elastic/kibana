@@ -23,7 +23,7 @@ import {
   getCloudRegion,
 } from './helpers/logs_mock_data';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
-import { IndexName } from '../lib/logs/custom_logsdb_indices';
+import { timestampDateMapping } from '../lib/logs/custom_logsdb_indices';
 
 // Logs Data logic
 const MESSAGE_LOG_LEVELS = [
@@ -72,7 +72,8 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
 
   return {
     bootstrap: async ({ logsEsClient }) => {
-      await logsEsClient.createIndex(IndexName.cloudLogs);
+      await logsEsClient.createIndex('cloud-logs-synth.1-default', timestampDateMapping);
+      await logsEsClient.createIndex('cloud-logs-synth.2-default');
       if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
     },
     generate: ({ range, clients: { logsEsClient } }) => {

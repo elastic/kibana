@@ -10,11 +10,11 @@ import { Client } from '@elastic/elasticsearch';
 import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
 import { pipeline, Readable, Transform } from 'stream';
 import { LogDocument } from '@kbn/apm-synthtrace-client/src/lib/logs';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
 import { indexTemplates, IndexTemplateName } from './custom_logsdb_index_templates';
-import { indexMappings, IndexName } from './custom_logsdb_indices';
 
 export type LogsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
@@ -25,7 +25,7 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       pipeline: logsPipeline(),
     });
     this.dataStreams = ['logs-*-*'];
-    this.indices = ['cloud-logs-synth.1-default', 'cloud-logs-synth.2-default'];
+    this.indices = ['cloud-logs-*-*'];
   }
 
   async createIndexTemplate(name: IndexTemplateName) {
@@ -43,15 +43,17 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
     }
   }
 
-  async createIndex(index: IndexName) {
-    const isIndexExisting = await this.client.indices.exists({ index });
-
-    if (isIndexExisting) return this.logger.info(`Index already exists: ${index}`);
-
-    const template = indexMappings[index];
-
+  async createIndex(index: string, mappings?: MappingTypeMapping) {
     try {
-      await this.client.indices.create(template);
+      const isIndexExisting = await this.client.indices.exists({ index });
+
+      if (isIndexExisting) {
+        this.logger.info(`Index already exists: ${index}`);
+        return;
+      }
+
+      await this.client.indices.create({ index, mappings });
+
       this.logger.info(`Index successfully created: ${index}`);
     } catch (err) {
       this.logger.error(`Index creation failed: ${index} - ${err.message}`);

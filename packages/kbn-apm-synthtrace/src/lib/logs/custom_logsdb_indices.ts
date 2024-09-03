@@ -6,23 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
-export enum IndexName {
-  cloudLogs = 'cloud-logs-synth.1-default',
-}
-
-export const indexMappings: {
-  [key in IndexName]: IndicesCreateRequest;
-} = {
-  [IndexName.cloudLogs]: {
-    index: IndexName.cloudLogs,
-    mappings: {
-      properties: {
-        '@timestamp': {
-          type: 'date',
-        },
-      },
+export const timestampDateMapping: MappingTypeMapping = {
+  properties: {
+    '@timestamp': {
+      type: 'date',
     },
   },
 };
