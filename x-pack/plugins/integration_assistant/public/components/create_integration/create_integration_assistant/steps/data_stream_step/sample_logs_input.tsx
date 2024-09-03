@@ -65,14 +65,34 @@ export const parseJSONArray = (
   return { errorNoArrayFound: true, entries: [], pathToEntries: [] };
 };
 
+/**
+ * Truncates an array of log samples type T and returns a new array.
+ *
+ * Note array cannot be empty since we keep the first element in place.
+ *
+ * @param array - The array to truncate.
+ * @returns The truncated array with no more than MaxLogsSampleRows.
+ * @template T - The type of elements in the array.
+ */
+function _truncateLogSample<T>(array: T[]): T[] {
+  const numElements = Math.min(MaxLogsSampleRows, array.length);
+  partialShuffleArray(array, 1, numElements);
+  return array.slice(0, numElements);
+}
+
+// The error message structure.
 interface ParseLogsErrorResult {
   error: string;
 }
 
+// The parsed logs sample structure.
 interface ParseLogsSuccessResult {
-  logSamples: string[];
-  isTruncated: boolean;
+  // Format of the samples, if able to be determined.
   samplesFormat?: SamplesFormat;
+  // The parsed log samples. If samplesFormat is (ND)JSON, these are JSON strings.
+  logSamples: string[];
+  // Whether the log samples were truncated.
+  isTruncated: boolean;
 }
 
 type ParseLogsResult = ParseLogsErrorResult | ParseLogsSuccessResult;
@@ -84,12 +104,15 @@ type ParseLogsResult = ParseLogsErrorResult | ParseLogsSuccessResult;
  *  - it is too large to parse (the memory required is 2-3x of the file size); or
  *  - it looks like a JSON format, but there is no array; or
  *  - it looks like (ND)JSON format, but the items are not JSON dictionaries; or
- *  - the list of entires is empty.
- * Otherwise it is guaranteed to parse and return the `logSamples` array of strings.
+ *  - the list of entries is empty.
+ * In other cases it will parse and return the `logSamples` array of strings.
  *
- * If the format was (ND)JSON:
- *  - the samples will be serialized back to JSON strings; and
- *  - the `samplesFormat` field will be filled out with the format description.
+ * Additionally if the format was (ND)JSON:
+ *  - the `samplesFormat` field will be filled out with the format description; and
+ *  - the samples will be serialized back to JSON strings;
+ * otherwise:
+ *  - the `samplesFormat` field will be undefined; and
+ *  - the samples will be strings with unknown structure.
  *
  * In all cases it will also:
  *  - shuffle the parsed logs sample using the reproducible shuffle algorithm;
@@ -99,7 +122,7 @@ type ParseLogsResult = ParseLogsErrorResult | ParseLogsSuccessResult;
  * @returns The parsed logs sample structure or an error message.
  */
 const parseLogsContent = (fileContent: string): ParseLogsResult => {
-  let parsedContent: unknown[];
+  let parsedContent: unknown[] | undefined;
   let samplesFormat: SamplesFormat | undefined;
 
   try {
@@ -136,12 +159,21 @@ const parseLogsContent = (fileContent: string): ParseLogsResult => {
         if (parseMultilineNDJSONError instanceof RangeError) {
           return { error: i18n.LOGS_SAMPLE_ERROR.TOO_LARGE_TO_PARSE };
         }
-        parsedContent = fileContent.split('\n').filter((line) => line.trim() !== '');
+        // This is an unknown format, so split into lines and return no samplesFormat.
+        const fileLines = fileContent.split('\n').filter((line) => line.trim() !== '');
+        if (fileLines.length === 0) {
+          return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
+        }
+
+        const logSamples = _truncateLogSample(fileLines);
+        return { logSamples, isTruncated: fileLines.length !== logSamples.length };
       }
     }
   }
 
-  if (samplesFormat && parsedContent.some((log) => !isPlainObject(log))) {
+  // This seems to be an ND(JSON), so perform additional checks and return samplesFormat.
+
+  if (parsedContent.some((log) => !isPlainObject(log))) {
     return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT };
   }
 
@@ -149,12 +181,8 @@ const parseLogsContent = (fileContent: string): ParseLogsResult => {
     return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
   }
 
-  const isTruncated = parsedContent.length > MaxLogsSampleRows;
-  const numSampleRows = isTruncated ? MaxLogsSampleRows : parsedContent.length;
-  partialShuffleArray(parsedContent, 1, numSampleRows);
-
-  const logSamples = parsedContent.slice(0, numSampleRows).map((log) => JSON.stringify(log));
-  return { isTruncated, logSamples, samplesFormat };
+  const logSamples = _truncateLogSample(parsedContent).map((line) => JSON.stringify(line));
+  return { samplesFormat, logSamples, isTruncated: parsedContent.length !== logSamples.length };
 };
 
 interface SampleLogsInputProps {
@@ -179,9 +207,27 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         logSamples: undefined,
         samplesFormat: undefined,
       });
+      if (!files) {
+        return;
+      }
+
+      setSampleFileError(undefined);
+      setIntegrationSettings({
+        ...integrationSettings,
+        logSamples: undefined,
+        samplesFormat: undefined,
+      });
 
       const logsSampleFile = files[0];
       const reader = new FileReader();
+
+      reader.onloadstart = function () {
+        setIsParsing(true);
+      };
+
+      reader.onloadend = function () {
+        setIsParsing(false);
+      };
 
       reader.onloadstart = function () {
         setIsParsing(true);
@@ -213,7 +259,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
           return;
         }
 
-        const { isTruncated, logSamples, samplesFormat } = result;
+        const { samplesFormat, logSamples, isTruncated } = result;
 
         if (isTruncated) {
           notifications?.toasts.addInfo(i18n.LOGS_SAMPLE_TRUNCATED(MaxLogsSampleRows));
