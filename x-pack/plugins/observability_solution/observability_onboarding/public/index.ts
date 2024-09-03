@@ -31,6 +31,7 @@ export interface ConfigSchema {
 }
 
 export interface AppContext {
+  isCloud: boolean;
   isServerless: boolean;
   stackVersion: string;
 }

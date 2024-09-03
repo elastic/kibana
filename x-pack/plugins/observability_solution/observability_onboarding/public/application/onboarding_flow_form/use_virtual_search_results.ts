@@ -15,7 +15,7 @@ export function useVirtualSearchResults(): CustomCard[] {
   const {
     services: {
       application,
-      context: { isServerless },
+      context: { isCloud },
       config: { firehoseQuickStartCardVisible },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -77,6 +77,6 @@ export function useVirtualSearchResults(): CustomCard[] {
       integration: '',
       isCollectionCard: false,
     },
-    ...(isServerless && firehoseQuickStartCardVisible ? [firehoseQuickstartCard] : []),
+    ...(isCloud && firehoseQuickStartCardVisible ? [firehoseQuickstartCard] : []),
   ];
 }

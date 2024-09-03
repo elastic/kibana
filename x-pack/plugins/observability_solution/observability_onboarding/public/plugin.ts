@@ -112,6 +112,7 @@ export class ObservabilityOnboardingPlugin
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
             config,
             context: {
+              isCloud: Boolean(pluginSetupDeps.cloud?.isCloudEnabled),
               isServerless:
                 Boolean(pluginSetupDeps.cloud?.isServerlessEnabled) || isServerlessBuild,
               stackVersion,
