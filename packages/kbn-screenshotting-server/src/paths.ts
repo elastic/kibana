@@ -102,7 +102,7 @@ export class ChromiumArchivePaths {
   ];
 
   // zip files get downloaded to a .chromium directory in the kibana root
-  public readonly archivesPath = path.resolve(__dirname, '../../../../../../.chromium');
+  public readonly archivesPath = path.resolve(__dirname, '../../../.chromium');
 
   public find(platform: string, architecture: string, packages: PackageInfo[] = this.packages) {
     return packages.find((p) => p.platform === platform && p.architecture === architecture);
