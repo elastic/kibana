@@ -461,6 +461,11 @@ export class DataGridService extends FtrService {
     await this.find.clickByButtonText('Move left');
   }
 
+  public async clickHideColumn(field?: string) {
+    await this.clickColumnMenuField(field);
+    await this.find.clickByButtonText('Hide column');
+  }
+
   public async clickRemoveColumn(field?: string) {
     await this.clickColumnMenuField(field);
     await this.find.clickByButtonText('Remove column');
