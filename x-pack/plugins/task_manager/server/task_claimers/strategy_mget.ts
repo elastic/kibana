@@ -125,6 +125,9 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     taskPartitioner,
   });
 
+  // eslint-disable-next-line no-console
+  console.error(`mget docs ${JSON.stringify(docs)}`);
+
   if (docs.length === 0)
     return {
       ...getEmptyClaimOwnershipResult(),
