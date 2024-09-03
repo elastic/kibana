@@ -66,7 +66,7 @@ const primaryButtonConfigs = {
           panels={[
             {
               id: 0,
-              title: 'Open editor',
+              title: 'Open Ryan editor',
               items: [
                 {
                   name: 'Lens',
