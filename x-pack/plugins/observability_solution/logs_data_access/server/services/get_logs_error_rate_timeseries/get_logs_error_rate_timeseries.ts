@@ -31,20 +31,23 @@ const getLogErrorsAggregation = () => ({
 
 type LogErrorsAggregation = ReturnType<typeof getLogErrorsAggregation>;
 
-const getAPMLogErrorsAggregation = () => ({
+const getErrorLogLevelErrorsAggregation = () => ({
   terms: {
     field: ERROR_LOG_LEVEL,
     include: ['error', 'ERROR'],
   },
 });
 
-type APMLogErrorsAggregation = ReturnType<typeof getAPMLogErrorsAggregation>;
+type ErrorLogLevelErrorsAggregation = ReturnType<typeof getErrorLogLevelErrorsAggregation>;
 
 interface LogsErrorRateTimeseriesHistogram {
   timeseries: AggregationResultOf<
     {
       date_histogram: AggregationOptionsByType['date_histogram'];
-      aggs: { logErrors: LogErrorsAggregation; APMLogErrors: APMLogErrorsAggregation };
+      aggs: {
+        logErrors: LogErrorsAggregation;
+        errorLogLevelErrors: ErrorLogLevelErrorsAggregation;
+      };
     },
     {}
   >;
@@ -116,7 +119,7 @@ export function createGetLogErrorRateTimeseries() {
               },
               aggs: {
                 logErrors: getLogErrorsAggregation(),
-                APMlogErrors: getAPMLogErrorsAggregation(),
+                errorLogLevelErrors: getErrorLogLevelErrorsAggregation(),
               },
             },
           },
@@ -131,8 +134,9 @@ export function createGetLogErrorRateTimeseries() {
       ? buckets.reduce<LogsErrorRateTimeseriesReturnType>((acc, bucket) => {
           const timeseries = bucket.timeseries.buckets.map((timeseriesBucket) => {
             const logErrorCount = timeseriesBucket.logErrors.buckets[0]?.doc_count || 0;
-            const APMLogErrorsCount = timeseriesBucket.APMLogErrors?.buckets[0]?.doc_count || 0;
-            const totalErrorsCount = logErrorCount + APMLogErrorsCount;
+            const errorLogLevelErrorsCount =
+              timeseriesBucket.errorLogLevelErrors?.buckets[0]?.doc_count || 0;
+            const totalErrorsCount = logErrorCount + errorLogLevelErrorsCount;
             return {
               x: timeseriesBucket.key,
               y: totalErrorsCount,
