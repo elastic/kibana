@@ -122,8 +122,8 @@ type ParseLogsResult = ParseLogsErrorResult | ParseLogsSuccessResult;
  * @returns The parsed logs sample structure or an error message.
  */
 const parseLogsContent = (fileContent: string): ParseLogsResult => {
-  let parsedContent: unknown[] | undefined;
-  let samplesFormat: SamplesFormat | undefined;
+  let parsedContent: unknown[];
+  let samplesFormat: SamplesFormat;
 
   try {
     parsedContent = parseNDJSON(fileContent);
@@ -166,7 +166,12 @@ const parseLogsContent = (fileContent: string): ParseLogsResult => {
         }
 
         const logSamples = _truncateLogSample(fileLines);
-        return { logSamples, isTruncated: fileLines.length !== logSamples.length };
+
+        return {
+          samplesFormat: undefined,
+          logSamples,
+          isTruncated: fileLines.length !== logSamples.length,
+        };
       }
     }
   }
