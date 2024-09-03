@@ -19,10 +19,17 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { showErrorToast } from '../..';
 import type { CspClientPluginStartDeps } from '../../type';
-import type { FindingsBaseEsQuery } from '../../type';
 import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
 
-interface UseFindingsOptions extends FindingsBaseEsQuery {
+interface MisconfigurationPreviewBaseEsQuery {
+  query?: {
+    bool: {
+      filter: estypes.QueryDslQueryContainer[];
+    };
+  };
+}
+
+interface UseMisconfigurationPreviewOptions extends MisconfigurationPreviewBaseEsQuery {
   sort: string[][];
   enabled: boolean;
   pageSize: number;
@@ -40,7 +47,7 @@ interface FindingsAggs {
 export const getFindingsCountAggQueryMisconfigurationPreview = () => ({
   count: {
     filters: {
-      other_bucket_key: 'other_messages',
+      other_bucket_key: 'unknown',
       filters: {
         passed: { match: { 'result.evaluation': 'passed' } },
         failed: { match: { 'result.evaluation': 'failed' } },
@@ -54,7 +61,7 @@ export const getMisconfigurationAggregationCount = (
 ) => {
   const passed = buckets.find((bucket) => bucket?.key === 'passed');
   const failed = buckets.find((bucket) => bucket?.key === 'failed');
-  const noStatus = buckets.find((bucket) => bucket?.key === 'other_messages');
+  const noStatus = buckets.find((bucket) => bucket?.key === 'unknown');
 
   return {
     passed: passed?.doc_count || 0,
@@ -64,7 +71,7 @@ export const getMisconfigurationAggregationCount = (
 };
 
 export const buildMisconfigurationsFindingsQuery = (
-  { query }: UseFindingsOptions,
+  { query }: UseMisconfigurationPreviewOptions,
   rulesStates: CspBenchmarkRulesStates
 ) => {
   const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
@@ -79,7 +86,7 @@ export const buildMisconfigurationsFindingsQuery = (
 };
 
 const buildMisconfigurationsFindingsQueryWithFilters = (
-  query: UseFindingsOptions['query'],
+  query: UseMisconfigurationPreviewOptions['query'],
   mutedRulesFilterQuery: estypes.QueryDslQueryContainer[]
 ) => {
   return {
@@ -97,12 +104,12 @@ const buildMisconfigurationsFindingsQueryWithFilters = (
           },
         },
       ],
-      must_not: [...(query?.bool?.must_not ?? []), ...mutedRulesFilterQuery],
+      must_not: [...mutedRulesFilterQuery],
     },
   };
 };
 
-export const useMisconfigurationPreview = (options: UseFindingsOptions) => {
+export const useMisconfigurationPreview = (options: UseMisconfigurationPreviewOptions) => {
   const {
     data,
     notifications: { toasts },

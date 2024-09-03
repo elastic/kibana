@@ -150,7 +150,6 @@ describe('test helper methods', () => {
       const query = 'exampleHost';
       const expectedQuery = {
         bool: {
-          must: [],
           filter: [
             {
               bool: {
@@ -159,8 +158,6 @@ describe('test helper methods', () => {
               },
             },
           ],
-          should: [],
-          must_not: [],
         },
       };
 
@@ -171,7 +168,6 @@ describe('test helper methods', () => {
       const field = 'host.name';
       const expectedQuery = {
         bool: {
-          must: [],
           filter: [
             {
               bool: {
@@ -180,8 +176,6 @@ describe('test helper methods', () => {
               },
             },
           ],
-          should: [],
-          must_not: [],
         },
       };
 

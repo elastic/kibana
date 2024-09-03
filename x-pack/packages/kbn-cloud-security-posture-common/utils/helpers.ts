@@ -45,7 +45,6 @@ export const buildMutedRulesFilter = (
 export const buildEntityFlyoutPreviewQuery = (field: string, queryValue?: string) => {
   return {
     bool: {
-      must: [],
       filter: [
         {
           bool: {
@@ -54,8 +53,6 @@ export const buildEntityFlyoutPreviewQuery = (field: string, queryValue?: string
           },
         },
       ],
-      should: [],
-      must_not: [],
     },
   };
 };
