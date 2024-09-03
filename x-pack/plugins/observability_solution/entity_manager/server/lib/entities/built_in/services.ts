@@ -104,17 +104,12 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
       },
       {
         name: 'logErrorRate',
-        equation: 'A / B',
+        equation: 'A',
         metrics: [
           {
             name: 'A',
             aggregation: 'doc_count',
-            filter: 'log.level: "error" OR error.log.level: "error"',
-          },
-          {
-            name: 'B',
-            aggregation: 'doc_count',
-            filter: 'log.level: * OR error.log.level: *',
+            filter: 'log.level: "error" OR log.level: "ERROR" OR error.log.level: "error"',
           },
         ],
       },
