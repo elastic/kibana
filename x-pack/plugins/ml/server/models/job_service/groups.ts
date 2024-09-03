@@ -27,8 +27,8 @@ export function groupsProvider(mlClient: MlClient) {
   const calMngr = new CalendarManager(mlClient);
 
   async function getAllGroups() {
-    const groups: { [id: string]: Group } = {};
-    const jobIds: { [id: string]: undefined | null } = {};
+    const groups: { [id: string]: Group } = Object.create(null);
+    const jobIds: { [id: string]: undefined | null } = Object.create(null);
     const [{ body }, calendars] = await Promise.all([
       mlClient.getJobs<MlJobsResponse>(),
       calMngr.getAllCalendars(),
@@ -78,7 +78,7 @@ export function groupsProvider(mlClient: MlClient) {
   }
 
   async function updateGroups(jobs: Array<{ jobId: string; groups: string[] }>) {
-    const results: Results = {};
+    const results: Results = Object.create(null);
     for (const job of jobs) {
       const { jobId, groups } = job;
       try {

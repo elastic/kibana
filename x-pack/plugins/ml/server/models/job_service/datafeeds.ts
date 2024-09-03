@@ -40,7 +40,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
       return acc;
     }, {} as { [id: string]: boolean });
 
-    const results: Results = {};
+    const results: Results = Object.create(null);
 
     async function doStart(datafeedId: string): Promise<{ started: boolean; error?: string }> {
       if (doStartsCalled[datafeedId] === false) {
@@ -113,7 +113,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
   }
 
   async function stopDatafeeds(datafeedIds: string[]) {
-    const results: Results = {};
+    const results: Results = Object.create(null);
 
     for (const datafeedId of datafeedIds) {
       try {

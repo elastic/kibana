@@ -24,7 +24,7 @@ const COLORS = [
   euiVars.euiColorPrimary,
 ];
 
-const colorMap: Record<string, string> = {};
+const colorMap: Record<string, string> = Object.create(null);
 
 export function tabColor(name: string): string {
   if (colorMap[name] === undefined) {

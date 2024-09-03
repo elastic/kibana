@@ -40,7 +40,7 @@ export function jobSavedObjectServiceFactory(
     currentSpaceOnly: boolean = true
   ) {
     await isMlReady();
-    const filterObject: JobObjectFilter = {};
+    const filterObject: JobObjectFilter = Object.create(null);
 
     if (jobType !== undefined) {
       filterObject.type = jobType;
@@ -182,7 +182,7 @@ export function jobSavedObjectServiceFactory(
 
   async function getAllJobObjectsForAllSpaces(jobType?: JobType, jobId?: string) {
     await isMlReady();
-    const filterObject: JobObjectFilter = {};
+    const filterObject: JobObjectFilter = Object.create(null);
 
     if (jobType !== undefined) {
       filterObject.type = jobType;
@@ -306,7 +306,7 @@ export function jobSavedObjectServiceFactory(
     spacesToAdd: string[],
     spacesToRemove: string[]
   ) {
-    const results: Record<string, { success: boolean; error?: any }> = {};
+    const results: Record<string, { success: boolean; error?: any }> = Object.create(null);
     const jobs = await _getJobObjects(jobType);
     const jobObjectIdMap = new Map<string, string>();
     const objectsToUpdate: Array<{ type: string; id: string }> = [];
