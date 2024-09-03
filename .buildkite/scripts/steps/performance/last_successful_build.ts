@@ -13,8 +13,7 @@ import { BuildkiteClient } from '#pipeline-utils';
     const client = new BuildkiteClient();
     const lastBuild = await client.getLastBuild('kibana-on-merge', 'main', 'passed');
     const buildId = lastBuild.id;
-    console.log(`Last successful build: ${buildId}`);
-    return buildId;
+    console.log(buildId);
   } catch (ex) {
     console.error('Buildkite API Error', ex.message);
     if (ex.response) {

@@ -8,7 +8,7 @@ source .buildkite/scripts/common/util.sh
 
 KIBANA_BUILD_ID=$(ts-node "$(dirname "${0}")/last_successful_build.ts")
 
-echo "...${KIBANA_BUILD_ID}..."
+echo "Using build artifacts from kibana-on-merge pipeline, build id: $KIBANA_BUILD_ID"
 export KIBANA_BUILD_ID
 
 .buildkite/scripts/download_build_artifacts.sh
