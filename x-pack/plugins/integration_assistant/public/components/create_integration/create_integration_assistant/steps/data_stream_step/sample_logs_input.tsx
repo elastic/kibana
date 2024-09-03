@@ -66,12 +66,17 @@ export const parseJSONArray = (
 };
 
 /**
- * Truncates an array of log samples type T and returns a new array.
+ * Selects samples from the backend from an array of log samples type T.
  *
- * Note array cannot be empty since we keep the first element in place.
+ * This is a generic function to apply to arrays of any type.
  *
- * @param array - The array to truncate.
- * @returns The truncated array with no more than MaxLogsSampleRows.
+ * The result will:
+ *   - have no more than MaxLogsSampleRows; and
+ *   - be shuffled using the reproducible shuffle algorithm;
+ *   - however, the first element will be kept in-place.
+ *
+ * @param array - The array to select from (cannot be empty).
+ * @returns The new array, truncated and shuffled.
  * @template T - The type of elements in the array.
  */
 function selectFromLogsSample<T>(array: T[]): T[] {
