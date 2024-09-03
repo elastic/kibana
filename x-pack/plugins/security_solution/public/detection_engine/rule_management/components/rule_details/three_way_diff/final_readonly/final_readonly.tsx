@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type { DiffableAllFields } from '../../../../../../../common/api/detection_engine';
 import { KqlQueryReadOnly } from './fields/kql_query';
 import { DataSourceReadOnly } from './fields/data_source/data_source';
@@ -85,6 +84,6 @@ export function FinalReadOnly({ fieldName, finalDiffableRule }: FinalReadonlyPro
         />
       );
     default:
-      return assertUnreachable(fieldName);
+      return null;
   }
 }

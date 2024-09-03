@@ -42,14 +42,14 @@ function createKibanaServicesMock(overrides?: Partial<CoreStart>) {
       },
     },
     uiSettings: {},
-  } as unknown as CoreStart;
+  };
 
   return merge(baseMock, overrides);
 }
 
 interface StorybookProvidersProps {
   children: React.ReactNode;
-  kibanaServicesMock?: ReturnType<typeof createKibanaServicesMock>;
+  kibanaServicesMock?: Record<string, unknown>;
 }
 
 export function FinalReadOnlyStorybookProviders({

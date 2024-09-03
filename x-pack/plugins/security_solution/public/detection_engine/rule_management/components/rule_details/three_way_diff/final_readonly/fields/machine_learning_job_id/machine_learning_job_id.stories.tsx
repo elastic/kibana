@@ -66,7 +66,7 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FinalReadOnlyStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
+    <FinalReadOnlyStorybookProviders>
       <MockMlData>
         <FinalReadOnly
           fieldName="machine_learning_job_id"
