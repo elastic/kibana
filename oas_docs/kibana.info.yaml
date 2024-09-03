@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Kibana APIs
   description: |
-    NOTE: Access to internal {kib} API endpoints will be restricted in Kibana version 9.0. For more information, refer to https://github.com/elastic/kibana/issues/163654.
+    NOTE: Access to internal {kib} API endpoints will be restricted in Kibana version 9.0. Please move any integrations to publicly documented APIs.
 
     The Kibana REST APIs enable you to manage resources such as connectors, data views, and saved objects.
     The API calls are stateless.
