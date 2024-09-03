@@ -53,7 +53,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId, selectedJobs }) 
             : i18n.translate('xpack.ml.anomalyResultsViewSelector.singleMetricViewerLabel', {
                 defaultMessage: 'View results in the Single Metric Viewer',
               }),
-        iconType: 'visLine',
+        iconType: 'singleMetricViewer',
         value: ML_PAGES.SINGLE_METRIC_VIEWER,
         'data-test-subj': 'mlAnomalyResultsViewSelectorSingleMetricViewer',
         isDisabled: viewId === 'explorer' && isSingleMetricViewerDisabled,
