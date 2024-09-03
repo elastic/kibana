@@ -13,6 +13,7 @@ import {
   EuiDataGridCellValueElementProps,
   EuiDataGridCustomBodyProps,
 } from '@elastic/eui';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -957,9 +958,17 @@ describe('UnifiedDataTable', () => {
     const EUI_DEFAULT_COLUMN_WIDTH = '100px';
     const getColumnHeader = (name: string) => screen.getByRole('columnheader', { name });
     const queryColumnHeader = (name: string) => screen.queryByRole('columnheader', { name });
-    const getColumnActions = (name: string) =>
-      screen.getByTestId(`dataGridHeaderCellActionButton-${name}`);
-    const getButton = (name: string) => screen.getByRole('button', { name });
+    const openColumnActions = async (name: string) => {
+      const actionsButton = screen.getByTestId(`dataGridHeaderCellActionButton-${name}`);
+      await userEvent.click(actionsButton);
+      await waitForEuiPopoverOpen();
+    };
+    const clickColumnAction = async (name: string) => {
+      const action = screen.getByRole('button', { name });
+      await act(async () => {
+        await userEvent.click(action, undefined, { skipPointerEventsCheck: true });
+      });
+    };
     const queryButton = (name: string) => screen.queryByRole('button', { name });
 
     it('should reset the last column to auto width if only absolute width columns remain', async () => {
@@ -975,8 +984,8 @@ describe('UnifiedDataTable', () => {
       expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
       expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
       expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
-      userEvent.click(getColumnActions('message'));
-      userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
+      await openColumnActions('message');
+      await clickColumnAction('Remove column');
       expect(queryColumnHeader('message')).not.toBeInTheDocument();
       expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
       expect(getColumnHeader('bytes')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
@@ -994,8 +1003,8 @@ describe('UnifiedDataTable', () => {
       expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
       expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
       expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
-      userEvent.click(getColumnActions('message'));
-      userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
+      await openColumnActions('message');
+      await clickColumnAction('Remove column');
       expect(queryColumnHeader('message')).not.toBeInTheDocument();
       expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
       expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
@@ -1012,15 +1021,15 @@ describe('UnifiedDataTable', () => {
         },
       });
       expect(getColumnHeader('@timestamp')).toHaveStyle({ width: '50px' });
-      userEvent.click(getColumnActions('@timestamp'));
-      userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
+      await openColumnActions('@timestamp');
+      await clickColumnAction('Reset width');
       expect(getColumnHeader('@timestamp')).toHaveStyle({ width: `${defaultTimeColumnWidth}px` });
       expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
-      userEvent.click(getColumnActions('message'));
+      await openColumnActions('message');
       expect(queryButton('Reset width')).not.toBeInTheDocument();
       expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
-      userEvent.click(getColumnActions('extension'));
-      userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
+      await openColumnActions('extension');
+      await clickColumnAction('Reset width');
       expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
     });
   });
