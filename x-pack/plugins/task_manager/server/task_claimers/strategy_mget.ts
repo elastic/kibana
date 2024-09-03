@@ -209,60 +209,50 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   // perform the task object updates, deal with errors
   const updatedTasks: ConcreteTaskInstance[] = [];
   let conflicts = staleTasks.length;
-  let bulkErrors = 0;
+  let bulkUpdateErrors = 0;
+  let bulkGetErrors = 0;
 
-  try {
-    const updateResults = await taskStore.bulkUpdate(taskUpdates, {
-      validate: false,
-      excludeLargeFields: true,
-    });
-    for (const updateResult of updateResults) {
-      if (isOk(updateResult)) {
-        updatedTasks.push(updateResult.value);
-      } else {
-        const { id, type, error } = updateResult.error;
+  const updateResults = await taskStore.bulkUpdate(taskUpdates, {
+    validate: false,
+    excludeLargeFields: true,
+  });
+  for (const updateResult of updateResults) {
+    if (isOk(updateResult)) {
+      updatedTasks.push(updateResult.value);
+    } else {
+      const { id, type, error } = updateResult.error;
 
-        // this check is needed so error will be typed correctly for isConflictError
-        if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
-          if (SavedObjectsErrorHelpers.isConflictError(error)) {
-            conflicts++;
-          } else {
-            logger.warn(
-              `Saved Object error updating task ${id}:${type} during claim: ${error.error}`,
-              logMeta
-            );
-            bulkErrors++;
-          }
+      // this check is needed so error will be typed correctly for isConflictError
+      if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+        if (SavedObjectsErrorHelpers.isConflictError(error)) {
+          conflicts++;
         } else {
-          logger.warn(`Error updating task ${id}:${type} during claim: ${error.message}`, logMeta);
-          bulkErrors++;
+          logger.error(
+            `Saved Object error updating task ${id}:${type} during claim: ${error.error}`,
+            logMeta
+          );
+          bulkUpdateErrors++;
         }
+      } else {
+        logger.error(`Error updating task ${id}:${type} during claim: ${error.message}`, logMeta);
+        bulkUpdateErrors++;
       }
     }
-  } catch (err) {
-    logger.warn(`Error updating tasks during claim: ${err}`, logMeta);
   }
 
   // perform an mget to get the full task instance for claiming
-  let fullTasksToRun: ConcreteTaskInstance[] = [];
-  try {
-    fullTasksToRun = (await taskStore.bulkGet(updatedTasks.map((task) => task.id))).reduce<
-      ConcreteTaskInstance[]
-    >((acc, task) => {
-      if (isOk(task)) {
-        acc.push(task.value);
-      } else {
-        const { id, type, error } = task.error;
-        logger.warn(
-          `Error getting full task ${id}:${type} during claim: ${error.message}`,
-          logMeta
-        );
-      }
-      return acc;
-    }, []);
-  } catch (err) {
-    logger.warn(`Error getting full task documents during claim: ${err}`, logMeta);
-  }
+  const fullTasksToRun = (await taskStore.bulkGet(updatedTasks.map((task) => task.id))).reduce<
+    ConcreteTaskInstance[]
+  >((acc, task) => {
+    if (isOk(task)) {
+      acc.push(task.value);
+    } else {
+      const { id, type, error } = task.error;
+      logger.error(`Error getting full task ${id}:${type} during claim: ${error.message}`, logMeta);
+      bulkGetErrors++;
+    }
+    return acc;
+  }, []);
 
   // separate update for removed tasks; shouldn't happen often, so unlikely
   // a performance concern, and keeps the rest of the logic simpler
@@ -291,12 +281,13 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
         }
       }
     } catch (err) {
+      // swallow the error because this is unrelated to the claim cycle
       logger.warn(`Error updating tasks to mark as unrecognized during claim: ${err}`, logMeta);
     }
   }
 
   // TODO: need a better way to generate stats
-  const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkErrors}; removed: ${removedCount};`;
+  const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors}; removed: ${removedCount};`;
   logger.debug(message, logMeta);
 
   // build results
@@ -306,6 +297,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       tasksConflicted: conflicts,
       tasksClaimed: fullTasksToRun.length,
       tasksLeftUnclaimed: leftOverTasks.length,
+      tasksErrors: bulkUpdateErrors + bulkGetErrors,
     },
     docs: fullTasksToRun,
     timing: stopTaskTimer(),

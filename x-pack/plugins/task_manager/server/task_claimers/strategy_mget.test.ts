@@ -385,7 +385,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 3; updateErrors: 0; removed: 0;',
+        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 3; updateErrors: 0; getErrors: 0; removed: 0;',
         { tags: ['claimAvailableTasksMget'] }
       );
 
@@ -436,6 +436,7 @@ describe('TaskClaiming', () => {
       expect(result.stats).toEqual({
         tasksClaimed: 3,
         tasksConflicted: 0,
+        tasksErrors: 0,
         tasksUpdated: 3,
         tasksLeftUnclaimed: 3,
       });
@@ -489,7 +490,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 2;',
+        'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 2;',
         { tags: ['claimAvailableTasksMget'] }
       );
 
@@ -532,6 +533,7 @@ describe('TaskClaiming', () => {
       expect(result.stats).toEqual({
         tasksClaimed: 1,
         tasksConflicted: 0,
+        tasksErrors: 0,
         tasksUpdated: 1,
         tasksLeftUnclaimed: 0,
       });
@@ -597,7 +599,7 @@ describe('TaskClaiming', () => {
         { tags: ['claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 1;',
+        'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 1;',
         { tags: ['claimAvailableTasksMget'] }
       );
 
@@ -640,6 +642,7 @@ describe('TaskClaiming', () => {
       expect(result.stats).toEqual({
         tasksClaimed: 1,
         tasksConflicted: 0,
+        tasksErrors: 0,
         tasksUpdated: 1,
         tasksLeftUnclaimed: 0,
       });
@@ -697,7 +700,7 @@ describe('TaskClaiming', () => {
         { tags: ['claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 0;',
+        'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
         { tags: ['claimAvailableTasksMget'] }
       );
 
@@ -740,6 +743,7 @@ describe('TaskClaiming', () => {
       expect(result.stats).toEqual({
         tasksClaimed: 1,
         tasksConflicted: 0,
+        tasksErrors: 0,
         tasksUpdated: 1,
         tasksLeftUnclaimed: 0,
       });
@@ -848,7 +852,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; removed: 0;',
+        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
         { tags: ['claimAvailableTasksMget'] }
       );
 
@@ -884,6 +888,7 @@ describe('TaskClaiming', () => {
       expect(result.stats).toEqual({
         tasksClaimed: 2,
         tasksConflicted: 0,
+        tasksErrors: 0,
         tasksUpdated: 2,
         tasksLeftUnclaimed: 0,
       });
@@ -937,7 +942,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; removed: 0;',
+        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
         { tags: ['claimAvailableTasksMget'] }
       );
 
@@ -973,6 +978,7 @@ describe('TaskClaiming', () => {
       expect(result.stats).toEqual({
         tasksClaimed: 2,
         tasksConflicted: 0,
+        tasksErrors: 0,
         tasksUpdated: 2,
         tasksLeftUnclaimed: 0,
       });
@@ -1026,7 +1032,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 2; stale: 1; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; removed: 0;',
+        'task claimer claimed: 2; stale: 1; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
         { tags: ['claimAvailableTasksMget'] }
       );
 
@@ -1062,6 +1068,7 @@ describe('TaskClaiming', () => {
       expect(result.stats).toEqual({
         tasksClaimed: 2,
         tasksConflicted: 1,
+        tasksErrors: 0,
         tasksUpdated: 2,
         tasksLeftUnclaimed: 0,
       });
@@ -1121,7 +1128,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 4; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 0;',
+        'task claimer claimed: 4; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
         { tags: ['claimAvailableTasksMget'] }
       );
 
@@ -1180,6 +1187,7 @@ describe('TaskClaiming', () => {
       expect(result.stats).toEqual({
         tasksClaimed: 4,
         tasksConflicted: 0,
+        tasksErrors: 0,
         tasksUpdated: 4,
         tasksLeftUnclaimed: 0,
       });
@@ -1244,10 +1252,10 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 0;',
+        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 1; removed: 0;',
         { tags: ['claimAvailableTasksMget'] }
       );
-      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+      expect(taskManagerLogger.error).toHaveBeenCalledWith(
         'Error getting full task id-2:task during claim: Oh no',
         { tags: ['claimAvailableTasksMget'] }
       );
@@ -1305,13 +1313,14 @@ describe('TaskClaiming', () => {
       expect(result.stats).toEqual({
         tasksClaimed: 3,
         tasksConflicted: 0,
+        tasksErrors: 1,
         tasksUpdated: 3,
         tasksLeftUnclaimed: 0,
       });
       expect(result.docs.length).toEqual(3);
     });
 
-    test('should handle error when bulk getting all full task docs', async () => {
+    test('should throw when error when bulk getting all full task docs', async () => {
       const store = taskStoreMock.create({ taskManagerId: 'test-test' });
       store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
 
@@ -1342,30 +1351,17 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
-
-      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
-        expect(resultOrErr).toBe(undefined);
-      }
-
-      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+      await expect(() =>
+        getAllAsPromise(
+          taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"oh no"`);
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
-      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
-
-      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 0; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 0;',
-        { tags: ['claimAvailableTasksMget'] }
-      );
-      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
-        'Error getting full task documents during claim: Error: oh no',
-        { tags: ['claimAvailableTasksMget'] }
-      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
 
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
         size: 40,
@@ -1416,14 +1412,6 @@ describe('TaskClaiming', () => {
         { validate: false, excludeLargeFields: true }
       );
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
-
-      expect(result.stats).toEqual({
-        tasksClaimed: 0,
-        tasksConflicted: 0,
-        tasksUpdated: 0,
-        tasksLeftUnclaimed: 0,
-      });
-      expect(result.docs.length).toEqual(0);
     });
 
     test('should handle individual errors when bulk updating the task doc', async () => {
@@ -1486,10 +1474,10 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 1; removed: 0;',
+        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 1; getErrors: 0; removed: 0;',
         { tags: ['claimAvailableTasksMget'] }
       );
-      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+      expect(taskManagerLogger.error).toHaveBeenCalledWith(
         'Error updating task id-2:task during claim: Oh no',
         { tags: ['claimAvailableTasksMget'] }
       );
@@ -1547,13 +1535,14 @@ describe('TaskClaiming', () => {
       expect(result.stats).toEqual({
         tasksClaimed: 3,
         tasksConflicted: 0,
+        tasksErrors: 1,
         tasksUpdated: 3,
         tasksLeftUnclaimed: 0,
       });
       expect(result.docs.length).toEqual(3);
     });
 
-    test('should handle error when bulk updating all task docs', async () => {
+    test('should throw error when error bulk updating all task docs', async () => {
       const store = taskStoreMock.create({ taskManagerId: 'test-test' });
       store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
 
@@ -1582,30 +1571,17 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
-
-      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
-        expect(resultOrErr).toBe(undefined);
-      }
-
-      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+      await expect(() =>
+        getAllAsPromise(
+          taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"oh no"`);
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
-      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
-
-      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 0; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; removed: 0;',
-        { tags: ['claimAvailableTasksMget'] }
-      );
-      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
-        'Error updating tasks during claim: Error: oh no',
-        { tags: ['claimAvailableTasksMget'] }
-      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
 
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
         size: 40,
@@ -1655,15 +1631,7 @@ describe('TaskClaiming', () => {
         ],
         { validate: false, excludeLargeFields: true }
       );
-      expect(store.bulkGet).toHaveBeenCalledWith([]);
-
-      expect(result.stats).toEqual({
-        tasksClaimed: 0,
-        tasksConflicted: 0,
-        tasksUpdated: 0,
-        tasksLeftUnclaimed: 0,
-      });
-      expect(result.docs.length).toEqual(0);
+      expect(store.bulkGet).not.toHaveBeenCalled();
     });
 
     test('it should filter for specific partitions and tasks without partitions', async () => {
