@@ -51,7 +51,7 @@ export function DashboardDrilldownPanelActionsProvider({
 
     async clickManageDrilldowns() {
       log.debug('clickManageDrilldowns');
-      await testSubjects.clickWhenNotDisabledWithoutRetry(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
+      await dashboardPanelActions.clickContextMenuItem(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
     }
 
     async expectMultipleActionsMenuOpened() {
