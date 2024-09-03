@@ -214,9 +214,6 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
               <FormattedMessage
                 id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentlessMessage"
                 defaultMessage="Deleting this agentless deployment might include inactive agents."
-                values={{
-                  agentsCount,
-                }}
               />
             ) : (
               <FormattedMessage
