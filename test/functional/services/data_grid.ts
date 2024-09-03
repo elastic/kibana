@@ -433,6 +433,13 @@ export class DataGridService extends FtrService {
     });
   }
 
+  public async clickColumnActionAt(field: string, index: number) {
+    await this.openColMenuByField(field);
+    const actionsGroup = await this.testSubjects.find(`dataGridHeaderCellActionGroup-${field}`);
+    const actionButtons = await actionsGroup.findAllByTagName('button');
+    await actionButtons[index].click();
+  }
+
   private async clickColumnMenuField(field?: string) {
     if (field) {
       await this.openColMenuByField(field);
