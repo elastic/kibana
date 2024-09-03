@@ -7,12 +7,14 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 
 interface FetchSourceDocumentsArgs {
   isRuleAggregating: boolean;
   esClient: ElasticsearchClient;
   index: string[];
   results: Array<Record<string, string | null>>;
+  loggedRequests?: RulePreviewLoggedRequest[];
 }
 /**
  * fetches source documents by list of their ids
@@ -24,6 +26,7 @@ export const fetchSourceDocuments = async ({
   results,
   esClient,
   index,
+  loggedRequests,
 }: FetchSourceDocumentsArgs): Promise<Record<string, { fields: estypes.SearchHit['fields'] }>> => {
   const ids = results.reduce<string[]>((acc, doc) => {
     if (doc._id) {
@@ -47,30 +50,33 @@ export const fetchSourceDocuments = async ({
     },
   };
 
+  const searchBody = {
+    query: idsQuery.query,
+    _source: false,
+    fields: ['*'],
+  };
+  const ignoreUnavailable = true;
+
+  if (loggedRequests) {
+    loggedRequests.push({
+      request: `POST /${index}/_search?ignore_unavailable=${ignoreUnavailable}\n${JSON.stringify(
+        searchBody,
+        null,
+        2
+      )}`,
+      description: `Retrieve source documents when ES|QL query is not aggregable`,
+    });
+  }
+
   const response = await esClient.search({
     index,
-    body: {
-      query: idsQuery.query,
-      _source: false,
-      fields: ['*'],
-    },
-    ignore_unavailable: true,
+    body: searchBody,
+    ignore_unavailable: ignoreUnavailable,
   });
 
-  // console.log(
-  //   '>>>>',
-  //   JSON.stringify(
-  //     {
-  //       body: {
-  //         query: idsQuery.query,
-  //         _source: false,
-  //         fields: ['*'],
-  //       },
-  //     },
-  //     null,
-  //     2
-  //   )
-  // );
+  if (loggedRequests) {
+    loggedRequests[loggedRequests.length - 1].duration = response.took;
+  }
 
   return response.hits.hits.reduce<Record<string, { fields: estypes.SearchHit['fields'] }>>(
     (acc, hit) => {

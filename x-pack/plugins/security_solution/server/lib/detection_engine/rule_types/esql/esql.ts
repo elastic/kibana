@@ -27,7 +27,7 @@ import { createEnrichEventsFunction } from '../utils/enrichments';
 import { rowToDocument } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
-
+import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RunOpts, SignalSource } from '../types';
 
 import {
@@ -63,7 +63,7 @@ export const esqlExecutor = async ({
   spaceId,
   experimentalFeatures,
   licensing,
-  isLoggingRequestsEnabled,
+  isLoggedRequestsEnabled,
 }: {
   runOpts: RunOpts<EsqlRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -72,10 +72,9 @@ export const esqlExecutor = async ({
   version: string;
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
-  isLoggingRequestsEnabled: boolean;
+  isLoggedRequestsEnabled: boolean;
 }) => {
-  console.log('>>>>> isLoggingRequestsEnabled', isLoggingRequestsEnabled);
-  const requests: Array<{ request: string }> = [];
+  const loggedRequests: RulePreviewLoggedRequest[] = [];
   const ruleParams = completeRule.ruleParams;
   /**
    * ES|QL returns results as a single page. max size of 10,000
@@ -101,13 +100,12 @@ export const esqlExecutor = async ({
         exceptionFilter,
       });
 
-      if (isLoggingRequestsEnabled) {
-        requests.push({
+      if (isLoggedRequestsEnabled) {
+        loggedRequests.push({
           request: `POST _query\n${JSON.stringify(esqlRequest, null, 2)}`,
+          description: 'ES|QL request to find all matches',
         });
       }
-
-      //   console.log('>>>', requests);
 
       ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
       const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
@@ -125,6 +123,10 @@ export const esqlExecutor = async ({
       const esqlSearchDuration = makeFloatString(performance.now() - esqlSignalSearchStart);
       result.searchAfterTimes.push(esqlSearchDuration);
 
+      if (isLoggedRequestsEnabled && loggedRequests[0]) {
+        loggedRequests[0].duration = performance.now() - esqlSignalSearchStart;
+      }
+
       ruleExecutionLogger.debug(`ES|QL query request took: ${esqlSearchDuration}ms`);
 
       const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
@@ -141,6 +143,7 @@ export const esqlExecutor = async ({
         results,
         index,
         isRuleAggregating,
+        loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
       });
 
       const isAlertSuppressionActive = await getIsAlertSuppressionActive({
@@ -247,7 +250,6 @@ export const esqlExecutor = async ({
       // ES|QL does not support pagination so we need to increase size of response to be able to catch all events
       size += tuple.maxSignals;
     }
-    console.log('>>> requests esql executor', requests);
-    return { ...result, state, requests };
+    return { ...result, state, requests: loggedRequests };
   });
 };

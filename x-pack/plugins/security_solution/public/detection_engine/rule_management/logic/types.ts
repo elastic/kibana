@@ -36,7 +36,7 @@ export interface PreviewRulesProps {
     invocationCount: number;
     timeframeEnd: string;
   };
-  enableLoggingRequests?: boolean;
+  enableLoggedRequests?: boolean;
   signal?: AbortSignal;
 }
 

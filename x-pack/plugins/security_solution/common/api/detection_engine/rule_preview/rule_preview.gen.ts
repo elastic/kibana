@@ -35,6 +35,13 @@ export const RulePreviewParams = z.object({
   timeframeEnd: z.string().datetime(),
 });
 
+export type RulePreviewLoggedRequest = z.infer<typeof RulePreviewLoggedRequest>;
+export const RulePreviewLoggedRequest = z.object({
+  request: NonEmptyString,
+  description: NonEmptyString.optional(),
+  duration: z.number().int().optional(),
+});
+
 export type RulePreviewLogs = z.infer<typeof RulePreviewLogs>;
 export const RulePreviewLogs = z.object({
   errors: z.array(NonEmptyString),
@@ -44,7 +51,7 @@ export const RulePreviewLogs = z.object({
    */
   duration: z.number().int(),
   startedAt: NonEmptyString.optional(),
-  requests: z.object({}).optional(),
+  requests: z.array(RulePreviewLoggedRequest).optional(),
 });
 
 export type RulePreviewRequestQuery = z.infer<typeof RulePreviewRequestQuery>;
@@ -52,7 +59,7 @@ export const RulePreviewRequestQuery = z.object({
   /**
    * Enables logging and returning in response ES queries, performed during rule execution
    */
-  enable_logging_requests: BooleanFromString.optional(),
+  enable_logged_requests: BooleanFromString.optional(),
 });
 export type RulePreviewRequestQueryInput = z.input<typeof RulePreviewRequestQuery>;
 

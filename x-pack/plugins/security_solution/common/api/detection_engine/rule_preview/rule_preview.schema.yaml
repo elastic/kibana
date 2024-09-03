@@ -12,7 +12,7 @@ paths:
       tags:
         - Rule preview API
       parameters:
-        - name: enable_logging_requests
+        - name: enable_logged_requests
           in: query
           description: Enables logging and returning in response ES queries, performed during rule execution
           required: false
@@ -101,6 +101,18 @@ components:
           format: date-time
       required: [invocationCount, timeframeEnd]
 
+    RulePreviewLoggedRequest:
+      type: object  
+      properties:
+        request:
+          $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        description:
+          $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        duration:
+          type: integer
+      required:
+        - request
+
     RulePreviewLogs:
       type: object
       properties:
@@ -118,7 +130,9 @@ components:
         startedAt:
           $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         requests:
-          type: object  
+          type: array
+          items:
+            $ref: '#/components/schemas/RulePreviewLoggedRequest'
       required:
         - errors
         - warnings

@@ -143,7 +143,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     scheduleRuleData: previewData.scheduleRuleData,
     exceptionsList,
     timeframeOptions: previewData.timeframeOptions,
-    enableLoggingRequests: showElasticsearchRequests,
+    enableLoggedRequests: showElasticsearchRequests,
   });
 
   const { startTransaction } = useStartTransaction();

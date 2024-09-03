@@ -278,7 +278,7 @@ export const previewRulesRoute = (
               invocationStartTime = moment();
 
               ({ state: statePreview, requests } = (await executor({
-                isLoggingRequestsEnabled: request.query.enable_logging_requests,
+                isLoggedRequestsEnabled: request.query.enable_logged_requests,
                 executionId: uuidv4(),
                 params,
                 previousStartedAt,
