@@ -6,20 +6,10 @@
  */
 
 import { EuiBadge, EuiPageHeaderProps, EuiToolTip } from '@elastic/eui';
-import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
-import { useProfilingIntegrationSetting } from '../../../../hooks/use_profiling_integration_setting';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../../hooks/use_time_range';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { ServerlessType } from '../../../../../common/serverless';
+import { keyBy, omit } from 'lodash';
+import React from 'react';
 import {
   isAWSLambdaAgentName,
   isAzureFunctionsAgentName,
@@ -28,10 +18,20 @@ import {
   isServerlessAgentName,
 } from '../../../../../common/agent_name';
 import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
-import { isApmSignal, isLogsSignal } from '../../../../utils/get_signal_type';
 import { SignalTypes } from '../../../../../common/entities/types';
-import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
+import { ServerlessType } from '../../../../../common/serverless';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useProfilingIntegrationSetting } from '../../../../hooks/use_profiling_integration_setting';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { isApmSignal, isLogsSignal } from '../../../../utils/get_signal_type';
+import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { BetaBadge } from '../../../shared/beta_badge';
+import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 
 export type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -48,8 +48,34 @@ export type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'profiling'
     | 'dashboards';
   hidden?: boolean;
-  sortKey: number;
 };
+
+const apmOrderedTabs: Array<Tab['key']> = [
+  'overview',
+  'transactions',
+  'dependencies',
+  'errors',
+  'metrics',
+  'infrastructure',
+  'service-map',
+  'logs',
+  'alerts',
+  'profiling',
+  'dashboards',
+];
+const logsOnlyOrderedTabs: Array<Tab['key']> = [
+  'overview',
+  'logs',
+  'dashboards',
+  'transactions',
+  'dependencies',
+  'errors',
+  'metrics',
+  'infrastructure',
+  'service-map',
+  'alerts',
+  'profiling',
+];
 
 export function isMetricsTabHidden({
   agentName,
@@ -119,17 +145,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     [serviceName, start, end, environment]
   );
 
-  const hasLogsSignal =
-    serviceEntitySummary?.signalTypes &&
-    isLogsSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
-
-  const hasApmSignal =
-    serviceEntitySummary?.signalTypes &&
-    isApmSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
-
-  const isLogsOnlyView = hasLogsSignal && !hasApmSignal;
-
-  const tabs: Tab[] = [
+  const allTabsDefinitions: Tab[] = [
     {
       key: 'overview',
       href: router.link('/services/{serviceName}/overview', {
@@ -139,7 +155,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.overviewTabLabel', {
         defaultMessage: 'Overview',
       }),
-      sortKey: 10,
     },
     {
       key: 'transactions',
@@ -150,7 +165,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
         defaultMessage: 'Transactions',
       }),
-      sortKey: 20,
     },
     {
       key: 'dependencies',
@@ -161,7 +175,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
         defaultMessage: 'Dependencies',
       }),
-      sortKey: 30,
       hidden: !agentName || isRumAgentName(agentName),
     },
     {
@@ -173,7 +186,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
         defaultMessage: 'Errors',
       }),
-      sortKey: 40,
     },
     {
       key: 'metrics',
@@ -184,7 +196,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      sortKey: 50,
       append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="beaker" />,
       hidden: isMetricsTabHidden({
         agentName,
@@ -202,7 +213,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
-      sortKey: 60,
       hidden: isInfraTabHidden({
         agentName,
         serverlessType,
@@ -218,7 +228,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
         defaultMessage: 'Service Map',
       }),
-      sortKey: 70,
     },
     {
       key: 'logs',
@@ -229,7 +238,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      sortKey: isLogsOnlyView ? 11 : 80,
       append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="beaker" />,
       hidden: !agentName || isRumAgentName(agentName) || isAzureFunctionsAgentName(serverlessType),
     },
@@ -256,7 +264,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.alertsTabLabel', {
         defaultMessage: 'Alerts',
       }),
-      sortKey: 90,
       hidden: !(isAlertingAvailable && canReadAlerts),
     },
     {
@@ -268,7 +275,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.profilingTabLabel', {
         defaultMessage: 'Universal Profiling',
       }),
-      sortKey: 100,
+
       hidden:
         !isProfilingIntegrationEnabled ||
         isRumOrMobileAgentName(agentName) ||
@@ -283,14 +290,26 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.dashboardsTabLabel', {
         defaultMessage: 'Dashboards',
       }),
-      sortKey: isLogsOnlyView ? 12 : 110,
       append: <TechnicalPreviewBadge icon="beaker" />,
     },
   ];
 
-  return tabs
+  const hasLogsSignal =
+    serviceEntitySummary?.signalTypes &&
+    isLogsSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+
+  const hasApmSignal =
+    serviceEntitySummary?.signalTypes &&
+    isApmSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+
+  const isLogsOnlyView = hasLogsSignal && !hasApmSignal;
+
+  const tabsGroupedByKey = keyBy(allTabsDefinitions, 'key');
+  const tabKeys = isLogsOnlyView ? logsOnlyOrderedTabs : apmOrderedTabs;
+
+  return tabKeys
+    .map((key) => tabsGroupedByKey[key])
     .filter((t) => !t.hidden)
-    .sort((a, b) => a.sortKey - b.sortKey)
     .map(({ href, key, label, prepend, append }) => ({
       href,
       label,
