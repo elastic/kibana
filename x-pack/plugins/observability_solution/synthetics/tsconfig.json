@@ -104,7 +104,6 @@
     "@kbn/babel-register",
     "@kbn/slo-plugin",
     "@kbn/ebt-tools",
-    "@kbn/synthetics-plugin"
   ],
   "exclude": ["target/**/*"]
 }
