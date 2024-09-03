@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
     const dateRangeStart = new Date().toISOString();
     const dateRangeEnd = new Date().toISOString();
 
-    describe('when no data is present', async () => {
+    describe('when no data is present', () => {
       it('returns a null snapshot', async () => {
         const apiResponse = await supertest.get(API_URLS.SNAPSHOT_COUNT).query({
           dateRangeStart,
@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when data is present', async () => {
+    describe('when data is present', () => {
       const numUpMonitors = 10;
       const numDownMonitors = 7;
       const numIps = 2;
@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       [true, false].forEach((includeTimespan: boolean) => {
         [true, false].forEach((includeObserver: boolean) => {
-          describe(`with timespans=${includeTimespan} and observer=${includeObserver}`, async () => {
+          describe(`with timespans=${includeTimespan} and observer=${includeObserver}`, () => {
             before(async () => {
               const promises: Array<Promise<any>> = [];
 
