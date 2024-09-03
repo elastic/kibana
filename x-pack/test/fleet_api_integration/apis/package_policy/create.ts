@@ -591,6 +591,41 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
+    it('should return 200 and disable an input that has all disabled streams', async function () {
+      const { body } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-disabled-streams',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              enabled: true,
+              streams: [
+                {
+                  enabled: false,
+                  data_stream: {
+                    type: 'logs',
+                    dataset: 'test.some_logs',
+                  },
+                },
+              ],
+              type: 'single_input',
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+      expect(body.item.inputs[0].enabled).to.eql(false);
+    });
+
     describe('input only packages', () => {
       it('should default dataset if not provided for input only pkg', async function () {
         await supertest

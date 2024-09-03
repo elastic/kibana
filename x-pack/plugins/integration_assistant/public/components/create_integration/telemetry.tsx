@@ -120,7 +120,7 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
         integrationName,
         integrationDescription: integrationSettings?.description ?? 'unknown',
         dataStreamName: integrationSettings?.dataStreamName ?? 'unknown',
-        inputType: integrationSettings?.inputType ?? 'unknown',
+        inputTypes: integrationSettings?.inputTypes ?? ['unknown'],
         actionTypeId: connector.actionTypeId,
         model: getConnectorModel(connector),
         provider: connector.apiProvider ?? 'unknown',

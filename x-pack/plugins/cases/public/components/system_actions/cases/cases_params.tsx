@@ -153,7 +153,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         error={errors.timeWindow}
         isInvalid={
           errors.timeWindow !== undefined &&
-          errors.timeWindow.length > 0 &&
+          Number(errors.timeWindow.length) > 0 &&
           timeWindow !== undefined
         }
       >

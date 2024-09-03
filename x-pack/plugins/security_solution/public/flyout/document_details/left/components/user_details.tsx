@@ -34,7 +34,7 @@ import { InspectButton, InspectButtonContainer } from '../../../../common/compon
 import { NetworkDetailsLink } from '../../../../common/components/links';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
+import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import { CellActions } from './cell_actions';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -52,6 +52,7 @@ import {
   USER_DETAILS_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID,
 } from './test_ids';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
@@ -87,6 +88,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
   const dispatch = useDispatch();
+  const { telemetry } = useKibana().services;
   // create a unique, but stable (across re-renders) query id
   const userDetailsQueryId = useMemo(() => `${USER_DETAILS_ID}-${uuid()}`, []);
   const relatedHostsQueryId = useMemo(() => `${RELATED_HOSTS_ID}-${uuid()}`, []);
@@ -96,7 +98,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
   const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const narrowDateRange = useCallback(
     (score, interval) => {
@@ -121,7 +123,11 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         banner: USER_PREVIEW_BANNER,
       },
     });
-  }, [openPreviewPanel, userName, scopeId]);
+    telemetry.reportDetailsFlyoutOpened({
+      location: scopeId,
+      panel: 'preview',
+    });
+  }, [openPreviewPanel, userName, scopeId, telemetry]);
 
   const openHostPreview = useCallback(
     (hostName: string) => {
@@ -133,8 +139,12 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
           banner: HOST_PREVIEW_BANNER,
         },
       });
+      telemetry.reportDetailsFlyoutOpened({
+        location: scopeId,
+        panel: 'preview',
+      });
     },
-    [openPreviewPanel, scopeId]
+    [openPreviewPanel, scopeId, telemetry]
   );
 
   const [isUserLoading, { inspect, userDetails, refetch }] = useObservedUserDetails({

@@ -12,6 +12,7 @@ import type { HttpFetchOptions } from '@kbn/core/public';
 import { getTimeFieldRange } from '@kbn/ml-date-picker';
 import moment from 'moment';
 import { useStorage } from '@kbn/ml-local-storage';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import type { MinimumTimeRangeOption } from './minimum_time_range';
 import { MINIMUM_TIME_RANGE } from './minimum_time_range';
@@ -29,6 +30,7 @@ export function useMinimumTimeRange() {
       timeRange: { from: number; to: number },
       minimumTimeRangeOption: MinimumTimeRangeOption,
       queryIn: QueryDslQueryContainer,
+      runtimeMappings: MappingRuntimeFields | undefined,
       headers?: HttpFetchOptions['headers']
     ) => {
       const minimumTimeRange = MINIMUM_TIME_RANGE[minimumTimeRangeOption];
@@ -47,6 +49,7 @@ export function useMinimumTimeRange() {
         index,
         timeFieldName: timeField,
         query: queryIn,
+        runtimeMappings,
         path: '/internal/file_upload/time_field_range',
         signal: abortController.current.signal,
       });

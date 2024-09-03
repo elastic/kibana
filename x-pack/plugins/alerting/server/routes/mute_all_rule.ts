@@ -28,6 +28,7 @@ export const muteAllRuleRoute = (
       options: {
         access: 'public',
         summary: `Mute all alerts`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         params: paramSchema,

@@ -75,6 +75,7 @@ export const getCategoryRequest = (
     timeFieldName,
     undefined,
     query,
+    undefined,
     wrap,
     undefined,
     undefined,

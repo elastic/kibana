@@ -49,6 +49,15 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
   const username = i18n.translate('xpack.searchPlayground.chat.message.assistant.username', {
     defaultMessage: 'AI',
   });
+  const AIMessageWrapperCSS = css`
+    .euiAvatar {
+      background-color: ${euiTheme.colors.emptyShade};
+    },
+    .euiCommentEvent {
+      border: ${euiTheme.border.thin};
+      border-radius: ${euiTheme.border.radius.medium};
+    },
+`;
 
   return (
     <>
@@ -58,13 +67,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
           timelineAvatar="dot"
           data-test-subj="retrieval-docs-comment"
           eventColor="subdued"
-          css={{
-            '.euiAvatar': { backgroundColor: euiTheme.colors.ghost },
-            '.euiCommentEvent': {
-              border: euiTheme.border.thin,
-              borderRadius: euiTheme.border.radius.medium,
-            },
-          }}
+          css={AIMessageWrapperCSS}
           event={
             <>
               <EuiText size="s">
@@ -107,13 +110,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
           timelineAvatar="dot"
           data-test-subj="retrieval-docs-comment-no-docs"
           eventColor="subdued"
-          css={{
-            '.euiAvatar': { backgroundColor: euiTheme.colors.ghost },
-            '.euiCommentEvent': {
-              border: euiTheme.border.thin,
-              borderRadius: euiTheme.border.radius.medium,
-            },
-          }}
+          css={AIMessageWrapperCSS}
           event={
             <>
               <EuiText size="s">
@@ -163,9 +160,9 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
           })
         }
         css={{
-          '.euiAvatar': { backgroundColor: euiTheme.colors.ghost },
+          '.euiAvatar': { backgroundColor: euiTheme.colors.emptyShade },
           '.euiCommentEvent__body': {
-            backgroundColor: euiTheme.colors.ghost,
+            backgroundColor: euiTheme.colors.emptyShade,
           },
         }}
         eventColor="subdued"

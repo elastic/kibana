@@ -13,7 +13,6 @@ import { EuiSpacer, EuiInMemoryTable, EuiButtonIcon, EuiToolTip } from '@elastic
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import { timeFormatter } from '@kbn/ml-date-utils';
 
 import type { JobMessage } from '../../../../common/types/audit_message';
@@ -66,7 +65,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
           ''
         ),
         render: (message: JobMessage) => <JobIcon message={message} />,
-        width: `${theme.euiSizeL}`,
+        width: '6%',
       },
       {
         field: 'timestamp',

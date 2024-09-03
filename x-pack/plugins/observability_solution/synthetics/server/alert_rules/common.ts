@@ -189,6 +189,9 @@ export const setRecoveredAlertsContext = ({
     const alertUuid = recoveredAlert.alert.getUuid();
 
     const state = recoveredAlert.alert.getState();
+    const alertHit = recoveredAlert.hit;
+    const locationId = alertHit?.['location.id'];
+    const configId = alertHit?.configId;
 
     let recoveryReason = '';
     let recoveryStatus = i18n.translate(
@@ -202,15 +205,14 @@ export const setRecoveredAlertsContext = ({
     let monitorSummary: MonitorSummaryStatusRule | null = null;
     let lastErrorMessage;
 
-    if (state?.idWithLocation && staleDownConfigs[state.idWithLocation]) {
-      const { idWithLocation, locationId } = state;
-      const downConfig = staleDownConfigs[idWithLocation];
-      const { ping, configId } = downConfig;
+    if (recoveredAlertId && locationId && staleDownConfigs[recoveredAlertId]) {
+      const downConfig = staleDownConfigs[recoveredAlertId];
+      const { ping } = downConfig;
       monitorSummary = getMonitorSummary(
         ping,
         RECOVERED_LABEL,
         locationId,
-        configId,
+        downConfig.configId,
         dateFormat,
         tz
       );
@@ -245,12 +247,11 @@ export const setRecoveredAlertsContext = ({
       }
     }
 
-    if (state?.idWithLocation && upConfigs[state.idWithLocation]) {
-      const { idWithLocation, configId, locationId } = state;
+    if (configId && recoveredAlertId && locationId && upConfigs[recoveredAlertId]) {
       // pull the last error from state, since it is not available on the up ping
-      lastErrorMessage = state.lastErrorMessage;
+      lastErrorMessage = alertHit?.['error.message'];
 
-      const upConfig = upConfigs[idWithLocation];
+      const upConfig = upConfigs[recoveredAlertId];
       isUp = Boolean(upConfig) || false;
       const ping = upConfig.ping;
 
@@ -293,6 +294,8 @@ export const setRecoveredAlertsContext = ({
     const context = {
       ...state,
       ...(monitorSummary ? monitorSummary : {}),
+      locationId,
+      idWithLocation: recoveredAlertId,
       lastErrorMessage,
       recoveryStatus,
       linkMessage,

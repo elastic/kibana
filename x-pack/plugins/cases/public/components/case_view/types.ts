@@ -16,6 +16,7 @@ export interface CaseViewBaseProps {
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
+  onAlertsTableLoaded?: (eventIds: Array<Partial<{ _id: string }>>) => void;
   /**
    * A React `Ref` that Exposes data refresh callbacks.
    * **NOTE**: Do not hold on to the `.current` object, as it could become stale

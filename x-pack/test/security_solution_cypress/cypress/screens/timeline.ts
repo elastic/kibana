@@ -110,6 +110,10 @@ export const ANALYZER_GRAPH_TAB_BUTTON = getDataTestSubjectSelector('timelineTab
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
+export const EQL_EVENT_COUNT = '[data-test-subj="eql-events-count"]';
+
+export const QUERY_EVENT_COUNT = '[data-test-subj="query-events-count"]';
+
 export const ALERTS_TABLE_COUNT = `[data-test-subj="toolbar-alerts-count"]`;
 
 export const STAR_ICON = '[data-test-subj="timeline-favorite-empty-star"]';

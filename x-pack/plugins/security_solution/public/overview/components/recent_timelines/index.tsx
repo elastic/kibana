@@ -33,8 +33,8 @@ interface Props {
 const PAGE_SIZE = 3;
 
 const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
@@ -47,10 +47,10 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
       queryTimelineById({
         duplicate,
         timelineId,
-        unifiedComponentsInTimelineEnabled,
+        unifiedComponentsInTimelineDisabled,
       });
     },
-    [queryTimelineById, unifiedComponentsInTimelineEnabled]
+    [queryTimelineById, unifiedComponentsInTimelineDisabled]
   );
 
   const goToTimelines = useCallback(

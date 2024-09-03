@@ -52,19 +52,10 @@ const rule = getEsqlRule();
 const expectedValidEsqlQuery =
   'from auditbeat* | stats _count=count(event.category) by event.category';
 
-// skipped in MKI as it depends on feature flag alertSuppressionForEsqlRuleEnabled
-// alertSuppressionForEsqlRuleEnabled feature flag is also enabled in a global config
 describe(
   'Detection ES|QL rules, edit',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForEsqlRuleEnabled',
-        ])}`,
-      ],
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     beforeEach(() => {

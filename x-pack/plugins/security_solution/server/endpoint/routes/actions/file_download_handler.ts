@@ -47,7 +47,7 @@ export const registerActionFileDownloadRoutes = (
         },
       },
       withEndpointAuthz(
-        { all: ['canWriteFileOperations'] },
+        { any: ['canWriteFileOperations', 'canWriteExecuteOperations'] },
         logger,
         getActionFileDownloadRouteHandler(endpointContext)
       )

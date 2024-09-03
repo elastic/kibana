@@ -66,18 +66,18 @@ describe('NewTimelineButton', () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({
-        columns: defaultHeaders,
+        columns: defaultUdtHeaders,
         dataViewId,
         id: TimelineId.test,
         indexNames: selectedPatterns,
         show: true,
         timelineType: 'default',
         updated: undefined,
-        excludedRowRendererIds: [],
+        excludedRowRendererIds: [...Object.keys(RowRendererId)],
       });
     });
 
-    // enable unified components in timeline
+    // disable unified components in timeline
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
 
     getByTestId('timeline-modal-new-timeline-dropdown-button').click();
@@ -87,14 +87,14 @@ describe('NewTimelineButton', () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({
-        columns: defaultUdtHeaders,
+        columns: defaultHeaders,
         dataViewId,
         id: TimelineId.test,
         indexNames: selectedPatterns,
         show: true,
         timelineType: 'default',
         updated: undefined,
-        excludedRowRendererIds: [...Object.keys(RowRendererId)],
+        excludedRowRendererIds: [],
       });
     });
   });

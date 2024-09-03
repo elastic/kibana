@@ -176,6 +176,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('show edit context', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens();
         });
+
+        it('save selected fields between modes', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveFieldsBetweenModes();
+        });
       });
 
       after(async () => {

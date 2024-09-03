@@ -49,18 +49,21 @@ export const GithubViaAppLogic = kea<MakeLogicType<GithubViaAppValues, GithubVia
     githubAppId: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setGithubAppId: (_, githubAppId) => githubAppId,
       },
     ],
     githubEnterpriseServerUrl: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setGithubEnterpriseServerUrl: (_, githubEnterpriseServerUrl) => githubEnterpriseServerUrl,
       },
     ],
     stagedPrivateKey: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setStagedPrivateKey: (_, stagedPrivateKey) => stagedPrivateKey,
       },
     ],
@@ -74,6 +77,7 @@ export const GithubViaAppLogic = kea<MakeLogicType<GithubViaAppValues, GithubVia
     indexPermissionsValue: [
       true,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setSourceIndexPermissionsValue: (_, indexPermissionsValue) => indexPermissionsValue,
         resetSourceState: () => false,
       },

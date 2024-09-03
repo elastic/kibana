@@ -80,7 +80,12 @@ describe('Response Actions file download API', () => {
     it('should error if user has no authz to api', async () => {
       (
         (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
-      ).mockResolvedValue(getEndpointAuthzInitialStateMock({ canWriteFileOperations: false }));
+      ).mockResolvedValue(
+        getEndpointAuthzInitialStateMock({
+          canWriteFileOperations: false,
+          canWriteExecuteOperations: false,
+        })
+      );
 
       await apiTestSetup
         .getRegisteredVersionedRoute('get', ACTION_AGENT_FILE_DOWNLOAD_ROUTE, '2023-10-31')

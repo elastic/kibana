@@ -51,8 +51,8 @@ export const useTimelineControlColumn = ({
 }: UseTimelineControlColumnArgs) => {
   const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const isEnterprisePlus = useLicense().isEnterprise();
@@ -62,7 +62,7 @@ export const useTimelineControlColumn = ({
   // We need one less when the unified components are enabled because the document expand is provided by the unified data table
   const UNIFIED_COMPONENTS_ACTION_BUTTON_COUNT = ACTION_BUTTON_COUNT - 1;
   return useMemo(() => {
-    if (unifiedComponentsInTimelineEnabled) {
+    if (!unifiedComponentsInTimelineDisabled) {
       return getDefaultControlColumn(UNIFIED_COMPONENTS_ACTION_BUTTON_COUNT).map((x) => ({
         ...x,
         headerCellRender: function HeaderCellRender(props: UnifiedActionProps) {
@@ -94,7 +94,7 @@ export const useTimelineControlColumn = ({
            * the number of rows in the table currently rendered.
            *
            * */
-          if (props.rowIndex >= events.length) return <></>;
+          if ('rowIndex' in props && props.rowIndex >= events.length) return <></>;
           props.setCellProps({
             className:
               props.expandedEventId === events[props.rowIndex]?._id
@@ -135,7 +135,7 @@ export const useTimelineControlColumn = ({
       })) as unknown as ColumnHeaderOptions[];
     }
   }, [
-    unifiedComponentsInTimelineEnabled,
+    unifiedComponentsInTimelineDisabled,
     UNIFIED_COMPONENTS_ACTION_BUTTON_COUNT,
     browserFields,
     localColumns,

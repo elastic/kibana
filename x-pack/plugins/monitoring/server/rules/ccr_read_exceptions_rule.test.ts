@@ -279,9 +279,9 @@ describe('CCRReadExceptionsRule', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1:.follower_index_1',
         context: {
-          internalFullMessage: `CCR read exceptions alert is firing for the following remote cluster: ${remoteCluster}. Current 'follower_index' index affected: ${followerIndex}. [View CCR stats](http://localhost:5601/app/monitoring#/elasticsearch/ccr?_g=(cluster_uuid:${clusterUuid}))`,
+          internalFullMessage: `CCR read exceptions alert is firing for the following remote cluster: ${remoteCluster}. Current 'follower_index' index affected: ${followerIndex}. [View CCR stats](http://localhost:5601/app/monitoring#/elasticsearch/ccr?_g=(cluster_uuid:'${clusterUuid}'))`,
           internalShortMessage: `CCR read exceptions alert is firing for the following remote cluster: ${remoteCluster}. Verify follower and leader index relationships on the affected remote cluster.`,
-          action: `[View CCR stats](http://localhost:5601/app/monitoring#/elasticsearch/ccr?_g=(cluster_uuid:${clusterUuid}))`,
+          action: `[View CCR stats](http://localhost:5601/app/monitoring#/elasticsearch/ccr?_g=(cluster_uuid:'${clusterUuid}'))`,
           actionPlain:
             'Verify follower and leader index relationships on the affected remote cluster.',
           clusterName,
@@ -452,9 +452,9 @@ describe('CCRReadExceptionsRule', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1:.follower_index_1',
         context: {
-          internalFullMessage: `CCR read exceptions alert is firing for the following remote cluster: ${remoteCluster}. Current 'follower_index' index affected: ${followerIndex}. [View CCR stats](http://localhost:5601/app/monitoring#/elasticsearch/ccr?_g=(cluster_uuid:${clusterUuid},ccs:testCluster))`,
+          internalFullMessage: `CCR read exceptions alert is firing for the following remote cluster: ${remoteCluster}. Current 'follower_index' index affected: ${followerIndex}. [View CCR stats](http://localhost:5601/app/monitoring#/elasticsearch/ccr?_g=(cluster_uuid:'${clusterUuid}',ccs:testCluster))`,
           internalShortMessage: `CCR read exceptions alert is firing for the following remote cluster: ${remoteCluster}. Verify follower and leader index relationships on the affected remote cluster.`,
-          action: `[View CCR stats](http://localhost:5601/app/monitoring#/elasticsearch/ccr?_g=(cluster_uuid:${clusterUuid},ccs:testCluster))`,
+          action: `[View CCR stats](http://localhost:5601/app/monitoring#/elasticsearch/ccr?_g=(cluster_uuid:'${clusterUuid}',ccs:testCluster))`,
           actionPlain:
             'Verify follower and leader index relationships on the affected remote cluster.',
           clusterName,

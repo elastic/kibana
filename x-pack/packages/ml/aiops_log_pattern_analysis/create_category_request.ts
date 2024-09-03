@@ -9,6 +9,8 @@ import type {
   QueryDslQueryContainer,
   AggregationsCustomCategorizeTextAnalyzer,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object/src/is_populated_object';
 
 import type { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
@@ -29,6 +31,7 @@ export function createCategoryRequest(
   timeField: string,
   timeRange: { from: number; to: number } | undefined,
   queryIn: QueryDslQueryContainer,
+  runtimeMappings: MappingRuntimeFields | undefined,
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number,
   additionalFilter?: CategorizationAdditionalFilter,
@@ -113,6 +116,7 @@ export function createCategoryRequest(
       body: {
         query,
         aggs: wrap(aggs),
+        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
       },
     },
   };

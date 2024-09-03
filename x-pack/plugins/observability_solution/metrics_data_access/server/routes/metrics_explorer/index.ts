@@ -10,6 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
+import { METRICS_EXPLORER_API_MAX_METRICS } from '../../../common/constants';
 import {
   metricsExplorerRequestBodyRT,
   metricsExplorerResponseRT,
@@ -36,49 +37,71 @@ export const initMetricExplorerRoute = (framework: KibanaFramework) => {
       },
     },
     async (requestContext, request, response) => {
-      const options = pipe(
-        metricsExplorerRequestBodyRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
+      try {
+        const options = pipe(
+          metricsExplorerRequestBodyRT.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
 
-      const client = createSearchClient(requestContext, framework);
-      const interval = await findIntervalForMetrics(client, options);
+        if (options.metrics.length > METRICS_EXPLORER_API_MAX_METRICS) {
+          throw Boom.badRequest(
+            `'metrics' size is greater than maximum of ${METRICS_EXPLORER_API_MAX_METRICS} allowed.`
+          );
+        }
 
-      const optionsWithInterval = options.forceInterval
-        ? options
-        : {
-            ...options,
-            timerange: {
-              ...options.timerange,
-              interval: interval ? `>=${interval}s` : options.timerange.interval,
-            },
-          };
+        const client = createSearchClient(requestContext, framework);
+        const interval = await findIntervalForMetrics(client, options);
 
-      const metricsApiOptions = convertRequestToMetricsAPIOptions(optionsWithInterval);
-      const metricsApiResponse = await query(client, metricsApiOptions);
-      const totalGroupings = await queryTotalGroupings(client, metricsApiOptions);
-      const hasGroupBy =
-        Array.isArray(metricsApiOptions.groupBy) && metricsApiOptions.groupBy.length > 0;
+        const optionsWithInterval = options.forceInterval
+          ? options
+          : {
+              ...options,
+              timerange: {
+                ...options.timerange,
+                interval: interval ? `>=${interval}s` : options.timerange.interval,
+              },
+            };
 
-      const pageInfo: MetricsExplorerPageInfo = {
-        total: totalGroupings,
-        afterKey: null,
-      };
+        const metricsApiOptions = convertRequestToMetricsAPIOptions(optionsWithInterval);
+        const metricsApiResponse = await query(client, metricsApiOptions);
+        const totalGroupings = await queryTotalGroupings(client, metricsApiOptions);
+        const hasGroupBy =
+          Array.isArray(metricsApiOptions.groupBy) && metricsApiOptions.groupBy.length > 0;
 
-      if (metricsApiResponse.info.afterKey) {
-        pageInfo.afterKey = metricsApiResponse.info.afterKey;
+        const pageInfo: MetricsExplorerPageInfo = {
+          total: totalGroupings,
+          afterKey: null,
+        };
+
+        if (metricsApiResponse.info.afterKey) {
+          pageInfo.afterKey = metricsApiResponse.info.afterKey;
+        }
+
+        // If we have a groupBy but there are ZERO groupings returned then we need to
+        // return an empty array. Otherwise we transform the series to match the current schema.
+        const series =
+          hasGroupBy && totalGroupings === 0
+            ? []
+            : metricsApiResponse.series.map(transformSeries(hasGroupBy));
+
+        return response.ok({
+          body: metricsExplorerResponseRT.encode({ series, pageInfo }),
+        });
+      } catch (err) {
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
+
+        return response.customError({
+          statusCode: err.statusCode ?? 500,
+          body: {
+            message: err.message ?? 'An unexpected error occurred',
+          },
+        });
       }
-
-      // If we have a groupBy but there are ZERO groupings returned then we need to
-      // return an empty array. Otherwise we transform the series to match the current schema.
-      const series =
-        hasGroupBy && totalGroupings === 0
-          ? []
-          : metricsApiResponse.series.map(transformSeries(hasGroupBy));
-
-      return response.ok({
-        body: metricsExplorerResponseRT.encode({ series, pageInfo }),
-      });
     }
   );
 };

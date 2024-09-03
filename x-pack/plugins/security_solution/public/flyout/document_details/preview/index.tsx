@@ -8,7 +8,6 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { i18n } from '@kbn/i18n';
 import { DocumentDetailsPreviewPanelKey } from '../shared/constants/panel_keys';
 import { useTabs } from '../right/hooks/use_tabs';
 import { useFlyoutIsExpandable } from '../right/hooks/use_flyout_is_expandable';
@@ -18,17 +17,7 @@ import { PanelHeader } from '../right/header';
 import { PanelContent } from '../right/content';
 import { PreviewPanelFooter } from './footer';
 import type { RightPanelTabType } from '../right/tabs';
-
-export const ALERT_PREVIEW_BANNER = {
-  title: i18n.translate(
-    'xpack.securitySolution.flyout.left.insights.correlations.alertPreviewTitle',
-    {
-      defaultMessage: 'Preview alert details',
-    }
-  ),
-  backgroundColor: 'warning',
-  textColor: 'warning',
-};
+import { ALERT_PREVIEW_BANNER } from './constants';
 
 /**
  * Panel to be displayed in the document details expandable flyout on top of right section

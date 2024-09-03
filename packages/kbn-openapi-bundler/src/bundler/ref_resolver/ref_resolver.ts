@@ -7,8 +7,8 @@
  */
 
 import path from 'path';
-import { extractByJsonPointer } from '../../utils/extract_by_json_pointer';
-import { readYamlDocument } from '../../utils/read_yaml_document';
+import { extractObjectByJsonPointer } from '../../utils/extract_by_json_pointer';
+import { readDocument } from '../../utils/read_document';
 import { ResolvedRef } from './resolved_ref';
 import { ResolvedDocument } from './resolved_document';
 
@@ -22,7 +22,7 @@ export class RefResolver implements IRefResolver {
 
   async resolveRef(refDocumentAbsolutePath: string, pointer: string): Promise<ResolvedRef> {
     const resolvedRefDocument = await this.resolveDocument(refDocumentAbsolutePath);
-    const refNode = extractByJsonPointer(resolvedRefDocument.document, pointer);
+    const refNode = extractObjectByJsonPointer(resolvedRefDocument.document, pointer);
     const resolvedRef = {
       absolutePath: refDocumentAbsolutePath,
       pointer,
@@ -47,7 +47,7 @@ export class RefResolver implements IRefResolver {
     }
 
     try {
-      const document = await readYamlDocument(documentAbsolutePath);
+      const document = await readDocument(documentAbsolutePath);
       const resolvedRef = {
         absolutePath: documentAbsolutePath,
         document,

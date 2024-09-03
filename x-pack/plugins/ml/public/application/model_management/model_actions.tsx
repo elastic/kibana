@@ -332,7 +332,7 @@ export function useModelActions({
             item.deployment_ids.some(
               (dId) =>
                 Array.isArray(item.inference_apis) &&
-                !item.inference_apis.some((inference) => inference.model_id === dId)
+                !item.inference_apis.some((inference) => inference.inference_id === dId)
             )),
         enabled: (item) => !isLoading,
         onClick: async (item) => {

@@ -28,7 +28,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
   const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
-  const INTEGRATIONS_DEV_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/${DOC_LINK_VERSION}/`;
+  const INTEGRATIONS_DEV_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/current/`;
   const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
   const OBSERVABILITY_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/`;
   const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
@@ -196,9 +196,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       crawlerOverview: `${ENTERPRISE_SEARCH_DOCS}crawler.html`,
       deployTrainedModels: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-models.html`,
       documentLevelSecurity: `${ELASTICSEARCH_DOCS}document-level-security.html`,
+      e5Model: `${MACHINE_LEARNING_DOCS}ml-nlp-e5.html`,
       elser: `${ELASTICSEARCH_DOCS}semantic-search-elser.html`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       indexApi: `${ELASTICSEARCH_DOCS}docs-index_.html`,
+      inferenceApiCreate: `${ELASTICSEARCH_DOCS}put-inference-api.html`,
       ingestionApis: `${ELASTICSEARCH_DOCS}search-with-elasticsearch.html`,
       ingestPipelines: `${ELASTICSEARCH_DOCS}ingest-pipeline-search.html`,
       knnSearch: `${ELASTICSEARCH_DOCS}knn-search.html`,
@@ -216,6 +218,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       searchLabs: `${SEARCH_LABS_URL}`,
       searchLabsRepo: `${SEARCH_LABS_REPO}`,
       searchTemplates: `${ELASTICSEARCH_DOCS}search-template.html`,
+      semanticTextField: `${ELASTICSEARCH_DOCS}semantic-text.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
       supportedNlpModels: `${MACHINE_LEARNING_DOCS}ml-nlp-model-ref.html`,
       syncRules: `${ENTERPRISE_SEARCH_DOCS}sync-rules.html`,
@@ -492,6 +495,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         assetCriticality: `${SECURITY_SOLUTION_DOCS}asset-criticality.html`,
       },
       detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
+      aiAssistant: `${SECURITY_SOLUTION_DOCS}security-assistant.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -613,6 +617,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       sloBurnRateRule: isServerless
         ? `${SERVERLESS_OBSERVABILITY_DOCS}create-slo-burn-rate-alert-rule`
         : `${OBSERVABILITY_DOCS}slo-burn-rate-alert.html`,
+      aiAssistant: `${OBSERVABILITY_DOCS}obs-ai-assistant.html`,
     },
     alerting: {
       guide: isServerless

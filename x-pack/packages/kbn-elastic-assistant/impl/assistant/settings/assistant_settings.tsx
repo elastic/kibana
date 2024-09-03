@@ -59,7 +59,6 @@ interface Props {
   onClose: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;
-  isFlyoutMode: boolean;
   onSave: (success: boolean) => Promise<void>;
   selectedConversationId?: string;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
@@ -80,10 +79,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     onConversationSelected,
     conversations,
     conversationsLoaded,
-    isFlyoutMode,
   }) => {
     const {
-      actionTypeRegistry,
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
       toasts,
@@ -99,7 +96,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
 
     const { data: anonymizationFields, refetch: refetchAnonymizationFieldsResults } =
       useFetchAnonymizationFields();
-    const { data: allPrompts } = useFetchPrompts();
+    const { data: allPrompts, isFetched: promptsLoaded } = useFetchPrompts();
 
     const { data: connectors } = useLoadConnectors({
       http,
@@ -125,7 +122,13 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       setUpdatedAnonymizationData,
       setPromptsBulkActions,
       setUpdatedSystemPromptSettings,
-    } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded, anonymizationFields);
+    } = useSettingsUpdater(
+      conversations,
+      allPrompts,
+      conversationsLoaded,
+      promptsLoaded,
+      anonymizationFields
+    );
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
@@ -172,6 +175,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
         conversationSettings[defaultSelectedConversationId] == null;
       const newSelectedConversation: Conversation | undefined =
         Object.values(conversationSettings)[0];
+
       if (isSelectedConversationDeleted && newSelectedConversation != null) {
         onConversationSelected({
           cId: newSelectedConversation.id,
@@ -317,14 +321,13 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 className="eui-scrollBar"
                 grow={true}
                 css={css`
-                  max-height: 550px;
+                  max-height: 519px;
                   overflow-y: scroll;
                 `}
               >
                 {!selectedSettingsTab ||
                   (selectedSettingsTab === CONVERSATIONS_TAB && (
                     <ConversationSettings
-                      actionTypeRegistry={actionTypeRegistry}
                       connectors={connectors}
                       defaultConnector={defaultConnector}
                       conversationSettings={conversationSettings}
@@ -338,7 +341,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                       setAssistantStreamingEnabled={setUpdatedAssistantStreamingEnabled}
                       onSelectedConversationChange={onHandleSelectedConversationChange}
                       http={http}
-                      isFlyoutMode={isFlyoutMode}
                     />
                   ))}
                 {selectedSettingsTab === QUICK_PROMPTS_TAB && (

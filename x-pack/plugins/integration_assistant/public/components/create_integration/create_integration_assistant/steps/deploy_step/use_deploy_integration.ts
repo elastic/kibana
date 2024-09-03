@@ -46,6 +46,12 @@ export const useDeployIntegration = ({
 
     (async () => {
       try {
+        if (integrationSettings.samplesFormat == null) {
+          throw new Error(
+            'Logic error: samplesFormat is required and cannot be null or undefined when creating integration.'
+          );
+        }
+
         const parameters: BuildIntegrationRequestBody = {
           integration: {
             title: integrationSettings.title ?? '',
@@ -57,10 +63,11 @@ export const useDeployIntegration = ({
                 title: integrationSettings.dataStreamTitle ?? '',
                 description: integrationSettings.dataStreamDescription ?? '',
                 name: integrationSettings.dataStreamName ?? '',
-                inputTypes: integrationSettings.inputType ? [integrationSettings.inputType] : [],
+                inputTypes: integrationSettings.inputTypes ?? [],
                 rawSamples: integrationSettings.logsSampleParsed ?? [],
                 docs: result.docs ?? [],
                 pipeline: result.pipeline,
+                samplesFormat: integrationSettings.samplesFormat,
               },
             ],
           },

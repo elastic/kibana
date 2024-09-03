@@ -100,7 +100,7 @@ describe('UnifiedTimelineBody', () => {
 
     expect(MockUnifiedTimelineComponent).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        columns: defaultUdtHeaders,
+        columns: [],
       }),
       {}
     );

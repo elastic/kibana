@@ -26,7 +26,7 @@ export const createQueue = (config: Config, client: Client, logger: ToolingLog):
       docs.forEach((doc) => {
         const namespace = `${config.indexing.dataset}.${doc.namespace}`;
         const indexName = `${INDEX_PREFIX}-${namespace}-${moment(doc['@timestamp']).format(
-          'YYYY-MM-DD'
+          'YYYY-MM-01'
         )}`;
         indices.add(indexName);
         body.push({ create: { _index: indexName } });

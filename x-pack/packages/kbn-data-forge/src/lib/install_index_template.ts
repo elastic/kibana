@@ -7,6 +7,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
+import { isArray } from 'lodash';
 import { indexTemplates } from '../data_sources';
 import { Config } from '../types';
 
@@ -26,9 +27,14 @@ export async function installIndexTemplate(
       await client.cluster.putComponentTemplate({ name: component.name, ...component.template });
     }
     logger.info(`Installing index template (${indexTemplateDef.namespace})`);
+    // Clone the template and add the base component name
+    const template = { ...indexTemplateDef.template };
+    if (isArray(template.composed_of)) {
+      template.composed_of.push('kbn-data-forge_base');
+    }
     await client.indices.putIndexTemplate({
       name: indexTemplateDef.namespace,
-      body: indexTemplateDef.template,
+      body: template,
     });
   }
 }

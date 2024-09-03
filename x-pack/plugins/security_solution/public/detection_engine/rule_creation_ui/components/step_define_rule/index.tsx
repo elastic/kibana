@@ -54,7 +54,6 @@ import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { SuppressionInfoIcon } from '../suppression_info_icon';
 import { EsqlInfoIcon } from '../../../rule_creation/components/esql_info_icon';
 import {
@@ -203,13 +202,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     watch: ['machineLearningJobId'],
   });
   const {
+    allJobsStarted,
     hasMlAdminPermissions,
     hasMlLicense,
-    mlFieldsLoading,
+    loading: mlRuleConfigLoading,
     mlSuppressionFields,
-    noMlJobsStarted,
-    someMlJobsStarted,
   } = useMLRuleConfig({ machineLearningJobId });
+
+  const isMlSuppressionIncomplete =
+    isMlRule(ruleType) && machineLearningJobId?.length > 0 && !allJobsStarted;
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
@@ -217,10 +218,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const isThresholdRule = getIsThresholdRule(ruleType);
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
-
-  const isAIAssistantEnabled = useIsExperimentalFeatureEnabled(
-    'AIAssistantOnRuleCreationFormEnabled'
-  );
   const { getFields, reset, setFieldValue } = form;
 
   const setRuleTypeCallback = useSetFieldValueWithCallback({
@@ -472,82 +469,68 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       indexPatternsFields: indexPattern.fields,
     });
 
+  /** Suppression fields being selected is a special case for our form logic, as we can't
+   * disable these fields and leave users in a bad state that they cannot change.
+   * The exception is threshold rules, which use an existing threshold field for the same
+   * purpose and so are treated as if the field is always selected.  */
+  const areSuppressionFieldsSelected = isThresholdRule || groupByFields.length > 0;
+
   const areSuppressionFieldsDisabledBySequence =
     isEqlRule(ruleType) &&
     isEqlSequenceQuery(queryBar?.query?.query as string) &&
     groupByFields.length === 0;
 
+  /** If we don't have ML field information, users can't meaningfully interact with suppression fields */
+  const areSuppressionFieldsDisabledByMlFields =
+    isMlRule(ruleType) && (mlRuleConfigLoading || !mlSuppressionFields.length);
+
+  const isThresholdSuppressionDisabled = isThresholdRule && !enableThresholdSuppression;
+
+  /** Suppression fields are generally disabled if either:
+   * - License is insufficient (i.e. less than platinum)
+   * - An EQL Sequence is used
+   * - ML Field information is not available
+   */
+  const areSuppressionFieldsDisabled =
+    !isAlertSuppressionLicenseValid ||
+    areSuppressionFieldsDisabledBySequence ||
+    areSuppressionFieldsDisabledByMlFields;
+
   const isSuppressionGroupByDisabled =
-    !isAlertSuppressionLicenseValid ||
-    areSuppressionFieldsDisabledBySequence ||
-    isEsqlSuppressionLoading ||
-    (isMlRule(ruleType) && (noMlJobsStarted || mlFieldsLoading || !mlSuppressionFields.length));
+    (areSuppressionFieldsDisabled || isEsqlSuppressionLoading) && !areSuppressionFieldsSelected;
 
-  const suppressionGroupByDisabledText = areSuppressionFieldsDisabledBySequence
-    ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
-    : isMlRule(ruleType) && noMlJobsStarted
-    ? i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL
-    : alertSuppressionUpsellingMessage;
+  const suppressionGroupByDisabledText = useMemo(() => {
+    if (areSuppressionFieldsDisabledBySequence) {
+      return i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP;
+    } else if (areSuppressionFieldsDisabledByMlFields) {
+      return i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL;
+    } else {
+      return alertSuppressionUpsellingMessage;
+    }
+  }, [
+    alertSuppressionUpsellingMessage,
+    areSuppressionFieldsDisabledByMlFields,
+    areSuppressionFieldsDisabledBySequence,
+  ]);
 
-  const suppressionGroupByFields = isEsqlRule(ruleType)
-    ? esqlSuppressionFields
-    : isMlRule(ruleType)
-    ? mlSuppressionFields
-    : termsAggregationFields;
+  const suppressionGroupByFields = useMemo(() => {
+    if (isEsqlRule(ruleType)) {
+      return esqlSuppressionFields;
+    } else if (isMlRule(ruleType)) {
+      return mlSuppressionFields;
+    } else {
+      return termsAggregationFields;
+    }
+  }, [esqlSuppressionFields, mlSuppressionFields, ruleType, termsAggregationFields]);
 
-  /**
-   * Component that allows selection of suppression intervals disabled:
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - or for not threshold rule - when groupBy fields not selected
-   * - Eql sequence is used
-   */
   const isGroupByChildrenDisabled =
-    areSuppressionFieldsDisabledBySequence || !isAlertSuppressionLicenseValid || isThresholdRule
-      ? false
-      : !groupByFields?.length;
-
-  /**
-   * Per rule execution radio option is disabled
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - always disabled for threshold rule
-   *  - Eql sequence is used and suppression fields are in the default state
-   */
-  const isPerRuleExecutionDisabled =
-    areSuppressionFieldsDisabledBySequence || !isAlertSuppressionLicenseValid || isThresholdRule;
-
-  /**
-   * Per time period execution radio option is disabled
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - disabled for threshold rule when enabled suppression is not checked
-   * - Eql sequence is used and suppression fields are in the default state
-   */
+    areSuppressionFieldsDisabled || isThresholdSuppressionDisabled || !areSuppressionFieldsSelected;
+  const isPerRuleExecutionDisabled = areSuppressionFieldsDisabled || isThresholdRule;
   const isPerTimePeriodDisabled =
-    areSuppressionFieldsDisabledBySequence ||
-    !isAlertSuppressionLicenseValid ||
-    (isThresholdRule && !enableThresholdSuppression);
-
-  /**
-   * Suppression duration is disabled when
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - when suppression by rule execution is selected in radio button
-   *  - when threshold suppression is not enabled and no group by fields selected
-   * -  Eql sequence is used and suppression fields are in the default state
-   * */
+    areSuppressionFieldsDisabled || isThresholdSuppressionDisabled || !areSuppressionFieldsSelected;
   const isDurationDisabled =
-    areSuppressionFieldsDisabledBySequence ||
-    !isAlertSuppressionLicenseValid ||
-    (!enableThresholdSuppression && groupByFields?.length === 0);
-
-  /**
-   * Suppression missing fields is disabled when
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - when no group by fields selected
-   * -  Eql sequence is used and suppression fields are in the default state
-   * */
-  const isMissingFieldsDisabled =
-    areSuppressionFieldsDisabledBySequence ||
-    !isAlertSuppressionLicenseValid ||
-    !groupByFields.length;
+    areSuppressionFieldsDisabled || isThresholdSuppressionDisabled || !areSuppressionFieldsSelected;
+  const isMissingFieldsDisabled = areSuppressionFieldsDisabled || !areSuppressionFieldsSelected;
 
   const GroupByChildren = useCallback(
     ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
@@ -953,7 +936,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
 
-          {isAIAssistantEnabled && !isMlRule(ruleType) && !isQueryBarValid && (
+          {!isMlRule(ruleType) && !isQueryBarValid && (
             <AiAssistant getFields={form.getFields} language={queryBar?.query?.language} />
           )}
 
@@ -1107,7 +1090,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     disabledText: suppressionGroupByDisabledText,
                   }}
                 />
-                {someMlJobsStarted && (
+                {isMlSuppressionIncomplete && (
                   <EuiText size="xs" color="warning">
                     {i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL}
                   </EuiText>

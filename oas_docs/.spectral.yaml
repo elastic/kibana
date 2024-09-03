@@ -13,17 +13,21 @@ rules:
   oas3-valid-media-example: false
   oas3-valid-schema-example: false
   oas2-valid-media-example: false
-  # Operations 
-  operation-operationId: false
-  operation-operationId-unique: false
+  # Operations
+  operation-operationId: error
+  operation-operationId-unique: error
   operation-operationId-valid-in-url: false
   operation-tag-defined: warn
   operation-tags: warn
+  # Parameters
+  # Lower severity to allow optional path parameters
+  path-params: warn
   # Responses
   operation-success-response: warn
   # Schema
   oas3-schema: error
   oas2-schema: error
+  array-items: false
   # Tags
   openapi-tags: warn
   openapi-tags-alphabetical: info
@@ -47,7 +51,7 @@ rules:
     description: Response code 200 should have at least one example.
     message: "Each response body should have a realistic example. It must not contain any sensitive or confidential data."
     severity: info
-    given: $.paths[*].[*].responses.[200].content.[application/json]
+    given: $.paths[*][*].responses.[200].content.[application/json]
     then:
       field: examples
       function: defined
@@ -56,7 +60,7 @@ rules:
     description: Operations should not have x-internal extension.
     message: "Do not publish x-internal operations"
     severity: error
-    given: $.paths[*].[get,put,post,delete,options,head,patch,trace]
+    given: $.paths[*][*]
     then:
       field: x-internal
       function: undefined
@@ -66,13 +70,13 @@ rules:
     message: "Each operation should have a summary"
     severity: error
     recommended: true
-    given: $.paths[*].[get,put,post,delete,options,head,patch,trace]
+    given: $.paths[*][get,put,post,delete,options,head,patch,trace]
     then:
       field: summary
       function: defined   
   operation-summary-length:
     description: Operation summary should be between 5 and 45 characters
-    given: "$.paths[*].[get,put,post,delete,options,head,patch,trace]"
+    given: '$.paths[*][get,put,post,delete,options,head,patch,trace]'
     then:
       field: summary
       function: length

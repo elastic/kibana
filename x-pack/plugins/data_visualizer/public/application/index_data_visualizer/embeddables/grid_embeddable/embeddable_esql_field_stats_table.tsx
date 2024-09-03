@@ -79,6 +79,7 @@ const EmbeddableESQLFieldStatsTableWrapper = React.memo(
         onChange={onTableUpdate}
         loading={progress < 100}
         overallStatsRunning={overallStatsProgress.isRunning}
+        error={overallStatsProgress.error}
       />
     );
   }

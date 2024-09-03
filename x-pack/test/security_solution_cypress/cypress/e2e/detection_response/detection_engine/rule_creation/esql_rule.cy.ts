@@ -70,16 +70,7 @@ const workaroundForResizeObserver = () =>
 describe(
   'Detection ES|QL rules, creation',
   {
-    // skipped in MKI as it depends on feature flag alertSuppressionForEsqlRuleEnabled
-    // alertSuppressionForEsqlRuleEnabled feature flag is also enabled in a global config
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForEsqlRuleEnabled',
-        ])}`,
-      ],
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     const rule = getEsqlRule();

@@ -46,7 +46,7 @@ export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
 
         return response.redirected({
           headers: {
-            location: `${basePath}${normalizedRoute.pathname}${normalizedRoute.search}`,
+            location: `${basePath}${normalizedRoute.pathname}${normalizedRoute.search}${normalizedRoute.hash}`,
           },
         });
       } catch (e) {

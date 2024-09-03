@@ -8,12 +8,38 @@
 require('../../../../../src/setup_node_env');
 const { bundle } = require('@kbn/openapi-bundler');
 // eslint-disable-next-line import/no-nodejs-modules
-const { resolve } = require('path');
+const { join, resolve } = require('path');
 
 const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
 
-bundle({
-  rootDir: ELASTIC_ASSISTANT_ROOT,
-  sourceGlob: './impl/schemas/**/*.schema.yaml',
-  outputFilePath: './target/openapi/elastic_assistant.bundled.schema.yaml',
-});
+(async () => {
+  await bundle({
+    sourceGlob: join(ELASTIC_ASSISTANT_ROOT, 'impl/schemas/**/*.schema.yaml'),
+    outputFilePath: join(
+      ELASTIC_ASSISTANT_ROOT,
+      'docs/openapi/serverless/elastic_assistant_api_{version}.bundled.schema.yaml'
+    ),
+    options: {
+      includeLabels: ['serverless'],
+      specInfo: {
+        title: 'Security AI Assistant API (Elastic Cloud Serverless)',
+        description: 'Manage and interact with Security Assistant resources.',
+      },
+    },
+  });
+
+  await bundle({
+    sourceGlob: join(ELASTIC_ASSISTANT_ROOT, 'impl/schemas/**/*.schema.yaml'),
+    outputFilePath: join(
+      ELASTIC_ASSISTANT_ROOT,
+      'docs/openapi/ess/elastic_assistant_api_{version}.bundled.schema.yaml'
+    ),
+    options: {
+      includeLabels: ['ess'],
+      specInfo: {
+        title: 'Security AI Assistant API (Elastic Cloud & self-hosted)',
+        description: 'Manage and interact with Security Assistant resources.',
+      },
+    },
+  });
+})();

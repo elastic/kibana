@@ -41,16 +41,16 @@ paths:
     $ref: 'paths/api@saved_objects@{type}@{id}.yaml'
   '/api/saved_objects/resolve/{type}/{id}':
     $ref: 'paths/api@saved_objects@resolve@{type}@{id}.yaml'
-components:
-  securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
+# components:
+#   securitySchemes:
+#     basicAuth:
+#       type: http
+#       scheme: basic
+#     apiKeyAuth:
+#       type: apiKey
+#       in: header
+#       name: Authorization
+#       description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+# security:
+#   - basicAuth: []
+#   - apiKeyAuth: []

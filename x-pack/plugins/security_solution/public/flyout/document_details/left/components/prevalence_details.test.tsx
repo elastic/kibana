@@ -130,7 +130,7 @@ describe('PrevalenceDetails', () => {
     jest.clearAllMocks();
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
   it('should render the table with all data if license is platinum', () => {
@@ -159,7 +159,7 @@ describe('PrevalenceDetails', () => {
   });
 
   it('should render host and user name as clickable link if feature flag is true', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     (usePrevalence as jest.Mock).mockReturnValue(mockPrevelanceReturnValue);
 
     const { getByTestId } = renderPrevalenceDetails();

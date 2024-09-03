@@ -44,12 +44,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // See https://github.com/elastic/kibana/pull/125396 for details
         '--xpack.alerting.rules.minimumScheduleInterval.value=1s',
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForEsqlRuleEnabled',
-          'bulkCustomHighlightedFieldsEnabled',
-          'alertSuppressionForMachineLearningRuleEnabled',
-          'manualRuleRunEnabled',
-        ])}`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['manualRuleRunEnabled'])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests
         '--xpack.cloud.id=test',
         `--home.disableWelcomeScreen=true`,

@@ -6,7 +6,13 @@
  */
 
 import { noop } from 'lodash/fp';
-import { EuiFocusTrap, EuiOutsideClickDetector, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFocusTrap,
+  EuiOutsideClickDetector,
+  EuiScreenReaderOnly,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import {
@@ -73,13 +79,15 @@ export const StatefulRowRenderer = ({
               <EuiScreenReaderOnly data-test-subj="eventRendererScreenReaderOnly">
                 <p>{i18n.YOU_ARE_IN_AN_EVENT_RENDERER(ariaRowindex)}</p>
               </EuiScreenReaderOnly>
-              <div onKeyDown={onKeyDown}>
-                {rowRenderer.renderRow({
-                  data: event.ecs,
-                  isDraggable: true,
-                  scopeId: timelineId,
-                })}
-              </div>
+              <EuiFlexGroup direction="column" onKeyDown={onKeyDown}>
+                <EuiFlexItem grow={true}>
+                  {rowRenderer.renderRow({
+                    data: event.ecs,
+                    isDraggable: true,
+                    scopeId: timelineId,
+                  })}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFocusTrap>
           </EuiOutsideClickDetector>
         </div>
