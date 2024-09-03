@@ -12,12 +12,12 @@ import { OutputAPI, OutputEvent, OutputEventType } from '.';
 import { ensureMultiTurn } from '../ensure_multi_turn';
 
 export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
-  return (id, { connectorId, input, schema, system, messages }) => {
+  return (id, { connectorId, input, schema, system, previousMessages }) => {
     return chatCompleteApi({
       connectorId,
       system,
       messages: ensureMultiTurn([
-        ...(messages || []),
+        ...(previousMessages || []),
         {
           role: MessageRole.User,
           content: input,

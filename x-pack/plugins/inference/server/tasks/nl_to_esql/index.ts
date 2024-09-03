@@ -221,7 +221,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
         .output('request_documentation', {
           connectorId,
           system: systemMessage,
-          messages,
+          previousMessages: messages,
           input: `Based on the previous conversation, request documentation
         from the ES|QL handbook to help you get the right information
         needed to generate a query.

@@ -17,6 +17,7 @@ import Path from 'path';
 import git, { SimpleGitProgressEvent } from 'simple-git';
 import yargs, { Argv } from 'yargs';
 import { lastValueFrom } from 'rxjs';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { INLINE_ESQL_QUERY_REGEX } from '../../common/tasks/nl_to_esql/constants';
 import { correctCommonEsqlMistakes } from '../../common/tasks/nl_to_esql/correct_common_esql_mistakes';
 import { connectorIdOption, elasticsearchOption, kibanaOption } from '../util/cli_options';
@@ -79,7 +80,7 @@ yargs(process.argv.slice(2))
 
           log.info(`Using connector ${connector.connectorId}`);
 
-          const builtDocsDir = Path.join(__dirname, '../../../../../../built-docs');
+          const builtDocsDir = Path.join(REPO_ROOT, '../built-docs');
 
           log.debug(`Looking in ${builtDocsDir} for built-docs repository`);
 

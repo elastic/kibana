@@ -41,7 +41,8 @@ export type OutputEvent<TId extends string = string, TOutput extends Output = Ou
  *
  * @param {string} id The id of the operation
  * @param {string} options.connectorId The ID of the connector that is to be used.
- * @param {string} options.input The prompt for the LLM
+ * @param {string} options.input The prompt for the LLM.
+ * @param {string} options.messages Previous messages in a conversation.
  * @param {ToolSchema} [options.schema] The schema the response from the LLM should adhere to.
  */
 export type OutputAPI = <
@@ -54,7 +55,7 @@ export type OutputAPI = <
     system?: string;
     input: string;
     schema?: TOutputSchema;
-    messages?: Message[];
+    previousMessages?: Message[];
   }
 ) => Observable<
   OutputEvent<TId, TOutputSchema extends ToolSchema ? FromToolSchema<TOutputSchema> : undefined>
