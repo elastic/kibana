@@ -7,13 +7,13 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { FinalReadOnly } from '../../final_readonly';
+import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatMappingReadOnly } from './threat_mapping';
 
 export default {
   component: ThreatMappingReadOnly,
-  title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/threat_mapping',
+  title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/threat_mapping',
 };
 
 interface TemplateProps {
@@ -22,7 +22,7 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FinalReadOnly
+    <FieldReadOnly
       fieldName="threat_mapping"
       finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
     />

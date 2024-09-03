@@ -7,14 +7,14 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { FinalReadOnly } from '../../final_readonly';
+import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatIndicatorPathReadOnly } from './threat_indicator_path';
 
 export default {
   component: ThreatIndicatorPathReadOnly,
   title:
-    'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/threat_indicator_path',
+    'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/threat_indicator_path',
 };
 
 interface TemplateProps {
@@ -23,7 +23,7 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FinalReadOnly
+    <FieldReadOnly
       fieldName="threat_indicator_path"
       finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
     />

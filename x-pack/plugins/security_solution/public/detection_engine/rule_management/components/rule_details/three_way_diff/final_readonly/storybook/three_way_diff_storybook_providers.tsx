@@ -52,7 +52,7 @@ interface StorybookProvidersProps {
   kibanaServicesMock?: Record<string, unknown>;
 }
 
-export function FinalReadOnlyStorybookProviders({
+export function ThreeWayDiffStorybookProviders({
   children,
   kibanaServicesMock,
 }: StorybookProvidersProps) {

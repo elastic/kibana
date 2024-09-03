@@ -7,12 +7,12 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { FinalReadOnly } from '../../final_readonly';
+import { FieldReadOnly } from '../../field_readonly';
 import type {
   DiffableAllFields,
   RuleKqlQuery,
 } from '../../../../../../../../../common/api/detection_engine';
-import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_storybook_providers';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 import {
   dataSourceWithDataView,
   dataSourceWithIndexPatterns,
@@ -23,8 +23,8 @@ import {
 } from '../../storybook/mocks';
 
 export default {
-  component: FinalReadOnly,
-  title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/kql_query',
+  component: FieldReadOnly,
+  title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/kql_query',
 };
 
 interface TemplateProps {
@@ -34,12 +34,12 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FinalReadOnlyStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
-      <FinalReadOnly
+    <ThreeWayDiffStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
+      <FieldReadOnly
         fieldName="kql_query"
         finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
       />
-    </FinalReadOnlyStorybookProviders>
+    </ThreeWayDiffStorybookProviders>
   );
 };
 

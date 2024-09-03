@@ -7,14 +7,14 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { FinalReadOnly } from '../../final_readonly';
+import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 import { SeverityMappingReadOnly } from './severity_mapping';
 
 export default {
   component: SeverityMappingReadOnly,
   title:
-    'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/severity_mapping',
+    'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/severity_mapping',
 };
 
 interface TemplateProps {
@@ -23,7 +23,7 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FinalReadOnly
+    <FieldReadOnly
       fieldName="severity_mapping"
       finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
     />

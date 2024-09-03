@@ -10,8 +10,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Story } from '@storybook/react';
 import { MachineLearningJobIdReadOnly } from './machine_learning_job_id';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
-import { FinalReadOnly } from '../../final_readonly';
-import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_storybook_providers';
+import { FieldReadOnly } from '../../field_readonly';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 import { GET_MODULES_QUERY_KEY } from '../../../../../../../../common/components/ml_popover/hooks/use_fetch_modules_query';
 import { GET_RECOGNIZER_QUERY_KEY } from '../../../../../../../../common/components/ml_popover/hooks/use_fetch_recognizer_query';
 import { GET_JOBS_SUMMARY_QUERY_KEY } from '../../../../../../../../common/components/ml/hooks/use_fetch_jobs_summary_query';
@@ -19,7 +19,7 @@ import { GET_JOBS_SUMMARY_QUERY_KEY } from '../../../../../../../../common/compo
 export default {
   component: MachineLearningJobIdReadOnly,
   title:
-    'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/machine_learning_job_id',
+    'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/machine_learning_job_id',
 };
 
 const mockedModulesData = [
@@ -66,14 +66,14 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FinalReadOnlyStorybookProviders>
+    <ThreeWayDiffStorybookProviders>
       <MockMlData>
-        <FinalReadOnly
+        <FieldReadOnly
           fieldName="machine_learning_job_id"
           finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
         />
       </MockMlData>
-    </FinalReadOnlyStorybookProviders>
+    </ThreeWayDiffStorybookProviders>
   );
 };
 

@@ -7,14 +7,14 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { FinalReadOnly } from '../../final_readonly';
+import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 import { RiskScoreMappingReadOnly } from './risk_score_mapping';
 
 export default {
   component: RiskScoreMappingReadOnly,
   title:
-    'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/risk_score_mapping',
+    'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/risk_score_mapping',
 };
 
 interface TemplateProps {
@@ -23,7 +23,7 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FinalReadOnly
+    <FieldReadOnly
       fieldName="risk_score_mapping"
       finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
     />

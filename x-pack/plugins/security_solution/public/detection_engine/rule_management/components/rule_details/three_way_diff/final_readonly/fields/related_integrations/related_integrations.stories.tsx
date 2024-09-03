@@ -9,14 +9,14 @@ import React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Story } from '@storybook/react';
 import { RelatedIntegrationsReadOnly } from './related_integrations';
-import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_storybook_providers';
-import { FinalReadOnly } from '../../final_readonly';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
+import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 
 export default {
   component: RelatedIntegrationsReadOnly,
   title:
-    'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/related_integrations',
+    'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/related_integrations',
 };
 
 const mockedIntegrationsData = [
@@ -44,14 +44,14 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FinalReadOnlyStorybookProviders>
+    <ThreeWayDiffStorybookProviders>
       <MockRelatedIntegrationsData>
-        <FinalReadOnly
+        <FieldReadOnly
           fieldName="related_integrations"
           finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
         />
       </MockRelatedIntegrationsData>
-    </FinalReadOnlyStorybookProviders>
+    </ThreeWayDiffStorybookProviders>
   );
 };
 

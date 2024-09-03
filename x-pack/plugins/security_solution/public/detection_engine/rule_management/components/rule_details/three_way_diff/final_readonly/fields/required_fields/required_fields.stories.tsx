@@ -7,12 +7,12 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { RequiredFieldsReadOnly } from './required_fields';
-import { FinalReadOnly } from '../../final_readonly';
+import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 
 export default {
   component: RequiredFieldsReadOnly,
-  title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/required_fields',
+  title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/required_fields',
 };
 
 interface TemplateProps {
@@ -21,7 +21,7 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FinalReadOnly
+    <FieldReadOnly
       fieldName="required_fields"
       finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
     />

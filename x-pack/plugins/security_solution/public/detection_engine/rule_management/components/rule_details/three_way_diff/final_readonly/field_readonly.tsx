@@ -22,12 +22,12 @@ import { ThreatIndexReadOnly } from './fields/threat_index/threat_index';
 import { ThreatIndicatorPathReadOnly } from './fields/threat_indicator_path/threat_indicator_path';
 import { ThreatQueryReadOnly } from './fields/threat_query/threat_query';
 
-interface FinalReadonlyProps {
+interface FieldReadOnlyProps {
   fieldName: keyof DiffableAllFields;
   finalDiffableRule: DiffableAllFields;
 }
 
-export function FinalReadOnly({ fieldName, finalDiffableRule }: FinalReadonlyProps) {
+export function FieldReadOnly({ fieldName, finalDiffableRule }: FieldReadOnlyProps) {
   switch (fieldName) {
     case 'data_source':
       return <DataSourceReadOnly dataSource={finalDiffableRule.data_source} />;
