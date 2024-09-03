@@ -51,19 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('degraded field flyout open-close', () => {
-      it('should open the flyout when user clicks on the expand button', async () => {
-        await PageObjects.datasetQuality.navigateToDetails({
-          dataStream: degradedDataStreamName,
-        });
-
-        await PageObjects.datasetQuality.openDegradedFieldFlyout('test_field');
-
-        await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
-        );
-      });
-
-      it('should close the flyout when user clicks on close flyout button', async () => {
+      it('should open and close the flyout when user clicks on the expand button', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: degradedDataStreamName,
         });

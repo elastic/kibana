@@ -49,19 +49,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     });
 
     describe('degraded field flyout open-close', () => {
-      it('should open the flyout when user clicks on the expand button', async () => {
-        await PageObjects.datasetQuality.navigateToDetails({
-          dataStream: degradedDataStreamName,
-        });
-
-        await PageObjects.datasetQuality.openDegradedFieldFlyout('test_field');
-
-        await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
-        );
-      });
-
-      it('should close the flyout when user clicks on close flyout button', async () => {
+      it('should open and close the flyout when user clicks on the expand button', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: degradedDataStreamName,
         });
@@ -79,7 +67,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
       });
 
-      it('should open the flyoout when navigating to the page with degradedField in URL State', async () => {
+      it('should open the flyout when navigating to the page with degradedField in URL State', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: degradedDataStreamName,
           expandedDegradedField: 'test_field',
@@ -90,10 +78,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
 
         await PageObjects.datasetQuality.closeFlyout();
-
-        await testSubjects.missingOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
-        );
       });
     });
 
