@@ -150,6 +150,9 @@ export async function getHoverItem(
 
   const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
 
+  let hoverContent: monaco.languages.Hover = {
+    contents: [],
+  };
   const hoverItemsForFunction = await getHoverItemForFunction(
     model,
     position,
@@ -157,7 +160,9 @@ export async function getHoverItem(
     astProvider,
     resourceRetriever
   );
-  if (hoverItemsForFunction) return hoverItemsForFunction;
+  if (hoverItemsForFunction) {
+    hoverContent = hoverItemsForFunction;
+  }
 
   if (['newCommand', 'list'].includes(astContext.type)) {
     return { contents: [] };
@@ -167,12 +172,13 @@ export async function getHoverItem(
     const fnDefinition = getFunctionDefinition(astContext.node.name);
 
     if (fnDefinition) {
-      return {
-        contents: [
+      hoverContent.contents.push(
+        ...[
           { value: getFunctionSignatures(fnDefinition)[0].declaration },
           { value: fnDefinition.description },
-        ],
-      };
+        ]
+      );
+      return hoverContent;
     }
   }
 
