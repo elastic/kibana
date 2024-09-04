@@ -8,23 +8,16 @@
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Filter } from '@kbn/es-query';
+import {
+  SECURITY_DEFAULT_DATA_VIEW_ID,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+} from '@kbn/cloud-security-posture-common';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { findingsNavigation } from '../../constants/navigation';
 import { useDataView } from './use_data_view';
 import { CspClientPluginStartDeps } from '../..';
 import { encodeQuery } from '../utils/query_utils';
-
-export const CLOUD_SECURITY_POSTURE_BASE_PATH = '/cloud_security_posture';
-export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
-  'security_solution_cdr_latest_misconfigurations';
-export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
-export const findingsNavigation = {
-  findings_default: {
-    name: 'Findings',
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/configurations`,
-    id: 'cloud_security_posture-findings-default',
-  },
-};
 
 interface NegatedValue {
   value: string | number;
@@ -90,5 +83,5 @@ export const useNavigateFindings = () => {
   return useNavigate(findingsNavigation.findings_default.path, data?.id);
 };
 
-// export const useNavigateVulnerabilities = () =>
-//   useNavigate(findingsNavigation.vulnerabilities.path);
+export const useNavigateVulnerabilities = () =>
+  useNavigate(findingsNavigation.vulnerabilities.path);

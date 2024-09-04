@@ -6,14 +6,15 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks/dom';
-import { useNavigateFindings, useNavigateVulnerabilities } from './use_navigate_findings';
+import { useNavigateVulnerabilities } from './use_navigate_findings';
+import { useNavigateFindings } from './use_navigate_findings';
 import { useHistory } from 'react-router-dom';
 
 jest.mock('react-router-dom', () => ({
   useHistory: jest.fn().mockReturnValue({ push: jest.fn() }),
 }));
 
-jest.mock('./use_kibana', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
       data: {
@@ -29,7 +30,8 @@ jest.mock('./use_kibana', () => ({
     },
   }),
 }));
-jest.mock('../api/use_data_view', () => ({
+
+jest.mock('./use_data_view', () => ({
   useDataView: jest.fn().mockReturnValue({
     status: 'success',
     data: {

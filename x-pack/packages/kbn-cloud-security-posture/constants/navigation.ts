@@ -8,7 +8,7 @@
 import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
 import { i18n } from '@kbn/i18n';
 
-const NAV_ITEMS_NAMES = {
+export const NAV_ITEMS_NAMES = {
   DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
     defaultMessage: 'Cloud Security Posture',
   }),
