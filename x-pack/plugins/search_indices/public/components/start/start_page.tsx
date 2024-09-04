@@ -16,6 +16,7 @@ import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 
 import { useIndicesRedirect } from './hooks/use_indices_redirect';
 import { ElasticsearchStart } from './elasticsearch_start';
+import { StartPageError } from './status_error';
 
 export const ElasticsearchStartPage = () => {
   const { console: consolePlugin } = useKibana().services;
@@ -42,7 +43,7 @@ export const ElasticsearchStartPage = () => {
     >
       <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
         {isInitialLoading && <EuiLoadingLogo />}
-        {hasIndicesStatusFetchError && <div>TODO : handle error</div>}
+        {hasIndicesStatusFetchError && <StartPageError error={indicesFetchError} />}
         <ElasticsearchStart indicesData={indicesData} userPrivileges={userPrivileges} />
       </KibanaPageTemplate.Section>
       {embeddableConsole}
