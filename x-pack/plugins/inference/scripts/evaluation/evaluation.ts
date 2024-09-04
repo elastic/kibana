@@ -9,13 +9,10 @@ import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import * as fastGlob from 'fast-glob';
 import yargs from 'yargs';
-import chalk from 'chalk';
 import { castArray } from 'lodash';
 // @ts-expect-error
 import Mocha from 'mocha';
 import Path from 'path';
-import * as table from 'table';
-import { TableUserConfig } from 'table';
 import { EvaluateWith, options } from './cli';
 import { getServiceUrls } from '../util/get_service_urls';
 import { KibanaClient } from '../util/kibana_client';
@@ -23,6 +20,7 @@ import { initServices } from './services';
 import { EvaluationResult } from './types';
 import { selectConnector } from '../util/select_connector';
 import { createInferenceEvaluationClient } from './evaluation_client';
+import { createResultRenderer, renderFailedScenarios } from './table_renderer';
 
 function runEvaluations() {
   yargs(process.argv.slice(2))
@@ -43,7 +41,6 @@ function runEvaluations() {
           await kibanaClient.createSpaceIfNeeded();
 
           const connectors = await kibanaClient.getConnectors();
-
           if (!connectors.length) {
             throw new Error('No connectors found');
           }
@@ -100,91 +97,17 @@ function runEvaluations() {
             suite: mocha.suite,
           });
 
-          const header: string[][] = [
-            [chalk.bold('Criterion'), chalk.bold('Result'), chalk.bold('Reasoning')],
-          ];
-
-          const tableConfig: TableUserConfig = {
-            singleLine: false,
-            border: {
-              topBody: `─`,
-              topJoin: `┬`,
-              topLeft: `┌`,
-              topRight: `┐`,
-
-              bottomBody: `─`,
-              bottomJoin: `┴`,
-              bottomLeft: `└`,
-              bottomRight: `┘`,
-
-              bodyLeft: `│`,
-              bodyRight: `│`,
-              bodyJoin: `│`,
-
-              joinBody: `─`,
-              joinLeft: `├`,
-              joinRight: `┤`,
-              joinJoin: `┼`,
-            },
-            spanningCells: [
-              { row: 0, col: 0, colSpan: 3 },
-              { row: 1, col: 0, colSpan: 3 },
-            ],
-            columns: [
-              { wrapWord: true, width: 60 },
-              { wrapWord: true },
-              { wrapWord: true, width: 60 },
-            ],
-          };
-
-          // avoid glitches in the table rendering
-          const sanitize = (text: string) => {
-            return text
-              .replace(/^ +/gm, '')
-              .replace(/ +$/gm, '')
-              .replace(/^\n+/g, '')
-              .replace(/\n+$/g, '');
-          };
-
+          const renderer = createResultRenderer();
           const results: EvaluationResult[] = [];
-          const failedScenarios: string[][] = [
-            ['Failed Tests', '', ''],
-            ['Scenario, Scores, Reasoning', '', ''],
-          ];
+          const failedResults: EvaluationResult[] = [];
 
           evaluationClient.onResult((result) => {
             results.push(result);
-            log.debug(`Result:`, JSON.stringify(result));
-            const output: string[][] = [[sanitize(result.input), '', ''], ['', '', ''], ...header];
-
-            result.scores.forEach((score) => {
-              output.push([
-                sanitize(score.criterion),
-                score.score < 1
-                  ? chalk.redBright(String(score.score))
-                  : chalk.greenBright(String(score.score)),
-                sanitize(score.reasoning),
-              ]);
-            });
-
-            log.write(table.table(output, tableConfig));
-
-            const totalResults = result.scores.length;
-            const failedResults = result.scores.filter((score) => score.score < 1).length;
-
-            if (failedResults / totalResults > 0) {
-              const reasoningConcat = result.scores
-                .map((score) => sanitize(score.reasoning))
-                .join(' ');
-              failedScenarios.push([
-                `${result.name}`,
-                `Average score ${Math.round(
-                  (result.scores.reduce((total, next) => total + next.score, 0) * 100) /
-                    totalResults
-                )}. Failed ${failedResults} tests out of ${totalResults}`,
-                `Reasoning: ${reasoningConcat}`,
-              ]);
+            if (result.scores.filter((score) => score.score < 1).length) {
+              failedResults.push(result);
             }
+
+            log.write(renderer.render({ result }));
           });
 
           initServices({
@@ -202,7 +125,7 @@ function runEvaluations() {
           return new Promise<void>((resolve, reject) => {
             mocha.run((failures: any) => {
               if (failures) {
-                log.write(table.table(failedScenarios, tableConfig));
+                log.write(renderFailedScenarios(failedResults));
                 reject(new Error(`Some tests failed`));
                 return;
               }
@@ -226,33 +149,22 @@ function runEvaluations() {
             );
             log.write('-------------------------------------------');
 
-            const scoresByCategory: {
+            const scoresByCategory = results.reduce<{
               [key: string]: {
                 score: number;
                 total: number;
               };
-            } = results.reduce(
-              (
-                acc: {
-                  [key: string]: {
-                    score: number;
-                    total: number;
-                  };
-                },
-                result
-              ) => {
-                const category = result.category;
-                if (!acc[category]) {
-                  acc[category] = { score: 0, total: 0 };
-                }
-                result.scores.forEach((score) => {
-                  acc[category].score += score.score;
-                  acc[category].total += 1;
-                });
-                return acc;
-              },
-              {}
-            );
+            }>((acc, result) => {
+              const category = result.category;
+              if (!acc[category]) {
+                acc[category] = { score: 0, total: 0 };
+              }
+              result.scores.forEach((score) => {
+                acc[category].score += score.score;
+                acc[category].total += 1;
+              });
+              return acc;
+            }, {});
 
             log.write('-------------------------------------------');
             log.write(`Model ${connector.connectorId} scores per category`);
