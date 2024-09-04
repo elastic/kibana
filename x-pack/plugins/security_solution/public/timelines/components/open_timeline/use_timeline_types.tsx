@@ -56,7 +56,7 @@ export const useTimelineTypes = ({
   }, [formatUrl, urlSearch]);
 
   const goToTimeline = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToUrl(timelineUrl);
     },
@@ -64,7 +64,7 @@ export const useTimelineTypes = ({
   );
 
   const goToTemplateTimeline = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToUrl(templateUrl);
     },
@@ -72,7 +72,7 @@ export const useTimelineTypes = ({
   );
 
   const goToNotes = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToUrl(notesUrl);
     },
@@ -102,7 +102,7 @@ export const useTimelineTypes = ({
   );
 
   const onFilterClicked = useCallback(
-    (tabId, tabStyle: TimelineTabsStyle) => {
+    (tabId: TimelineType, tabStyle: TimelineTabsStyle) => {
       setTimelineTypes((prevTimelineTypes) => {
         if (prevTimelineTypes !== tabId) {
           setTimelineTypes(tabId);

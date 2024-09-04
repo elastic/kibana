@@ -78,7 +78,7 @@ import {
   getDateLiterals,
   buildFieldsDefinitionsWithMetadata,
   TRIGGER_SUGGESTION_COMMAND,
-  ADD_DATE_HISTOGRAM_SNIPPET,
+  getAddDateHistogramSnippet,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -244,6 +244,7 @@ export async function suggest(
     buildQueryUntilPreviousCommand(ast, correctedQuery),
     ast
   );
+
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields,
     resourceRetriever
@@ -298,7 +299,8 @@ export async function suggest(
         { option, ...rest },
         getFieldsByType,
         getFieldsMap,
-        getPolicyMetadata
+        getPolicyMetadata,
+        resourceRetriever?.getPreferences
       );
     }
   }
@@ -1102,6 +1104,7 @@ async function getBuiltinFunctionNextArgument(
       } else {
         const finalType = nestedType || nodeArgType || 'any';
         const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType as string);
+
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             // this is a special case with AND/OR
@@ -1232,8 +1235,11 @@ async function getFieldsOrFunctionsSuggestions(
       }
     }
   }
+  // could also be in stats (bucket) but our autocomplete is not great yet
+  const displayDateSuggestions = types.includes('date') && ['where', 'eval'].includes(commandName);
 
   const suggestions = filteredFieldsByType.concat(
+    displayDateSuggestions ? getDateLiterals() : [],
     functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
@@ -1569,8 +1575,14 @@ async function getOptionArgsSuggestions(
   },
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMaps: GetFieldsMapFn,
-  getPolicyMetadata: GetPolicyMetadataFn
+  getPolicyMetadata: GetPolicyMetadataFn,
+  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
 ) {
+  let preferences: { histogramBarTarget: number } | undefined;
+  if (getPreferences) {
+    preferences = await getPreferences();
+  }
+
   const optionDef = getCommandOption(option.name);
   const { nodeArg, argIndex, lastArg } = extractArgMeta(option, node);
   const suggestions = [];
@@ -1774,9 +1786,9 @@ async function getOptionArgsSuggestions(
                   defaultMessage: 'Add date histogram',
                 }
               ),
-              text: ADD_DATE_HISTOGRAM_SNIPPET,
+              text: getAddDateHistogramSnippet(preferences?.histogramBarTarget),
               asSnippet: true,
-              kind: 'Function',
+              kind: 'Issue',
               detail: i18n.translate(
                 'kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogramDetail',
                 {

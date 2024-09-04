@@ -41,3 +41,18 @@ export const buildMutedRulesFilter = (
 
   return mutedRulesFilterQuery;
 };
+
+export const buildEntityFlyoutPreviewQuery = (field: string, queryValue?: string) => {
+  return {
+    bool: {
+      filter: [
+        {
+          bool: {
+            should: [{ term: { [field]: { value: `${queryValue || ''}` } } }],
+            minimum_should_match: 1,
+          },
+        },
+      ],
+    },
+  };
+};
