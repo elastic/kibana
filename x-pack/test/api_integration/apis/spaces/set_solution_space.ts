@@ -13,104 +13,119 @@ export default function ({ getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
 
   describe('PUT /internal/spaces/space/{id}/solution', () => {
-    before(async () => {
-      await spacesService.create({
-        id: 'foo-space',
-        name: 'Foo Space',
-        disabledFeatures: [],
-        color: '#AABBCC',
+    describe('For default space', () => {
+      beforeEach(async () => {
+        await supertest
+          .put('/internal/spaces/space/default/solution')
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'cloud')
+          .send({
+            solution: 'classic',
+          })
+          .expect(200);
+      });
+
+      it('Use solution_type param to set solution', async () => {
+        await supertest
+          .put('/internal/spaces/space/default/solution')
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'cloud')
+          .send({
+            solution_type: 'observability',
+          })
+          .expect(200)
+          .then((response) => {
+            const { solution, name, id } = response.body;
+            expect({ solution, name, id }).to.eql({
+              id: 'default',
+              name: 'Default',
+              solution: 'oblt',
+            });
+          });
+      });
+
+      it('Use solution param to set solution', async () => {
+        await supertest
+          .put('/internal/spaces/space/default/solution')
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'cloud')
+          .send({
+            solution: 'oblt',
+          })
+          .expect(200)
+          .then((response) => {
+            const { solution, name, id } = response.body;
+            expect({ solution, name, id }).to.eql({
+              solution: 'oblt',
+              id: 'default',
+              name: 'Default',
+            });
+          });
       });
     });
 
-    beforeEach(async () => {
-      await supertest
-        .put('/internal/spaces/space/default/solution')
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'cloud')
-        .send({
-          solution: 'classic',
-        })
-        .expect(200);
-    });
-
-    after(async () => {
-      await spacesService.delete('foo-space');
-    });
-
-    it('Use solution_type param to set solution for default space', async () => {
-      await supertest
-        .put('/internal/spaces/space/default/solution')
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'cloud')
-        .send({
-          solution_type: 'observability',
-        })
-        .expect(200)
-        .then((response) => {
-          const { solution, name, id } = response.body;
-          expect({ solution, name, id }).to.eql({
-            id: 'default',
-            name: 'Default',
-            solution: 'oblt',
-          });
+    describe('For Foo Space space', () => {
+      before(async () => {
+        await spacesService.create({
+          id: 'foo-space',
+          name: 'Foo Space',
+          disabledFeatures: [],
+          color: '#AABBCC',
         });
-    });
+      });
 
-    it('Use solution_type param to set solution for Foo Space space', async () => {
-      await supertest
-        .put('/internal/spaces/space/foo-space/solution')
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'cloud')
-        .send({
-          solution_type: 'observability',
-        })
-        .expect(200)
-        .then((response) => {
-          const { solution, name, id } = response.body;
-          expect({ solution, name, id }).to.eql({
-            id: 'foo-space',
-            name: 'Foo Space',
-            solution: 'oblt',
-          });
-        });
-    });
+      after(async () => {
+        await spacesService.delete('foo-space');
+      });
 
-    it('Use solution param to set solution for default space', async () => {
-      await supertest
-        .put('/internal/spaces/space/default/solution')
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'cloud')
-        .send({
-          solution: 'oblt',
-        })
-        .expect(200)
-        .then((response) => {
-          const { solution, name, id } = response.body;
-          expect({ solution, name, id }).to.eql({
-            solution: 'oblt',
-            id: 'default',
-            name: 'Default',
-          });
-        });
-    });
+      beforeEach(async () => {
+        await supertest
+          .put('/internal/spaces/space/foo-space/solution')
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'cloud')
+          .send({
+            solution: 'classic',
+          })
+          .expect(200);
+      });
 
-    it('Use solution param to set solution for Foo Space space', async () => {
-      await supertest
-        .put('/internal/spaces/space/foo-space/solution')
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'cloud')
-        .send({
-          solution: 'oblt',
-        })
-        .expect(200)
-        .then((response) => {
-          const { solution, name, id } = response.body;
-          expect({ solution, name, id }).to.eql({
-            solution: 'oblt',
-            id: 'foo-space',
-            name: 'Foo Space',
+      it('Use solution_type param to set solution for Foo Space space', async () => {
+        await supertest
+          .put('/internal/spaces/space/foo-space/solution')
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'cloud')
+          .send({
+            solution_type: 'observability',
+          })
+          .expect(200)
+          .then((response) => {
+            const { solution, name, id } = response.body;
+            expect({ solution, name, id }).to.eql({
+              id: 'foo-space',
+              name: 'Foo Space',
+              solution: 'oblt',
+            });
           });
-        });
+      });
+
+      it('Use solution param to set solution for Foo Space space', async () => {
+        await supertest
+          .put('/internal/spaces/space/foo-space/solution')
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'cloud')
+          .send({
+            solution: 'oblt',
+          })
+          .expect(200)
+          .then((response) => {
+            const { solution, name, id } = response.body;
+            expect({ solution, name, id }).to.eql({
+              solution: 'oblt',
+              id: 'foo-space',
+              name: 'Foo Space',
+            });
+          });
+      });
     });
 
     it('throw error if solution_type is not supported', async () => {
