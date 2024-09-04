@@ -44,13 +44,13 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     // commands
     ...buildRuleGroup(
       [
-        'metrics',
+        'dev_metrics',
         'meta',
         'metadata',
-        'match',
+        'dev_match',
         'mv_expand',
         'stats',
-        'inlinestats',
+        'dev_inlinestats',
         'dissect',
         'grok',
         'keep',
@@ -67,7 +67,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'in',
         'as',
         'limit',
-        'lookup',
+        'dev_lookup',
         'null',
         'enrich',
         'on',
