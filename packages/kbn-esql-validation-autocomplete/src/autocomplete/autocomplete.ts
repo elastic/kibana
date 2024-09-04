@@ -1302,18 +1302,6 @@ async function getFunctionArgsSuggestions(
     innerText
   );
 
-  const {
-    typesToSuggestNext,
-    hasMoreMandatoryArgs,
-    shouldAddComma: addComma,
-    enrichedArgs,
-    argIndex,
-  } = getValidSignaturesAndTypesToSuggestNext(node, references, fnDefinition, fullText, offset);
-
-  const shouldBeBooleanCondition = typesToSuggestNext.some(
-    (t) => t && t.type === 'boolean' && t.name === 'condition'
-  );
-  const shouldAddComma = !shouldBeBooleanCondition && addComma;
   // pick the type of the next arg
   const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
   let argIndex = Math.max(node.args.length, 0);
@@ -1341,8 +1329,15 @@ async function getFunctionArgsSuggestions(
   // Whether to prepend comma to suggestion string
   // E.g. if true, "fieldName" -> "fieldName, "
   const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
+  const shouldBeBooleanCondition = typesToSuggestNext.some(
+    (t) => t && t.type === 'boolean' && t.name === 'condition'
+  );
+
   const shouldAddComma =
-    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !alreadyHasComma;
+    hasMoreMandatoryArgs &&
+    fnDefinition.type !== 'builtin' &&
+    !alreadyHasComma &&
+    !shouldBeBooleanCondition;
 
   const suggestedConstants = uniq(
     typesToSuggestNext
