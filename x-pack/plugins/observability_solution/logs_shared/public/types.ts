@@ -6,7 +6,6 @@
  */
 
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -45,7 +44,6 @@ export interface LogsSharedClientStartDeps {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
   uiActions: UiActionsStart;
-  uiSettings: SettingsStart;
 }
 
 export type LogsSharedClientCoreSetup = CoreSetup<

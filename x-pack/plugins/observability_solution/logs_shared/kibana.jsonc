@@ -16,7 +16,6 @@
       "logsDataAccess",
       "observabilityShared",
       "share",
-      "uiSettings",
       "usageCollection",
     ],
     "optionalPlugins": [
