@@ -35,8 +35,7 @@ export function LogRateChart({ height }: { height: number }) {
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
     path: { serviceName },
-  } = useApmParams('/logs-services/{serviceName}');
-
+  } = useApmParams('/services/{serviceName}');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data = INITIAL_STATE, status } = useFetcher(
