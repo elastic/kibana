@@ -12,7 +12,7 @@ import styled from '@emotion/styled';
 import { TEST_IDS } from './constants';
 
 const FilterGroupLoadingButton = styled(EuiButton)`
-  height: 34px;
+  height: 38px;
 `;
 
 export const FilterGroupLoading = () => {
