@@ -34,22 +34,24 @@ export const collectServiceLogs = {
   link: '/app/observabilityOnboarding/customLogs/?category=logs',
 };
 
-export function AddApmData({
-  onClick,
-  ...props
-}: {
+interface AddApmDataProps {
   onClick?: () => void;
   'data-test-subj': string;
-}) {
+  fill?: boolean;
+  size?: 's' | 'm';
+}
+
+export function AddApmData({ onClick, fill = false, size = 's', ...props }: AddApmDataProps) {
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
 
   return (
     <EuiButton
       data-test-subj={props['data-test-subj']}
-      size="s"
+      size={size}
       onClick={onClick}
       href={basePath.prepend(addApmData.link)}
+      fill={fill}
     >
       {addApmData.name}
     </EuiButton>
