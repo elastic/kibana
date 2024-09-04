@@ -48,8 +48,8 @@ export const fetchDurationHistogramRangeSteps = async ({
 
   if (durationMinOverride && durationMaxOverride) {
     // these values should never be 0, so if they are we set them to 1
-    const durationMin = Math.min(1, durationMinOverride);
-    const durationMax = Math.min(1, durationMaxOverride);
+    const durationMin = Math.max(1, durationMinOverride);
+    const durationMax = Math.max(1, durationMaxOverride);
 
     return {
       durationMin,
@@ -105,8 +105,8 @@ export const fetchDurationHistogramRangeSteps = async ({
   }
 
   // these values should never be 0, so if they are we set them to 1
-  const durationMin = Math.min(1, resp.aggregations.duration_min.value);
-  const durationMax = Math.min(1, resp.aggregations.duration_max.value * 2);
+  const durationMin = Math.max(1, resp.aggregations.duration_min.value);
+  const durationMax = Math.max(1, resp.aggregations.duration_max.value * 2);
 
   return {
     durationMin,
