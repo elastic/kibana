@@ -102,7 +102,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   >();
 
   const isMounted = useMountedState();
-  const { mlApiServices, mlTimeSeriesExplorerService, toastNotificationService } = mlServices;
+  const { mlApi, mlTimeSeriesExplorerService, toastNotificationService } = mlServices;
   const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
   const datePickerDeps: DatePickerDependencies = {
     ...pick(coreStart, ['http', 'notifications', 'theme', 'uiSettings', 'i18n']),
@@ -116,11 +116,11 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   useEffect(
     function setUpSelectedJob() {
       async function fetchSelectedJob() {
-        if (mlApiServices && selectedJobId !== undefined) {
+        if (mlApi && selectedJobId !== undefined) {
           try {
             const [{ jobs }, { jobs: jobStats }] = await Promise.all([
-              mlApiServices.getJobs({ jobId: selectedJobId }),
-              mlApiServices.getJobStats({ jobId: selectedJobId }),
+              mlApi.getJobs({ jobId: selectedJobId }),
+              mlApi.getJobStats({ jobId: selectedJobId }),
             ]);
             setSelectedJobWrapper({ job: jobs[0], stats: jobStats[0] });
           } catch (e) {
@@ -135,7 +135,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
       }
       fetchSelectedJob();
     },
-    [selectedJobId, mlApiServices, isMounted, onError]
+    [selectedJobId, mlApi, isMounted, onError]
   );
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(

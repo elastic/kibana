@@ -21,10 +21,9 @@ import {
 import { css } from '@emotion/react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common/inventory_models/types';
 import { PageTitleWithPopover } from './page_title_with_popover';
+
 type Props = Pick<EuiPageHeaderProps, 'tabs' | 'title' | 'rightSideItems'> & {
-  hasSystemIntegration: boolean;
   assetType: InventoryItemType;
-  metadataLoading: boolean;
   loading: boolean;
 };
 
@@ -32,9 +31,7 @@ export const FlyoutHeader = ({
   title,
   tabs = [],
   rightSideItems = [],
-  hasSystemIntegration,
   assetType,
-  metadataLoading,
   loading,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
@@ -55,19 +52,10 @@ export const FlyoutHeader = ({
           `}
         >
           <EuiTitle size="xs">
-            {metadataLoading || loading ? (
+            {loading ? (
               <EuiLoadingSpinner size="m" />
             ) : (
-              <h4>
-                {assetType === 'host' ? (
-                  <PageTitleWithPopover
-                    hasSystemMetrics={hasSystemIntegration}
-                    name={title ?? ''}
-                  />
-                ) : (
-                  title
-                )}
-              </h4>
+              <h4>{assetType === 'host' ? <PageTitleWithPopover name={title ?? ''} /> : title}</h4>
             )}
           </EuiTitle>
         </EuiFlexItem>

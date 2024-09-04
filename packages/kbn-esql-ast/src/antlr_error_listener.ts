@@ -11,6 +11,7 @@ import { ErrorListener } from 'antlr4';
 import type { EditorError } from './types';
 import { getPosition } from './ast_position_utils';
 
+const REPLACE_DEV = /,*\s*DEV_\w+\s*/g;
 export class ESQLErrorListener extends ErrorListener<any> {
   protected errors: EditorError[] = [];
 
@@ -22,6 +23,9 @@ export class ESQLErrorListener extends ErrorListener<any> {
     message: string,
     error: RecognitionException | undefined
   ): void {
+    // Remove any DEV_ tokens from the error message
+    message = message.replace(REPLACE_DEV, '');
+
     const textMessage = `SyntaxError: ${message}`;
 
     const tokenPosition = getPosition(offendingSymbol);
