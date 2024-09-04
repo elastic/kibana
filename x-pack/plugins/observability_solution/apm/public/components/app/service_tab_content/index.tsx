@@ -63,7 +63,6 @@ export function ServiceTabContent({ children, tabName }: ServiceTabContentProps)
             title={emptyStateContent[tabName].title}
             content={emptyStateContent[tabName].content}
             imgSrc={emptyStateContent[tabName].imgSrc ?? null}
-            dismissable={true}
             onDissmiss={() => setdismissedLogsOnlyEmptyState(true)}
           />
           <EuiSpacer size="m" />

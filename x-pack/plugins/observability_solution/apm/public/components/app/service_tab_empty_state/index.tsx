@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import defaultImgSrc from '../../../assets/service_tab_empty_state/service_tab_empty_state_default_2.png';
+import defaultImgSrc from '../../../assets/service_tab_empty_state/service_tab_empty_state_default.png';
 import { AddApmData } from '../../shared/add_data_buttons/buttons';
 
 export interface ServiceTabEmptyStateProps {
@@ -48,7 +48,6 @@ export function ServiceTabEmptyState({
   title,
   content,
   imgSrc,
-  dismissable,
   onDissmiss,
 }: ServiceTabEmptyStateProps) {
   const { euiTheme } = useEuiTheme();
@@ -108,7 +107,7 @@ export function ServiceTabEmptyState({
             </EuiFlexItem>
           )}
 
-          {dismissable && (
+          {onDissmiss && (
             <EuiButtonIcon
               style={{
                 position: 'absolute',
