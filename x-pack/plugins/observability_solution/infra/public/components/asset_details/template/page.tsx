@@ -87,10 +87,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
         pageTitle: loading ? (
           <EuiLoadingSpinner size="m" />
         ) : asset.type === 'host' ? (
-          <PageTitleWithPopover
-            hasSystemMetrics={!!metadata?.hasSystemIntegration}
-            name={asset.name}
-          />
+          <PageTitleWithPopover name={asset.name} />
         ) : (
           asset.name
         ),
