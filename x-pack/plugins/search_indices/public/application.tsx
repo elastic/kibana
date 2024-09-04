@@ -19,11 +19,11 @@ import { SearchIndicesServicesContext, SearchIndicesServicesContextDeps } from '
 import { Router } from '@kbn/shared-ux-router';
 
 export const renderApp = async (
+  App: React.FC<{}>,
   core: CoreStart,
   services: SearchIndicesServicesContextDeps,
   element: HTMLElement
 ) => {
-  const { SearchIndicesRouter } = await import('./search_indices_router');
   const queryClient = initQueryClient(core.notifications.toasts);
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
@@ -32,7 +32,7 @@ export const renderApp = async (
           <I18nProvider>
             <QueryClientProvider client={queryClient}>
               <Router history={services.history}>
-                <SearchIndicesRouter />
+                <App />
               </Router>
             </QueryClientProvider>
           </I18nProvider>

@@ -13,6 +13,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'svlSearchIndexDetailPage',
   ]);
   const es = getService('es');
+  const retry = getService('retry');
+  const PageObjects = getPageObjects(['common']);
+
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const indexName = 'test-my-index';
 
@@ -21,13 +24,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async ()=>{
       await pageObjects.svlCommonPage.loginWithRole('viewer');
       await es.indices.create({ index: indexName });
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
+          shouldLoginIfPrompted: false,
+        });
+        await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPage();
+      });
     })
 
     after(async () => {
       await esDeleteAllIndices(indexName);
     })
     it('loads index detail page', async () =>{
-      await pageObjects.svlSearchIndexDetailPage.expectToBeIndexDetailPage();
       await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
       await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPage();
       await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonExists();

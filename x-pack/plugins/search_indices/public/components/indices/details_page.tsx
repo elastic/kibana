@@ -6,18 +6,13 @@
  */
 
 import { EuiPageSection, EuiSpacer, EuiButton, EuiPageTemplate } from '@elastic/eui';
-import React, { useMemo } from 'react';
-import { FunctionComponent } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import React from 'react';
+import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIndex } from '../../hooks/api/use_index';
-import { i18n } from '@kbn/i18n';
 
-export const SearchIndexDetailsPage: FunctionComponent<
-  RouteComponentProps<{ indexName: string }>
-> = ({ location: { search } }) => {
-  const queryParams = useMemo(() => new URLSearchParams(search), [search]);
-  const indexName = queryParams.get('indexName') ?? '';
+export const SearchIndexDetailsPage = () => {
+  const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
 
   const { data: index } = useIndex(indexName);
 
@@ -42,7 +37,6 @@ export const SearchIndexDetailsPage: FunctionComponent<
           />
         </EuiButton>
       </EuiPageSection>
-      <EuiSpacer size="l" />
       <EuiPageTemplate.Header
         data-test-subj="searchIndexDetailsHeader"
         pageTitle={

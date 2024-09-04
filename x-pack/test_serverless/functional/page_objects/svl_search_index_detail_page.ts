@@ -14,7 +14,7 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
 
   return {
     async expectToBeIndexDetailPage() {
-      expect(await browser.getCurrentUrl()).contain('/search_index_details');
+      expect(await browser.getCurrentUrl()).contain('/index_details');
     },
     async expectIndexDetailPageHeader() {
       await testSubjects.existOrFail('searchIndexDetailsHeader', { timeout: 2000 });

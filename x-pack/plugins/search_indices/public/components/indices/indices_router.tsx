@@ -5,16 +5,15 @@
  * 2.0.
  */
 import React from 'react';
-import { Redirect } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { ROOT_PATH, SEARCH_INDICES_DETAILS_PATH } from './routes';
-import { SearchIndexDetailsPage } from './components/details_page/details_page';
-import { ElasticsearchStartPage } from './components/start/start_page';
+import { ROOT_PATH, SEARCH_INDICES_DETAILS_PATH } from '../../routes';
+import { SearchIndexDetailsPage } from './details_page';
+import { ElasticsearchStartPage } from '../start/start_page';
 
 export const SearchIndicesRouter: React.FC = () => {
   return (
     <Routes>
-      <Route exact path={SEARCH_INDICES_DETAILS_PATH} component={SearchIndexDetailsPage}></Route>
+      <Route exact path={SEARCH_INDICES_DETAILS_PATH} component={SearchIndexDetailsPage} />
       <Route path={ROOT_PATH} component={ElasticsearchStartPage} />
     </Routes>
   );

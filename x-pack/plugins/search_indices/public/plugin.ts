@@ -24,17 +24,35 @@ export class SearchIndicesPlugin
     core.application.register({
       id: 'elasticsearchStart',
       appRoute: '/app/elasticsearch/start',
-      title: i18n.translate('xpack.searchIndices.startAppTitle', {
+      title: i18n.translate('xpack.searchIndices.elasticsearchStart.startAppTitle', {
         defaultMessage: 'Elasticsearch Start',
       }),
       async mount({ element, history }) {
         const { renderApp } = await import('./application');
+        const { ElasticsearchStartPage } = await import('./components/start/start_page');
         const [coreStart, depsStart] = await core.getStartServices();
         const startDeps: SearchIndicesServicesContextDeps = {
           ...depsStart,
           history,
         };
-        return renderApp(coreStart, startDeps, element);
+        return renderApp(ElasticsearchStartPage, coreStart, startDeps, element);
+      },
+    });
+    core.application.register({
+      id: 'elasticsearchIndices',
+      appRoute: '/app/elasticsearch/indices',
+      title: i18n.translate('xpack.searchIndices.elasticsearchIndices.startAppTitle', {
+        defaultMessage: 'Elasticsearch Indices',
+      }),
+      async mount({ element, history }) {
+        const { renderApp } = await import('./application');
+        const { SearchIndicesRouter } = await import('./components/indices/indices_router');
+        const [coreStart, depsStart] = await core.getStartServices();
+        const startDeps: SearchIndicesServicesContextDeps = {
+          ...depsStart,
+          history,
+        };
+        return renderApp(SearchIndicesRouter, coreStart, startDeps, element);
       },
     });
 
