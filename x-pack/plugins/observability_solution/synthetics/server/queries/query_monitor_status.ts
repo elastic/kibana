@@ -34,21 +34,18 @@ const fields = [
 ];
 
 const getStatusQuery = ({
-  monitorQueryIds,
+  idsToQuery,
   range,
   monitorLocationIds,
-  i,
   idSize,
 }: {
-  i: number;
   idSize: number;
   monitorLocationIds: string[];
   range: { from: string; to: string };
-  monitorQueryIds: string[];
+  idsToQuery: string[];
   monitorLocationsMap: Record<string, string[]>;
   monitorQueryIdToConfigIdMap: Record<string, string>;
 }) => {
-  const idsToQuery = (monitorQueryIds as string[]).slice(i * idSize, i * idSize + idSize);
   const params = createEsParams({
     body: {
       size: 0,
@@ -149,11 +146,10 @@ export async function queryMonitorStatus(
   const queries: MsearchMultisearchBody[] = times(pageCount).map((i) => {
     const idsToQuery = (monitorQueryIds as string[]).slice(i * idSize, i * idSize + idSize);
     return getStatusQuery({
-      i,
       idSize,
       monitorLocationIds,
       range,
-      monitorQueryIds: idsToQuery,
+      idsToQuery,
       monitorLocationsMap,
       monitorQueryIdToConfigIdMap,
     }).body;
