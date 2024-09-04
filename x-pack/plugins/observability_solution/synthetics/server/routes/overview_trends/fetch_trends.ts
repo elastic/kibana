@@ -5,104 +5,88 @@
  * 2.0.
  */
 
-import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/types';
+import { EXCLUDE_RUN_ONCE_FILTER, SUMMARY_FILTER } from '../../../common/constants/client_defaults';
+import { createEsParams } from '../../lib';
 
-export const getFetchTrendsQuery = (
-  configId: string,
-  locationIds: string[],
-  interval: number
-): MsearchMultisearchBody => ({
-  size: 0,
-  query: {
-    bool: {
-      filter: [
-        {
-          bool: {
-            filter: [
-              {
-                exists: {
-                  field: 'summary',
+export const getFetchTrendsQuery = (configId: string, locationIds: string[], interval: number) =>
+  createEsParams({
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            SUMMARY_FILTER,
+            EXCLUDE_RUN_ONCE_FILTER,
+            {
+              terms: {
+                'observer.name': locationIds,
+              },
+            },
+            {
+              term: {
+                config_id: configId,
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: `now-${interval}m`,
+                  lte: 'now',
                 },
               },
-            ],
-          },
-        },
-        {
-          bool: {
-            must_not: {
-              exists: {
-                field: 'run_once',
-              },
             },
-          },
+          ],
         },
-        {
-          terms: {
-            'observer.name': locationIds,
-          },
-        },
-        {
-          term: {
-            config_id: configId,
-          },
-        },
-        {
-          range: {
-            '@timestamp': {
-              gte: `now-${interval}m`,
-              lte: 'now',
-            },
-          },
-        },
-      ],
-    },
-  },
-  aggs: {
-    byId: {
-      terms: {
-        field: 'config_id',
       },
       aggs: {
-        byLocation: {
+        byId: {
           terms: {
-            field: 'observer.name',
+            field: 'config_id',
           },
           aggs: {
-            last_50: {
-              histogram: {
-                field: '@timestamp',
-                interval: interval * 1000,
-                min_doc_count: 1,
+            byLocation: {
+              terms: {
+                field: 'observer.name',
               },
               aggs: {
-                max: {
-                  avg: {
+                last50: {
+                  histogram: {
+                    field: '@timestamp',
+                    interval: interval * 1000,
+                    min_doc_count: 1,
+                  },
+                  aggs: {
+                    max: {
+                      avg: {
+                        field: 'monitor.duration.us',
+                      },
+                    },
+                  },
+                },
+                stats: {
+                  stats: {
                     field: 'monitor.duration.us',
+                  },
+                },
+                median: {
+                  percentiles: {
+                    field: 'monitor.duration.us',
+                    percents: [50],
                   },
                 },
               },
             },
-            stats: {
-              stats: {
-                field: 'monitor.duration.us',
-              },
-            },
-            median: {
-              percentiles: {
-                field: 'monitor.duration.us',
-                percents: [50],
-              },
-            },
           },
         },
       },
+      _source: false,
+      sort: [
+        {
+          '@timestamp': 'desc',
+        },
+      ],
+      fields: ['monitor.duration.us'],
     },
-  },
-  _source: false,
-  sort: [
-    {
-      '@timestamp': 'desc',
-    },
-  ],
-  fields: ['monitor.duration.us'],
-});
+  });
+
+export type TrendsQuery = ReturnType<typeof getFetchTrendsQuery>;

@@ -90,7 +90,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
     "@kbn/search-types",
-    "@kbn/apm-utils",
     "@kbn/core-lifecycle-browser",
     "@kbn/ui-actions-browser",
     "@kbn/presentation-publishing",
