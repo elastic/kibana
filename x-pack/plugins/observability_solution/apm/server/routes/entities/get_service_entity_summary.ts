@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
+import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getServiceLatestEntity } from './get_service_latest_entity';
 import { ServiceEntities } from './types';
