@@ -70,7 +70,7 @@ export default function (providerContext: FtrProviderContext) {
       })
       .catch(() => {});
 
-  describe('When installing system integration in multiple spaces', async () => {
+  describe('When installing system integration in multiple spaces', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {

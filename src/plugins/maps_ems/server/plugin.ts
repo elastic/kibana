@@ -9,7 +9,7 @@
 import { ILicense, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { Plugin, PluginInitializerContext } from '@kbn/core-plugins-server';
 import { CoreSetup } from '@kbn/core-lifecycle-server';
-import { MapConfig } from '../config';
+import { MapConfig } from './config';
 import { LICENSE_CHECK_ID, EMSSettings } from '../common';
 
 export interface MapsEmsPluginServerSetup {
