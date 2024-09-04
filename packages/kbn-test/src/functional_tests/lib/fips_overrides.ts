@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// This will only apply overrides when running in FIPS mode
 export function applyFipsOverrides(vars: any) {
   if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
     vars.esTestCluster.license = 'trial';
