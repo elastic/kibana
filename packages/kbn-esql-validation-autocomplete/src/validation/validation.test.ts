@@ -10075,6 +10075,18 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats avg(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats avg(nullVar)', []);
+
+        testErrorsAndWarnings('from a_index | stats var = avg(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats avg(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort avg(doubleField)', [
+          'SORT does not support function avg',
+        ]);
       });
 
       describe('sum', () => {
@@ -10623,6 +10635,18 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats sum(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats sum(nullVar)', []);
+
+        testErrorsAndWarnings('from a_index | stats var = sum(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats sum(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort sum(doubleField)', [
+          'SORT does not support function sum',
+        ]);
       });
 
       describe('median', () => {
@@ -11201,6 +11225,18 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats median(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats median(nullVar)', []);
+
+        testErrorsAndWarnings('from a_index | stats var = median(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats median(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort median(doubleField)', [
+          'SORT does not support function median',
+        ]);
       });
 
       describe('median_absolute_deviation', () => {
@@ -11952,6 +11988,21 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats median_absolute_deviation(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats median_absolute_deviation(nullVar)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = median_absolute_deviation(avg(doubleField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+          ]
+        );
+
+        testErrorsAndWarnings('from a_index | stats median_absolute_deviation(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort median_absolute_deviation(doubleField)', [
+          'SORT does not support function median_absolute_deviation',
+        ]);
       });
       describe('max', () => {
         testErrorsAndWarnings('from a_index | stats var = max(doubleField)', []);
@@ -12350,6 +12401,18 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval max(keywordField) > 0', [
           'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = max(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats max(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort max(booleanField)', [
+          'SORT does not support function max',
         ]);
       });
 
@@ -12751,6 +12814,18 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval min(keywordField) > 0', [
           'EVAL does not support function min',
         ]);
+
+        testErrorsAndWarnings('from a_index | stats var = min(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats min(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort min(booleanField)', [
+          'SORT does not support function min',
+        ]);
       });
 
       describe('count', () => {
@@ -12799,6 +12874,355 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats count(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats count(nullVar)', []);
+        testErrorsAndWarnings('from a_index | stats var = count(booleanField)', []);
+        testErrorsAndWarnings('from a_index | stats count(booleanField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count(booleanField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count(booleanField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count(booleanField)) + count(booleanField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count(booleanField)) + count(booleanField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats count(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats count(cartesianShapeField)', [
+          'Argument of [count] must be [boolean], found value [cartesianShapeField] type [cartesian_shape]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = count(*)', []);
+        testErrorsAndWarnings('from a_index | stats var = count(cartesianPointField)', []);
+        testErrorsAndWarnings('from a_index | stats count(cartesianPointField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count(cartesianPointField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count(cartesianPointField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count(cartesianPointField)) + count(cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count(cartesianPointField)) + count(cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count(dateField)', []);
+        testErrorsAndWarnings('from a_index | stats count(dateField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count(dateField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count(dateField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count(dateField)) + count(dateField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count(dateField)) + count(dateField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats var = count(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats count(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count(doubleField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count(doubleField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count(doubleField)) + count(doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count(doubleField)) + count(doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = count(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), count(doubleField / 2)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count(doubleField / 2)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats var0 = count(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), count(doubleField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count(doubleField)',
+          []
+        );
+        testErrorsAndWarnings(
+          'from a_index | stats count(doubleField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count(doubleField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count(doubleField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count(doubleField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count(doubleField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count(doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count(geoPointField)', []);
+        testErrorsAndWarnings('from a_index | stats count(geoPointField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count(geoPointField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count(geoPointField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count(geoPointField)) + count(geoPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count(geoPointField)) + count(geoPointField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count(integerField)', []);
+        testErrorsAndWarnings('from a_index | stats count(integerField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count(integerField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count(integerField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count(integerField)) + count(integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count(integerField)) + count(integerField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var0 = count(integerField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), count(integerField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count(integerField)',
+          []
+        );
+        testErrorsAndWarnings(
+          'from a_index | stats count(integerField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count(integerField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count(integerField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count(integerField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count(integerField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count(integerField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count(ipField)', []);
+        testErrorsAndWarnings('from a_index | stats count(ipField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count(ipField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count(ipField))', []);
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count(ipField)) + count(ipField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats round(count(ipField)) + count(ipField)', []);
+        testErrorsAndWarnings('from a_index | stats var = count(keywordField)', []);
+        testErrorsAndWarnings('from a_index | stats count(keywordField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count(keywordField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count(keywordField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count(keywordField)) + count(keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count(keywordField)) + count(keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count(longField)', []);
+        testErrorsAndWarnings('from a_index | stats count(longField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count(longField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count(longField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count(longField)) + count(longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count(longField)) + count(longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats var0 = count(longField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), count(longField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), var0 = count(longField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats count(longField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count(longField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count(longField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count(longField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count(longField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count(longField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count(unsignedLongField)', []);
+        testErrorsAndWarnings('from a_index | stats count(unsignedLongField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count(unsignedLongField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count(unsignedLongField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count(unsignedLongField)) + count(unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count(unsignedLongField)) + count(unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var0 = count(unsignedLongField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count(unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count(unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count(unsignedLongField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count(unsignedLongField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count(unsignedLongField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count(unsignedLongField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count(unsignedLongField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count(unsignedLongField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats count(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count(versionField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count(versionField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count(versionField)) + count(versionField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count(versionField)) + count(versionField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | sort count(booleanField)', [
+          'SORT does not support function count',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where count(booleanField)', [
+          'WHERE does not support function count',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where count(booleanField) > 0', [
+          'WHERE does not support function count',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = count(booleanField)', [
+          'EVAL does not support function count',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = count(booleanField) > 0', [
+          'EVAL does not support function count',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval count(booleanField)', [
+          'EVAL does not support function count',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval count(booleanField) > 0', [
+          'EVAL does not support function count',
+        ]);
       });
 
       describe('count_distinct', () => {
@@ -12876,6 +13300,1558 @@ describe('validation logic', () => {
           'from a_index | eval count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
           ['EVAL does not support function count_distinct']
         );
+        testErrorsAndWarnings('from a_index | stats var = count_distinct(booleanField)', []);
+        testErrorsAndWarnings('from a_index | stats count_distinct(booleanField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count_distinct(booleanField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count_distinct(booleanField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(booleanField)) + count_distinct(booleanField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(booleanField)) + count_distinct(booleanField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count_distinct(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats count_distinct(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats count_distinct(cartesianPointField)', [
+          'Argument of [count_distinct] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = count_distinct(*)', [
+          'Using wildcards (*) in count_distinct is not allowed',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(booleanField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(booleanField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(booleanField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(booleanField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(booleanField, integerField)) + count_distinct(booleanField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(booleanField, integerField)) + count_distinct(booleanField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(avg(doubleField), avg(doubleField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(avg(doubleField), avg(doubleField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(cartesianPointField, booleanField)',
+          [
+            'Argument of [count_distinct] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
+            'Argument of [count_distinct] must be [integer], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(booleanField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(booleanField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(booleanField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(booleanField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(booleanField, longField)) + count_distinct(booleanField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(booleanField, longField)) + count_distinct(booleanField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(booleanField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(booleanField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(booleanField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(booleanField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(booleanField, unsignedLongField)) + count_distinct(booleanField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(booleanField, unsignedLongField)) + count_distinct(booleanField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count_distinct(dateField)', []);
+        testErrorsAndWarnings('from a_index | stats count_distinct(dateField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count_distinct(dateField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count_distinct(dateField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(dateField)) + count_distinct(dateField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(dateField)) + count_distinct(dateField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(dateField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(dateField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(dateField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(dateField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(dateField, integerField)) + count_distinct(dateField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(dateField, integerField)) + count_distinct(dateField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(dateField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(dateField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(dateField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(dateField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(dateField, longField)) + count_distinct(dateField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(dateField, longField)) + count_distinct(dateField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(dateField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(dateField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(dateField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(dateField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(dateField, unsignedLongField)) + count_distinct(dateField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(dateField, unsignedLongField)) + count_distinct(dateField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count_distinct(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats count_distinct(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count_distinct(doubleField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count_distinct(doubleField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(doubleField)) + count_distinct(doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(doubleField)) + count_distinct(doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats count_distinct(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = count_distinct(doubleField / 2)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var0 = count_distinct(doubleField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(doubleField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(doubleField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(doubleField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(doubleField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(doubleField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(doubleField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(doubleField, integerField)) + count_distinct(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(doubleField, integerField)) + count_distinct(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(doubleField / 2, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(doubleField / 2, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField / 2, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField / 2, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(doubleField, integerField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(doubleField, integerField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField, integerField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, integerField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField, integerField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, integerField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(doubleField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(doubleField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(doubleField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(doubleField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(doubleField, longField)) + count_distinct(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(doubleField, longField)) + count_distinct(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(doubleField / 2, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(doubleField / 2, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField / 2, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField / 2, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(doubleField, longField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(doubleField, longField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField, longField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, longField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField, longField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, longField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(doubleField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(doubleField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(doubleField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(doubleField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(doubleField, unsignedLongField)) + count_distinct(doubleField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(doubleField, unsignedLongField)) + count_distinct(doubleField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(doubleField / 2, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(doubleField / 2, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField / 2, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField / 2, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(doubleField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(doubleField, unsignedLongField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(doubleField, unsignedLongField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField, unsignedLongField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, unsignedLongField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(doubleField, unsignedLongField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, unsignedLongField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count_distinct(integerField)', []);
+        testErrorsAndWarnings('from a_index | stats count_distinct(integerField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count_distinct(integerField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count_distinct(integerField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(integerField)) + count_distinct(integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(integerField)) + count_distinct(integerField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var0 = count_distinct(integerField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(integerField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(integerField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(integerField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(integerField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(integerField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(integerField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(integerField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(integerField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(integerField, integerField)) + count_distinct(integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(integerField, integerField)) + count_distinct(integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(integerField, integerField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(integerField, integerField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(integerField, integerField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(integerField, integerField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(integerField, integerField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(integerField, integerField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(integerField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(integerField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(integerField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(integerField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(integerField, longField)) + count_distinct(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(integerField, longField)) + count_distinct(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(integerField, longField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(integerField, longField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(integerField, longField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(integerField, longField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(integerField, longField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(integerField, longField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(integerField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(integerField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(integerField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(integerField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(integerField, unsignedLongField)) + count_distinct(integerField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(integerField, unsignedLongField)) + count_distinct(integerField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(integerField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(integerField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(integerField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(integerField, unsignedLongField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(integerField, unsignedLongField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(integerField, unsignedLongField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(integerField, unsignedLongField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(integerField, unsignedLongField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(integerField, unsignedLongField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count_distinct(ipField)', []);
+        testErrorsAndWarnings('from a_index | stats count_distinct(ipField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count_distinct(ipField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count_distinct(ipField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(ipField)) + count_distinct(ipField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(ipField)) + count_distinct(ipField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(ipField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(ipField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(ipField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(ipField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(ipField, integerField)) + count_distinct(ipField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(ipField, integerField)) + count_distinct(ipField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count_distinct(ipField, longField)', []);
+        testErrorsAndWarnings('from a_index | stats count_distinct(ipField, longField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(ipField, longField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats round(count_distinct(ipField, longField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(ipField, longField)) + count_distinct(ipField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(ipField, longField)) + count_distinct(ipField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(ipField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(ipField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(ipField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(ipField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(ipField, unsignedLongField)) + count_distinct(ipField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(ipField, unsignedLongField)) + count_distinct(ipField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count_distinct(keywordField)', []);
+        testErrorsAndWarnings('from a_index | stats count_distinct(keywordField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count_distinct(keywordField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count_distinct(keywordField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(keywordField)) + count_distinct(keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(keywordField)) + count_distinct(keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(keywordField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(keywordField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(keywordField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(keywordField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(keywordField, integerField)) + count_distinct(keywordField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(keywordField, integerField)) + count_distinct(keywordField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(keywordField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(keywordField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(keywordField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(keywordField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(keywordField, longField)) + count_distinct(keywordField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(keywordField, longField)) + count_distinct(keywordField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(keywordField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(keywordField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(keywordField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(keywordField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(keywordField, unsignedLongField)) + count_distinct(keywordField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(keywordField, unsignedLongField)) + count_distinct(keywordField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count_distinct(longField)', []);
+        testErrorsAndWarnings('from a_index | stats count_distinct(longField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count_distinct(longField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count_distinct(longField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(longField)) + count_distinct(longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(longField)) + count_distinct(longField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var0 = count_distinct(longField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(longField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(longField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(longField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(longField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(longField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(longField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(longField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(longField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(longField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(longField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(longField, integerField)) + count_distinct(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(longField, integerField)) + count_distinct(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(longField, integerField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(longField, integerField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(longField, integerField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(longField, integerField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(longField, integerField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(longField, integerField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(longField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(longField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(longField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(longField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(longField, longField)) + count_distinct(longField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(longField, longField)) + count_distinct(longField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(longField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(longField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(longField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(longField, longField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(longField, longField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(longField, longField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(longField, longField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(longField, longField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(longField, longField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(longField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(longField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(longField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(longField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(longField, unsignedLongField)) + count_distinct(longField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(longField, unsignedLongField)) + count_distinct(longField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(longField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(longField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(longField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(longField, unsignedLongField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = count_distinct(longField, unsignedLongField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(longField, unsignedLongField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(longField, unsignedLongField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), count_distinct(longField, unsignedLongField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = count_distinct(longField, unsignedLongField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count_distinct(textField)', []);
+        testErrorsAndWarnings('from a_index | stats count_distinct(textField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count_distinct(textField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count_distinct(textField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(textField)) + count_distinct(textField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(textField)) + count_distinct(textField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(textField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(textField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(textField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(textField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(textField, integerField)) + count_distinct(textField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(textField, integerField)) + count_distinct(textField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(textField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(textField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(textField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(textField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(textField, longField)) + count_distinct(textField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(textField, longField)) + count_distinct(textField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(textField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(textField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(textField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(textField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(textField, unsignedLongField)) + count_distinct(textField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(textField, unsignedLongField)) + count_distinct(textField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = count_distinct(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats count_distinct(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(count_distinct(versionField))', []);
+        testErrorsAndWarnings('from a_index | stats round(count_distinct(versionField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(versionField)) + count_distinct(versionField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(versionField)) + count_distinct(versionField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(versionField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(versionField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(versionField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(versionField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(versionField, integerField)) + count_distinct(versionField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(versionField, integerField)) + count_distinct(versionField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(versionField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(versionField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(versionField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(versionField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(versionField, longField)) + count_distinct(versionField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(versionField, longField)) + count_distinct(versionField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(versionField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(versionField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(versionField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(versionField, unsignedLongField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(versionField, unsignedLongField)) + count_distinct(versionField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(versionField, unsignedLongField)) + count_distinct(versionField, unsignedLongField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | sort count_distinct(booleanField)', [
+          'SORT does not support function count_distinct',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where count_distinct(booleanField)', [
+          'WHERE does not support function count_distinct',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where count_distinct(booleanField) > 0', [
+          'WHERE does not support function count_distinct',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = count_distinct(booleanField)', [
+          'EVAL does not support function count_distinct',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = count_distinct(booleanField) > 0', [
+          'EVAL does not support function count_distinct',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval count_distinct(booleanField)', [
+          'EVAL does not support function count_distinct',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval count_distinct(booleanField) > 0', [
+          'EVAL does not support function count_distinct',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats count_distinct(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | stats count_distinct(nullVar, nullVar)', []);
       });
 
       describe('st_centroid_agg', () => {
@@ -12959,6 +14935,14 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats st_centroid_agg(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats st_centroid_agg(nullVar)', []);
+
+        testErrorsAndWarnings('from a_index | stats var = st_centroid_agg(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats st_centroid_agg(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
       });
 
       describe('values', () => {
@@ -12995,6 +14979,222 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats values(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats values(nullVar)', []);
+        testErrorsAndWarnings('from a_index | stats var = values(booleanField)', []);
+        testErrorsAndWarnings('from a_index | stats values(booleanField)', []);
+
+        testErrorsAndWarnings('from a_index | stats var = values(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats values(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats values(cartesianPointField)', [
+          'Argument of [values] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = values(*)', [
+          'Using wildcards (*) in values is not allowed',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = values(dateField)', []);
+        testErrorsAndWarnings('from a_index | stats values(dateField)', []);
+        testErrorsAndWarnings('from a_index | stats var = values(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats values(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(values(doubleField))', []);
+        testErrorsAndWarnings('from a_index | stats round(values(doubleField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(values(doubleField)) + values(doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(values(doubleField)) + values(doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats values(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = values(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), values(doubleField / 2)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = values(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var0 = values(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), values(doubleField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = values(doubleField)',
+          []
+        );
+        testErrorsAndWarnings(
+          'from a_index | stats values(doubleField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = values(doubleField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), values(doubleField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = values(doubleField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), values(doubleField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = values(doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = values(integerField)', []);
+        testErrorsAndWarnings('from a_index | stats values(integerField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(values(integerField))', []);
+        testErrorsAndWarnings('from a_index | stats round(values(integerField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(values(integerField)) + values(integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(values(integerField)) + values(integerField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var0 = values(integerField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), values(integerField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = values(integerField)',
+          []
+        );
+        testErrorsAndWarnings(
+          'from a_index | stats values(integerField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = values(integerField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), values(integerField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = values(integerField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), values(integerField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = values(integerField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = values(ipField)', []);
+        testErrorsAndWarnings('from a_index | stats values(ipField)', []);
+        testErrorsAndWarnings('from a_index | stats var = values(keywordField)', []);
+        testErrorsAndWarnings('from a_index | stats values(keywordField)', []);
+        testErrorsAndWarnings('from a_index | stats var = values(longField)', []);
+        testErrorsAndWarnings('from a_index | stats values(longField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(values(longField))', []);
+        testErrorsAndWarnings('from a_index | stats round(values(longField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(values(longField)) + values(longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(values(longField)) + values(longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats var0 = values(longField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), values(longField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = values(longField)',
+          []
+        );
+        testErrorsAndWarnings(
+          'from a_index | stats values(longField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = values(longField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), values(longField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = values(longField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), values(longField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = values(longField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = values(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats values(versionField)', []);
+
+        testErrorsAndWarnings('from a_index | sort values(booleanField)', [
+          'SORT does not support function values',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where values(booleanField)', [
+          'WHERE does not support function values',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where values(booleanField) > 0', [
+          'WHERE does not support function values',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = values(booleanField)', [
+          'EVAL does not support function values',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = values(booleanField) > 0', [
+          'EVAL does not support function values',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval values(booleanField)', [
+          'EVAL does not support function values',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval values(booleanField) > 0', [
+          'EVAL does not support function values',
+        ]);
       });
 
       describe('top', () => {
@@ -13077,6 +15277,344 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval top(textField, integerField, "asc") > 0', [
           'EVAL does not support function top',
         ]);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = top(booleanField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats top(booleanField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = top(avg(doubleField), avg(doubleField), avg(doubleField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats top(avg(doubleField), avg(doubleField), avg(doubleField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats top(cartesianPointField, booleanField, booleanField)',
+          [
+            'Argument of [top] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
+            'Argument of [top] must be [integer], found value [booleanField] type [boolean]',
+            'Argument of [top] must be [keyword], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = top(dateField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats top(dateField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = top(doubleField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats top(doubleField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(top(doubleField, integerField, keywordField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(top(doubleField, integerField, keywordField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(top(doubleField, integerField, keywordField)) + top(doubleField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(top(doubleField, integerField, keywordField)) + top(doubleField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats top(doubleField / 2, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = top(doubleField / 2, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), top(doubleField / 2, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = top(doubleField / 2, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = top(doubleField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), top(doubleField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = top(doubleField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats top(doubleField, integerField, keywordField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = top(doubleField, integerField, keywordField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), top(doubleField, integerField, keywordField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = top(doubleField, integerField, keywordField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), top(doubleField, integerField, keywordField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = top(doubleField, integerField, keywordField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = top(integerField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats top(integerField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(top(integerField, integerField, keywordField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(top(integerField, integerField, keywordField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(top(integerField, integerField, keywordField)) + top(integerField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(top(integerField, integerField, keywordField)) + top(integerField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = top(integerField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), top(integerField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = top(integerField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats top(integerField, integerField, keywordField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = top(integerField, integerField, keywordField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), top(integerField, integerField, keywordField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = top(integerField, integerField, keywordField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), top(integerField, integerField, keywordField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = top(integerField, integerField, keywordField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = top(ipField, integerField, keywordField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats top(ipField, integerField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = top(longField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats top(longField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(top(longField, integerField, keywordField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(top(longField, integerField, keywordField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(top(longField, integerField, keywordField)) + top(longField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(top(longField, integerField, keywordField)) + top(longField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = top(longField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), top(longField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = top(longField, integerField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats top(longField, integerField, keywordField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = top(longField, integerField, keywordField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), top(longField, integerField, keywordField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = top(longField, integerField, keywordField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), top(longField, integerField, keywordField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = top(longField, integerField, keywordField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | sort top(booleanField, integerField, keywordField)', [
+          'SORT does not support function top',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | where top(booleanField, integerField, keywordField)',
+          ['WHERE does not support function top']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where top(booleanField, integerField, keywordField) > 0',
+          ['WHERE does not support function top']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = top(booleanField, integerField, keywordField)',
+          ['EVAL does not support function top']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = top(booleanField, integerField, keywordField) > 0',
+          ['EVAL does not support function top']
+        );
+
+        testErrorsAndWarnings('from a_index | eval top(booleanField, integerField, keywordField)', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval top(booleanField, integerField, keywordField) > 0',
+          ['EVAL does not support function top']
+        );
+
+        testErrorsAndWarnings('from a_index | stats top("2022", integerField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats top(concat("20", "22"), integerField, keywordField)',
+          []
+        );
       });
 
       describe('weighted_avg', () => {
@@ -14015,6 +16553,22 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval weighted_avg(integerField, integerField) > 0', [
           'EVAL does not support function weighted_avg',
         ]);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(avg(doubleField), avg(doubleField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(avg(doubleField), avg(doubleField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+          ]
+        );
       });
 
       describe('bucket', () => {
@@ -15725,6 +18279,27 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats percentile(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | stats percentile(nullVar, nullVar)', [
           'Argument of [percentile] must be a constant, received [nullVar]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = percentile(avg(doubleField), avg(doubleField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats percentile(avg(doubleField), avg(doubleField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+          ]
+        );
+
+        testErrorsAndWarnings('from a_index | stats percentile(booleanField, booleanField)', [
+          'Argument of [percentile] must be [double], found value [booleanField] type [boolean]',
+          'Argument of [percentile] must be [double], found value [booleanField] type [boolean]',
         ]);
       });
 

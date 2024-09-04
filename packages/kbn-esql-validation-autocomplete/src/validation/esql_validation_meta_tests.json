@@ -28630,6 +28630,27 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = avg(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort avg(doubleField)",
+      "error": [
+        "SORT does not support function avg"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = sum(integerField)",
       "error": [],
       "warning": []
@@ -29511,6 +29532,27 @@
     {
       "query": "row nullVar = null | stats sum(nullVar)",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = sum(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats sum(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort sum(doubleField)",
+      "error": [
+        "SORT does not support function sum"
+      ],
       "warning": []
     },
     {
@@ -30398,6 +30440,27 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = median(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats median(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort median(doubleField)",
+      "error": [
+        "SORT does not support function median"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = median_absolute_deviation(integerField)",
       "error": [],
       "warning": []
@@ -31282,6 +31345,27 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = median_absolute_deviation(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats median_absolute_deviation(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort median_absolute_deviation(doubleField)",
+      "error": [
+        "SORT does not support function median_absolute_deviation"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = max(doubleField)",
       "error": [],
       "warning": []
@@ -32016,6 +32100,27 @@
       "query": "from a_index | eval max(keywordField) > 0",
       "error": [
         "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort max(booleanField)",
+      "error": [
+        "SORT does not support function max"
       ],
       "warning": []
     },
@@ -32758,6 +32863,27 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = min(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort min(booleanField)",
+      "error": [
+        "SORT does not support function min"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = count(textField)",
       "error": [],
       "warning": []
@@ -32847,6 +32973,611 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = count(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(booleanField)) + count(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(booleanField)) + count(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(cartesianShapeField)",
+      "error": [
+        "Argument of [count] must be [boolean], found value [cartesianShapeField] type [cartesian_shape]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count(*)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(cartesianPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(cartesianPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(cartesianPointField)) + count(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(cartesianPointField)) + count(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(dateField)) + count(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(dateField)) + count(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(doubleField)) + count(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(doubleField)) + count(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(doubleField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count(doubleField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count(doubleField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count(doubleField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count(doubleField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count(doubleField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(geoPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(geoPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(geoPointField)) + count(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(geoPointField)) + count(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(integerField)) + count(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(integerField)) + count(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(integerField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count(integerField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count(integerField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count(integerField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count(integerField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count(integerField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(ipField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(ipField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(ipField)) + count(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(ipField)) + count(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(keywordField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(keywordField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(keywordField)) + count(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(keywordField)) + count(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(longField)) + count(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(longField)) + count(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(longField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count(longField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count(longField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count(longField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count(longField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count(longField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count(unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(unsignedLongField)) + count(unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(unsignedLongField)) + count(unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count(unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count(unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count(unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(unsignedLongField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count(unsignedLongField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count(unsignedLongField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count(unsignedLongField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count(unsignedLongField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count(unsignedLongField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(versionField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(versionField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count(versionField)) + count(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count(versionField)) + count(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort count(booleanField)",
+      "error": [
+        "SORT does not support function count"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where count(booleanField)",
+      "error": [
+        "WHERE does not support function count"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where count(booleanField) > 0",
+      "error": [
+        "WHERE does not support function count"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = count(booleanField)",
+      "error": [
+        "EVAL does not support function count"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = count(booleanField) > 0",
+      "error": [
+        "EVAL does not support function count"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval count(booleanField)",
+      "error": [
+        "EVAL does not support function count"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval count(booleanField) > 0",
+      "error": [
+        "EVAL does not support function count"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats count_distinct(null, null, null, null, null, null, null, null)",
       "error": [],
       "warning": []
@@ -32933,6 +33664,1817 @@
       "error": [
         "EVAL does not support function count_distinct"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(booleanField)) + count_distinct(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(booleanField)) + count_distinct(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(cartesianPointField)",
+      "error": [
+        "Argument of [count_distinct] must be [boolean], found value [cartesianPointField] type [cartesian_point]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(*)",
+      "error": [
+        "Using wildcards (*) in count_distinct is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(booleanField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(booleanField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(booleanField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(booleanField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(booleanField, integerField)) + count_distinct(booleanField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(booleanField, integerField)) + count_distinct(booleanField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(avg(doubleField), avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(avg(doubleField), avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(cartesianPointField, booleanField)",
+      "error": [
+        "Argument of [count_distinct] must be [boolean], found value [cartesianPointField] type [cartesian_point]",
+        "Argument of [count_distinct] must be [integer], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(booleanField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(booleanField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(booleanField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(booleanField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(booleanField, longField)) + count_distinct(booleanField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(booleanField, longField)) + count_distinct(booleanField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(booleanField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(booleanField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(booleanField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(booleanField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(booleanField, unsignedLongField)) + count_distinct(booleanField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(booleanField, unsignedLongField)) + count_distinct(booleanField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(dateField)) + count_distinct(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(dateField)) + count_distinct(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(dateField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(dateField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(dateField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(dateField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(dateField, integerField)) + count_distinct(dateField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(dateField, integerField)) + count_distinct(dateField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(dateField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(dateField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(dateField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(dateField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(dateField, longField)) + count_distinct(dateField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(dateField, longField)) + count_distinct(dateField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(dateField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(dateField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(dateField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(dateField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(dateField, unsignedLongField)) + count_distinct(dateField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(dateField, unsignedLongField)) + count_distinct(dateField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(doubleField)) + count_distinct(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(doubleField)) + count_distinct(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(doubleField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(doubleField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(doubleField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(doubleField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(doubleField, integerField)) + count_distinct(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(doubleField, integerField)) + count_distinct(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(doubleField / 2, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(doubleField / 2, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField / 2, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField / 2, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(doubleField, integerField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(doubleField, integerField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField, integerField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, integerField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField, integerField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, integerField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(doubleField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(doubleField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(doubleField, longField)) + count_distinct(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(doubleField, longField)) + count_distinct(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(doubleField / 2, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(doubleField / 2, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField / 2, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField / 2, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(doubleField, longField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(doubleField, longField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField, longField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, longField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField, longField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, longField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(doubleField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(doubleField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(doubleField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(doubleField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(doubleField, unsignedLongField)) + count_distinct(doubleField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(doubleField, unsignedLongField)) + count_distinct(doubleField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(doubleField / 2, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(doubleField / 2, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField / 2, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField / 2, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(doubleField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(doubleField, unsignedLongField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(doubleField, unsignedLongField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField, unsignedLongField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, unsignedLongField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(doubleField, unsignedLongField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(doubleField, unsignedLongField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(integerField)) + count_distinct(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(integerField)) + count_distinct(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(integerField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(integerField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(integerField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(integerField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(integerField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(integerField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(integerField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(integerField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(integerField, integerField)) + count_distinct(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(integerField, integerField)) + count_distinct(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(integerField, integerField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(integerField, integerField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(integerField, integerField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(integerField, integerField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(integerField, integerField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(integerField, integerField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(integerField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(integerField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(integerField, longField)) + count_distinct(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(integerField, longField)) + count_distinct(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(integerField, longField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(integerField, longField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(integerField, longField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(integerField, longField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(integerField, longField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(integerField, longField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(integerField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(integerField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(integerField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(integerField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(integerField, unsignedLongField)) + count_distinct(integerField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(integerField, unsignedLongField)) + count_distinct(integerField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(integerField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(integerField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(integerField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(integerField, unsignedLongField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(integerField, unsignedLongField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(integerField, unsignedLongField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(integerField, unsignedLongField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(integerField, unsignedLongField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(integerField, unsignedLongField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(ipField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(ipField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(ipField)) + count_distinct(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(ipField)) + count_distinct(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(ipField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(ipField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(ipField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(ipField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(ipField, integerField)) + count_distinct(ipField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(ipField, integerField)) + count_distinct(ipField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(ipField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(ipField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(ipField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(ipField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(ipField, longField)) + count_distinct(ipField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(ipField, longField)) + count_distinct(ipField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(ipField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(ipField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(ipField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(ipField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(ipField, unsignedLongField)) + count_distinct(ipField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(ipField, unsignedLongField)) + count_distinct(ipField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(keywordField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(keywordField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(keywordField)) + count_distinct(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(keywordField)) + count_distinct(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(keywordField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(keywordField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(keywordField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(keywordField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(keywordField, integerField)) + count_distinct(keywordField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(keywordField, integerField)) + count_distinct(keywordField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(keywordField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(keywordField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(keywordField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(keywordField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(keywordField, longField)) + count_distinct(keywordField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(keywordField, longField)) + count_distinct(keywordField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(keywordField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(keywordField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(keywordField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(keywordField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(keywordField, unsignedLongField)) + count_distinct(keywordField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(keywordField, unsignedLongField)) + count_distinct(keywordField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(longField)) + count_distinct(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(longField)) + count_distinct(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(longField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(longField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(longField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(longField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(longField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(longField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(longField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(longField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(longField, integerField)) + count_distinct(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(longField, integerField)) + count_distinct(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(longField, integerField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(longField, integerField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(longField, integerField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(longField, integerField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(longField, integerField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(longField, integerField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(longField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(longField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(longField, longField)) + count_distinct(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(longField, longField)) + count_distinct(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(longField, longField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(longField, longField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(longField, longField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(longField, longField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(longField, longField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(longField, longField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(longField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(longField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(longField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(longField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(longField, unsignedLongField)) + count_distinct(longField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(longField, unsignedLongField)) + count_distinct(longField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(longField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(longField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(longField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(longField, unsignedLongField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = count_distinct(longField, unsignedLongField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(longField, unsignedLongField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(longField, unsignedLongField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), count_distinct(longField, unsignedLongField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = count_distinct(longField, unsignedLongField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(textField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(textField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(textField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(textField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(textField)) + count_distinct(textField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(textField)) + count_distinct(textField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(textField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(textField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(textField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(textField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(textField, integerField)) + count_distinct(textField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(textField, integerField)) + count_distinct(textField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(textField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(textField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(textField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(textField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(textField, longField)) + count_distinct(textField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(textField, longField)) + count_distinct(textField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(textField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(textField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(textField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(textField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(textField, unsignedLongField)) + count_distinct(textField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(textField, unsignedLongField)) + count_distinct(textField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(versionField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(versionField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(versionField)) + count_distinct(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(versionField)) + count_distinct(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(versionField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(versionField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(versionField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(versionField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(versionField, integerField)) + count_distinct(versionField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(versionField, integerField)) + count_distinct(versionField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(versionField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(versionField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(versionField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(versionField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(versionField, longField)) + count_distinct(versionField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(versionField, longField)) + count_distinct(versionField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = count_distinct(versionField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(versionField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(versionField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(versionField, unsignedLongField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(versionField, unsignedLongField)) + count_distinct(versionField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(versionField, unsignedLongField)) + count_distinct(versionField, unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort count_distinct(booleanField)",
+      "error": [
+        "SORT does not support function count_distinct"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where count_distinct(booleanField)",
+      "error": [
+        "WHERE does not support function count_distinct"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where count_distinct(booleanField) > 0",
+      "error": [
+        "WHERE does not support function count_distinct"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = count_distinct(booleanField)",
+      "error": [
+        "EVAL does not support function count_distinct"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = count_distinct(booleanField) > 0",
+      "error": [
+        "EVAL does not support function count_distinct"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval count_distinct(booleanField)",
+      "error": [
+        "EVAL does not support function count_distinct"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval count_distinct(booleanField) > 0",
+      "error": [
+        "EVAL does not support function count_distinct"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats count_distinct(nullVar, nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -33085,6 +35627,20 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = st_centroid_agg(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats st_centroid_agg(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = values(textField)",
       "error": [],
       "warning": []
@@ -33151,6 +35707,378 @@
     {
       "query": "row nullVar = null | stats values(nullVar)",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = values(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = values(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(cartesianPointField)",
+      "error": [
+        "Argument of [values] must be [boolean], found value [cartesianPointField] type [cartesian_point]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = values(*)",
+      "error": [
+        "Using wildcards (*) in values is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = values(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = values(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(values(doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(values(doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(values(doubleField)) + values(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(values(doubleField)) + values(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = values(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), values(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = values(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = values(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), values(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = values(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(doubleField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = values(doubleField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), values(doubleField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = values(doubleField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), values(doubleField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = values(doubleField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = values(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(values(integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(values(integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(values(integerField)) + values(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(values(integerField)) + values(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = values(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), values(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = values(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(integerField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = values(integerField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), values(integerField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = values(integerField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), values(integerField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = values(integerField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = values(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = values(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = values(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(values(longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(values(longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(values(longField)) + values(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(values(longField)) + values(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = values(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), values(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = values(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(longField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = values(longField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), values(longField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = values(longField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), values(longField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = values(longField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = values(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort values(booleanField)",
+      "error": [
+        "SORT does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where values(booleanField)",
+      "error": [
+        "WHERE does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where values(booleanField) > 0",
+      "error": [
+        "WHERE does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = values(booleanField)",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = values(booleanField) > 0",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval values(booleanField)",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval values(booleanField) > 0",
+      "error": [
+        "EVAL does not support function values"
+      ],
       "warning": []
     },
     {
@@ -33291,6 +36219,367 @@
       "error": [
         "EVAL does not support function top"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(booleanField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(booleanField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(avg(doubleField), avg(doubleField), avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(avg(doubleField), avg(doubleField), avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(cartesianPointField, booleanField, booleanField)",
+      "error": [
+        "Argument of [top] must be [boolean], found value [cartesianPointField] type [cartesian_point]",
+        "Argument of [top] must be [integer], found value [booleanField] type [boolean]",
+        "Argument of [top] must be [keyword], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(dateField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(dateField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(doubleField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(doubleField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(top(doubleField, integerField, keywordField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(top(doubleField, integerField, keywordField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(top(doubleField, integerField, keywordField)) + top(doubleField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(top(doubleField, integerField, keywordField)) + top(doubleField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(doubleField / 2, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = top(doubleField / 2, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), top(doubleField / 2, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = top(doubleField / 2, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = top(doubleField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), top(doubleField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = top(doubleField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(doubleField, integerField, keywordField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = top(doubleField, integerField, keywordField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), top(doubleField, integerField, keywordField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = top(doubleField, integerField, keywordField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), top(doubleField, integerField, keywordField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = top(doubleField, integerField, keywordField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(integerField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(integerField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(top(integerField, integerField, keywordField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(top(integerField, integerField, keywordField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(top(integerField, integerField, keywordField)) + top(integerField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(top(integerField, integerField, keywordField)) + top(integerField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = top(integerField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), top(integerField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = top(integerField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(integerField, integerField, keywordField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = top(integerField, integerField, keywordField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), top(integerField, integerField, keywordField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = top(integerField, integerField, keywordField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), top(integerField, integerField, keywordField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = top(integerField, integerField, keywordField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(ipField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(ipField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(longField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(longField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(top(longField, integerField, keywordField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(top(longField, integerField, keywordField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(top(longField, integerField, keywordField)) + top(longField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(top(longField, integerField, keywordField)) + top(longField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = top(longField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), top(longField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = top(longField, integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(longField, integerField, keywordField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = top(longField, integerField, keywordField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), top(longField, integerField, keywordField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = top(longField, integerField, keywordField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), top(longField, integerField, keywordField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = top(longField, integerField, keywordField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort top(booleanField, integerField, keywordField)",
+      "error": [
+        "SORT does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top(booleanField, integerField, keywordField)",
+      "error": [
+        "WHERE does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top(booleanField, integerField, keywordField) > 0",
+      "error": [
+        "WHERE does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top(booleanField, integerField, keywordField)",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top(booleanField, integerField, keywordField) > 0",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top(booleanField, integerField, keywordField)",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top(booleanField, integerField, keywordField) > 0",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(\"2022\", integerField, keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(concat(\"20\", \"22\"), integerField, keywordField)",
+      "error": [],
       "warning": []
     },
     {
@@ -34444,6 +37733,22 @@
       "query": "from a_index | eval weighted_avg(integerField, integerField) > 0",
       "error": [
         "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = weighted_avg(avg(doubleField), avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(avg(doubleField), avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
       ],
       "warning": []
     },
@@ -36683,6 +39988,30 @@
       "query": "row nullVar = null | stats percentile(nullVar, nullVar)",
       "error": [
         "Argument of [percentile] must be a constant, received [nullVar]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = percentile(avg(doubleField), avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(avg(doubleField), avg(doubleField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(booleanField, booleanField)",
+      "error": [
+        "Argument of [percentile] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [percentile] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },

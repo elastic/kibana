@@ -361,37 +361,37 @@ function generateWhereCommandTestsForAggFunction(
   testCases: Map<string, string[]>
 ) {
   // statsSignatures.some(({ returnType, params }) => [...ESQL_NUMBER_TYPES].includes(returnType))
-  for (const { params, ...signRest } of signatures) {
-    const fieldMapping = getFieldMapping(params);
 
-    testCases.set(
-      `from a_index | where ${
-        getFunctionSignatures(
-          {
-            name,
-            ...defRest,
-            signatures: [{ params: fieldMapping, ...signRest }],
-          },
-          { withTypes: false }
-        )[0].declaration
-      }`,
-      [`WHERE does not support function ${name}`]
-    );
+  const { params, ...signRest } = signatures[0];
+  const fieldMapping = getFieldMapping(params);
 
-    testCases.set(
-      `from a_index | where ${
-        getFunctionSignatures(
-          {
-            name,
-            ...defRest,
-            signatures: [{ params: fieldMapping, ...signRest }],
-          },
-          { withTypes: false }
-        )[0].declaration
-      } > 0`,
-      [`WHERE does not support function ${name}`]
-    );
-  }
+  testCases.set(
+    `from a_index | where ${
+      getFunctionSignatures(
+        {
+          name,
+          ...defRest,
+          signatures: [{ params: fieldMapping, ...signRest }],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    [`WHERE does not support function ${name}`]
+  );
+
+  testCases.set(
+    `from a_index | where ${
+      getFunctionSignatures(
+        {
+          name,
+          ...defRest,
+          signatures: [{ params: fieldMapping, ...signRest }],
+        },
+        { withTypes: false }
+      )[0].declaration
+    } > 0`,
+    [`WHERE does not support function ${name}`]
+  );
 }
 
 function generateEvalCommandTestsForEvalFunction(
@@ -589,64 +589,63 @@ function generateEvalCommandTestsForAggFunction(
   { name, signatures, alias, ...defRest }: FunctionDefinition,
   testCases: Map<string, string[]>
 ) {
-  for (const { params, ...signRest } of signatures) {
-    const fieldMapping = getFieldMapping(params);
-    testCases.set(
-      `from a_index | eval var = ${
-        getFunctionSignatures(
-          {
-            name,
-            ...defRest,
-            signatures: [{ params: fieldMapping, ...signRest }],
-          },
-          { withTypes: false }
-        )[0].declaration
-      }`,
-      [`EVAL does not support function ${name}`]
-    );
+  const { params, ...signRest } = signatures[0];
+  const fieldMapping = getFieldMapping(params);
+  testCases.set(
+    `from a_index | eval var = ${
+      getFunctionSignatures(
+        {
+          name,
+          ...defRest,
+          signatures: [{ params: fieldMapping, ...signRest }],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    [`EVAL does not support function ${name}`]
+  );
 
-    testCases.set(
-      `from a_index | eval var = ${
-        getFunctionSignatures(
-          {
-            name,
-            ...defRest,
-            signatures: [{ params: fieldMapping, ...signRest }],
-          },
-          { withTypes: false }
-        )[0].declaration
-      } > 0`,
-      [`EVAL does not support function ${name}`]
-    );
+  testCases.set(
+    `from a_index | eval var = ${
+      getFunctionSignatures(
+        {
+          name,
+          ...defRest,
+          signatures: [{ params: fieldMapping, ...signRest }],
+        },
+        { withTypes: false }
+      )[0].declaration
+    } > 0`,
+    [`EVAL does not support function ${name}`]
+  );
 
-    testCases.set(
-      `from a_index | eval ${
-        getFunctionSignatures(
-          {
-            name,
-            ...defRest,
-            signatures: [{ params: fieldMapping, ...signRest }],
-          },
-          { withTypes: false }
-        )[0].declaration
-      }`,
-      [`EVAL does not support function ${name}`]
-    );
+  testCases.set(
+    `from a_index | eval ${
+      getFunctionSignatures(
+        {
+          name,
+          ...defRest,
+          signatures: [{ params: fieldMapping, ...signRest }],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    [`EVAL does not support function ${name}`]
+  );
 
-    testCases.set(
-      `from a_index | eval ${
-        getFunctionSignatures(
-          {
-            name,
-            ...defRest,
-            signatures: [{ params: fieldMapping, ...signRest }],
-          },
-          { withTypes: false }
-        )[0].declaration
-      } > 0`,
-      [`EVAL does not support function ${name}`]
-    );
-  }
+  testCases.set(
+    `from a_index | eval ${
+      getFunctionSignatures(
+        {
+          name,
+          ...defRest,
+          signatures: [{ params: fieldMapping, ...signRest }],
+        },
+        { withTypes: false }
+      )[0].declaration
+    } > 0`,
+    [`EVAL does not support function ${name}`]
+  );
 }
 
 function generateStatsCommandTestsForAggFunction(
