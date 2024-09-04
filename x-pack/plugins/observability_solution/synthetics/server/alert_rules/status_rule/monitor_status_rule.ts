@@ -73,7 +73,7 @@ export const registerSyntheticsStatusCheckRule = (
         ruleState.meta?.downConfigs as StatusConfigs
       );
 
-      const { numberOfLocations, numberOfChecks } = getConditionType(params.condition);
+      const { locationsThreshold, numberOfChecks } = getConditionType(params.condition);
 
       await statusRule.handleDownMonitorThresholdAlert({
         downConfigs,
@@ -88,7 +88,7 @@ export const registerSyntheticsStatusCheckRule = (
         dateFormat,
         tz,
         numberOfChecks,
-        numberOfLocations,
+        locationsThreshold,
       });
       return {
         state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),

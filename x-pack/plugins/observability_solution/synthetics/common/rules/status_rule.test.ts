@@ -16,7 +16,6 @@ describe('Status Rule', () => {
   it('should return the correct condition type check based', () => {
     const { isChecksBased, isTimeWindow } = getConditionType({
       window: {
-        numberOfLocations: 5,
         numberOfChecks: 5,
       },
     });
@@ -27,7 +26,6 @@ describe('Status Rule', () => {
   it('should return the correct condition type time based', () => {
     const { isTimeWindow, isChecksBased } = getConditionType({
       window: {
-        numberOfLocations: 5,
         time: {
           unit: 'm',
           size: 5,

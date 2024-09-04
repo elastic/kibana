@@ -186,7 +186,7 @@ export class StatusRuleExecutor {
       : 'now-2m';
 
     const condition = this.params.condition;
-    if (condition && 'numberOfLocations' in condition.window) {
+    if (condition && 'locationsThreshold' in condition.window) {
       from = moment().subtract(maxPeriod, 'milliseconds').subtract(5, 'minutes').toISOString();
       return { from, to: 'now' };
     }
@@ -238,16 +238,16 @@ export class StatusRuleExecutor {
 
   handleDownMonitorThresholdAlert = ({ downConfigs }: { downConfigs: StatusConfigs }) => {
     const isCustomRule = !isEmpty(this.params);
-    const { isTimeWindow, downThreshold, numberOfLocations } = getConditionType(
+    const { isTimeWindow, downThreshold, locationsThreshold } = getConditionType(
       this.params?.condition
     );
     const groupBy = this.params?.condition?.groupBy ?? 'locationId';
 
-    if (groupBy === 'locationId' && numberOfLocations === 1) {
+    if (groupBy === 'locationId' && locationsThreshold === 1) {
       Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
         const doesMonitorMeetLocationThreshold = getDoesMonitorMeetLocationThreshold({
           matchesByLocation: [statusConfig],
-          locationsThreshold: numberOfLocations,
+          locationsThreshold,
           downThreshold,
           useTimeWindow: isTimeWindow || false,
         });
@@ -272,7 +272,7 @@ export class StatusRuleExecutor {
       for (const [configId, configs] of downConfigsById) {
         const doesMonitorMeetLocationThreshold = getDoesMonitorMeetLocationThreshold({
           matchesByLocation: configs,
-          locationsThreshold: numberOfLocations,
+          locationsThreshold,
           downThreshold,
           useTimeWindow: isTimeWindow || false,
         });
@@ -281,7 +281,7 @@ export class StatusRuleExecutor {
           const alertId = configId;
           const monitorSummary = this.getUngroupedDownSummary({
             statusConfigs: configs,
-            numberOfLocations,
+            locationsThreshold,
           });
           return this.scheduleAlert({
             idWithLocation: configId,
@@ -297,7 +297,7 @@ export class StatusRuleExecutor {
 
   getMonitorDownSummary({ statusConfig }: { statusConfig: AlertStatusMetaDataCodec }) {
     const { ping, configId, locationId, checks } = statusConfig;
-    const { numberOfChecks, downThreshold, numberOfLocations } = getConditionType(
+    const { numberOfChecks, downThreshold, locationsThreshold } = getConditionType(
       this.params.condition
     );
 
@@ -311,7 +311,7 @@ export class StatusRuleExecutor {
       checks,
       downThreshold,
       numberOfChecks,
-      numberOfLocations,
+      locationsThreshold,
     });
 
     const condition = this.params.condition;
@@ -324,7 +324,7 @@ export class StatusRuleExecutor {
         downThreshold,
         timeWindow: time,
         timestamp: baseSummary.timestamp,
-        numberOfLocations,
+        locationsThreshold,
       });
     }
 
@@ -333,10 +333,10 @@ export class StatusRuleExecutor {
 
   getUngroupedDownSummary({
     statusConfigs,
-    numberOfLocations,
+    locationsThreshold,
   }: {
     statusConfigs: AlertStatusMetaDataCodec[];
-    numberOfLocations: number;
+    locationsThreshold: number;
   }) {
     const { numberOfChecks, downThreshold } = getConditionType(this.params.condition);
     const sampleConfig = statusConfigs[0];
@@ -351,20 +351,15 @@ export class StatusRuleExecutor {
       checks,
       downThreshold,
       numberOfChecks,
-      numberOfLocations,
+      locationsThreshold,
     });
-    if (statusConfigs.length === 1) {
-      baseSummary.reason = getUngroupedReasonMessage({
-        statusConfigs,
-        monitorName: baseSummary.monitorName,
-        params: this.params,
-      });
-    } else {
-      baseSummary.reason = getUngroupedReasonMessage({
-        statusConfigs,
-        monitorName: baseSummary.monitorName,
-        params: this.params,
-      });
+    baseSummary.reason = getUngroupedReasonMessage({
+      statusConfigs,
+      monitorName: baseSummary.monitorName,
+      params: this.params,
+      locationsThreshold,
+    });
+    if (statusConfigs.length > 1) {
       baseSummary.locationNames = statusConfigs.map((c) => c.ping.observer.geo?.name!).join(' | ');
     }
 

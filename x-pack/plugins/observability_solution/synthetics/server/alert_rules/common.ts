@@ -147,7 +147,7 @@ export const setRecoveredAlertsContext = ({
   dateFormat,
   tz,
   numberOfChecks,
-  numberOfLocations,
+  locationsThreshold,
 }: {
   alertsClient: PublicAlertsClient<
     ObservabilityUptimeAlert,
@@ -162,7 +162,7 @@ export const setRecoveredAlertsContext = ({
   dateFormat: string;
   tz: string;
   numberOfChecks: number;
-  numberOfLocations: number;
+  locationsThreshold: number;
 }) => {
   const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
   for (const recoveredAlert of recoveredAlerts) {
@@ -201,7 +201,7 @@ export const setRecoveredAlertsContext = ({
         checks,
         downThreshold,
         numberOfChecks,
-        numberOfLocations,
+        locationsThreshold,
       });
       lastErrorMessage = monitorSummary.lastErrorMessage;
 
@@ -252,7 +252,7 @@ export const setRecoveredAlertsContext = ({
         checks,
         downThreshold,
         numberOfChecks,
-        numberOfLocations,
+        locationsThreshold,
       });
 
       // When alert is flapping, the stateId is not available on ping.state.ends.id, use state instead

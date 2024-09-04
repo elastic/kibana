@@ -43,7 +43,6 @@ export const WindowValueExpression = ({ ruleParams, setRuleParams }: Props) => {
         window: {
           ...ruleParams.condition?.window,
           time: value,
-          numberOfLocations: ruleParams.condition?.window.numberOfLocations ?? 1,
         },
       });
     },
@@ -57,7 +56,6 @@ export const WindowValueExpression = ({ ruleParams, setRuleParams }: Props) => {
         window: {
           ...ruleParams.condition?.window,
           numberOfChecks: value,
-          numberOfLocations: ruleParams.condition?.window.numberOfLocations ?? 1,
         },
       });
     },

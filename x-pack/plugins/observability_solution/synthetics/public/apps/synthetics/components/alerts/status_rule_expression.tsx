@@ -32,18 +32,17 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
   const condition = ruleParams.condition;
   const downThreshold =
     condition && 'downThreshold' in condition ? condition.downThreshold ?? 5 : 5;
-  const showGroupBy =
-    condition &&
-    'numberOfLocations' in condition.window &&
-    condition.window.numberOfLocations === 1;
+  const locationsThreshold =
+    condition && 'locationsThreshold' in condition ? condition?.locationsThreshold ?? 1 : 1;
+  const showGroupBy = locationsThreshold === 1;
 
   const onThresholdChange = useCallback(
     (value: number) => {
       const prevCondition = ruleParams.condition ?? {
         downThreshold: 5,
+        locationsThreshold: 1,
         window: {
           numberOfChecks: 5,
-          numberOfLocations: 1,
         },
       };
       setRuleParams('condition', {
@@ -153,7 +152,10 @@ export const StatusTranslations = {
   isDownDescription: i18n.translate('xpack.synthetics.status.expirationExpression.description', {
     defaultMessage: 'is down ',
   }),
-  fromLocationsDescription: i18n.translate('xpack.synthetics.status.fromLocations.description', {
-    defaultMessage: 'from at least',
-  }),
+  fromLocationsDescription: i18n.translate(
+    'xpack.synthetics.status.locationsThreshold.description',
+    {
+      defaultMessage: 'from at least',
+    }
+  ),
 };

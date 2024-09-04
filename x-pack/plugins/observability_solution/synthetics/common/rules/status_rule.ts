@@ -28,14 +28,6 @@ export const NumberOfChecksSchema = schema.object({
   }),
 });
 
-export const numberOfLocationsSchema = schema.object({
-  numberOfLocations: schema.number({
-    defaultValue: 1,
-    min: 1,
-    max: 100,
-  }),
-});
-
 export const StatusRuleConditionSchema = schema.object({
   groupBy: schema.maybe(
     schema.string({
@@ -43,14 +35,12 @@ export const StatusRuleConditionSchema = schema.object({
     })
   ),
   downThreshold: schema.maybe(schema.number()),
+  locationsThreshold: schema.maybe(schema.number()),
   window: schema.oneOf([
-    schema.intersection([
-      schema.object({
-        time: TimeWindowSchema,
-      }),
-      numberOfLocationsSchema,
-    ]),
-    schema.intersection([NumberOfChecksSchema, numberOfLocationsSchema]),
+    schema.object({
+      time: TimeWindowSchema,
+    }),
+    NumberOfChecksSchema,
   ]),
 });
 
@@ -95,15 +85,12 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
     numberOfChecks = condition?.downThreshold ?? 1;
   }
 
-  const numberOfLocations =
-    conWindow && 'numberOfLocations' in conWindow ? conWindow.numberOfLocations ?? 1 : 1;
-
   return {
     isTimeWindow,
     timeWindow,
     isChecksBased,
     numberOfChecks,
-    numberOfLocations,
+    locationsThreshold: condition?.locationsThreshold ?? 1,
     downThreshold: condition?.downThreshold ?? 1,
   };
 };

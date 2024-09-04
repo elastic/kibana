@@ -322,10 +322,10 @@ describe('StatusRuleExecutor', () => {
       statusRule.params = {
         condition: {
           window: {
-            numberOfLocations: 2,
             numberOfChecks: 1,
           },
           downThreshold: 1,
+          locationsThreshold: 2,
         },
       };
 
@@ -353,10 +353,10 @@ describe('StatusRuleExecutor', () => {
       statusRule.params = {
         condition: {
           window: {
-            numberOfLocations: 1,
             numberOfChecks: 1,
           },
           downThreshold: 1,
+          locationsThreshold: 1,
         },
       };
       const spy = jest.spyOn(statusRule, 'scheduleAlert');
@@ -396,10 +396,10 @@ describe('StatusRuleExecutor', () => {
         condition: {
           groupBy: 'none',
           window: {
-            numberOfLocations: 1,
             numberOfChecks: 1,
           },
           downThreshold: 1,
+          locationsThreshold: 1,
         },
       };
       const spy = jest.spyOn(statusRule, 'scheduleAlert');

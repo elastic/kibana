@@ -60,9 +60,10 @@ const OPTIONS: Option[] = [
 ];
 
 export const DEFAULT_CONDITION: StatusRuleCondition = {
-  window: { numberOfChecks: 5, numberOfLocations: 1 },
+  window: { numberOfChecks: 5 },
   groupBy: 'locationId',
   downThreshold: 5,
+  locationsThreshold: 1,
 };
 const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {
   const { isTimeWindow, isLocationBased } = getConditionType(condition);
@@ -138,14 +139,16 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
               setRuleParams('condition', {
                 ...ruleParams.condition,
                 downThreshold: 5,
-                window: { numberOfChecks: 5, numberOfLocations: 1 },
+                locationsThreshold: 1,
+                window: { numberOfChecks: 5 },
               });
               break;
             case 'timeWindow':
               setRuleParams('condition', {
                 ...ruleParams.condition,
                 downThreshold: 5,
-                window: { time: { unit: 'm', size: 5 }, numberOfLocations: 1 },
+                locationsThreshold: 1,
+                window: { time: { unit: 'm', size: 5 } },
               });
               break;
             default:

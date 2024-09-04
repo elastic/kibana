@@ -24,26 +24,21 @@ export const LocationsValueExpression = ({ ruleParams, setRuleParams }: Props) =
     (value: number) => {
       setRuleParams('condition', {
         ...ruleParams.condition,
-        window: {
-          ...ruleParams.condition?.window,
-          numberOfLocations: value,
-        },
+        locationsThreshold: value,
         groupBy: value === 1 ? ruleParams.condition?.groupBy : 'none',
       } as StatusRuleCondition);
     },
     [ruleParams.condition, setRuleParams]
   );
 
-  const numberOfLocations =
-    condition && 'numberOfLocations' in condition.window
-      ? condition.window.numberOfLocations ?? 1
-      : 1;
+  const locationsThreshold =
+    condition && 'locationsThreshold' in condition ? condition.locationsThreshold ?? 1 : 1;
   return (
     <PopoverExpression
       value={i18n.translate('xpack.synthetics.windowValueExpression.percentLabel', {
         defaultMessage:
           '{numberOfLocations} {numberOfLocations, plural, one {location} other {locations}}',
-        values: { numberOfLocations: numberOfLocations ?? 1 },
+        values: { numberOfLocations: locationsThreshold ?? 1 },
       })}
     >
       <EuiPopoverTitle>
@@ -56,7 +51,7 @@ export const LocationsValueExpression = ({ ruleParams, setRuleParams }: Props) =
         min={1}
         max={100}
         compressed
-        value={numberOfLocations}
+        value={locationsThreshold}
         onChange={(evt) => onLocationCountChange(Number(evt.target.value))}
       />
     </PopoverExpression>

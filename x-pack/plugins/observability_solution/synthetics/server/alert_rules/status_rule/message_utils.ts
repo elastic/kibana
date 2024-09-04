@@ -57,7 +57,7 @@ export interface MonitorSummaryData {
   };
   downThreshold: number;
   numberOfChecks: number;
-  numberOfLocations: number;
+  locationsThreshold: number;
 }
 
 export const getMonitorSummary = ({
@@ -69,7 +69,7 @@ export const getMonitorSummary = ({
   dateFormat,
   statusMessage,
   checks = { downWithinXChecks: 1, down: 1 },
-  numberOfLocations,
+  locationsThreshold,
   numberOfChecks,
 }: MonitorSummaryData): MonitorSummaryStatusRule => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
@@ -115,7 +115,7 @@ export const getMonitorSummary = ({
       timestamp: monitorInfo['@timestamp'],
       checks,
       downThreshold,
-      numberOfLocations,
+      locationsThreshold,
       numberOfChecks,
     }),
     checks,
@@ -137,7 +137,7 @@ export const getUngroupedReasonMessage = ({
   status?: string;
   params: StatusRuleParams;
 }) => {
-  const { isChecksBased, numberOfChecks, timeWindow, downThreshold, numberOfLocations } =
+  const { isChecksBased, numberOfChecks, timeWindow, downThreshold, locationsThreshold } =
     getConditionType(params.condition);
 
   if (statusConfigs.length === 1) {
@@ -145,12 +145,13 @@ export const getUngroupedReasonMessage = ({
     return i18n.translate(
       'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location.ungrouped',
       {
-        defaultMessage: `Monitor "{name}" is {status} from {locName}. Alert when down {threshold} {threshold, plural, one {time} other {times}}.`,
+        defaultMessage: `Monitor "{name}" is {status} from {locName}. Alert when down {threshold} {threshold, plural, one {time} other {times}} from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
         values: {
           locName: locNames[0],
           name: monitorName,
           status,
           threshold: downThreshold,
+          locationsThreshold,
         },
       }
     );
@@ -158,12 +159,12 @@ export const getUngroupedReasonMessage = ({
     return i18n.translate(
       'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location.ungrouped.multiple',
       {
-        defaultMessage: `Monitor "{name}" is {status}{locationDetails}. Alert when down => {threshold} {threshold, plural, one {time} other {times}} {condition} from at least {numberOfLocations} {numberOfLocations, plural, one {location} other {locations}}.`,
+        defaultMessage: `Monitor "{name}" is {status}{locationDetails}. Alert when down => {threshold} {threshold, plural, one {time} other {times}} {condition} from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
         values: {
           name: monitorName,
           status,
           threshold: downThreshold,
-          numberOfLocations,
+          locationsThreshold,
           condition: isChecksBased
             ? i18n.translate(
                 'xpack.synthetics.alertRules.monitorStatus.reasonMessage.condition.latestChecks',
@@ -210,7 +211,7 @@ export const getReasonMessage = ({
   timestamp,
   checks,
   downThreshold,
-  numberOfLocations,
+  locationsThreshold,
   numberOfChecks,
 }: {
   name: string;
@@ -222,20 +223,20 @@ export const getReasonMessage = ({
     down: number;
   };
   downThreshold: number;
-  numberOfLocations: number;
+  locationsThreshold: number;
   numberOfChecks: number;
 }) => {
   const checkedAt = moment(timestamp).format('LLL');
 
   return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.new', {
-    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Monitor is down {downChecks} {downChecks, plural, one {time} other {times}} within the last {numberOfChecks} checks. Alert when {downThreshold} out of last {numberOfChecks} checks are down from at least {numberOfLocations} {numberOfLocations, plural, one {location} other {locations}}.`,
+    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Monitor is down {downChecks} {downChecks, plural, one {time} other {times}} within the last {numberOfChecks} checks. Alert when {downThreshold} out of last {numberOfChecks} checks are down from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
     values: {
       name,
       status,
       location,
       checkedAt,
       downThreshold,
-      numberOfLocations,
+      locationsThreshold,
       downChecks: checks?.downWithinXChecks ?? 1,
       numberOfChecks,
     },
@@ -247,7 +248,7 @@ export const getReasonMessageForTimeWindow = ({
   location,
   timestamp,
   downThreshold,
-  numberOfLocations,
+  locationsThreshold,
   timeWindow,
   status = DOWN_LABEL,
 }: {
@@ -256,13 +257,13 @@ export const getReasonMessageForTimeWindow = ({
   status?: string;
   timestamp: string;
   downThreshold: number;
-  numberOfLocations: number;
+  locationsThreshold: number;
   timeWindow: TimeWindow;
 }) => {
   const checkedAt = moment(timestamp).format('LLL');
 
   return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.timeBased', {
-    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Alert when {downThreshold} checks are down within the last {size} {unitLabel} from at least {numberOfLocations} {numberOfLocations, plural, one {location} other {locations}}.`,
+    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Alert when {downThreshold} checks are down within the last {size} {unitLabel} from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
     values: {
       name,
       status,
@@ -270,7 +271,7 @@ export const getReasonMessageForTimeWindow = ({
       checkedAt,
       downThreshold,
       unitLabel: getTimeUnitLabel(timeWindow),
-      numberOfLocations,
+      locationsThreshold,
       size: timeWindow.size,
     },
   });
