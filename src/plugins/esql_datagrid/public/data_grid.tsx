@@ -14,6 +14,7 @@ import {
   type SortOrder,
   renderCustomToolbar,
   type UnifiedDataTableProps,
+  type UnifiedDataTableRenderCustomToolbarProps,
 } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
@@ -68,7 +69,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
-  const onSetColumns = useCallback((columns) => {
+  const onSetColumns = useCallback((columns: string[]) => {
     setActiveColumns(columns);
   }, []);
 
@@ -149,7 +150,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [props.share?.url.locators]);
 
   const renderToolbar = useCallback(
-    (customToolbarProps) => {
+    (customToolbarProps: UnifiedDataTableRenderCustomToolbarProps) => {
       const discoverLink = discoverLocator?.getRedirectUrl({
         dataViewSpec: props.dataView.toSpec(),
         timeRange: props.data.query.timefilter.timefilter.getTime(),

@@ -23,6 +23,7 @@ import {
   EuiCallOut,
   useResizeObserver,
   EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -391,14 +392,14 @@ export const DocViewerTable = ({
   );
 
   const onHideNullValuesChange = useCallback(
-    (e) => {
+    (e: EuiSwitchEvent) => {
       setAreNullValuesHidden(e.target.checked);
     },
     [setAreNullValuesHidden]
   );
 
   const onShowOnlySelectedFieldsChange = useCallback(
-    (e) => {
+    (e: EuiSwitchEvent) => {
       setShowOnlySelectedFields(e.target.checked);
     },
     [setShowOnlySelectedFields]

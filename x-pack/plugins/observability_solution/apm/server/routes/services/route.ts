@@ -80,7 +80,7 @@ import {
 import { getThroughput, ServiceThroughputResponse } from './get_throughput';
 import { getServiceEntitySummary } from '../entities/get_service_entity_summary';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { createEntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
+import { createEntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',

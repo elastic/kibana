@@ -12,6 +12,7 @@ import type {
   DraggableProvided,
   DraggableStateSnapshot,
   DraggingStyle,
+  DroppableProvided,
   NotDraggingStyle,
 } from '@hello-pangea/dnd';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
@@ -89,7 +90,7 @@ export const ProviderContentWrapper = styled.span`
   }
 `;
 
-type RenderFunctionProp = (
+export type RenderFunctionProp = (
   props: DataProvider,
   provided: DraggableProvided | null,
   state: DraggableStateSnapshot
@@ -156,7 +157,7 @@ const DraggableOnWrapper: React.FC<DraggableWrapperProps> = React.memo(
     );
 
     const RenderClone = useCallback(
-      (provided, snapshot) => (
+      (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
         <ConditionalPortal registerProvider={registerProvider}>
           <div
             {...provided.draggableProps}
@@ -178,7 +179,7 @@ const DraggableOnWrapper: React.FC<DraggableWrapperProps> = React.memo(
     );
 
     const DraggableContent = useCallback(
-      (provided, snapshot) => (
+      (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
         <ProviderContainer
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -215,7 +216,7 @@ const DraggableOnWrapper: React.FC<DraggableWrapperProps> = React.memo(
     );
 
     const DroppableContent = useCallback(
-      (droppableProvided) => (
+      (droppableProvided: DroppableProvided) => (
         <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
           <div
             className={DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME}
