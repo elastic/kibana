@@ -7,8 +7,10 @@
 
 import type { EntitiesESClient } from '../../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { getServiceLatestEntity } from '../get_service_latest_entity';
-import type { ServiceEntities } from '../types';
+import { getEntityLatestServices } from '../get_entity_latest_services';
+import { calculateAvgMetrics } from '../utils/calculate_avg_metrics';
+import { mergeEntities } from '../utils/merge_entities';
+import { MAX_NUMBER_OF_SERVICES } from './get_service_entities';
 
 interface Params {
   entitiesESClient: EntitiesESClient;
@@ -24,15 +26,18 @@ export function getServiceEntitySummary({
   environment,
   serviceName,
   start,
-}: Params): Promise<ServiceEntities | undefined> {
-  return withApmSpan('get_service_entity_summary', () => {
-    return getServiceLatestEntity({
-      end,
+}: Params) {
+  return withApmSpan('get_service_entity_summary', async () => {
+    const entityLatestServices = await getEntityLatestServices({
       entitiesESClient,
-      environment,
-      size: 1,
       start,
+      end,
+      environment,
+      size: MAX_NUMBER_OF_SERVICES,
       serviceName,
     });
+
+    const serviceEntity = calculateAvgMetrics(mergeEntities({ entities: entityLatestServices }));
+    return serviceEntity[0];
   });
 }
