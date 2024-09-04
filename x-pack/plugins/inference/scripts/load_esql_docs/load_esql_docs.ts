@@ -8,10 +8,9 @@
 import { run } from '@kbn/dev-cli-runner';
 import { ESQLMessage, EditorError, getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
-import $, { load } from 'cheerio';
 import FastGlob from 'fast-glob';
 import Fs from 'fs/promises';
-import { compact, partition } from 'lodash';
+import { compact } from 'lodash';
 import pLimit from 'p-limit';
 import Path from 'path';
 import yargs, { Argv } from 'yargs';
@@ -23,8 +22,8 @@ import { connectorIdOption, elasticsearchOption, kibanaOption } from '../util/cl
 import { getServiceUrls } from '../util/get_service_urls';
 import { KibanaClient } from '../util/kibana_client';
 import { selectConnector } from '../util/select_connector';
-import { extractSections } from './extract_sections';
 import { syncBuiltDocs } from './built-docs';
+import { extractDocEntries } from './extract_doc_entries';
 
 yargs(process.argv.slice(2))
   .command(
@@ -93,173 +92,8 @@ yargs(process.argv.slice(2))
 
           log.info(`Processing ${files.length} files`);
 
-          async function extractContents(
-            file: string
-          ): Promise<
-            Array<{ title: string; content: string; instructions?: string; skip?: boolean }>
-          > {
-            const fileContents = await Fs.readFile(file);
-            const $element = load(fileContents.toString())('*');
-
-            function getSimpleText() {
-              $element.remove('.navfooter');
-              $element.remove('#sticky_content');
-              $element.find('code').each(function () {
-                $(this).replaceWith('`' + $(this).text() + '`');
-              });
-              return $element
-                .find('.section,section,.part')
-                .last()
-                .text()
-                .replaceAll(/([\n]\s*){2,}/g, '\n');
-            }
-
-            switch (Path.basename(file)) {
-              case 'esql-commands.html':
-                return extractSections($element)
-                  .filter(({ title }) => !!title.match(/^[A-Z_]+$/))
-                  .map((doc) => ({
-                    ...doc,
-                    instructions: `For this command, generate a Markdown document containing the following sections:
-
-                    ## {Title}
-
-                    {What this command does, the use cases, and any limitations from this document or esql-limitations.txt}
-
-                    ### Examples
-
-                    {example ES|QL queries using this command. prefer to copy mentioned queries, but make sure there are at least three different examples, focusing on different usages of this command}`,
-                  }));
-
-              case 'esql-limitations.html':
-                return [
-                  {
-                    title: 'Limitations',
-                    content: getSimpleText(),
-                    skip: true,
-                  },
-                ];
-
-              case 'esql-syntax.html':
-                return [
-                  {
-                    title: 'Syntax',
-                    content: getSimpleText(),
-                    instructions: `Generate a description of ES|QL syntax. Be as complete as possible.
-                    For timespan literals, generate at least five examples of full ES|QL queries, using a mix commands and functions, using different intervals and units.
-                    **Make sure you use timespan literals, such as \`1 day\` or \`24h\` or \`7 weeks\` in these examples**.
-                    Combine ISO timestamps with time span literals and NOW().
-                    Make sure the example queries are using different combinations of syntax, commands and functions for each.
-                    When using DATE_TRUNC, make sure you DO NOT wrap the timespan in single or double quotes.
-                    Do not use the Cast operator.
-                    `,
-                  },
-                ];
-
-              case 'esql.html':
-                return [
-                  {
-                    title: 'Overview',
-                    content: getSimpleText().replace(
-                      /The ES\|QL documentation is organized in these sections(.*)$/,
-                      ''
-                    ),
-                    instructions: `Generate a description of ES|QL as a language. Ignore links to other documents. From Limitations, include the known limitations, but ignore limitations that are specific to a command.
-                      Include a summary of what is mentioned in the CROSS_CLUSTER, Kibana and API sections. Explain how to use the REST API with an example and mention important information for Kibana usage and cross cluster querying.`,
-                  },
-                ];
-
-              case 'esql-cross-clusters.html':
-                return [
-                  {
-                    title: 'CROSS_CLUSTER',
-                    content: getSimpleText(),
-                    skip: true,
-                  },
-                ];
-
-              case 'esql-query-api.html':
-                return [
-                  {
-                    title: 'API',
-                    content: getSimpleText(),
-                    skip: true,
-                  },
-                ];
-
-              case 'esql-kibana.html':
-                return [
-                  {
-                    title: 'Kibana',
-                    content: getSimpleText(),
-                    skip: true,
-                  },
-                ];
-
-              case 'esql-functions-operators.html':
-                const sections = extractSections($element);
-
-                const searches = [
-                  'Binary operators',
-                  'Equality',
-                  'Inequality',
-                  'Less than',
-                  'Greater than',
-                  'Add +',
-                  'Subtract -',
-                  'Multiply *',
-                  'Divide /',
-                  'Modulus %',
-                  'Unary operators',
-                  'Logical operators',
-                  'IS NULL',
-                  'IS NOT NULL',
-                  'Cast (::)',
-                ];
-
-                const matches = ['IN', 'LIKE', 'RLIKE'];
-
-                const [operatorSections, allOtherSections] = partition(sections, (section) => {
-                  return (
-                    matches.includes(section.title) ||
-                    searches.some((search) =>
-                      section.title.toLowerCase().startsWith(search.toLowerCase())
-                    )
-                  );
-                });
-
-                return allOtherSections
-                  .map((section) => ({
-                    ...section,
-                    instructions: `For each function, use the following template:
-
-                  ## {Title}
-
-                  {description of what this function does}
-
-                  ### Examples
-
-                  {at least two examples of full ES|QL queries. prefer the ones in the document verbatim}
-                  `,
-                  }))
-                  .concat({
-                    title: 'Operators',
-                    content: operatorSections
-                      .map(({ title, content }) => `${title}\n${content}`)
-                      .join('\n'),
-                    instructions:
-                      'Generate a document describing the operators. For each type of operator (binary, unary, logical, and the remaining), generate a section. For each operator, generate at least one full ES|QL query as an example of its usage. Keep it short, e.g. only a ```esql\nFROM ...\n| WHERE ... ```',
-                  });
-
-              default:
-                log.debug('Dropping file', file);
-                break;
-            }
-            return [];
-          }
-
           const documents = await Promise.all(
-            files.map((file) => fsLimiter(() => extractContents(file)))
+            files.map((file) => fsLimiter(() => extractDocEntries({ file, log })))
           );
 
           const flattened = documents.flat().filter((doc) => {
@@ -363,8 +197,7 @@ yargs(process.argv.slice(2))
           }
 
           await Promise.all(
-            // TODO: remove
-            flattened.slice(0, 2).map(async (doc) => {
+            flattened.map(async (doc) => {
               if (doc.skip || (argv.only && !argv.only.includes(doc.title))) {
                 return undefined;
               }
@@ -380,7 +213,7 @@ yargs(process.argv.slice(2))
                       connectorId: chatClient.getConnectorId(),
                       system: `## System instructions
 
-                    Your job is to generate Markdown documentation off of content that is scraped from the Elasticsearch website.
+                    Your job is to generate technical documentation in Markdown format based on content that is scraped from the Elasticsearch website.
 
                     The documentation is about ES|QL, or the Elasticsearch Query Language, which is a new piped language that can be
                     used for loading, extracting and transforming data stored in Elasticsearch. The audience for the documentation
