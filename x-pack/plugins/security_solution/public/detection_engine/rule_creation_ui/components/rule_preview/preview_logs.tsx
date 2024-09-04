@@ -10,7 +10,7 @@ import React, { Fragment, useMemo } from 'react';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion, EuiCodeBlock } from '@elastic/eui';
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
-import { FormattedDate } from '../../../../common/components/formatted_date';
+import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { OptimizedAccordion } from './optimizied_accordion';
 interface PreviewLogsProps {
   logs: RulePreviewLogs[];
@@ -133,7 +133,11 @@ const RequestsAccordion: FC<{ logs: RulePreviewLogs[] }> = ({ logs }) => {
               buttonContent={
                 <>
                   {`Rule execution started at`}{' '}
-                  <FormattedDate value={log.startedAt} fieldName="startedAt" />{' '}
+                  {log.startedAt ? (
+                    <PreferenceFormattedDate value={new Date(log.startedAt)} />
+                  ) : (
+                    'unknown time'
+                  )}{' '}
                   {`[${log.duration}ms]`}
                 </>
               }
