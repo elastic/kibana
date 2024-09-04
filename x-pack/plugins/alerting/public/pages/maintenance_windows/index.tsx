@@ -40,7 +40,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
 
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
 
-  const { isLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows({
+  const { isLoading, isInitialLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows({
     enabled: hasLicense,
   });
 
@@ -81,7 +81,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
     };
   }, [setBadge, chrome]);
 
-  if (isLoading) {
+  if (isInitialLoading) {
     return <CenterJustifiedSpinner />;
   }
 
@@ -127,7 +127,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
           <MaintenanceWindowsList
             readOnly={readOnly}
             refreshData={refreshData}
-            loading={isLoading}
+            isLoading={isLoading}
             items={maintenanceWindows}
           />
         </>
