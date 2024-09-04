@@ -24,4 +24,10 @@ export const MAIN_PANEL_LABELS = {
   variablesButton: i18n.translate('console.variablesButton', {
     defaultMessage: 'Variables',
   }),
+  openFullscrenButton: i18n.translate('console.openFullscreenButton', {
+    defaultMessage: 'Open this console as a full page experience',
+  }),
+  closeFullscrenButton: i18n.translate('console.closeFullscreenButton', {
+    defaultMessage: 'Close full page experience',
+  }),
 };

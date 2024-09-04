@@ -18,6 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -92,7 +93,7 @@ export const Editor = memo(({ loading, setEditorInstance, containerWidth }: Prop
 
   return (
     <>
-      {requestInFlight || fetchingMappings ? (
+      {fetchingMappings ? (
         <div className="conApp__requestProgressBarContainer">
           <EuiProgress size="xs" color="accent" position="absolute" />
         </div>

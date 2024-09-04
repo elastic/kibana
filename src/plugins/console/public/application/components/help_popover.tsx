@@ -36,6 +36,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
       closePopover={closePopover}
       anchorPosition="downRight"
       buffer={4}
+      ownFocus={false}
       data-test-subj="consoleHelpPopover"
     >
       <EuiTitle size="xs">
