@@ -87,5 +87,5 @@ export interface ModelProvider {
 export interface Pagination {
   from: number;
   size: number;
-  total?: number;
+  total: number;
 }

@@ -77,7 +77,10 @@ export const SearchMode: React.FC = () => {
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
                 {searchResults ? (
-                  <ResultList searchResults={searchResults} />
+                  <ResultList
+                    searchResults={searchResults}
+                    pagination={searchBarValue.pagination}
+                  />
                 ) : (
                   <EuiEmptyPrompt
                     iconType={'checkInCircleFilled'}

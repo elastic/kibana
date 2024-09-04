@@ -6,7 +6,7 @@
  */
 
 import { useFormContext } from 'react-hook-form';
-import { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { APIRoutes, ChatFormFields, Pagination } from '../types';
 import { useKibana } from './use_kibana';
 import { DEFAULT_PAGINATION } from '../../common';
@@ -31,7 +31,7 @@ export const useSearchPreview = () => {
     pagination: paginationParam = DEFAULT_PAGINATION,
   }: UseSearchPreviewArgs): Promise<UseSearchPreviewResponse> => {
     const { results, pagination } = await http.post<{
-      results: SearchResponse;
+      results: SearchHit[];
       pagination: Pagination;
     }>(APIRoutes.POST_SEARCH_QUERY, {
       body: JSON.stringify({
@@ -42,6 +42,6 @@ export const useSearchPreview = () => {
         from: paginationParam.from,
       }),
     });
-    return { results: results.hits.hits, pagination };
+    return { results, pagination };
   };
 };

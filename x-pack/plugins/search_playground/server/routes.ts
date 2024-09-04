@@ -267,14 +267,19 @@ export function defineRoutes({
           from,
           size,
         });
+        const total = searchResult.hits.total
+          ? typeof searchResult.hits.total === 'object'
+            ? searchResult.hits.total.value
+            : searchResult.hits.total
+          : 0;
 
         return response.ok({
           body: {
-            results: searchResult,
+            results: searchResult.hits.hits,
             pagination: {
               from,
               size,
-              total: searchResult.hits.total,
+              total,
             },
           },
         });

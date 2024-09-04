@@ -16,4 +16,5 @@ export const SEARCH_MODE_FEATURE_FLAG_ID = 'searchPlayground:searchModeEnabled';
 export const DEFAULT_PAGINATION: Pagination = {
   from: 0,
   size: 10,
+  total: 0,
 };

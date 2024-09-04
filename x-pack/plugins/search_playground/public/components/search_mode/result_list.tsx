@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiPagination,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -22,21 +23,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { DocViewer } from '@kbn/unified-doc-viewer';
+import { Pagination } from '../../types';
+import { getPageCounts } from '../../utils/pagination_helper';
 
-const DEMO_DATA = [
-  { id: '123321', name: 'John Doe', age: 25 },
-  { id: '123321', name: 'John Doe', age: 25 },
-  { id: '123321', name: 'John Doe', age: 25 },
-  { id: '123321', name: 'John Doe', age: 25 },
-  { id: '123321', name: 'John Doe', age: 25 },
-  { id: '123321', name: 'John Doe', age: 25 },
-  { id: '123321', name: 'John Doe', age: 25 },
-  { id: '123321', name: 'John Doe', age: 25 },
-  { id: '123321', name: 'John Doe', age: 25 },
-  { id: '123321', name: 'John Doe', age: 25 },
-];
-
+// TODO replace with real data view
 const dataView = {
   title: 'foo',
   id: 'foo',
@@ -53,10 +43,12 @@ const dataView = {
 
 export interface ResultListArgs {
   searchResults: SearchHit[];
+  pagination: Pagination;
 }
 
-export const ResultList: React.FC<ResultListArgs> = ({ searchResults }) => {
+export const ResultList: React.FC<ResultListArgs> = ({ searchResults, pagination }) => {
   const [flyoutDocId, setFlyoutDocId] = useState<string | undefined>(undefined);
+  const { totalPage, page } = getPageCounts(pagination);
   return (
     <EuiPanel grow={false}>
       <EuiFlexGroup direction="column" gutterSize="none">
@@ -85,6 +77,11 @@ export const ResultList: React.FC<ResultListArgs> = ({ searchResults }) => {
             </>
           );
         })}
+        {searchResults.length !== 0 && (
+          <EuiFlexItem>
+            <EuiPagination pageCount={totalPage} activePage={page} onPageClick={(p) => {}} />
+          </EuiFlexItem>
+        )}
         {flyoutDocId && (
           <UnifiedDocViewerFlyout
             services={{}}
