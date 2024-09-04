@@ -7,12 +7,14 @@
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { LogFormatDetectionState } from '../../types';
 import { LOG_FORMAT_DETECTION_PROMPT } from './prompts';
-import { LogDetectionNodeParams } from './types';
+import type { LogDetectionNodeParams } from './types';
 
 const MaxLogSamplesInPrompt = 5;
 
-export async function handleLogFormatDetection(
-  {state, model}: LogDetectionNodeParams): Promise<Partial<LogFormatDetectionState>> {
+export async function handleLogFormatDetection({
+  state,
+  model,
+}: LogDetectionNodeParams): Promise<Partial<LogFormatDetectionState>> {
   const outputParser = new JsonOutputParser();
   const logFormatDetectionNode = LOG_FORMAT_DETECTION_PROMPT.pipe(model).pipe(outputParser);
 

@@ -102,14 +102,14 @@ export async function getLogFormatDetectionGraph({ model, client }: LogDetection
   const workflow = new StateGraph({
     channels: graphState,
   })
-    .addNode('modelInput', modelInput)
+    .addNode('modelInput', (state: LogFormatDetectionState) => modelInput({ state }))
     .addNode('modelOutput', (state: LogFormatDetectionState) => modelOutput({ state }))
     .addNode('handleLogFormatDetection', (state: LogFormatDetectionState) =>
       handleLogFormatDetection({ state, model })
     )
     .addNode('handleKVGraph', await getKVGraph({ model, client }))
-    // .addNode('handleUnstructuredGraph', (state: LogFormatDetectionState) => getCompiledUnstructuredGraph(state, model))
-    // .addNode('handleCsvGraph', (state: LogFormatDetectionState) => getCompiledCsvGraph(state, model))
+    // .addNode('handleUnstructuredGraph', (state: LogFormatDetectionState) => getCompiledUnstructuredGraph({state, model}))
+    // .addNode('handleCsvGraph', (state: LogFormatDetectionState) => getCompiledCsvGraph({state, model}))
     .addEdge(START, 'modelInput')
     .addEdge('modelInput', 'handleLogFormatDetection')
     .addEdge('handleKVGraph', 'modelOutput')
@@ -126,6 +126,5 @@ export async function getLogFormatDetectionGraph({ model, client }: LogDetection
     );
 
   const compiledLogFormatDetectionGraph = workflow.compile();
-
   return compiledLogFormatDetectionGraph;
 }
