@@ -186,9 +186,13 @@ export const DashboardPanelSelectionListFlyout: React.FC<
               >
                 {panelsSearchResult?.some(({ isDisabled }) => !isDisabled) ? (
                   panelsSearchResult.map(
-                    ({ id, title, items, isDisabled, ['data-test-subj']: dataTestSubj }) =>
+                    ({ id, title, items, isDisabled, ['data-test-subj']: dataTestSubj, order }) =>
                       !isDisabled ? (
-                        <EuiFlexItem key={id} data-test-subj={dataTestSubj}>
+                        <EuiFlexItem
+                          key={id}
+                          data-test-subj={dataTestSubj}
+                          data-group-sort-order={order}
+                        >
                           <EuiTitle id={`${id}-group`} size="xxs">
                             {typeof title === 'string' ? <h3>{title}</h3> : title}
                           </EuiTitle>
