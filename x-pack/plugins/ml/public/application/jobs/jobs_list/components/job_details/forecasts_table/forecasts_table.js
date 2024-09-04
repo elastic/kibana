@@ -322,7 +322,7 @@ export class ForecastsTable extends Component {
                 this.props.job.blocked !== undefined ||
                 forecast.forecast_status !== FORECAST_REQUEST_STATE.FINISHED
               }
-              iconType="visLine"
+              iconType="singleMetricViewer"
               aria-label={viewForecastAriaLabel}
               data-test-subj="mlJobListForecastTabOpenSingleMetricViewButton"
             />

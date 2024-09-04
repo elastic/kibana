@@ -819,7 +819,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         items.push(
           <EuiContextMenuItem
             key="view_series"
-            icon="visLine"
+            icon="singleMetricViewer"
             onClick={() => {
               closePopover();
               viewSeries();
