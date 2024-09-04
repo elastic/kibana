@@ -342,8 +342,8 @@ function printGeneratedFunctionsFile(functionDefinitions: FunctionDefinition[]) 
 
 import type { ESQLFunction } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
-import { isLiteralItem } from '../shared/helpers';
-import type { FunctionDefinition } from './types';
+import { isLiteralItem } from '../../shared/helpers';
+import type { FunctionDefinition } from '../types';
 
 
 `;
@@ -378,25 +378,30 @@ import type { FunctionDefinition } from './types';
     JSON.parse(readFileSync(`${ESFunctionDefinitionsDirectory}/${file}`, 'utf-8'))
   );
 
-  const evalFunctionDefinitions: FunctionDefinition[] = [];
+  const scalarFunctionDefinitions: FunctionDefinition[] = [];
+  const aggFunctionDefinitions: FunctionDefinition[] = [];
   for (const ESDefinition of ESFunctionDefinitions) {
-    if (
-      aliases.has(ESDefinition.name) ||
-      excludedFunctions.has(ESDefinition.name) ||
-      ESDefinition.type !== 'eval'
-    ) {
+    if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
       continue;
     }
 
     const functionDefinition = getFunctionDefinition(ESDefinition);
 
-    evalFunctionDefinitions.push(functionDefinition);
+    if (functionDefinition.type === 'eval') {
+      scalarFunctionDefinitions.push(functionDefinition);
+    } else if (functionDefinition.type === 'agg') {
+      aggFunctionDefinitions.push(functionDefinition);
+    }
   }
 
-  evalFunctionDefinitions.push(...extraFunctions);
+  scalarFunctionDefinitions.push(...extraFunctions);
 
   await writeFile(
-    join(__dirname, '../src/definitions/functions.ts'),
-    printGeneratedFunctionsFile(evalFunctionDefinitions)
+    join(__dirname, '../src/definitions/generated/scalar_functions.ts'),
+    printGeneratedFunctionsFile(scalarFunctionDefinitions)
   );
+  // await writeFile(
+  //   join(__dirname, '../src/definitions/generated/aggs.ts'),
+  //   printGeneratedFunctionsFile(aggFunctionDefinitions)
+  // );
 })();

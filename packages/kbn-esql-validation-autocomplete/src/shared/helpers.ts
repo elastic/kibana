@@ -21,7 +21,7 @@ import { ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
-import { evalFunctionDefinitions } from '../definitions/functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
@@ -138,7 +138,7 @@ function buildFunctionLookup() {
   if (!fnLookups) {
     fnLookups = builtinFunctions
       .concat(
-        evalFunctionDefinitions,
+        scalarFunctionDefinitions,
         statsAggregationFunctionDefinitions,
         groupingFunctionDefinitions
       )

@@ -8,7 +8,7 @@
 
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { evalFunctionDefinitions } from '../../definitions/functions';
+import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { builtinFunctions } from '../../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../../definitions/aggs';
 import { timeUnitsToSuggest } from '../../definitions/literals';
@@ -157,7 +157,7 @@ export function getFunctionSignaturesByReturnType(
   }
   // eval functions (eval is a special keyword in JS)
   if (scalar) {
-    list.push(...evalFunctionDefinitions);
+    list.push(...scalarFunctionDefinitions);
   }
   if (builtin) {
     list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));

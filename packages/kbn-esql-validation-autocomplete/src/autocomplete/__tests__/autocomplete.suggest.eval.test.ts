@@ -16,7 +16,7 @@ import {
   getDateLiteralsByFieldType,
 } from './helpers';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
-import { evalFunctionDefinitions } from '../../definitions/functions';
+import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import {
   getCompatibleTypesToSuggestNext,
@@ -360,7 +360,7 @@ describe('autocomplete.suggest', () => {
 
     describe('eval functions', () => {
       // // Test suggestions for each possible param, within each signature variation, for each function
-      for (const fn of evalFunctionDefinitions) {
+      for (const fn of scalarFunctionDefinitions) {
         // skip this fn for the moment as it's quite hard to test
         // if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
         if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {

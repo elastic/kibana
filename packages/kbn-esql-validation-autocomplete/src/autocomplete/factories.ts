@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { evalFunctionDefinitions } from '../definitions/functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import {
@@ -26,7 +26,7 @@ import { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
 
 const allFunctions = statsAggregationFunctionDefinitions
-  .concat(evalFunctionDefinitions)
+  .concat(scalarFunctionDefinitions)
   .concat(groupingFunctionDefinitions);
 
 export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];

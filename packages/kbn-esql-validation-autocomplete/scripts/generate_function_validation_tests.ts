@@ -12,7 +12,7 @@ import * as recast from 'recast';
 import { camelCase } from 'lodash';
 import { getParamAtPosition } from '../src/autocomplete/helper';
 import { statsAggregationFunctionDefinitions } from '../src/definitions/aggs';
-import { evalFunctionDefinitions } from '../src/definitions/functions';
+import { scalarFunctionDefinitions } from '../src/definitions/generated/scalar_functions';
 import { groupingFunctionDefinitions } from '../src/definitions/grouping';
 import { getFunctionSignatures } from '../src/definitions/helpers';
 import { timeUnits } from '../src/definitions/literals';
@@ -34,7 +34,7 @@ export const fieldNameFromType = (type: SupportedDataType) => `${camelCase(type)
 function main() {
   const testCasesByFunction: Map<string, Map<string, string[]>> = new Map();
 
-  for (const definition of evalFunctionDefinitions) {
+  for (const definition of scalarFunctionDefinitions) {
     testCasesByFunction.set(definition.name, generateTestsForEvalFunction(definition));
   }
 
@@ -1021,21 +1021,21 @@ function prepareNestedFunction(fnSignature: FunctionDefinition): string {
 }
 
 const toAvgSignature = statsAggregationFunctionDefinitions.find(({ name }) => name === 'avg')!;
-const toInteger = evalFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
-const toDoubleSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_double')!;
-const toStringSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_string')!;
-const toDateSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_datetime')!;
-const toBooleanSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_boolean')!;
-const toIpSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_ip')!;
-const toGeoPointSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_geopoint')!;
-const toGeoShapeSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_geoshape')!;
-const toCartesianPointSignature = evalFunctionDefinitions.find(
+const toInteger = scalarFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
+const toDoubleSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_double')!;
+const toStringSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_string')!;
+const toDateSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_datetime')!;
+const toBooleanSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_boolean')!;
+const toIpSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_ip')!;
+const toGeoPointSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_geopoint')!;
+const toGeoShapeSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_geoshape')!;
+const toCartesianPointSignature = scalarFunctionDefinitions.find(
   ({ name }) => name === 'to_cartesianpoint'
 )!;
-const toCartesianShapeSignature = evalFunctionDefinitions.find(
+const toCartesianShapeSignature = scalarFunctionDefinitions.find(
   ({ name }) => name === 'to_cartesianshape'
 )!;
-const toVersionSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_version')!;
+const toVersionSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_version')!;
 
 // We don't have full list for long, unsigned_long, etc.
 const nestedFunctions: Record<SupportedDataType, string> = {
