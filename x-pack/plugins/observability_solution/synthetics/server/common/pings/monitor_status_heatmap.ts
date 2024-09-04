@@ -13,14 +13,14 @@ export async function queryMonitorHeatmap({
   to,
   monitorId,
   location,
-  interval,
+  intervalInMinutes,
 }: {
   syntheticsEsClient: SyntheticsEsClient;
   from: number | string;
   to: number | string;
   monitorId: string;
   location: string;
-  interval: number;
+  intervalInMinutes: number;
 }) {
   return syntheticsEsClient.search({
     body: {
@@ -67,7 +67,7 @@ export async function queryMonitorHeatmap({
         heatmap: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: `${interval}m`,
+            fixed_interval: `${intervalInMinutes}m`,
           },
           aggs: {
             up: {
