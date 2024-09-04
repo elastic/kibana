@@ -234,6 +234,11 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleShortcutsButton');
   }
 
+  public async setFileToUpload(path: string) {
+    const input = await this.find.byCssSelector('#importConsoleFile');
+    await input.type(path);
+  }
+
   public async isHelpPopoverOpen() {
     const classAttribute = await this.testSubjects.getAttribute('consoleHelpPopover', 'class');
     return classAttribute?.includes('euiPopover-isOpen');
