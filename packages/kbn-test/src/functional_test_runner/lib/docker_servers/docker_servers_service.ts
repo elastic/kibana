@@ -11,6 +11,7 @@ import execa from 'execa';
 import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs/operators';
 import { ToolingLog } from '@kbn/dev-utils';
+// @ts-ignore - this is not available: Cannot find module 'p-retry' or its corresponding type declarations.
 import pRetry from 'p-retry';
 
 import { Lifecycle } from '../lifecycle';
