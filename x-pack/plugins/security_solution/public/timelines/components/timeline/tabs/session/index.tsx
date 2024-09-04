@@ -29,7 +29,7 @@ interface Props {
 
 const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
   const [height, setHeight] = useState(0);
-  const measuredRef = useCallback((node) => {
+  const measuredRef = useCallback((node: HTMLDivElement | HTMLSpanElement | null) => {
     if (node !== null) {
       setHeight(node.getBoundingClientRect().height);
     }

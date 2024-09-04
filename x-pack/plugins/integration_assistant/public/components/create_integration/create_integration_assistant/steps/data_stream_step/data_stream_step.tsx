@@ -36,7 +36,7 @@ export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
   { value: 'filestream', label: 'File Stream' },
   { value: 'gcp-pubsub', label: 'GCP Pub/Sub' },
   { value: 'gcs', label: 'Google Cloud Storage' },
-  { value: 'http-endpoint', label: 'HTTP Endpoint' },
+  { value: 'http_endpoint', label: 'HTTP Endpoint' },
   { value: 'journald', label: 'Journald' },
   { value: 'kafka', label: 'Kafka' },
   { value: 'tcp', label: 'TCP' },
