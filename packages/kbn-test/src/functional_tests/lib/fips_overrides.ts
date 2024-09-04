@@ -20,6 +20,11 @@ export function applyFipsOverrides(vars: any) {
 
     vars.security = {
       ...vars.security,
+      /*
+       * When running in FIPS mode, security must be enabled. Many suites expect that there will be no authc/authz.
+       * Test user's roles are set to `defaultRoles`, the most privileged roles are added here
+       *  so that more tests can be run successfully
+       */
       defaultRoles: ['superuser', 'kibana_admin', 'system_indices_superuser'],
     };
 

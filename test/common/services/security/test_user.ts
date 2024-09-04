@@ -52,7 +52,15 @@ export class TestUser extends FtrService {
       return;
     }
 
+    /*
+     * When running in FIPS mode, security must be enabled. Many suites expect that there will be no authc/authz.
+     * Test user is configured to get `defaultRole` which is being overridden in `fips_overrides.ts` to the most privileged
+     * roles available so that more tests can be run successfully
+     */
     if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
+      log.debug(
+        `FTR is running in FIPS mode and does not allow for Test User's roles to be overridden`
+      );
       return;
     }
 

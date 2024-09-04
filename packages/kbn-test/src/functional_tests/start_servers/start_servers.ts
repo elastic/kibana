@@ -28,13 +28,12 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
   const reportTime = getTimeReporter(log, 'scripts/functional_tests_server');
 
   await withProcRunner(log, async (procs) => {
-    const config = await readConfigFile(
-      log,
-      options.esVersion,
-      options.config,
-      {},
-      applyFipsOverrides
-    );
+    let config;
+    if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
+      config = await readConfigFile(log, options.esVersion, options.config, {});
+    } else {
+      config = await readConfigFile(log, options.esVersion, options.config, {}, applyFipsOverrides);
+    }
 
     const shutdownEs = await runElasticsearch({
       config,

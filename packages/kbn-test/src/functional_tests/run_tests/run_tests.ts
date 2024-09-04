@@ -68,13 +68,18 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         log.write(`--- [${progress}] Running ${Path.relative(REPO_ROOT, path)}`);
       }
 
-      const config = await readConfigFile(
-        log,
-        options.esVersion,
-        path,
-        settingOverrides,
-        applyFipsOverrides
-      );
+      let config;
+      if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
+        config = await readConfigFile(log, options.esVersion, options.config, {});
+      } else {
+        config = await readConfigFile(
+          log,
+          options.esVersion,
+          options.config,
+          {},
+          applyFipsOverrides
+        );
+      }
 
       const hasTests = await checkForEnabledTestsInFtrConfig({
         config,
