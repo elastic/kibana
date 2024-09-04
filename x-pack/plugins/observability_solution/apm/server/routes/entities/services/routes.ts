@@ -9,7 +9,7 @@ import { jsonRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { EntityServiceListItem } from '../../../../common/entities/types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
+import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
 import { getServiceEntities } from './get_service_entities';
@@ -28,7 +28,7 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
     query: t.intersection([environmentRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  async handler(resources): Promise<ServiceEntities> {
+  async handler(resources): Promise<ServiceEntities | undefined> {
     const { context, params, request } = resources;
     const coreContext = await context.core;
 
