@@ -508,8 +508,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   const suggestionProvider = useMemo(
-    () => ESQLLang.getSuggestionProvider?.(esqlCallbacks, { histogramBarTarget }),
-    [esqlCallbacks, histogramBarTarget]
+    () => ESQLLang.getSuggestionProvider?.(esqlCallbacks),
+    [esqlCallbacks]
   );
 
   const hoverProvider = useMemo(() => ESQLLang.getHoverProvider?.(esqlCallbacks), [esqlCallbacks]);
