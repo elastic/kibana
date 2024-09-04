@@ -125,7 +125,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         truncateText: true,
         sortable: true,
       });
-    } else {
+    } else if (config.enableDataStreamStats) {
       columns.push({
         field: 'maxTimeStamp',
         name: i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnTitle', {

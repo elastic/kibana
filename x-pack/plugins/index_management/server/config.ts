@@ -83,6 +83,7 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     enableLegacyTemplates: true,
     enableIndexStats: true,
     enableDataStreamStats: true,
+    enableSizeAndDocCount: true,
     editableIndexSettings: true,
     enableMappingsSourceFieldSection: true,
     enableTogglingDataRetention: true,

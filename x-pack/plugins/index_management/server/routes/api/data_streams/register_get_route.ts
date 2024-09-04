@@ -84,10 +84,14 @@ const getDataStreamsStats = (client: IScopedClusterClient, name = '*') => {
   });
 };
 
-const getMeteringStats = (client: IScopedClusterClient) => {
+const getMeteringStats = (client: IScopedClusterClient, name?: string) => {
+  let path = `/_metering/stats`;
+  if (name) {
+    path = `${path}/${name}`;
+  }
   return client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>({
     method: 'GET',
-    path: `/_metering/stats`,
+    path,
   });
 };
 
@@ -164,12 +168,17 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
       const { name } = request.params as TypeOf<typeof paramsSchema>;
       const { client } = (await context.core).elasticsearch;
       let dataStreamsStats;
+      let meteringStats;
 
       try {
         const { data_streams: dataStreams } = await getDataStreams(client, name);
 
         if (config.isDataStreamStatsEnabled !== false) {
           ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client, name));
+        }
+
+        if (config.isSizeAndDocCountEnabled !== false) {
+          ({ datastreams: meteringStats } = await getMeteringStats(client, name));
         }
 
         if (dataStreams[0]) {
@@ -182,6 +191,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
           const enhancedDataStreams = enhanceDataStreams({
             dataStreams,
             dataStreamsStats,
+            meteringStats,
             dataStreamsPrivileges,
           });
           const body = deserializeDataStream(enhancedDataStreams[0]);
