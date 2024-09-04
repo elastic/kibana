@@ -206,9 +206,9 @@ export const getRangesliderControlFactory = (
         selectionHasNoResults$.next(hasNoResults);
       });
 
-      if (selections.hasInitialSelections) {
+      /*if (selections.hasInitialSelections) {
         await dataControl.api.untilFiltersReady();
-      }
+      }*/
 
       return {
         api,

@@ -362,9 +362,9 @@ export const getOptionsListControlFactory = (
         },
       };
 
-      if (selections.hasInitialSelections) {
+      /*if (selections.hasInitialSelections) {
         await dataControl.api.untilFiltersReady();
-      }
+      }*/
 
       return {
         api,
