@@ -44,30 +44,38 @@ interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
+const RESULT_EVALUATION = {
+  PASSED: 'passed',
+  FAILED: 'failed',
+  UNKNOWN: 'unknown',
+};
+
 export const getFindingsCountAggQueryMisconfigurationPreview = () => ({
   count: {
     filters: {
-      other_bucket_key: 'unknown',
+      other_bucket_key: RESULT_EVALUATION.UNKNOWN,
       filters: {
-        passed: { match: { 'result.evaluation': 'passed' } },
-        failed: { match: { 'result.evaluation': 'failed' } },
+        [RESULT_EVALUATION.PASSED]: { match: { 'result.evaluation': RESULT_EVALUATION.PASSED } },
+        [RESULT_EVALUATION.FAILED]: { match: { 'result.evaluation': RESULT_EVALUATION.FAILED } },
       },
     },
   },
 });
 
 export const getMisconfigurationAggregationCount = (
-  buckets: Array<estypes.AggregationsStringRareTermsBucketKeys | undefined>
+  buckets: estypes.AggregationsBuckets<estypes.AggregationsStringRareTermsBucketKeys>
 ) => {
-  const passed = buckets.find((bucket) => bucket?.key === 'passed');
-  const failed = buckets.find((bucket) => bucket?.key === 'failed');
-  const noStatus = buckets.find((bucket) => bucket?.key === 'unknown');
-
-  return {
-    passed: passed?.doc_count || 0,
-    failed: failed?.doc_count || 0,
-    no_status: noStatus?.doc_count || 0,
-  };
+  return Object.entries(buckets).reduce(
+    (evaluation, [key, value]) => {
+      evaluation[key] = (evaluation[key] || 0) + (value.doc_count || 0);
+      return evaluation;
+    },
+    {
+      [RESULT_EVALUATION.PASSED]: 0,
+      [RESULT_EVALUATION.FAILED]: 0,
+      [RESULT_EVALUATION.UNKNOWN]: 0,
+    }
+  );
 };
 
 export const buildMisconfigurationsFindingsQuery = (
@@ -129,12 +137,7 @@ export const useMisconfigurationPreview = (options: UseMisconfigurationPreviewOp
       if (!aggregations) throw new Error('expected aggregations to be defined');
 
       return {
-        count: getMisconfigurationAggregationCount(
-          Object.entries(aggregations.count.buckets).map(([key, value]) => ({
-            key,
-            doc_count: value.doc_count || 0,
-          }))
-        ),
+        count: getMisconfigurationAggregationCount(aggregations.count.buckets),
       };
     },
     {

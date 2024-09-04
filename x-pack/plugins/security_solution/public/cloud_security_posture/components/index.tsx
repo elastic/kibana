@@ -23,10 +23,10 @@ export const EntityInsight = <T,>({ hostName }: { hostName: string }) => {
       {hasMisconfigurationFindings && (
         <EuiAccordion
           initialIsOpen={true}
-          id="observedEntity-accordion"
+          id="entityInsight-accordion"
           data-test-subj="entityInsightTestSubj"
           buttonProps={{
-            'data-test-subj': 'observedEntity-accordion-button',
+            'data-test-subj': 'entityInsight-accordion-button',
             css: css`
               color: ${euiTheme.colors.primary};
             `,

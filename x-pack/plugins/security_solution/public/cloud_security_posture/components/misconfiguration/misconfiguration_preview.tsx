@@ -48,12 +48,7 @@ const MisconfigurationEmptyState = ({ euiTheme }: { euiTheme: EuiThemeComputed<{
     <EuiFlexItem>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
-          <EuiTitle
-            size="m"
-            css={css`
-              font-weight: ${euiTheme.font.weight.bold};
-            `}
-          >
+          <EuiTitle size="m">
             <h1>{'-'}</h1>
           </EuiTitle>
         </EuiFlexItem>
@@ -89,12 +84,7 @@ const MisconfigurationPreviewScore = ({
     <EuiFlexItem>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
-          <EuiTitle
-            size="s"
-            css={css`
-              font-weight: ${euiTheme.font.weight.bold};
-            `}
-          >
+          <EuiTitle size="s">
             <h1>{`${Math.round((passedFindings / (passedFindings + failedFindings)) * 100)}%`}</h1>
           </EuiTitle>
         </EuiFlexItem>
