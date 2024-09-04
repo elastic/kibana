@@ -13,7 +13,7 @@ export const MAIN_PANEL_LABELS = {
     defaultMessage: 'Console',
   }),
   importButton: i18n.translate('console.importButtonLabel', {
-    defaultMessage: 'Import',
+    defaultMessage: 'Import requests',
   }),
   importButtonTooltip: i18n.translate('console.importButtonTooltipLabel', {
     defaultMessage: 'Import requests from a file into the editor',
