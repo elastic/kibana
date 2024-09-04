@@ -156,7 +156,7 @@ describe('ScheduleRiskEngineCallout', () => {
       wrapper: TestProviders,
     });
 
-    fireEvent.click(getByText('Run engine now'));
+    fireEvent.click(getByText('Recalculate entity risk scores now'));
 
     expect(mockScheduleNowRiskEngine).toHaveBeenCalled();
   });

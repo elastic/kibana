@@ -51,7 +51,7 @@ describe('Schedule rule run hook', () => {
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(mockFetch).toHaveBeenCalledWith(RISK_ENGINE_SCHEDULE_NOW_URL, {
         method: 'POST',
-        version: '1',
+        version: '2023-10-31',
       });
     });
   });

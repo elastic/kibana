@@ -578,7 +578,7 @@ export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namesp
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_SCHEDULE_NOW_URL, namespace))
       .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', '1')
+      .set('elastic-api-version', '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(expectStatusCode),
