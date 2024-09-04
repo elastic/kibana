@@ -74,7 +74,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     services: {
       notifications,
       mlServices: {
-        mlApiServices: { getTimeFieldRange, setupDataRecognizerConfig, getDataRecognizerModule },
+        mlApi: { getTimeFieldRange, setupDataRecognizerConfig, getDataRecognizerModule },
       },
     },
   } = useMlKibana();

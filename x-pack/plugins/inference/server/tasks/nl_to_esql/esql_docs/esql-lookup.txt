@@ -1,0 +1,101 @@
+## LOOKUP
+
+The `LOOKUP` command in ES|QL is highly experimental and only available in SNAPSHOT versions. It matches values from the input against a table provided in the request, adding the other fields from the table to the output. This command is useful for enriching your dataset with additional information from a predefined table. However, it is important to note that if the table’s column names conflict with existing columns, the existing columns will be dropped.
+
+### Examples
+
+Here are some example ES|QL queries using the `LOOKUP` command:
+
+1. **Basic Lookup Example:**
+   ```esql
+FROM library
+| SORT page_count DESC
+| KEEP name, author
+| LOOKUP era ON author
+| LIMIT 5
+```
+
+2. **Lookup with Multiple Match Fields:**
+   ```esql
+FROM library
+| SORT page_count DESC
+| KEEP name, author, genre
+| LOOKUP era ON author, genre
+| LIMIT 5
+```
+
+3. **Lookup with Different Table:**
+   ```esql
+FROM library
+| SORT page_count DESC
+| KEEP name, author
+| LOOKUP awards ON author
+| LIMIT 5
+```
+
+### Content of file
+
+```plaintext
+LOOKUP
+
+LOOKUP is highly experimental and only available in SNAPSHOT versions.
+LOOKUP matches values from the input against a table provided in the request,
+adding the other fields from the table to the output.
+
+Syntax:
+LOOKUP table ON match_field1[, match_field2, ...]
+
+Parameters:
+- table: The name of the table provided in the request to match. If the table’s column names conflict with existing columns, the existing columns will be dropped.
+- match_field: The fields in the input to match against the table.
+
+Examples:
+const response = await client.esql.query({
+  format: "txt",
+  query:
+    "\n      FROM library\n    | SORT page_count DESC\n    | KEEP name, author\n    | LOOKUP era ON author\n    | LIMIT 5\n  ",
+  tables: {
+    era: {
+      author: {
+        keyword: [
+          "Frank Herbert",
+          "Peter F. Hamilton",
+          "Vernor Vinge",
+          "Alastair Reynolds",
+          "James S.A. Corey",
+        ],
+      },
+      era: {
+        keyword: ["The New Wave", "Diamond", "Diamond", "Diamond", "Hadron"],
+      },
+    },
+  },
+});
+console.log(response);
+
+POST /_query?format=txt
+{
+  "query": """
+      FROM library
+    | SORT page_count DESC
+    | KEEP name, author
+    | LOOKUP era ON author
+    | LIMIT 5
+  """,
+  "tables": {
+    "era": {
+      "author": {"keyword": ["Frank Herbert", "Peter F. Hamilton", "Vernor Vinge", "Alastair Reynolds", "James S.A. Corey"]},
+      "era":    {"keyword": [ "The New Wave",           "Diamond",      "Diamond",           "Diamond",           "Hadron"]}
+    }
+  }
+}
+
+Which returns:
+name        |     author      |      era
+--------------------+-----------------+---------------
+Pandora's Star      |Peter F. Hamilton|Diamond
+A Fire Upon the Deep|Vernor Vinge     |Diamond
+Dune                |Frank Herbert    |The New Wave
+Revelation Space    |Alastair Reynolds|Diamond
+Leviathan Wakes     |James S.A. Corey |Hadron
+```
