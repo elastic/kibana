@@ -32,7 +32,7 @@ describe('indices lib', () => {
     it('should create index with req', async () => {
       mockClient.indices.create.mockResolvedValue({});
 
-      expect(createIndex(client, logger, { indexName: 'test-index' })).resolves.toEqual({
+      await expect(createIndex(client, logger, { indexName: 'test-index' })).resolves.toEqual({
         index: 'test-index',
       });
 
@@ -44,7 +44,7 @@ describe('indices lib', () => {
       const error = new Error('Boom!!');
       mockClient.indices.create.mockRejectedValue(error);
 
-      expect(createIndex(client, logger, { indexName: 'test-index' })).rejects.toBe(error);
+      await expect(createIndex(client, logger, { indexName: 'test-index' })).rejects.toEqual(error);
     });
   });
 });
