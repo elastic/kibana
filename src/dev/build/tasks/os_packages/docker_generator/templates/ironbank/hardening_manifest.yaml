@@ -80,3 +80,7 @@ maintainers:
     email: sid.mantri@elastic.co
     name: Sid Mantri
     username: sidmantri
+  - cht_member: false
+    email: elena.shostak@elastic.co
+    name: Elena Shostak
+    username: elena.shostak

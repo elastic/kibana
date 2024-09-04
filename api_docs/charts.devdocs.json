@@ -609,7 +609,8 @@
           "Chart",
           ">, syncOptions: ",
           "ActiveCursorSyncOption",
-          ") => (cursor: any) => void"
+          ") => ",
+          "PointerUpdateListener"
         ],
         "path": "src/plugins/charts/public/services/active_cursor/use_active_cursor.ts",
         "deprecated": false,

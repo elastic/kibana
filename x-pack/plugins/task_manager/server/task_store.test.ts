@@ -360,6 +360,141 @@ describe('TaskStore', () => {
     });
   });
 
+  describe('msearch', () => {
+    let store: TaskStore;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let childEsClient: ReturnType<
+      typeof elasticsearchServiceMock.createClusterClient
+    >['asInternalUser'];
+
+    beforeAll(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.child.mockReturnValue(childEsClient as unknown as Client);
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+      });
+    });
+
+    async function testMsearch(
+      optsArray: SearchOpts[],
+      hitsArray: Array<estypes.SearchHitsMetadata<unknown>> = []
+    ) {
+      childEsClient.msearch.mockResponse({
+        took: 0,
+        responses: hitsArray.map((hits) => ({
+          hits,
+          took: 0,
+          _shards: {
+            failed: 0,
+            successful: 1,
+            total: 1,
+          },
+          timed_out: false,
+          status: 200,
+        })),
+      });
+
+      const result = await store.msearch(optsArray);
+
+      expect(childEsClient.msearch).toHaveBeenCalledTimes(1);
+
+      return {
+        result,
+        args: childEsClient.msearch.mock.calls[0][0],
+      };
+    }
+
+    test('empty call filters by type, sorts by runAt and id', async () => {
+      const { args } = await testMsearch([{}], []);
+      expect(args).toMatchObject({
+        index: 'tasky',
+        body: [
+          {},
+          {
+            sort: [{ 'task.runAt': 'asc' }],
+            query: { term: { type: 'task' } },
+          },
+        ],
+      });
+    });
+
+    test('allows multiple custom queries', async () => {
+      const { args } = await testMsearch(
+        [
+          {
+            query: {
+              term: { 'task.taskType': 'foo' },
+            },
+          },
+          {
+            query: {
+              term: { 'task.taskType': 'bar' },
+            },
+          },
+        ],
+        []
+      );
+
+      expect(args).toMatchObject({
+        body: [
+          {},
+          {
+            query: {
+              bool: {
+                must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'foo' } }],
+              },
+            },
+          },
+          {},
+          {
+            query: {
+              bool: {
+                must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'bar' } }],
+              },
+            },
+          },
+        ],
+      });
+    });
+
+    test('pushes error from call cluster to errors$', async () => {
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      childEsClient.msearch.mockResponse({
+        took: 0,
+        responses: [
+          {
+            took: 0,
+            _shards: {
+              failed: 0,
+              successful: 1,
+              total: 1,
+            },
+            timed_out: false,
+            status: 429,
+          },
+        ],
+      } as estypes.MsearchResponse);
+      await expect(store.msearch([{}])).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unexpected status code from taskStore::msearch: 429"`
+      );
+      expect(await firstErrorPromise).toMatchInlineSnapshot(
+        `[Error: Unexpected status code from taskStore::msearch: 429]`
+      );
+    });
+  });
+
   describe('aggregate', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
@@ -1406,7 +1541,7 @@ describe('TaskStore', () => {
       childEsClient.updateByQuery.mockResponse({
         hits: { hits: [], total: 0, updated: 100, version_conflicts: 0 },
       } as UpdateByQueryResponse);
-      await store.updateByQuery({ script: '' }, { max_docs: 10 });
+      await store.updateByQuery({ script: { source: '' } }, { max_docs: 10 });
       expect(childEsClient.updateByQuery).toHaveBeenCalledWith(expect.any(Object), {
         requestTimeout: 1000,
       });

@@ -27,7 +27,7 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
-import { DEFAULT_CONTROL_WIDTH } from '../../../../common';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../../common';
 
 import { ControlPanelProps, DefaultControlApi } from '../../controls/types';
 import { ControlError } from './control_error';
@@ -121,17 +121,18 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
   const viewMode = (rawViewMode ?? ViewMode.VIEW) as ViewMode;
   const isEditable = viewMode === ViewMode.EDIT;
   const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
+  const controlGrow = grow ?? DEFAULT_CONTROL_GROW;
 
   return (
     <EuiFlexItem
       ref={setNodeRef}
       style={style}
-      grow={grow}
+      grow={controlGrow}
       data-control-id={uuid}
-      data-test-subj={`control-frame`}
+      data-test-subj="control-frame"
       data-render-complete="true"
       className={classNames('controlFrameWrapper', {
-        'controlFrameWrapper--grow': grow,
+        'controlFrameWrapper--grow': controlGrow,
         'controlFrameWrapper--small': controlWidth === 'small',
         'controlFrameWrapper--medium': controlWidth === 'medium',
         'controlFrameWrapper--large': controlWidth === 'large',
@@ -154,10 +155,12 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           data-test-subj="control-frame-title"
           fullWidth
           label={usingTwoLineLayout ? panelTitle || defaultPanelTitle || '...' : undefined}
+          display="rowCompressed"
         >
           <EuiFormControlLayout
             fullWidth
             isLoading={Boolean(dataLoading)}
+            compressed
             className="controlFrame__formControlLayout"
             prepend={
               <>
