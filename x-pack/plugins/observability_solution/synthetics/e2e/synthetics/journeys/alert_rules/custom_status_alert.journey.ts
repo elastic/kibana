@@ -66,6 +66,7 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
       expect(rules[2].params).toStrictEqual({
         condition: {
           downThreshold: 5,
+          locationsThreshold: 1,
           groupBy: 'locationId',
           window: {
             numberOfChecks: 5,
