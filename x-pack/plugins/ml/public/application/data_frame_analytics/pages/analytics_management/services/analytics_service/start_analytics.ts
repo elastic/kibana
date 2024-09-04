@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { useMlApiContext } from '../../../../../contexts/kibana';
+import { useMlApi } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
@@ -16,11 +16,11 @@ import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/
 
 export const useStartAnalytics = () => {
   const toastNotificationService = useToastNotificationService();
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
 
   return async (d: DataFrameAnalyticsListRow) => {
     try {
-      await ml.dataFrameAnalytics.startDataFrameAnalytics(d.config.id);
+      await mlApi.dataFrameAnalytics.startDataFrameAnalytics(d.config.id);
       toastNotificationService.displaySuccessToast(
         i18n.translate('xpack.ml.dataframe.analyticsList.startAnalyticsSuccessMessage', {
           defaultMessage: 'Request to start data frame analytics {analyticsId} acknowledged.',
