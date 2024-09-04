@@ -18,3 +18,15 @@ export const CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH =
 export const CSP_GET_BENCHMARK_RULES_STATE_API_CURRENT_VERSION = '1';
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATUS_API_CURRENT_VERSION = '1';
+
+export const CLOUD_SECURITY_POSTURE_BASE_PATH = '/cloud_security_posture';
+export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
+  'security_solution_cdr_latest_misconfigurations';
+export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
+export const findingsNavigation = {
+  findings_default: {
+    name: 'Findings',
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/configurations`,
+    id: 'cloud_security_posture-findings-default',
+  },
+};
