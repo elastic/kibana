@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
-import { rangeQuery } from '@kbn/observability-utils/es/queries/range_query';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
 
 export enum CoverageType {
   none = 'none',

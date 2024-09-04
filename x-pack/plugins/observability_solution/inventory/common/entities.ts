@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+export interface Entity<TAttributes extends Record<string, any> = {}> {
+  id: string;
+  name: string;
+  type: string;
+  properties: TAttributes;
+}
+
 export interface EntityTypeDefinition {
   name: string;
   label: string;

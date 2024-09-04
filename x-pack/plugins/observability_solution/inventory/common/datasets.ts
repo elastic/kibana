@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { Entity } from './entities';
+
+export type DatasetEntity = Entity<{
+  'dataset.type': 'dataStream' | 'alias';
+}>;
+
 export enum DatasetType {
   dataStream = 'dataStream',
   alias = 'alias',

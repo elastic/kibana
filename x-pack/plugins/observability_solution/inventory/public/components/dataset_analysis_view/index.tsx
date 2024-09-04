@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-utils/hooks/use_theme';
+import { useTheme } from '@kbn/observability-utils-browser/hooks/use_theme';
 import { css } from '@emotion/css';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { ServiceExtractionList } from './service_extraction_list';

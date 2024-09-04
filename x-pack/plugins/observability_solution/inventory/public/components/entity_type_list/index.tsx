@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import {
-  EuiBadge,
+  // EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntityTypeDefinition } from '../../../common/entities';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
@@ -39,9 +40,9 @@ export function EntityTypeListItem({
         <EuiFlexItem grow>
           <EuiText size="s">{label}</EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        {/* <EuiFlexItem grow={false}>
           <EuiBadge color="hollow">{count}</EuiBadge>
-        </EuiFlexItem>
+        </EuiFlexItem> */}
       </EuiFlexGroup>
     </EuiLink>
   );
@@ -63,7 +64,15 @@ export function EntityTypeListBase({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      {definitions?.map((definition) => {
+      <EntityTypeListItem
+        href={router.link('/all')}
+        icon="globe"
+        count={0}
+        label={i18n.translate('xpack.inventory.entityTypeList.allTypesLink', {
+          defaultMessage: 'All',
+        })}
+      />
+      {/* {definitions?.map((definition) => {
         return (
           <EntityTypeListItem
             key={definition.name}
@@ -73,7 +82,7 @@ export function EntityTypeListBase({
             label={definition.label}
           />
         );
-      })}
+      })} */}
     </EuiFlexGroup>
   );
 }

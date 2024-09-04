@@ -5,10 +5,10 @@
  * 2.0.
  */
 import React, { useCallback, useState } from 'react';
-import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAbortController } from '@kbn/observability-utils/hooks/use_abort_controller';
+import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { useKibana } from '../../hooks/use_kibana';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { ErrorCallOut } from '../error_call_out';
@@ -17,8 +17,8 @@ import { MetricDefinition } from '../../../common/metrics';
 
 export function DatasetMetricsView() {
   const {
-    path: { name },
-  } = useInventoryParams('/dataset/{name}/metrics');
+    path: { id },
+  } = useInventoryParams('/dataset/{id}/metrics');
 
   const {
     core: { notifications },
@@ -32,14 +32,14 @@ export function DatasetMetricsView() {
         {
           params: {
             path: {
-              name,
+              name: id,
             },
           },
           signal,
         }
       );
     },
-    [name, inventoryAPIClient]
+    [id, inventoryAPIClient]
   );
 
   const fetchMetricDefinitionsController = useAbortController();
@@ -56,7 +56,7 @@ export function DatasetMetricsView() {
         .stream('POST /internal/inventory/datasets/{name}/metrics/extract', {
           params: {
             path: {
-              name,
+              name: id,
             },
             body: {
               connectorId: 'azure-gpt4o',
@@ -76,7 +76,7 @@ export function DatasetMetricsView() {
           },
         });
     });
-  }, [name, inventoryAPIClient, fetchMetricDefinitionsController.signal]);
+  }, [id, inventoryAPIClient, fetchMetricDefinitionsController.signal]);
 
   if (error) {
     return <ErrorCallOut error={error} />;

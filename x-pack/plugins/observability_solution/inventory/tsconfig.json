@@ -25,7 +25,6 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/typed-react-router-config",
     "@kbn/investigate-plugin",
-    "@kbn/observability-utils",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/deeplinks-observability",

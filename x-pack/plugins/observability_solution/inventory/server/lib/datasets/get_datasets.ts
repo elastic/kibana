@@ -6,7 +6,7 @@
  */
 
 import { castArray } from 'lodash';
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { Dataset, DatasetType } from '../../../common/datasets';
 
 export async function getDatasets({

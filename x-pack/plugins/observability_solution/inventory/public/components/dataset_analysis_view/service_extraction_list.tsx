@@ -6,8 +6,8 @@
  */
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
-import { useAbortController } from '@kbn/observability-utils/hooks/use_abort_controller';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import {
   EuiBadge,
   EuiButton,
@@ -21,7 +21,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { useTheme } from '@kbn/observability-utils/hooks/use_theme';
+import { useTheme } from '@kbn/observability-utils-browser/hooks/use_theme';
 import { groupBy } from 'lodash';
 import { css } from '@emotion/css';
 import { useKibana } from '../../hooks/use_kibana';

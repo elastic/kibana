@@ -20,8 +20,8 @@ type TabMap = Record<
 
 export function DatasetDetailView({ children }: { children: React.ReactNode }) {
   const {
-    path: { name },
-  } = useInventoryParams('/dataset/{name}/*');
+    path: { id },
+  } = useInventoryParams('/dataset/{id}/*');
 
   const router = useInventoryRouter();
 
@@ -29,16 +29,16 @@ export function DatasetDetailView({ children }: { children: React.ReactNode }) {
 
   const tabs = {
     overview: {
-      selected: routePath === '/dataset/{name}/overview',
-      href: router.link('/dataset/{name}/overview', { path: { name } }),
+      selected: routePath === '/dataset/{id}/overview',
+      href: router.link('/dataset/{id}/overview', { path: { id } }),
       label: i18n.translate('xpack.inventory.datasetOverview.overviewTabLabel', {
         defaultMessage: 'Overview',
       }),
       content: <></>,
     },
     metrics: {
-      selected: routePath === '/dataset/{name}/metrics',
-      href: router.link('/dataset/{name}/metrics', { path: { name } }),
+      selected: routePath === '/dataset/{id}/metrics',
+      href: router.link('/dataset/{id}/metrics', { path: { id } }),
       label: i18n.translate('xpack.inventory.datasetOverview.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
@@ -48,7 +48,7 @@ export function DatasetDetailView({ children }: { children: React.ReactNode }) {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EntityOverviewHeader title={name} />
+      <EntityOverviewHeader title={id} />
       <EntityOverviewTabList
         tabs={Object.entries(tabs).map(([key, { label, href, selected }]) => {
           return {

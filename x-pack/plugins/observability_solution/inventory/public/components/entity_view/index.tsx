@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function EntityView({ entityId, entityType }: { entityId: string; entityType: string }) {

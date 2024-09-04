@@ -14,6 +14,7 @@ import { DatasetOverview } from '../components/dataset_overview';
 import { DatasetDetailView } from '../components/dataset_detail_view';
 import { DatasetMetricsView } from '../components/dataset_metrics_view';
 import { RedirectTo } from '../components/redirect_to';
+import { AllInventoryView } from '../components/all_inventory_view';
 
 /**
  * The array of route definitions to be used when the application
@@ -30,6 +31,9 @@ const inventoryRoutes = {
       '/updates': {
         element: <></>,
       },
+      '/all': {
+        element: <AllInventoryView />,
+      },
       '/dataset/analyze': {
         element: <DatasetAnalysisView />,
         params: t.type({
@@ -41,10 +45,10 @@ const inventoryRoutes = {
       '/dataset': {
         element: <DatasetInventoryView />,
       },
-      '/dataset/{name}': {
+      '/dataset/{id}': {
         params: t.type({
           path: t.type({
-            name: t.string,
+            id: t.string,
           }),
         }),
         element: (
@@ -53,14 +57,14 @@ const inventoryRoutes = {
           </DatasetDetailView>
         ),
         children: {
-          '/dataset/{name}/overview': {
+          '/dataset/{id}/overview': {
             element: <DatasetOverview />,
           },
-          '/dataset/{name}/metrics': {
+          '/dataset/{id}/metrics': {
             element: <DatasetMetricsView />,
           },
-          '/dataset/{name}': {
-            element: <RedirectTo path="/dataset/{name}/overview" />,
+          '/dataset/{id}': {
+            element: <RedirectTo path="/dataset/{id}/overview" />,
           },
         },
       },
@@ -69,9 +73,17 @@ const inventoryRoutes = {
         params: t.type({
           path: t.type({ type: t.string }),
         }),
+        children: {
+          '/{type}/{id}': {
+            element: <></>,
+            params: t.type({
+              path: t.type({ id: t.string }),
+            }),
+          },
+        },
       },
       '/': {
-        element: <></>,
+        element: <RedirectTo path="/all" />,
       },
     },
   },

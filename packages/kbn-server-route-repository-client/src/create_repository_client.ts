@@ -16,11 +16,14 @@ import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { from } from 'rxjs';
 import { HttpFetchOptions, HttpFetchQuery, HttpResponse } from '@kbn/core-http-browser';
 import { omit } from 'lodash';
+import { RequestCacheOptions, createRequestCache } from './request_cache';
 
 export function createRepositoryClient<
   TRepository extends ServerRouteRepository,
-  TClientOptions extends HttpFetchOptions = {}
+  TClientOptions extends HttpFetchOptions & { caching?: Partial<RequestCacheOptions> } = {}
 >(core: CoreStart | CoreSetup): RouteRepositoryClient<TRepository, TClientOptions> {
+  const requestCache = createRequestCache();
+
   const fetch = (
     endpoint: string,
     params: { path?: Record<string, string>; body?: unknown; query?: HttpFetchQuery } | undefined,
@@ -28,12 +31,22 @@ export function createRepositoryClient<
   ) => {
     const { method, pathname, version } = formatRequest(endpoint, params?.path);
 
-    return core.http[method](pathname, {
-      ...options,
-      body: params && params.body ? JSON.stringify(params.body) : undefined,
-      query: params?.query,
-      version,
-    });
+    const { caching, ...otherOptions } = options;
+
+    const body = params && params.body ? JSON.stringify(params.body) : undefined;
+    const query = params?.query;
+
+    return requestCache.fetch(
+      { pathname, body, method, query },
+      { mode: 'default', type: 'inMemory', ...caching },
+      () =>
+        core.http[method](pathname, {
+          ...otherOptions,
+          body,
+          query,
+          version,
+        })
+    );
   };
 
   return {

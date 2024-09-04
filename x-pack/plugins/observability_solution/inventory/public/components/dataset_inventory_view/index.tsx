@@ -15,14 +15,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
-import { partition } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
+import React, { useMemo, useState } from 'react';
 import { Dataset, DatasetType } from '../../../common/datasets';
-import { createDatasetMatcher } from '../../../common/utils/create_dataset_matcher';
-import { useKibana } from '../../hooks/use_kibana';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function DatasetInventoryView() {
   const {
@@ -78,9 +76,9 @@ export function DatasetInventoryView() {
           return (
             <EuiLink
               data-test-subj="inventoryColumnsLink"
-              href={router.link('/dataset/{name}', {
+              href={router.link('/dataset/{id}', {
                 path: {
-                  name,
+                  id: name,
                 },
               })}
             >
@@ -124,23 +122,14 @@ export function DatasetInventoryView() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredItems = useMemo(() => {
-    if (!datasetsFetch.value?.datasets || !searchQuery) {
-      return datasetsFetch.value?.datasets || [];
+    const datasets = datasetsFetch.value?.datasets;
+    if (!datasets || !searchQuery) {
+      return datasets || [];
     }
 
-    const matchers = [createDatasetMatcher(searchQuery, true)];
+    const lowercasedSearchQuery = searchQuery.toLowerCase();
 
-    const [includeMatchers, excludeMatchers] = partition(
-      matchers,
-      (matcher) => !matcher.excludeIfMatch
-    );
-
-    return datasetsFetch.value.datasets.filter((dataset) => {
-      return (
-        includeMatchers.some((matcher) => matcher.match(dataset.name)) &&
-        excludeMatchers.every((matcher) => matcher.match(dataset.name))
-      );
-    });
+    return datasets.filter((dataset) => dataset.name.toLowerCase().includes(lowercasedSearchQuery));
   }, [datasetsFetch.value?.datasets, searchQuery]);
 
   const visibleItems = useMemo(() => {
@@ -176,6 +165,7 @@ export function DatasetInventoryView() {
           pageIndex: page.pageIndex,
           totalItemCount: filteredItems.length ?? 0,
         }}
+        loading={datasetsFetch.loading}
         noItemsMessage={i18n.translate('xpack.inventory.datasetView.noItemsMessage', {
           defaultMessage: `No matching datasets for selected patterns`,
         })}

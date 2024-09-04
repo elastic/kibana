@@ -7,7 +7,7 @@
 
 import type { InferenceClient } from '@kbn/inference-plugin/server/types';
 import { mergeMap, Observable, of, switchMap, from, map, catchError } from 'rxjs';
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { withoutOutputUpdateEvents } from '@kbn/inference-plugin/server';
 import { OutputCompleteEvent } from '@kbn/inference-plugin/common/output';

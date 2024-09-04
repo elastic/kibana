@@ -4,106 +4,49 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
-import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
-import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import { lastValueFrom } from 'rxjs';
-import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import { ESQLSearchResponse } from '@kbn/es-types';
-import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { useKibana } from '../../hooks/use_kibana';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
-import { LoadingPanel } from '../loading_panel';
+import { ControlledEsqlGrid } from '../esql_grid/controlled_esql_grid';
+import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
+import { getInitialColumnsForLogs } from '../../util/get_initial_columns_for_logs';
+import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
 
 export function DatasetOverview() {
   const {
-    dependencies: {
-      start: { dataViews, data },
-    },
-  } = useKibana();
+    path: { id },
+  } = useInventoryParams('/dataset/{id}/*');
 
-  const {
-    path: { name },
-  } = useInventoryParams('/dataset/{name}/*');
+  const baseQuery = `FROM "${id}" | WHERE @timestamp <= NOW() AND @timestamp >= NOW() - 30 minutes`;
 
-  const [query, setQuery] = useState(`FROM "${name}" | LIMIT 100`);
+  const logsQuery = `${baseQuery} | LIMIT 100`;
 
-  const dataViewAsync = useAbortableAsync(() => {
-    return getESQLAdHocDataview(query, dataViews);
-  }, [query, dataViews]);
+  const logsQueryResult = useEsqlQueryResult({ query: logsQuery });
 
-  const { value: datatable } = useAbortableAsync(
-    async ({ signal }) => {
-      return await lastValueFrom(
-        data.search.search(
-          {
-            params: {
-              query,
-              dropNullColumns: true,
-            },
-          },
-          { strategy: ESQL_SEARCH_STRATEGY, abortSignal: signal }
-        )
-      ).then((searchResponse) => {
-        const esqlResponse = searchResponse.rawResponse as unknown as ESQLSearchResponse;
+  const histogramQuery = `${baseQuery} | STATS count = COUNT(*) BY @timestamp = BUCKET(@timestamp, 1 minute)`;
 
-        const columns =
-          esqlResponse.columns?.map(({ name: columnName, type }) => ({
-            id: columnName,
-            name: columnName,
-            meta: { type: esFieldTypeToKibanaFieldType(type) as DatatableColumnType },
-          })) ?? [];
-
-        return {
-          columns,
-          rows: esqlResponse.values,
-        };
-      });
-    },
-    [query, data.search]
-  );
+  const histogramQueryResult = useEsqlQueryResult({ query: histogramQuery });
 
   const initialColumns = useMemo(() => {
-    if (!datatable) {
-      return [];
-    }
-
-    const timestampColumnIndex = datatable.columns.findIndex(
-      (column) => column.name === '@timestamp'
-    );
-    const messageColumnIndex = datatable.columns.findIndex((column) => column.name === 'message');
-
-    if (datatable.columns.length > 20 && timestampColumnIndex !== -1 && messageColumnIndex !== -1) {
-      const hasDataForBothColumns = datatable.rows.every((row) => {
-        const timestampValue = row[timestampColumnIndex];
-        const messageValue = row[messageColumnIndex];
-
-        return timestampValue !== null && timestampValue !== undefined && !!messageValue;
-      });
-
-      if (hasDataForBothColumns) {
-        return [datatable.columns[timestampColumnIndex], datatable.columns[messageColumnIndex]];
-      }
-    }
-    return datatable.columns;
-  }, [datatable]);
-
-  if (!dataViewAsync.value || !datatable) {
-    return <LoadingPanel loading={dataViewAsync.loading} />;
-  }
+    return getInitialColumnsForLogs({
+      result: logsQueryResult,
+    });
+  }, [logsQueryResult]);
 
   return (
-    <ESQLDataGrid
-      rows={datatable.rows}
-      columns={datatable.columns}
-      initialColumns={initialColumns}
-      dataView={dataViewAsync.value}
-      query={{ esql: query }}
-      flyoutType="overlay"
-      isTableView={false}
-      initialRowHeight={0}
-    />
+    <EuiFlexGroup direction="column">
+      <ControlledEsqlChart
+        result={histogramQueryResult}
+        id="datastream_log_rate"
+        metricNames={['count']}
+        height={200}
+        chartType="bar"
+      />
+      <ControlledEsqlGrid
+        query={logsQuery}
+        result={logsQueryResult}
+        initialColumns={initialColumns}
+      />
+    </EuiFlexGroup>
   );
 }

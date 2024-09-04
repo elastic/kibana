@@ -11,7 +11,7 @@ import { withoutOutputUpdateEvents, type InferenceClient } from '@kbn/inference-
 import {
   ObservabilityElasticsearchClient,
   createObservabilityEsClient,
-} from '@kbn/observability-utils/es/client/create_observability_es_client';
+} from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import moment from 'moment';
 import { Observable, lastValueFrom } from 'rxjs';
 import { Metric, MetricDefinition } from '../../../common/metrics';
