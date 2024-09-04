@@ -45,9 +45,7 @@ export class ForecastsTable extends Component {
       isLoading: props.job.data_counts.processed_record_count !== 0,
       forecasts: [],
     };
-    this.mlForecastService = forecastServiceFactory(
-      constructorContext.services.mlServices.mlApiServices
-    );
+    this.mlForecastService = forecastServiceFactory(constructorContext.services.mlServices.mlApi);
   }
 
   /**
@@ -324,7 +322,7 @@ export class ForecastsTable extends Component {
                 this.props.job.blocked !== undefined ||
                 forecast.forecast_status !== FORECAST_REQUEST_STATE.FINISHED
               }
-              iconType="visLine"
+              iconType="singleMetricViewer"
               aria-label={viewForecastAriaLabel}
               data-test-subj="mlJobListForecastTabOpenSingleMetricViewButton"
             />
