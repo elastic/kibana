@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
@@ -14,18 +12,18 @@ import type { InternalRouteDeps } from '.';
 import type { SolutionView, Space } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { solutionSchema } from '../../../lib/space_schema';
-import { createLicensedRouteHandler, isValidSpaceSolution, parseCloudSolution } from '../../lib';
+import { createLicensedRouteHandler, parseCloudSolution } from '../../lib';
 
-const spaceSolutionSchema = schema.object({
-  solution_type: schema.maybe(
-    schema.oneOf([
+const spaceSolutionSchema = schema.oneOf([
+  schema.object({ solution: solutionSchema }),
+  schema.object({
+    solution_type: schema.oneOf([
       schema.literal('security'),
       schema.literal('observability'),
       schema.literal('elasticsearch'),
-    ])
-  ),
-  solution: schema.maybe(solutionSchema),
-});
+    ]),
+  }),
+]);
 
 /* FUTURE Engineer
  * This route /internal/spaces/space/{id}/solution is and will be used by cloud (control panel)
@@ -51,31 +49,16 @@ export function initSetSolutionSpaceApi(deps: InternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const spacesClient = (await getSpacesService()).createSpacesClient(request);
-
       const id = request.params.id;
-      const { solution, solution_type: solutionType } = request.body;
-
-      if (solution && solutionType) {
-        return response.customError(
-          wrapError(
-            Boom.badRequest(`Can not have solution and solution_type parameter defined together`)
-          )
-        );
-      }
-      let solutionToUpdate: SolutionView | undefined = solution;
-      if (!solutionToUpdate) {
-        solutionToUpdate = parseCloudSolution(solutionType);
-      }
-      if (!isValidSpaceSolution(solutionToUpdate)) {
-        return response.customError(
-          wrapError(
-            Boom.badRequest(`One of solution and solution_type parameter need to be defined`)
-          )
-        );
-      }
+      let solutionToUpdate: SolutionView | undefined;
 
       let result: Space;
       try {
+        if ('solution' in request.body) {
+          solutionToUpdate = request.body.solution;
+        } else {
+          solutionToUpdate = parseCloudSolution(request.body.solution_type);
+        }
         const space = await spacesClient?.get(id);
         result = await spacesClient.update(id, { ...space, solution: solutionToUpdate });
       } catch (error) {

@@ -7,6 +7,12 @@
 
 import type { SolutionView } from '../../../common';
 
+export const CLOUD_TO_KIBANA_SOLUTION_MAP = new Map<string, SolutionView>([
+  ['elasticsearch', 'es'],
+  ['observability', 'oblt'],
+  ['security', 'security'],
+]);
+
 /**
  * Cloud does not type the value of the "use case" that is set during onboarding for a deployment. Any string can
  * be passed. This function maps the known values to the Kibana values.
@@ -14,26 +20,11 @@ import type { SolutionView } from '../../../common';
  * @param value The solution value set by Cloud.
  * @returns The default solution value for onboarding that matches Kibana naming.
  */
-export function parseCloudSolution(value?: string): SolutionView | undefined {
-  if (!value) return;
+export function parseCloudSolution(value?: string): SolutionView {
+  const parsedValue = value ? CLOUD_TO_KIBANA_SOLUTION_MAP.get(value.toLowerCase()) : undefined;
+  if (!parsedValue) {
+    throw new Error(`${value} is not a valid solution value set by Cloud`);
+  }
 
-  const solutions: Array<{
-    cloudValue: 'elasticsearch' | 'observability' | 'security';
-    kibanaValue: SolutionView;
-  }> = [
-    {
-      cloudValue: 'elasticsearch',
-      kibanaValue: 'es',
-    },
-    {
-      cloudValue: 'observability',
-      kibanaValue: 'oblt',
-    },
-    {
-      cloudValue: 'security',
-      kibanaValue: 'security',
-    },
-  ];
-
-  return solutions.find(({ cloudValue }) => value.toLowerCase() === cloudValue)?.kibanaValue;
+  return parsedValue;
 }

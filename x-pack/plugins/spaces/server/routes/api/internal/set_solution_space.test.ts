@@ -128,58 +128,6 @@ describe('PUT /internal/spaces/space/{id}/solution', () => {
     });
   });
 
-  it('should not allow solution and solution_type to be defined together', async () => {
-    const payload = {
-      solution: 'oblt',
-      solution_type: 'observability',
-    };
-
-    const { routeHandler } = await setup();
-
-    const request = httpServerMock.createKibanaRequest({
-      params: {
-        id: 'a-new-space',
-      },
-      body: payload,
-      method: 'post',
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    const { status, payload: payloadResp } = response;
-
-    expect(status).toEqual(400);
-    expect(payloadResp).toMatchInlineSnapshot(
-      `[Error: Can not have solution and solution_type parameter defined together]`
-    );
-  });
-
-  it('should have at least solution and solution_type to be defined', async () => {
-    const payload = {
-      solution: undefined,
-      solution_type: undefined,
-    };
-
-    const { routeHandler } = await setup();
-
-    const request = httpServerMock.createKibanaRequest({
-      params: {
-        id: 'a-new-space',
-      },
-      body: payload,
-      method: 'post',
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    const { status, payload: payloadResp } = response;
-
-    expect(status).toEqual(400);
-    expect(payloadResp).toMatchInlineSnapshot(
-      `[Error: One of solution and solution_type parameter need to be defined]`
-    );
-  });
-
   it('should not allow a new space to be created', async () => {
     const payload = {
       solution: 'oblt',
