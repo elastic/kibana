@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiResizableContainer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
@@ -35,7 +36,6 @@ import {
 import type { SenseEditor } from '../../models';
 import { MonacoEditor, MonacoEditorOutput } from './monaco';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
-import { MIN_HORIZONTAL_CONTAINER_WIDTH } from '../../../../common/constants';
 
 const INITIAL_PANEL_SIZE = 50;
 const PANEL_MIN_SIZE = '20%';
@@ -47,6 +47,7 @@ interface Props {
 }
 
 export const Editor = memo(({ loading, setEditorInstance, containerWidth }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const {
     services: { storage },
     config: { isMonacoEnabled } = {},
@@ -98,7 +99,7 @@ export const Editor = memo(({ loading, setEditorInstance, containerWidth }: Prop
       ) : null}
       <EuiResizableContainer
         style={{ height: '100%' }}
-        direction={containerWidth < MIN_HORIZONTAL_CONTAINER_WIDTH ? 'vertical' : 'horizontal'}
+        direction={containerWidth < euiTheme.breakpoint.l ? 'vertical' : 'horizontal'}
         onPanelWidthChange={(sizes) => onPanelSizeChange(sizes)}
       >
         {(EuiResizablePanel, EuiResizableButton) => (

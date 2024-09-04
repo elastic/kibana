@@ -53,7 +53,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
-  const [resizeRef, setResizeRef] = useState();
+  const [resizeRef, setResizeRef] = useState<HTMLDivElement | null>(null);
   const containerDimensions = useResizeObserver(resizeRef);
 
   const { docLinks } = useServicesContext();
