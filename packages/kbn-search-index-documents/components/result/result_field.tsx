@@ -96,7 +96,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
           fieldType === 'array' ||
           fieldType === 'nested' ||
           Array.isArray(fieldValue)) &&
-          isExpanded ? (
+        isExpanded ? (
           <EuiCodeBlock language="json" overflowHeight="250" transparentBackground>
             {fieldValue}
           </EuiCodeBlock>
