@@ -150,7 +150,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
 
         await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-        await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal', true);
+        await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal');
 
         const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
