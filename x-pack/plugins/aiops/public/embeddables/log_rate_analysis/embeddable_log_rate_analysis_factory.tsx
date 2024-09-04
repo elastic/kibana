@@ -28,20 +28,20 @@ import { cloneDeep } from 'lodash';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, distinctUntilChanged, map, skipWhile } from 'rxjs';
-import { getPatternAnalysisComponent } from '../../shared_components';
+import { getLogRateAnalysisComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
-import { initializePatternAnalysisControls } from './initialize_pattern_analysis_controls';
+import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysis_analysis_controls';
 import type {
-  PatternAnalysisEmbeddableApi,
-  PatternAnalysisEmbeddableRuntimeState,
-  PatternAnalysisEmbeddableState,
+  LogRateAnalysisEmbeddableApi,
+  LogRateAnalysisEmbeddableRuntimeState,
+  LogRateAnalysisEmbeddableState,
 } from './types';
 
-export interface EmbeddablePatternAnalysisStartServices {
+export interface EmbeddableLogRateAnalysisStartServices {
   data: DataPublicPluginStart;
 }
 
-export type EmbeddablePatternAnalysisType = typeof EMBEDDABLE_PATTERN_ANALYSIS_TYPE;
+export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
 
 export const getDependencies = async (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
@@ -63,20 +63,20 @@ export const getDependencies = async (
   };
 };
 
-export const getPatternAnalysisEmbeddableFactory = (
+export const getLogRateAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
   const factory: ReactEmbeddableFactory<
-    PatternAnalysisEmbeddableState,
-    PatternAnalysisEmbeddableRuntimeState,
-    PatternAnalysisEmbeddableApi
+    LogRateAnalysisEmbeddableState,
+    LogRateAnalysisEmbeddableRuntimeState,
+    LogRateAnalysisEmbeddableApi
   > = {
-    type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
+    type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
     deserializeState: (state) => {
       const serializedState = cloneDeep(state.rawState);
       // inject the reference
       const dataViewIdRef = state.references?.find(
-        (ref) => ref.name === PATTERN_ANALYSIS_DATA_VIEW_REF_NAME
+        (ref) => ref.name === LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME
       );
       // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
       if (dataViewIdRef && serializedState && !serializedState.dataViewId) {
@@ -110,10 +110,10 @@ export const getPatternAnalysisEmbeddableFactory = (
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
 
       const {
-        patternAnalysisControlsApi,
-        serializePatternAnalysisChartState,
-        patternAnalysisControlsComparators,
-      } = initializePatternAnalysisControls(state);
+        logRateAnalysisControlsApi,
+        serializeLogRateAnalysisChartState,
+        logRateAnalysisControlsComparators,
+      } = initializeLogRateAnalysisControls(state);
 
       const dataLoading = new BehaviorSubject<boolean | undefined>(true);
       const blockingError = new BehaviorSubject<Error | undefined>(undefined);
@@ -128,30 +128,30 @@ export const getPatternAnalysisEmbeddableFactory = (
         {
           ...timeRangeApi,
           ...titlesApi,
-          ...patternAnalysisControlsApi,
+          ...logRateAnalysisControlsApi,
           getTypeDisplayName: () =>
-            i18n.translate('xpack.aiops.patternAnalysis.typeDisplayName', {
-              defaultMessage: 'pattern analysis',
+            i18n.translate('xpack.aiops.logRateAnalysis.typeDisplayName', {
+              defaultMessage: 'log rate analysis',
             }),
           isEditingEnabled: () => true,
           onEdit: async () => {
             try {
-              const { resolveEmbeddablePatternAnalysisUserInput } = await import(
-                './resolve_pattern_analysis_config_input'
+              const { resolveEmbeddableLogRateAnalysisUserInput } = await import(
+                './resolve_log_rate_analysis_config_input'
               );
 
-              const result = await resolveEmbeddablePatternAnalysisUserInput(
+              const result = await resolveEmbeddableLogRateAnalysisUserInput(
                 coreStart,
                 pluginStart,
                 parentApi,
                 uuid,
                 false,
-                patternAnalysisControlsApi,
+                logRateAnalysisControlsApi,
                 undefined,
-                serializePatternAnalysisChartState()
+                serializeLogRateAnalysisChartState()
               );
 
-              patternAnalysisControlsApi.updateUserInput(result);
+              logRateAnalysisControlsApi.updateUserInput(result);
             } catch (e) {
               return Promise.reject();
             }
@@ -160,12 +160,12 @@ export const getPatternAnalysisEmbeddableFactory = (
           blockingError,
           dataViews: dataViews$,
           serializeState: () => {
-            const dataViewId = patternAnalysisControlsApi.dataViewId.getValue();
+            const dataViewId = logRateAnalysisControlsApi.dataViewId.getValue();
             const references: Reference[] = dataViewId
               ? [
                   {
                     type: DATA_VIEW_SAVED_OBJECT_TYPE,
-                    name: PATTERN_ANALYSIS_DATA_VIEW_REF_NAME,
+                    name: LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME,
                     id: dataViewId,
                   },
                 ]
@@ -175,7 +175,7 @@ export const getPatternAnalysisEmbeddableFactory = (
                 timeRange: undefined,
                 ...serializeTitles(),
                 ...serializeTimeRange(),
-                ...serializePatternAnalysisChartState(),
+                ...serializeLogRateAnalysisChartState(),
               },
               references,
             };
@@ -184,11 +184,11 @@ export const getPatternAnalysisEmbeddableFactory = (
         {
           ...timeRangeComparators,
           ...titleComparators,
-          ...patternAnalysisControlsComparators,
+          ...logRateAnalysisControlsComparators,
         }
       );
 
-      const PatternAnalysisComponent = getPatternAnalysisComponent(coreStart, pluginStart);
+      const LogRateAnalysisComponent = getLogRateAnalysisComponent(coreStart, pluginStart);
 
       const onLoading = (v: boolean) => dataLoading.next(v);
       const onRenderComplete = () => dataLoading.next(false);
@@ -201,19 +201,7 @@ export const getPatternAnalysisEmbeddableFactory = (
             throw new Error('Parent API does not have execution context');
           }
 
-          const [
-            dataViewId,
-            fieldName,
-            minimumTimeRangeOption,
-            randomSamplerMode,
-            randomSamplerProbability,
-          ] = useBatchedPublishingSubjects(
-            api.dataViewId,
-            api.fieldName,
-            api.minimumTimeRangeOption,
-            api.randomSamplerMode,
-            api.randomSamplerProbability
-          );
+          const [dataViewId] = useBatchedPublishingSubjects(api.dataViewId);
 
           const reload$ = useMemo(
             () =>
@@ -242,12 +230,8 @@ export const getPatternAnalysisEmbeddableFactory = (
           }
 
           return (
-            <PatternAnalysisComponent
+            <LogRateAnalysisComponent
               dataViewId={dataViewId}
-              fieldName={fieldName}
-              minimumTimeRangeOption={minimumTimeRangeOption}
-              randomSamplerMode={randomSamplerMode}
-              randomSamplerProbability={randomSamplerProbability}
               timeRange={timeRange}
               onLoading={onLoading}
               onRenderComplete={onRenderComplete}
