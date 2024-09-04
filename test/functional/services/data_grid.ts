@@ -402,7 +402,8 @@ export class DataGridService extends FtrService {
   }
 
   public async getHeaderFields(): Promise<string[]> {
-    const result = await this.find.allByCssSelector(
+    const table = await this.find.byCssSelector('.euiDataGrid');
+    const result = await table.findAllByCssSelector(
       '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
     );
 
