@@ -6,7 +6,7 @@
  */
 
 import { taskManagerMock } from "@kbn/task-manager-plugin/server/mocks";
-import { RISK_ENGINE_INSTALLATION_AND_DATA_CLEANUP_URL } from "../../../../../common/constants";
+import { RISK_ENGINE_CLEANUP_URL } from "../../../../../common/constants";
 import {
   serverMock,
   requestContextMock,
@@ -43,7 +43,7 @@ describe("risk engine cleanup route", () => {
   const buildRequest = () => {
     return requestMock.create({
       method: "delete",
-      path: RISK_ENGINE_INSTALLATION_AND_DATA_CLEANUP_URL,
+      path: RISK_ENGINE_CLEANUP_URL,
       body: {},
     });
   };
