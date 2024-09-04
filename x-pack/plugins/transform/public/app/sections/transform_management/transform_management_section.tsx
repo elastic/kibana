@@ -309,7 +309,6 @@ export const TransformManagement: FC = () => {
 
             <AlertRulesManageContext.Provider value={getAlertRuleManageContext()}>
               <DanglingTasksWarning transformIdsWithoutConfig={transformIdsWithoutConfig} />
-              <EuiSpacer size="s" />
               {(transformNodes > 0 || transforms.length > 0) && (
                 <TransformList
                   isLoading={transformsWithoutStatsLoading}
