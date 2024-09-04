@@ -22,6 +22,6 @@ export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
       navigateToIndexDetails(application, http, indicesStatus.indexNames[0]);
       return;
     }
-    application.navigateToApp('management:index_management');
+    application.navigateToApp('management', { deepLinkId: 'index_management' });
   }, [application, http, indicesStatus]);
 };
