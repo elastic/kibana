@@ -23,14 +23,16 @@ import { useFormContext } from 'react-hook-form';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { ChatForm } from '../../types';
+import { ChatForm, PlaygroundPageMode } from '../../types';
 import { useKibana } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../../common/routes';
 import { LANGCHAIN_PYTHON } from './examples/py_langchain_python';
 import { PY_LANG_CLIENT } from './examples/py_lang_client';
+import { DevToolsCode } from './examples/dev_tools';
 
 interface ViewCodeFlyoutProps {
   onClose: () => void;
+  selectedPageMode: PlaygroundPageMode;
 }
 
 export const ES_CLIENT_DETAILS = (cloud: CloudSetup | undefined) => {
@@ -50,7 +52,7 @@ es_client = Elasticsearch(
   `;
 };
 
-export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
+export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selectedPageMode }) => {
   const usageTracker = useUsageTracker();
   const [selectedLanguage, setSelectedLanguage] = useState('py-es-client');
   const { getValues } = useFormContext<ChatForm>();
@@ -102,16 +104,18 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiSelect
-                  options={[
-                    { value: 'py-es-client', text: 'Python Elasticsearch Client with OpenAI' },
-                    { value: 'lc-py', text: 'LangChain Python with OpenAI' },
-                  ]}
-                  onChange={handleLanguageChange}
-                  value={selectedLanguage}
-                />
-              </EuiFlexItem>
+              {selectedPageMode === PlaygroundPageMode.chat && (
+                <EuiFlexItem>
+                  <EuiSelect
+                    options={[
+                      { value: 'py-es-client', text: 'Python Elasticsearch Client with OpenAI' },
+                      { value: 'lc-py', text: 'LangChain Python with OpenAI' },
+                    ]}
+                    onChange={handleLanguageChange}
+                    value={selectedLanguage}
+                  />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   color="primary"
@@ -128,7 +132,14 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{steps[selectedLanguage]}</EuiFlexItem>
+          {selectedPageMode === PlaygroundPageMode.chat && (
+            <EuiFlexItem grow={false}>{steps[selectedLanguage]}</EuiFlexItem>
+          )}
+          {selectedPageMode === PlaygroundPageMode.search && (
+            <EuiFlexItem grow={false}>
+              <DevToolsCode />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutBody>
     </EuiFlyout>
