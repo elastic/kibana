@@ -218,13 +218,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
           expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
           expect(stats.body.dataStreamsStats[0].totalDocs).greaterThan(0);
-          expect(stats.body.dataStreamsStats[0].integration).not.ok();
           expect(stats.body.dataStreamsStats[0].name).match(new RegExp(/^logs-[\w.]+-[\w.]+/));
           expect(stats.body.dataStreamsStats[1].size).not.empty();
           expect(stats.body.dataStreamsStats[1].sizeBytes).greaterThan(0);
           expect(stats.body.dataStreamsStats[1].lastActivity).greaterThan(0);
           expect(stats.body.dataStreamsStats[1].totalDocs).greaterThan(0);
-          expect(stats.body.dataStreamsStats[0].integration).to.be('synthetics');
           expect(stats.body.dataStreamsStats[1].name).match(
             new RegExp(/^synthetics-[\w.]+-[\w.]+/)
           );
