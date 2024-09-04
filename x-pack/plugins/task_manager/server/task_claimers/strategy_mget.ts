@@ -13,8 +13,6 @@
 // - from the non-stale search results, return as many as we can run based on available
 //   capacity and the cost of each task type to run
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-
 import apm from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
 
@@ -221,21 +219,16 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     if (isOk(updateResult)) {
       updatedTaskIds.push(updateResult.value.id);
     } else {
-      const { id, type, error } = updateResult.error;
+      const { id, type, error, status } = updateResult.error;
 
-      // this check is needed so error will be typed correctly for isConflictError
-      if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
-        if (SavedObjectsErrorHelpers.isConflictError(error)) {
-          conflicts++;
-        } else {
-          logger.error(
-            `Saved Object error updating task ${id}:${type} during claim: ${error.error}`,
-            logMeta
-          );
-          bulkUpdateErrors++;
-        }
+      // check for 409 conflict errors
+      if (status === 409) {
+        conflicts++;
       } else {
-        logger.error(`Error updating task ${id}:${type} during claim: ${error.message}`, logMeta);
+        logger.error(
+          `Error updating task ${id}:${type} during claim: ${JSON.stringify(error)}`,
+          logMeta
+        );
         bulkUpdateErrors++;
       }
     }
@@ -282,7 +275,9 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
         } else {
           const { id, type, error } = removeResult.error;
           logger.warn(
-            `Error updating task ${id}:${type} to mark as unrecognized during claim: ${error.message}`,
+            `Error updating task ${id}:${type} to mark as unrecognized during claim: ${JSON.stringify(
+              error
+            )}`,
             logMeta
           );
         }

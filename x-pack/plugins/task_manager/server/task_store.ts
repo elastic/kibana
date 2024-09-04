@@ -99,7 +99,7 @@ export type BulkUpdateResult = Result<
 
 export type PartialBulkUpdateResult = Result<
   PartialConcreteTaskInstance,
-  { type: string; id: string; error: estypes.ErrorCause }
+  { type: string; id: string; status?: number; error: estypes.ErrorCause }
 >;
 
 export type BulkGetResult = Array<
@@ -406,6 +406,7 @@ export class TaskStore {
         return asErr({
           type: 'task',
           id: docId,
+          status: item.update.status,
           error: item.update.error,
         });
       }

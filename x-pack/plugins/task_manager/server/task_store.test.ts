@@ -1110,6 +1110,12 @@ describe('TaskStore', () => {
         status: 'running' as TaskStatus,
       };
 
+      const task3 = {
+        id: '7845',
+        version: 'WzQsMV0=',
+        runAt: mockedDate,
+      };
+
       esClient.bulk.mockResolvedValue({
         errors: false,
         took: 0,
@@ -1141,10 +1147,19 @@ describe('TaskStore', () => {
               status: 404,
             },
           },
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:7845',
+              _version: 2,
+              status: 409,
+              error: { type: 'anything', reason: 'some-reason', index: 'some-index' },
+            },
+          },
         ],
       });
 
-      const result = await store.bulkPartialUpdate([task1, task2]);
+      const result = await store.bulkPartialUpdate([task1, task2, task3]);
 
       expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
 
@@ -1154,6 +1169,8 @@ describe('TaskStore', () => {
           { doc: { task: { attempts: 3 } } },
           { update: { _id: 'task:45343254', if_primary_term: 1, if_seq_no: 4 } },
           { doc: { task: { status: 'running' } } },
+          { update: { _id: 'task:7845', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { runAt: mockedDate.toISOString() } } },
         ],
         index: 'tasky',
         refresh: false,
@@ -1164,6 +1181,7 @@ describe('TaskStore', () => {
         asErr({
           type: 'task',
           id: '45343254',
+          status: 404,
           error: {
             type: 'document_missing_exception',
             reason: '[5]: document missing',
@@ -1171,6 +1189,12 @@ describe('TaskStore', () => {
             shard: '0',
             index: '.kibana_task_manager_8.16.0_001',
           },
+        }),
+        asErr({
+          type: 'task',
+          id: '7845',
+          status: 409,
+          error: { type: 'anything', reason: 'some-reason', index: 'some-index' },
         }),
       ]);
     });
