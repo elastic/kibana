@@ -357,7 +357,6 @@ export class StatusRuleExecutor {
       statusConfigs,
       monitorName: baseSummary.monitorName,
       params: this.params,
-      locationsThreshold,
     });
     if (statusConfigs.length > 1) {
       baseSummary.locationNames = statusConfigs.map((c) => c.ping.observer.geo?.name!).join(' | ');

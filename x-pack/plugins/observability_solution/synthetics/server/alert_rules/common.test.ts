@@ -282,6 +282,7 @@ describe('setRecoveredAlertsContext', () => {
       id: idWithLocation,
       context: {
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
+        checks: { down: 1, downWithinXChecks: 1 },
         configId: '12345',
         linkMessage: '',
         'kibana.alert.reason': 'the monitor has been deleted',
@@ -367,6 +368,7 @@ describe('setRecoveredAlertsContext', () => {
       context: {
         configId: '12345',
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
+        checks: { down: 1, downWithinXChecks: 1 },
         monitorUrl: '(unavailable)',
         idWithLocation,
         'kibana.alert.reason': 'this location has been removed from the monitor',
@@ -461,6 +463,7 @@ describe('setRecoveredAlertsContext', () => {
         recoveryStatus: 'is now up',
         locationId: location,
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
+        checks: { down: 1, downWithinXChecks: 1 },
         linkMessage:
           '- Link: https://localhost:5601/app/synthetics/monitor/12345/errors/123456?locationId=us_west',
         monitorUrl: '(unavailable)',
