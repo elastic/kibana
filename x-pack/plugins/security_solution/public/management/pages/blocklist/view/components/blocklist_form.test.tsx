@@ -293,7 +293,10 @@ describe('blocklist form', () => {
       'C3AB8FF13720E8AD9047DD39466B3C8974E592C2FA383D4A3960714CAEF0C4F2',
       '4F4C17F77EC2483C49A9543B21AA75862F8F04F2D8806507E08086E21A51222C',
     ];
-    await user.type(screen.getByRole('combobox'), `${hashes.join(',')}{enter}`);
+    // use paste instead of type, otherwise it might time out
+    await user.click(screen.getByRole('combobox'));
+    await user.paste(hashes.join(','));
+    await user.keyboard('{Enter}');
     const expected = createOnChangeArgs({
       item: createItem({
         entries: [createEntry('file.hash.*', hashes)],
@@ -306,7 +309,10 @@ describe('blocklist form', () => {
     render();
     const hash = 'C3AB8FF13720E8AD9047DD39466B3C8974E592C2FA383D4A3960714CAEF0C4F2';
     const hashes = [hash, hash];
-    await user.type(screen.getByRole('combobox'), `${hashes.join(',')}{enter}`);
+    // use paste instead of type, otherwise it might time out
+    await user.click(screen.getByRole('combobox'));
+    await user.paste(hashes.join(','));
+    await user.keyboard('{Enter}');
     expect(screen.queryByText(ERRORS.DUPLICATE_VALUES)).toBeTruthy();
     const expected = createOnChangeArgs({
       item: createItem({
