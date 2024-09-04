@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const find = getService('find');
   const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects([
     'common',
