@@ -14,17 +14,19 @@ import {
   EuiForm,
   useEuiTheme,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { Controller, useController, useFormContext } from 'react-hook-form';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
 import { ResultList } from './result_list';
 import { ChatForm, ChatFormFields } from '../../types';
 import { useSearchPreview } from '../../hooks/use_search_preview';
 
 export const SearchMode: React.FC = () => {
-  const [searchResults, setSearchResults] = React.useState<SearchHit[] | undefined>();
-  const searchRequest = useSearchPreview();
+  const {
+    data: { results, pagination, isInitialState },
+    fetchSearchResults,
+  } = useSearchPreview();
   const { euiTheme } = useEuiTheme();
   const { control, handleSubmit } = useFormContext();
   const {
@@ -34,18 +36,12 @@ export const SearchMode: React.FC = () => {
     name: ChatFormFields.searchQuery,
   });
 
-  const handleSearch = handleSubmit(async () => {
-    try {
-      const searchData = await searchRequest(searchBarValue);
-      setSearchResults(searchData.results);
-    } catch (e) {
-      // TODO handle error ?
-    }
-  });
-
-  const updateSearchQuery = (query: string) => {
-    searchBarOnChange({ query, pagination: searchBarValue.pagination });
-  };
+  const updateSearchQuery = useCallback(
+    (query: string) => {
+      searchBarOnChange({ query, pagination: searchBarValue.pagination });
+    },
+    [searchBarOnChange, searchBarValue]
+  );
 
   return (
     <EuiFlexGroup direction="row" justifyContent="center">
@@ -57,7 +53,16 @@ export const SearchMode: React.FC = () => {
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiForm component="form" onSubmit={handleSearch}>
+            <EuiForm
+              component="form"
+              onSubmit={handleSubmit(async () => {
+                try {
+                  await fetchSearchResults(searchBarValue);
+                } catch (e) {
+                  // TODO handle error ?
+                }
+              })}
+            >
               <Controller
                 control={control}
                 name={ChatFormFields.searchQuery}
@@ -78,23 +83,34 @@ export const SearchMode: React.FC = () => {
           <EuiFlexItem className="eui-yScroll">
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                {searchResults ? (
-                  <ResultList
-                    searchResults={searchResults}
-                    pagination={searchBarValue.pagination}
-                  />
+                {!isInitialState ? (
+                  <ResultList searchResults={results} pagination={pagination} />
                 ) : (
                   <EuiEmptyPrompt
                     iconType={'checkInCircleFilled'}
                     iconColor="success"
-                    title={<h2>Ready to search</h2>}
+                    title={
+                      <h2>
+                        {i18n.translate('x-pack.translate.searchMode.readyToSearch', {
+                          defaultMessage: 'Ready to search',
+                        })}
+                      </h2>
+                    }
                     body={
                       <p>
-                        Type in a query in the search bar above or view the query we automatically
-                        created for you.
+                        {i18n.translate('x-pack.translate.searchMode.searchPrompt', {
+                          defaultMessage:
+                            'Type in a query in the search bar above or view the query we automatically created for you.',
+                        })}
                       </p>
                     }
-                    actions={<EuiButton>View the query</EuiButton>}
+                    actions={
+                      <EuiButton>
+                        {i18n.translate('x-pack.translate.searchMode.viewQuery', {
+                          defaultMessage: 'View the query',
+                        })}
+                      </EuiButton>
+                    }
                   />
                 )}
               </EuiFlexItem>

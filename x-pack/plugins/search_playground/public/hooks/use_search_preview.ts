@@ -7,30 +7,47 @@
 
 import { useFormContext } from 'react-hook-form';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import useSWR from 'swr';
 import { APIRoutes, ChatFormFields, Pagination } from '../types';
 import { useKibana } from './use_kibana';
 import { DEFAULT_PAGINATION } from '../../common';
 
-export interface UseSearchPreviewArgs {
+export interface FetchSearchResultsArgs {
   query: string;
   pagination: Pagination;
 }
 
-export interface UseSearchPreviewResponse {
+interface UseSearchPreviewData {
   results: SearchHit[];
   pagination: Pagination;
+  isInitialState: boolean;
 }
 
-export const useSearchPreview = () => {
+export interface UseSearchPreviewResponse {
+  fetchSearchResults: (args: FetchSearchResultsArgs) => Promise<void>;
+  data: UseSearchPreviewData;
+}
+
+const DEFAULT_SEARCH_PREVIEW_DATA: UseSearchPreviewData = {
+  results: [],
+  pagination: DEFAULT_PAGINATION,
+  isInitialState: true,
+};
+
+export const useSearchPreview = (): UseSearchPreviewResponse => {
   const { getValues } = useFormContext();
   const { services } = useKibana();
   const { http } = services;
 
-  return async ({
+  const { data, mutate } = useSWR<UseSearchPreviewData>('search-preview-results', null, {
+    fallbackData: DEFAULT_SEARCH_PREVIEW_DATA,
+  });
+
+  const fetchSearchResults = async ({
     query,
     pagination: paginationParam = DEFAULT_PAGINATION,
-  }: UseSearchPreviewArgs): Promise<UseSearchPreviewResponse> => {
-    const { results, pagination } = await http.post<{
+  }: FetchSearchResultsArgs) => {
+    const { results, pagination: paginationResult } = await http.post<{
       results: SearchHit[];
       pagination: Pagination;
     }>(APIRoutes.POST_SEARCH_QUERY, {
@@ -42,6 +59,8 @@ export const useSearchPreview = () => {
         from: paginationParam.from,
       }),
     });
-    return { results, pagination };
+    mutate({ results, pagination: paginationResult, isInitialState: false });
   };
+
+  return { fetchSearchResults, data: data || DEFAULT_SEARCH_PREVIEW_DATA };
 };
