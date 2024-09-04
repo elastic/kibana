@@ -5,7 +5,7 @@ info:
 paths:
   /api/endpoint/policy/summaries:
     get:
-      summary: Get Agent Policy Summary schema
+      summary: Get an agent policy summary
       operationId: GetAgentPolicySummary
       deprecated: true
       x-codegen-enabled: true
