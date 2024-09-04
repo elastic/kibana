@@ -14,13 +14,18 @@ import {
 } from '@kbn/task-manager-plugin/server';
 
 import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
-import { getTotalCountAggregations, getTotalCountInUse } from './lib/get_telemetry_from_kibana';
+import {
+  getTotalCountAggregations,
+  getTotalCountInUse,
+  getTotalMWCount,
+} from './lib/get_telemetry_from_kibana';
 import {
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
 } from './lib/get_telemetry_from_event_log';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../common';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
@@ -93,16 +98,25 @@ export function telemetryTaskRunner(
         .getStartServices()
         .then(([coreStart]) => coreStart.savedObjects.getIndexForType(RULE_SAVED_OBJECT_TYPE));
 
+    const getMXIndex = () =>
+      core
+        .getStartServices()
+        .then(([coreStart]) =>
+          coreStart.savedObjects.getIndexForType(MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE)
+        );
+
     return {
       async run() {
         const esClient = await getEsClient();
         const alertIndex = await getAlertIndex();
+        const MWIndex = await getMXIndex();
         return Promise.all([
           getTotalCountAggregations({ esClient, alertIndex, logger }),
           getTotalCountInUse({ esClient, alertIndex, logger }),
           getExecutionsPerDayCount({ esClient, eventLogIndex, logger }),
           getExecutionTimeoutsPerDayCount({ esClient, eventLogIndex, logger }),
           getFailedAndUnrecognizedTasksPerDay({ esClient, taskManagerIndex, logger }),
+          getTotalMWCount({ esClient, MWIndex, logger }),
         ])
           .then(
             ([
@@ -111,13 +125,15 @@ export function telemetryTaskRunner(
               dailyExecutionCounts,
               dailyExecutionTimeoutCounts,
               dailyFailedAndUnrecognizedTasks,
+              totalMWCount,
             ]) => {
               const hasErrors =
                 totalCountAggregations.hasErrors ||
                 totalInUse.hasErrors ||
                 dailyExecutionCounts.hasErrors ||
                 dailyExecutionTimeoutCounts.hasErrors ||
-                dailyFailedAndUnrecognizedTasks.hasErrors;
+                dailyFailedAndUnrecognizedTasks.hasErrors ||
+                totalMWCount.hasErrors;
 
               const errorMessages = [
                 totalCountAggregations.errorMessage,
@@ -125,6 +141,7 @@ export function telemetryTaskRunner(
                 dailyExecutionCounts.errorMessage,
                 dailyExecutionTimeoutCounts.errorMessage,
                 dailyFailedAndUnrecognizedTasks.errorMessage,
+                totalMWCount.errorMessage,
               ].filter((message) => message !== undefined);
 
               const updatedState: LatestTaskStateSchema = {
@@ -147,6 +164,7 @@ export function telemetryTaskRunner(
                 count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
                 count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
                 count_rules_muted: totalCountAggregations.count_rules_muted,
+                count_total_mw: totalMWCount.count_total_mw,
                 count_rules_with_muted_alerts: totalCountAggregations.count_rules_with_muted_alerts,
                 count_connector_types_by_consumers:
                   totalCountAggregations.count_connector_types_by_consumers,

@@ -146,6 +146,7 @@ export const stateSchemaByVersion = {
       }),
       count_rules_snoozed: schema.number(),
       count_rules_muted: schema.number(),
+      count_total_mw: schema.number(),
       count_rules_with_muted_alerts: schema.number(),
       count_connector_types_by_consumers: schema.recordOf(
         schema.string(),
@@ -248,6 +249,7 @@ export const emptyState: LatestTaskStateSchema = {
   },
   count_rules_snoozed: 0,
   count_rules_muted: 0,
+  count_total_mw: 0,
   count_rules_with_muted_alerts: 0,
   count_connector_types_by_consumers: {},
   count_rules_namespaces: 0,

@@ -30,6 +30,12 @@ interface Opts {
   logger: Logger;
 }
 
+interface MWOpts {
+  esClient: ElasticsearchClient;
+  MWIndex: string;
+  logger: Logger;
+}
+
 type GetTotalCountsResults = Pick<
   AlertingUsage,
   | 'count_total'
@@ -47,6 +53,11 @@ type GetTotalCountsResults = Pick<
   | 'schedule_time_number_s'
   | 'connectors_per_alert'
 > & { errorMessage?: string; hasErrors: boolean };
+
+type GetTotalMWCountMWResults = Pick<AlertingUsage, 'count_total_mw'> & {
+  errorMessage?: string;
+  hasErrors: boolean;
+};
 
 interface GetTotalCountInUseResults {
   countTotal: number;
@@ -487,6 +498,55 @@ export async function getTotalCountInUse({
       countTotal: 0,
       countByType: {},
       countNamespaces: 0,
+    };
+  }
+}
+
+export async function getTotalMWCount({
+  esClient,
+  MWIndex,
+  logger,
+}: MWOpts): Promise<GetTotalMWCountMWResults> {
+  try {
+    const query = {
+      index: MWIndex,
+      body: {
+        query: {
+          bool: {
+            filter: [{ term: { type: 'maintenance-window' } }],
+          },
+        },
+      },
+    };
+
+    logger.debug(() => `query for getTotalCountAggregationsMW - ${JSON.stringify(query)}`);
+    const results = await esClient.search(query);
+
+    logger.debug(
+      () => `results for getTotalCountAggregationsMW query - ${JSON.stringify(results)}`
+    );
+
+    const countTotalMW =
+      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
+
+    return {
+      hasErrors: false,
+      count_total_mw: countTotalMW ?? 0,
+    };
+  } catch (err) {
+    const errorMessage = err && err.message ? err.message : err.toString();
+
+    logger.warn(
+      `Error executing alerting telemetry task: getTotalCountAggregations - ${JSON.stringify(err)}`,
+      {
+        tags: ['alerting', 'telemetry-failed'],
+        error: { stack_trace: err.stack },
+      }
+    );
+    return {
+      hasErrors: true,
+      errorMessage,
+      count_total_mw: 0,
     };
   }
 }
