@@ -145,6 +145,7 @@ export function History() {
               tabIndex={0}
               borderRadius="none"
               hasShadow={false}
+              paddingSize="none"
             >
               <EuiSplitPanel.Outer
                 grow
@@ -154,7 +155,7 @@ export function History() {
                   paddingRight: euiTheme.size.s,
                 }}
               >
-                <EuiSplitPanel.Inner paddingSize="none">
+                <EuiSplitPanel.Inner paddingSize="m">
                   <EuiFlexGroup direction="column" gutterSize="none">
                     <EuiFlexItem grow={false}>
                       <EuiSpacer size="s" />
@@ -202,7 +203,7 @@ export function History() {
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiSplitPanel.Inner>
-                <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="none">
+                <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="s">
                   <EuiText>
                     <EuiButtonEmpty
                       size="xs"
