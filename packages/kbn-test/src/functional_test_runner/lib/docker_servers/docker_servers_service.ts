@@ -11,6 +11,7 @@ import execa from 'execa';
 import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs/operators';
 import { ToolingLog } from '@kbn/dev-utils';
+import pRetry from 'p-retry';
 
 import { Lifecycle } from '../lifecycle';
 import { observeContainerRunning } from './container_running';
@@ -104,8 +105,13 @@ export class DockerServersService {
     const { image, name, waitFor, waitForLogLine } = server;
 
     // pull image from registry
-    log.info(`[docker:${name}] pulling docker image "${image}"`);
-    await execa('docker', ['pull', image]);
+    await pRetry(
+      async () => {
+        log.info(`[docker:${name}] pulling docker image "${image}"`);
+        await execa('docker', ['pull', image]);
+      },
+      { retries: 5 }
+    );
 
     // run the image that we just pulled
     const containerId = await this.dockerRun(server);

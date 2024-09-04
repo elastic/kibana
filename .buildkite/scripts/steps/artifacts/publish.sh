@@ -39,14 +39,14 @@ download "kibana-$FULL_VERSION-windows-x86_64.zip"
 
 download "dependencies-$FULL_VERSION.csv"
 
-cd - 
+cd -
 
 echo "--- Set artifact permissions"
 chmod -R a+r target/*
 chmod -R a+w target
 
 echo "--- Pull latest Release Manager CLI"
-docker pull docker.elastic.co/infra/release-manager:latest
+docker_with_retry pull docker.elastic.co/infra/release-manager:latest
 
 echo "--- Publish artifacts"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
