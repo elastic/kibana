@@ -1,0 +1,18 @@
+## STARTS_WITH
+
+The `STARTS_WITH` function returns a boolean that indicates whether a keyword string starts with another string.
+
+### Examples
+
+```esql
+FROM employees
+| KEEP last_name
+| EVAL ln_S = STARTS_WITH(last_name, "B")
+```
+
+```esql
+FROM employees
+| KEEP first_name, last_name
+| EVAL fn_S = STARTS_WITH(first_name, "A")
+| WHERE fn_S
+```
