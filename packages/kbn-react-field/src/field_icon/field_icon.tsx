@@ -12,34 +12,34 @@ import { EuiToken, EuiTokenProps } from '@elastic/eui';
 
 export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
   type:
-    | 'binary'
-    | 'boolean'
-    | 'conflict'
-    | 'date'
-    | 'date_range'
-    | 'dense_vector'
-    | 'geo_point'
-    | 'geo_shape'
-    | 'ip'
-    | 'ip_range'
-    | 'flattened'
-    | 'match_only_text'
-    | 'murmur3'
-    | 'number'
-    | 'number_range'
-    | 'rank_feature'
-    | 'rank_features'
-    | '_source'
-    | 'point'
-    | 'shape'
-    | 'sparse_vector'
-    | 'semantic_text'
-    | 'string'
-    | string
-    | 'nested'
-    | 'gauge'
-    | 'counter'
-    | 'version';
+  | 'binary'
+  | 'boolean'
+  | 'conflict'
+  | 'date'
+  | 'date_range'
+  | 'dense_vector'
+  | 'geo_point'
+  | 'geo_shape'
+  | 'ip'
+  | 'ip_range'
+  | 'flattened'
+  | 'match_only_text'
+  | 'murmur3'
+  | 'number'
+  | 'number_range'
+  | 'rank_feature'
+  | 'rank_features'
+  | '_source'
+  | 'point'
+  | 'shape'
+  | 'sparse_vector'
+  | 'semantic_text'
+  | 'string'
+  | string
+  | 'nested'
+  | 'gauge'
+  | 'counter'
+  | 'version';
   label?: string;
   scripted?: boolean;
 }
@@ -72,6 +72,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   point: { iconType: 'tokenShape' }, // there is no separate icon for `point` yet
   shape: { iconType: 'tokenShape' },
   sparse_vector: { iconType: 'tokenVectorSparse' },
+  semantic_text: { iconType: 'tokenSemanticText' },
   string: { iconType: 'tokenString' },
   text: { iconType: 'tokenString' },
   keyword: { iconType: 'tokenKeyword' },

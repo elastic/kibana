@@ -24,6 +24,7 @@ const iconMap: Record<string, string> = {
   boolean: 'tokenBoolean',
   date: 'tokenDate',
   date_range: 'tokenDate',
+  dense_vector: 'tokenVectorDense',
   double: 'tokenNumber',
   double_range: 'tokenDate',
   flattened: 'tokenObject',
@@ -48,8 +49,10 @@ const iconMap: Record<string, string> = {
   rank_features: 'tokenRankFeatures',
   scaled_float: 'tokenNumber',
   search_as_you_type: 'tokenSearchType',
+  semantic_text: 'tokenSemanticText',
   shape: 'tokenShape',
   short: 'tokenNumber',
+  sparse_vector: 'tokenVectorSparse',
   text: 'tokenString',
   token_count: 'tokenTokenCount',
   unsigned_long: 'tokenNumber',
@@ -93,7 +96,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
           fieldType === 'array' ||
           fieldType === 'nested' ||
           Array.isArray(fieldValue)) &&
-        isExpanded ? (
+          isExpanded ? (
           <EuiCodeBlock language="json" overflowHeight="250" transparentBackground>
             {fieldValue}
           </EuiCodeBlock>
