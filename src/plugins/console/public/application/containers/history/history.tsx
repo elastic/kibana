@@ -9,7 +9,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
-import { css } from '@emotion/react';
 import moment from 'moment';
 import {
   EuiSpacer,
@@ -59,7 +58,11 @@ const CheckeableCardLabel = ({
   </EuiFlexGroup>
 );
 
-export function History() {
+interface Props {
+  containerWidth: number;
+}
+
+export function History({ containerWidth }: Props) {
   const { euiTheme } = useEuiTheme();
   const {
     services: { history },
@@ -136,7 +139,10 @@ export function History() {
       borderRadius="none"
       css={{ height: '100%' }}
     >
-      <EuiResizableContainer style={{ height: '100%' }}>
+      <EuiResizableContainer
+        style={{ height: '100%' }}
+        direction={containerWidth < euiTheme.breakpoint.l ? 'vertical' : 'horizontal'}
+      >
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
             <EuiResizablePanel
@@ -220,24 +226,23 @@ export function History() {
               </EuiSplitPanel.Outer>
             </EuiResizablePanel>
 
-            <EuiResizableButton
-              css={css`
-                background-color: ${euiTheme.colors.lightestShade};
-              `}
-            />
+            <EuiResizableButton className="conApp__resizerButton" />
 
             <EuiResizablePanel initialSize={50} minSize="15%" tabIndex={0} paddingSize="none">
               <EuiSplitPanel.Outer
                 color="subdued"
-                grow
                 css={{ height: '100%' }}
                 borderRadius="none"
                 hasShadow={false}
               >
-                <EuiSplitPanel.Inner paddingSize="none">
+                <EuiSplitPanel.Inner
+                  paddingSize="none"
+                  css={{ top: 0 }}
+                  className="consoleEditorPanel"
+                >
                   <HistoryViewer settings={readOnlySettings} req={viewingReq} />
                 </EuiSplitPanel.Inner>
-                <EuiSplitPanel.Inner grow={false}>
+                <EuiSplitPanel.Inner grow={false} className="consoleEditorPanel">
                   <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiButton

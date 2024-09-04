@@ -204,15 +204,15 @@ export function Main({ isEmbeddable = false }: MainProps) {
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner paddingSize="none">
-          {selectedTab === SHELL_TAB_ID && (
+          {currentView === SHELL_TAB_ID && (
             <Editor
               loading={!done}
               setEditorInstance={() => {}}
               containerWidth={containerDimensions.width}
             />
           )}
-          {currentView === HISTORY_TAB_ID && <History />}
-          {selectedTab === CONFIG_TAB_ID && (
+          {currentView === HISTORY_TAB_ID && <History containerWidth={containerDimensions.width} />}
+          {currentView === CONFIG_TAB_ID && (
             <Config editorInstance={null} containerWidth={containerDimensions.width} />
           )}
         </EuiSplitPanel.Inner>
