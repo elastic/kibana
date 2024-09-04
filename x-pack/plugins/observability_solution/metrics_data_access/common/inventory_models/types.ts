@@ -238,18 +238,12 @@ export type TSVBMetricModelCreator = (
 export const isBasicMetricAgg = (
   agg: unknown
 ): agg is Record<string, undefined | Pick<estypes.AggregationsMetricAggregationBase, 'field'>> => {
-  if (agg && typeof agg === 'object' && Object.keys(agg).length !== 0) {
-    for (const key in agg) {
-      if (Object.hasOwn(agg, key)) {
-        return !!(
-          agg[key as keyof typeof agg] === undefined ||
-          (agg[key as keyof typeof agg] as estypes.AggregationsMetricAggregationBase).field
-        );
-      }
-    }
-  }
+  if (agg === null || typeof agg !== 'object') return false;
 
-  return false;
+  return Object.values(agg).some(
+    (value) =>
+      value === undefined || 'field' in (value as estypes.AggregationsMetricAggregationBase)
+  );
 };
 
 export const isDerivativeAgg = (
