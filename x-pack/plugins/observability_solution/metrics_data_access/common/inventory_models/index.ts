@@ -93,3 +93,12 @@ export const isSumBucketAgg = (
 ): agg is Pick<estypes.AggregationsAggregationContainer, 'sum_bucket'> => {
   return !!(agg as estypes.AggregationsAggregationContainer).sum_bucket;
 };
+
+export const isTermsWithAggregation = (
+  agg: unknown
+): agg is Pick<estypes.AggregationsAggregationContainer, 'terms' | 'aggregations'> => {
+  return !!(
+    (agg as estypes.AggregationsAggregationContainer).aggregations &&
+    (agg as estypes.AggregationsAggregationContainer).terms
+  );
+};

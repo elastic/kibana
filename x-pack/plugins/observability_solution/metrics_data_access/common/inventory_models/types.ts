@@ -237,11 +237,6 @@ export type TSVBMetricModelCreator = (
 
 export type MetricsUIAggregation = Record<string, estypes.AggregationsAggregate>;
 
-export const ESTermsWithAggregationRT = rt.type({
-  terms: rt.type({ field: rt.string }),
-  aggregations: rt.UnknownRecord,
-});
-
 export const SnapshotMetricTypeKeys = {
   count: null,
   cpuV2: null,
