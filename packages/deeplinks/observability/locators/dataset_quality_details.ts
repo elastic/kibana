@@ -40,4 +40,5 @@ export interface DataQualityDetailsLocatorParams extends SerializableRecord {
   degradedFields?: {
     table?: DegradedFieldsTable;
   };
+  expandedDegradedField?: string;
 }
