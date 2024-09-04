@@ -23,8 +23,13 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { asyncForEach } from '@kbn/std';
+import {
+  usePermissionCheck,
+  createPermissionFailureMessage,
+} from '../../capabilities/check_capabilities';
 import type { Module } from '../../../../common/types/modules';
 import { useMlKibana } from '../../contexts/kibana';
 import type { TabIdType, KibanaAssetType } from './flyout';
@@ -111,13 +116,14 @@ export const OverviewTabContent: FC<Props> = ({
     services: {
       docLinks,
       mlServices: {
-        mlApiServices: { recognizeModule },
+        mlApi: { recognizeModule },
       },
       data: { dataViews: dataViewsService },
     },
   } = useMlKibana();
   const logsConfigsUrl = docLinks.links.ml.logsAnomalyDetectionConfigs;
   const metricsConfigsUrl = docLinks.links.ml.metricsAnomalyDetectionConfigs;
+  const canCreateJob = usePermissionCheck('canCreateJob');
 
   const runDataRecongizer = async () => {
     setRunningDataRecognizer(true);
@@ -147,6 +153,24 @@ export const OverviewTabContent: FC<Props> = ({
     setRunningDataRecognizer(false);
     setRecognizerWasRun(true);
   };
+
+  const runRecognizerButton = (
+    <span>
+      <EuiButton
+        fill
+        isDisabled={runningDataRecognizer || canCreateJob === false}
+        isLoading={runningDataRecognizer}
+        color={'primary'}
+        onClick={runDataRecongizer}
+        size="s"
+      >
+        <FormattedMessage
+          id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.runDataRecognizerButtonLabel"
+          defaultMessage="Run data recognizer"
+        />
+      </EuiButton>
+    </span>
+  );
 
   return (
     <EuiFlexGroup direction="column">
@@ -263,21 +287,16 @@ export const OverviewTabContent: FC<Props> = ({
                         </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <span>
-                          <EuiButton
-                            fill
-                            isDisabled={runningDataRecognizer}
-                            isLoading={runningDataRecognizer}
-                            color={'primary'}
-                            onClick={runDataRecongizer}
-                            size="s"
+                        {canCreateJob === false ? (
+                          <EuiToolTip
+                            position="top"
+                            content={createPermissionFailureMessage('canCreateJob')}
                           >
-                            <FormattedMessage
-                              id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.runDataRecognizerButtonLabel"
-                              defaultMessage="Run data recognizer"
-                            />
-                          </EuiButton>
-                        </span>
+                            {runRecognizerButton}
+                          </EuiToolTip>
+                        ) : (
+                          runRecognizerButton
+                        )}
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>

@@ -35,7 +35,7 @@ export const SuppliedConfigurations = () => {
   const {
     services: {
       mlServices: {
-        mlApiServices: { getDataRecognizerModule },
+        mlApi: { getDataRecognizerModule },
       },
     },
   } = useMlKibana();

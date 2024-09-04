@@ -52,7 +52,7 @@ export const suppliedConfigurationsRouteFactory = (
 });
 
 const PageWrapper: FC = () => {
-  const { context } = useRouteResolver('full', ['canCreateJob'], basicResolvers());
+  const { context } = useRouteResolver('full', ['canGetJobs'], basicResolvers());
 
   return (
     <PageLoader context={context}>
