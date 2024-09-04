@@ -96,12 +96,13 @@ describe('validateRoleName', () => {
       expect(validator.validateRoleName(role)).toEqual({ isInvalid: false });
     });
   });
+});
 
-  test('should not allow whitespace for serverless', () => {
-    const serverlessValidator = new RoleValidator({
-      shouldValidate: true,
-      buildFlavor: 'serverless',
-    });
+describe('validateRoleName for serverless', () => {
+  beforeEach(() => {
+    validator = new RoleValidator({ shouldValidate: true, buildFlavor: 'serverless' });
+  });
+  test('should not allow whitespace', () => {
     const role = {
       name: 'role name',
       elasticsearch: {
@@ -111,9 +112,53 @@ describe('validateRoleName', () => {
       },
       kibana: [],
     };
-    expect(serverlessValidator.validateRoleName(role)).toEqual({
+    expect(validator.validateRoleName(role)).toEqual({
       isInvalid: true,
       error: `Name must contain only letters, numbers, punctuation and printable symbols.`,
+    });
+  });
+  test('should not allow leading symbols', () => {
+    const role = {
+      name: '.rolename',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [],
+    };
+    expect(validator.validateRoleName(role)).toEqual({
+      isInvalid: true,
+      error: `Name must contain only letters, numbers, punctuation and printable symbols.`,
+    });
+  });
+  test('should not allow symbols in the middle', () => {
+    const role = {
+      name: 'role.name',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [],
+    };
+    expect(validator.validateRoleName(role)).toEqual({
+      isInvalid: true,
+      error: `Name must contain only letters, numbers, punctuation and printable symbols.`,
+    });
+  });
+  test('should allow valid names', () => {
+    const role = {
+      name: 'rolename._-',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [],
+    };
+    expect(validator.validateRoleName(role)).toEqual({
+      isInvalid: false,
     });
   });
 });

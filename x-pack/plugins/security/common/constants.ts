@@ -68,10 +68,11 @@ export const NAME_REGEX =
 /**
  * Matches valid usernames and role names for serverless offering.
  *
- * - Must contain only letters, numbers, punctuation and printable symbols.
+ * - Must contain only letters, numbers and trailing dots, hyphens or underscores.
  * - Must not contain leading, trailing spaces or white spaces in between.
+ * - Must not contain leading dots, hyphens or underscores.
  */
-export const SERVERLESS_NAME_REGEX = /^[a-zA-Z0-9!"#$%&'()*+,\-./\\:;<=>?@\[\]^_`{|}~]+$/;
+export const SERVERLESS_NAME_REGEX = /^^[a-zA-Z0-9]+[._-]*$/;
 
 /**
  * Maximum length of usernames and role names.
