@@ -8,34 +8,8 @@
 import { ObjectType, schema } from '@kbn/config-schema';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { TrendRequest } from '../../../common/types';
-import { getFetchTrendsQuery } from './fetch_trends';
+import { getFetchTrendsQuery, TrendsQuery } from './fetch_trends';
 import { SyntheticsRestApiRouteFactory } from '../types';
-
-interface TrendAggs {
-  aggregations: {
-    byId: {
-      buckets: Array<{
-        key: string;
-        byLocation: {
-          buckets: Array<{
-            key: string;
-            last_50: {
-              buckets: Array<{
-                max: { value: number };
-              }>;
-            };
-            stats: {};
-            median: {
-              values: {
-                '50.0': number;
-              };
-            };
-          }>;
-        };
-      }>;
-    };
-  };
-}
 
 export const getIntervalForCheckCount = (schedule: string, numChecks = 50) =>
   Number(schedule) * numChecks;
@@ -55,6 +29,7 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   handler: async (routeContext) => {
     const esClient = routeContext.syntheticsEsClient;
     const body = routeContext.request.body as TrendRequest[];
+
     const configs = body.reduce(
       (
         acc: Record<string, { locations: string[]; interval: number }>,
@@ -70,26 +45,23 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
       {}
     );
 
-    const requests = Object.keys(configs).map((key) =>
-      getFetchTrendsQuery(key, configs[key].locations, configs[key].interval)
+    const requests = Object.keys(configs).map(
+      (key) => getFetchTrendsQuery(key, configs[key].locations, configs[key].interval).body
     );
-    const results = await esClient.msearch(requests);
+    const results = await esClient.msearch<TrendsQuery>(requests);
 
     let main = {};
-    for (const res of results.responses as unknown as TrendAggs[]) {
-      const aggregations = res.aggregations;
-      aggregations.byId.buckets.map(({ key, byLocation }) => {
+    for (const res of results.responses) {
+      res.aggregations?.byId.buckets.map(({ key, byLocation }) => {
         const ret: Record<string, any> = {};
         for (const location of byLocation.buckets) {
-          ret[key + location.key] = {
+          ret[String(key) + String(location.key)] = {
             configId: key,
             locationId: location.key,
-            data: location.last_50.buckets.map(
-              (durationBucket: { max: { value: number } }, x: number) => ({
-                x,
-                y: durationBucket.max.value,
-              })
-            ),
+            data: location.last50.buckets.map((durationBucket, x) => ({
+              x,
+              y: durationBucket.max.value,
+            })),
             ...location.stats,
             median: location.median.values['50.0'],
           };
@@ -97,6 +69,6 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
         main = { ...main, ...ret };
       });
     }
-    return routeContext.response.ok({ body: main });
+    return main;
   },
 });
