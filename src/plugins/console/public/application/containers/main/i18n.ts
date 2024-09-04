@@ -15,6 +15,9 @@ export const MAIN_PANEL_LABELS = {
   importButton: i18n.translate('console.importButtonLabel', {
     defaultMessage: 'Import',
   }),
+  importButtonTooltip: i18n.translate('console.importButtonTooltipLabel', {
+    defaultMessage: 'Import requests from a file into the editor',
+  }),
   helpButton: i18n.translate('console.helpButtonTooltipContent', {
     defaultMessage: 'Help',
   }),

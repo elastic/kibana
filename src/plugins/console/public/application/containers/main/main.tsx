@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiPageTemplate,
   EuiSplitPanel,
+  EuiToolTip,
   useEuiTour,
   EuiButtonEmpty,
   EuiHorizontalRule,
@@ -195,14 +196,16 @@ export function Main({ isEmbeddable = false }: MainProps) {
                 <EuiFlexItem grow={false}>
                   <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
                     <>
-                      <EuiButtonEmpty
-                        iconType="importAction"
-                        onClick={() => document.getElementById('importConsoleFile')?.click()}
-                        size="xs"
-                        data-test-subj="consoleImportButton"
-                      >
-                        {MAIN_PANEL_LABELS.importButton}
-                      </EuiButtonEmpty>
+                      <EuiToolTip content={MAIN_PANEL_LABELS.importButtonTooltip}>
+                        <EuiButtonEmpty
+                          iconType="importAction"
+                          onClick={() => document.getElementById('importConsoleFile')?.click()}
+                          size="xs"
+                          data-test-subj="consoleImportButton"
+                        >
+                          {MAIN_PANEL_LABELS.importButton}
+                        </EuiButtonEmpty>
+                      </EuiToolTip>
                       {/* This input is hidden by CSS in the UI, but the NavIcon button activates it */}
                       <input
                         type="file"
