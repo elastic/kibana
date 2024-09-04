@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Pagination } from '../types';
+import { Pagination } from '../../common/types';
 
 export const getPageCounts = (pagination: Pagination) => {
   const { total, from, size } = pagination;

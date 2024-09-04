@@ -14,18 +14,17 @@ import {
   EuiForm,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { Controller, useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_PAGINATION } from '../../../common';
 import { ResultList } from './result_list';
 import { ChatForm, ChatFormFields } from '../../types';
 import { useSearchPreview } from '../../hooks/use_search_preview';
 import { getPaginationFromPage } from '../../utils/pagination_helper';
-import { DEFAULT_PAGINATION } from '../../../common';
 
 export const SearchMode: React.FC = () => {
-  const formRef = useRef<HTMLFormElement>(null);
   const {
     data: { results, pagination, isInitialState },
     fetchSearchResults,
@@ -67,7 +66,7 @@ export const SearchMode: React.FC = () => {
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiForm component="form" onSubmit={handleSubmit(() => handleSearch())} ref={formRef}>
+            <EuiForm component="form" onSubmit={handleSubmit(() => handleSearch())}>
               <Controller
                 control={control}
                 name={ChatFormFields.searchQuery}

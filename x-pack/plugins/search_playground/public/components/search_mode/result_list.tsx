@@ -23,6 +23,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { i18n } from '@kbn/i18n';
 import { Pagination } from '../../types';
 import { getPageCounts } from '../../utils/pagination_helper';
 import { EmptyResults } from './empty_results';
@@ -65,12 +66,17 @@ export const ResultList: React.FC<ResultListArgs> = ({
                 <EuiFlexGroup direction="column" gutterSize="xs">
                   <EuiFlexItem grow>
                     <EuiTitle size="xs">
-                      <h2>{item._id}</h2>
+                      <h3>ID:{item._id}</h3>
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow>
                     <EuiText size="s">
-                      <p>{item._source?.title || item._id}</p>
+                      <p>
+                        {i18n.translate('searchIndexDocuments.result.score', {
+                          defaultMessage: 'Document score: {score}',
+                          values: { score: item._score },
+                        })}
+                      </p>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
