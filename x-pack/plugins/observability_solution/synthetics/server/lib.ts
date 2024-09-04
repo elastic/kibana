@@ -125,7 +125,8 @@ export class SyntheticsEsClient {
     TDocument = unknown,
     TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest
   >(
-    requests: MsearchMultisearchBody[]
+    requests: MsearchMultisearchBody[],
+    operationName?: string
   ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
     const searches: Array<MsearchMultisearchHeader | MsearchMultisearchBody> = [];
     for (const request of requests) {
