@@ -12,13 +12,13 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import {
-  Subject,
   from,
+  defer,
   delay,
   filter,
   tap,
   take,
-  takeUntil,
+  takeWhile,
   exhaustMap,
   switchMap,
   map,
@@ -55,7 +55,7 @@ import { DataTelemetryEvent } from './types';
 
 export class DataTelemetryService {
   private readonly logger: Logger;
-  private readonly stop$ = new Subject<void>();
+  private isStopped = false;
 
   private telemetryStart?: TelemetryPluginStart;
 
@@ -68,8 +68,8 @@ export class DataTelemetryService {
   private isOptedIn?: boolean = true; // Assume true until the first check
   private esClient?: ElasticsearchClient;
 
-  private run$ = from(this.isTelemetryOptedIn()).pipe(
-    takeUntil(this.stop$),
+  private run$ = defer(() => from(this.isTelemetryOptedIn())).pipe(
+    takeWhile(() => !this.isStopped),
     tap((isOptedIn) => {
       if (!isOptedIn) {
         this.logTelemetryNotOptedIn();
@@ -110,7 +110,7 @@ export class DataTelemetryService {
   }
 
   public stop() {
-    this.stop$.next();
+    this.isStopped = true;
   }
 
   private registerTask(taskManager: TaskManagerSetupContract) {

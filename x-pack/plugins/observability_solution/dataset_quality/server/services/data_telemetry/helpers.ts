@@ -227,7 +227,7 @@ export function getIndexBasicStats({
     })
   ).pipe(
     concatMap((allIndexStats) => {
-      return from(getFailureStoreStats({ esClient, indexName: indexNames[0] })).pipe(
+      return from(getFailureStoreStats({ esClient, indexName: indexNames.join(',') })).pipe(
         delay(breatheDelay),
         map((allFailureStoreStats) => {
           return indices.map((info) =>

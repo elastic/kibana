@@ -14,20 +14,12 @@ import { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { DataTelemetryEvent } from './types';
-import {
-  STARTUP_DELAY,
-  TELEMETRY_INTERVAL,
-  BREATHE_DELAY_MEDIUM,
-  MAX_STREAMS_TO_REPORT,
-} from './constants';
+import { BREATHE_DELAY_MEDIUM, MAX_STREAMS_TO_REPORT } from './constants';
 import { DataTelemetryService } from './data_telemetry_service';
 
 // Mock the constants module to speed up and simplify the tests
 jest.mock('./constants', () => ({
   ...jest.requireActual('./constants'),
-  STARTUP_DELAY: 1000,
-  TELEMETRY_INTERVAL: 5000,
-
   BREATHE_DELAY_SHORT: 10,
   BREATHE_DELAY_MEDIUM: 50,
   BREATHE_DELAY_LONG: 100,
@@ -58,6 +50,7 @@ describe('DataTelemetryService', () => {
   let mockLogger: jest.Mocked<Logger>;
   let mockTaskManagerSetup: ReturnType<typeof taskManagerMock.createSetup>;
   let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
+  let runTask: ReturnType<typeof setupMocks>['runTask'];
 
   describe('Data Telemetry Task', () => {
     beforeEach(async () => {
@@ -68,6 +61,7 @@ describe('DataTelemetryService', () => {
       mockTelemetryStart = mocks.mockTelemetryStart;
       mockTaskManagerSetup = mocks.taskManagerSetup;
       mockTaskManagerStart = mocks.taskManagerStart;
+      runTask = mocks.runTask;
 
       service = new DataTelemetryService(mockLogger);
       service.setup(mockAnalyticsSetup, mockTaskManagerSetup);
@@ -86,13 +80,10 @@ describe('DataTelemetryService', () => {
     });
 
     it('should trigger task runner run method', async () => {
-      const taskDefinitions = mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0];
-      const taskType = Object.keys(taskDefinitions)[0];
-      const taskRunner = taskDefinitions[taskType].createTaskRunner({ taskInstance: {} as any });
-
       jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
       const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
-      await taskRunner.run();
+
+      await runTask();
 
       // Assert collectAndSend is called
       expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
@@ -108,6 +99,7 @@ describe('DataTelemetryService', () => {
       mockTelemetryStart = mocks.mockTelemetryStart;
       mockTaskManagerSetup = mocks.taskManagerSetup;
       mockTaskManagerStart = mocks.taskManagerStart;
+      runTask = mocks.runTask;
 
       service = new DataTelemetryService(mockLogger);
       service.setup(mockAnalyticsSetup, mockTaskManagerSetup);
@@ -132,16 +124,16 @@ describe('DataTelemetryService', () => {
       async () => {
         const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
 
-        await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
+        await runTask();
         expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
 
-        await new Promise((resolve) => setTimeout(resolve, BREATHE_DELAY_MEDIUM * 10));
+        await sleepForBreathDelay();
         expect(mockEsClient.indices.getMapping).toHaveBeenCalledTimes(1);
 
-        await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
+        await runTask();
         expect(collectAndSendSpy).toHaveBeenCalledTimes(2);
 
-        await new Promise((resolve) => setTimeout(resolve, BREATHE_DELAY_MEDIUM * 10));
+        await sleepForBreathDelay();
         expect(mockEsClient.indices.getMapping).toHaveBeenCalledTimes(2);
 
         // getMapping should not be called for non logs data streams e.g. logs-synth
@@ -159,13 +151,13 @@ describe('DataTelemetryService', () => {
       async () => {
         const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
 
-        await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
+        await runTask();
         expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
 
         service.stop();
 
-        await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
-        await new Promise((resolve) => setTimeout(resolve, BREATHE_DELAY_MEDIUM));
+        await runTask();
+        await sleepForBreathDelay();
         expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
       },
       TEST_TIMEOUT
@@ -178,10 +170,11 @@ describe('DataTelemetryService', () => {
 
         const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
 
-        await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
+        await runTask();
         expect(collectAndSendSpy).not.toHaveBeenCalled();
 
-        await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
+        await runTask();
+        await sleepForBreathDelay();
         expect(collectAndSendSpy).not.toHaveBeenCalled();
 
         // Assert that logger.debug is called with appropriate message
@@ -210,12 +203,8 @@ describe('DataTelemetryService', () => {
           })),
         });
 
-        await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
-        await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
-        await new Promise((resolve) =>
-          setTimeout(resolve, 2 * (MAX_STREAMS_TO_REPORT + 1) * BREATHE_DELAY_MEDIUM)
-        );
-
+        await runTask();
+        await sleepForBreathDelay();
         expect(mockEsClient.indices.getMapping).not.toHaveBeenCalled();
       },
       TEST_TIMEOUT
@@ -228,8 +217,8 @@ describe('DataTelemetryService', () => {
 
         const reportEventsSpy = jest.spyOn(service as any, 'reportEvents');
 
-        await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
-        await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
+        await runTask();
+        await sleepForBreathDelay();
 
         expect(reportEventsSpy).toHaveBeenCalledTimes(1);
         expect(reportEventsSpy.mock?.lastCall?.[0]).toEqual([
@@ -258,12 +247,19 @@ describe('DataTelemetryService', () => {
       mockLogger = mocks.mockLogger;
       mockAnalyticsSetup = mocks.mockAnalyticsSetup;
       mockTelemetryStart = mocks.mockTelemetryStart;
+      mockTaskManagerSetup = mocks.taskManagerSetup;
+      mockTaskManagerStart = mocks.taskManagerStart;
+      runTask = mocks.runTask;
 
       service = new DataTelemetryService(mockLogger);
       service.setup(mockAnalyticsSetup, mockTaskManagerSetup);
-      await service.start(mockTelemetryStart, {
-        elasticsearch: { client: { asInternalUser: mockEsClient } },
-      } as any);
+      await service.start(
+        mockTelemetryStart,
+        {
+          elasticsearch: { client: { asInternalUser: mockEsClient } },
+        } as any,
+        mockTaskManagerStart
+      );
 
       jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
     });
@@ -280,8 +276,8 @@ describe('DataTelemetryService', () => {
 
         const reportEventsSpy = jest.spyOn(service as any, 'reportEvents');
 
-        await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
-        await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
+        await runTask();
+        await sleepForBreathDelay();
 
         expect(reportEventsSpy).toHaveBeenCalledTimes(1);
         const lastCall = reportEventsSpy.mock?.lastCall?.[0] as [Partial<DataTelemetryEvent>];
@@ -300,6 +296,10 @@ describe('DataTelemetryService', () => {
     );
   });
 });
+
+function sleepForBreathDelay() {
+  return new Promise((resolve) => setTimeout(resolve, BREATHE_DELAY_MEDIUM * 10));
+}
 
 function setupMocks() {
   const mockEsClient = {
@@ -364,6 +364,14 @@ function setupMocks() {
   const taskManagerSetup = taskManagerMock.createSetup();
   const taskManagerStart = taskManagerMock.createStart();
 
+  const runTask = () => {
+    const taskDefinitions = taskManagerSetup.registerTaskDefinitions.mock.calls[0][0];
+    const taskType = Object.keys(taskDefinitions)[0];
+    const taskRunner = taskDefinitions[taskType].createTaskRunner({ taskInstance: {} as any });
+
+    return taskRunner.run();
+  };
+
   return {
     mockEsClient,
     mockLogger,
@@ -371,6 +379,7 @@ function setupMocks() {
     mockTelemetryStart,
     taskManagerSetup,
     taskManagerStart,
+    runTask,
   };
 }
 

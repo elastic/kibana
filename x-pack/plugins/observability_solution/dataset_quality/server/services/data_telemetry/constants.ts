@@ -10,10 +10,8 @@ import { DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from '@kbn/telemetry-plugin/serve
 import { DatasetIndexPattern } from './types';
 
 export const LOGS_DATA_TELEMETRY_TASK_TYPE = 'logs-data-telemetry';
-export const LOGS_DATA_TELEMETRY_TASK_ID = 'logs-data-telemetry:collect-and-report-task';
+export const LOGS_DATA_TELEMETRY_TASK_ID = 'logs-data-telemetry:collect-and-report-task-2';
 
-export const STARTUP_DELAY = 10 * 60 * 60 * 1000; // 10 hours
-export const TELEMETRY_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
 export const TELEMETRY_TASK_INTERVAL = 24 * 60; // 24 hours (in minutes)
 export const TELEMETRY_TASK_TIMEOUT = 18 * 60; // 18 hours (in minutes)
 
@@ -54,11 +52,8 @@ const TELEMETRY_PATTERNS_BY_NAME = DATA_DATASETS_INDEX_PATTERNS_UNIQUE.reduce((a
   return acc;
 }, {} as Record<string, DatasetIndexPattern[]>);
 
-export const LOGS_DATASET_INDEX_PATTERNS = LOGS_INDEX_PATTERN_NAMES.reduce<DatasetIndexPattern[]>(
-  (acc, patternName) => {
-    return [...acc, ...(TELEMETRY_PATTERNS_BY_NAME[patternName] || [])];
-  },
-  []
+export const LOGS_DATASET_INDEX_PATTERNS = LOGS_INDEX_PATTERN_NAMES.flatMap<DatasetIndexPattern>(
+  (patternName) => TELEMETRY_PATTERNS_BY_NAME[patternName] || []
 );
 
 export const DATA_TELEMETRY_FIELDS = [
