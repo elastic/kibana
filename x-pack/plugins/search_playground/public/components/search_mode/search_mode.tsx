@@ -99,14 +99,14 @@ export const SearchMode: React.FC = () => {
                     iconColor="success"
                     title={
                       <h2>
-                        {i18n.translate('x-pack.translate.searchMode.readyToSearch', {
+                        {i18n.translate('x-pack.searchPlayground.searchMode.readyToSearch', {
                           defaultMessage: 'Ready to search',
                         })}
                       </h2>
                     }
                     body={
                       <p>
-                        {i18n.translate('x-pack.translate.searchMode.searchPrompt', {
+                        {i18n.translate('x-pack.searchPlayground.searchMode.searchPrompt', {
                           defaultMessage:
                             'Type in a query in the search bar above or view the query we automatically created for you.',
                         })}
@@ -114,7 +114,7 @@ export const SearchMode: React.FC = () => {
                     }
                     actions={
                       <EuiButton>
-                        {i18n.translate('x-pack.translate.searchMode.viewQuery', {
+                        {i18n.translate('x-pack.searchPlayground.searchMode.viewQuery', {
                           defaultMessage: 'View the query',
                         })}
                       </EuiButton>
