@@ -558,7 +558,7 @@
         "label": "CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN",
         "description": [],
         "signature": [
-          "\"logs-*_latest_misconfigurations_cdr\""
+          "\"security_solution-*.misconfiguration_latest\""
         ],
         "path": "x-pack/packages/kbn-cloud-security-posture-common/constants.ts",
         "deprecated": false,
