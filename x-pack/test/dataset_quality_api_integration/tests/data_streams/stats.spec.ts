@@ -198,7 +198,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 log.create().message('This is a log message').timestamp(timestamp).defaults({
                   'log.file.path': '/my-service.log',
                 }),
-                syntheticsMonitor.create().dataset('http').timestamp(timestamp),
               ]),
           ]);
           await syntheticsSynthrace.index([
