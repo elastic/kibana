@@ -233,6 +233,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       describe('Severity', () => {
         createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 
+        afterEach(async () => {
+          await toasts.dismissAll();
+        });
+
         it('to medium', async () => {
           await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
           await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
