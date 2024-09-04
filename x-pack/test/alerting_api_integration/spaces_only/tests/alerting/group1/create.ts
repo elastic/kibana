@@ -132,7 +132,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('create alert', function () {
+    describe('store references correctly', function () {
       this.tags('skipFIPS');
       it('should store references correctly for actions', async () => {
         const { body: createdAction } = await supertest
