@@ -15,6 +15,11 @@ export const ecsFieldMap = {
     array: false,
     required: true,
   },
+  'actor.entity.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'agent.build.original': {
     type: 'keyword',
     array: false,
@@ -385,9 +390,30 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'container.cpu.usage': {
+    type: 'scaled_float',
+    array: false,
+    required: false,
+    scaling_factor: 1000,
+  },
+  'container.disk.read.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'container.disk.write.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   'container.id': {
     type: 'keyword',
     array: false,
+    required: false,
+  },
+  'container.image.hash.all': {
+    type: 'keyword',
+    array: true,
     required: false,
   },
   'container.image.name': {
@@ -405,13 +431,34 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'container.memory.usage': {
+    type: 'scaled_float',
+    array: false,
+    required: false,
+    scaling_factor: 1000,
+  },
   'container.name': {
     type: 'keyword',
     array: false,
     required: false,
   },
+  'container.network.egress.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'container.network.ingress.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   'container.runtime': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'container.security_context.privileged': {
+    type: 'boolean',
     array: false,
     required: false,
   },
@@ -590,6 +637,26 @@ export const ecsFieldMap = {
     array: true,
     required: false,
   },
+  'device.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'device.manufacturer': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'device.model.identifier': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'device.model.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'dll.code_signature.digest_algorithm': {
     type: 'keyword',
     array: false,
@@ -650,12 +717,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'dll.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'dll.hash.sha512': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'dll.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'dll.hash.tlsh': {
     type: 'keyword',
     array: false,
     required: false,
@@ -690,8 +767,53 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'dll.pe.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'dll.pe.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'dll.pe.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'dll.pe.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'dll.pe.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
   'dll.pe.imphash': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'dll.pe.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'dll.pe.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'dll.pe.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'dll.pe.imports_names_var_entropy': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -700,8 +822,43 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'dll.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'dll.pe.product': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'dll.pe.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'dll.pe.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'dll.pe.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'dll.pe.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'dll.pe.sections.var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'dll.pe.sections.virtual_size': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -799,6 +956,136 @@ export const ecsFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+  },
+  'email.attachments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'email.attachments.file.extension': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.mime_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'email.bcc.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.cc.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.content_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.delivery_timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'email.direction': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.from.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.local_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.message_id': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'email.origination_timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'email.reply_to.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.sender.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.subject': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.to.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.x_mailer': {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
   'error.code': {
     type: 'keyword',
@@ -965,8 +1252,13 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'faas.trigger': {
-    type: 'nested',
+  'faas.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'faas.name': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -976,6 +1268,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'faas.trigger.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'faas.version': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1085,6 +1382,31 @@ export const ecsFieldMap = {
     array: true,
     required: false,
   },
+  'file.elf.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'file.elf.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.elf.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.elf.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
   'file.elf.header.abi_version': {
     type: 'keyword',
     array: false,
@@ -1125,9 +1447,24 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'file.elf.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'file.elf.imports': {
     type: 'flattened',
     array: true,
+    required: false,
+  },
+  'file.elf.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.elf.imports_names_var_entropy': {
+    type: 'long',
+    array: false,
     required: false,
   },
   'file.elf.sections': {
@@ -1167,6 +1504,11 @@ export const ecsFieldMap = {
   },
   'file.elf.sections.type': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.elf.sections.var_entropy': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -1240,6 +1582,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'file.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'file.hash.sha512': {
     type: 'keyword',
     array: false,
@@ -1250,7 +1597,92 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'file.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'file.inode': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.macho.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.macho.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'file.macho.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.macho.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.macho.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'file.macho.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.macho.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'file.macho.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.macho.imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.macho.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'file.macho.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.macho.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.macho.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.macho.sections.var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.macho.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.macho.symhash': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1305,8 +1737,53 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'file.pe.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.pe.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'file.pe.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.pe.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.pe.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
   'file.pe.imphash': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.pe.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.pe.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'file.pe.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.pe.imports_names_var_entropy': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -1315,8 +1792,43 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'file.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'file.pe.product': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.pe.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'file.pe.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.pe.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.pe.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.pe.sections.var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'file.pe.sections.virtual_size': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -1791,6 +2303,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'log.syslog.appname': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'log.syslog.facility.code': {
     type: 'long',
     array: false,
@@ -1801,8 +2318,23 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'log.syslog.hostname': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'log.syslog.msgid': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'log.syslog.priority': {
     type: 'long',
+    array: false,
+    required: false,
+  },
+  'log.syslog.procid': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -1812,6 +2344,16 @@ export const ecsFieldMap = {
     required: false,
   },
   'log.syslog.severity.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'log.syslog.structured_data': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'log.syslog.version': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2141,6 +2683,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'orchestrator.resource.annotation': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   'orchestrator.resource.id': {
     type: 'keyword',
     array: false,
@@ -2148,6 +2695,11 @@ export const ecsFieldMap = {
   },
   'orchestrator.resource.ip': {
     type: 'ip',
+    array: true,
+    required: false,
+  },
+  'orchestrator.resource.label': {
+    type: 'keyword',
     array: true,
     required: false,
   },
@@ -2331,6 +2883,31 @@ export const ecsFieldMap = {
     array: true,
     required: false,
   },
+  'process.elf.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'process.elf.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.elf.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.elf.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
   'process.elf.header.abi_version': {
     type: 'keyword',
     array: false,
@@ -2371,9 +2948,24 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.elf.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.elf.imports': {
     type: 'flattened',
     array: true,
+    required: false,
+  },
+  'process.elf.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.elf.imports_names_var_entropy': {
+    type: 'long',
+    array: false,
     required: false,
   },
   'process.elf.sections': {
@@ -2413,6 +3005,11 @@ export const ecsFieldMap = {
   },
   'process.elf.sections.type': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.elf.sections.var_entropy': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -2461,9 +3058,219 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.entry_leader.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.attested_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.attested_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.attested_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
   'process.entry_leader.entity_id': {
     type: 'keyword',
     array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.vpid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.vpid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.vpid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.working_directory': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.env_vars': {
+    type: 'keyword',
+    array: true,
     required: false,
   },
   'process.executable': {
@@ -2473,6 +3280,161 @@ export const ecsFieldMap = {
   },
   'process.exit_code': {
     type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.group_leader.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.vpid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.working_directory': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -2491,12 +3453,152 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.hash.sha512': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'process.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.io': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.io.bytes_skipped': {
+    type: 'object',
+    array: true,
+    required: false,
+  },
+  'process.io.bytes_skipped.length': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.io.bytes_skipped.offset': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.io.max_bytes_per_process_exceeded': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.io.text': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.io.total_bytes_captured': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.io.total_bytes_skipped': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.io.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.macho.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.macho.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'process.macho.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.macho.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.macho.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.macho.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.macho.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.macho.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.macho.imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.macho.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.macho.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.macho.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.macho.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.macho.sections.var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.macho.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.macho.symhash': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2591,6 +3693,31 @@ export const ecsFieldMap = {
     array: true,
     required: false,
   },
+  'process.parent.elf.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
   'process.parent.elf.header.abi_version': {
     type: 'keyword',
     array: false,
@@ -2631,9 +3758,24 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.elf.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.parent.elf.imports': {
     type: 'flattened',
     array: true,
+    required: false,
+  },
+  'process.parent.elf.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.imports_names_var_entropy': {
+    type: 'long',
+    array: false,
     required: false,
   },
   'process.parent.elf.sections': {
@@ -2673,6 +3815,11 @@ export const ecsFieldMap = {
   },
   'process.parent.elf.sections.type': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.elf.sections.var_entropy': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -2731,6 +3878,36 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.vpid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   'process.parent.hash.md5': {
     type: 'keyword',
     array: false,
@@ -2746,12 +3923,107 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.parent.hash.sha512': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'process.parent.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.parent.macho.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.parent.macho.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.sections.var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.sections.virtual_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.macho.symhash': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2781,8 +4053,53 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.pe.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.pe.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'process.parent.pe.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.pe.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.pe.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
   'process.parent.pe.imphash': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.pe.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.pe.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.parent.pe.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.pe.imports_names_var_entropy': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -2791,8 +4108,43 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.parent.pe.product': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.pe.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.parent.pe.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.pe.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.pe.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.pe.sections.var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.pe.sections.virtual_size': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -2806,9 +4158,69 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.parent.start': {
     type: 'date',
     array: false,
+    required: false,
+  },
+  'process.parent.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.thread.capabilities.effective': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.parent.thread.capabilities.permitted': {
+    type: 'keyword',
+    array: true,
     required: false,
   },
   'process.parent.thread.id': {
@@ -2826,7 +4238,37 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.parent.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   'process.parent.uptime': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.vpid': {
     type: 'long',
     array: false,
     required: false,
@@ -2856,8 +4298,53 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.pe.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.pe.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'process.pe.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.pe.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.pe.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
   'process.pe.imphash': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.pe.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.pe.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'process.pe.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.pe.imports_names_var_entropy': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -2866,8 +4353,43 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.pe.product': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.pe.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'process.pe.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.pe.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.pe.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.pe.sections.var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.pe.sections.virtual_size': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -2881,7 +4403,242 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.previous.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.previous.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
   'process.session_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.vpid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.vpid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.vpid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.working_directory': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2889,6 +4646,26 @@ export const ecsFieldMap = {
   'process.start': {
     type: 'date',
     array: false,
+    required: false,
+  },
+  'process.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.thread.capabilities.effective': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.thread.capabilities.permitted': {
+    type: 'keyword',
+    array: true,
     required: false,
   },
   'process.thread.id': {
@@ -2906,7 +4683,47 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.tty.columns': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.tty.rows': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   'process.uptime': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.vpid': {
     type: 'long',
     array: false,
     required: false,
@@ -3226,6 +5043,16 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'service.node.role': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.node.roles': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   'service.origin.address': {
     type: 'keyword',
     array: false,
@@ -3254,6 +5081,16 @@ export const ecsFieldMap = {
   'service.origin.node.name': {
     type: 'keyword',
     array: false,
+    required: false,
+  },
+  'service.origin.node.role': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.origin.node.roles': {
+    type: 'keyword',
+    array: true,
     required: false,
   },
   'service.origin.state': {
@@ -3304,6 +5141,16 @@ export const ecsFieldMap = {
   'service.target.node.name': {
     type: 'keyword',
     array: false,
+    required: false,
+  },
+  'service.target.node.role': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.target.node.roles': {
+    type: 'keyword',
+    array: true,
     required: false,
   },
   'service.target.state': {
@@ -3656,6 +5503,31 @@ export const ecsFieldMap = {
     array: true,
     required: false,
   },
+  'threat.enrichments.indicator.file.elf.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
   'threat.enrichments.indicator.file.elf.header.abi_version': {
     type: 'keyword',
     array: false,
@@ -3696,9 +5568,24 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.enrichments.indicator.file.elf.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.enrichments.indicator.file.elf.imports': {
     type: 'flattened',
     array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.imports_names_var_entropy': {
+    type: 'long',
+    array: false,
     required: false,
   },
   'threat.enrichments.indicator.file.elf.sections': {
@@ -3738,6 +5625,11 @@ export const ecsFieldMap = {
   },
   'threat.enrichments.indicator.file.elf.sections.type': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.elf.sections.var_entropy': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -3811,12 +5703,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.enrichments.indicator.file.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.enrichments.indicator.file.hash.sha512': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'threat.enrichments.indicator.file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.hash.tlsh': {
     type: 'keyword',
     array: false,
     required: false,
@@ -3876,8 +5778,53 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.enrichments.indicator.file.pe.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
   'threat.enrichments.indicator.file.pe.imphash': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.imports_names_var_entropy': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -3886,8 +5833,43 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.enrichments.indicator.file.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.enrichments.indicator.file.pe.product': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.sections.var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.sections.virtual_size': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -4106,8 +6088,18 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.enrichments.indicator.marking.tlp_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.enrichments.indicator.modified_at': {
     type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.name': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -4386,7 +6378,32 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.enrichments.matched.occurred': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
   'threat.enrichments.matched.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.feed.dashboard_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.feed.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.feed.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.feed.reference': {
     type: 'keyword',
     array: false,
     required: false,
@@ -4546,6 +6563,31 @@ export const ecsFieldMap = {
     array: true,
     required: false,
   },
+  'threat.indicator.file.elf.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
   'threat.indicator.file.elf.header.abi_version': {
     type: 'keyword',
     array: false,
@@ -4586,9 +6628,24 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.indicator.file.elf.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.indicator.file.elf.imports': {
     type: 'flattened',
     array: true,
+    required: false,
+  },
+  'threat.indicator.file.elf.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.imports_names_var_entropy': {
+    type: 'long',
+    array: false,
     required: false,
   },
   'threat.indicator.file.elf.sections': {
@@ -4628,6 +6685,11 @@ export const ecsFieldMap = {
   },
   'threat.indicator.file.elf.sections.type': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.elf.sections.var_entropy': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -4701,12 +6763,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.indicator.file.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.indicator.file.hash.sha512': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'threat.indicator.file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.hash.tlsh': {
     type: 'keyword',
     array: false,
     required: false,
@@ -4766,8 +6838,53 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.indicator.file.pe.go_import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.go_imports': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.go_imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.go_imports_names_var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.go_stripped': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
   'threat.indicator.file.pe.imphash': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.import_hash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.imports': {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.pe.imports_names_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.imports_names_var_entropy': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -4776,8 +6893,43 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.indicator.file.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.indicator.file.pe.product': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.sections': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'threat.indicator.file.pe.sections.entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.sections.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.sections.physical_size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.sections.var_entropy': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.sections.virtual_size': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -4981,6 +7133,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.indicator.id': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   'threat.indicator.ip': {
     type: 'ip',
     array: false,
@@ -4996,8 +7153,18 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.indicator.marking.tlp_version': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.indicator.modified_at': {
     type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.name': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -6078,6 +8245,86 @@ export const ecsFieldMap = {
   },
   'user_agent.version': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.bus_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.default_access': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.device_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.device_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.dos_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.file_system_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.mount_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.nt_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.product_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.product_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.removable': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'volume.serial_number': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'volume.vendor_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.vendor_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'volume.writable': {
+    type: 'boolean',
     array: false,
     required: false,
   },

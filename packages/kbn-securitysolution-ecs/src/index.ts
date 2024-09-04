@@ -7,6 +7,7 @@
  */
 
 import { AgentEcs } from './agent';
+import type { ActorEcs } from './actor';
 import type { AuditdEcs } from './auditd';
 import type { CloudEcs } from './cloud';
 import type { CodeSignature, FileEcs } from './file';
@@ -29,6 +30,7 @@ import type { SignalEcs, SignalEcsAAD } from './signal';
 import type { SourceEcs } from './source';
 import type { SuricataEcs } from './suricata';
 import type { SystemEcs } from './system';
+import type { TargetEcs } from './target';
 import type { Target } from './target_type';
 import type { ThreatEcs, ThreatIndicatorEcs } from './threat';
 import type { TlsEcs } from './tls';
@@ -96,6 +98,8 @@ export interface EcsSecurityExtension {
   tls?: TlsEcs;
   url?: UrlEcs;
   user?: UserEcs;
+  actor?: ActorEcs;
+  target?: TargetEcs;
 
   // Security Specific Ecs
   // exists only in security solution Ecs definition
