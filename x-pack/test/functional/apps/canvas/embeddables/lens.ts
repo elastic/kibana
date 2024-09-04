@@ -88,7 +88,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       });
     });
 
-    describe('switch page smoke test', async () => {
+    describe('switch page smoke test', () => {
       it('loads embeddables on page change', async () => {
         await PageObjects.canvas.goToPreviousPage();
         await PageObjects.header.waitUntilLoadingHasFinished();

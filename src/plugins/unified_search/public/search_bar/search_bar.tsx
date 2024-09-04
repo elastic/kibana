@@ -79,6 +79,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   // Date picker
   isRefreshPaused?: boolean;
   refreshInterval?: number;
+  minRefreshInterval?: number;
   dateRangeFrom?: string;
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
@@ -619,6 +620,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           dateRangeTo={this.state.dateRangeTo}
           isRefreshPaused={this.props.isRefreshPaused}
           refreshInterval={this.props.refreshInterval}
+          minRefreshInterval={this.props.minRefreshInterval}
           showAutoRefreshOnly={this.props.showAutoRefreshOnly}
           showQueryInput={this.props.showQueryInput}
           showAddFilter={this.props.showFilterBar}

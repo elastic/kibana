@@ -36,6 +36,8 @@ import { UnifiedSearchPageObject } from './unified_search_page';
 import { UnifiedFieldListPageObject } from './unified_field_list';
 import { FilesManagementPageObject } from './files_management';
 import { AnnotationEditorPageObject } from './annotation_library_editor_page';
+import { SolutionNavigationProvider } from './solution_navigation';
+import { EmbeddedConsoleProvider } from './embedded_console';
 
 export const pageObjects = {
   annotationEditor: AnnotationEditorPageObject,
@@ -46,12 +48,14 @@ export const pageObjects = {
   dashboardControls: DashboardPageControls,
   dashboardLinks: DashboardPageLinks,
   discover: DiscoverPageObject,
+  embeddedConsole: EmbeddedConsoleProvider,
   error: ErrorPageObject,
   header: HeaderPageObject,
   home: HomePageObject,
   newsfeed: NewsfeedPageObject,
   settings: SettingsPageObject,
   share: SharePageObject,
+  solutionNavigation: SolutionNavigationProvider,
   legacyDataTableVis: LegacyDataTableVisPageObject,
   login: LoginPageObject,
   timelion: TimelionPageObject,
@@ -69,3 +73,5 @@ export const pageObjects = {
   unifiedFieldList: UnifiedFieldListPageObject,
   filesManagement: FilesManagementPageObject,
 };
+
+export { SolutionNavigationProvider } from './solution_navigation';

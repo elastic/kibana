@@ -48,8 +48,8 @@ interface Props {
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
   formattedDatatables: DatatablesWithFormatInfo;
-  syncColors?: boolean;
-  timeZone?: string;
+  syncColors: boolean;
+  timeZone: string;
   emphasizeFitting?: boolean;
   fillOpacity?: number;
   minBarHeight: number;
