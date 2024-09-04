@@ -7,7 +7,7 @@ source .buildkite/scripts/steps/functional/common.sh
 export JOB=kibana-security-solution-playwright
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
-echo "---ESS - Security Solution Playwright Tests"
+echo "--- ESS - Security Solution Playwright Tests"
 
 cd x-pack/test/security_solution_playwright
 
