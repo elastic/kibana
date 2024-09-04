@@ -445,7 +445,7 @@ export class DataGridService extends FtrService {
       await this.openColMenuByField(field);
     } else {
       const columns = await this.find.allByCssSelector(
-        `[data-test-subj^="dataGridHeaderCell-"]:not(.euiDataGridHeaderCell--controlColumn)`
+        '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn)'
       );
       await columns[0].moveMouseTo();
       await this.find.clickByCssSelector('.euiDataGridHeaderCell__button');
