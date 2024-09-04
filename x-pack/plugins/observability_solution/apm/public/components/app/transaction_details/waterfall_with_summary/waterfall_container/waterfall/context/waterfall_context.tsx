@@ -63,7 +63,7 @@ export function WaterfallContextProvider({
   }, [tree]);
 
   const getErrorCount = useCallback(
-    (waterfallItemId) => waterfall.getErrorCount(waterfallItemId),
+    (waterfallItemId: string) => waterfall.getErrorCount(waterfallItemId),
     [waterfall]
   );
 

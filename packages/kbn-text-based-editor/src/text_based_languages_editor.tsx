@@ -192,6 +192,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     setIsHistoryOpen(status);
   }, []);
 
+  const showSuggestionsIfEmptyQuery = useCallback(() => {
+    if (editorModel.current?.getValueLength() === 0) {
+      setImmediate(() => {
+        editor1.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+      });
+    }
+  }, []);
+
   const openTimePickerPopover = useCallback(() => {
     const currentCursorPosition = editor1.current?.getPosition();
     const editorCoords = editor1.current?.getDomNode()!.getBoundingClientRect();
@@ -237,10 +245,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const containerRef = useRef<HTMLElement>(null);
 
   // When the editor is on full size mode, the user can resize the height of the editor.
-  const onMouseDownResizeHandler = useCallback(
+  const onMouseDownResizeHandler = useCallback<
+    React.ComponentProps<typeof ResizableButton>['onMouseDownResizeHandler']
+  >(
     (mouseDownEvent) => {
+      function isMouseEvent(e: React.TouchEvent | React.MouseEvent): e is React.MouseEvent {
+        return e && 'pageY' in e;
+      }
       const startSize = editorHeight;
-      const startPosition = mouseDownEvent.pageY;
+      const startPosition = isMouseEvent(mouseDownEvent)
+        ? mouseDownEvent?.pageY
+        : mouseDownEvent?.touches[0].pageY;
 
       function onMouseMove(mouseMoveEvent: MouseEvent) {
         const height = startSize - startPosition + mouseMoveEvent.pageY;
@@ -257,7 +272,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [editorHeight]
   );
 
-  const onKeyDownResizeHandler = useCallback(
+  const onKeyDownResizeHandler = useCallback<
+    React.ComponentProps<typeof ResizableButton>['onKeyDownResizeHandler']
+  >(
     (keyDownEvent) => {
       let height = editorHeight;
       if (
@@ -275,7 +292,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
-  }, []);
+    showSuggestionsIfEmptyQuery();
+  }, [showSuggestionsIfEmptyQuery]);
 
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
@@ -682,6 +700,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });
+
+                    editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
                   }}
                 />
               </div>

@@ -86,6 +86,19 @@ describe('Package Policy Utils', () => {
       );
     });
 
+    it('should throw if no enterprise license and no policy_ids is provided', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
+
+      await expect(
+        preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: [] })
+      ).rejects.toThrowError(
+        'Reusable integration policies are only available with an Enterprise license'
+      );
+    });
+
     it('should throw if enterprise license and multiple policy_ids is provided but no feature flag', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       jest
@@ -104,6 +117,16 @@ describe('Package Policy Utils', () => {
         .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
       await expect(
         preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: ['1', '2'] })
+      ).resolves.not.toThrow();
+    });
+
+    it('should not throw if enterprise license and no policy_ids is provided', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
+      await expect(
+        preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: [] })
       ).resolves.not.toThrow();
     });
 
