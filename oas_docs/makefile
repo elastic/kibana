@@ -61,12 +61,12 @@ api-docs-overlay: ## Run spectral API docs linter on kibana.serverless.yaml
 	rm output/kibana.serverless.tmp*.yaml
 
 .PHONY: api-docs-preview
-api-docs-preview-preview: ## Generate a preview for kibana.yaml and kibana.serverless.yaml
+api-docs-preview: ## Generate a preview for kibana.yaml and kibana.serverless.yaml
 	@npx bump preview "output/kibana.yaml"
 	@npx bump preview "output/kibana.serverless.yaml"
 
 .PHONY: api-docs-overlay-preview
-api-docs-preview-overlay: ## Generate a preview for kibana.new.yaml and kibana.serverless.new.yaml
+api-docs-overlay-preview: ## Generate a preview for kibana.new.yaml and kibana.serverless.new.yaml
 	@npx bump preview "output/kibana.new.yaml"
 	@npx bump preview "output/kibana.serverless.new.yaml"
 
