@@ -98,7 +98,7 @@ interface PluginsSetup {
   ml?: MlPluginSetup;
   licensing: LicensingPluginStart;
   searchConnectors?: SearchConnectorsPluginSetup;
-  security: SecurityPluginSetup;
+  security?: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -217,35 +217,33 @@ export class EnterpriseSearchPlugin implements Plugin {
         };
 
         const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
-        const showEnterpriseSearch =
-          hasAppSearchAccess || hasWorkplaceSearchAccess || !config.canDeployEntSearch;
 
         return {
           navLinks: {
-            enterpriseSearch: showEnterpriseSearch,
-            enterpriseSearchContent: showEnterpriseSearch,
-            enterpriseSearchAnalytics: showEnterpriseSearch,
-            enterpriseSearchApplications: showEnterpriseSearch,
-            enterpriseSearchAISearch: showEnterpriseSearch,
-            enterpriseSearchVectorSearch: showEnterpriseSearch,
-            enterpriseSearchSemanticSearch: showEnterpriseSearch,
-            enterpriseSearchElasticsearch: showEnterpriseSearch,
+            enterpriseSearch: true,
+            enterpriseSearchContent: true,
+            enterpriseSearchAnalytics: true,
+            enterpriseSearchApplications: true,
+            enterpriseSearchAISearch: true,
+            enterpriseSearchVectorSearch: true,
+            enterpriseSearchSemanticSearch: true,
+            enterpriseSearchElasticsearch: true,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-            searchExperiences: showEnterpriseSearch,
+            searchExperiences: true,
           },
           catalogue: {
-            enterpriseSearch: showEnterpriseSearch,
-            enterpriseSearchContent: showEnterpriseSearch,
-            enterpriseSearchAnalytics: showEnterpriseSearch,
-            enterpriseSearchApplications: showEnterpriseSearch,
-            enterpriseSearchAISearch: showEnterpriseSearch,
-            enterpriseSearchVectorSearch: showEnterpriseSearch,
-            enterpriseSearchSemanticSearch: showEnterpriseSearch,
-            enterpriseSearchElasticsearch: showEnterpriseSearch,
+            enterpriseSearch: true,
+            enterpriseSearchContent: true,
+            enterpriseSearchAnalytics: true,
+            enterpriseSearchApplications: true,
+            enterpriseSearchAISearch: true,
+            enterpriseSearchVectorSearch: true,
+            enterpriseSearchSemanticSearch: true,
+            enterpriseSearchElasticsearch: true,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-            searchExperiences: showEnterpriseSearch,
+            searchExperiences: true,
           },
         };
       },

@@ -17,7 +17,7 @@ import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
 interface CheckAccess {
   request: KibanaRequest;
-  security: SecurityPluginSetup;
+  security?: SecurityPluginSetup;
   spaces?: SpacesPluginStart;
   config: ConfigType;
   log: Logger;
@@ -44,7 +44,7 @@ export const checkAccess = async ({
   request,
   log,
 }: CheckAccess): Promise<ProductAccess> => {
-  const isRbacEnabled = security.authz.mode.useRbacForRequest(request);
+  const isRbacEnabled = security?.authz.mode.useRbacForRequest(request);
 
   // If security has been disabled, always hide the plugin
   if (!isRbacEnabled) {
@@ -76,10 +76,10 @@ export const checkAccess = async ({
   // If the user is a "superuser" or has the base Kibana all privilege globally, always show the plugin
   const isSuperUser = async (): Promise<boolean> => {
     try {
-      const { hasAllRequested } = await security.authz
+      const privileges = await security?.authz
         .checkPrivilegesWithRequest(request)
         .globally({ kibana: security.authz.actions.ui.get('enterpriseSearch', 'all') });
-      return hasAllRequested;
+      return privileges?.hasAllRequested || false;
     } catch (err) {
       if (err.statusCode === 401 || err.statusCode === 403) {
         return false;
