@@ -1,0 +1,159 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React from 'react';
+import { render, screen, act } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
+import { DocViewerTable, SHOW_ONLY_SELECTED_FIELDS } from './table';
+import { mockUnifiedDocViewerServices } from '../../__mocks__';
+import { setUnifiedDocViewerServices } from '../../plugin';
+
+const storage = new Storage(window.localStorage);
+
+setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
+
+const dataView = createStubDataView({
+  spec: {
+    id: 'test',
+    title: 'test',
+    timeFieldName: '@timestamp',
+    fields: {
+      '@timestamp': {
+        name: '@timestamp',
+        type: 'date',
+        esTypes: ['date'],
+        aggregatable: true,
+        searchable: true,
+        count: 30,
+        readFromDocValues: true,
+        scripted: false,
+        isMapped: true,
+      },
+      bytes: {
+        name: 'bytes',
+        type: 'number',
+        esTypes: ['long'],
+        aggregatable: true,
+        searchable: true,
+        count: 10,
+        readFromDocValues: true,
+        scripted: false,
+        isMapped: true,
+      },
+      'extension.keyword': {
+        name: 'extension.keyword',
+        type: 'string',
+        esTypes: ['keyword'],
+        aggregatable: true,
+        searchable: true,
+        count: 0,
+        readFromDocValues: true,
+        scripted: false,
+        subType: {
+          multi: {
+            parent: 'extension',
+          },
+        },
+        isMapped: true,
+      },
+      _id: {
+        name: '_id',
+        type: 'string',
+        esTypes: ['_id'],
+        aggregatable: false,
+        searchable: true,
+        readFromDocValues: true,
+        isMapped: true,
+      },
+    },
+  },
+});
+const hit = buildDataTableRecord(generateEsHits(dataView, 1)[0], dataView);
+
+describe('DocViewerTable', () => {
+  afterEach(() => {
+    storage.clear();
+  });
+
+  describe('switch - show only selected fields', () => {
+    it('should disable the switch if _source is present in columns', async () => {
+      render(
+        <IntlProvider locale="en">
+          <DocViewerTable
+            dataView={dataView}
+            hit={hit}
+            columns={[]}
+            displayedColumns={['@timestamp', '_source']}
+          />
+        </IntlProvider>
+      );
+
+      expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+    });
+
+    it('should disable the switch if columns is empty', async () => {
+      render(
+        <IntlProvider locale="en">
+          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
+        </IntlProvider>
+      );
+
+      expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+    });
+
+    it('should allow toggling the switch', async () => {
+      render(
+        <IntlProvider locale="en">
+          <DocViewerTable
+            dataView={dataView}
+            hit={hit}
+            columns={['bytes']}
+            displayedColumns={['@timestamp', 'bytes']}
+          />
+        </IntlProvider>
+      );
+
+      const showOnlySelectedFieldsSwitch = screen.getByTestId(
+        'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+      );
+
+      expect(showOnlySelectedFieldsSwitch).toBeEnabled();
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+
+      act(() => {
+        showOnlySelectedFieldsSwitch.click();
+      });
+
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.queryByText('extension.keyword')).toBeNull();
+      expect(storage.get(SHOW_ONLY_SELECTED_FIELDS)).toBe(true);
+
+      act(() => {
+        showOnlySelectedFieldsSwitch.click();
+      });
+
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+      expect(storage.get(SHOW_ONLY_SELECTED_FIELDS)).toBe(false);
+    });
+  });
+});
