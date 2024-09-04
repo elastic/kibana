@@ -205,7 +205,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public start(core: CoreStart, plugins: StartPlugins): PluginStart {
     this.services.start(core, plugins);
     this.registerFleetExtensions(core, plugins);
-    this.updatePluginVisible(core);
+    this.updatePluginStatus(core);
     this.registerAppLinks(core, plugins); // Not awaiting to prevent blocking start execution
     return this.contract.getStartContract(core);
   }
@@ -366,23 +366,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   /**
-   * Checks if the plugin is visible based on the user's capabilities and updates the plugin using appUpdater$ accordingly.
+   * Checks if the plugin should be accessible based on the user's capabilities, and updates the plugin using appUpdater$ accordingly.
    */
-  private updatePluginVisible(core: CoreStart) {
+  private updatePluginStatus(core: CoreStart) {
     const { capabilities } = core.application;
 
-    // The plugin should only be disabled when both SIEM (main Security) and Security Cases features are "none".
+    // The plugin should only be inaccessible when both SIEM (main Security) and Security Cases features are "none".
     if (!capabilities.siem?.show && !capabilities.securitySolutionCases?.read_cases) {
       this.appUpdater$.next(() => ({
-        visibleIn: [],
         status: AppStatus.inaccessible,
+        visibleIn: [],
       }));
     }
   }
 
-  /**
-   * Registers Fleet extensions.
-   */
   private registerFleetExtensions(core: CoreStart, plugins: StartPlugins) {
     if (!plugins.fleet) {
       return;
