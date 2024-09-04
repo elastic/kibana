@@ -17,7 +17,7 @@ import { BuildkiteClient } from '#pipeline-utils';
       buildNumber: lastBuild.number,
       commit: lastBuild.commit,
     };
-    console.log(output);
+    console.log(JSON.stringify(output));
   } catch (ex) {
     console.error('Buildkite API Error', ex.message);
     if (ex.response) {

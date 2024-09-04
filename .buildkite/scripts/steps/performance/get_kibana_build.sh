@@ -7,11 +7,11 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 echo "--- Fetch the latest successful build in 'kibana-on-merge' pipeline"
-json_output=$(ts-node "$(dirname "${0}")/last_successful_build.ts")
+JSON_OUTPUT=$(ts-node "$(dirname "${0}")/last_successful_build.ts")
 
-KIBANA_BUILD_ID=$(echo $json_output | jq -r '.buildId')
-BUILD_NUMBER=$(echo $json_output | jq -r '.buildNumber')
-COMMIT_HASH=$(echo $json_output | jq -r '.status')
+KIBANA_BUILD_ID=$(echo $JSON_OUTPUT | jq -r '.buildId')
+BUILD_NUMBER=$(echo $JSON_OUTPUT | jq -r '.buildNumber')
+COMMIT_HASH=$(echo $JSON_OUTPUT | jq -r '.status')
 
 echo "KIBANA_BUILD_ID: $KIBANA_BUILD_ID"
 echo "BUILD_NUMBER: $BUILD_NUMBER"
