@@ -263,7 +263,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Add min-height to all codeblocks so timeline icon doesn't overflow
   const codeBlockContainers = [...document.getElementsByClassName('euiCodeBlock')];
   // @ts-ignore-expect-error
-  codeBlockContainers.forEach((e) => (e.style.minHeight = '75px'));
+  codeBlockContainers.forEach((e) => (e.style.minHeight = '85px'));
   ////
 
   const onToggleShowAnonymizedValues = useCallback(() => {
@@ -456,7 +456,7 @@ const AssistantComponent: React.FC<Props> = ({
           overflow: hidden;
         `}
       >
-        <CommentContainer>
+        <CommentContainer data-test-subj="assistantChat">
           <EuiFlexGroup
             css={css`
               overflow: hidden;

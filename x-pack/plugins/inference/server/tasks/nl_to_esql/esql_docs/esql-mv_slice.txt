@@ -1,0 +1,15 @@
+## MV_SLICE
+
+The `MV_SLICE` function returns a subset of the multivalued field using the start and end index values.
+
+### Examples
+
+```esql
+ROW a = [1, 2, 2, 3]
+| EVAL a1 = MV_SLICE(a, 1), a2 = MV_SLICE(a, 2, 3)
+```
+
+```esql
+ROW a = [1, 2, 2, 3]
+| EVAL a1 = MV_SLICE(a, -2), a2 = MV_SLICE(a, -3, -1)
+```

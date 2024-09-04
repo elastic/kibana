@@ -167,7 +167,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
   );
 
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
@@ -262,7 +262,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
   }, [actionConnector, isTestResolveAction, isTestTriggerAction]);
 
   const additionalFieldsOnChange = useCallback(
-    (value) => editSubActionProperty('additional_fields', value),
+    (value: string | null) => editSubActionProperty('additional_fields', value),
     [editSubActionProperty]
   );
 
