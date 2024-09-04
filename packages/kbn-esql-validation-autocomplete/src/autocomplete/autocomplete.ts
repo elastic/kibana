@@ -1426,10 +1426,12 @@ async function getFunctionArgsSuggestions(
     suggestions.push(
       ...pushItUpInTheList(
         await getFieldsByType(
-          // @TODO: have a way to better suggest constant only params
+          // For example, in case() where we are expecting a boolean condition
+          // we can accept any field types (field1 !== field2)
           shouldBeBooleanCondition
             ? ['any']
-            : (getTypesFromParamDefs(
+            : // @TODO: have a way to better suggest constant only params
+              (getTypesFromParamDefs(
                 typesToSuggestNext.filter((d) => !d.constantOnly)
               ) as string[]),
           [],
