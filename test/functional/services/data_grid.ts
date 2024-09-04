@@ -384,7 +384,8 @@ export class DataGridService extends FtrService {
   }
 
   public async getHeaderFields(): Promise<string[]> {
-    const result = await this.find.allByCssSelector(
+    const table = await this.find.byCssSelector('.euiDataGrid');
+    const result = await table.findAllByCssSelector(
       '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
     );
 
@@ -444,6 +445,10 @@ export class DataGridService extends FtrService {
     if (field) {
       await this.openColMenuByField(field);
     } else {
+      const columns = await this.find.allByCssSelector(
+        `[data-test-subj^="dataGridHeaderCell-"]:not(.euiDataGridHeaderCell--controlColumn)`
+      );
+      await columns[0].moveMouseTo();
       await this.find.clickByCssSelector('.euiDataGridHeaderCell__button');
     }
   }
