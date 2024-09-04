@@ -1104,6 +1104,7 @@ async function getBuiltinFunctionNextArgument(
       } else {
         const finalType = nestedType || nodeArgType || 'any';
         const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType as string);
+
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             // this is a special case with AND/OR
@@ -1234,8 +1235,11 @@ async function getFieldsOrFunctionsSuggestions(
       }
     }
   }
+  // could also be in stats (bucket) but our autocomplete is not great yet
+  const displayDateSuggestions = types.includes('date') && ['where', 'eval'].includes(commandName);
 
   const suggestions = filteredFieldsByType.concat(
+    displayDateSuggestions ? getDateLiterals() : [],
     functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)

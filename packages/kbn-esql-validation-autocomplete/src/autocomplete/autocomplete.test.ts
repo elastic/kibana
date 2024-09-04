@@ -12,6 +12,7 @@ import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import {
   getAddDateHistogramSnippet,
+  getDateLiterals,
   getSafeInsertText,
   TIME_SYSTEM_PARAMS,
   TRIGGER_SUGGESTION_COMMAND,
@@ -141,6 +142,19 @@ describe('autocomplete', () => {
         ['and', 'or', 'not']
       ),
     ]);
+
+    const expectedComparisonWithDateSuggestions = [
+      ...getDateLiterals(),
+      ...getFieldNamesByType(['date']),
+      // all functions compatible with a keywordField type
+      ...getFunctionSignaturesByReturnType('where', ['date'], { scalar: true }),
+    ];
+    testSuggestions('from a | where dateField == /', expectedComparisonWithDateSuggestions);
+
+    testSuggestions('from a | where dateField < /', expectedComparisonWithDateSuggestions);
+
+    testSuggestions('from a | where dateField >= /', expectedComparisonWithDateSuggestions);
+
     const expectedComparisonWithTextFieldSuggestions = [
       ...getFieldNamesByType(['text', 'keyword', 'ip', 'version']),
       ...getFunctionSignaturesByReturnType('where', ['text', 'keyword', 'ip', 'version'], {
