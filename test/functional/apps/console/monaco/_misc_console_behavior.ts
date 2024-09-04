@@ -217,9 +217,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickExportFileButton();
 
         // Wait for download to trigger
-        const downloadPath = path.resolve(
+        await PageObjects.common.sleep(1000);
+
+        const downloadPath = resolve(
           REPO_ROOT,
-          `target/functional-tests/downloads/console_export.tsx`
+          `target/functional-tests/downloads/console_export`
         );
         await retry.try(async () => {
           const fileExists = existsSync(downloadPath);
