@@ -114,7 +114,7 @@ describe('validateRoleName for serverless', () => {
     };
     expect(validator.validateRoleName(role)).toEqual({
       isInvalid: true,
-      error: `Name must contain only letters, numbers, punctuation and printable symbols.`,
+      error: `Name must contain only letters, numbers and trailing dots, hyphens or underscores.`,
     });
   });
   test('should not allow leading symbols', () => {
@@ -129,7 +129,7 @@ describe('validateRoleName for serverless', () => {
     };
     expect(validator.validateRoleName(role)).toEqual({
       isInvalid: true,
-      error: `Name must contain only letters, numbers, punctuation and printable symbols.`,
+      error: `Name must contain only letters, numbers and trailing dots, hyphens or underscores.`,
     });
   });
   test('should not allow symbols in the middle', () => {
@@ -144,7 +144,7 @@ describe('validateRoleName for serverless', () => {
     };
     expect(validator.validateRoleName(role)).toEqual({
       isInvalid: true,
-      error: `Name must contain only letters, numbers, punctuation and printable symbols.`,
+      error: `Name must contain only letters, numbers and trailing dots, hyphens or underscores.`,
     });
   });
   test('should allow valid names', () => {
