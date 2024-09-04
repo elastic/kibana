@@ -87,31 +87,31 @@ export const Editor = memo(
       }, 300),
       []
     );
-    
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedUpdateLocalStorageValue = useCallback(
-    debounce((textObject: TextObject) => {
-      editorDispatch({ type: 'setCurrentTextObject', payload: textObject });
-    }, DEBOUNCE_DELAY),
-    []
-  );
 
-  // Always keep the currentTextObject in sync with the value in the editor
-  // to avoid losing the text object when the user navigates away from the shell
-  useEffect(() => {
-    // Only update when its not empty, this is to avoid setting the currentTextObject
-    // to the example text when the user clears the editor.
-    if (inputEditorValue !== '') {
-      const textObject = {
-        ...currentTextObject,
-        text: inputEditorValue,
-        updatedAt: Date.now(),
-      } as TextObject;
-
-      debouncedUpdateLocalStorageValue(textObject);
-    }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [inputEditorValue, debouncedUpdateLocalStorageValue]);
+    const debouncedUpdateLocalStorageValue = useCallback(
+      debounce((textObject: TextObject) => {
+        editorDispatch({ type: 'setCurrentTextObject', payload: textObject });
+      }, DEBOUNCE_DELAY),
+      []
+    );
+
+    // Always keep the currentTextObject in sync with the value in the editor
+    // to avoid losing the text object when the user navigates away from the shell
+    useEffect(() => {
+      // Only update when its not empty, this is to avoid setting the currentTextObject
+      // to the example text when the user clears the editor.
+      if (inputEditorValue !== '') {
+        const textObject = {
+          ...currentTextObject,
+          text: inputEditorValue,
+          updatedAt: Date.now(),
+        } as TextObject;
+
+        debouncedUpdateLocalStorageValue(textObject);
+      }
+      /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    }, [inputEditorValue, debouncedUpdateLocalStorageValue]);
 
     const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
     const isLoading = loading || requestInFlight;
