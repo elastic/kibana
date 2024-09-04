@@ -13,10 +13,6 @@ steps:
     # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
     timeout_in_minutes: 300
     parallelism: 1
-    retry:
-      automatic:
-        - exit_status: "-1"
-          limit: 1
 
   - group: "API MKI - GenAI"
     key: api_test_ai_assistant
@@ -34,8 +30,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -51,7 +45,5 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2

@@ -16,10 +16,6 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 8
-        retry:
-          automatic:
-            - exit_status: "-1"
-              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:prebuilt_rules
         label: "Cypress MKI - Rule Management - Prebuilt Rules"
@@ -35,10 +31,6 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 4
-        retry:
-          automatic:
-            - exit_status: "-1"
-              limit: 1
 
   - group: "API MKI - Rule Management"
     key: api_test_rule_management
@@ -55,8 +47,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -72,8 +62,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -89,8 +77,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -106,8 +92,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -123,8 +107,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -140,8 +122,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -157,8 +137,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -174,8 +152,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -191,8 +167,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -208,8 +182,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -225,8 +197,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -242,8 +212,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -259,8 +227,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -276,8 +242,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -293,8 +257,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -310,8 +272,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -327,8 +287,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -344,8 +302,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -361,7 +317,5 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2

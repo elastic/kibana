@@ -13,10 +13,6 @@ steps:
     # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
     timeout_in_minutes: 300
     parallelism: 2
-    retry:
-      automatic:
-          - exit_status: "-1"
-            limit: 1
 
   - group: "API MKI - Entity Analytics"
     key: api_test_entity_analytics
@@ -33,8 +29,6 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
 
@@ -50,7 +44,5 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "-1"
-              limit: 1
             - exit_status: "1"
               limit: 2
