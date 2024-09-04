@@ -56,7 +56,7 @@ export const getDefaultNotificationsListState = (): ListingPageUrlState => ({
 export const NotificationsList: FC = () => {
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
@@ -116,7 +116,7 @@ export const NotificationsList: FC = () => {
 
     try {
       setIsLoading(true);
-      const response = await mlApiServices.notifications.findMessages({
+      const response = await mlApi.notifications.findMessages({
         sortField: sorting.sort!.field,
         sortDirection: sorting.sort!.direction,
         earliest: timeRange.from,
@@ -135,7 +135,7 @@ export const NotificationsList: FC = () => {
     }
 
     setIsLoading(false);
-  }, [sorting, queryInstance, mlApiServices.notifications, displayErrorToast, timeRange]);
+  }, [sorting, queryInstance, mlApi.notifications, displayErrorToast, timeRange]);
 
   useEffect(
     function updateLastCheckedAt() {
