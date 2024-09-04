@@ -17,7 +17,7 @@ import {
   LAST_SEEN,
 } from '../../../common/es_fields/entities';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
-import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
+import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { environmentQuery } from '../../../common/utils/environment_query';
 
 interface Params {

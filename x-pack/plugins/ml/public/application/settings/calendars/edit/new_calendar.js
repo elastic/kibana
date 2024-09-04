@@ -72,7 +72,7 @@ class NewCalendarUI extends Component {
   async formSetup() {
     try {
       const { jobIds, groupIds, calendars } = await getCalendarSettingsData(
-        this.props.kibana.services.mlServices.mlApiServices
+        this.props.kibana.services.mlServices.mlApi
       );
 
       const jobIdOptions = jobIds.map((jobId) => ({ label: jobId }));
@@ -145,7 +145,7 @@ class NewCalendarUI extends Component {
   };
 
   onCreate = async () => {
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     const { formCalendarId } = this.state;
 
     if (this.isDuplicateId()) {
@@ -161,7 +161,7 @@ class NewCalendarUI extends Component {
       this.setState({ saving: true });
 
       try {
-        await ml.addCalendar(calendar);
+        await mlApi.addCalendar(calendar);
         await this.returnToCalendarsManagementPage();
       } catch (error) {
         this.setState({ saving: false });
@@ -177,12 +177,12 @@ class NewCalendarUI extends Component {
   };
 
   onEdit = async () => {
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     const calendar = this.setUpCalendarForApi();
     this.setState({ saving: true });
 
     try {
-      await ml.updateCalendar(calendar);
+      await mlApi.updateCalendar(calendar);
       await this.returnToCalendarsManagementPage();
     } catch (error) {
       this.setState({ saving: false });

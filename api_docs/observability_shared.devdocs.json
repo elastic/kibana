@@ -1504,7 +1504,7 @@
             "section": "def-public.ChromeBreadcrumb",
             "text": "ChromeBreadcrumb"
           },
-          "[], app?: { id: string; label: string; } | undefined, breadcrumbsAppendExtension?: ",
+          "[], options?: { app?: { id: string; label: string; } | undefined; breadcrumbsAppendExtension?: ",
           {
             "pluginId": "@kbn/core-chrome-browser",
             "scope": "public",
@@ -1512,7 +1512,15 @@
             "section": "def-public.ChromeBreadcrumbsAppendExtension",
             "text": "ChromeBreadcrumbsAppendExtension"
           },
-          " | undefined) => void"
+          " | undefined; serverless?: ",
+          {
+            "pluginId": "serverless",
+            "scope": "public",
+            "docId": "kibServerlessPluginApi",
+            "section": "def-public.ServerlessPluginStart",
+            "text": "ServerlessPluginStart"
+          },
+          " | undefined; } | undefined) => void"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_breadcrumbs.ts",
         "deprecated": false,
@@ -1545,7 +1553,7 @@
             "id": "def-public.useBreadcrumbs.$2",
             "type": "Object",
             "tags": [],
-            "label": "app",
+            "label": "options",
             "description": [],
             "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_breadcrumbs.ts",
             "deprecated": false,
@@ -1553,49 +1561,61 @@
             "children": [
               {
                 "parentPluginId": "observabilityShared",
-                "id": "def-public.useBreadcrumbs.$2.id",
-                "type": "string",
+                "id": "def-public.useBreadcrumbs.$2.app",
+                "type": "Object",
                 "tags": [],
-                "label": "id",
+                "label": "app",
                 "description": [],
+                "signature": [
+                  "{ id: string; label: string; } | undefined"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_breadcrumbs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "observabilityShared",
-                "id": "def-public.useBreadcrumbs.$2.label",
-                "type": "string",
+                "id": "def-public.useBreadcrumbs.$2.breadcrumbsAppendExtension",
+                "type": "Object",
                 "tags": [],
-                "label": "label",
+                "label": "breadcrumbsAppendExtension",
                 "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-public.ChromeBreadcrumbsAppendExtension",
+                    "text": "ChromeBreadcrumbsAppendExtension"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_breadcrumbs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.useBreadcrumbs.$2.serverless",
+                "type": "Object",
+                "tags": [],
+                "label": "serverless",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "serverless",
+                    "scope": "public",
+                    "docId": "kibServerlessPluginApi",
+                    "section": "def-public.ServerlessPluginStart",
+                    "text": "ServerlessPluginStart"
+                  },
+                  " | undefined"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_breadcrumbs.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
-          },
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-public.useBreadcrumbs.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "breadcrumbsAppendExtension",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBreadcrumbsAppendExtension",
-                "text": "ChromeBreadcrumbsAppendExtension"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_breadcrumbs.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -4237,6 +4257,106 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.MetricsExplorerLocatorDefinition",
+        "type": "Class",
+        "tags": [],
+        "label": "MetricsExplorerLocatorDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.MetricsExplorerLocatorDefinition",
+            "text": "MetricsExplorerLocatorDefinition"
+          },
+          " implements ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorDefinition",
+            "text": "LocatorDefinition"
+          },
+          "<",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.MetricsExplorerLocatorParams",
+            "text": "MetricsExplorerLocatorParams"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/metrics_explorer_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.MetricsExplorerLocatorDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"METRICS_EXPLORER_LOCATOR\""
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/metrics_explorer_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.MetricsExplorerLocatorDefinition.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "observabilityShared",
+                "scope": "common",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-common.MetricsExplorerLocatorParams",
+                "text": "MetricsExplorerLocatorParams"
+              },
+              ") => Promise<{ app: string; path: string; state: {}; }>"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/metrics_explorer_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-common.MetricsExplorerLocatorDefinition.getLocation.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "observabilityShared",
+                    "scope": "common",
+                    "docId": "kibObservabilitySharedPluginApi",
+                    "section": "def-common.MetricsExplorerLocatorParams",
+                    "text": "MetricsExplorerLocatorParams"
+                  }
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/metrics_explorer_locator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.ServiceOverviewLocatorDefinition",
         "type": "Class",
         "tags": [],
@@ -4974,7 +5094,15 @@
             "label": "assetDetails",
             "description": [],
             "signature": [
-              "{ tabId?: string | undefined; name?: string | undefined; dashboardId?: string | undefined; dateRange?: { from: string; to: string; } | undefined; alertMetric?: string | undefined; } | undefined"
+              "{ tabId?: string | undefined; name?: string | undefined; dashboardId?: string | undefined; dateRange?: { from: string; to: string; } | undefined; alertMetric?: string | undefined; processSearch?: string | undefined; metadataSearch?: string | undefined; logsSearch?: string | undefined; profilingSearch?: string | undefined; alertStatus?: \"all\" | ",
+              {
+                "pluginId": "@kbn/rule-data-utils",
+                "scope": "common",
+                "docId": "kibKbnRuleDataUtilsPluginApi",
+                "section": "def-common.AlertStatus",
+                "text": "AlertStatus"
+              },
+              " | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/asset_details_locator.ts",
             "deprecated": false,
@@ -5425,6 +5553,36 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.MetricsExplorerLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "MetricsExplorerLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.MetricsExplorerLocatorParams",
+            "text": "MetricsExplorerLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/metrics_explorer_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -6333,6 +6491,21 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.HOSTS_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "HOSTS_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"HOSTS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/hosts_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.HostsLocator",
         "type": "Type",
         "tags": [],
@@ -6762,6 +6935,51 @@
           "\"system.memory.total\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRICS_EXPLORER_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "METRICS_EXPLORER_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"METRICS_EXPLORER_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/metrics_explorer_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.MetricsExplorerLocator",
+        "type": "Type",
+        "tags": [],
+        "label": "MetricsExplorerLocator",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.MetricsExplorerLocatorParams",
+            "text": "MetricsExplorerLocatorParams"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/metrics_explorer_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
