@@ -113,7 +113,7 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
 
   const queryTimelineById = useQueryTimelineById();
   const openTimeline = useCallback(
-    ({ timelineId }) =>
+    ({ timelineId }: { timelineId: string }) =>
       queryTimelineById({
         duplicate: false,
         onOpenTimeline: undefined,
