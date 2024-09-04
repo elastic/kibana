@@ -13,3 +13,7 @@ export function isApmSignal(signalTypes: SignalTypes[]) {
 export function isLogsSignal(signalTypes: SignalTypes[]) {
   return signalTypes.includes(SignalTypes.LOGS);
 }
+
+export function isOnlyLogsSignal(signalTypes: SignalTypes[]) {
+  return !isApmSignal(signalTypes) && isLogsSignal(signalTypes);
+}
