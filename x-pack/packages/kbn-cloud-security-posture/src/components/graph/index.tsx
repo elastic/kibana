@@ -80,18 +80,38 @@ export function GraphViewHome() {
 //   return <GraphView environment={environment} kuery={kuery} start={start} end={end} />;
 // }
 
+export interface AuditEvent {
+  actor?: {
+    entity?: {
+      id: string | string[];
+    }
+  }
+
+  target?: {
+    entity?: {
+      id: string | string[];
+    }
+  }
+
+  event?: {
+    action: string;
+  }
+}
+
 export function GraphView({
   // environment,
   kuery,
   start,
   end,
   serviceGroupId,
+  event,
 }: {
   // environment: Environment;
   kuery: string;
   start: string;
   end: string;
   serviceGroupId?: string;
+  event: AuditEvent
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -176,6 +196,36 @@ export function GraphView({
     // onPageReady();
   }
 
+  const elements = [];
+  const actors = [];
+
+  // if actor ids is an array
+  if (Array.isArray(event.actor?.entity?.id)) {
+    for (const id of event.actor?.entity?.id) {
+      elements.push({data:{ id, label: id }});
+      actors.push(id);
+    }
+  } else if (event.actor?.entity?.id) {
+    elements.push({data:{ id: event.actor?.entity?.id, label: event.actor?.entity?.id }});
+    actors.push(event.actor?.entity?.id);
+  }
+
+  if (Array.isArray(event.target?.entity?.id)) {
+    for (const id of event.target?.entity?.id) {
+      elements.push({data:{ id, label: id }});
+
+      for (const actor of actors) {
+        elements.push({data:{ source: actor, target: id, label: event.event?.action }});
+      }
+    }
+  } else if (event.target?.entity?.id) {
+    elements.push({data:{ id: event.target?.entity?.id, label: event.target?.entity?.id }});
+
+    for (const actor of actors) {
+      elements.push({data:{ source: actor, target: event.target?.entity?.id, label: event.event?.action }});
+    }
+  }
+
   return (
     <>
       {/* <SearchBar showTimeComparison /> */}
@@ -183,9 +233,9 @@ export function GraphView({
         <div data-test-subj={GRAPH_PREVIEW_TEST_ID} style={{ height: heightWithPadding }} ref={ref}>
           <Cytoscape
             // elements={data.elements}
-            elements={[]}
+            elements={elements}
             height={heightWithPadding}
-            serviceName={"serviceName"}
+            // serviceName={"serviceName"}
             // serviceName={serviceName}
             style={getCytoscapeDivStyle(euiTheme/* TODO: KFIR , status */)}
           >

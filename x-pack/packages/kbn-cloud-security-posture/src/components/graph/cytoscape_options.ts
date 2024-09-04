@@ -123,14 +123,14 @@ const getStyle = (theme: EuiThemeComputed): cytoscape.Stylesheet[] => {
             : theme.colors.text,
         // theme.euiFontFamily doesn't work here for some reason, so we're just
         // specifying a subset of the fonts for the label text.
-        'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
-        'font-size': theme.font.scale.s,
+        // 'font-family': theme.font.family, //'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
+        // 'font-size': theme.font.scale.s,
         ghost: 'yes',
         'ghost-offset-x': 0,
         'ghost-offset-y': 2,
         'ghost-opacity': 0.15,
         height: getNodeHeight(theme),
-        label: (el: cytoscape.NodeSingular) => "foo",
+        label: (el: cytoscape.NodeSingular) => el.data('label'),
           // isService(el)
           //   ? el.data(SERVICE_NAME)
           //   : el.data('label') || el.data(SPAN_DESTINATION_SERVICE_RESOURCE),
@@ -154,6 +154,16 @@ const getStyle = (theme: EuiThemeComputed): cytoscape.Stylesheet[] => {
     {
       selector: 'edge',
       style: {
+        label: (el: cytoscape.EdgeSingular) => el.data('label'),
+        'text-background-color': theme.colors.primary,
+        'text-background-opacity': (el: cytoscape.EdgeSingular) =>
+          el.hasClass('primary') || el.selected() ? 0.1 : 0,
+        'text-background-padding': theme.size.xs,
+        'text-background-shape': 'roundrectangle',
+        'text-margin-y': parseInt(theme.size.s, 10),
+        'text-max-width': '200px',
+        'text-valign': 'bottom',
+        'text-wrap': 'ellipsis',
         'curve-style': 'unbundled-bezier',
         'line-color': lineColor,
         'overlay-opacity': 0,

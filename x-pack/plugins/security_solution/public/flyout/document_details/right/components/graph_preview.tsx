@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 // import { GRAPH_PREVIEW_TEST_ID, GRAPH_PREVIEW_LOADING_TEST_ID } from './test_ids';
 // import type { StatsNode } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
-import { GraphView, GRAPH_PREVIEW_TEST_ID, GRAPH_PREVIEW_LOADING_TEST_ID } from '@kbn/cloud-security-posture';
+import { GraphView, GRAPH_PREVIEW_TEST_ID, type AuditEvent, GRAPH_PREVIEW_LOADING_TEST_ID } from '@kbn/cloud-security-posture';
 
 // const CHILD_COUNT_LIMIT = 3;
 // const ANCESTOR_LEVEL = 3;
@@ -23,10 +23,16 @@ import { GraphView, GRAPH_PREVIEW_TEST_ID, GRAPH_PREVIEW_LOADING_TEST_ID } from 
 //   statsNodes: StatsNode[];
 // }
 
+type Props = {
+  event: AuditEvent
+}
+
 /**
  * Graph preview under Overview, Visualizations. It shows a graph representation of alert.
  */
-export const GraphPreview: React.FC = () => {
+export const GraphPreview: React.FC<Props> = ({
+  event
+}) => {
   const loading = false;
   const success = true;
 
@@ -44,7 +50,8 @@ export const GraphPreview: React.FC = () => {
     <GraphView
     kuery=''
     start=''
-    end='' />
+    end=''
+    event={event} />
   ) : (
     <FormattedMessage
       id="xpack.securitySolution.flyout.right.visualizations.graphPreview.errorDescription"

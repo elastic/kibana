@@ -21,7 +21,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useDocumentDetailsContext } from '../../shared/context';
 // import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { GraphPreview } from './graph_preview';
-import { GRAPH_PREVIEW_TEST_ID } from '@kbn/cloud-security-posture';
+import { GRAPH_PREVIEW_TEST_ID, type AuditEvent } from '@kbn/cloud-security-posture';
 import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
 
 // const timelineId = 'timeline-1';
@@ -96,7 +96,21 @@ export const GraphPreviewContainer: React.FC = () => {
       data-test-subj={GRAPH_PREVIEW_TEST_ID}
     >
       {isEnabled ? (
-        <GraphPreview />
+        <GraphPreview event={{
+          actor: {
+            entity: {
+              id: getFieldsData('actor.entity.id')!
+            }
+          },
+          target: {
+            entity: {
+              id: getFieldsData('target.entity.id')!
+            }
+          },
+          event: {
+            action: get(['event', 'action'], dataAsNestedObject)[0]
+          }
+        }} />
       ) : (
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.noDataDescription"
