@@ -103,6 +103,8 @@ custom_log_file_path_list_tsv_string=""
 elastic_agent_artifact_name=""
 elastic_agent_config_path="/opt/Elastic/Agent/elastic-agent.yml"
 elastic_agent_tmp_config_path="/tmp/elastic-agent-config-template.yml"
+integration_names=()
+integration_titles=()
 
 OS="$(uname)"
 ARCH="$(uname -m)"
@@ -366,6 +368,10 @@ detect_known_integrations() {
             # Capture patterns by trimming spaces and handling multi-line patterns
             IFS=$'\n' read -r -d '' -a patterns <<< "${line#patterns=}"
             patterns=($(echo "${patterns[@]}" | xargs))  # Trim leading/trailing spaces
+        elif [[ $line =~ ^title=.*$ ]]; then
+        # Capture titles
+            integration_titles+=("${line#title=}")
+            integration_names+=("$integration")
         elif [[ -n "$integration" && -n "$line" ]]; then
             # Capture multi-line patterns if not directly following "patterns="
             patterns+=("$(echo "$line" | xargs)")  # Trim leading/trailing spaces
@@ -386,42 +392,14 @@ detect_known_integrations() {
 }
 
 known_integration_title() {
-  local integration=$1
-  case $integration in
-    "nginx")
-      echo "Nginx Logs"
-      ;;
-    "apache")
-      echo "Apache Logs"
-      ;;
-    "docker")
-      echo "Docker Container Logs"
-      ;;
-    "system")
-      echo "System Logs And Metrics"
-      ;;
-    "mysql")
-      echo "Mysql Logs"
-      ;;
-    "postgresql")
-      echo "Postgresql Logs"
-      ;;
-    "redis")
-      echo "Redis Logs"
-      ;;
-    "haproxy")
-      echo "Haproxy Logs"
-      ;;
-    "rabbitmq")
-      echo "Rabbitmq Logs"
-      ;;
-    "kafka")
-      echo "Kafka Logs"
-      ;;
-    *)
-      echo "Unknown"
-      ;;
-  esac
+    local integration=$1
+    for i in "${!integration_names[@]}"; do
+        if [[ "${integration_names[$i]}" == "$integration" ]]; then
+            echo "${integration_titles[$i]}"
+            return
+        fi
+    done
+    echo "Unknown"
 }
 
 build_unknown_log_file_patterns() {
