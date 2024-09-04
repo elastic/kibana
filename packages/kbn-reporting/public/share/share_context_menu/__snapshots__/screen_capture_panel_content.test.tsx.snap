@@ -16,7 +16,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
-    class="euiFormRow"
+    class="euiFormRow emotion-euiFormRow"
     id="generated-id-row"
   >
     <div
@@ -29,41 +29,39 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
           aria-checked="false"
           aria-describedby="generated-id-help-0"
           aria-labelledby="generated-id"
-          class="euiSwitch__button"
+          class="euiSwitch__button emotion-euiSwitch__button"
           data-test-subj="reportModeToggle"
           id="generated-id"
           role="switch"
           type="button"
         >
           <span
-            class="euiSwitch__body"
+            class="euiSwitch__body emotion-euiSwitch__body-off"
           >
             <span
-              class="euiSwitch__thumb"
-            />
-            <span
-              class="euiSwitch__track"
+              class="euiSwitch__icons emotion-euiSwitch__icons-off-enabled"
             >
               <span
-                class="euiSwitch__icon"
-                data-euiicon-type="cross"
+                data-euiicon-type="check"
               />
               <span
-                class="euiSwitch__icon euiSwitch__icon--checked"
-                data-euiicon-type="check"
+                data-euiicon-type="cross"
               />
             </span>
           </span>
+          <span
+            class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+          />
         </button>
         <span
-          class="euiSwitch__label"
+          class="euiSwitch__label emotion-euiSwitch__label"
           id="generated-id"
         >
           Full page layout
         </span>
       </div>
       <div
-        class="euiFormHelpText euiFormRow__text"
+        class="euiFormHelpText euiFormRow__text emotion-euiFormHelpText"
         id="generated-id-help-0"
       >
         Remove borders and footer logo
@@ -200,7 +198,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
-    class="euiFormRow"
+    class="euiFormRow emotion-euiFormRow"
     id="generated-id-row"
   >
     <div
@@ -213,41 +211,39 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
           aria-checked="false"
           aria-describedby="generated-id-help-0"
           aria-labelledby="generated-id"
-          class="euiSwitch__button"
+          class="euiSwitch__button emotion-euiSwitch__button"
           data-test-subj="usePrintLayout"
           id="generated-id"
           role="switch"
           type="button"
         >
           <span
-            class="euiSwitch__body"
+            class="euiSwitch__body emotion-euiSwitch__body-off"
           >
             <span
-              class="euiSwitch__thumb"
-            />
-            <span
-              class="euiSwitch__track"
+              class="euiSwitch__icons emotion-euiSwitch__icons-off-enabled"
             >
               <span
-                class="euiSwitch__icon"
-                data-euiicon-type="cross"
+                data-euiicon-type="check"
               />
               <span
-                class="euiSwitch__icon euiSwitch__icon--checked"
-                data-euiicon-type="check"
+                data-euiicon-type="cross"
               />
             </span>
           </span>
+          <span
+            class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+          />
         </button>
         <span
-          class="euiSwitch__label"
+          class="euiSwitch__label emotion-euiSwitch__label"
           id="generated-id"
         >
           Optimize for printing
         </span>
       </div>
       <div
-        class="euiFormHelpText euiFormRow__text"
+        class="euiFormHelpText euiFormRow__text emotion-euiFormHelpText"
         id="generated-id-help-0"
       >
         Uses multiple pages, showing at most 2 visualizations per page

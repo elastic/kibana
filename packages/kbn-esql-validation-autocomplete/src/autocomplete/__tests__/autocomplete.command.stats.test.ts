@@ -7,6 +7,8 @@
  */
 
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
+import { ADD_DATE_HISTOGRAM_SNIPPET } from '../factories';
+import { roundParameterTypes } from './constants';
 import { setup, getFunctionSignaturesByReturnType, getFieldNamesByType } from './helpers';
 
 const allAggFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
@@ -82,7 +84,6 @@ describe('autocomplete.suggest', () => {
             scalar: true,
           }).map((s) => ({ ...s, text: `${s.text},` })),
         ]);
-        const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
         await assertSuggestions('from a | stats round(/', [
           ...getFunctionSignaturesByReturnType('stats', roundParameterTypes, {
             agg: true,
@@ -137,10 +138,27 @@ describe('autocomplete.suggest', () => {
       test('when typing inside function left paren', async () => {
         const { assertSuggestions } = await setup();
         const expected = [
-          ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date', 'boolean', 'ip']),
+          ...getFieldNamesByType([
+            ...ESQL_COMMON_NUMERIC_TYPES,
+            'date',
+            'boolean',
+            'ip',
+            'version',
+            'text',
+            'keyword',
+          ]),
           ...getFunctionSignaturesByReturnType(
             'stats',
-            [...ESQL_COMMON_NUMERIC_TYPES, 'date', 'date_period', 'boolean', 'ip'],
+            [
+              ...ESQL_COMMON_NUMERIC_TYPES,
+              'date',
+              'date_period',
+              'boolean',
+              'ip',
+              'version',
+              'text',
+              'keyword',
+            ],
             {
               scalar: true,
             }
@@ -196,6 +214,7 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
         const expected = [
           'var0 = ',
+          ADD_DATE_HISTOGRAM_SNIPPET,
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
@@ -218,6 +237,7 @@ describe('autocomplete.suggest', () => {
         const fields = getFieldNamesByType('any').map((field) => `${field} `);
         await assertSuggestions('from a | stats a=c by d, /', [
           'var0 = ',
+          ADD_DATE_HISTOGRAM_SNIPPET,
           ...fields,
           ...allEvaFunctions,
           ...allGroupingFunctions,
@@ -229,6 +249,7 @@ describe('autocomplete.suggest', () => {
         ]);
         await assertSuggestions('from a | stats avg(b) by c, /', [
           'var0 = ',
+          ADD_DATE_HISTOGRAM_SNIPPET,
           ...fields,
           ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
           ...allGroupingFunctions,
@@ -250,11 +271,13 @@ describe('autocomplete.suggest', () => {
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by var0 = /', [
+          ADD_DATE_HISTOGRAM_SNIPPET,
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, var0 = /', [
+          ADD_DATE_HISTOGRAM_SNIPPET,
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,

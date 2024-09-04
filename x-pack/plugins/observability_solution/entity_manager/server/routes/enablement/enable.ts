@@ -10,7 +10,6 @@ import {
   CreateEntityDefinitionQuery,
   createEntityDefinitionQuerySchema,
 } from '@kbn/entities-schema';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SetupRouteOptions } from '../types';
 import {
   canEnableEntityDiscovery,
@@ -71,7 +70,7 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
     {
       path: '/internal/entities/managed/enablement',
       validate: {
-        query: buildRouteValidationWithZod(createEntityDefinitionQuerySchema),
+        query: createEntityDefinitionQuerySchema,
       },
     },
     async (context, req, res) => {

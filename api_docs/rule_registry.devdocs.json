@@ -1946,17 +1946,17 @@
           "<Params, ",
           {
             "pluginId": "@kbn/alerting-state-types",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnAlertingStateTypesPluginApi",
-            "section": "def-common.WrappedLifecycleRuleState",
+            "section": "def-server.WrappedLifecycleRuleState",
             "text": "WrappedLifecycleRuleState"
           },
           "<State>, InstanceState, InstanceContext, ActionGroupIds, never>) => Promise<{ state: ",
           {
             "pluginId": "@kbn/alerting-state-types",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnAlertingStateTypesPluginApi",
-            "section": "def-common.WrappedLifecycleRuleState",
+            "section": "def-server.WrappedLifecycleRuleState",
             "text": "WrappedLifecycleRuleState"
           },
           "<State>; }>"
@@ -2221,7 +2221,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<\"default\">[]; schemas?: { params?: { type: \"zod\"; schema: Zod.ZodObject<Zod.ZodRawShape, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }> | Zod.ZodIntersection<Zod.ZodTypeAny, Zod.ZodTypeAny>; } | { type: \"config-schema\"; schema: ",
+          "<\"default\">[]; schemas?: { params?: { type: \"zod\"; schema: any; } | { type: \"config-schema\"; schema: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",

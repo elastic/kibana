@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { Replacements } from '../conversations/common_attributes.gen';
 

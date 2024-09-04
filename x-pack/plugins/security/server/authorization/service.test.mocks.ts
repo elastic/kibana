@@ -21,9 +21,13 @@ jest.mock('./check_saved_objects_privileges', () => ({
 }));
 
 export const mockPrivilegesFactory = jest.fn();
-jest.mock('./privileges', () => ({
-  privilegesFactory: mockPrivilegesFactory,
-}));
+jest.mock('@kbn/security-authorization-core', () => {
+  const authzCore = jest.requireActual('@kbn/security-authorization-core');
+  return {
+    ...authzCore,
+    privilegesFactory: mockPrivilegesFactory,
+  };
+});
 
 export const mockAuthorizationModeFactory = jest.fn();
 jest.mock('./mode', () => ({

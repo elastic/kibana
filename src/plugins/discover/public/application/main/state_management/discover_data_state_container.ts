@@ -185,7 +185,7 @@ export function getDataStateContainer({
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
   };
 
-  let autoRefreshDone: AutoRefreshDoneFn | undefined;
+  let autoRefreshDone: AutoRefreshDoneFn | undefined | null = null;
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
    * to notify when data completed loading and to start a new autorefresh loop
@@ -304,8 +304,8 @@ export function getDataStateContainer({
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
           // replacing this current one, call it to make sure we tell that the auto refresh is done
-          // and a new one can be scheduled.
-          if (autoRefreshDone === prevAutoRefreshDone) {
+          // and a new one can be scheduled. null is checked to always start initial looping.
+          if (autoRefreshDone === prevAutoRefreshDone || prevAutoRefreshDone === null) {
             // if this function was set and is executed, another refresh fetch can be triggered
             autoRefreshDone?.();
             autoRefreshDone = undefined;

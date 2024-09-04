@@ -22,6 +22,7 @@ import { ControlGroupApi, ControlPanelsState, ControlPanelState } from './types'
 import { DefaultControlApi, DefaultControlState } from '../controls/types';
 import { ControlGroupComparatorState } from './control_group_unsaved_changes_api';
 import { DefaultDataControlState } from '../controls/data_controls/types';
+import { ControlWidth, DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 
 export type ControlsInOrder = Array<{ id: string; type: string }>;
 
@@ -37,23 +38,28 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
 }
 
 export function initControlsManager(
-  initialControlPanelsState: ControlPanelsState,
-  defaultDataViewId: string | null
+  /**
+   * Composed from last saved controls state and previous sessions's unsaved changes to controls state
+   */
+  initialControlsState: ControlPanelsState,
+  /**
+   * Observable that publishes last saved controls state only
+   */
+  lastSavedControlsState$: PublishingSubject<ControlPanelsState>
 ) {
-  const lastSavedControlsPanelState$ = new BehaviorSubject(initialControlPanelsState);
-  const initialControlIds = Object.keys(initialControlPanelsState);
+  const initialControlIds = Object.keys(initialControlsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
-  let controlsPanelState: { [panelId: string]: DefaultControlState } = {
-    ...initialControlPanelsState,
+  let currentControlsState: { [panelId: string]: DefaultControlState } = {
+    ...initialControlsState,
   };
   const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(
-    getControlsInOrder(initialControlPanelsState)
+    getControlsInOrder(initialControlsState)
   );
   const lastUsedDataViewId$ = new BehaviorSubject<string | undefined>(
-    getLastUsedDataViewId(controlsInOrder$.value, initialControlPanelsState) ??
-      defaultDataViewId ??
-      undefined
+    getLastUsedDataViewId(controlsInOrder$.value, initialControlsState)
   );
+  const lastUsedWidth$ = new BehaviorSubject<ControlWidth>(DEFAULT_CONTROL_WIDTH);
+  const lastUsedGrow$ = new BehaviorSubject<boolean>(DEFAULT_CONTROL_GROW);
 
   function untilControlLoaded(
     id: string
@@ -91,6 +97,13 @@ export function initControlsManager(
     if ((initialState as DefaultDataControlState)?.dataViewId) {
       lastUsedDataViewId$.next((initialState as DefaultDataControlState).dataViewId);
     }
+    if (initialState?.width) {
+      lastUsedWidth$.next(initialState.width);
+    }
+    if (typeof initialState?.grow === 'boolean') {
+      lastUsedGrow$.next(initialState.grow);
+    }
+
     const id = generateId();
     const nextControlsInOrder = [...controlsInOrder$.value];
     nextControlsInOrder.splice(index, 0, {
@@ -98,18 +111,25 @@ export function initControlsManager(
       type: panelType,
     });
     controlsInOrder$.next(nextControlsInOrder);
-    controlsPanelState[id] = initialState ?? {};
+    currentControlsState[id] = initialState ?? {};
     return await untilControlLoaded(id);
   }
 
   function removePanel(panelId: string) {
-    delete controlsPanelState[panelId];
+    delete currentControlsState[panelId];
     controlsInOrder$.next(controlsInOrder$.value.filter(({ id }) => id !== panelId));
     children$.next(omit(children$.value, panelId));
   }
 
   return {
     controlsInOrder$,
+    getNewControlState: () => {
+      return {
+        grow: lastUsedGrow$.value,
+        width: lastUsedWidth$.value,
+        dataViewId: lastUsedDataViewId$.value,
+      };
+    },
     getControlApi,
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => {
       children$.next({
@@ -144,7 +164,7 @@ export function initControlsManager(
           type: controlApi.type,
           width,
           /** Re-add the `explicitInput` layer on serialize so control group saved object retains shape */
-          explicitInput: rest,
+          explicitInput: { id, ...rest },
         };
       });
 
@@ -167,10 +187,30 @@ export function initControlsManager(
       });
       return controlsRuntimeState;
     },
+    resetControlsUnsavedChanges: () => {
+      currentControlsState = {
+        ...lastSavedControlsState$.value,
+      };
+      const nextControlsInOrder = getControlsInOrder(currentControlsState as ControlPanelsState);
+      controlsInOrder$.next(nextControlsInOrder);
+
+      const nextControlIds = nextControlsInOrder.map(({ id }) => id);
+      const children = { ...children$.value };
+      let modifiedChildren = false;
+      Object.keys(children).forEach((controlId) => {
+        if (!nextControlIds.includes(controlId)) {
+          // remove children that no longer exist after reset
+          delete children[controlId];
+          modifiedChildren = true;
+        }
+      });
+      if (modifiedChildren) {
+        children$.next(children);
+      }
+    },
     api: {
-      lastUsedDataViewId$: lastUsedDataViewId$ as PublishingSubject<string | undefined>,
       getSerializedStateForChild: (childId: string) => {
-        const controlPanelState = controlsPanelState[childId];
+        const controlPanelState = currentControlsState[childId];
         return controlPanelState ? { rawState: controlPanelState } : undefined;
       },
       children$: children$ as PublishingSubject<{
@@ -210,30 +250,14 @@ export function initControlsManager(
       },
     } as PresentationContainer &
       HasSerializedChildState<ControlPanelState> &
-      Pick<ControlGroupApi, 'untilInitialized' | 'lastUsedDataViewId$'>,
+      Pick<ControlGroupApi, 'untilInitialized'>,
     comparators: {
       controlsInOrder: [
         controlsInOrder$,
-        (next: ControlsInOrder) => controlsInOrder$.next(next),
+        (next: ControlsInOrder) => {}, // setter does nothing, controlsInOrder$ reset by resetControlsRuntimeState
         fastIsEqual,
       ],
-      // Control state differences tracked by controlApi comparators
-      // Control ordering differences tracked by controlsInOrder comparator
-      // initialChildControlState comparatator exists to reset controls manager to last saved state
-      initialChildControlState: [
-        lastSavedControlsPanelState$,
-        (lastSavedControlPanelsState: ControlPanelsState) => {
-          lastSavedControlsPanelState$.next(lastSavedControlPanelsState);
-          controlsPanelState = {
-            ...lastSavedControlPanelsState,
-          };
-          controlsInOrder$.next(getControlsInOrder(lastSavedControlPanelsState));
-        },
-        () => true,
-      ],
-    } as StateComparators<
-      Pick<ControlGroupComparatorState, 'controlsInOrder' | 'initialChildControlState'>
-    >,
+    } as StateComparators<Pick<ControlGroupComparatorState, 'controlsInOrder'>>,
   };
 }
 
