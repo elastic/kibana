@@ -6149,7 +6149,7 @@
           },
           ">; } & { start: number; end: number; }; }; }) => Promise<",
           "ServiceEntities",
-          ">; } & ",
+          " | undefined>; } & ",
           "APMRouteCreateOptions",
           "; \"POST /internal/apm/entities/services/detailed_statistics\": { endpoint: \"POST /internal/apm/entities/services/detailed_statistics\"; params?: ",
           "TypeC",
