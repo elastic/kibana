@@ -50,10 +50,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    after(async () => {
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     describe('ES|QL in Discover', () => {
@@ -455,7 +459,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first cell contains the highest value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
-          return text === '483';
+          return text === '17,966';
         });
 
         expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
@@ -470,7 +474,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first cell contains the same highest value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
-          return text === '483';
+          return text === '17,966';
         });
 
         await browser.refresh();
@@ -481,7 +485,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first cell contains the same highest value after reload', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
-          return text === '483';
+          return text === '17,966';
         });
 
         await PageObjects.discover.clickNewSearchButton();
@@ -499,7 +503,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           async () => {
             const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
             const text = await cell.getVisibleText();
-            return text === '483';
+            return text === '17,966';
           }
         );
 
