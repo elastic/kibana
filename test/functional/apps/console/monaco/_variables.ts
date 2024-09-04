@@ -52,6 +52,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.console.addNewVariable({ name: 'index3', value: '_search' });
         await PageObjects.console.openConsole();
 
+        await PageObjects.console.clickClearInput();
         await PageObjects.console.monaco.enterText('\n GET ${index3}');
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +25,11 @@ import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
 import { Config } from '../config';
 import {
+  useEditorReadContext,
+  useEditorActionContext,
+  useRequestActionContext,
+} from '../../contexts';
+import {
   TopNavMenu,
   SomethingWentWrongCallout,
   HelpPopover,
@@ -32,12 +37,14 @@ import {
   ConsoleTourStep,
   ConsoleTourStepProps,
 } from '../../components';
+import { History } from '../history';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import { useEditorReadContext } from '../../contexts';
 import { getTourSteps } from './get_tour_steps';
 import {
   SHELL_TAB_ID,
+  HISTORY_TAB_ID,
   CONFIG_TAB_ID,
   EDITOR_TOUR_STEP,
   TOUR_STORAGE_KEY,
@@ -51,7 +58,9 @@ interface MainProps {
 }
 
 export function Main({ isEmbeddable = false }: MainProps) {
-  const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
+  const dispatch = useEditorActionContext();
+  const requestDispatch = useRequestActionContext();
+  const { currentView } = useEditorReadContext();
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
@@ -66,11 +75,16 @@ export function Main({ isEmbeddable = false }: MainProps) {
     localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(tourState));
   }, [tourState]);
 
+  // Clean up request output when switching tabs
+  useEffect(() => {
+    requestDispatch({ type: 'cleanRequest', payload: undefined });
+  }, [currentView, requestDispatch]);
+
   const consoleTourStepProps: ConsoleTourStepProps[] = getConsoleTourStepProps(
     tourStepProps,
     actions,
     tourState,
-    selectedTab
+    currentView
   );
 
   const { done, error, retry } = useDataInit();
@@ -138,8 +152,8 @@ export function Main({ isEmbeddable = false }: MainProps) {
                   <TopNavMenu
                     disabled={!done}
                     items={getTopNavConfig({
-                      selectedTab,
-                      setSelectedTab,
+                      selectedTab: currentView,
+                      setSelectedTab: (tab) => dispatch({ type: 'setCurrentView', payload: tab }),
                     })}
                     tourStepProps={consoleTourStepProps}
                   />
@@ -210,13 +224,13 @@ export function Main({ isEmbeddable = false }: MainProps) {
                   setInputEditorValue={setInputEditorValue}
                 />
               )}
-
-              {selectedTab === CONFIG_TAB_ID && <Config editorInstance={null} />}
+              {currentView === HISTORY_TAB_ID && <History />}
+              {currentView === CONFIG_TAB_ID && <Config editorInstance={null} />}
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
               <EuiButtonEmpty
-                onClick={() => setSelectedTab(CONFIG_TAB_ID)}
+                onClick={() => dispatch({ type: 'setCurrentView', payload: CONFIG_TAB_ID })}
                 iconType="editorCodeBlock"
                 size="xs"
                 color="text"

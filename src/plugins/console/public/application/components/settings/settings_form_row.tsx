@@ -8,31 +8,20 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
 export interface DevToolsSettingsModalProps {
   label: string;
-  labelWarning?: string;
   children: React.ReactNode;
 }
 
-export const SettingsFormRow = ({ label, labelWarning, children }: DevToolsSettingsModalProps) => {
+export const SettingsFormRow = ({ label, children }: DevToolsSettingsModalProps) => {
   return (
     <EuiFormRow fullWidth>
       <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-            {labelWarning && (
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  type="warning"
-                  color="warning"
-                  content={labelWarning}
-                  position="right"
-                />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         </EuiFlexItem>
 

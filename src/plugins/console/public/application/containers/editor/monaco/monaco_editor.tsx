@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { debounce } from 'lodash';
 import React, { CSSProperties, useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -18,7 +19,9 @@ import {
   useServicesContext,
   useEditorReadContext,
   useRequestActionContext,
+  useEditorActionContext,
 } from '../../../contexts';
+import { TextObject } from '../../../../../common/text_object';
 import {
   useSetInitialValue,
   useSetupAutocompletePolling,
@@ -36,6 +39,8 @@ export interface EditorProps {
   setValue: (value: string) => void;
 }
 
+const DEBOUNCE_DELAY = 500;
+
 export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps) => {
   const context = useServicesContext();
   const {
@@ -44,7 +49,11 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     config: { isDevMode },
   } = context;
   const { toasts } = notifications;
-  const { settings } = useEditorReadContext();
+  const {
+    settings,
+    currentTextObject,
+    restoreRequestFromHistory: requestToRestoreFromHistory,
+  } = useEditorReadContext();
   const [editorInstance, setEditorInstace] = useState<
     monaco.editor.IStandaloneCodeEditor | undefined
   >();
@@ -53,6 +62,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useKeyboardCommandsUtils();
 
+  const editorDispatch = useEditorActionContext();
   const dispatch = useRequestActionContext();
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
@@ -124,6 +134,47 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
 
   useSetupAutosave({ value });
+
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  const debouncedUpdateLocalStorageValue = useCallback(
+    debounce((textObject: TextObject) => {
+      editorDispatch({ type: 'setCurrentTextObject', payload: textObject });
+    }, DEBOUNCE_DELAY),
+    []
+  );
+
+  // Always keep the currentTextObject in sync with the value in the editor
+  // to avoid losing the text object when the user navigates away from the shell
+  useEffect(() => {
+    // Only update the currentTextObject if the value has changed and is not empty
+    // This is to avoid setting the currentTextObject to the example text when
+    // the user clears the editor.
+    if (currentTextObject?.text !== value && value !== '') {
+      const textObject = {
+        ...currentTextObject,
+        text: value,
+        updatedAt: Date.now(),
+      } as TextObject;
+
+      debouncedUpdateLocalStorageValue(textObject);
+    }
+  }, [value, currentTextObject, editorDispatch, debouncedUpdateLocalStorageValue]);
+
+  // Restore the request from history if there is one
+  const updateEditor = useCallback(async () => {
+    if (requestToRestoreFromHistory) {
+      editorDispatch({ type: 'clearRequestToRestore' });
+      await actionsProvider.current?.appendRequestToEditor(
+        requestToRestoreFromHistory,
+        dispatch,
+        context
+      );
+    }
+  }, [requestToRestoreFromHistory, dispatch, context, editorDispatch]);
+
+  useEffect(() => {
+    updateEditor();
+  }, [updateEditor]);
 
   return (
     <div

@@ -39,6 +39,7 @@ import {
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
+import { type RequestToRestore, RestoreMethod } from '../../../../types';
 import { StorageQuotaError } from '../../../components/storage_quota_error';
 import { ContextValue } from '../../../contexts';
 import { containsComments, indentData } from './utils/requests_utils';
@@ -487,9 +488,6 @@ export class MonacoEditorActionsProvider {
     return this.getSuggestions(model, position, context);
   }
 
-  /*
-   * This function inserts a request from the history into the editor
-   */
   public async restoreRequestFromHistory(request: string) {
     const model = this.editor.getModel();
     if (!model) {
@@ -685,6 +683,65 @@ export class MonacoEditorActionsProvider {
     // if the line is empty or it matches specified regex, trigger suggestions
     if (!lineContentBefore.trim() || shouldTriggerSuggestions(lineContentBefore)) {
       this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
+    }
+  }
+
+  /*
+   * This function inserts a request after the last request in the editor
+   */
+  public async appendRequestToEditor(
+    req: RequestToRestore,
+    dispatch: Dispatch<Actions>,
+    context: ContextValue
+  ) {
+    const model = this.editor.getModel();
+
+    if (!model) {
+      return;
+    }
+
+    // 1 - Create an edit operation to insert the request after the last request
+    const lastLineNumber = model.getLineCount();
+    const column = model.getLineMaxColumn(lastLineNumber);
+    const edit: monaco.editor.IIdentifiedSingleEditOperation = {
+      range: {
+        startLineNumber: lastLineNumber,
+        startColumn: column,
+        endLineNumber: lastLineNumber,
+        endColumn: column,
+      },
+      text: `\n\n${req.request}`,
+      forceMoveMarkers: true,
+    };
+    this.editor.executeEdits('restoreFromHistory', [edit]);
+
+    // 2 - Since we add two new lines, the cursor should be at the beginning of the new request
+    const beginningOfNewReq = lastLineNumber + 2;
+    const selectedRequests = await this.getRequestsBetweenLines(
+      model,
+      beginningOfNewReq,
+      beginningOfNewReq
+    );
+    // We can assume that there is only one request given that we only add one
+    // request at a time.
+    const restoredRequest = selectedRequests[0];
+
+    // 3 - Set the cursor to the beginning of the new request,
+    this.editor.setSelection({
+      startLineNumber: restoredRequest.startLineNumber,
+      startColumn: 1,
+      endLineNumber: restoredRequest.startLineNumber,
+      endColumn: 1,
+    });
+
+    // 4 - Scroll to the beginning of the new request
+    this.editor.setScrollPosition({
+      scrollTop: this.editor.getTopForLineNumber(restoredRequest.startLineNumber),
+    });
+
+    // 5 - Optionally send the request
+    if (req.restoreMethod === RestoreMethod.RESTORE_AND_EXECUTE) {
+      this.sendRequests(dispatch, context);
     }
   }
 }
