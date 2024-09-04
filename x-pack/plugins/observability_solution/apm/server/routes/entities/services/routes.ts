@@ -13,7 +13,7 @@ import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/cr
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
 import { getServiceEntities } from './get_service_entities';
-import { getServiceEntitySummary } from '../get_service_entity_summary';
+import { getServiceEntitySummary } from './get_service_entity_summary';
 import { ServiceEntities } from '../types';
 import { getServiceEntitiesHistoryTimeseries } from '../get_service_entities_history_timeseries';
 
