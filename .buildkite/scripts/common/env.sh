@@ -89,11 +89,13 @@ if is_pr; then
   export ghprbActualCommit="$BUILDKITE_COMMIT"
   export BUILD_URL="$BUILDKITE_BUILD_URL"
 
-  set_git_merge_base
+  if [[ "$BUILDKITE_STEP_KEY" != "terrazzo-initial-pipeline-upload" ]]; then
+    set_git_merge_base
+    # For backwards compatibility
+    export PR_MERGE_BASE="$GITHUB_PR_MERGE_BASE"
+    export PR_TARGET_BRANCH="$GITHUB_PR_TARGET_BRANCH"
+  fi
 
-  # For backwards compatibility
-  export PR_MERGE_BASE="$GITHUB_PR_MERGE_BASE"
-  export PR_TARGET_BRANCH="$GITHUB_PR_TARGET_BRANCH"
 else
   export ELASTIC_APM_ACTIVE=true
   export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=false
