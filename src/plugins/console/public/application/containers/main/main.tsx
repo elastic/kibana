@@ -182,24 +182,24 @@ export function Main({ isEmbeddable = false }: MainProps) {
               />
             </EuiFlexItem>
             {isEmbeddable && (
-                  <EuiFlexItem grow={false}>
-                    <NavIconButton
-                      iconType={isFullscreenOpen ? 'fullScreenExit' : 'fullScreen'}
-                      onClick={toggleFullscreen}
-                      ariaLabel={
-                        isFullscreenOpen
-                          ? MAIN_PANEL_LABELS.closeFullscrenButton
-                          : MAIN_PANEL_LABELS.openFullscrenButton
-                      }
-                      dataTestSubj="consoleToggleFullscreenButton"
-                      toolTipContent={
-                        isFullscreenOpen
-                          ? MAIN_PANEL_LABELS.closeFullscrenButton
-                          : MAIN_PANEL_LABELS.openFullscrenButton
-                      }
-                    />
-                  </EuiFlexItem>
-                )}
+              <EuiFlexItem grow={false}>
+                <NavIconButton
+                  iconType={isFullscreenOpen ? 'fullScreenExit' : 'fullScreen'}
+                  onClick={toggleFullscreen}
+                  ariaLabel={
+                    isFullscreenOpen
+                      ? MAIN_PANEL_LABELS.closeFullscrenButton
+                      : MAIN_PANEL_LABELS.openFullscrenButton
+                  }
+                  dataTestSubj="consoleToggleFullscreenButton"
+                  toolTipContent={
+                    isFullscreenOpen
+                      ? MAIN_PANEL_LABELS.closeFullscrenButton
+                      : MAIN_PANEL_LABELS.openFullscrenButton
+                  }
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" />
