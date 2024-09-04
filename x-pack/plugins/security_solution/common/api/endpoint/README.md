@@ -48,7 +48,7 @@ yarn --cwd x-pack/plugins/security_solution openapi:generate
 ```
 3. Create a new bundle with the updated APIs:
 ```shell
-yarn --cwd x-pack/plugins/security_solution openapi:generate openapi:bundle:endpoint-management
+yarn --cwd x-pack/plugins/security_solution openapi:bundle:endpoint-management
 ```
 4. Ensure that the newly generated files are commited to source
 
