@@ -18,7 +18,7 @@ import type {
 } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
-import type { EditorContext, SuggestionRawDefinition } from './types';
+import type { EditorContext, ItemKind, SuggestionRawDefinition } from './types';
 import {
   getColumnForASTNode,
   getCommandDefinition,
@@ -109,6 +109,7 @@ import {
   isParameterType,
   isReturnType,
 } from '../definitions/types';
+import { comparisonFunctions } from '../definitions/builtin';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetDataStreamsForIntegrationFn = (
@@ -1300,6 +1301,19 @@ async function getFunctionArgsSuggestions(
     fieldsMap,
     innerText
   );
+
+  const {
+    typesToSuggestNext,
+    hasMoreMandatoryArgs,
+    shouldAddComma: addComma,
+    enrichedArgs,
+    argIndex,
+  } = getValidSignaturesAndTypesToSuggestNext(node, references, fnDefinition, fullText, offset);
+
+  const shouldBeBooleanCondition = typesToSuggestNext.some(
+    (t) => t && t.type === 'boolean' && t.name === 'condition'
+  );
+  const shouldAddComma = !shouldBeBooleanCondition && addComma;
   // pick the type of the next arg
   const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
   let argIndex = Math.max(node.args.length, 0);
@@ -1413,11 +1427,16 @@ async function getFunctionArgsSuggestions(
     );
 
     // Fields
+
     suggestions.push(
       ...pushItUpInTheList(
         await getFieldsByType(
           // @TODO: have a way to better suggest constant only params
-          getTypesFromParamDefs(typesToSuggestNext.filter((d) => !d.constantOnly)) as string[],
+          shouldBeBooleanCondition
+            ? ['any']
+            : (getTypesFromParamDefs(
+                typesToSuggestNext.filter((d) => !d.constantOnly)
+              ) as string[]),
           [],
           {
             addComma: shouldAddComma,
@@ -1428,6 +1447,7 @@ async function getFunctionArgsSuggestions(
         true
       )
     );
+
     // Functions
     suggestions.push(
       ...getCompatibleFunctionDefinition(
@@ -1467,9 +1487,19 @@ async function getFunctionArgsSuggestions(
         );
       }
     }
-
+    // Suggest comparison functions for boolean conditions
+    if (shouldBeBooleanCondition && isColumnItem(arg)) {
+      suggestions.push(
+        ...comparisonFunctions.map<SuggestionRawDefinition>(({ name, description }) => ({
+          label: name,
+          text: name + ' ',
+          kind: 'Function' as ItemKind,
+          detail: description,
+        }))
+      );
+    }
     if (hasMoreMandatoryArgs) {
-      // suggest a comma if there's another argument for the function
+      // Suggest a comma if there's another argument for the function
       suggestions.push(commaCompleteItem);
     }
   }
@@ -1650,6 +1680,7 @@ async function getOptionArgsSuggestions(
             suggestions.push(...buildFieldsDefinitions(policyMetadata.enrichFields));
           }
         }
+
         if (
           assignFn &&
           hasSameArgBothSides(assignFn) &&

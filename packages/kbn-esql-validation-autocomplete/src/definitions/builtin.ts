@@ -290,7 +290,7 @@ export const mathFunctions: FunctionDefinition[] = [
   ),
 ];
 
-const comparisonFunctions: FunctionDefinition[] = [
+export const comparisonFunctions: FunctionDefinition[] = [
   {
     name: '==',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.equalToDoc', {
