@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { LogDocument } from '@kbn/apm-synthtrace-client';
-import { createAssetsAggregatorFactory } from '../../utils/create_assets_aggregator_factory';
+import { serviceEntity } from './service_entity_type';
 
-export const createLogsAssetsAggregator = createAssetsAggregatorFactory<LogDocument>();
+export type EntityDataStreamType = 'metrics' | 'logs' | 'traces';
+
+export const entity = {
+  serviceEntity,
+};

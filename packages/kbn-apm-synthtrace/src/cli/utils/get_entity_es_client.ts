@@ -7,17 +7,19 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { AssetsSynthtraceEsClient } from '../../lib/assets/assets_synthtrace_es_client';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
+import { EntitySynthtraceEsClient } from '../../lib/entity/entity_syntrace_es_client';
 import { getEsClientTlsSettings } from './ssl';
 
-export function getAssetsEsClient({
+export function getEntityEsClient({
   target,
   logger,
   concurrency,
+  kibanaTarget,
 }: Pick<RunOptions, 'concurrency'> & {
   target: string;
+  kibanaTarget: string;
   logger: Logger;
 }) {
   const client = new Client({
@@ -25,10 +27,11 @@ export function getAssetsEsClient({
     tls: getEsClientTlsSettings(target),
   });
 
-  return new AssetsSynthtraceEsClient({
+  return new EntitySynthtraceEsClient({
     client,
     logger,
     concurrency,
     refreshAfterIndex: true,
+    kibanaTarget,
   });
 }

@@ -24,7 +24,7 @@ export async function startHistoricalDataUpload({
   from: Date;
   to: Date;
 }) {
-  const { logger, esUrl, version } = await bootstrap(runOptions);
+  const { logger, esUrl, version, kibanaUrl } = await bootstrap(runOptions);
 
   const cores = cpus().length;
 
@@ -91,6 +91,7 @@ export async function startHistoricalDataUpload({
         workerId: workerIndex.toString(),
         esUrl,
         version,
+        kibanaUrl,
       };
       const worker = new Worker(Path.join(__dirname, './worker.js'), {
         workerData,

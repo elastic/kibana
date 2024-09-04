@@ -11,13 +11,13 @@ import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
   LogsSynthtraceEsClient,
-  AssetsSynthtraceEsClient,
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
 import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
+import { EntitySynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/entity/entity_syntrace_es_client';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
@@ -77,15 +77,15 @@ export interface CreateTest {
       context: InheritedFtrProviderContext
     ) => Promise<LogsSynthtraceEsClient>;
     synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
-    assetsSynthtraceEsClient: (
-      context: InheritedFtrProviderContext
-    ) => Promise<AssetsSynthtraceEsClient>;
     apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
     synthtraceKibanaClient: (
       context: InheritedFtrProviderContext
     ) => Promise<ApmSynthtraceKibanaClient>;
     apmApiClient: (context: InheritedFtrProviderContext) => ApmApiClient;
     ml: ({ getService }: FtrProviderContext) => ReturnType<typeof MachineLearningAPIProvider>;
+    entitySynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => Promise<EntitySynthtraceEsClient>;
   };
   junit: { reportName: string };
   esTestCluster: any;
@@ -126,8 +126,8 @@ export function createTestConfig(
             logger: createLogger(LogLevel.info),
             refreshAfterIndex: true,
           }),
-        assetsSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
-          new AssetsSynthtraceEsClient({
+        entitySynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+          new EntitySynthtraceEsClient({
             client: context.getService('es'),
             logger: createLogger(LogLevel.info),
             refreshAfterIndex: true,
