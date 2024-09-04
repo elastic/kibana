@@ -63,13 +63,24 @@ interface UseSettingsUpdater {
   saveSettings: () => Promise<boolean>;
 }
 
-export const useSettingsUpdater = (
-  conversations: Record<string, Conversation>,
-  allPrompts: FindPromptsResponse,
-  conversationsLoaded: boolean,
-  promptsLoaded: boolean,
-  anonymizationFields: FindAnonymizationFieldsResponse = DEFAULT_ANONYMIZATION_FIELDS // Put default as a constant to avoid re-creating it on every render
-): UseSettingsUpdater => {
+export interface UseSettingsUpdaterParams {
+  conversations?: Record<string, Conversation>;
+  allPrompts?: FindPromptsResponse;
+  conversationsLoaded?: boolean;
+  promptsLoaded?: boolean;
+  anonymizationFieldsLoaded?: boolean;
+  anonymizationFields?: FindAnonymizationFieldsResponse;
+}
+
+export const useSettingsUpdater = (params?: UseSettingsUpdaterParams): UseSettingsUpdater => {
+  const {
+    allPrompts = DEFAULT_PROMPTS,
+    anonymizationFields = DEFAULT_ANONYMIZATION_FIELDS, // Put default as a constant to avoid re-creating it on every render
+    anonymizationFieldsLoaded = false,
+    conversations = DEFAULT_CONVERSATIONS,
+    conversationsLoaded = false,
+    promptsLoaded = false,
+  } = params ?? {};
   // Initial state from assistant context
   const {
     assistantTelemetry,
@@ -193,6 +204,7 @@ export const useSettingsUpdater = (
 
     setPromptsBulkActions({});
     setConversationsSettingsBulkActions({});
+    setAnonymizationFieldsBulkActions({});
     return (
       (bulkResult?.success ?? true) &&
       (bulkAnonymizationFieldsResult?.success ?? true) &&
@@ -217,20 +229,10 @@ export const useSettingsUpdater = (
   ]);
 
   useEffect(() => {
-    if (
-      !(
-        anonymizationFieldsBulkActions.create?.length ||
-        anonymizationFieldsBulkActions.update?.length ||
-        anonymizationFieldsBulkActions.delete?.ids?.length
-      )
-    )
+    if (anonymizationFieldsLoaded) {
       setUpdatedAnonymizationData(anonymizationFields);
-  }, [
-    anonymizationFields,
-    anonymizationFieldsBulkActions.create?.length,
-    anonymizationFieldsBulkActions.delete?.ids?.length,
-    anonymizationFieldsBulkActions.update?.length,
-  ]);
+    }
+  }, [anonymizationFields, anonymizationFieldsLoaded]);
 
   useEffect(() => {
     // Update conversation settings when conversations are loaded

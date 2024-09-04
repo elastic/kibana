@@ -100,9 +100,9 @@ describe('useSettingsUpdater', () => {
   it('should set all state variables to their initial values when resetSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(
-          mockConversations,
-          {
+        useSettingsUpdater({
+          conversations: mockConversations,
+          allPrompts: {
             data: [...mockSystemPrompts, ...mockQuickPrompts],
             page: 1,
             perPage: 100,
@@ -110,8 +110,8 @@ describe('useSettingsUpdater', () => {
           },
           conversationsLoaded,
           promptsLoaded,
-          anonymizationFields
-        )
+          anonymizationFields,
+        })
       );
       await waitForNextUpdate();
       const {
@@ -157,9 +157,9 @@ describe('useSettingsUpdater', () => {
   it('should update all state variables to their updated values when saveSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(
-          mockConversations,
-          {
+        useSettingsUpdater({
+          conversations: mockConversations,
+          allPrompts: {
             data: mockSystemPrompts,
             page: 1,
             perPage: 100,
@@ -167,8 +167,8 @@ describe('useSettingsUpdater', () => {
           },
           conversationsLoaded,
           promptsLoaded,
-          anonymizationFields
-        )
+          anonymizationFields,
+        })
       );
       await waitForNextUpdate();
       const {
@@ -205,9 +205,9 @@ describe('useSettingsUpdater', () => {
   it('should track when alerts count is updated', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(
-          mockConversations,
-          {
+        useSettingsUpdater({
+          conversations: mockConversations,
+          allPrompts: {
             data: mockSystemPrompts,
             page: 1,
             perPage: 100,
@@ -215,8 +215,8 @@ describe('useSettingsUpdater', () => {
           },
           conversationsLoaded,
           promptsLoaded,
-          anonymizationFields
-        )
+          anonymizationFields,
+        })
       );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;
@@ -231,9 +231,9 @@ describe('useSettingsUpdater', () => {
   it('should track when streaming is updated', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(
-          mockConversations,
-          {
+        useSettingsUpdater({
+          conversations: mockConversations,
+          allPrompts: {
             data: mockSystemPrompts,
             page: 1,
             perPage: 100,
@@ -241,8 +241,8 @@ describe('useSettingsUpdater', () => {
           },
           conversationsLoaded,
           promptsLoaded,
-          anonymizationFields
-        )
+          anonymizationFields,
+        })
       );
       await waitForNextUpdate();
       const { setUpdatedAssistantStreamingEnabled } = result.current;
@@ -257,9 +257,9 @@ describe('useSettingsUpdater', () => {
   it('if no settings update, do not track anything', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(
-          mockConversations,
-          {
+        useSettingsUpdater({
+          conversations: mockConversations,
+          allPrompts: {
             data: mockSystemPrompts,
             page: 1,
             perPage: 100,
@@ -267,8 +267,8 @@ describe('useSettingsUpdater', () => {
           },
           conversationsLoaded,
           promptsLoaded,
-          anonymizationFields
-        )
+          anonymizationFields,
+        })
       );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;

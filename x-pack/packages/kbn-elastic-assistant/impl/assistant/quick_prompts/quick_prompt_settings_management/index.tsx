@@ -29,10 +29,7 @@ import {
 } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';
 import { useAssistantContext } from '../../../assistant_context';
-import {
-  DEFAULT_CONVERSATIONS,
-  useSettingsUpdater,
-} from '../../settings/use_settings_updater/use_settings_updater';
+import { useSettingsUpdater } from '../../settings/use_settings_updater/use_settings_updater';
 import { useFetchPrompts } from '../../api';
 
 const QuickPromptSettingsManagementComponent = () => {
@@ -47,12 +44,10 @@ const QuickPromptSettingsManagementComponent = () => {
     saveSettings,
     setPromptsBulkActions,
     setUpdatedQuickPromptSettings,
-  } = useSettingsUpdater(
-    DEFAULT_CONVERSATIONS, // Quick Prompt settings do not require conversations
+  } = useSettingsUpdater({
     allPrompts,
-    false, // Quick Prompt settings do not require conversations
-    promptsLoaded
-  );
+    promptsLoaded,
+  });
 
   // Quick Prompt Selection State
   const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<PromptResponse | undefined>();

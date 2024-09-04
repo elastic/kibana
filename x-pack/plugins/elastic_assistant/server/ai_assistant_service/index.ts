@@ -285,12 +285,15 @@ export class AIAssistantService {
       }
 
       this.resourceInitializationHelper.retry(opts.spaceId, initRetryPromise);
-
-      const retryResult = await this.resourceInitializationHelper.getInitializedResources(
-        opts.spaceId ?? DEFAULT_NAMESPACE_STRING
-      );
-
-      if (!retryResult.result) {
+      let retryResult: InitializationPromise = { result: false };
+      try {
+        retryResult = await this.resourceInitializationHelper.getInitializedResources(
+          opts.spaceId ?? DEFAULT_NAMESPACE_STRING
+        );
+        this.options.logger.info(
+          `Resource installation for "${opts.spaceId}" succeeded after retry`
+        );
+      } catch (e) {
         const errorLogPrefix = `There was an error in the framework installing spaceId-level resources and creating concrete indices for spaceId "${opts.spaceId}" - `;
         // Retry also failed
         this.options.logger.warn(
@@ -299,10 +302,6 @@ export class AIAssistantService {
             : `${errorLogPrefix}Original error: ${error}; Error after retry: ${retryResult.error}`
         );
         return null;
-      } else {
-        this.options.logger.info(
-          `Resource installation for "${opts.spaceId}" succeeded after retry`
-        );
       }
     }
   }
@@ -408,20 +407,25 @@ export class AIAssistantService {
   }
 
   public async getSpaceResourcesInitializationPromise(
-    spaceId: string | undefined = DEFAULT_NAMESPACE_STRING
+    spaceId: string | undefined = DEFAULT_NAMESPACE_STRING,
+    retried = false
   ): Promise<InitializationPromise> {
-    const result = await this.resourceInitializationHelper.getInitializedResources(spaceId);
-    // If the spaceId is unrecognized and spaceId is not the default, we
-    // need to kick off resource installation and return the promise
-    if (
-      result.error &&
-      result.error.includes(`Unrecognized spaceId`) &&
-      spaceId !== DEFAULT_NAMESPACE_STRING
-    ) {
-      this.resourceInitializationHelper.add(spaceId);
-      return this.resourceInitializationHelper.getInitializedResources(spaceId);
+    try {
+      const result = this.resourceInitializationHelper.getInitializedResources(spaceId);
+      return result;
+    } catch (err) {
+      // If the spaceId is unrecognized and spaceId is not the default, we
+      // need to kick off resource installation and return the promise
+      if (err.error && err.error.includes(`Unrecognized spaceId`) && !retried) {
+        this.resourceInitializationHelper.add(spaceId);
+        return this.getSpaceResourcesInitializationPromise(spaceId, true);
+      }
+
+      this.options.logger.error(
+        `Failed to initializing spaceId level resources for AIAssistantService ${err.message}`
+      );
+      return Promise.reject(err);
     }
-    return result;
   }
 
   private async installAndUpdateSpaceLevelResources(

@@ -94,7 +94,9 @@ describe('createResourceInstallationHelper', () => {
 
     await retryUntil('init fns run', async () => logger.info.mock.calls.length === 3);
 
-    expect(logger.info).toHaveBeenNthCalledWith(1, `commonInitPromise resolved`);
+    expect(logger.info).toHaveBeenNthCalledWith(1, `Adding spaceId test1`);
+    expect(logger.info).toHaveBeenNthCalledWith(2, `Adding spaceId test2`);
+    expect(logger.info).toHaveBeenNthCalledWith(3, `commonInitPromise resolved`);
     expect(await helper.getInitializedResources('test1')).toEqual({
       result: true,
     });
@@ -138,14 +140,11 @@ describe('createResourceInstallationHelper', () => {
 
     await retryUntil(
       'common init fns run',
-      async () => (await getContextInitialized(helper)) === false
+      async () => (await getContextInitialized(helper, '', 'test1')) === false
     );
 
     expect(logger.error).toHaveBeenCalledWith(`Error initializing resources test1 - fail`);
-    expect(await helper.getInitializedResources('test1')).toEqual({
-      result: false,
-      error: `fail`,
-    });
+    expect(await helper.getInitializedResources('test1')).toEqual(errorResult(`fail`));
   });
 
   test(`should retry using new common init function if specified`, async () => {

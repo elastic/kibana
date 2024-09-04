@@ -99,7 +99,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     setConversationSettings,
     setConversationsSettingsBulkActions,
     setUpdatedAssistantStreamingEnabled,
-  } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded, promptsLoaded);
+  } = useSettingsUpdater({ conversations, allPrompts, conversationsLoaded, promptsLoaded });
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
