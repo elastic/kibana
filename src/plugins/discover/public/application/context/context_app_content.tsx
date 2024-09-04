@@ -40,6 +40,7 @@ import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
+import { useProfileAccessor } from '../../context_awareness';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -159,6 +160,12 @@ export function ContextAppContent({
     [grid, setAppState]
   );
 
+  const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
+  const cellRenderers = useMemo(() => {
+    const getCellRenderers = getCellRenderersAccessor(() => ({}));
+    return getCellRenderers();
+  }, [getCellRenderersAccessor]);
+
   return (
     <Fragment>
       <WrapperWithPadding>
@@ -222,6 +229,7 @@ export function ContextAppContent({
               configHeaderRowHeight={3}
               settings={grid}
               onResize={onResize}
+              externalCustomRenderers={cellRenderers}
             />
           </CellActionsProvider>
         </div>

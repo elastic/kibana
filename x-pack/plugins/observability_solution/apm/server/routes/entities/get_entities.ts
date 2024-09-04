@@ -14,7 +14,7 @@ import {
 } from '../../../common/es_fields/apm';
 import { FIRST_SEEN, LAST_SEEN, ENTITY, ENTITY_TYPE } from '../../../common/es_fields/entities';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
+import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { getServiceEntitiesHistoryMetrics } from './get_service_entities_history_metrics';
 import { EntitiesRaw, EntityType, ServiceEntities } from './types';
 import { isFiniteNumber } from '../../../common/utils/is_finite_number';
