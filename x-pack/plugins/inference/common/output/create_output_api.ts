@@ -49,7 +49,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
           id,
           type: OutputEventType.OutputComplete,
           output:
-            'arguments' in event.toolCalls[0].function
+            event.toolCalls.length && 'arguments' in event.toolCalls[0].function
               ? event.toolCalls[0].function.arguments
               : undefined,
           content: event.content,
