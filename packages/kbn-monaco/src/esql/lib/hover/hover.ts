@@ -112,7 +112,7 @@ async function getHoverItemForFunction(
         value: `**${ACCEPTABLE_TYPES_HOVER}**: ${typesToSuggestNext
           .map(
             ({ type, constantOnly }) =>
-              `_${constantOnly ? 'constant ' : ''}**${type}**_` +
+              `${constantOnly ? '_constant_ ' : ''}**${type}**` +
               // If function arg is a constant date, helpfully suggest named time system params
               (constantOnly && type === 'date' ? ` | ${TIME_SYSTEM_PARAMS.join(' | ')}` : '')
           )
@@ -178,7 +178,6 @@ export async function getHoverItem(
           { value: fnDefinition.description },
         ]
       );
-      return hoverContent;
     }
   }
 
@@ -187,8 +186,8 @@ export async function getHoverItem(
       if (isSourceItem(astContext.node) && astContext.node.sourceType === 'policy') {
         const policyMetadata = await getPolicyMetadata(astContext.node.name);
         if (policyMetadata) {
-          return {
-            contents: [
+          hoverContent.contents.push(
+            ...[
               {
                 value: `${i18n.translate('monaco.esql.hover.policyIndexes', {
                   defaultMessage: '**Indexes**',
@@ -204,8 +203,8 @@ export async function getHoverItem(
                   defaultMessage: '**Fields**',
                 })}: ${policyMetadata.enrichFields.join(', ')}`,
               },
-            ],
-          };
+            ]
+          );
         }
       }
       if (isSettingItem(astContext.node)) {
@@ -215,17 +214,17 @@ export async function getHoverItem(
         );
         if (settingDef) {
           const mode = settingDef.values.find(({ name }) => name === astContext.node!.name)!;
-          return {
-            contents: [
+          hoverContent.contents.push(
+            ...[
               { value: settingDef.description },
               {
                 value: `**${mode.name}**: ${mode.description}`,
               },
-            ],
-          };
+            ]
+          );
         }
       }
     }
   }
-  return { contents: [] };
+  return hoverContent;
 }
