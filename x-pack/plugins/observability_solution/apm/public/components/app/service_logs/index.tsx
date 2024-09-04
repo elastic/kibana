@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { LogCategories } from '@kbn/observability-logs-overview';
+import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { CONTAINER_ID, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -19,11 +18,10 @@ import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 export function ServiceLogs() {
   const {
     services: {
-      charts,
       data: {
         search: { search },
       },
-      settings: uiSettings,
+      logsShared,
     },
   } = useKibana();
   const { serviceName } = useApmServiceContext();
@@ -31,22 +29,6 @@ export function ServiceLogs() {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useAnyOfApmParams('/services/{serviceName}/logs');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const logCategoriesDependencies = useMemo(
-    () => ({
-      charts,
-      search,
-      uiSettings,
-    }),
-    [charts, search, uiSettings]
-  );
-
-  // TODO: make charts required
-  if (typeof logCategoriesDependencies.charts === 'undefined') {
-    return null;
-  }
-
-  // const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   // const { data } = useFetcher(
   //   (callApmApi) => {
@@ -69,7 +51,14 @@ export function ServiceLogs() {
 
   // TODO: filter by service name and environment
   // TODO: filter by time
-  return <LogCategories dependencies={logCategoriesDependencies} />;
+  return (
+    <logsShared.LogsOverview
+      timeRange={{
+        start,
+        end,
+      }}
+    />
+  );
 
   // return (
   //   <LogStream

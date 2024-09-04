@@ -32,6 +32,7 @@ export const LogCategoriesLoadingContent: React.FC<LogCategoriesLoadingContentPr
         onCancel != null
           ? [
               <EuiButton
+                data-test-subj="o11yLogCategoriesLoadingContentButton"
                 onClick={() => {
                   onCancel();
                 }}

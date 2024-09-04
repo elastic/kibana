@@ -9,12 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { ISearchGeneric } from '@kbn/search-types';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import { useMachine } from '@xstate5/react';
-import React, { useCallback, useMemo } from 'react';
-import { LogsSourceConfiguration, normalizeLogsSource } from '../../../utils/logs_source';
+import React, { useCallback } from 'react';
 import {
   categorizeLogsService,
   createCategorizeLogsServiceImplementations,
 } from '../../services/categorize_logs_service';
+import { IndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 import { LogCategoriesLoadingContent } from './log_categories_loading_content';
 import {
   LogCategoriesResultContent,
@@ -23,7 +23,7 @@ import {
 
 export interface LogCategoriesProps {
   dependencies: LogCategoriesDependencies;
-  logsSource: LogsSourceConfiguration;
+  logsSource: IndexNameLogsSourceConfiguration;
   // The time range could be made optional if we want to support an internal
   // time range picker
   timeRange: {
@@ -41,24 +41,19 @@ export const LogCategories: React.FC<LogCategoriesProps> = ({
   logsSource,
   timeRange,
 }) => {
-  const categorizeLogsServiceInput = useMemo(() => {
-    const normalizedLogsSource = normalizeLogsSource(logsSource);
-    return {
-      index: normalizedLogsSource.indexName,
-      startTimestamp: timeRange.start,
-      endTimestamp: timeRange.end,
-      timeField: normalizedLogsSource.timestampField,
-      messageField: normalizedLogsSource.messageField,
-    };
-  }, [logsSource, timeRange.end, timeRange.start]);
-
   const [categorizeLogsServiceState, sendToCategorizeLogsService] = useMachine(
     categorizeLogsService.provide(
       createCategorizeLogsServiceImplementations({ search: dependencies.search })
     ),
     {
       inspect: consoleInspector,
-      input: categorizeLogsServiceInput,
+      input: {
+        index: logsSource.indexName,
+        startTimestamp: timeRange.start,
+        endTimestamp: timeRange.end,
+        timeField: logsSource.timestampField,
+        messageField: logsSource.messageField,
+      },
     }
   );
 

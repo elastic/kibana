@@ -70,6 +70,7 @@ import { from } from 'rxjs';
 import { map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { registerEmbeddables } from './embeddable/register_embeddables';
@@ -146,6 +147,7 @@ export interface ApmPluginStartDeps {
   metricsDataAccess: MetricsDataPluginStart;
   uiSettings: IUiSettingsClient;
   entityManager: EntityManagerPublicPluginSetup;
+  logsShared: LogsSharedClientStartExports;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {

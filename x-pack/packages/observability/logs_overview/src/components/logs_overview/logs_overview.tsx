@@ -5,16 +5,50 @@
  * 2.0.
  */
 
+import { type LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import React from 'react';
+import useAsync from 'react-use/lib/useAsync';
+import { LogsSourceConfiguration, normalizeLogsSource } from '../../utils/logs_source';
 import { LogCategories, LogCategoriesDependencies } from '../log_categories';
+import { LogsOverviewLoadingContent } from './logs_overview_loading_content';
 
 export interface LogsOverviewProps {
   dependencies: LogsOverviewDependencies;
+  logsSource?: LogsSourceConfiguration;
+  timeRange: {
+    start: string;
+    end: string;
+  };
 }
 
-export type LogsOverviewDependencies = LogCategoriesDependencies;
+export type LogsOverviewDependencies = LogCategoriesDependencies & {
+  logsDataAccess: LogsDataAccessPluginStart;
+};
 
-export const LogsOverview: React.FC<LogsOverviewProps> = ({ dependencies }) => {
-  // TODO: pass the right props
-  return <LogCategories dependencies={dependencies} />;
+export const LogsOverview: React.FC<LogsOverviewProps> = ({
+  dependencies,
+  logsSource = { type: 'shared_setting' },
+  timeRange,
+}) => {
+  const normalizedLogsSource = useAsync(
+    () => normalizeLogsSource({ logsDataAccess: dependencies.logsDataAccess })(logsSource),
+    [dependencies.logsDataAccess, logsSource]
+  );
+
+  if (normalizedLogsSource.loading) {
+    return <LogsOverviewLoadingContent />;
+  }
+
+  if (normalizedLogsSource.error != null || normalizedLogsSource.value == null) {
+    // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+    return <>Error</>;
+  }
+
+  return (
+    <LogCategories
+      dependencies={dependencies}
+      logsSource={normalizedLogsSource.value}
+      timeRange={timeRange}
+    />
+  );
 };

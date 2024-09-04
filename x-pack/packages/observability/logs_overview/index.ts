@@ -5,4 +5,14 @@
  * 2.0.
  */
 
-export { LogCategories } from './src/components/log_categories';
+export {
+  LogsOverview,
+  type LogsOverviewDependencies,
+  type LogsOverviewProps,
+} from './src/components/logs_overview';
+export type {
+  DataViewLogsSourceConfiguration,
+  IndexNameLogsSourceConfiguration,
+  LogsSourceConfiguration,
+  SharedSettingLogsSourceConfiguration,
+} from './src/utils/logs_source';
