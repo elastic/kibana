@@ -235,29 +235,6 @@ export type TSVBMetricModelCreator = (
   interval: string
 ) => TSVBMetricModel;
 
-export const isBasicMetricAgg = (
-  agg: unknown
-): agg is Record<string, undefined | Pick<estypes.AggregationsMetricAggregationBase, 'field'>> => {
-  if (agg === null || typeof agg !== 'object') return false;
-
-  return Object.values(agg).some(
-    (value) =>
-      value === undefined || 'field' in (value as estypes.AggregationsMetricAggregationBase)
-  );
-};
-
-export const isDerivativeAgg = (
-  agg: unknown
-): agg is Pick<estypes.AggregationsAggregationContainer, 'derivative'> => {
-  return !!(agg as estypes.AggregationsAggregationContainer).derivative;
-};
-
-export const isSumBucketAgg = (
-  agg: unknown
-): agg is Pick<estypes.AggregationsAggregationContainer, 'sum_bucket'> => {
-  return !!(agg as estypes.AggregationsAggregationContainer).sum_bucket;
-};
-
 export type MetricsUIAggregation = Record<string, estypes.AggregationsAggregate>;
 
 export const ESTermsWithAggregationRT = rt.type({
