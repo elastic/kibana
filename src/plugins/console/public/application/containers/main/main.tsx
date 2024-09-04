@@ -80,8 +80,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
   const consoleTourStepProps: ConsoleTourStepProps[] = getConsoleTourStepProps(
     tourStepProps,
     actions,
-    tourState,
-    currentView
+    tourState
   );
 
   const { done, error, retry } = useDataInit();
@@ -177,6 +176,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
                     closePopover={() => setIsHelpOpen(false)}
                     resetTour={() => {
                       setIsHelpOpen(false);
+                      dispatch({ type: 'setCurrentView', payload: SHELL_TAB_ID });
                       actions.resetTour();
                     }}
                   />
