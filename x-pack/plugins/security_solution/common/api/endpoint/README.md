@@ -50,6 +50,7 @@ yarn --cwd x-pack/plugins/security_solution openapi:generate
 ```shell
 yarn --cwd x-pack/plugins/security_solution openapi:generate openapi:bundle:endpoint-management
 ```
+4. Ensure that the newly generated files are commited to source
 
 
 
