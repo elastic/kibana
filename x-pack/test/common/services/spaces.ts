@@ -29,7 +29,10 @@ interface SpaceCreate {
 export function SpacesServiceProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
+  const kibanaServer = getService('kibanaServer');
   const url = formatUrl(config.get('servers.kibana'));
+  // used often in fleet_api_integration tests
+  const TEST_SPACE_1 = 'test1';
 
   const certificateAuthorities = config.get('servers.kibana.certificateAuthorities');
   const httpsAgent: Https.Agent | undefined = certificateAuthorities
@@ -108,6 +111,22 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
         port,
         pathname: `/s/${spaceId}`,
       });
+    }
+
+    public getDefaultTestSpace() {
+      return TEST_SPACE_1;
+    }
+
+    public async createTestSpace(id: string, name: string = id) {
+      try {
+        await kibanaServer.spaces.create({
+          id,
+          name,
+        });
+      } catch (err) {
+        log.error(`failed to create space with 'id=${id}': ${err}`);
+      }
+      return id;
     }
   })();
 }

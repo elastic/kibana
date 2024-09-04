@@ -105,6 +105,10 @@ export interface VisualizeServices extends CoreStart {
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
   setActiveUrl: (newUrl: string) => void;
+  /** @deprecated
+   * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
+   * used within the visualize editor.
+   */
   createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject>;
   restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory;
