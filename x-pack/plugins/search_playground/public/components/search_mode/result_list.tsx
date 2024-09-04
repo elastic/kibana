@@ -72,7 +72,7 @@ export const ResultList: React.FC<ResultListArgs> = ({
                   <EuiFlexItem grow>
                     <EuiText size="s">
                       <p>
-                        {i18n.translate('x-pack.searchPlayground.resultList.result.score', {
+                        {i18n.translate('xpack.searchPlayground.resultList.result.score', {
                           defaultMessage: 'Document score: {score}',
                           values: { score: item._score },
                         })}
