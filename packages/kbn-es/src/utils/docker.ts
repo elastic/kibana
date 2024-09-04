@@ -27,6 +27,7 @@ import {
   createMockIdpMetadata,
 } from '@kbn/mock-idp-utils';
 
+import { extractAndArchiveLogs } from './extract_and_archive_logs';
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
@@ -443,7 +444,7 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
 
   try {
     if (ARCHIVE_LOGS) {
-      await archiveLogs(log);
+      await extractAndArchiveLogs({ log, nodeNames: SERVERLESS_NODES.map(({ name }) => name) });
     }
 
     const { stdout } = await execa('docker', ['container', 'prune', '--force']);
@@ -478,21 +479,6 @@ export async function detectRunningNodes(
     }
   } else {
     log.info('No running nodes detected.');
-  }
-}
-
-async function archiveLogs(log: ToolingLog) {
-  for (const { name } of SERVERLESS_NODES) {
-    const { stdout: nodeId } = await execa('docker', [
-      'ps',
-      '-a',
-      '--quiet',
-      '--filter',
-      `name=${name}`,
-    ]);
-    const { stdout } = await execa('docker', ['logs', name]);
-    await Fsp.writeFile(`${name}-${nodeId}.log`, stdout);
-    log.info(`Archived logs for ${name} to ${name}-${nodeId}.log`);
   }
 }
 
@@ -876,7 +862,9 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');
     await readyPromise.catch(async (e) => {
-      await archiveLogs(log);
+      if (ARCHIVE_LOGS) {
+        await extractAndArchiveLogs({ log, nodeNames: SERVERLESS_NODES.map(({ name }) => name) });
+      }
       throw e;
     });
     if (!options.esArgs || !options.esArgs.includes('xpack.security.enabled=false')) {
