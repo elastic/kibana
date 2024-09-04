@@ -55,5 +55,6 @@
     "@kbn/rule-data-utils",
     "@kbn/shared-ux-router",
     "@kbn/investigation-shared",
+    "@kbn/core-security-common",
   ],
 }

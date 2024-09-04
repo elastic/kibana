@@ -9,7 +9,8 @@ import type { TimeRange } from '@kbn/data-plugin/common/query/timefilter/types';
 import type { CombinedJob, Datafeed, Job } from '../../../common/types/anomaly_detection_jobs';
 import type { Calendar } from '../../../common/types/calendars';
 import type { ToastNotificationService } from './toast_notification_service';
-import type { MlApiServices } from './ml_api_service';
+import type { MlApi } from './ml_api_service';
+import type { JobCreatorType } from '../jobs/new_job/common/job_creator';
 
 export interface ExistingJobsAndGroups {
   jobIds: string[];
@@ -40,16 +41,28 @@ export declare interface MlJobService {
     start: number | undefined,
     end: number | undefined
   ): Promise<any>;
+  forceStartDatafeeds(
+    dIds: string[],
+    start: number | undefined,
+    end: number | undefined
+  ): Promise<any>;
   createResultsUrl(jobId: string[], start: number, end: number, location: string): string;
   getJobAndGroupIds(): Promise<ExistingJobsAndGroups>;
   getJob(jobId: string): CombinedJob;
   loadJobsWrapper(): Promise<CombinedJob[]>;
   customUrlsByJob: Record<string, any[]>;
   detectorsByJob: Record<string, any>;
+  stashJobForCloning(
+    jobCreator: JobCreatorType,
+    skipTimeRangeStep: boolean = false,
+    includeTimeRange: boolean = false,
+    autoSetTimeRange: boolean = false
+  ): void;
 }
 
-export const mlJobService: MlJobService;
 export const mlJobServiceFactory: (
-  toastNotificationServiceOverride?: ToastNotificationService,
-  mlOverride?: MlApiServices
+  toastNotificationService: ToastNotificationService,
+  mlApi: MlApi
 ) => MlJobService;
+
+export const useMlJobService: () => MlJobService;

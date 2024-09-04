@@ -5,7 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ESQLSource, ESQLFunction, ESQLColumn, ESQLSingleAstItem } from '@kbn/esql-ast';
+import type {
+  ESQLSource,
+  ESQLFunction,
+  ESQLColumn,
+  ESQLSingleAstItem,
+  ESQLCommandOption,
+} from '@kbn/esql-ast';
 import { getAstAndSyntaxErrors, Walker, walk } from '@kbn/esql-ast';
 
 const DEFAULT_ESQL_LIMIT = 1000;
@@ -104,4 +110,15 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   }) as ESQLColumn;
 
   return column?.name;
+};
+
+export const retieveMetadataColumns = (esql: string): string[] => {
+  const { ast } = getAstAndSyntaxErrors(esql);
+  const options: ESQLCommandOption[] = [];
+
+  walk(ast, {
+    visitCommandOption: (node) => options.push(node),
+  });
+  const metadataOptions = options.find(({ name }) => name === 'metadata');
+  return metadataOptions?.args.map((column) => (column as ESQLColumn).name) ?? [];
 };

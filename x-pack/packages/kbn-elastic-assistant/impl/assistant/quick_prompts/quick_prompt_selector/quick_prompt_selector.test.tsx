@@ -17,6 +17,7 @@ const testProps = {
   selectedQuickPrompt: MOCK_QUICK_PROMPTS[0],
   onQuickPromptDeleted,
   onQuickPromptSelectionChange,
+  selectedColor: '#D36086',
 };
 
 describe('QuickPromptSelector', () => {
@@ -28,7 +29,10 @@ describe('QuickPromptSelector', () => {
     expect(getByTestId('euiComboBoxPill')).toHaveTextContent(MOCK_QUICK_PROMPTS[0].name);
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
     fireEvent.click(getByTestId(MOCK_QUICK_PROMPTS[1].name));
-    expect(onQuickPromptSelectionChange).toHaveBeenCalledWith(MOCK_QUICK_PROMPTS[1]);
+    expect(onQuickPromptSelectionChange).toHaveBeenCalledWith(
+      MOCK_QUICK_PROMPTS[1],
+      testProps.selectedColor
+    );
   });
   it('Only custom option can be deleted', () => {
     const { getByTestId } = render(<QuickPromptSelector {...testProps} />);
@@ -46,14 +50,17 @@ describe('QuickPromptSelector', () => {
       code: 'Enter',
       charCode: 13,
     });
-    expect(onQuickPromptSelectionChange).toHaveBeenCalledWith({
-      categories: [],
-      color: '#D36086',
-      content: 'quickly prompt please',
-      id: 'A_CUSTOM_OPTION',
-      name: 'A_CUSTOM_OPTION',
-      promptType: 'quick',
-    });
+    expect(onQuickPromptSelectionChange).toHaveBeenCalledWith(
+      {
+        categories: [],
+        color: '#D36086',
+        content: 'quickly prompt please',
+        id: 'A_CUSTOM_OPTION',
+        name: 'A_CUSTOM_OPTION',
+        promptType: 'quick',
+      },
+      testProps.selectedColor
+    );
   });
   it('Reset settings every time before selecting an system prompt from the input if resetSettings is provided', () => {
     const mockResetSettings = jest.fn();
@@ -80,6 +87,9 @@ describe('QuickPromptSelector', () => {
       code: 'Enter',
       charCode: 13,
     });
-    expect(onQuickPromptSelectionChange).toHaveBeenCalledWith(customOption);
+    expect(onQuickPromptSelectionChange).toHaveBeenCalledWith(
+      customOption,
+      testProps.selectedColor
+    );
   });
 });

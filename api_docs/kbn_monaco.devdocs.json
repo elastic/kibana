@@ -1186,45 +1186,6 @@
             "path": "packages/kbn-monaco/src/console/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ParsedRequest.method",
-            "type": "string",
-            "tags": [],
-            "label": "method",
-            "description": [],
-            "path": "packages/kbn-monaco/src/console/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ParsedRequest.url",
-            "type": "string",
-            "tags": [],
-            "label": "url",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-monaco/src/console/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ParsedRequest.data",
-            "type": "Array",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              "Record<string, unknown>[] | undefined"
-            ],
-            "path": "packages/kbn-monaco/src/console/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

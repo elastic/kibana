@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 
+import type { DeepPartial } from '@kbn/utility-types';
 import type { NewJobCapsResponse } from '@kbn/ml-anomaly-utils';
 import type {
   AnalyticsMapReturnType,
@@ -21,7 +22,6 @@ import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
 import type { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
-import type { DeepPartial } from '../../../../common/types/common';
 import type { JobMessage } from '../../../../common/types/audit_message';
 import type { PutDataFrameAnalyticsResponseSchema } from '../../../../server/routes/schemas/data_frame_analytics_schema';
 

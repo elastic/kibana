@@ -46,8 +46,8 @@ const TitleWithPopoverMessage = ({
   embeddableId: string;
 }) => {
   return (
-    <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
-      <EuiFlexGroup alignItems="center" gutterSize="xs">
+    <EuiFormLabel htmlFor={embeddableId}>
+      <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
         <EuiFlexItem grow={false}>{title}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <Popover>{helpMessage}</Popover>
@@ -62,8 +62,6 @@ export const ControlTitle = ({ title, embeddableId }: { title?: string; embeddab
   return helpMessage ? (
     <TitleWithPopoverMessage title={title} helpMessage={helpMessage} embeddableId={embeddableId} />
   ) : (
-    <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
-      {title}
-    </EuiFormLabel>
+    <EuiFormLabel htmlFor={embeddableId}>{title}</EuiFormLabel>
   );
 };

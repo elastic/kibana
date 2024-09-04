@@ -259,6 +259,7 @@ export class TaskManagerPlugin
       savedObjectsRepository,
       logger: this.logger,
       currentNode: this.taskManagerId!,
+      config: this.config.discovery,
     });
 
     if (this.shouldRunBackgroundTasks) {
@@ -315,7 +316,12 @@ export class TaskManagerPlugin
         excludedTypes: new Set(this.config.unsafe.exclude_task_types),
       });
 
-      const taskPartitioner = new TaskPartitioner(this.taskManagerId!, this.kibanaDiscoveryService);
+      const taskPartitioner = new TaskPartitioner({
+        podName: this.taskManagerId!,
+        kibanaDiscoveryService: this.kibanaDiscoveryService,
+        kibanasPerPartition: this.config.kibanas_per_partition,
+      });
+
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -395,9 +401,13 @@ export class TaskManagerPlugin
     };
   }
 
-  public stop() {
+  public async stop() {
     if (this.kibanaDiscoveryService?.isStarted()) {
-      this.kibanaDiscoveryService.deleteCurrentNode().catch(() => {});
+      try {
+        await this.kibanaDiscoveryService.deleteCurrentNode();
+      } catch (e) {
+        this.logger.error(`Deleting current node has failed. error: ${e.message}`);
+      }
     }
   }
 }
