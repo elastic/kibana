@@ -495,10 +495,10 @@ describe('UnifiedDataTable', () => {
           'message_8',
           'message_9',
         ]);
-        userEvent.click(getButton('message'));
+        await userEvent.click(getButton('message'));
         // Column sort button incorrectly renders as "Sort " instead
         // of "Sort Z-A" in Jest tests, so we need to find it by index
-        userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], {
+        await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], {
           pointerEventsCheck: 0,
         });
         await waitFor(() => {
@@ -542,10 +542,10 @@ describe('UnifiedDataTable', () => {
           'message_8',
           'message_9',
         ]);
-        userEvent.click(getButton('message'));
+        await userEvent.click(getButton('message'));
         // Column sort button incorrectly renders as "Sort " instead
         // of "Sort Z-A" in Jest tests, so we need to find it by index
-        userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], {
+        await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], {
           pointerEventsCheck: 0,
         });
         await waitFor(() => {
