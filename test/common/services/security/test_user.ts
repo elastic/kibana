@@ -58,7 +58,7 @@ export class TestUser extends FtrService {
      * roles available so that more tests can be run successfully
      */
     if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
-      log.debug(
+      this.log.debug(
         `FTR is running in FIPS mode and does not allow for Test User's roles to be overridden`
       );
       return;
