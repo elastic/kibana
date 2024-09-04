@@ -232,6 +232,7 @@ export const OverviewGrid = memo(() => {
         <EuiSpacer size="m" />
       </div>
       {groupField === 'none' &&
+        loaded &&
         // display this footer when user scrolls to end of list
         currentIndex * ROW_COUNT + ROW_COUNT >= monitorsSortedByStatus.length && (
           <>
