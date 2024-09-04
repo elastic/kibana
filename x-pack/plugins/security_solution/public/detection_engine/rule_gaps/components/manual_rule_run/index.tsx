@@ -127,7 +127,6 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
         iconType="warning"
         title={i18n.MANUAL_RULE_RUN_NOTIFIACTIONS_LIMITATIONS}
       />
-
     </EuiConfirmModal>
   );
 };

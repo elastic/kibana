@@ -69,7 +69,6 @@ export const MANUAL_RULE_RUN_START_DATE_OUT_OF_RANGE_ERROR = (maxDaysLookback: n
       'Manual rule run cannot be scheduled earlier than {maxDaysLookback, plural, =1 {# day} other {# days}} ago',
   });
 
-
 export const MANUAL_RULE_RUN_NOTIFIACTIONS_LIMITATIONS = i18n.translate(
   'xpack.securitySolution.manualRuleRun.notificationsLimitations',
   {
