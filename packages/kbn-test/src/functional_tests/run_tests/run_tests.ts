@@ -14,7 +14,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
 import { applyFipsOverrides } from '../lib/fips_overrides';
-import { readConfigFile } from '../../functional_test_runner';
+import { Config, readConfigFile } from '../../functional_test_runner';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
@@ -68,15 +68,15 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         log.write(`--- [${progress}] Running ${Path.relative(REPO_ROOT, path)}`);
       }
 
-      let config;
+      let config: Config;
       if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
-        config = await readConfigFile(log, options.esVersion, options.config, {});
+        config = await readConfigFile(log, options.esVersion, options.config, settingOverrides);
       } else {
         config = await readConfigFile(
           log,
           options.esVersion,
           options.config,
-          {},
+          settingOverrides,
           applyFipsOverrides
         );
       }

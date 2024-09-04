@@ -16,7 +16,7 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { applyFipsOverrides } from '../lib/fips_overrides';
-import { readConfigFile } from '../../functional_test_runner';
+import { Config, readConfigFile } from '../../functional_test_runner';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
 import { StartServerOptions } from './flags';
@@ -28,7 +28,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
   const reportTime = getTimeReporter(log, 'scripts/functional_tests_server');
 
   await withProcRunner(log, async (procs) => {
-    let config;
+    let config: Config;
     if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
       config = await readConfigFile(log, options.esVersion, options.config, {});
     } else {
