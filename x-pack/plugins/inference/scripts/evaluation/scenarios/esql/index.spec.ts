@@ -49,9 +49,9 @@ const callNaturalLanguageToEsql = async (question: string) => {
 const expectedQueryCriteria = (expected: string) => {
   return `The answer provides a ES|QL query that is functionally equivalent to:
 
-          """esql
+          \`\`\`esql
           ${expected}
-          """
+          \`\`\`
 
           It's OK if column names are slightly different, or if the used functions or operators are different,
           as long as the expected end result is the same.`;

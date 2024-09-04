@@ -137,6 +137,15 @@ function runEvaluations() {
             ],
           };
 
+          // avoid glitches in the table rendering
+          const sanitize = (text: string) => {
+            return text
+              .replace(/^ +/gm, '')
+              .replace(/ +$/gm, '')
+              .replace(/^\n+/g, '')
+              .replace(/\n+$/g, '');
+          };
+
           const results: EvaluationResult[] = [];
           const failedScenarios: string[][] = [
             ['Failed Tests', '', ''],
@@ -146,15 +155,15 @@ function runEvaluations() {
           evaluationClient.onResult((result) => {
             results.push(result);
             log.debug(`Result:`, JSON.stringify(result));
-            const output: string[][] = [[result.input, '', ''], ['', '', ''], ...header];
+            const output: string[][] = [[sanitize(result.input), '', ''], ['', '', ''], ...header];
 
             result.scores.forEach((score) => {
               output.push([
-                score.criterion,
+                sanitize(score.criterion),
                 score.score < 1
                   ? chalk.redBright(String(score.score))
                   : chalk.greenBright(String(score.score)),
-                score.reasoning,
+                sanitize(score.reasoning),
               ]);
             });
 
@@ -164,7 +173,9 @@ function runEvaluations() {
             const failedResults = result.scores.filter((score) => score.score < 1).length;
 
             if (failedResults / totalResults > 0) {
-              const reasoningConcat = result.scores.map((score) => score.reasoning).join(' ');
+              const reasoningConcat = result.scores
+                .map((score) => sanitize(score.reasoning))
+                .join(' ');
               failedScenarios.push([
                 `${result.name}`,
                 `Average score ${Math.round(
@@ -244,10 +255,9 @@ function runEvaluations() {
             );
 
             log.write('-------------------------------------------');
-            log.write(`Model ${connector.connectorId} Scores per Category`);
+            log.write(`Model ${connector.connectorId} scores per category`);
             Object.entries(scoresByCategory).forEach(([category, { score, total }]) => {
-              log.write('-------------------------');
-              log.write(`Category: ${category} - Scored ${score} out of ${total}`);
+              log.write(`- category: ${category} - scored ${score} out of ${total}`);
             });
             log.write('-------------------------------------------');
           });
