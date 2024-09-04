@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getConsoleTourStepProps } from './get_console_tour_step_props';
 import { useServicesContext } from '../../contexts';
 import { MAIN_PANEL_LABELS } from './i18n';
@@ -62,7 +63,10 @@ export function Main({ isEmbeddable = false }: MainProps) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
 
-  const { docLinks } = useServicesContext();
+  const {
+    docLinks,
+    services: { notifications },
+  } = useServicesContext();
 
   const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
   const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
@@ -95,6 +99,42 @@ export function Main({ isEmbeddable = false }: MainProps) {
       document.querySelector('#consoleRoot')?.requestFullscreen();
     } else {
       document.exitFullscreen();
+    }
+  };
+
+  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    const file = files && files[0];
+    // Clear the input value so that a file can be imported again
+    event.target.value = '';
+
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const fileContent = e?.target?.result;
+
+        if (fileContent) {
+          dispatch({
+            type: 'setFileToImport',
+            payload: fileContent as string,
+          });
+
+          notifications.toasts.addSuccess(
+            i18n.translate('console.notification.error.fileImportedSuccessfully', {
+              defaultMessage: `The file you selected has been imported successfully.`,
+            })
+          );
+        } else {
+          notifications.toasts.add(
+            i18n.translate('console.notification.error.fileImportNoContent', {
+              defaultMessage: `The file you selected doesn't appear to have any content. Please select a different file.`,
+            })
+          );
+        }
+      };
+
+      reader.readAsText(file);
     }
   };
 
@@ -154,13 +194,25 @@ export function Main({ isEmbeddable = false }: MainProps) {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
-                    <NavIconButton
-                      iconType="save"
-                      onClick={() => {}}
-                      ariaLabel={MAIN_PANEL_LABELS.importExportButton}
-                      dataTestSubj="consoleImportExportButton"
-                      toolTipContent={MAIN_PANEL_LABELS.importExportButton}
-                    />
+                    <>
+                      <EuiButtonEmpty
+                        iconType="importAction"
+                        onClick={() => document.getElementById('importConsoleFile')?.click()}
+                        size="xs"
+                        data-test-subj="consoleImportButton"
+                      >
+                        {MAIN_PANEL_LABELS.importButton}
+                      </EuiButtonEmpty>
+                      {/* This input is hidden by CSS in the UI, but the NavIcon button activates it */}
+                      <input
+                        type="file"
+                        accept="text/*"
+                        multiple={false}
+                        name="consoleSnippets"
+                        id="importConsoleFile"
+                        onChange={onFileChange}
+                      />
+                    </>
                   </ConsoleTourStep>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

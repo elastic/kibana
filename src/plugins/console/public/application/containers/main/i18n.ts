@@ -12,8 +12,8 @@ export const MAIN_PANEL_LABELS = {
   consolePageHeading: i18n.translate('console.pageHeading', {
     defaultMessage: 'Console',
   }),
-  importExportButton: i18n.translate('console.importExportButtonLabel', {
-    defaultMessage: 'Import/Export',
+  importButton: i18n.translate('console.importButtonLabel', {
+    defaultMessage: 'Import',
   }),
   helpButton: i18n.translate('console.helpButtonTooltipContent', {
     defaultMessage: 'Help',
