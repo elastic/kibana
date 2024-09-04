@@ -1338,6 +1338,7 @@ async function getFunctionArgsSuggestions(
     fnDefinition.type !== 'builtin' &&
     !alreadyHasComma &&
     !shouldBeBooleanCondition;
+  const shouldAdvanceCursor = hasMoreMandatoryArgs && fnDefinition.type !== 'builtin';
 
   const suggestedConstants = uniq(
     typesToSuggestNext
@@ -1437,8 +1438,8 @@ async function getFunctionArgsSuggestions(
           [],
           {
             addComma: shouldAddComma,
-            advanceCursor: shouldAddComma,
-            openSuggestions: shouldAddComma,
+            advanceCursor: shouldAdvanceCursor,
+            openSuggestions: shouldAdvanceCursor,
           }
         ),
         true
@@ -1492,6 +1493,7 @@ async function getFunctionArgsSuggestions(
           text: name + ' ',
           kind: 'Function' as ItemKind,
           detail: description,
+          command: TRIGGER_SUGGESTION_COMMAND,
         }))
       );
     }
