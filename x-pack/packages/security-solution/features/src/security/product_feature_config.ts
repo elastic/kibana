@@ -79,7 +79,7 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
 
   [ProductFeatureSecurityKey.endpointArtifactManagement]: {
     subFeatureIds: [
-      SecuritySubFeatureId.hostIsolationExceptions,
+      SecuritySubFeatureId.hostIsolationExceptionsBasic,
       SecuritySubFeatureId.trustedApplications,
       SecuritySubFeatureId.blocklist,
       SecuritySubFeatureId.eventFilters,
@@ -89,7 +89,6 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
   // Endpoint Complete Tier:
   // Allows access to create/update HIEs
   [ProductFeatureSecurityKey.endpointHostIsolationExceptions]: {
-    subFeatureIds: [SecuritySubFeatureId.hostIsolationExceptions],
     subFeaturesPrivileges: [
       {
         id: 'host_isolation_exceptions_all',

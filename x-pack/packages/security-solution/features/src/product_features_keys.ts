@@ -126,7 +126,7 @@ export enum SecuritySubFeatureId {
   endpointList = 'endpointListSubFeature',
   endpointExceptions = 'endpointExceptionsSubFeature',
   trustedApplications = 'trustedApplicationsSubFeature',
-  hostIsolationExceptions = 'hostIsolationExceptionsSubFeature',
+  hostIsolationExceptionsBasic = 'hostIsolationExceptionsSubFeature',
   blocklist = 'blocklistSubFeature',
   eventFilters = 'eventFiltersSubFeature',
   policyManagement = 'policyManagementSubFeature',
