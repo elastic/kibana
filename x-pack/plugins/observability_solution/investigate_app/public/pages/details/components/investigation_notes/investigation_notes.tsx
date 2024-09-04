@@ -54,8 +54,8 @@ export function InvestigationNotes({ investigation, user }: Props) {
       <EuiSplitPanel.Inner className={panelClassName}>
         <EuiTitle size="xs">
           <h2>
-            {i18n.translate('xpack.investigateApp.investigationNotes.investigationTimelineHeader', {
-              defaultMessage: 'Investigation timeline',
+            {i18n.translate('xpack.investigateApp.investigationNotes.header', {
+              defaultMessage: 'Notes',
             })}
           </h2>
         </EuiTitle>
