@@ -468,6 +468,7 @@
       "reviewers": ["team:kibana-cloud-security-posture"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
