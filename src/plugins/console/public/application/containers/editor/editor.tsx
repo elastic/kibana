@@ -85,16 +85,17 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
   // Always keep the currentTextObject in sync with the value in the editor
   // to avoid losing the text object when the user navigates away from the shell
   useEffect(() => {
-    // Only update the currentTextObject if the value has changed and is not empty
-    // This is to avoid setting the currentTextObject to the example text when
-    // the user clears the editor.
-    const textObject = {
-      ...currentTextObject,
-      text: inputEditorValue,
-      updatedAt: Date.now(),
-    } as TextObject;
+    // Only update when its not empty, this is to avoid setting the currentTextObject
+    // to the example text when the user clears the editor.
+    if (inputEditorValue !== '') {
+      const textObject = {
+        ...currentTextObject,
+        text: inputEditorValue,
+        updatedAt: Date.now(),
+      } as TextObject;
 
-    debouncedUpdateLocalStorageValue(textObject);
+      debouncedUpdateLocalStorageValue(textObject);
+    }
   }, [inputEditorValue, debouncedUpdateLocalStorageValue]);
 
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
