@@ -350,10 +350,10 @@ describe('Data Streams tab', () => {
       ]);
     });
 
-    test('shows last updated and storage size if enableSizeAndDocCount===false', async () => {
+    test('shows last updated and storage size if enableDataStreamStats===true', async () => {
       testBed = await setup(httpSetup, {
         config: {
-          enableSizeAndDocCount: false,
+          enableDataStreamStats: true,
         },
       });
 

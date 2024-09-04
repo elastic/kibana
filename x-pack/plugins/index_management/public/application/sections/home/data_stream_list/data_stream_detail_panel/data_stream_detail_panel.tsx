@@ -262,7 +262,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           dataTestSubj: 'meteringStorageSizeDetail',
         }
       );
-    } else if (config.enableDataStreamStats) {
+    }
+    if (config.enableDataStreamStats) {
       defaultDetails.push(
         {
           name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampTitle', {
