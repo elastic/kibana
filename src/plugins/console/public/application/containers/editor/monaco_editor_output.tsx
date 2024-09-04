@@ -27,16 +27,15 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { CONSOLE_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
-import { getStatusCodeDecorations } from './utils';
-import { useEditorReadContext, useRequestReadContext, useServicesContext } from '../../../contexts';
-import { convertMapboxVectorTileToJson } from '../legacy/console_editor/mapbox_vector_tile';
-import { MonacoEditorOutputActionsProvider } from './monaco_editor_output_actions_provider';
 import {
+  getStatusCodeDecorations,
   isJSONContentType,
   isMapboxVectorTile,
   safeExpandLiteralStrings,
   languageForContentType,
-} from '../utilities';
+} from './utils';
+import { useEditorReadContext, useRequestReadContext, useServicesContext } from '../../contexts';
+import { MonacoEditorOutputActionsProvider } from './monaco_editor_output_actions_provider';
 import { useResizeCheckerUtils } from './hooks';
 
 export const MonacoEditorOutput: FunctionComponent = () => {

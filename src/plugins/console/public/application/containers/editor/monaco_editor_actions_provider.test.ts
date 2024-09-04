@@ -28,7 +28,7 @@ jest.mock('@kbn/monaco', () => {
   };
 });
 
-jest.mock('../../../../services', () => {
+jest.mock('../../../services', () => {
   return {
     getStorage: () => ({
       get: () => [],
@@ -39,7 +39,7 @@ jest.mock('../../../../services', () => {
   };
 });
 
-jest.mock('../../../../lib/autocomplete/engine', () => {
+jest.mock('../../../lib/autocomplete/engine', () => {
   return {
     populateContext: (...args: any) => {
       mockPopulateContext(args);

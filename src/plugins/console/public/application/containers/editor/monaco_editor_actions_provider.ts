@@ -12,11 +12,11 @@ import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { isQuotaExceededError } from '../../../../services/history';
-import { DEFAULT_VARIABLES } from '../../../../../common/constants';
-import { getStorage, StorageKeys } from '../../../../services';
-import { sendRequest } from '../../../hooks';
-import { Actions } from '../../../stores/request';
+import { isQuotaExceededError } from '../../../services/history';
+import { DEFAULT_VARIABLES } from '../../../../common/constants';
+import { getStorage, StorageKeys } from '../../../services';
+import { sendRequest } from '../../hooks';
+import { Actions } from '../../stores/request';
 
 import {
   AutocompleteType,
@@ -39,9 +39,9 @@ import {
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
-import { type RequestToRestore, RestoreMethod } from '../../../../types';
-import { StorageQuotaError } from '../../../components/storage_quota_error';
-import { ContextValue } from '../../../contexts';
+import { type RequestToRestore, RestoreMethod } from '../../../types';
+import { StorageQuotaError } from '../../components/storage_quota_error';
+import { ContextValue } from '../../contexts';
 import { containsComments, indentData } from './utils/requests_utils';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';

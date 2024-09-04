@@ -12,14 +12,14 @@ import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import { useSetInputEditor } from '../../../hooks';
+import { useSetInputEditor } from '../../hooks';
 import { ContextMenu } from './components';
 import {
   useServicesContext,
   useEditorReadContext,
   useRequestActionContext,
   useEditorActionContext,
-} from '../../../contexts';
+} from '../../contexts';
 import {
   useSetInitialValue,
   useSetupAutocompletePolling,

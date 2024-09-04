@@ -30,8 +30,7 @@ const schemaLatest = schema.object(
       endpointsAvailability: schema.oneOf([schema.literal('stack'), schema.literal('serverless')], {
         defaultValue: 'stack',
       }),
-    }),
-    dev: schema.object({ enableMonaco: schema.boolean({ defaultValue: true }) }),
+    })
   },
   { defaultValue: undefined }
 );

@@ -26,7 +26,6 @@ import {
   NetworkRequestStatusBar,
 } from '../../components';
 import { Panel, PanelsContainer } from '..';
-import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
 import {
   useEditorReadContext,
@@ -36,7 +35,8 @@ import {
   useEditorActionContext,
 } from '../../contexts';
 import type { SenseEditor } from '../../models';
-import { MonacoEditor, MonacoEditorOutput } from './monaco';
+import { MonacoEditor } from './monaco_editor';
+import { MonacoEditorOutput } from './monaco_editor_output';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
 const DEBOUNCE_DELAY = 500;
@@ -51,7 +51,6 @@ interface Props {
 export const Editor = memo(({ loading, setEditorInstance }: Props) => {
   const {
     services: { storage },
-    config: { isMonacoEnabled } = {},
   } = useServicesContext();
 
   const { currentTextObject } = useEditorReadContext();
@@ -133,16 +132,11 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
             <EuiSplitPanel.Inner paddingSize="none">
               {loading ? (
                 <EditorContentSpinner />
-              ) : isMonacoEnabled ? (
+              ) : (
                 <MonacoEditor
                   localStorageValue={currentTextObject.text}
                   value={inputEditorValue}
                   setValue={setInputEditorValue}
-                />
-              ) : (
-                <EditorUI
-                  initialTextValue={currentTextObject.text}
-                  setEditorInstance={setEditorInstance}
                 />
               )}
             </EuiSplitPanel.Inner>
@@ -176,11 +170,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
           <EuiSplitPanel.Outer grow borderRadius="none" hasShadow={false}>
             <EuiSplitPanel.Inner paddingSize="none" css={{ alignContent: 'center' }}>
               {data ? (
-                isMonacoEnabled ? (
-                  <MonacoEditorOutput />
-                ) : (
-                  <EditorOutput />
-                )
+                <MonacoEditorOutput />
               ) : isLoading ? (
                 <EditorContentSpinner />
               ) : (
