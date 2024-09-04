@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { run } from '@kbn/dev-cli-runner';
 import { ESQLMessage, EditorError, getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import $, { load } from 'cheerio';
-import { SingleBar } from 'cli-progress';
 import FastGlob from 'fast-glob';
 import Fs from 'fs/promises';
-import { compact, once, partition } from 'lodash';
+import { compact, partition } from 'lodash';
 import pLimit from 'p-limit';
 import Path from 'path';
-import git, { SimpleGitProgressEvent } from 'simple-git';
 import yargs, { Argv } from 'yargs';
 import { lastValueFrom } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -25,6 +24,7 @@ import { getServiceUrls } from '../util/get_service_urls';
 import { KibanaClient } from '../util/kibana_client';
 import { selectConnector } from '../util/select_connector';
 import { extractSections } from './extract_sections';
+import { syncBuiltDocs } from './built-docs';
 
 yargs(process.argv.slice(2))
   .command(
@@ -63,86 +63,33 @@ yargs(process.argv.slice(2))
           const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl);
 
           const connectors = await kibanaClient.getConnectors();
-
           if (!connectors.length) {
             throw new Error('No connectors found');
           }
-
           const connector = await selectConnector({
             connectors,
             preferredId: argv.connectorId,
             log,
           });
+          log.info(`Using connector ${connector.connectorId}`);
 
           const chatClient = kibanaClient.createInferenceClient({
             connectorId: connector.connectorId,
           });
 
-          log.info(`Using connector ${connector.connectorId}`);
-
           const builtDocsDir = Path.join(REPO_ROOT, '../built-docs');
+          log.info(`Looking in ${builtDocsDir} for built-docs repository`);
 
-          log.debug(`Looking in ${builtDocsDir} for built-docs repository`);
-
-          const dirExists = await Fs.stat(builtDocsDir);
-
-          const getProgressHandler = () => {
-            let stage: string = '';
-            let method: string = '';
-            const loader: SingleBar = new SingleBar({
-              barsize: 25,
-              format: `{phase} {bar} {percentage}%`,
-            });
-
-            const start = once(() => {
-              loader.start(100, 0, { phase: 'initializing' });
-            });
-
-            return {
-              progress: (event: SimpleGitProgressEvent) => {
-                start();
-                if (event.stage !== stage || event.method !== method) {
-                  stage = event.stage;
-                  method = event.method;
-                }
-                loader.update(event.progress, { phase: event.method + '/' + event.stage });
-              },
-              stop: () => loader.stop(),
-            };
-          };
-
-          if (!dirExists) {
-            log.info('Cloning built-docs repo. This will take a while.');
-
-            const { progress, stop } = getProgressHandler();
-            await git(Path.join(builtDocsDir, '..'), {
-              progress,
-            }).clone(`https://github.com/elastic/built-docs`, builtDocsDir, ['--depth', '1']);
-
-            stop();
-          }
-
-          const { progress, stop } = getProgressHandler();
-
-          const builtDocsGit = git(builtDocsDir, { progress });
-
-          log.debug('Initializing simple-git');
-          await builtDocsGit.init();
-
-          log.info('Making sure built-docs is up to date');
-          await builtDocsGit.pull();
+          await syncBuiltDocs({ builtDocsDir, log });
 
           const files = FastGlob.sync(
             `${builtDocsDir}/html/en/elasticsearch/reference/master/esql*.html`
           );
-
-          if (!files) {
+          if (!files.length) {
             throw new Error('No files found');
           }
 
           const fsLimiter = pLimit(10);
-
-          stop();
 
           log.info(`Processing ${files.length} files`);
 
@@ -174,13 +121,13 @@ yargs(process.argv.slice(2))
                   .map((doc) => ({
                     ...doc,
                     instructions: `For this command, generate a Markdown document containing the following sections:
-                  
+
                     ## {Title}
-  
+
                     {What this command does, the use cases, and any limitations from this document or esql-limitations.txt}
-  
+
                     ### Examples
-  
+
                     {example ES|QL queries using this command. prefer to copy mentioned queries, but make sure there are at least three different examples, focusing on different usages of this command}`,
                   }));
 
@@ -285,7 +232,7 @@ yargs(process.argv.slice(2))
                   .map((section) => ({
                     ...section,
                     instructions: `For each function, use the following template:
-                  
+
                   ## {Title}
 
                   {description of what this function does}
@@ -416,7 +363,8 @@ yargs(process.argv.slice(2))
           }
 
           await Promise.all(
-            flattened.map(async (doc) => {
+            // TODO: remove
+            flattened.slice(0, 2).map(async (doc) => {
               if (doc.skip || (argv.only && !argv.only.includes(doc.title))) {
                 return undefined;
               }
@@ -431,7 +379,7 @@ yargs(process.argv.slice(2))
                     chatClient.output('generate_markdown', {
                       connectorId: chatClient.getConnectorId(),
                       system: `## System instructions
-                    
+
                     Your job is to generate Markdown documentation off of content that is scraped from the Elasticsearch website.
 
                     The documentation is about ES|QL, or the Elasticsearch Query Language, which is a new piped language that can be
@@ -448,11 +396,11 @@ yargs(process.argv.slice(2))
                     FROM logs-*
                     | WHERE @timestamp <= NOW()
                     \`\`\`
-                    
+
                     **If you are describing the syntax of a command, only wrap it in SINGLE backticks.
                     Leave out the esql part**. Eg:
                     ### Syntax:
-                    
+
                     \`DISSECT input "pattern" [APPEND_SEPARATOR="<separator>"]\`
 
                     #### Context
@@ -466,7 +414,7 @@ yargs(process.argv.slice(2))
                     ## ${doc.title}
 
                     ### Instructions
-                    
+
                     ${doc.instructions}
 
                     ### Content of file
@@ -479,7 +427,7 @@ yargs(process.argv.slice(2))
                     writeFile({ title: doc.title, content: response.content! })
                   );
                 } catch (error) {
-                  log.error(`Error processing ${doc.title}: ${error.message}`);
+                  log.error(`Error processing ${doc.title}: ${error.stack}`);
                 }
               });
             })
