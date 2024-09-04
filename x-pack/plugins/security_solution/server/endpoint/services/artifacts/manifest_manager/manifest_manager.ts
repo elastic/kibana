@@ -157,7 +157,12 @@ export class ManifestManager {
   }): Promise<WrappedTranslatedExceptionList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
       let itemsByListId: ExceptionListItemSchema[] = [];
-      if (this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement)) {
+      if (
+        (listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
+          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointResponseActions)) ||
+        (listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
+          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement))
+      ) {
         itemsByListId = await getAllItemsFromEndpointExceptionList({
           elClient,
           os,
