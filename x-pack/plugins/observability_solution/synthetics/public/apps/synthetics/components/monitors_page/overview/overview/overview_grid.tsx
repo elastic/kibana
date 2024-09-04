@@ -72,6 +72,7 @@ export const OverviewGrid = memo(() => {
 
   const [page, setPage] = useState(1);
   const [maxItem, setMaxItem] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const dispatch = useDispatch();
 
@@ -189,27 +190,30 @@ export const OverviewGrid = memo(() => {
                         index: listIndex,
                         style,
                         data: listData,
-                      }: React.PropsWithChildren<ListChildComponentProps<ListItem[][]>>) => (
-                        <EuiFlexGroup
-                          data-test-subj={`overview-grid-row-${listIndex}`}
-                          gutterSize="m"
-                          style={{ ...style }}
-                        >
-                          {listData[listIndex].map((_, idx) => (
-                            <EuiFlexItem key={listIndex * ROW_COUNT + idx}>
-                              <MetricItem
-                                monitor={monitorsSortedByStatus[listIndex * ROW_COUNT + idx]}
-                                onClick={setFlyoutConfigCallback}
-                              />
-                            </EuiFlexItem>
-                          ))}
-                          {listData[listIndex].length % ROW_COUNT !== 0 &&
-                            // Adds empty items to fill out row
-                            Array.from({
-                              length: ROW_COUNT - listData[listIndex].length,
-                            }).map((_, idx) => <EuiFlexItem key={idx} />)}
-                        </EuiFlexGroup>
-                      )}
+                      }: React.PropsWithChildren<ListChildComponentProps<ListItem[][]>>) => {
+                        setCurrentIndex(listIndex);
+                        return (
+                          <EuiFlexGroup
+                            data-test-subj={`overview-grid-row-${listIndex}`}
+                            gutterSize="m"
+                            style={{ ...style }}
+                          >
+                            {listData[listIndex].map((_, idx) => (
+                              <EuiFlexItem key={listIndex * ROW_COUNT + idx}>
+                                <MetricItem
+                                  monitor={monitorsSortedByStatus[listIndex * ROW_COUNT + idx]}
+                                  onClick={setFlyoutConfigCallback}
+                                />
+                              </EuiFlexItem>
+                            ))}
+                            {listData[listIndex].length % ROW_COUNT !== 0 &&
+                              // Adds empty items to fill out row
+                              Array.from({
+                                length: ROW_COUNT - listData[listIndex].length,
+                              }).map((_, idx) => <EuiFlexItem key={idx} />)}
+                          </EuiFlexGroup>
+                        );
+                      }}
                     </FixedSizeList>
                   )}
                 </InfiniteLoader>
@@ -227,35 +231,37 @@ export const OverviewGrid = memo(() => {
         )}
         <EuiSpacer size="m" />
       </div>
-      {groupField === 'none' && (
-        <>
-          <EuiSpacer />
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            {monitorsSortedByStatus.length === monitors.length && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">{SHOWING_ALL_MONITORS_LABEL}</EuiText>
-              </EuiFlexItem>
-            )}
-            {monitorsSortedByStatus.length === monitors.length &&
-              monitorsSortedByStatus.length > perPage && (
+      {groupField === 'none' &&
+        // display this footer when user scrolls to end of list
+        currentIndex * ROW_COUNT + ROW_COUNT >= monitorsSortedByStatus.length && (
+          <>
+            <EuiSpacer />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              {monitorsSortedByStatus.length === monitors.length && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="syntheticsOverviewGridButton"
-                    onClick={() => {
-                      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-                      listRef.current?.scrollToItem(0);
-                    }}
-                    iconType="sortUp"
-                    iconSide="right"
-                    size="xs"
-                  >
-                    {SCROLL_TO_TOP_LABEL}
-                  </EuiButtonEmpty>
+                  <EuiText size="xs">{SHOWING_ALL_MONITORS_LABEL}</EuiText>
                 </EuiFlexItem>
               )}
-          </EuiFlexGroup>
-        </>
-      )}
+              {monitorsSortedByStatus.length === monitors.length &&
+                monitorsSortedByStatus.length > perPage && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      data-test-subj="syntheticsOverviewGridButton"
+                      onClick={() => {
+                        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                        listRef.current?.scrollToItem(0);
+                      }}
+                      iconType="sortUp"
+                      iconSide="right"
+                      size="xs"
+                    >
+                      {SCROLL_TO_TOP_LABEL}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
+            </EuiFlexGroup>
+          </>
+        )}
       {flyoutConfig?.configId && flyoutConfig?.location && (
         <MonitorDetailFlyout
           configId={flyoutConfig.configId}
