@@ -50,7 +50,7 @@ export function ServiceLogs() {
   // );
 
   // TODO: filter by service name and environment
-  // TODO: filter by time
+  // TODO: fix loop when no logsSource is given
   return (
     <logsShared.LogsOverview
       timeRange={{
