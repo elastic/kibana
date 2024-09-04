@@ -1,10 +1,10 @@
 ### Create Document Entry
 POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
 kbn-xsrf: "true"
-Elastic-Api-Version: 1
-Authorization: Basic elastic changeme
-X-Kbn-Context: %7B%22type%22%3A%22application%22%2C%22name%22%3A%22securitySolutionUI%22%2C%22url%22%3A%22%2Fkbn%2Fapp%2Fsecurity%22%7D
 Content-Type: application/json
+Elastic-Api-Version: {{elasticApiVersion}}
+Authorization: Basic {{auth.username}} {{auth.password}}
+X-Kbn-Context: {{appContext.security}}
 
 {
   "type": "document",
@@ -18,10 +18,10 @@ Content-Type: application/json
 ### Create Index Entry
 POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
 kbn-xsrf: "true"
-Elastic-Api-Version: 1
 Content-Type: application/json
-Authorization: Basic elastic changeme
-X-Kbn-Context: %7B%22type%22%3A%22application%22%2C%22name%22%3A%22securitySolutionUI%22%2C%22url%22%3A%22%2Fkbn%2Fapp%2Fsecurity%22%7D
+Elastic-Api-Version: {{elasticApiVersion}}
+Authorization: Basic {{auth.username}} {{auth.password}}
+X-Kbn-Context: {{appContext.security}}
 
 {
   "type": "index",
