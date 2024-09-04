@@ -6,6 +6,7 @@
  */
 
 import { Group } from '@kbn/observability-alerting-rule-utils';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import {
   CustomThresholdExpressionMetric,
   CustomThresholdSearchSourceFields,
@@ -13,24 +14,24 @@ import {
 import { MetricExpression } from '../components/custom_threshold/types';
 import { getGroupFilters } from '..';
 
-const generateLensEquation = (criterion: MetricExpression) => {
-  const metricNameResolver: Record<string, string> = {};
+const AggMappingForLens: Record<string, string> = {
+  avg: 'average',
+  cardinality: 'unique_count',
+};
 
-  const aggMapping: Record<string, string> = {
-    avg: 'average',
-    cardinality: 'unique_count',
-  };
+const genLensEqForCustomThresholdRule = (criterion: MetricExpression) => {
+  const metricNameResolver: Record<string, string> = {};
 
   criterion.metrics.forEach(
     (metric: CustomThresholdExpressionMetric) =>
       (metricNameResolver[metric.name] = `${
-        aggMapping[metric.aggType] ? aggMapping[metric.aggType] : metric.aggType
+        AggMappingForLens[metric.aggType] ? AggMappingForLens[metric.aggType] : metric.aggType
       }(${metric.field ? metric.field : metric.filter ? metric.filter : ''})`)
   );
 
   let equation = criterion.equation
     ? criterion.equation
-    : criterion.metrics.map((m: any) => m.name).join('+');
+    : criterion.metrics.map((m) => m.name).join('+');
 
   Object.keys(metricNameResolver)
     .sort()
@@ -45,24 +46,28 @@ const generateLensEquation = (criterion: MetricExpression) => {
 export const generateInvestigationItem = (
   criterion: MetricExpression,
   searchConfiguration: CustomThresholdSearchSourceFields,
-  groupBy: string | string[] | undefined,
-  groups: Group[]
+  ruleTypeId: string,
+  groupBy?: string | string[],
+  groups?: Group[]
 ) => {
-  const equation = generateLensEquation(criterion);
-  const filters = searchConfiguration.filter || [];
-  const additionalFilters = getGroupFilters(groups);
-  const interval = `${criterion.timeSize}${criterion.timeUnit}`;
+  if (ruleTypeId === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID) {
+    const equation = genLensEqForCustomThresholdRule(criterion);
+    const filters = searchConfiguration.filter || [];
+    const additionalFilters = getGroupFilters(groups);
+    const interval = `${criterion.timeSize}${criterion.timeUnit}`;
 
-  const item = {
-    title: equation,
-    type: 'lens',
-    params: {
-      filters: [...filters, ...additionalFilters],
-      equation,
-      interval,
-      searchConfiguration,
-      groupBy,
-    },
-  };
-  return item;
+    const item = {
+      title: equation,
+      type: 'lens',
+      params: {
+        filters: [...filters, ...additionalFilters],
+        equation,
+        interval,
+        searchConfiguration,
+        groupBy,
+      },
+    };
+
+    return item;
+  }
 };

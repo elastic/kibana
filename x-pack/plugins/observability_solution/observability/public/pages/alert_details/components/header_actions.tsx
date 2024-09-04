@@ -150,10 +150,14 @@ export function HeaderActions({
         const item = generateInvestigationItem(
           criterion,
           ruleParams.searchConfiguration,
+          alert.fields[ALERT_RULE_TYPE_ID],
           ruleParams.groupBy,
           alert.fields[ALERT_GROUP] as Group[]
         );
-        await addInvestigationItem({ investigationId: investigationDetails.id, item });
+
+        if (item) {
+          await addInvestigationItem({ investigationId: investigationDetails.id, item });
+        }
       }
     }
   };
