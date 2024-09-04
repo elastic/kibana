@@ -3,10 +3,13 @@ description: >
   Test an action that sends an email message.
   There must be at least one recipient in `to`, `cc`, or `bcc`.
 type: object
-anyOf:
-  - required: [ bcc, message, subject ]
-  - required: [ cc, message, subject ]
-  - required: [ to, message, subject ]
+required:
+  - message
+  - subject
+  - anyOf:
+      - to
+      - cc
+      - bcc
 properties:
   bcc:
     type: array
