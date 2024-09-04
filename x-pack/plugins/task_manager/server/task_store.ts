@@ -519,6 +519,15 @@ export class TaskStore {
     });
     const { responses } = result;
 
+    const resultTemp = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
+      index: this.index,
+      ignore_unavailable: true,
+      body: { size: 1000, query: { match_all: {} } },
+    });
+
+    // eslint-disable-next-line no-console
+    console.error(`allTasks ${JSON.stringify(resultTemp)}`);
+
     const versionMap = this.createVersionMap([]);
     let allTasks = new Array<ConcreteTaskInstance>();
 

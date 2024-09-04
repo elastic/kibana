@@ -355,6 +355,9 @@ async function searchAvailableTasks({
       filterDownBy(InactiveTasks),
       tasksWithPartitions(partitions)
     );
+
+    // eslint-disable-next-line no-console
+    console.error(`queryUnlimitedTasks ${JSON.stringify(queryUnlimitedTasks)}`);
     searches.push({
       query: queryUnlimitedTasks,
       sort, // note: we could optimize this to not sort on priority, for this case
