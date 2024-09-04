@@ -193,9 +193,11 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   public async getToken(id: string): Promise<UninstallToken | null> {
-    const namespacePrefix = this.soClient.getCurrentNamespace()
-      ? `${this.soClient.getCurrentNamespace()}:`
-      : '';
+    const namespacePrefix =
+      appContextService.getExperimentalFeatures().useSpaceAwareness &&
+      this.soClient.getCurrentNamespace()
+        ? `${this.soClient.getCurrentNamespace()}:`
+        : '';
     const filter = `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${namespacePrefix}${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${id}"`;
     const tokenObjects = await this.getDecryptedTokenObjects({ filter });
     return tokenObjects.length === 1
@@ -280,9 +282,11 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         this.assertCreatedAt(_source.created_at);
         const policyId = _source[UNINSTALL_TOKENS_SAVED_OBJECT_TYPE].policy_id;
 
-        const namespacePrefix = this.soClient.getCurrentNamespace()
-          ? `${this.soClient.getCurrentNamespace()}:`
-          : '';
+        const namespacePrefix =
+          appContextService.getExperimentalFeatures().useSpaceAwareness &&
+          this.soClient.getCurrentNamespace()
+            ? `${this.soClient.getCurrentNamespace()}:`
+            : '';
         return {
           id: _id!.replace(`${namespacePrefix}${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:`, ''),
           policy_id: policyId,
