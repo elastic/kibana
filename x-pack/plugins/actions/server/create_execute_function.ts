@@ -113,13 +113,13 @@ export function createBulkExecutionEnqueuerFunction({
       inMemoryConnectors,
       connectorIds
     );
-    const validatedActionsToExecute: ExecuteOptions[] = [];
+    const skippedConnectors: string[] = [];
 
     for (const c of connectors) {
       const { id, connector, isInMemory } = c;
-      try {
-        validateCanActionBeUsed(connector);
-      } catch (e) {
+
+      if (connector.isMissingSecrets) {
+        skippedConnectors.push(id);
         continue;
       }
 
@@ -130,14 +130,13 @@ export function createBulkExecutionEnqueuerFunction({
 
       actionTypeIds[id] = actionTypeId;
       connectorIsInMemory[id] = isInMemory;
-
-      const currentAction = actionsToExecute.find((a) => a.id === id);
-      if (currentAction) {
-        validatedActionsToExecute.push(currentAction);
-      }
     }
 
-    const actions = validatedActionsToExecute.map((actionToExecute) => {
+    const actionsWithoutSkippedConnectors = actionsToExecute.filter(
+      (action) => !skippedConnectors.includes(action.id)
+    );
+
+    const actions = actionsWithoutSkippedConnectors.map((actionToExecute) => {
       // Get saved object references from action ID and relatedSavedObjects
       const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
         actionToExecute.id,
@@ -193,7 +192,7 @@ export function createBulkExecutionEnqueuerFunction({
 
     return {
       errors: actionsOverLimit.length > 0,
-      items: validatedActionsToExecute
+      items: actionsWithoutSkippedConnectors
         .map((a) => ({
           id: a.id,
           actionTypeId: a.actionTypeId,
@@ -220,7 +219,12 @@ export function createEphemeralExecutionEnqueuerFunction({
     { id, params, spaceId, source, consumer, apiKey, executionId }: ExecuteOptions
   ): Promise<RunNowResult> {
     const { action } = await getAction(unsecuredSavedObjectsClient, inMemoryConnectors, id);
-    validateCanActionBeUsed(action);
+
+    if (action.isMissingSecrets) {
+      throw new Error(
+        `Unable to execute action because no secrets are defined for the "${action.name}" connector.`
+      );
+    }
 
     const { actionTypeId } = action;
     if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
@@ -248,15 +252,6 @@ export function createEphemeralExecutionEnqueuerFunction({
       scope: ['actions'],
     });
   };
-}
-
-function validateCanActionBeUsed(action: InMemoryConnector | RawAction) {
-  const { name, isMissingSecrets } = action;
-  if (isMissingSecrets) {
-    throw new Error(
-      `Unable to execute action because no secrets are defined for the "${name}" connector.`
-    );
-  }
 }
 
 function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorOptions['source']) {
