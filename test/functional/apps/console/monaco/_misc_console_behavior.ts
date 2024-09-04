@@ -214,15 +214,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('import/export file', () => {
       it('can export input as file', async () => {
         await PageObjects.console.monaco.enterText('GET _search');
-        await PageObjects.console.clickExportFileButton();
+        await PageObjects.console.clickExportButton();
 
         // Wait for download to trigger
         await PageObjects.common.sleep(1000);
 
-        const downloadPath = resolve(
-          REPO_ROOT,
-          `target/functional-tests/downloads/console_export`
-        );
+        const downloadPath = resolve(REPO_ROOT, `target/functional-tests/downloads/console_export`);
         await retry.try(async () => {
           const fileExists = existsSync(downloadPath);
           expect(fileExists).to.be(true);

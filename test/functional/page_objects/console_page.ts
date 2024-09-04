@@ -226,8 +226,8 @@ export class ConsolePageObject extends FtrService {
     }
   }
 
-  public async clickExportFileButton() {
-    await this.testSubjects.click('consoleExportFileButton');
+  public async clickExportButton() {
+    await this.testSubjects.click('consoleExportButton');
   }
 
   public async clickHelpIcon() {
