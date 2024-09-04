@@ -7,9 +7,19 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 echo "--- Fetch the latest successful build in 'kibana-on-merge' pipeline"
-KIBANA_BUILD_ID=$(ts-node "$(dirname "${0}")/last_successful_build.ts")
+json_output=$(ts-node "$(dirname "${0}")/last_successful_build.ts")
 
-echo "Using build artifacts from kibana-on-merge pipeline, build id: $KIBANA_BUILD_ID"
+KIBANA_BUILD_ID=$(echo $json_output | jq -r '.buildId')
+BUILD_NUMBER=$(echo $json_output | jq -r '.buildNumber')
+COMMIT_HASH=$(echo $json_output | jq -r '.status')
+
+echo "KIBANA_BUILD_ID: $KIBANA_BUILD_ID"
+echo "BUILD_NUMBER: $BUILD_NUMBER"
+echo "COMMIT_HASH: $COMMIT_HASH"
+
+echo "--- Set commit-hash in meta-data"
+buildkite-agent meta-data set "commit-hash" "$COMMIT_HASH"
+
 export KIBANA_BUILD_ID
 
 .buildkite/scripts/download_build_artifacts.sh

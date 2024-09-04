@@ -19,7 +19,10 @@ steps:
     key: build
 
   - label: '💪 Performance Tests with Playwright config'
-    command: .buildkite/scripts/steps/functional/performance_playwright.sh
+    commands:
+      - export COMMIT_HASH=$(buildkite-agent meta-data get "commit-hash")
+      - git checkout $COMMIT_HASH
+      - .buildkite/scripts/steps/functional/performance_playwright.sh
     env:
       PERFORMANCE_ENABLE_TELEMETRY: true
     agents:
