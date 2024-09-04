@@ -103,6 +103,24 @@ describe('DocViewerTable', () => {
       expect(screen.getByText('extension.keyword')).toBeInTheDocument();
     });
 
+    it('should disable the switch if only a time field is selected', async () => {
+      render(
+        <IntlProvider locale="en">
+          <DocViewerTable
+            dataView={dataView}
+            hit={hit}
+            columns={['@timestamp']}
+            displayedColumns={['@timestamp', '_source']}
+          />
+        </IntlProvider>
+      );
+
+      expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+    });
+
     it('should disable the switch if columns is empty', async () => {
       render(
         <IntlProvider locale="en">
@@ -113,6 +131,41 @@ describe('DocViewerTable', () => {
       expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
       expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+    });
+
+    it('should disable the switch even if it was previously switched on', async () => {
+      storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
+
+      render(
+        <IntlProvider locale="en">
+          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
+        </IntlProvider>
+      );
+
+      expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+    });
+
+    it('should show only selected fields if it was previously switched on', async () => {
+      storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
+
+      render(
+        <IntlProvider locale="en">
+          <DocViewerTable
+            dataView={dataView}
+            hit={hit}
+            columns={['extension.keyword']}
+            displayedColumns={['@timestamp', 'extension.keyword']}
+          />
+        </IntlProvider>
+      );
+
+      expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeEnabled();
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.queryByText('bytes')).toBeNull();
       expect(screen.getByText('extension.keyword')).toBeInTheDocument();
     });
 
@@ -133,6 +186,7 @@ describe('DocViewerTable', () => {
       );
 
       expect(showOnlySelectedFieldsSwitch).toBeEnabled();
+      expect(showOnlySelectedFieldsSwitch).toHaveValue('');
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
       expect(screen.getByText('bytes')).toBeInTheDocument();
       expect(screen.getByText('extension.keyword')).toBeInTheDocument();
