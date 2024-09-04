@@ -205,24 +205,23 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
     services: {
       data: { dataViews: dataViewsService },
       savedSearch: savedSearchService,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
   const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
     ...basicResolvers(),
     // TODO useRouteResolver should be responsible for the redirect
-    privileges: () =>
-      checkCreateJobsCapabilitiesResolver(mlApiServices, redirectToJobsManagementPage),
+    privileges: () => checkCreateJobsCapabilitiesResolver(mlApi, redirectToJobsManagementPage),
     jobCaps: () =>
       loadNewJobCapabilities(
         index,
         savedSearchId,
-        mlApiServices,
+        mlApi,
         dataViewsService,
         savedSearchService,
         ANOMALY_DETECTOR
       ),
-    existingJobsAndGroups: () => mlApiServices.jobs.getAllJobAndGroupIds(),
+    existingJobsAndGroups: () => mlApi.jobs.getAllJobAndGroupIds(),
   });
 
   return (

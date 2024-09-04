@@ -42,11 +42,9 @@ describe('ErrorCallout', () => {
     expect(prompt).toHaveLength(1);
     expect(prompt.prop('title')).toBeDefined();
     expect(prompt.prop('title')).not.toBeInstanceOf(String);
-    expect(prompt.prop('body')).toBeDefined();
-    expect(findTestSubject(prompt, 'discoverErrorCalloutTitle').contains(title)).toBe(true);
-    expect(findTestSubject(prompt, 'discoverErrorCalloutMessage').contains(error.message)).toBe(
-      true
-    );
+    expect(prompt.find('EuiCodeBlock')).toHaveLength(1);
+    expect(prompt.find('EuiCodeBlock').text()).toContain(error.message);
+    expect(prompt.find('[data-test-subj="discoverErrorCalloutTitle"]').contains(title)).toBe(true);
     expect(prompt.find(EuiButton)).toHaveLength(1);
   });
 
@@ -76,5 +74,21 @@ describe('ErrorCallout', () => {
       title,
       error,
     });
+  });
+
+  it('should not render the "View details" button for ES|QL', () => {
+    (discoverServiceMock.core.notifications.showErrorDialog as jest.Mock).mockClear();
+    const title = 'Error title';
+    const error = new Error('My error');
+    const wrapper = mountWithServices(<ErrorCallout title={title} error={error} isEsqlMode />);
+    expect(findTestSubject(wrapper, 'discoverErrorCalloutShowDetailsButton')).toHaveLength(0);
+  });
+
+  it('should render the "ES|QL reference" button for ES|QL', () => {
+    (discoverServiceMock.core.notifications.showErrorDialog as jest.Mock).mockClear();
+    const title = 'Error title';
+    const error = new Error('My error');
+    const wrapper = mountWithServices(<ErrorCallout title={title} error={error} isEsqlMode />);
+    expect(findTestSubject(wrapper, 'discoverErrorCalloutESQLReferenceButton')).toHaveLength(1);
   });
 });

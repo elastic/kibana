@@ -11,7 +11,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { createDatafeedId } from '../../../common/util/job_utils';
 
 import { isWebUrl } from '../util/url_utils';
-import { useMlApiContext } from '../contexts/kibana';
+import { useMlApi } from '../contexts/kibana';
 
 let jobs = [];
 let datafeedIds = {};
@@ -286,14 +286,14 @@ function processBasicJobInfo(localJobService, jobsList) {
 
 // This is to retain the singleton behavior of the previous direct instantiation and export.
 let mlJobService;
-export const mlJobServiceFactory = (mlApiServices) => {
+export const mlJobServiceFactory = (mlApi) => {
   if (mlJobService) return mlJobService;
 
-  mlJobService = new JobService(mlApiServices);
+  mlJobService = new JobService(mlApi);
   return mlJobService;
 };
 
 export const useMlJobService = () => {
-  const mlApiServices = useMlApiContext();
-  return mlJobServiceFactory(mlApiServices);
+  const mlApi = useMlApi();
+  return mlJobServiceFactory(mlApi);
 };

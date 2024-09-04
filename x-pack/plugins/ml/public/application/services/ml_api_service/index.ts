@@ -100,7 +100,7 @@ export interface GetModelSnapshotsResponse {
   model_snapshots: ModelSnapshot[];
 }
 
-export function mlApiServicesProvider(httpService: HttpService) {
+export function mlApiProvider(httpService: HttpService) {
   return {
     getJobs(obj?: { jobId?: string }) {
       const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
@@ -792,4 +792,4 @@ export function mlApiServicesProvider(httpService: HttpService) {
   };
 }
 
-export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;
+export type MlApi = ReturnType<typeof mlApiProvider>;

@@ -54,7 +54,7 @@ export class StartDatafeedModal extends Component {
     this.refreshJobs = this.props.refreshJobs;
     this.getShowCreateAlertFlyoutFunction = this.props.getShowCreateAlertFlyoutFunction;
     this.toastNotifications = constructorContext.services.notifications.toasts;
-    this.mlApiServices = constructorContext.services.mlServices.mlApiServices;
+    this.mlApi = constructorContext.services.mlServices.mlApi;
   }
 
   componentDidMount() {
@@ -119,7 +119,7 @@ export class StartDatafeedModal extends Component {
       ? this.state.endTime.valueOf()
       : this.state.endTime;
 
-    forceStartDatafeeds(this.toastNotifications, this.mlApiServices, jobs, start, end, () => {
+    forceStartDatafeeds(this.toastNotifications, this.mlApi, jobs, start, end, () => {
       if (this.state.createAlert && jobs.length > 0) {
         this.getShowCreateAlertFlyoutFunction()(jobs.map((job) => job.id));
       }

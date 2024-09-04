@@ -29,7 +29,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { DataGrid } from '@kbn/ml-data-grid';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { useMlApiContext, useMlKibana } from '../../../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,
   FieldStatsFlyoutProvider,
@@ -116,7 +116,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 }) => {
   const { services } = useMlKibana();
   const toastNotifications = services.notifications.toasts;
-  const mlApiServices = useMlApiContext();
+  const mlApi = useMlApi();
   const newJobCapsServiceAnalytics = useNewJobCapsServiceAnalytics();
   const { selectedDataView, selectedSavedSearch } = useDataSource();
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
@@ -288,7 +288,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       fieldSelection,
       errorMessage,
       noDocsContainMappedFields: noDocsWithFields,
-    } = await fetchExplainData(mlApiServices, formToUse);
+    } = await fetchExplainData(mlApi, formToUse);
 
     if (success) {
       if (shouldUpdateEstimatedMml) {
@@ -444,7 +444,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           fieldSelection,
           errorMessage,
           noDocsContainMappedFields: noDocsWithFields,
-        } = await fetchExplainData(mlApiServices, formCopy);
+        } = await fetchExplainData(mlApi, formCopy);
         if (success) {
           // update the field selection table
           const hasRequiredFields = fieldSelection.some(

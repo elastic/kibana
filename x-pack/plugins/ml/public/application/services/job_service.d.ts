@@ -6,7 +6,7 @@
  */
 
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { MlApiServices } from './ml_api_service';
+import type { MlApi } from './ml_api_service';
 
 export interface ExistingJobsAndGroups {
   jobIds: string[];
@@ -22,6 +22,6 @@ export declare interface MlJobService {
   detectorsByJob: Record<string, any>;
 }
 
-export const mlJobServiceFactory: (mlApiServices: MlApiServices) => MlJobService;
+export const mlJobServiceFactory: (mlApi: MlApi) => MlJobService;
 
 export const useMlJobService: () => MlJobService;

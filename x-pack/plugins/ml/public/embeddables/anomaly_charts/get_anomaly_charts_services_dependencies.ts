@@ -19,7 +19,7 @@ export const getAnomalyChartsServiceDependencies = async (
     { AnomalyDetectorService },
     { fieldFormatServiceFactory },
     { indexServiceFactory },
-    { mlApiServicesProvider },
+    { mlApiProvider },
     { mlJobServiceFactory },
     { mlResultsServiceProvider },
   ] = await Promise.all([
@@ -32,12 +32,12 @@ export const getAnomalyChartsServiceDependencies = async (
   ]);
   const httpService = new HttpService(coreStart.http);
   const anomalyDetectorService = new AnomalyDetectorService(httpService);
-  const mlApiServices = mlApiServicesProvider(httpService);
-  const mlJobService = mlJobServiceFactory(mlApiServices);
-  const mlResultsService = mlResultsServiceProvider(mlApiServices);
+  const mlApi = mlApiProvider(httpService);
+  const mlJobService = mlJobServiceFactory(mlApi);
+  const mlResultsService = mlResultsServiceProvider(mlApi);
   const anomalyExplorerService = new AnomalyExplorerChartsService(
     pluginsStart.data.query.timefilter.timefilter,
-    mlApiServices,
+    mlApi,
     mlResultsService
   );
 
@@ -51,7 +51,7 @@ export const getAnomalyChartsServiceDependencies = async (
   //   its own context or possibly without having a singleton like state at all, since the
   //   way this manages its own state right now doesn't consider React component lifecycles.
   const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
-  const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils, mlJobService);
+  const mlFieldFormatService = fieldFormatServiceFactory(mlApi, mlIndexUtils, mlJobService);
 
   const anomalyChartsEmbeddableServices: AnomalyChartsEmbeddableServices = [
     coreStart,

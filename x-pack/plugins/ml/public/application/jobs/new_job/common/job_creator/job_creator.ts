@@ -23,7 +23,7 @@ import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { createDatafeedId } from '../../../../../../common/util/job_utils';
-import type { MlApiServices } from '../../../../services/ml_api_service';
+import type { MlApi } from '../../../../services/ml_api_service';
 import type { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
 import type {
@@ -79,17 +79,17 @@ export class JobCreator {
 
   protected _wizardInitialized$ = new BehaviorSubject<boolean>(false);
   public wizardInitialized$ = this._wizardInitialized$.asObservable();
-  public mlApiServices: MlApiServices;
+  public mlApi: MlApi;
   public newJobCapsService: NewJobCapsService;
 
   constructor(
-    mlApiServices: MlApiServices,
+    mlApi: MlApi,
     newJobCapsService: NewJobCapsService,
     indexPattern: DataView,
     savedSearch: SavedSearch | null,
     query: object
   ) {
-    this.mlApiServices = mlApiServices;
+    this.mlApi = mlApi;
     this.newJobCapsService = newJobCapsService;
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
@@ -489,7 +489,7 @@ export class JobCreator {
     }
 
     for (const calendar of this._calendars) {
-      await mlCalendarService.assignNewJobId(this.mlApiServices, calendar, this.jobId);
+      await mlCalendarService.assignNewJobId(this.mlApi, calendar, this.jobId);
     }
   }
 
@@ -619,7 +619,7 @@ export class JobCreator {
 
   public async createJob() {
     try {
-      await this.mlApiServices.addJob({
+      await this.mlApi.addJob({
         jobId: this._job_config.job_id,
         job: this._job_config,
       });
@@ -636,7 +636,7 @@ export class JobCreator {
       const datafeedId = createDatafeedId(jobId);
       tempDatafeed.job_id = jobId;
 
-      return this.mlApiServices.addDatafeed({
+      return this.mlApi.addDatafeed({
         datafeedId,
         datafeedConfig: tempDatafeed,
       });
@@ -846,7 +846,7 @@ export class JobCreator {
   // load the start and end times for the selected index
   // and apply them to the job creator
   public async autoSetTimeRange(excludeFrozenData = true) {
-    const { start, end } = await this.mlApiServices.getTimeFieldRange({
+    const { start, end } = await this.mlApi.getTimeFieldRange({
       index: this._indexPatternTitle,
       timeFieldName: this.timeFieldName,
       query: excludeFrozenData ? addExcludeFrozenToQuery(this.query) : this.query,
