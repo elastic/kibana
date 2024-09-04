@@ -15,12 +15,15 @@ export const DevToolsCode: React.FC = () => {
   const { getValues } = useFormContext();
   const query = getValues(ChatFormFields.elasticsearchQuery) ?? '';
   const indices = getValues(ChatFormFields.indices) ?? [];
-  const searchQuery = getValues(ChatFormFields.searchQuery) ?? '{query}';
+  const searchQuery = getValues(ChatFormFields.searchQuery) ?? '';
+  const replacedQuery = searchQuery
+    ? JSON.stringify(query, null, 2).replace(/\"{query}\"/g, JSON.stringify(searchQuery, null, 2))
+    : JSON.stringify(query, null, 2);
 
   return (
     <EuiCodeBlock isCopyable overflowHeight="100%">
       {`POST ${indices.join(',')}/_search
-${JSON.stringify(query, null, 2).replace(/\"{query}\"/g, JSON.stringify(searchQuery, null, 2))}
+${replacedQuery}
 `}
     </EuiCodeBlock>
   );

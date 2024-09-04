@@ -21,7 +21,7 @@ import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { Pagination } from '../../types';
@@ -90,9 +90,7 @@ export const ResultList: React.FC<ResultListArgs> = ({
             <EuiPagination
               pageCount={totalPage}
               activePage={page}
-              onPageClick={(p) => {
-                onPaginationChange(p);
-              }}
+              onPageClick={onPaginationChange}
             />
           </EuiFlexItem>
         )}

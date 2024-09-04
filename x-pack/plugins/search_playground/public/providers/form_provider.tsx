@@ -10,7 +10,6 @@ import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
 import { ChatForm, ChatFormFields } from '../types';
 import { useLLMsModels } from '../hooks/use_llms_models';
-import { DEFAULT_PAGINATION } from '../../common';
 
 type PartialChatForm = Partial<ChatForm>;
 export const LOCAL_STORAGE_KEY = 'search_playground_session';
@@ -21,10 +20,6 @@ const DEFAULT_FORM_VALUES: PartialChatForm = {
   source_fields: {},
   indices: [],
   summarization_model: undefined,
-  search_query: {
-    query: '',
-    pagination: DEFAULT_PAGINATION,
-  },
 };
 
 const getLocalSession = (storage: Storage): PartialChatForm => {

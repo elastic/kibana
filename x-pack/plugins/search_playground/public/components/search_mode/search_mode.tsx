@@ -76,7 +76,10 @@ export const SearchMode: React.FC = () => {
                     value={searchBarValue}
                     icon="search"
                     fullWidth
-                    placeholder="Search for documents"
+                    placeholder={i18n.translate(
+                      'xpack.searchPlayground.searchMode.searchBar.placeholder',
+                      { defaultMessage: 'Search for documents' }
+                    )}
                     onChange={(e) => updateSearchQuery(e.target.value)}
                     isLoading={isSubmitting}
                   />
