@@ -7,10 +7,8 @@
  */
 import React, { useCallback, useEffect } from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
-import {
-  type LanguageDocumentationSections,
-  LanguageDocumentationPopoverContent,
-} from './documentation_content';
+import { LanguageDocumentationSections } from './types';
+import { LanguageDocumentationFlyoutContent } from './documentation_flyout_content';
 
 interface DocumentationFlyoutProps {
   language: string;
@@ -52,10 +50,10 @@ function DocumentationFlyout({
           onClose={() => onHelpMenuVisibilityChange(false)}
           aria-labelledby="esqlInlineDocumentationFlyout"
           type="push"
+          size="s"
         >
           <EuiFlyoutBody>
-            <LanguageDocumentationPopoverContent
-              language={language}
+            <LanguageDocumentationFlyoutContent
               sections={sections}
               searchInDescription={searchInDescription}
               linkToDocumentation={linkToDocumentation}

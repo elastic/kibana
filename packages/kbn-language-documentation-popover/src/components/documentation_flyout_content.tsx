@@ -7,26 +7,19 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopoverTitle,
   EuiText,
-  EuiListGroupItem,
-  EuiListGroup,
-  EuiTitle,
   EuiFieldSearch,
-  EuiHighlight,
-  EuiSpacer,
   EuiLink,
+  EuiFlyoutHeader,
 } from '@elastic/eui';
 import { elementToString } from '../utils/element_to_string';
-import type { LanguageDocumentationSections } from './types';
+import { LanguageDocumentationSections } from './types';
 
-import './documentation.scss';
-
-interface DocumentationProps {
-  language: string;
+interface DocumentationFlyoutProps {
   sections?: LanguageDocumentationSections;
   // if sets to true, allows searching in the markdown description
   searchInDescription?: boolean;
@@ -34,12 +27,11 @@ interface DocumentationProps {
   linkToDocumentation?: string;
 }
 
-function DocumentationContent({
-  language,
+function DocumentationFlyoutContent({
   sections,
   searchInDescription,
   linkToDocumentation,
-}: DocumentationProps) {
+}: DocumentationFlyoutProps) {
   const [selectedSection, setSelectedSection] = useState<string | undefined>();
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
 
@@ -77,41 +69,25 @@ function DocumentationContent({
 
   return (
     <>
-      <EuiPopoverTitle
-        className="documentation__docsHeader"
-        paddingSize="m"
-        data-test-subj="language-documentation-title"
+      <EuiFlyoutHeader
+        hasBorder
+        css={css`
+          padding-inline: 0 !important;
+          padding-block-start: 0 !important;
+        `}
       >
-        <EuiFlexGroup
-          gutterSize="none"
-          responsive={false}
-          alignItems="center"
-          justifyContent="spaceBetween"
-        >
+        {linkToDocumentation && (
           <EuiFlexItem grow={false}>
-            {i18n.translate('languageDocumentationPopover.header', {
-              defaultMessage: '{language} reference',
-              values: { language },
-            })}
+            <EuiLink external href={linkToDocumentation} target="_blank">
+              {i18n.translate('languageDocumentationPopover.esqlDocsLabel', {
+                defaultMessage: 'View full ES|QL documentation',
+              })}
+            </EuiLink>
           </EuiFlexItem>
-          {linkToDocumentation && (
-            <EuiFlexItem grow={false}>
-              <EuiLink external href={linkToDocumentation} target="_blank">
-                {i18n.translate('languageDocumentationPopover.documentationLinkLabel', {
-                  defaultMessage: 'View full documentation',
-                })}
-              </EuiLink>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiPopoverTitle>
-      <EuiFlexGroup
-        className="documentation__docsContent"
-        gutterSize="none"
-        responsive={false}
-        alignItems="stretch"
-      >
-        <EuiFlexItem className="documentation__docsSidebar" grow={1}>
+        )}
+      </EuiFlyoutHeader>
+      <EuiFlexGroup gutterSize="none" responsive={false}>
+        {/* <EuiFlexItem className="documentation__docsSidebar" grow={1}>
           <EuiFlexGroup
             className="documentation__docsSidebarInner"
             direction="column"
@@ -175,11 +151,20 @@ function DocumentationContent({
               })}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem className="documentation__docsText" grow={2}>
+        </EuiFlexItem> */}
+        <EuiFlexItem>
+          <EuiFieldSearch
+            value={searchText}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+            }}
+            data-test-subj="language-documentation-navigation-search"
+            placeholder={i18n.translate('languageDocumentationPopover.searchPlaceholder', {
+              defaultMessage: 'Search',
+            })}
+          />
           <EuiText size="s">
             <section
-              className="documentation__docsTextIntro"
               ref={(el) => {
                 if (el && sections?.groups?.length) {
                   scrollTargets.current[sections.groups[0].label] = el;
@@ -191,7 +176,6 @@ function DocumentationContent({
             {sections?.groups.slice(1).map((helpGroup, index) => {
               return (
                 <section
-                  className="documentation__docsTextGroup"
                   key={helpGroup.label}
                   ref={(el) => {
                     if (el) {
@@ -206,7 +190,6 @@ function DocumentationContent({
                   {sections?.groups[index + 1].items.map((helpItem) => {
                     return (
                       <article
-                        className="documentation__docsTextItem"
                         key={helpItem.label}
                         ref={(el) => {
                           if (el) {
@@ -228,4 +211,4 @@ function DocumentationContent({
   );
 }
 
-export const LanguageDocumentationPopoverContent = React.memo(DocumentationContent);
+export const LanguageDocumentationFlyoutContent = React.memo(DocumentationFlyoutContent);
