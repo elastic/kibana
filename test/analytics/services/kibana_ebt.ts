@@ -17,6 +17,7 @@ export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBT
     await supertest
       .post(`/internal/analytics_ftr_helpers/opt_in`)
       .set('kbn-xsrf', 'xxx')
+      .set('x-elastic-internal-origin', 'kibana')
       .query({ consent: optIn })
       .expect(200);
   };
@@ -37,6 +38,7 @@ export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBT
           fromTimestamp,
         })
         .set('kbn-xsrf', 'xxx')
+        .set('x-elastic-internal-origin', 'kibana')
         .expect(200);
 
       return resp.body;
@@ -47,6 +49,7 @@ export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBT
         .get(`/internal/analytics_ftr_helpers/count_events`)
         .query({ eventTypes: JSON.stringify(eventTypes), withTimeoutMs, fromTimestamp })
         .set('kbn-xsrf', 'xxx')
+        .set('x-elastic-internal-origin', 'kibana')
         .expect(200);
 
       return resp.body.count;

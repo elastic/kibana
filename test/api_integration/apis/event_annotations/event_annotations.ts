@@ -21,6 +21,7 @@ import type {
 } from '@kbn/event-annotation-plugin/common';
 import { CONTENT_ID } from '@kbn/event-annotation-plugin/common';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const CONTENT_ENDPOINT = '/api/content_management/rpc';
@@ -93,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`${CONTENT_ENDPOINT}/get`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send(payload)
           .expect(200);
 
@@ -137,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`${CONTENT_ENDPOINT}/get`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send(payload)
           .expect(404);
 
@@ -150,7 +153,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('search', () => {
       const performSearch = (payload: EventAnnotationGroupSearchIn) =>
-        supertest.post(`${CONTENT_ENDPOINT}/search`).set('kbn-xsrf', 'kibana').send(payload);
+        supertest
+          .post(`${CONTENT_ENDPOINT}/search`)
+          .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .send(payload);
 
       it(`should retrieve existing groups`, async () => {
         const payload: EventAnnotationGroupSearchIn = {
@@ -276,6 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`${CONTENT_ENDPOINT}/create`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send(payload)
           .expect(200);
 
@@ -324,6 +332,7 @@ export default function ({ getService }: FtrProviderContext) {
           const resp = await supertest
             .post(`${CONTENT_ENDPOINT}/create`)
             .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(payload)
             .expect(400);
 
@@ -344,6 +353,7 @@ export default function ({ getService }: FtrProviderContext) {
           return supertest
             .post(`${CONTENT_ENDPOINT}/create`)
             .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(payload);
         };
 
@@ -379,6 +389,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`${CONTENT_ENDPOINT}/update`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send(payload)
           .expect(200);
 
@@ -430,6 +441,7 @@ export default function ({ getService }: FtrProviderContext) {
           const resp = await supertest
             .post(`${CONTENT_ENDPOINT}/update`)
             .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(payload)
             .expect(400);
 
@@ -452,6 +464,7 @@ export default function ({ getService }: FtrProviderContext) {
           return supertest
             .post(`${CONTENT_ENDPOINT}/update`)
             .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(payload);
         };
         const errorResp = await updateWithDataViewSpec(undefined).expect(400);
@@ -476,7 +489,11 @@ export default function ({ getService }: FtrProviderContext) {
           version: API_VERSION,
         };
 
-        return supertest.post(`${CONTENT_ENDPOINT}/delete`).set('kbn-xsrf', 'kibana').send(payload);
+        return supertest
+          .post(`${CONTENT_ENDPOINT}/delete`)
+          .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .send(payload);
       };
 
       it(`should delete a group`, async () => {

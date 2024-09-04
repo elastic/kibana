@@ -9,6 +9,7 @@
 import expect from '@kbn/expect';
 import { ReportManager, METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type { UserAgentMetric } from '@kbn/analytics';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -47,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/api/ui_counters/_report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({ report })
         .expect(200);
 
@@ -72,6 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/api/ui_counters/_report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({ report })
         .expect(200);
 
@@ -95,6 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/api/ui_counters/_report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({ report })
         .expect(200);
 

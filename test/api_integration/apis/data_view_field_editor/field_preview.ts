@@ -8,7 +8,10 @@
 
 import expect from '@kbn/expect';
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { getErrorCodeFromErrorReason } from '@kbn/data-view-field-editor-plugin/public/lib/runtime_field_validation';
 import {
   FIELD_PREVIEW_PATH,
@@ -91,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
             .send(payload)
             .set('kbn-xsrf', 'xxx')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .expect(200);
 
           expect(response.values).eql([test.expected]);
@@ -108,6 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
             index: INDEX_NAME,
           })
           .set('kbn-xsrf', 'xxx')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400);
       });
 
@@ -120,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
             index: INDEX_NAME,
           })
           .set('kbn-xsrf', 'xxx')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400);
       });
 
@@ -132,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
             context: 'keyword_field',
           })
           .set('kbn-xsrf', 'xxx')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400);
       });
     });
@@ -149,7 +156,8 @@ export default function ({ getService }: FtrProviderContext) {
             context: 'keyword_field',
             index: INDEX_NAME,
           })
-          .set('kbn-xsrf', 'xxx');
+          .set('kbn-xsrf', 'xxx')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
         const errorCode = getErrorCodeFromErrorReason(response.error?.caused_by?.reason);
 

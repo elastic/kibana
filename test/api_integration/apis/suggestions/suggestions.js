@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 import expect from '@kbn/expect';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
@@ -35,6 +38,7 @@ export default function ({ getService }) {
         supertest
           .post('/internal/kibana/suggestions/values/basic_index')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             field: 'baz.keyword',
             query: '',
@@ -49,6 +53,7 @@ export default function ({ getService }) {
         supertest
           .post('/internal/kibana/suggestions/values/basic_index')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             field: 'baz.keyword',
             method: 'terms_agg',
@@ -64,6 +69,7 @@ export default function ({ getService }) {
         supertest
           .post('/internal/kibana/suggestions/values/basic_index')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             field: 'baz.keyword',
             method: 'terms_enum',
@@ -79,6 +85,7 @@ export default function ({ getService }) {
         supertest
           .post('/internal/kibana/suggestions/values/basic_index')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             field: 'baz.keyword',
             query: '<something?with:lots&of^ bad characters',
@@ -92,6 +99,7 @@ export default function ({ getService }) {
         supertest
           .post('/internal/kibana/suggestions/values/basic_index')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             field: 'nestedField.child',
             query: 'nes',
@@ -102,6 +110,7 @@ export default function ({ getService }) {
         supertest
           .post('/internal/kibana/suggestions/values/not_found')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             field: 'baz.keyword',
             query: '1',
@@ -112,6 +121,7 @@ export default function ({ getService }) {
         supertest
           .post('/internal/kibana/suggestions/values/basic_index')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             field: 'baz.keyword',
           })
@@ -121,6 +131,7 @@ export default function ({ getService }) {
         supertest
           .post('/internal/kibana/suggestions/values/basic_index')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             field: 'baz.keyword',
             query: '',
@@ -149,6 +160,7 @@ export default function ({ getService }) {
         supertest
           .post('/internal/kibana/suggestions/values/logstash-*')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             field: 'extension.raw',
             query: '',
@@ -175,6 +187,7 @@ export default function ({ getService }) {
         supertest
           .post('/internal/kibana/suggestions/values/logstash-*')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             field: 'extension.raw',
             query: '',
@@ -201,6 +214,7 @@ export default function ({ getService }) {
         supertest
           .post('/internal/kibana/suggestions/values/logstash-*')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             field: 'request.raw',
             query: '/uploads/anatoly-art',
@@ -226,6 +240,7 @@ export default function ({ getService }) {
         supertest
           .post('/internal/kibana/suggestions/values/logstash-*')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             field: 'request.raw',
             query: '/uploads/anatoly-art',

@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -28,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
       supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({})
         .expect(400));
 
@@ -35,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
       supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           pattern: '*',
           include_unmapped: true,
@@ -45,6 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
       supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query({
           pattern: randomness.word(),
           [randomness.word()]: randomness.word(),
@@ -56,6 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
         supertest
           .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             fields: JSON.stringify(['baz']),
@@ -66,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         supertest
           .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             fields: ['baz', 'foo'],
@@ -76,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         supertest
           .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             fields: ['baz'],
@@ -86,6 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
         supertest
           .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             fields: 'baz',
@@ -96,6 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
         supertest
           .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             fields: 'foo,bar',
@@ -108,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         supertest
           .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             meta_fields: JSON.stringify(['meta']),
@@ -118,6 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
         supertest
           .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             meta_fields: ['_id', 'meta'],
@@ -128,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         supertest
           .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             meta_fields: ['_id'],
@@ -138,6 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
         supertest
           .get(FIELDS_FOR_WILDCARD_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .query({
             pattern: '*',
             meta_fields: 'foo,bar',

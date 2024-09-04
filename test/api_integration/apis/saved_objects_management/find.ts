@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import { Response } from 'supertest';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -38,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 200 with individual responses', async () =>
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=visualization')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects.map((so: { id: string }) => so.id)).to.eql([
@@ -49,6 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return 200 with empty response', async () =>
           await supertest
             .get('/api/kibana/management/saved_objects/_find?type=wigwags')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .expect(200)
             .then((resp: Response) => {
               expect(resp.body).to.eql({
@@ -66,6 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get(
               '/api/kibana/management/saved_objects/_find?type=visualization&page=100&perPage=100'
             )
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .expect(200)
             .then((resp: Response) => {
               expect(resp.body).to.eql({
@@ -81,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return 400 when using searchFields', async () =>
           await supertest
             .get('/api/kibana/management/saved_objects/_find?type=url&searchFields=a')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .expect(400)
             .then((resp: Response) => {
               expect(resp.body).to.eql({
@@ -106,6 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('search for a reference', async () => {
           await supertest
             .get('/api/kibana/management/saved_objects/_find')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .query({
               type: 'visualization',
               hasReference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
@@ -120,6 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('search for multiple references with OR operator', async () => {
           await supertest
             .get('/api/kibana/management/saved_objects/_find')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .query({
               type: 'visualization',
               hasReference: JSON.stringify([
@@ -142,6 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('search for multiple references with AND operator', async () => {
           await supertest
             .get('/api/kibana/management/saved_objects/_find')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .query({
               type: 'visualization',
               hasReference: JSON.stringify([
@@ -162,6 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('sort objects by "type" in "asc" order', async () => {
           await supertest
             .get('/api/kibana/management/saved_objects/_find')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .query({
               type: ['visualization', 'dashboard'],
               sortField: 'type',
@@ -178,6 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('sort objects by "type" in "desc" order', async () => {
           await supertest
             .get('/api/kibana/management/saved_objects/_find')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .query({
               type: ['visualization', 'dashboard'],
               sortField: 'type',
@@ -209,6 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should inject meta attributes for searches', async () =>
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=search')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(1);
@@ -227,6 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should inject meta attributes for dashboards', async () =>
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=dashboard')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(1);
@@ -245,6 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should inject meta attributes for visualizations', async () =>
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=visualization')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(2);
@@ -273,6 +286,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should inject meta attributes for index patterns', async () =>
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=index-pattern')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(1);

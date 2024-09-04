@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import _ from 'lodash';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -29,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200', async () => {
       const response = await supertest
         .put(`/api/saved_objects/_bulk_update`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([
           {
             type: 'visualization',
@@ -97,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const response = await supertest
         .put(`/api/saved_objects/_bulk_update`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([
           {
             type: 'visualization',
@@ -159,6 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await supertest
         .put(`/api/saved_objects/_bulk_update`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([
           {
             type: 'visualization',
@@ -190,6 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return a generic 404', async () => {
         const response = await supertest
           .put(`/api/saved_objects/_bulk_update`)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send([
             {
               type: 'visualization',

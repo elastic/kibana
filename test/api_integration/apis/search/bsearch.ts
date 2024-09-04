@@ -9,7 +9,10 @@
 import expect from '@kbn/expect';
 import request from 'superagent';
 import { inflateResponse } from '@kbn/bfetch-plugin/public/streaming';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
@@ -34,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             batch: [
               {
@@ -67,6 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch?compress=true`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             batch: [
               {
@@ -100,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             batch: [
               {
@@ -143,6 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             batch: [
               {
@@ -174,6 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             batch: [
               {
@@ -214,6 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
           const resp = await supertest
             .post(`/internal/bsearch`)
             .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({
               batch: [
                 {
@@ -239,6 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -273,6 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -323,6 +334,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -358,6 +370,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -407,6 +420,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -435,6 +449,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -465,6 +480,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -494,6 +510,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {
@@ -525,6 +542,7 @@ export default function ({ getService }: FtrProviderContext) {
             const resp = await supertest
               .post(`/internal/bsearch`)
               .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
               .send({
                 batch: [
                   {

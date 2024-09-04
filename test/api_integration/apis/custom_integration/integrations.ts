@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -18,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .get(`/internal/customIntegrations/appendCustomIntegrations`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body).to.be.an('array');
@@ -36,6 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .get(`/internal/customIntegrations/replacementCustomIntegrations`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body).to.be.an('array');

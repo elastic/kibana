@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import { schema } from '@kbn/config-schema';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -66,6 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should validate search response schema', async () => {
         const resp = await supertest
           .get(relationshipsUrl('search', '960372e0-3224-11e8-a572-ffca06da1357'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(() => {
@@ -76,6 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work for searches', async () => {
         const resp = await supertest
           .get(relationshipsUrl('search', '960372e0-3224-11e8-a572-ffca06da1357'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body.relations).to.eql([
@@ -118,6 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             relationshipsUrl('search', '960372e0-3224-11e8-a572-ffca06da1357', ['visualization'])
           )
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body.relations).to.eql([
@@ -158,6 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 404 if search finds no results', async () => {
         await supertest
           .get(relationshipsUrl('search', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(404);
       });
     });
@@ -166,6 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should validate dashboard response schema', async () => {
         const resp = await supertest
           .get(relationshipsUrl('dashboard', 'b70c7ae0-3224-11e8-a572-ffca06da1357'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(() => {
@@ -176,6 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work for dashboards', async () => {
         const resp = await supertest
           .get(relationshipsUrl('dashboard', 'b70c7ae0-3224-11e8-a572-ffca06da1357'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body.relations).to.eql([
@@ -215,6 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should filter based on savedObjectTypes', async () => {
         const resp = await supertest
           .get(relationshipsUrl('dashboard', 'b70c7ae0-3224-11e8-a572-ffca06da1357', ['search']))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body.relations).to.eql([
@@ -254,6 +262,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 404 if dashboard finds no results', async () => {
         await supertest
           .get(relationshipsUrl('dashboard', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(404);
       });
     });
@@ -262,6 +271,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should validate visualization response schema', async () => {
         const resp = await supertest
           .get(relationshipsUrl('visualization', 'a42c0580-3224-11e8-a572-ffca06da1357'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(() => {
@@ -272,6 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work for visualizations', async () => {
         const resp = await supertest
           .get(relationshipsUrl('visualization', 'a42c0580-3224-11e8-a572-ffca06da1357'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body.relations).to.eql([
@@ -313,6 +324,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             relationshipsUrl('visualization', 'a42c0580-3224-11e8-a572-ffca06da1357', ['search'])
           )
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body.relations).to.eql([
@@ -337,6 +349,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 404 if visualizations finds no results', async () => {
         await supertest
           .get(relationshipsUrl('visualization', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(404);
       });
     });
@@ -345,6 +358,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should validate index-pattern response schema', async () => {
         const resp = await supertest
           .get(relationshipsUrl('index-pattern', '8963ca30-3224-11e8-a572-ffca06da1357'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(() => {
@@ -355,6 +369,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work for index patterns', async () => {
         const resp = await supertest
           .get(relationshipsUrl('index-pattern', '8963ca30-3224-11e8-a572-ffca06da1357'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body.relations).to.eql([
@@ -396,6 +411,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             relationshipsUrl('index-pattern', '8963ca30-3224-11e8-a572-ffca06da1357', ['search'])
           )
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(200);
 
         expect(resp.body.relations).to.eql([
@@ -420,13 +436,17 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 404 if index pattern finds no results', async () => {
         await supertest
           .get(relationshipsUrl('index-pattern', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(404);
       });
     });
 
     describe('invalid references', () => {
       it('should validate the response schema', async () => {
-        const resp = await supertest.get(relationshipsUrl('dashboard', 'invalid-refs')).expect(200);
+        const resp = await supertest
+          .get(relationshipsUrl('dashboard', 'invalid-refs'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .expect(200);
 
         expect(() => {
           responseSchema.validate(resp.body);
@@ -434,7 +454,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return the invalid relations', async () => {
-        const resp = await supertest.get(relationshipsUrl('dashboard', 'invalid-refs')).expect(200);
+        const resp = await supertest
+          .get(relationshipsUrl('dashboard', 'invalid-refs'))
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .expect(200);
 
         expect(resp.body).to.eql({
           invalidRelations: [

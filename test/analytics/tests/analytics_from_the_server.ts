@@ -22,6 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
       .get(`/internal/analytics_plugin_a/stats`)
       .query({ takeNumberOfCounters, eventType: 'test-plugin-lifecycle' })
       .set('kbn-xsrf', 'xxx')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     return resp.body;
@@ -31,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     const resp = await supertest
       .get(`/internal/analytics_plugin_a/actions`)
       .set('kbn-xsrf', 'xxx')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     return resp.body;

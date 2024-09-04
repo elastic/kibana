@@ -8,6 +8,7 @@
 
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -71,6 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200 with individual responses', async () =>
       await supertest
         .post(`/api/saved_objects/_bulk_get`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(BULK_REQUESTS)
         .expect(200)
         .then((resp) => {
@@ -146,6 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200 with individual responses that include the managed property of each object', async () =>
       await supertest
         .post(`/api/saved_objects/_bulk_get`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(BULK_REQUESTS_MANAGED)
         .expect(200)
         .then((resp) => {
@@ -280,6 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body } = await supertest
         .post(`/api/saved_objects/_bulk_get`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([
           {
             type: 'config',

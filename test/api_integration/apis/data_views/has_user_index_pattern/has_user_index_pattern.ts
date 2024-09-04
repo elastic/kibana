@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import {
   INITIAL_REST_VERSION,
   INITIAL_REST_VERSION_INTERNAL,
@@ -41,7 +44,8 @@ export default function ({ getService }: FtrProviderContext) {
           await esArchiver.emptyKibanaIndex();
           const response = await supertest
             .get(servicePath)
-            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL);
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
           expect(response.status).to.be(200);
           expect(response.body.result).to.be(false);
         });
@@ -53,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertest
             .post(config.path)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({
               override: true,
               [config.serviceKey]: {
@@ -62,7 +67,8 @@ export default function ({ getService }: FtrProviderContext) {
 
           const response = await supertest
             .get(servicePath)
-            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL);
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
           expect(response.status).to.be(200);
           expect(response.body.result).to.be(true);
 
@@ -75,6 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertest
             .post(config.path)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({
               override: true,
               [config.serviceKey]: {
@@ -85,7 +92,8 @@ export default function ({ getService }: FtrProviderContext) {
 
           const response = await supertest
             .get(servicePath)
-            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL);
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
           expect(response.status).to.be(200);
           expect(response.body.result).to.be(true);
         });

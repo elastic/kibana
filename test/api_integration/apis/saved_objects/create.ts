@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -29,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200', async () => {
       await supertest
         .post(`/api/saved_objects/visualization`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           attributes: {
             title: 'My favorite vis',
@@ -71,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('result should not be updated to the latest Kibana version if there are no migrations', async () => {
       await supertest
         .post(`/api/saved_objects/visualization`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           attributes: {
             title: 'My favorite vis',
