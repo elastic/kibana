@@ -117,7 +117,7 @@ function modelJSONInput({ state }: RelatedBaseNodeParams): Partial<RelatedState>
     initialPipeline,
     finalized: false,
     reviewed: false,
-    lastExecutedChain: 'modelInput',
+    lastExecutedChain: 'modelJSONInput',
   };
 }
 

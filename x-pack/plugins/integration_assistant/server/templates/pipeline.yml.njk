@@ -15,7 +15,7 @@ processors:
       field: message
       ignore_missing: true
       tag: remove_message
-      if: 'ctx.event?.original != null'{% if log_format == 'json' %}
+      if: 'ctx.event?.original != null'{% if (log_format == 'json') or (log_format == 'ndjson') %}
   - json:
       field: event.original
       tag: json_original
