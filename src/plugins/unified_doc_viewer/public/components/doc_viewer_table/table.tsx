@@ -244,8 +244,8 @@ export const DocViewerTable = ({
   );
 
   const isShowOnlySelectedFieldsDisabled = useMemo(
-    () => columns?.includes('_source') || !columns?.length,
-    [columns]
+    () => displayedColumns?.includes('_source') || columns?.includes('_source') || !columns?.length,
+    [displayedColumns, columns]
   );
 
   const shouldShowOnlySelectedFields = useMemo(
