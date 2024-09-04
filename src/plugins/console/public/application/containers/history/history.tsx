@@ -123,20 +123,23 @@ export function History() {
     initialize();
   }, [initialize]);
 
-  const Row = ({ data, index, style }: RowProps) => (
-    <EuiFormFieldset key={index} data-test-subj="historyItemFieldset" style={style}>
-      <EuiCheckableCard
-        id={`${CHILD_ELEMENT_PREFIX}${index}`}
-        label={<CheckeableCardLabel historyItem={data[index]} />}
-        data-test-subj={`historyItem-${index}`}
-        checkableType="radio"
-        checked={viewingReq === data[index]}
-        onChange={() => {
-          setViewingReq(data[index]);
-        }}
-      />
-      <EuiSpacer size="s" />
-    </EuiFormFieldset>
+  const Row = useCallback(
+    ({ data, index, style }: RowProps) => (
+      <EuiFormFieldset key={index} data-test-subj="historyItemFieldset" style={style}>
+        <EuiCheckableCard
+          id={`${CHILD_ELEMENT_PREFIX}${index}`}
+          label={<CheckeableCardLabel historyItem={data[index]} />}
+          data-test-subj={`historyItem-${index}`}
+          checkableType="radio"
+          checked={viewingReq === data[index]}
+          onChange={() => {
+            setViewingReq(data[index]);
+          }}
+        />
+        <EuiSpacer size="s" />
+      </EuiFormFieldset>
+    ),
+    [viewingReq, setViewingReq]
   );
 
   return (
