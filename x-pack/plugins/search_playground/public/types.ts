@@ -21,6 +21,7 @@ import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-
 import { AppMountParameters } from '@kbn/core/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ChatRequestData, MessageRole, Pagination } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
@@ -52,6 +53,7 @@ export interface AppPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
   console?: ConsolePluginStart;
+  data: DataPublicPluginStart;
 }
 
 export interface AppServicesContext {
@@ -62,6 +64,7 @@ export interface AppServicesContext {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection?: UsageCollectionStart;
   console?: ConsolePluginStart;
+  data: DataPublicPluginStart;
 }
 
 export enum ChatFormFields {

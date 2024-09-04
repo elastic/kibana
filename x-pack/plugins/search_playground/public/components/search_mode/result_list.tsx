@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiFlexGroup,
@@ -26,21 +26,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { Pagination } from '../../types';
 import { getPageCounts } from '../../utils/pagination_helper';
 import { EmptyResults } from './empty_results';
-
-// TODO replace with real data view
-const dataView = {
-  title: 'foo',
-  id: 'foo',
-  name: 'foo',
-  toSpec: () => {},
-  toMinimalSpec: () => {},
-  isPersisted: () => false,
-  fields: {
-    getByName: () => {},
-    getAll: () => [],
-  },
-  timeFieldName: 'timestamp',
-};
+import { useKibana } from '../../hooks/use_kibana';
 
 export interface ResultListArgs {
   searchResults: SearchHit[];
@@ -48,8 +34,18 @@ export interface ResultListArgs {
 }
 
 export const ResultList: React.FC<ResultListArgs> = ({ searchResults, pagination }) => {
+  const {
+    services: { data },
+  } = useKibana();
+  const [dataView, setDataView] = useState<DataView | null>(null);
+  useEffect(() => {
+    data.dataViews.getDefaultDataView().then((d) => setDataView(d));
+  }, [data]);
   const [flyoutDocId, setFlyoutDocId] = useState<string | undefined>(undefined);
   const { totalPage, page } = getPageCounts(pagination);
+  const hit =
+    flyoutDocId &&
+    buildDataTableRecord(searchResults.find((item) => item._id === flyoutDocId) as EsHitRecord);
   return (
     <EuiPanel grow={false}>
       <EuiFlexGroup direction="column" gutterSize="none">
@@ -88,16 +84,14 @@ export const ResultList: React.FC<ResultListArgs> = ({ searchResults, pagination
             <EmptyResults />
           </EuiFlexItem>
         )}
-        {flyoutDocId && (
+        {flyoutDocId && dataView && hit && (
           <UnifiedDocViewerFlyout
             services={{}}
             onClose={() => setFlyoutDocId(undefined)}
             isEsqlQuery={false}
             columns={[]}
-            hit={buildDataTableRecord(
-              searchResults.find((item) => item._id === flyoutDocId) as EsHitRecord
-            )}
-            dataView={dataView as unknown as DataView}
+            hit={hit}
+            dataView={dataView}
             onAddColumn={() => {}}
             onRemoveColumn={() => {}}
             setExpandedDoc={() => {}}
