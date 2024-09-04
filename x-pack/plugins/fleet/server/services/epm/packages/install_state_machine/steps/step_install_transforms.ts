@@ -51,7 +51,7 @@ export async function cleanupTransformsStep(context: InstallContext) {
     const { installed_es: installedEs } = installedPkg.attributes;
 
     logger.debug('Retry transition - clean up transforms');
-    withPackageSpan('Retry transition - clean up ilm transforms', async () => {
+    await withPackageSpan('Retry transition - clean up ilm transforms', async () => {
       await cleanupTransforms(installedEs, esClient);
     });
   }

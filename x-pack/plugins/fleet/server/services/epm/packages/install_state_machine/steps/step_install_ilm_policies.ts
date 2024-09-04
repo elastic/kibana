@@ -60,7 +60,7 @@ export async function cleanupILMPoliciesStep(context: InstallContext) {
     const { indexTemplatesAndPipelines, indexAssets, transformAssets } = splitESAssets(installedEs);
 
     logger.debug('Retry transition - clean up prerequisite ES assets first');
-    withPackageSpan('Retry transition - clean up prerequisite ES assets first', async () => {
+    await withPackageSpan('Retry transition - clean up prerequisite ES assets first', async () => {
       await deletePrerequisiteAssets(
         {
           indexAssets,
@@ -71,7 +71,7 @@ export async function cleanupILMPoliciesStep(context: InstallContext) {
       );
     });
     logger.debug('Retry transition - clean up ilm Policies and datastream ilm policies');
-    withPackageSpan(
+    await withPackageSpan(
       'Retry transition - clean up ilm Policies and datastream ilm policies',
       async () => {
         await deleteILMPolicies(installedEs, esClient);

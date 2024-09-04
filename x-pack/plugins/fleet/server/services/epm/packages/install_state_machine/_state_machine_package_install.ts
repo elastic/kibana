@@ -168,8 +168,6 @@ export async function _stateMachineInstallPackage(
 
   // if retryFromLastState, restart install from last install state
   // if force is passed, the install should be executed from the beginning
-  // should check installType as well?
-
   if (retryFromLastState && !force && installedPkg?.attributes?.latest_executed_state?.name) {
     initialState = findNextState(
       installedPkg.attributes.latest_executed_state.name,

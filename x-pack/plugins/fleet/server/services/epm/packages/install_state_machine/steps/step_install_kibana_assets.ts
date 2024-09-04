@@ -59,7 +59,7 @@ export async function cleanUpKibanaAssetsStep(context: InstallContext) {
     const { installed_kibana: installedObjects } = installedPkg.attributes;
     logger.debug('Retry transition - clean up Kibana assets first');
 
-    withPackageSpan('Retry transition - clean up Kibana assets first', async () => {
+    await withPackageSpan('Retry transition - clean up Kibana assets first', async () => {
       await deleteKibanaAssets({ installedObjects, spaceId, packageInfo });
     });
   }

@@ -53,7 +53,7 @@ export async function cleanupArchiveEntriesStep(context: InstallContext) {
     const { package_assets: packageAssets } = installedPkg.attributes;
 
     logger.debug('Retry transition - clean up package archive assets');
-    withPackageSpan('Retry transition - clean up package archive assets', async () => {
+    await withPackageSpan('Retry transition - clean up package archive assets', async () => {
       await removeArchiveEntries({ savedObjectsClient, refs: packageAssets });
     });
   }

@@ -88,7 +88,7 @@ export async function cleanupIndexTemplatePipelinesStep(context: InstallContext)
     const { indexTemplatesAndPipelines, indexAssets, transformAssets } = splitESAssets(installedEs);
 
     logger.debug('Retry transition - clean up prerequisite ES assets first');
-    withPackageSpan('Retry transition - clean up prerequisite ES assets first', async () => {
+    await withPackageSpan('Retry transition - clean up prerequisite ES assets first', async () => {
       await deletePrerequisiteAssets(
         {
           indexAssets,
@@ -99,7 +99,7 @@ export async function cleanupIndexTemplatePipelinesStep(context: InstallContext)
       );
     });
     logger.debug('Retry transition - clean up component template');
-    withPackageSpan('Retry transition - clean up component template', async () => {
+    await withPackageSpan('Retry transition - clean up component template', async () => {
       await cleanupComponentTemplate(installedEs, esClient);
     });
   }

@@ -37,7 +37,7 @@ export async function cleanUpMlModelStep(context: InstallContext) {
     const { indexTemplatesAndPipelines, indexAssets, transformAssets } = splitESAssets(installedEs);
 
     logger.debug('Retry transition - clean up prerequisite ES assets first');
-    withPackageSpan('Retry transition - clean up prerequisite ES assets first', async () => {
+    await withPackageSpan('Retry transition - clean up prerequisite ES assets first', async () => {
       await deletePrerequisiteAssets(
         {
           indexAssets,
@@ -48,7 +48,7 @@ export async function cleanUpMlModelStep(context: InstallContext) {
       );
     });
     logger.debug('Retry transition - clean up ML model');
-    withPackageSpan('Retry transition - clean up ML model', async () => {
+    await withPackageSpan('Retry transition - clean up ML model', async () => {
       await deleteMLModels(installedEs, esClient);
     });
   }
