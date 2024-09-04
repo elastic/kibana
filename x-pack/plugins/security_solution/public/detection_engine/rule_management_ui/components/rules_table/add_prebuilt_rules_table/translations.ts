@@ -58,3 +58,18 @@ export const INSTALL_AND_ENABLE_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Install and enable',
   }
 );
+
+export const INSTALL_RULE_BUTTON_ARIA_LABEL = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.addRules.installRuleButton.ariaLabel', {
+    defaultMessage: 'Install "{ruleName}"',
+    values: {
+      ruleName,
+    },
+  });
+
+export const INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.installOverflowButton.ariaLabel',
+  {
+    defaultMessage: 'More install options',
+  }
+);

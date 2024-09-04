@@ -35,24 +35,24 @@ export const AddPrebuiltRulesHeaderButtons = () => {
   const isRuleInstalling = loadingRules.length > 0;
   const isRequestInProgress = isRuleInstalling || isRefetching || isUpgradingSecurityPackages;
 
-  const [isPopoverOpen, setPopover] = useState(false);
+  const [isOverflowPopoverOpen, setOverflowPopover] = useState(false);
 
   const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
+    setOverflowPopover(!isOverflowPopoverOpen);
   };
 
-  const closePopover = () => {
-    setPopover(false);
+  const closeOverflowPopover = () => {
+    setOverflowPopover(false);
   };
 
   const enableOnClick = () => {
     installSelectedRules(true);
-    closePopover();
+    closeOverflowPopover();
   };
 
-  const items = [
+  const overflowItems = [
     <EuiContextMenuItem key="copy" icon={'play'} onClick={enableOnClick}>
-      {'Install and enable'}
+      {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
     </EuiContextMenuItem>,
   ];
 
@@ -77,17 +77,17 @@ export const AddPrebuiltRulesHeaderButtons = () => {
                   display="base"
                   size="m"
                   iconType="boxesVertical"
-                  aria-label="More"
+                  aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
                   onClick={onButtonClick}
                   disabled={!canUserEditRules || isRequestInProgress}
                 />
               }
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
+              isOpen={isOverflowPopoverOpen}
+              closePopover={closeOverflowPopover}
               panelPaddingSize="s"
               anchorPosition="downRight"
             >
-              <EuiContextMenuPanel size="s" items={items} />
+              <EuiContextMenuPanel size="s" items={overflowItems} />
             </EuiPopover>
           </EuiFlexItem>
         </>

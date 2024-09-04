@@ -27,11 +27,16 @@ export const PERFORM_SPECIFIC_RULES_INSTALLATION_KEY = [
   PERFORM_RULE_INSTALLATION_URL,
 ];
 
+interface UsePerformSpecificRulesInstallParams {
+  rules: InstallSpecificRulesRequest['rules'];
+  enableOnInstall?: boolean;
+}
+
 export const usePerformSpecificRulesInstallMutation = (
   options?: UseMutationOptions<
     PerformRuleInstallationResponseBody,
     Error,
-    { rules: InstallSpecificRulesRequest['rules']; enableOnInstall?: boolean }
+    UsePerformSpecificRulesInstallParams
   >
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
@@ -47,12 +52,9 @@ export const usePerformSpecificRulesInstallMutation = (
   return useMutation<
     PerformRuleInstallationResponseBody,
     Error,
-    { rules: InstallSpecificRulesRequest['rules']; enableOnInstall?: boolean }
+    UsePerformSpecificRulesInstallParams
   >(
-    (rulesToInstall: {
-      rules: InstallSpecificRulesRequest['rules'];
-      enableOnInstall?: boolean;
-    }) => {
+    (rulesToInstall: UsePerformSpecificRulesInstallParams) => {
       return performInstallSpecificRules(rulesToInstall.rules);
     },
     {
@@ -68,10 +70,10 @@ export const usePerformSpecificRulesInstallMutation = (
         invalidateRuleStatus();
         invalidateFetchCoverageOverviewQuery();
 
-        const [, , { enableOnInstall, rules }] = args;
+        const [response, , { enableOnInstall }] = args;
 
-        if (enableOnInstall) {
-          const idMap = rules.map((rule) => rule.rule_id);
+        if (response && enableOnInstall) {
+          const idMap = response.results.created.map((rule) => rule.id);
           const bulkAction: BulkAction = { type: 'enable', ids: idMap };
           mutateAsync({ bulkAction });
         }
