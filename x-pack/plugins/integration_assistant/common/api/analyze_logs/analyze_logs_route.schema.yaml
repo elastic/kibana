@@ -21,6 +21,10 @@ paths:
                 - logSamples
                 - connectorId
               properties:
+                packageName:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/PackageName"
+                dataStreamName:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamName"
                 logSamples:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/LogSamples"
                 connectorId:

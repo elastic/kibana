@@ -14,6 +14,7 @@ import { KVProcessor } from '../../processor_types';
 import { HandleKVNodeParams } from './types';
 import { KV_EXAMPLE_ANSWER } from './constants';
 import { createKVProcessor } from '../../util/processors';
+import { deepCopy } from '../../util/util';
 
 export async function handleKV({
   state,
@@ -31,10 +32,10 @@ export async function handleKV({
     ex_answer: JSON.stringify(KV_EXAMPLE_ANSWER, null, 2),
   })) as KVProcessor;
 
-  const kvProcessor = createKVProcessor(kvInput);
-
+  const kvProcessor = createKVProcessor(kvInput, state);
+  const pipelineResultProcessor = deepCopy(kvProcessor);
   const { pipelineResults: kvOutputSamples, errors } = await createJSONInput(
-    kvProcessor,
+    pipelineResultProcessor,
     samples,
     client
   );
@@ -59,13 +60,15 @@ export async function handleKV({
  * @returns pipelineResults, errors
  */
 async function createJSONInput(
-  kvProcessor: ESProcessorItem,
+  pipelineResultProcessor: ESProcessorItem,
   formattedSamples: string[],
   client: IScopedClusterClient
 ): Promise<{ pipelineResults: object[]; errors: object[] }> {
   // This processor removes the original message field in the JSON output
   const removeProcessor = { remove: { field: 'message', ignore_missing: true } };
-  const pipeline = { processors: [kvProcessor[0], removeProcessor] };
+  const kvProcessor = pipelineResultProcessor[0] as ESProcessorItem;
+  kvProcessor.kv.target_field = '';
+  const pipeline = { processors: [pipelineResultProcessor[0], removeProcessor] };
   const { pipelineResults, errors } = await testPipeline(formattedSamples, pipeline, client);
   return { pipelineResults, errors };
 }

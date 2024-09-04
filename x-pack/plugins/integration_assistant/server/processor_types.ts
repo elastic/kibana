@@ -11,4 +11,6 @@ export interface KVProcessor {
   field_split: string;
   trim_key: string;
   trim_value: string;
+  packageName: string;
+  dataStreamName: string;
 }

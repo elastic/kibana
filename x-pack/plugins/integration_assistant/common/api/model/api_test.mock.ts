@@ -72,6 +72,7 @@ export const getEcsMappingRequestMock = (): EcsMappingRequestBody => ({
   dataStreamName: 'test-data-stream-name',
   packageName: 'test-package-name',
   connectorId: 'test-connector-id',
+  samplesFormat: { name: 'json', multiline: false },
 });
 
 export const getRelatedRequestMock = (): RelatedRequestBody => ({

@@ -44,6 +44,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
         const {
           packageName,
           dataStreamName,
+          samplesFormat,
           rawSamples,
           additionalProcessors,
           mapping,
@@ -81,6 +82,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             packageName,
             dataStreamName,
             rawSamples,
+            samplesFormat,
             additionalProcessors,
             ...(mapping && { mapping }),
           };

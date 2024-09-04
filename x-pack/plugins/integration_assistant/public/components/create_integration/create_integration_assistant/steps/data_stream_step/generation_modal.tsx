@@ -87,15 +87,18 @@ export const useGeneration = ({
 
     (async () => {
       try {
+        let additionalProcessors: ESProcessorItem[] | undefined;
+
         // logSamples may be modified to JSON format if they are in different formats
         // Keeping originalLogSamples for running pipeline and generating docs
-        let originalLogSamples;
+        const originalLogSamples = integrationSettings.logSamples;
         let logSamples = integrationSettings.logSamples;
         let samplesFormat = integrationSettings.samplesFormat;
-        let additionalProcessors: ESProcessorItem[] | undefined;
 
         if (integrationSettings.samplesFormat === undefined) {
           const analyzeLogsRequest: AnalyzeLogsRequestBody = {
+            packageName: integrationSettings.name ?? '',
+            dataStreamName: integrationSettings.dataStreamName ?? '',
             logSamples: integrationSettings.logSamples ?? [],
             connectorId: connector.id,
             langSmithOptions: getLangSmithOptions(),
@@ -117,6 +120,7 @@ export const useGeneration = ({
           packageName: integrationSettings.name ?? '',
           dataStreamName: integrationSettings.dataStreamName ?? '',
           rawSamples: logSamples ?? [],
+          samplesFormat: samplesFormat ?? { name: 'json' },
           additionalProcessors: additionalProcessors ?? [],
           connectorId: connector.id,
           langSmithOptions: getLangSmithOptions(),
@@ -131,7 +135,8 @@ export const useGeneration = ({
         }
         const categorizationRequest: CategorizationRequestBody = {
           ...ecsRequest,
-          originalLogSamples: originalLogSamples ?? [],
+          rawSamples: originalLogSamples ?? [],
+          samplesFormat: samplesFormat ?? { name: 'json' },
           currentPipeline: ecsGraphResult.results.pipeline,
         };
 

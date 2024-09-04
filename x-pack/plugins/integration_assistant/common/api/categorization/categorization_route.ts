@@ -11,10 +11,10 @@ import {
   Connector,
   DataStreamName,
   LangSmithOptions,
-  LogSamples,
   PackageName,
   Pipeline,
   RawSamples,
+  SamplesFormat,
 } from '../model/common_attributes';
 import { CategorizationAPIResponse } from '../model/response_schemas';
 
@@ -23,7 +23,7 @@ export const CategorizationRequestBody = z.object({
   packageName: PackageName,
   dataStreamName: DataStreamName,
   rawSamples: RawSamples,
-  originalLogSamples: LogSamples.optional(),
+  samplesFormat: SamplesFormat.optional(),
   currentPipeline: Pipeline,
   connectorId: Connector,
   langSmithOptions: LangSmithOptions.optional(),

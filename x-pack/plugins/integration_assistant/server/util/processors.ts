@@ -10,7 +10,7 @@ import { join as joinPath } from 'path';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { deepCopy } from './util';
 import type { ESProcessorItem, Pipeline } from '../../common';
-import type { SimplifiedProcessors } from '../types';
+import type { KVState, SimplifiedProcessors } from '../types';
 import { KVProcessor } from '../processor_types';
 
 export function combineProcessors(
@@ -63,13 +63,17 @@ export function createGrokProcessor(grokPattern: string): ESProcessorItem {
 
 // The kv graph returns a simplified grok processor for header
 // This function takes in the grok pattern string and creates the grok processor
-export function createKVProcessor(kvInput: KVProcessor): ESProcessorItem {
+export function createKVProcessor(kvInput: KVProcessor, state: KVState): ESProcessorItem {
   const templatesPath = joinPath(__dirname, '../templates/processors');
   const env = new Environment(new FileSystemLoader(templatesPath), {
     autoescape: false,
   });
   const template = env.getTemplate('kv.yml.njk');
-  const renderedTemplate = template.render({ kvInput });
+  const renderedTemplate = template.render({
+    kvInput,
+    packageName: state.packageName,
+    dataStreamName: state.dataStreamName,
+  });
   const kvProcessor = safeLoad(renderedTemplate) as ESProcessorItem;
   return kvProcessor;
 }

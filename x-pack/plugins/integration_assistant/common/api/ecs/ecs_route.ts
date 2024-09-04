@@ -23,6 +23,7 @@ import {
   Mapping,
   Connector,
   LangSmithOptions,
+  SamplesFormat,
 } from '../model/common_attributes';
 import { ESProcessorItem } from '../model/processor_attributes';
 import { EcsMappingAPIResponse } from '../model/response_schemas';
@@ -32,6 +33,7 @@ export const EcsMappingRequestBody = z.object({
   packageName: PackageName,
   dataStreamName: DataStreamName,
   rawSamples: RawSamples,
+  samplesFormat: SamplesFormat,
   mapping: Mapping.optional(),
   additionalProcessors: z.array(ESProcessorItem).optional(),
   connectorId: Connector,

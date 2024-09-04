@@ -7,6 +7,7 @@
 
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
+import { SamplesFormat } from '../../../common';
 import type { RelatedState } from '../../types';
 import type { RelatedGraphParams, RelatedBaseNodeParams } from './types';
 import { prefixSamples, formatSamples } from '../../util/samples';
@@ -85,9 +86,26 @@ const graphState: StateGraphArgs<RelatedState>['channels'] = {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
   },
+  samplesFormat: {
+    value: (x: SamplesFormat, y?: SamplesFormat) => y ?? x,
+    default: () => ({ name: 'unsupported' }),
+  },
 };
 
 function modelInput({ state }: RelatedBaseNodeParams): Partial<RelatedState> {
+  const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
+  return {
+    exAnswer: JSON.stringify(RELATED_EXAMPLE_ANSWER, null, 2),
+    ecs: JSON.stringify(RELATED_ECS_FIELDS, null, 2),
+    samples: state.rawSamples,
+    initialPipeline,
+    finalized: false,
+    reviewed: false,
+    lastExecutedChain: 'modelInput',
+  };
+}
+
+function modelJSONInput({ state }: RelatedBaseNodeParams): Partial<RelatedState> {
   const samples = prefixSamples(state);
   const formattedSamples = formatSamples(samples);
   const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
@@ -121,6 +139,13 @@ function inputRouter({ state }: RelatedBaseNodeParams): string {
   return 'related';
 }
 
+function modelRouter({ state }: RelatedBaseNodeParams): string {
+  if (state.samplesFormat.name === 'json' || state.samplesFormat.name === 'ndjson') {
+    return 'modelJSONInput';
+  }
+  return 'modelInput';
+}
+
 function chainRouter({ state }: RelatedBaseNodeParams): string {
   if (Object.keys(state.currentProcessors).length === 0) {
     return 'related';
@@ -140,6 +165,7 @@ function chainRouter({ state }: RelatedBaseNodeParams): string {
 export async function getRelatedGraph({ client, model }: RelatedGraphParams) {
   const workflow = new StateGraph({ channels: graphState })
     .addNode('modelInput', (state: RelatedState) => modelInput({ state }))
+    .addNode('modelJSONInput', (state: RelatedState) => modelJSONInput({ state }))
     .addNode('modelOutput', (state: RelatedState) => modelOutput({ state }))
     .addNode('handleRelated', (state: RelatedState) => handleRelated({ state, model }))
     .addNode('handleValidatePipeline', (state: RelatedState) =>
@@ -147,12 +173,19 @@ export async function getRelatedGraph({ client, model }: RelatedGraphParams) {
     )
     .addNode('handleErrors', (state: RelatedState) => handleErrors({ state, model }))
     .addNode('handleReview', (state: RelatedState) => handleReview({ state, model }))
-    .addEdge(START, 'modelInput')
+    .addConditionalEdges(START, (state: RelatedState) => modelRouter({ state }), {
+      modelJSONInput: 'modelJSONInput',
+      modelInput: 'modelInput', // For Non JSON input samples
+    })
     .addEdge('modelOutput', END)
     .addEdge('handleRelated', 'handleValidatePipeline')
     .addEdge('handleErrors', 'handleValidatePipeline')
     .addEdge('handleReview', 'handleValidatePipeline')
     .addConditionalEdges('modelInput', (state: RelatedState) => inputRouter({ state }), {
+      related: 'handleRelated',
+      validatePipeline: 'handleValidatePipeline',
+    })
+    .addConditionalEdges('modelJSONInput', (state: RelatedState) => inputRouter({ state }), {
       related: 'handleRelated',
       validatePipeline: 'handleValidatePipeline',
     })

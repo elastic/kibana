@@ -19,6 +19,14 @@ const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   },
+  packageName: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  dataStreamName: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
   logSamples: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],

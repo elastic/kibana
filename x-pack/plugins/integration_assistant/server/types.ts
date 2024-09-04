@@ -60,6 +60,7 @@ export interface CategorizationState {
   previousInvalidCategorization: string;
   initialPipeline: object;
   results: object;
+  samplesFormat: SamplesFormat;
 }
 
 export interface EcsMappingState {
@@ -67,7 +68,7 @@ export interface EcsMappingState {
   chunkSize: number;
   lastExecutedChain: string;
   rawSamples: string[];
-  additionalProcessors: object[];
+  additionalProcessors: ESProcessorItem[];
   prefixedSamples: string[];
   combinedSamples: string;
   sampleChunks: string[];
@@ -84,12 +85,14 @@ export interface EcsMappingState {
   missingKeys: string[];
   invalidEcsFields: string[];
   results: object;
-  samplesFormat: string;
+  samplesFormat: SamplesFormat;
   ecsVersion: string;
 }
 
 export interface LogFormatDetectionState {
   lastExecutedChain: string;
+  packageName: string;
+  dataStreamName: string;
   logSamples: string[];
   jsonSamples: string[];
   exAnswer: string;
@@ -103,6 +106,8 @@ export interface LogFormatDetectionState {
 
 export interface KVState {
   lastExecutedChain: string;
+  packageName: string;
+  dataStreamName: string;
   logSamples: string[];
   kvLogMessages: string[];
   jsonSamples: string[];
@@ -128,6 +133,7 @@ export interface RelatedState {
   initialPipeline: object;
   results: object;
   lastExecutedChain: string;
+  samplesFormat: SamplesFormat;
 }
 
 export type ChatModels =

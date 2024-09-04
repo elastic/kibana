@@ -8,8 +8,11 @@
 import { safeLoad } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
+import { Pipeline } from '../../../common/api/model/common_attributes';
 import type { EcsMappingState } from '../../types';
 import { ECS_TYPES } from './constants';
+import { ESProcessorItem } from '../../../common/api/model/processor_attributes';
+import { deepCopy } from '../../util/util';
 
 interface IngestPipeline {
   [key: string]: unknown;
@@ -163,9 +166,7 @@ function generateProcessors(ecsMapping: object, samples: object, basePath: strin
 export function createPipeline(state: EcsMappingState): IngestPipeline {
   const samples = JSON.parse(state.combinedSamples);
 
-  const generatedProcessors = generateProcessors(state.finalMapping, samples);
-  const additionalProcessors = state.additionalProcessors;
-  const processors = [...additionalProcessors, ...generatedProcessors];
+  const processors = generateProcessors(state.finalMapping, samples);
 
   // Retrieve all source field names from convert processors to populate single remove processor:
   const fieldsToRemove = processors
@@ -176,7 +177,7 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
     ecs_version: state.ecsVersion,
     package_name: state.packageName,
     data_stream_name: state.dataStreamName,
-    log_format: state.samplesFormat,
+    log_format: state.samplesFormat.name,
     fields_to_remove: fieldsToRemove,
   };
   const templatesPath = joinPath(__dirname, '../../templates');
@@ -188,6 +189,25 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
   });
   const template = env.getTemplate('pipeline.yml.njk');
   const renderedTemplate = template.render(mappedValues);
-  const ingestPipeline = safeLoad(renderedTemplate) as IngestPipeline;
+  let ingestPipeline = safeLoad(renderedTemplate) as Pipeline;
+  if (state.additionalProcessors.length > 0) {
+    ingestPipeline = combineProcessors(ingestPipeline, state.additionalProcessors);
+  }
   return ingestPipeline;
+}
+
+export function combineProcessors(
+  initialPipeline: Pipeline,
+  processors: ESProcessorItem[]
+): Pipeline {
+  // Create a deep copy of the initialPipeline to avoid modifying the original input
+  const currentPipeline = deepCopy(initialPipeline);
+  const currentProcessors = currentPipeline.processors;
+  const combinedProcessors = [
+    ...currentProcessors.slice(0, 2),
+    ...processors,
+    ...currentProcessors.slice(2),
+  ];
+  currentPipeline.processors = combinedProcessors;
+  return currentPipeline;
 }
