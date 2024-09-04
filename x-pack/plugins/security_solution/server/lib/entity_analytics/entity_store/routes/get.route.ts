@@ -23,7 +23,7 @@ import { GetEntityStoreEngineRequestParams } from '../../../../../common/api/ent
 import { API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-export const getEntityStoreEngineRoute = (
+export const getEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
 ) => {
@@ -53,7 +53,8 @@ export const getEntityStoreEngineRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const body: GetEntityStoreEngineResponse = undefined;
+          const secSol = await context.securitySolution;
+          const body = await secSol.getEntityStoreDataClient().get(request.params.entityType);
 
           return response.ok({ body });
         } catch (e) {

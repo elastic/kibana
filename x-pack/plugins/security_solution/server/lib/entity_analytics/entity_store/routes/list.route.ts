@@ -23,7 +23,7 @@ import type { ListEntityStoreEnginesResponse } from '../../../../../common/api/e
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-export const listEntityStoreEnginesRoute = (
+export const listEntityEnginesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
 ) => {
@@ -53,9 +53,16 @@ export const listEntityStoreEnginesRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const body: ListEntityStoreEnginesResponse = undefined;
+          const secSol = await context.securitySolution;
 
-          return response.ok({ body });
+          const { saved_objects: engines } = await secSol.getEntityStoreDataClient().list();
+
+          return response.ok({
+            body: {
+              engines,
+              count: engines.length,
+            },
+          });
         } catch (e) {
           logger.error('Error in ListEntityStoreEngines:', e);
           const error = transformError(e);

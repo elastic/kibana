@@ -26,7 +26,7 @@ import {
 import { API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-export const deleteEntityStoreRoute = (
+export const deleteEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
 ) => {
@@ -52,7 +52,8 @@ export const deleteEntityStoreRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const body: DeleteEntityStoreResponse = undefined;
+          const secSol = await context.securitySolution;
+          const body = await secSol.getEntityStoreDataClient().delete(request.params.entityType);
 
           return response.ok({ body });
         } catch (e) {

@@ -23,7 +23,7 @@ import { StartEntityStoreRequestParams } from '../../../../../common/api/entity_
 import { API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-export const startEntityStoreRoute = (
+export const startEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
 ) => {
@@ -49,9 +49,10 @@ export const startEntityStoreRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const body: StartEntityStoreResponse = undefined;
+          const secSol = await context.securitySolution;
+          const engine = await secSol.getEntityStoreDataClient().start(request.params.entityType);
 
-          return response.ok({ body });
+          return response.ok({ body: { started: engine.status === 'started' } });
         } catch (e) {
           logger.error('Error in StartEntityStore:', e);
           const error = transformError(e);

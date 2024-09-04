@@ -23,7 +23,7 @@ import { InitEntityStoreRequestParams } from '../../../../../common/api/entity_a
 import { API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-export const initEntityStoreRoute = (
+export const initEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
 ) => {

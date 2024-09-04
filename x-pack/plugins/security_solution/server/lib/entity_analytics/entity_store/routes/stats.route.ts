@@ -23,7 +23,7 @@ import { GetEntityStoreStatsRequestParams } from '../../../../../common/api/enti
 import { API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-export const getEntityStoreStatsRoute = (
+export const getEntityEngineStatsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
 ) => {
@@ -49,9 +49,10 @@ export const getEntityStoreStatsRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const body: GetEntityStoreStatsResponse = undefined;
+          // TODO
+          throw new Error('Not implemented');
 
-          return response.ok({ body });
+          // return response.ok({ body });
         } catch (e) {
           logger.error('Error in GetEntityStoreStats:', e);
           const error = transformError(e);

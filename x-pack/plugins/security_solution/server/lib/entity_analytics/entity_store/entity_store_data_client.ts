@@ -32,13 +32,13 @@ export class EntityStoreDataClient {
   }
 
   /**
-    * INIT
-        curl -H 'Content-Type: application/json' \
-            -X POST \
-            -H 'kbn-xsrf: true' \
-            -H 'elastic-api-version: 2023-10-31' \
-            http:///elastic:changeme@localhost:5601/api/entity_store/engines/host/init
-    */
+  * HOST:INIT
+    curl -H 'Content-Type: application/json' \
+      -X POST \
+      -H 'kbn-xsrf: true' \
+      -H 'elastic-api-version: 2023-10-31' \
+      http:///elastic:changeme@localhost:5601/api/entity_store/engines/host/init
+  */
   public async init(entityType: EntityType): Promise<InitEntityStoreResponse> {
     const definition = getEntityDefinition(entityType);
 
@@ -50,9 +50,17 @@ export class EntityStoreDataClient {
     });
     const updatedObj = await this.engineClient.update(savedObj.id, 'started');
 
-    return updatedObj.attributes;
+    return { ...savedObj.attributes, ...updatedObj.attributes };
   }
 
+  /**
+  * HOST:START
+    curl -H 'Content-Type: application/json' \
+      -X POST \
+      -H 'kbn-xsrf: true' \
+      -H 'elastic-api-version: 2023-10-31' \
+      http:///elastic:changeme@localhost:5601/api/entity_store/engines/host/start
+  */
   public async start(entityType: EntityType) {
     const definition = getEntityDefinition(entityType);
 
@@ -83,7 +91,6 @@ export class EntityStoreDataClient {
     }
 
     this.options.logger.debug(`Stopping entity store for ${entityType}`);
-
     // TODO: Manually stop the transforms
     const updatedObj = await this.engineClient.update(savedObj.id, 'stopped');
     return updatedObj.attributes;
@@ -110,6 +117,6 @@ export class EntityStoreDataClient {
     this.options.logger.debug(`Deleting entity store for ${entityType}`);
 
     // TODO: Delete definition
-    return { id: savedObj.id };
+    return { deleted: true };
   }
 }

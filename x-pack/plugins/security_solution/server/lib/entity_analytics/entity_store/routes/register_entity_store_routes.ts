@@ -6,8 +6,18 @@
  */
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { initEntityStoreRoute } from './init.route';
+import { deleteEntityEngineRoute } from './delete.route';
+import { getEntityEngineRoute } from './get.route';
+import { initEntityEngineRoute } from './init.route';
+import { listEntityEnginesRoute } from './list.route';
+import { startEntityEngineRoute } from './start.route';
+import { stopEntityEngineRoute } from './stop.route';
 
 export const registerEntityStoreRoutes = ({ router, logger }: EntityAnalyticsRoutesDeps) => {
-  initEntityStoreRoute(router, logger);
+  initEntityEngineRoute(router, logger);
+  startEntityEngineRoute(router, logger);
+  stopEntityEngineRoute(router, logger);
+  deleteEntityEngineRoute(router, logger);
+  getEntityEngineRoute(router, logger);
+  listEntityEnginesRoute(router, logger);
 };
