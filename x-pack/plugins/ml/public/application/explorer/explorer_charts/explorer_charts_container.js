@@ -279,7 +279,7 @@ function ExplorerChartContainer({
                 {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiButtonEmpty
                   iconSide="right"
-                  iconType="visLine"
+                  iconType="singleMetricViewer"
                   size="xs"
                   href={explorerSeriesLink}
                   onClick={addToRecentlyAccessed}
