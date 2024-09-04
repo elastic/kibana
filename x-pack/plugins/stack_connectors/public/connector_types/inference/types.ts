@@ -15,6 +15,19 @@ export interface InferenceActionParams {
   subActionParams: ChatCompleteParams;
 }
 
+export enum ServiceProviderKeys {
+  amazonbedrock = 'amazonbedrock',
+  azureopenai = 'azureopenai',
+  azureaistudio = 'azureaistudio',
+  cohere = 'cohere',
+  elasticsearch = 'elasticsearch',
+  elser = 'elser',
+  googleaistudio = 'googleaistudio',
+  hugging_face = 'hugging_face',
+  mistral = 'mistral',
+  openai = 'openai',
+}
+
 export interface Config {
   taskType: string;
   taskTypeSchema?: ConfigEntryView[];

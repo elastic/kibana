@@ -73,3 +73,15 @@ export const DOCUMENTATION = i18n.translate(
     defaultMessage: 'Inference API documentation',
   }
 );
+
+export const NO_HISTORY_EMPTY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.commandInputHistory.noHistoryEmptyMessage',
+  { defaultMessage: 'No commands have been entered' }
+);
+
+export const SELECT_PROVIDER = i18n.translate(
+  'xpack.stackConnectors.components.inference.selectProvider',
+  {
+    defaultMessage: 'Select a service',
+  }
+);

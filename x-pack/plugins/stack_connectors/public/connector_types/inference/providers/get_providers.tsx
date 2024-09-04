@@ -6,21 +6,26 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { ConfigProperties, DisplayType, FieldType } from '../lib/dynamic_config/types';
+import { i18n } from '@kbn/i18n';
+import { useQuery } from '@tanstack/react-query';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
+import { ConfigProperties, DisplayType, FieldType } from '../../lib/dynamic_config/types';
 
 export type ProviderConfiguration = Record<string, ConfigProperties | null>;
 
 export interface InferenceProvider {
   provider: string;
+  taskTypes: string[];
   logo?: string;
   configuration: ProviderConfiguration;
 }
 
 export const getProviders = (http: HttpSetup, taskType?: string): Promise<InferenceProvider[]> => {
-  return Promise.resolve([
+  const providers = [
     {
       provider: 'openai',
-      logo: 'logoElasticsearch', // openai logo here
+      logo: 'logoElasticsearch', // should be openai logo here, the hardcoded uses assets/images
+      taskTypes: ['completion', 'text_embeddings'],
       configuration: {
         api_key: {
           display: DisplayType.TEXTBOX,
@@ -83,6 +88,7 @@ export const getProviders = (http: HttpSetup, taskType?: string): Promise<Infere
     {
       provider: 'amazonbedrock',
       logo: 'logoElasticsearch', // openai logo here
+      taskTypes: ['completion', 'text_embeddings'],
       configuration: {
         deployment_id: {
           display: DisplayType.TEXTBOX,
@@ -145,6 +151,7 @@ export const getProviders = (http: HttpSetup, taskType?: string): Promise<Infere
     {
       provider: 'elasticsearch',
       logo: 'logoElasticsearch', // openai logo here
+      taskTypes: ['completion', 'text_embeddings'],
       configuration: {
         api_key: {
           display: DisplayType.TEXTBOX,
@@ -204,5 +211,28 @@ export const getProviders = (http: HttpSetup, taskType?: string): Promise<Infere
         },
       },
     },
-  ]);
+  ];
+  return Promise.resolve(
+    taskType ? providers.filter((p) => p.taskTypes.includes(taskType)) : providers
+  );
+};
+
+export const useProviders = (http: HttpSetup, toasts: ToastsStart, taskType: string) => {
+  const onErrorFn = (error: Error) => {
+    if (error) {
+      toasts.addDanger(
+        i18n.translate('alertsUIShared.hooks.useFindAlertsQuery.unableToFindAlertsQueryMessage', {
+          defaultMessage: 'Unable to find alerts',
+        })
+      );
+    }
+  };
+
+  const query = useQuery(['user-profile', taskType], {
+    queryFn: () => getProviders(http, taskType),
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    onError: onErrorFn,
+  });
+  return query;
 };
