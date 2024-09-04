@@ -30,7 +30,10 @@ const allFunctions = statsAggregationFunctionDefinitions
   .concat(groupingFunctionDefinitions);
 
 export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];
-export const ADD_DATE_HISTOGRAM_SNIPPET = 'BUCKET($0, 10, ?t_start, ?t_end)';
+
+export const getAddDateHistogramSnippet = (histogramBarTarget = 50) => {
+  return `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`;
+};
 
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
