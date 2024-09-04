@@ -54,6 +54,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       message: {
         role: MessageRole.User,
         content: 'Good morning, bot!',
+        // make sure it doesn't 400 on `data` being set
+        data: '{}',
       },
     },
   ];
@@ -218,7 +220,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when creating a new conversation', async () => {
+    describe('when creating a new conversation', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -298,7 +300,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('after executing a screen context action', async () => {
+    describe('after executing a screen context action', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -371,7 +373,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when updating an existing conversation', async () => {
+    describe('when updating an existing conversation', () => {
       let conversationCreatedEvent: ConversationCreateEvent;
       let conversationUpdatedEvent: ConversationUpdateEvent;
 

@@ -24,11 +24,13 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { HistoryLocationState } from '../../build_services';
 import { createSearchSessionMock } from '../../__mocks__/search_session';
+import { createDiscoverServicesMock } from '../../__mocks__/services';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = {
   ui: { TopNavMenu: mockTopNavMenu, AggregateQueryTopNavMenu: mockTopNavMenu },
 };
+const discoverServices = createDiscoverServicesMock();
 
 describe('ContextApp test', () => {
   const { history } = createSearchSessionMock();
@@ -53,6 +55,7 @@ describe('ContextApp test', () => {
     toastNotifications: { addDanger: () => {} },
     navigation: mockNavigationPlugin,
     core: {
+      ...discoverServices.core,
       executionContext: {
         set: jest.fn(),
       },
@@ -75,6 +78,7 @@ describe('ContextApp test', () => {
     },
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
+    profilesManager: discoverServices.profilesManager,
   } as unknown as DiscoverServices;
 
   const defaultProps = {
