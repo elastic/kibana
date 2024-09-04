@@ -31,6 +31,10 @@ const allFunctions = statsAggregationFunctionDefinitions
 
 export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];
 
+export const getAddDateHistogramSnippet = (histogramBarTarget = 50) => {
+  return `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`;
+};
+
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
   id: 'editor.action.triggerSuggest',
