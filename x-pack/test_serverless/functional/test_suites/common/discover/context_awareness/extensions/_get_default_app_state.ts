@@ -132,12 +132,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/191260
-    describe.skip('data view mode', () => {
+    describe('data view mode', () => {
       it('should render default columns and row height', async () => {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataViews.switchTo('my-example-logs');
         await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
@@ -151,6 +152,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataViews.switchTo('my-example-*');
         await expectColumns(['@timestamp', 'Document']);
         await dataGrid.clickGridSettings();
@@ -171,6 +174,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataViews.switchTo('my-example-logs');
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('log.level');
@@ -196,6 +201,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataViews.switchTo('my-example-logs');
         await expectColumns(['@timestamp', 'log.level', 'message', 'data_stream.type']);
       });
