@@ -37,3 +37,16 @@ export const getPatternAnalysisComponent = (
 };
 
 export type { PatternAnalysisSharedComponent } from './pattern_analysis';
+
+const LogRateAnalysisLazy = dynamic(async () => import('./log_rate_analysis'));
+
+export const getLogRateAnalysisComponent = (
+  coreStart: CoreStart,
+  pluginStart: AiopsPluginStartDeps
+) => {
+  return React.memo((props) => {
+    return <LogRateAnalysisLazy coreStart={coreStart} pluginStart={pluginStart} {...props} />;
+  });
+};
+
+export type { LogRateAnalysisSharedComponent } from './log_rate_analysis';
