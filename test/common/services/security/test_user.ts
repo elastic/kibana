@@ -52,10 +52,6 @@ export class TestUser extends FtrService {
       return;
     }
 
-    if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
-      return;
-    }
-
     this.log.debug(`set roles = ${roles}`);
     await this.user.create(TEST_USER_NAME, {
       password: TEST_USER_PASSWORD,
