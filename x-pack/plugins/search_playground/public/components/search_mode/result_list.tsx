@@ -25,6 +25,7 @@ import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { Pagination } from '../../types';
 import { getPageCounts } from '../../utils/pagination_helper';
+import { EmptyResults } from './empty_results';
 
 // TODO replace with real data view
 const dataView = {
@@ -80,6 +81,11 @@ export const ResultList: React.FC<ResultListArgs> = ({ searchResults, pagination
         {searchResults.length !== 0 && (
           <EuiFlexItem>
             <EuiPagination pageCount={totalPage} activePage={page} onPageClick={(p) => {}} />
+          </EuiFlexItem>
+        )}
+        {searchResults.length === 0 && (
+          <EuiFlexItem>
+            <EmptyResults />
           </EuiFlexItem>
         )}
         {flyoutDocId && (

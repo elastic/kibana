@@ -29,6 +29,7 @@ export const SearchMode: React.FC = () => {
   const { control, handleSubmit } = useFormContext();
   const {
     field: { onChange: searchBarOnChange, value: searchBarValue },
+    formState: { isSubmitting },
   } = useController<ChatForm, ChatFormFields.searchQuery>({
     name: ChatFormFields.searchQuery,
   });
@@ -68,6 +69,7 @@ export const SearchMode: React.FC = () => {
                     fullWidth
                     placeholder="Search for documents"
                     onChange={(e) => updateSearchQuery(e.target.value)}
+                    isLoading={isSubmitting}
                   />
                 )}
               />
