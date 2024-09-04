@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable sort-keys */
-
 import { type Observable, map, debounceTime } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
