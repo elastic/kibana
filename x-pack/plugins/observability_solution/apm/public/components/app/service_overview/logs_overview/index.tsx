@@ -10,21 +10,16 @@ import React from 'react';
 import { LogRateChart } from '../../entities/charts/log_rate_chart';
 import { LogErrorRateChart } from '../../entities/charts/log_error_rate_chart';
 import { chartHeight } from '..';
-import { ServiceTabContent } from '../../service_tab_content';
 
 export function LogsOverview() {
   return (
-    <>
-      <ServiceTabContent tabName="overview">
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={4}>
-            <LogRateChart height={chartHeight} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={4}>
-            <LogErrorRateChart height={chartHeight} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </ServiceTabContent>
-    </>
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem grow={4}>
+        <LogRateChart height={chartHeight} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={4}>
+        <LogErrorRateChart height={chartHeight} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
