@@ -17,7 +17,7 @@ import { SearchSessionService } from './session_service';
 import { createRequestHash } from './utils';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ConfigSchema } from '../../../config';
+import { ConfigSchema } from '../../config';
 import type { AuthenticatedUser } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';

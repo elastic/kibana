@@ -174,7 +174,7 @@ export default function (providerContext: FtrProviderContext) {
     await es.indices.deleteIndexTemplate({ name: templateName });
   };
 
-  describe('Package Policy - input package behavior', async function () {
+  describe('Package Policy - input package behavior', function () {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
