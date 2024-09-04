@@ -68,7 +68,9 @@ const DegradedDocs = ({
   Control: RowControlComponent;
   rowProps: RowControlRowProps;
 } & DegradedDocsControlProps) => {
-  const isDegradedDocumentExists = DEGRADED_DOCS_FIELDS.some((field) => field in record.raw);
+  const isDegradedDocumentExists = DEGRADED_DOCS_FIELDS.some(
+    (field) => field in record.raw && record.raw[field] !== null
+  );
 
   if (!enabled) {
     const codeSample = 'FROM logs-* METADATA _ignored';
