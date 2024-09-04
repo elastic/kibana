@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AstProviderFn } from '@kbn/esql-ast';
+import type { AstProviderFn, ESQLAstItem } from '@kbn/esql-ast';
 import {
   getAstContext,
   getFunctionDefinition,
@@ -32,6 +32,7 @@ import {
   TIME_SYSTEM_DESCRIPTIONS,
   TIME_SYSTEM_PARAMS,
 } from '@kbn/esql-validation-autocomplete/src/autocomplete/factories';
+import { isESQLFunction, isESQLNamedParamLiteral } from '@kbn/esql-ast/src/types';
 import { monacoPositionToOffset } from '../shared/utils';
 import { monaco } from '../../../monaco_imports';
 
@@ -62,7 +63,7 @@ async function getHoverItemForFunction(
   const { node } = astContext;
   const commands = ast;
 
-  if (node && astContext.type === 'function') {
+  if (isESQLFunction(node) && astContext.type === 'function') {
     const queryForFields = getQueryForFields(
       buildQueryUntilPreviousCommand(ast, correctedQuery),
       ast
@@ -90,23 +91,31 @@ async function getHoverItemForFunction(
       offset
     );
 
-    const hoveredArg = enrichedArgs[enrichedArgs.length - 1];
+    const hoveredArg: ESQLAstItem & {
+      dataType: string;
+    } = enrichedArgs[enrichedArgs.length - 1];
     const contents = [];
-    if (hoveredArg && hoveredArg.paramType === 'named' && hoveredArg.type === 'literal') {
-      const hasMatch = TIME_SYSTEM_PARAMS.find((p) => p.startsWith(hoveredArg.text));
-      if (hasMatch) {
-        contents.push(
-          ...Object.entries(TIME_SYSTEM_DESCRIPTIONS).map(([key, value]) => ({
-            value: `\n**${key}**: ${value}`,
-          }))
-        );
+    if (hoveredArg && isESQLNamedParamLiteral(hoveredArg)) {
+      const bestMatch = TIME_SYSTEM_PARAMS.find((p) => p.startsWith(hoveredArg.text));
+      // We only know if it's start or end after first 3 characters (?t_s or ?t_e)
+      if (hoveredArg.text.length > 3 && bestMatch) {
+        contents.push({
+          value: `**${bestMatch}**: ${
+            TIME_SYSTEM_DESCRIPTIONS[bestMatch as keyof typeof TIME_SYSTEM_DESCRIPTIONS]
+          }`,
+        });
       }
     }
 
     if (typesToSuggestNext.length > 0) {
       contents.push({
         value: `**${ACCEPTABLE_TYPES_HOVER}**: ${typesToSuggestNext
-          .map(({ type, constantOnly }) => `_${constantOnly ? 'constant ' : ''}**${type}**_`)
+          .map(
+            ({ type, constantOnly }) =>
+              `_${constantOnly ? 'constant ' : ''}**${type}**_` +
+              // If function arg is a constant date, helpfully suggest named time system params
+              (constantOnly && type === 'date' ? ` | ${TIME_SYSTEM_PARAMS.join(' | ')}` : '')
+          )
           .join(' | ')}`,
       });
     }
@@ -122,7 +131,6 @@ async function getHoverItemForFunction(
             contents,
           }
         : undefined;
-
     return hints;
   }
 }
