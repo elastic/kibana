@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 
+import semver from 'semver';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { fold } from 'fp-ts/lib/Either';
@@ -35,6 +36,7 @@ const COMMON_HEADERS = {
 };
 
 export default function ({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
@@ -43,8 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs'));
 
     describe('/log_entries/highlights', () => {
-      // FAILING ES 8.10 FORWARD COMPATIBILITY: https://github.com/elastic/kibana/issues/163845
-      describe.skip('with the default source', () => {
+      describe('with the default source', () => {
         before(() => esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
         after(() => esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
 
@@ -77,6 +78,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('highlights built-in message column', async () => {
+          const esInfo = (await es.info()).body;
+          const highlightTerms = 'message of document 0';
           const { body } = await supertest
             .post(LOG_ENTRIES_HIGHLIGHTS_PATH)
             .set(COMMON_HEADERS)
@@ -85,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
                 sourceId: 'default',
                 startTimestamp: KEY_BEFORE_START.time,
                 endTimestamp: KEY_AFTER_END.time,
-                highlightTerms: ['message of document 0'],
+                highlightTerms: [highlightTerms],
               })
             )
             .expect(200);
@@ -118,7 +121,10 @@ export default function ({ getService }: FtrProviderContext) {
           entries.forEach((entry) => {
             entry.columns.forEach((column) => {
               if ('message' in column && 'highlights' in column.message[0]) {
-                expect(column.message[0].highlights).to.eql(['message', 'of', 'document', '0']);
+                const expectation = semver.gte(esInfo.version.number, '8.10.0')
+                  ? [highlightTerms]
+                  : highlightTerms.split(' ');
+                expect(column.message[0].highlights).to.eql(expectation);
               }
             });
           });
