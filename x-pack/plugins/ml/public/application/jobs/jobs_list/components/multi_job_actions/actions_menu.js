@@ -44,17 +44,8 @@ class MultiJobActionsMenuUI extends Component {
     this.canResetJob = checkPermission('canResetJob') && mlNodesAvailable();
     this.canCreateMlAlerts = checkPermission('canCreateMlAlerts');
 
-<<<<<<< HEAD
     this.toastNotifications = constructorContext.services.notifications.toasts;
-    this.mlApiServices = constructorContext.services.mlServices.mlApiServices;
-=======
-    this.toastNoticiations = constructorContext.services.notifications.toasts;
-    const mlApi = constructorContext.services.mlServices.mlApi;
-    const toastNotificationService = toastNotificationServiceProvider(
-      constructorContext.services.notifications.toasts
-    );
-    this.mlJobService = mlJobServiceFactory(toastNotificationService, mlApi);
->>>>>>> origin/main
+    this.mlApi = constructorContext.services.mlServices.mlApi;
   }
 
   onButtonClick = () => {
@@ -119,7 +110,7 @@ class MultiJobActionsMenuUI extends Component {
             if (this.props.jobs.some((j) => isManagedJob(j))) {
               this.props.showCloseJobsConfirmModal(this.props.jobs);
             } else {
-              closeJobs(this.toastNotifications, this.mlApiServices, this.props.jobs);
+              closeJobs(this.toastNotifications, this.mlApi, this.props.jobs);
             }
 
             this.closePopover();
@@ -168,7 +159,7 @@ class MultiJobActionsMenuUI extends Component {
             } else {
               stopDatafeeds(
                 this.toastNotifications,
-                this.mlApiServices,
+                this.mlApi,
                 this.props.jobs,
                 this.props.refreshJobs
               );

@@ -19,7 +19,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMlApiContext, useMlKibana } from '../../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
 import { closeJobs } from '../utils';
@@ -43,7 +43,7 @@ export const CloseJobsConfirmModal: FC<Props> = ({
       notifications: { toasts },
     },
   } = useMlKibana();
-  const mlApiService = useMlApiContext();
+  const mlApi = useMlApi();
   const [modalVisible, setModalVisible] = useState(false);
   const [hasManagedJob, setHasManaged] = useState(true);
   const [jobsToReset, setJobsToReset] = useState<MlSummaryJob[]>([]);
@@ -120,7 +120,7 @@ export const CloseJobsConfirmModal: FC<Props> = ({
 
             <EuiButton
               onClick={() => {
-                closeJobs(toasts, mlApiService, jobsToReset, refreshJobs);
+                closeJobs(toasts, mlApi, jobsToReset, refreshJobs);
                 closeModal();
               }}
               fill

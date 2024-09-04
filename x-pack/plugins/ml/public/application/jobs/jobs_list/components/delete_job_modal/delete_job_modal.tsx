@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useMlApiContext, useMlKibana } from '../../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { deleteJobs } from '../utils';
 import { BLOCKED_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
@@ -45,7 +45,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
       notifications: { toasts },
     },
   } = useMlKibana();
-  const mlApiServices = useMlApiContext();
+  const mlApi = useMlApi();
   const [deleting, setDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [adJobs, setAdJobs] = useState<MlSummaryJob[]>([]);
@@ -91,7 +91,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
     setDeleting(true);
     deleteJobs(
       toasts,
-      mlApiServices,
+      mlApi,
       jobIds.map((id) => ({ id })),
       deleteUserAnnotations,
       deleteAlertingRules
@@ -101,15 +101,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
       closeModal();
       refreshJobs();
     }, BLOCKED_JOBS_REFRESH_INTERVAL_MS);
-  }, [
-    toasts,
-    mlApiServices,
-    jobIds,
-    deleteUserAnnotations,
-    deleteAlertingRules,
-    closeModal,
-    refreshJobs,
-  ]);
+  }, [toasts, mlApi, jobIds, deleteUserAnnotations, deleteAlertingRules, closeModal, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;

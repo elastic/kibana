@@ -19,7 +19,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMlApiContext, useMlKibana } from '../../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
 import { stopDatafeeds } from '../utils';
@@ -44,7 +44,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
       notifications: { toasts },
     },
   } = useMlKibana();
-  const mlApiServices = useMlApiContext();
+  const mlApi = useMlApi();
   const [modalVisible, setModalVisible] = useState(false);
   const [hasManagedJob, setHasManaged] = useState(true);
   const [jobsToStop, setJobsToStop] = useState<MlSummaryJob[]>([]);
@@ -121,7 +121,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
 
             <EuiButton
               onClick={() => {
-                stopDatafeeds(toasts, mlApiServices, jobsToStop, refreshJobs);
+                stopDatafeeds(toasts, mlApi, jobsToStop, refreshJobs);
                 closeModal();
               }}
               fill
