@@ -1,0 +1,15 @@
+## DATE_PARSE
+
+The `DATE_PARSE` function returns a date by parsing the second argument using the format specified in the first argument.
+
+### Examples
+
+```esql
+ROW date_string = "2022-05-06"
+| EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
+```
+
+```esql
+ROW date_string = "2023-12-25"
+| EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
+```
