@@ -258,11 +258,11 @@ export const isDerivativeAgg = (
   return !!(agg as estypes.AggregationsAggregationContainer).derivative;
 };
 
-export const ESSumBucketAggRT = rt.type({
-  sum_bucket: rt.type({
-    buckets_path: rt.string,
-  }),
-});
+export const isSumBucketAgg = (
+  agg: unknown
+): agg is Pick<estypes.AggregationsAggregationContainer, 'sum_bucket'> => {
+  return !!(agg as estypes.AggregationsAggregationContainer).sum_bucket;
+};
 
 export type MetricsUIAggregation = Record<string, estypes.AggregationsAggregate>;
 
