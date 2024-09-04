@@ -7,4 +7,10 @@
  */
 
 export { createRepositoryClient } from './src/create_repository_client';
-export type { DefaultClientOptions } from '@kbn/server-route-repository-utils';
+export { isHttpFetchError } from './src/is_http_fetch_error';
+
+export type {
+  DefaultClientOptions,
+  ClientRequestParamsOf,
+  RouteRepositoryClient,
+} from '@kbn/server-route-repository-utils';

@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { NewAgentPolicySchema } from '../models';
-
+import { inputsFormat } from '../../../common/constants';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_MAPPINGS } from '../../constants';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
@@ -39,6 +39,9 @@ export const GetAgentPoliciesRequestSchema = {
     ),
     noAgentCount: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
   }),
 };
 
@@ -46,11 +49,21 @@ export const BulkGetAgentPoliciesRequestSchema = {
   body: BulkRequestBodySchema.extends({
     full: schema.maybe(schema.boolean()),
   }),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
+  }),
 };
 
 export const GetOneAgentPolicyRequestSchema = {
   params: schema.object({
     agentPolicyId: schema.string(),
+  }),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
   }),
 };
 
