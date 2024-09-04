@@ -18,6 +18,12 @@ import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
+import {
+  AssetDetailsLocatorDefinition,
+  InventoryLocatorDefinition,
+  MetricsExplorerLocatorDefinition,
+} from '@kbn/observability-shared-plugin/common';
+import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
 import { mapValues } from 'lodash';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
@@ -192,6 +198,15 @@ export class InfraServerPlugin
       { sources }
     );
 
+    const alertsLocator = plugins.share.url.locators.get<AlertsLocatorParams>(alertsLocatorID);
+    const assetDetailsLocator = plugins.share.url.locators.create(
+      new AssetDetailsLocatorDefinition()
+    );
+    const metricsExplorerLocator = plugins.share.url.locators.create(
+      new MetricsExplorerLocatorDefinition()
+    );
+    const inventoryLocator = plugins.share.url.locators.create(new InventoryLocatorDefinition());
+
     // Setup infra services
     const inventoryViews = this.inventoryViews.setup();
     const metricsExplorerViews = this.metricsExplorerViews?.setup();
@@ -268,7 +283,12 @@ export class InfraServerPlugin
       ]);
     }
 
-    registerRuleTypes(plugins.alerting, this.libs, this.config);
+    registerRuleTypes(plugins.alerting, this.libs, this.config, {
+      alertsLocator,
+      assetDetailsLocator,
+      metricsExplorerLocator,
+      inventoryLocator,
+    });
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
