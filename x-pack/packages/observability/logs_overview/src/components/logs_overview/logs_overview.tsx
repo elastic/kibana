@@ -25,30 +25,30 @@ export type LogsOverviewDependencies = LogCategoriesDependencies & {
   logsDataAccess: LogsDataAccessPluginStart;
 };
 
-export const LogsOverview: React.FC<LogsOverviewProps> = ({
-  dependencies,
-  logsSource = { type: 'shared_setting' },
-  timeRange,
-}) => {
-  const normalizedLogsSource = useAsync(
-    () => normalizeLogsSource({ logsDataAccess: dependencies.logsDataAccess })(logsSource),
-    [dependencies.logsDataAccess, logsSource]
-  );
+export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
+  ({ dependencies, logsSource = defaultLogsSource, timeRange }) => {
+    const normalizedLogsSource = useAsync(
+      () => normalizeLogsSource({ logsDataAccess: dependencies.logsDataAccess })(logsSource),
+      [dependencies.logsDataAccess, logsSource]
+    );
 
-  if (normalizedLogsSource.loading) {
-    return <LogsOverviewLoadingContent />;
+    if (normalizedLogsSource.loading) {
+      return <LogsOverviewLoadingContent />;
+    }
+
+    if (normalizedLogsSource.error != null || normalizedLogsSource.value == null) {
+      // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+      return <>Error</>;
+    }
+
+    return (
+      <LogCategories
+        dependencies={dependencies}
+        logsSource={normalizedLogsSource.value}
+        timeRange={timeRange}
+      />
+    );
   }
+);
 
-  if (normalizedLogsSource.error != null || normalizedLogsSource.value == null) {
-    // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
-    return <>Error</>;
-  }
-
-  return (
-    <LogCategories
-      dependencies={dependencies}
-      logsSource={normalizedLogsSource.value}
-      timeRange={timeRange}
-    />
-  );
-};
+const defaultLogsSource: LogsSourceConfiguration = { type: 'shared_setting' };

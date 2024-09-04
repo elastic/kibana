@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { CONTAINER_ID, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -29,6 +29,7 @@ export function ServiceLogs() {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useAnyOfApmParams('/services/{serviceName}/logs');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const timeRange = useMemo(() => ({ start, end }), [start, end]);
 
   // const { data } = useFetcher(
   //   (callApmApi) => {
@@ -50,15 +51,7 @@ export function ServiceLogs() {
   // );
 
   // TODO: filter by service name and environment
-  // TODO: fix loop when no logsSource is given
-  return (
-    <logsShared.LogsOverview
-      timeRange={{
-        start,
-        end,
-      }}
-    />
-  );
+  return <logsShared.LogsOverview timeRange={timeRange} />;
 
   // return (
   //   <LogStream
