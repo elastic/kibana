@@ -1116,7 +1116,7 @@ class AgentPolicyService {
         // Deleting agentless deployment
         await agentlessAgentService.deleteAgentlessAgent(id);
         logger.debug(
-          `[Agentless API] Successfully deleted agentless deployment  with single agent policy with id ${id}`
+          `[Agentless API] Successfully deleted agentless deployment for single agent policy id ${id}`
         );
       } catch (error) {
         logger.error(
