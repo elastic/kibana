@@ -60,6 +60,16 @@ api-docs-overlay: ## Run spectral API docs linter on kibana.serverless.yaml
 	rm output/kibana.tmp*.yaml
 	rm output/kibana.serverless.tmp*.yaml
 
+.PHONY: api-docs-preview
+api-docs-preview-preview: ## Generate a preview for kibana.yaml and kibana.serverless.yaml
+	@npx bump preview "output/kibana.yaml"
+	@npx bump preview "output/kibana.serverless.yaml"
+
+.PHONY: api-docs-overlay-preview
+api-docs-preview-overlay: ## Generate a preview for kibana.new.yaml and kibana.serverless.new.yaml
+	@npx bump preview "output/kibana.new.yaml"
+	@npx bump preview "output/kibana.serverless.new.yaml"
+
 help:  ## Display help
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 #------------- <https://suva.sh/posts/well-documented-makefiles> --------------
