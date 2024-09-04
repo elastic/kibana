@@ -93,7 +93,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     uiSettings,
   } = kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
-  const histogramBarTarget = uiSettings?.get('histogram:barTarget');
+  const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
