@@ -200,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
           .auth(UNAUTHZD_TEST_USERNAME, UNAUTHZD_TEST_USER_PASSWORD)
           .set('kbn-xsrf', 'xxx')
           .expect(403)
-          .then(({ body }) => {
+          .then(({ body }: any) => {
             expect(body).to.eql({
               statusCode: 403,
               error: 'Forbidden',
@@ -214,7 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
           .auth(UNAUTHZD_TEST_USERNAME, UNAUTHZD_TEST_USER_PASSWORD)
           .set('kbn-xsrf', 'xxx')
           .expect(403)
-          .then(({ body }) => {
+          .then(({ body }: any) => {
             expect(body).to.eql({
               statusCode: 403,
               error: 'Forbidden',
