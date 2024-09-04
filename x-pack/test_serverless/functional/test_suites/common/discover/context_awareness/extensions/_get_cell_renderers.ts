@@ -45,6 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
         const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -65,6 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
         const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -78,7 +80,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
-        await dataViews.switchTo('my-example-logs,logstash*');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await dataViews.switchToAndValidate('my-example-logs,logstash*');
         await queryBar.setQuery('log.level:*');
         await queryBar.submitQuery();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -110,7 +114,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
-        await dataViews.switchTo('my-example-*');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await dataViews.switchToAndValidate('my-example-*');
         await queryBar.setQuery('log.level:*');
         await queryBar.submitQuery();
         await PageObjects.discover.waitUntilSearchingHasFinished();

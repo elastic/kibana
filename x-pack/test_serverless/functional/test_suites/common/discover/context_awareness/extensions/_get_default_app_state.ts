@@ -98,6 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('log.level');
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('message');
@@ -177,6 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataViews.switchToAndValidate('my-example-logs');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('log.level');
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('message');
