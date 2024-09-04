@@ -15,7 +15,7 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { isApmSignal, isLogsSignal, isOnlyLogsSignal } from '../../../utils/get_signal_type';
+import { isApmSignal, isLogsSignal, isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { ApmOverview } from './apm_overview';
 import { LogsOverview } from './logs_overview';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
@@ -68,7 +68,7 @@ export function ServiceOverview() {
 
   const hasOnlyLogsSignal =
     serviceEntitySummary?.signalTypes &&
-    isOnlyLogsSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+    isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
 
   // Shows APM overview when entity has APM signal or when Entity centric is not enabled
   const showApmOverview = isEntityCentricExperienceViewEnabled === false || hasApmSignal;
