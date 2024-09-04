@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { Clause, Value } from '@elastic/eui/src/components/search_bar/query/ast';
 import type { Module } from '../../../common/types/modules';
 import { stringMatch } from '../util/string_utils';
 
-export function filterModules(items: Module[], clauses: any[]) {
+export function filterModules(items: Module[], clauses: Clause[]) {
   if (clauses.length === 0) {
     return items;
   }
@@ -25,21 +26,21 @@ export function filterModules(items: Module[], clauses: any[]) {
   clauses.forEach((c) => {
     // the search term could be negated with a minus, e.g. -bananas
     const bool = c.match === 'must';
-    let js = [];
+    let matchingItems: Module[] = [];
 
     if (c.type === 'term') {
       // filter term based clauses, e.g. bananas
-      // match on id, description and memory_status
+      // match on id, description, title
       // if the term has been negated, AND the matches
       if (bool === true) {
-        js = items.filter(
+        matchingItems = items.filter(
           (item) =>
             stringMatch(item.id, c.value) === bool ||
             stringMatch(item.description, c.value) === bool ||
             stringMatch(item.title, c.value) === bool
         );
       } else {
-        js = items.filter(
+        matchingItems = items.filter(
           (item) =>
             stringMatch(item.id, c.value) === bool &&
             stringMatch(item.description, c.value) === bool &&
@@ -47,22 +48,26 @@ export function filterModules(items: Module[], clauses: any[]) {
         );
       }
     } else {
-      // filter other clauses, i.e. the filters for type and status
-      if (Array.isArray(c.value)) {
-        // Module tags is an array of string(s) e.g. c.value => ['observability', 'logs', 'security']
-        js = items.filter((item) =>
-          c.value.some((filterValue) =>
-            Array.isArray(item[c.field])
-              ? item[c.field]?.includes(filterValue)
-              : item[c.field] === filterValue
-          )
-        );
-      } else {
-        js = items.filter((item) => item[c.field as keyof Pick<typeof item, 'tags'>] === c.value);
+      // filter other clauses, i.e. the tags filter
+      if (c.type === 'field') {
+        if (Array.isArray(c.value)) {
+          // Module tags is an array of string(s) e.g. c.value => ['observability', 'logs', 'security']
+          matchingItems = items.filter((item) =>
+            (c.value as Value[]).some((filterValue) =>
+              Array.isArray(item[c.field as keyof Module])
+                ? item[c.field as keyof Module]?.includes(filterValue)
+                : item[c.field as keyof Module] === filterValue
+            )
+          );
+        } else {
+          matchingItems = items.filter(
+            (item) => item[c.field as keyof Pick<typeof item, 'tags'>] === c.value
+          );
+        }
       }
     }
 
-    js.forEach((j) => matches[j.id].count++);
+    matchingItems.forEach((j) => matches[j.id].count++);
   });
 
   // loop through the matches and return only those items which have match all the clauses

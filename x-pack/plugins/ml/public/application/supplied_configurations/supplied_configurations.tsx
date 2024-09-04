@@ -6,7 +6,11 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiSearchBarOnChangeArgs, SearchFilterConfig } from '@elastic/eui';
+import type {
+  EuiSearchBarOnChangeArgs,
+  SearchFilterConfig,
+  FieldValueOptionType,
+} from '@elastic/eui';
 import {
   EuiCallOut,
   EuiCard,
@@ -22,8 +26,6 @@ import type { Module } from '../../../common/types/modules';
 import { LoadingIndicator } from '../components/loading_indicator';
 import { filterModules } from './utils';
 import { SuppliedConfigurationsFlyout } from './supplied_configurations_flyout';
-
-const TAGS = ['observability', 'logs', 'security'];
 
 export function isLogoObject(arg: unknown): arg is { icon: string } {
   return isPopulatedObject(arg) && Object.hasOwn(arg, 'icon');
@@ -67,35 +69,34 @@ export const SuppliedConfigurations = () => {
     loadModules();
   }, [loadModules]);
 
-  const filters: SearchFilterConfig[] = useMemo(
-    () => [
+  const filters: SearchFilterConfig[] = useMemo(() => {
+    const options: FieldValueOptionType[] = [];
+    const tags = new Set(modules.map((module) => module.tags).flat());
+    tags.forEach((tag) => {
+      if (tag === undefined) return;
+      options.push({
+        value: tag,
+        view: tag,
+      });
+    });
+
+    return [
       {
         type: 'field_value_selection',
         field: 'tags',
         name: 'Tags',
         filterWith: 'includes',
         multiSelect: 'or',
-        options: TAGS.map((tag) => {
-          return {
-            value: tag,
-            view: tag,
-          };
-        }),
+        options,
       },
-    ],
-    []
-  );
+    ];
+  }, [modules]);
 
   const schema = {
     strict: true,
     fields: {
       tags: {
         type: 'string',
-        validate: (value: string) => {
-          if (!TAGS.some((tag) => tag === value)) {
-            throw new Error(`unknown tag (possible values: ${TAGS.map((tag) => tag)})`);
-          }
-        },
       },
     },
   };

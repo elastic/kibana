@@ -13,12 +13,16 @@ import type {
   IScopedClusterClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
 import { merge, intersection } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import type {
+  AggregationsAggregate,
+  SearchResponse,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { CompatibleModule } from '../../../common/constants/app';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
@@ -258,7 +262,9 @@ export class DataRecognizer {
 
     try {
       const listOfIndices = await this._client.asCurrentUser.cat.indices({ format: 'json' });
-      const promises: Array<Promise<estypes.SearchResponse<any>>> = [];
+      const promises: Array<
+        Promise<SearchResponse<unknown, Record<string, AggregationsAggregate>>>
+      > = [];
       // Keep track of which index name is associated with which promise
       const indicesMap: Record<string, Promise<any>> = {};
 
@@ -286,7 +292,7 @@ export class DataRecognizer {
           const totalHits =
             typeof response[i].hits.total === 'number'
               ? response[i].hits.total
-              : response[i].hits?.total?.value ?? 0;
+              : (response[i].hits?.total as SearchTotalHits)?.value ?? 0;
           return Object.assign(acc, { [indexName]: totalHits });
         },
         {}
