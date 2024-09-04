@@ -320,3 +320,6 @@ matchCommand
 matchQuery
     : QUOTED_STRING
     ;
+
+// DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.
+
