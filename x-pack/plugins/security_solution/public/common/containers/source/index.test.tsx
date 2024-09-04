@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'React';
+import type { PropsWithChildren } from 'react';
 import type { IndexFieldSearch } from './use_data_view';
 import { useDataView } from './use_data_view';
 import { mocksSource } from './mock';
