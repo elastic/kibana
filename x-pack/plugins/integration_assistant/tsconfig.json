@@ -8,6 +8,7 @@
     "public/**/*",
     "server/**/*.ts",
     "common/**/*.ts",
+    "scripts/**/*.ts",
     "__jest__/**/*",
     "../../typings/**/*"
   ],
@@ -39,6 +40,7 @@
     "@kbn/core-http-server",
     "@kbn/kibana-utils-plugin",
     "@kbn/utils",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/tooling-log"
   ]
 }
