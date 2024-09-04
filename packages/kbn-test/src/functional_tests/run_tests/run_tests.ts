@@ -70,12 +70,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
       let config: Config;
       if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
-        config = await readConfigFile(log, options.esVersion, options.config, settingOverrides);
+        config = await readConfigFile(log, options.esVersion, path, settingOverrides);
       } else {
         config = await readConfigFile(
           log,
           options.esVersion,
-          options.config,
+          path,
           settingOverrides,
           applyFipsOverrides
         );
