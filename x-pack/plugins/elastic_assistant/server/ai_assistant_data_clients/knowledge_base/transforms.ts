@@ -102,5 +102,6 @@ const transformEsSchemaToEntry = (
     };
     return indexEntry;
   }
+  // TODO: Return null/error and have caller manage errors as to not completely stop the operation
   throw new Error(`Unknown Knowledge Base Entry`);
 };

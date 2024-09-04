@@ -413,6 +413,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const elserId = await this.options.getElserId();
     const userFilter = getKBUserFilter(user);
     const results = await this.findDocuments<EsIndexEntry>({
+      // Note: This is a magic number to set some upward bound as to not blow the context with too
+      // many registered tools. As discussed in review, this will initially be mitigated by caps on
+      // the IndexEntries field lengths, context trimming at the graph layer (before compilation),
+      // and eventually some sort of tool discovery sub-graph or generic retriever to scale tool usage.
       perPage: 23,
       page: 1,
       sortField: 'created_at',
