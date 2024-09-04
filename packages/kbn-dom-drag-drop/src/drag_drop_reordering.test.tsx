@@ -126,13 +126,13 @@ describe('Drag and drop reordering', () => {
       },
       startDraggingByKeyboard: async (index = 0) => {
         draggableKeyboardHandlers[index].focus();
-        await user.keyboard('{enter}');
+        await user.keyboard('[Enter]');
         act(() => {
           jest.runAllTimers();
         });
       },
       dropByKeyboard: async () => {
-        await user.keyboard('{enter}');
+        await user.keyboard('[Enter]');
         act(() => {
           jest.runAllTimers();
         });
@@ -144,30 +144,30 @@ describe('Drag and drop reordering', () => {
         });
       },
       reorderDownByKeyboard: async () => {
-        await user.keyboard('{arrowdown}');
+        await user.keyboard('[ArrowDown]');
         act(() => {
           jest.runAllTimers();
         });
       },
       reorderUpByKeyboard: async () => {
-        await user.keyboard('{arrowup}');
+        await user.keyboard('[ArrowUp]');
         act(() => {
           jest.runAllTimers();
         });
       },
       dragOverToNextByKeyboard: async () => {
-        await user.keyboard('{arrowright}');
+        await user.keyboard('[ArrowRight]');
         act(() => {
           jest.runAllTimers();
         });
       },
       dragOverToPreviousByKeyboard: async () => {
-        await user.keyboard('{arrowleft}');
+        await user.keyboard('[ArrowLeft]');
         act(() => {
           jest.runAllTimers();
         });
       },
-      pressModifierKey: async (key: '{Shift}' | '{Alt}' | '{Ctrl}') => {
+      pressModifierKey: async (key: '{Shift>}' | '{Alt>}' | '{Control>}') => {
         await user.keyboard(key);
         act(() => {
           jest.runAllTimers();
@@ -343,8 +343,7 @@ describe('Drag and drop reordering', () => {
       expect(screen.getByText('Element no0')).toHaveClass('domDroppable--hover');
     });
 
-    // TODO needs fixing after the update of userEvent v14 https://github.com/elastic/kibana/pull/189949
-    test.skip('exits reordering and selects out of group target when hitting arrow left', async () => {
+    test('exits reordering and selects out of group target when hitting arrow left', async () => {
       const {
         startDraggingByKeyboard,
         cancelByKeyboard,

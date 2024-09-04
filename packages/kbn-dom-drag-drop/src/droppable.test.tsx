@@ -117,7 +117,7 @@ describe('Droppable', () => {
           jest.runAllTimers();
         });
       },
-      pressModifierKey: async (key: '{Shift}' | '{Alt}' | '{Ctrl}') => {
+      pressModifierKey: async (key: '{Shift>}' | '{Alt>}' | '{Control>}') => {
         await user.keyboard(key);
         act(() => {
           jest.runAllTimers();
@@ -394,6 +394,7 @@ describe('Droppable', () => {
     });
     describe('keyboard mode', () => {
       // TODO needs fixing after the update of userEvent v14 https://github.com/elastic/kibana/pull/189949
+      // There might be an issue related to triggering enter with v14 https://github.com/testing-library/user-event/discussions/1164
       test.skip('user can go through all the drop targets ', async () => {
         const { startDraggingByKeyboard, dragOverToNextByKeyboard, droppables, pressModifierKey } =
           renderTestComponents([
@@ -413,9 +414,9 @@ describe('Droppable', () => {
         await startDraggingByKeyboard();
         await dragOverToNextByKeyboard();
         expect(droppables[0]).toHaveClass('domDroppable--hover');
-        await pressModifierKey('{Alt}');
+        await pressModifierKey('{Alt>}');
         expect(droppables[1]).toHaveClass('domDroppable--hover');
-        await pressModifierKey('{Shift}');
+        await pressModifierKey('{Shift>}');
         expect(droppables[2]).toHaveClass('domDroppable--hover');
         await dragOverToNextByKeyboard();
         expect(droppables[3]).toHaveClass('domDroppable--hover');
@@ -425,6 +426,7 @@ describe('Droppable', () => {
         expect(droppables[0]).toHaveClass('domDroppable--hover');
       });
       // TODO needs fixing after the update of userEvent v14 https://github.com/elastic/kibana/pull/189949
+      // There might be an issue related to triggering enter with v14 https://github.com/testing-library/user-event/discussions/1164
       test.skip('user can go through all the drop targets in reverse direction', async () => {
         const {
           startDraggingByKeyboard,
@@ -446,9 +448,9 @@ describe('Droppable', () => {
         expect(droppables[3]).toHaveClass('domDroppable--hover');
         await dragOverToPreviousByKeyboard();
         expect(droppables[0]).toHaveClass('domDroppable--hover');
-        await pressModifierKey('{Alt}');
+        await pressModifierKey('{Alt>}');
         expect(droppables[1]).toHaveClass('domDroppable--hover');
-        await pressModifierKey('{Shift}');
+        await pressModifierKey('{Shift>}');
         expect(droppables[2]).toHaveClass('domDroppable--hover');
         await dragOverToPreviousByKeyboard();
         // we circled back to the draggable (no drop target is selected)
@@ -456,7 +458,7 @@ describe('Droppable', () => {
         expect(droppables[3]).toHaveClass('domDroppable--hover');
       });
       // TODO needs fixing after the update of userEvent v14 https://github.com/elastic/kibana/pull/189949
-      test.skip('user can drop on extra drop targets', async () => {
+      test('user can drop on extra drop targets', async () => {
         const {
           startDraggingByKeyboard,
           dragOverToNextByKeyboard,
@@ -477,14 +479,14 @@ describe('Droppable', () => {
 
         await startDraggingByKeyboard();
         await dragOverToNextByKeyboard();
-        await pressModifierKey('{Alt}');
+        await pressModifierKey('{Alt>}');
         await dropByKeyboard();
         expect(onDrop).toHaveBeenCalledWith(draggableValue, 'duplicate_compatible');
         onDrop.mockClear();
 
         await startDraggingByKeyboard();
         await dragOverToNextByKeyboard();
-        await pressModifierKey('{Shift}');
+        await pressModifierKey('{Shift>}');
         await dropByKeyboard();
         expect(onDrop).toHaveBeenCalledWith(draggableValue, 'swap_compatible');
       });
