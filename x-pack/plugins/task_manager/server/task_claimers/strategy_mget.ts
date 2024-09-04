@@ -125,9 +125,6 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     taskPartitioner,
   });
 
-  // eslint-disable-next-line no-console
-  console.error(`mget docs ${JSON.stringify(docs)}`);
-
   if (docs.length === 0)
     return {
       ...getEmptyClaimOwnershipResult(),
@@ -356,8 +353,6 @@ async function searchAvailableTasks({
       tasksWithPartitions(partitions)
     );
 
-    // eslint-disable-next-line no-console
-    console.error(`queryUnlimitedTasks ${JSON.stringify(queryUnlimitedTasks)}`);
     searches.push({
       query: queryUnlimitedTasks,
       sort, // note: we could optimize this to not sort on priority, for this case
