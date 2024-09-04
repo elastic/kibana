@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export * from './type';
-export { showErrorToast } from './src/utils/show_error_toast';
-export * from './src/components';
+import { getAgentIcon } from '@kbn/custom-icons';
+import cytoscape from 'cytoscape';
+
+export function iconForNode(node: cytoscape.NodeSingular) {
+  // TODO: KFIR
+  return getAgentIcon('rum-js', false);
+}
