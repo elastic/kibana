@@ -298,8 +298,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  // Failing: See https://github.com/elastic/kibana/issues/191806
-  describe.skip('Hosts View', function () {
+  describe('Hosts View', function () {
     let synthEsInfraClient: InfraSynthtraceEsClient;
     let syntEsLogsClient: LogsSynthtraceEsClient;
 
@@ -335,6 +334,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           packageVersion: version,
         });
 
+        const hosts = generateHostData({
+          from: DATE_WITH_HOSTS_DATA_FROM,
+          to: DATE_WITH_HOSTS_DATA_TO,
+          hosts: SYNTH_HOSTS,
+        });
+
         const services = generateAddServicesToExistingHost({
           from: DATE_WITH_HOSTS_DATA_FROM,
           to: DATE_WITH_HOSTS_DATA_TO,
@@ -352,13 +357,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         return Promise.all([
           synthtraceApmClient.index(services),
-          synthEsInfraClient.index(
-            generateHostData({
-              from: DATE_WITH_HOSTS_DATA_FROM,
-              to: DATE_WITH_HOSTS_DATA_TO,
-              hosts: SYNTH_HOSTS,
-            })
-          ),
+          synthEsInfraClient.index(hosts),
           syntEsLogsClient.index(logs),
         ]);
       });

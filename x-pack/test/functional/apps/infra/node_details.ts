@@ -139,13 +139,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let synthEsClient: InfraSynthtraceEsClient;
     before(async () => {
       synthEsClient = await getInfraSynthtraceEsClient(esClient);
-      await synthEsClient.clean();
       await kibanaServer.savedObjects.cleanStandardList();
       await browser.setWindowSize(1600, 1200);
-    });
-
-    after(async () => {
-      await synthEsClient.clean();
     });
 
     describe('#Asset Type: host', () => {
@@ -159,15 +154,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             hosts: HOSTS,
           })
         );
+
         await navigateToNodeDetails('host-1', 'host', {
           name: 'host-1',
         });
 
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await pageObjects.timePicker.setAbsoluteRange(
-          START_HOST_DATE.format(DATE_PICKER_FORMAT),
-          END_HOST_DATE.format(DATE_PICKER_FORMAT)
-        );
       });
 
       after(async () => {
