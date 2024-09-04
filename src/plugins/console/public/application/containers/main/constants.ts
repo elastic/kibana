@@ -25,3 +25,5 @@ export const INITIAL_TOUR_CONFIG = {
   tourPopoverWidth: 360,
   tourSubtitle: 'Console onboarding', // Used for state in local storage
 };
+
+export const EXPORT_FILE_NAME = 'console_export';
