@@ -33,7 +33,9 @@ export const WorkpadRoute = () => {
     <Route
       path={['/workpad/:id/page/:pageNumber', '/workpad/:id']}
       exact={false}
-      component={WorkpadRouteComponent}
+      children={(route: WorkpadRouteProps) => {
+        return <WorkpadRouteComponent route={route} />;
+      }}
     />
   );
 };
@@ -80,7 +82,9 @@ export const ExportWorkpadRoute = () => {
   return (
     <Route
       path={'/export/workpad/pdf/:id/page/:pageNumber'}
-      component={ExportWorkpadRouteComponent}
+      children={(route: WorkpadRouteProps) => {
+        return <ExportWorkpadRouteComponent route={route} />;
+      }}
     />
   );
 };

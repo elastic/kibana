@@ -67,8 +67,7 @@ export function shallowWithIntl(
   const optionsWithIntl = getOptions(context, props);
 
   return shallow(nodeWithIntlProp(node), {
-    // @ts-expect-error enzyme types are incorrect with @types/react@18
-    wrappingComponent: I18nProvider,
+    wrappingComponent: I18nProvider as ComponentType<{}>,
     ...optionsWithIntl,
   });
 }
@@ -86,8 +85,7 @@ export function mountWithIntl(node: React.ReactElement, options?: MountRendererP
   const optionsWithIntl = getOptions(context, props);
 
   return mount(nodeWithIntlProp(node), {
-    // @ts-expect-error enzyme types are incorrect with @types/react@18
-    wrappingComponent: I18nProvider,
+    wrappingComponent: I18nProvider as ComponentType<{}>,
     ...optionsWithIntl,
   });
 }
@@ -105,7 +103,7 @@ export function renderWithIntl<T>(node: React.ReactElement<T>, options?: any) {
   const optionsWithIntl = getOptions(context, props);
 
   return render(nodeWithIntlProp(node), {
-    wrappingComponent: I18nProvider,
+    wrappingComponent: I18nProvider as ComponentType<{}>,
     ...optionsWithIntl,
   });
 }
