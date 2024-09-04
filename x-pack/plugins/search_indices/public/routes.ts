@@ -6,4 +6,4 @@
  */
 
 export const ROOT_PATH = '/';
-export const SEARCH_INDICES_DETAILS_PATH = `${ROOT_PATH}search_index_details`;
+export const SEARCH_INDICES_DETAILS_PATH = `${ROOT_PATH}search_index_details`; //TODO: this path should be removed, should be in index management plugin

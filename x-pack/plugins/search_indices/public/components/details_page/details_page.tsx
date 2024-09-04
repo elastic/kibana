@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiPageHeader, EuiPageSection, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiButton, EuiPageTemplate } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FunctionComponent } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIndex } from '../../hooks/api/use_index';
+import { i18n } from '@kbn/i18n';
 
 export const SearchIndexDetailsPage: FunctionComponent<
   RouteComponentProps<{ indexName: string }>
@@ -21,8 +22,14 @@ export const SearchIndexDetailsPage: FunctionComponent<
   const { data: index } = useIndex(indexName);
 
   return (
-    <>
-      <EuiPageSection paddingSize="none">
+    <EuiPageTemplate
+      offset={0}
+      restrictWidth={false}
+      data-test-subj="searchIndicesDetailsPage"
+      grow={false}
+      bottomBorder={false}
+    >
+      <EuiPageSection>
         <EuiButton
           data-test-subj="searchIndexDetailsBackToIndicesButton"
           color="text"
@@ -36,14 +43,22 @@ export const SearchIndexDetailsPage: FunctionComponent<
         </EuiButton>
       </EuiPageSection>
       <EuiSpacer size="l" />
-      <EuiPageHeader
+      <EuiPageTemplate.Header
         data-test-subj="searchIndexDetailsHeader"
-        pageTitle={index?.name}
+        pageTitle={
+          <FormattedMessage
+            id="xpack.searchIndices.detailsPage.title"
+            defaultMessage="{indexName}"
+            values={{
+              indexName: index?.name,
+            }}
+          />
+        }
         rightSideItems={[]}
       />
       <EuiSpacer size="l" />
 
       <div data-test-subj="searchIndexDetailsContent" />
-    </>
+    </EuiPageTemplate>
   );
 };
