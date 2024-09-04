@@ -7,7 +7,7 @@
 
 import { ObjectType, schema } from '@kbn/config-schema';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { TrendRequest } from '../../../common/types';
+import { TrendRequest, TrendTable } from '../../../common/types';
 import { getFetchTrendsQuery, TrendsQuery } from './fetch_trends';
 import { SyntheticsRestApiRouteFactory } from '../types';
 
@@ -26,7 +26,7 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
       })
     ) as unknown as ObjectType,
   },
-  handler: async (routeContext) => {
+  handler: async (routeContext): Promise<TrendTable> => {
     const esClient = routeContext.syntheticsEsClient;
     const body = routeContext.request.body as TrendRequest[];
 
