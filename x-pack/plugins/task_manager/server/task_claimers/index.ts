@@ -39,6 +39,7 @@ export interface ClaimOwnershipResult {
     tasksConflicted: number;
     tasksClaimed: number;
     tasksLeftUnclaimed?: number;
+    tasksErrors?: number;
   };
   docs: ConcreteTaskInstance[];
   timing?: TaskTiming;
@@ -82,4 +83,13 @@ export function isTaskTypeExcluded(excludedTaskTypePatterns: string[], taskType:
   }
 
   return false;
+}
+
+export function getExcludedTaskTypes(
+  definitions: TaskTypeDictionary,
+  excludedTaskTypePatterns: string[]
+) {
+  return definitions
+    .getAllTypes()
+    .filter((taskType) => isTaskTypeExcluded(excludedTaskTypePatterns, taskType));
 }

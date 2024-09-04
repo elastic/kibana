@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 const PACKAGE_NAME = 'input_package_upgrade';
 const START_VERSION = '1.0.0';
 const UPGRADE_VERSION = '1.1.0';
@@ -20,6 +19,8 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
+
   const uninstallPackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
@@ -173,8 +174,12 @@ export default function (providerContext: FtrProviderContext) {
     await es.indices.deleteIndexTemplate({ name: templateName });
   };
 
-  describe('Package Policy - input package behavior', async function () {
+  describe('Package Policy - input package behavior', function () {
     skipIfNoDockerRegistry(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     let agentPolicyId: string;
     beforeEach(async () => {
@@ -188,7 +193,6 @@ export default function (providerContext: FtrProviderContext) {
 
       await uninstallPackage(PACKAGE_NAME, START_VERSION);
     });
-    setupFleetAndAgents(providerContext);
 
     it('should not have created any ES assets on install', async () => {
       const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);

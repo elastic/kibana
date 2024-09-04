@@ -16,6 +16,12 @@ components:
       minLength: 1
       description: DataStream name for the integration to be built.
 
+    LogSamples:
+      type: array
+      items:
+        type: string
+      description:  String form of the input logsamples.
+
     RawSamples:
       type: array
       items:
@@ -42,6 +48,10 @@ components:
       enum:
         - ndjson
         - json
+        - csv
+        - structured
+        - unstructured
+        - unsupported
 
     SamplesFormat:
       type: object
@@ -99,7 +109,7 @@ components:
         - filestream
         - gcp-pubsub
         - gcs
-        - http-endpoint
+        - http_endpoint
         - journald
         - kafka
         - tcp

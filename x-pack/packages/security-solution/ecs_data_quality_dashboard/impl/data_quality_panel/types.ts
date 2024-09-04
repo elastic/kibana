@@ -85,14 +85,6 @@ export interface PartitionedFieldMetadata {
   sameFamily: EcsBasedFieldMetadata[];
 }
 
-export interface PartitionedFieldMetadataStats {
-  all: number;
-  custom: number;
-  ecsCompliant: number;
-  incompatible: number;
-  sameFamily: number;
-}
-
 export interface UnallowedValueRequestItem {
   allowedValues: string[];
   indexFieldName: string;
@@ -283,4 +275,15 @@ export type ReportDataQualityCheckAllCompleted = (
 export interface TelemetryEvents {
   reportDataQualityIndexChecked?: ReportDataQualityIndexChecked;
   reportDataQualityCheckAllCompleted?: ReportDataQualityCheckAllCompleted;
+}
+
+export interface IndexSummaryTableItem {
+  docsCount: number;
+  incompatible: number | undefined;
+  indexName: string;
+  ilmPhase: IlmPhase | undefined;
+  pattern: string;
+  patternDocsCount: number;
+  sizeInBytes: number | undefined;
+  checkedAt: number | undefined;
 }
