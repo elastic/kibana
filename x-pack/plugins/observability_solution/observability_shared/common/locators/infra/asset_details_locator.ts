@@ -51,15 +51,13 @@ export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDet
     const isSupportedByAssetDetails =
       params.assetType === 'host' || params.assetType === 'container';
 
-    // Map the compatible parameters to _a compatible shape
-    const mappedParams =
-      params.assetDetails && !isSupportedByAssetDetails
-        ? {
-            time: params.assetDetails.dateRange,
-          }
-        : undefined;
+    const legacyNodeDetailsQueryParams = !isSupportedByAssetDetails
+      ? rison.encodeUnknown({
+          ...params._a,
+          ...(params.assetDetails ? { time: params.assetDetails.dateRange } : undefined),
+        })
+      : undefined;
 
-    const legacyNodeDetailsQueryParams = rison.encodeUnknown(params._a ?? mappedParams);
     const assetDetailsQueryParams = isSupportedByAssetDetails
       ? rison.encodeUnknown(params.assetDetails)
       : undefined;
