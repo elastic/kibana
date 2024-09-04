@@ -27,7 +27,7 @@ export const PERFORM_SPECIFIC_RULES_INSTALLATION_KEY = [
   PERFORM_RULE_INSTALLATION_URL,
 ];
 
-interface UsePerformSpecificRulesInstallParams {
+export interface UsePerformSpecificRulesInstallParams {
   rules: InstallSpecificRulesRequest['rules'];
   enableOnInstall?: boolean;
 }
