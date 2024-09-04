@@ -32,7 +32,7 @@ export type IndexPattern = z.infer<typeof IndexPattern>;
 export const IndexPattern = z.string();
 
 export type EngineStatus = z.infer<typeof EngineStatus>;
-export const EngineStatus = z.enum(['started', 'stopped']);
+export const EngineStatus = z.enum(['started', 'stopped', 'installing']);
 export type EngineStatusEnum = typeof EngineStatus.enum;
 export const EngineStatusEnum = EngineStatus.enum;
 

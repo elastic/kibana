@@ -28,6 +28,7 @@ components:
     EngineStatus:
       type: string
       enum:
+        - installing
         - started
         - stopped
     

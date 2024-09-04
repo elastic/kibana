@@ -195,15 +195,17 @@ export class RequestContextFactory implements IRequestContextFactory {
       getEntityStoreDataClient: memoize(() => {
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
         const logger = options.logger;
+        const soClient = coreContext.savedObjects.client;
         return new EntityStoreDataClient({
+          namespace: getSpaceId(),
           esClient,
           logger,
+          soClient,
           entityClient: new EntityClient({
             esClient,
-            soClient: coreContext.savedObjects.getClient(),
+            soClient,
             logger,
           }),
-          namespace: getSpaceId(),
         });
       }),
     };
