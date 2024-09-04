@@ -6,13 +6,14 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { DEFAULT_CAPACITY } from '../config';
 import { TaskDefinition } from '../task';
 import { TaskRunner } from '../task_running';
 import { CapacityOpts, ICapacity } from './types';
 import { getCapacityInCost } from './utils';
 
 export class CostCapacity implements ICapacity {
-  private maxAllowedCost: number = 0;
+  private maxAllowedCost: number = DEFAULT_CAPACITY;
   private logger: Logger;
 
   constructor(opts: CapacityOpts) {
