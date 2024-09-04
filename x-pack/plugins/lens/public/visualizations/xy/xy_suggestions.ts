@@ -644,7 +644,7 @@ function getScore(
       ? 0.5
       : 1;
   // chart with multiple y values and split series will have a score of 1, single y value and no split series reduce score
-  return (((yValues.length > 1 ? 2 : 1) + (splitBy ? 1 : 0)) / 3) * changeFactor;
+  return (((yValues.length > 1 ? 3 : 2) + (splitBy ? 1 : 0)) / 4) * changeFactor;
 }
 
 function getExistingLayer(currentState: XYState | undefined, layerId: string) {

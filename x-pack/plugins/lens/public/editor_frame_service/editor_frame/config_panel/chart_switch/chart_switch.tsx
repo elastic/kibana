@@ -392,17 +392,13 @@ function getTopSuggestion(
     mainPalette,
     dataViews: framePublicAPI.dataViews,
   });
-  const suggestions = unfilteredSuggestions
-    .filter((suggestion) => {
-      // don't use extended versions of current data table on switching between visualizations
-      // to avoid confusing the user.
+  const suggestions = unfilteredSuggestions.filter((suggestion) => {
+    // don't use extended versions of current data table on switching between visualizations
+    // to avoid confusing the user.
 
-      const subtypes = getVisualizationSubtypes(newVisualization, suggestion.visualizationState);
-      return suggestion.changeType !== 'extended' && subtypes.includes(subVisualizationId);
-    })
-    .sort((a) =>
-      newVisualization.getVisualizationTypeId(a.visualizationState) === subVisualizationId ? -1 : 1
-    );
+    const subtypes = getVisualizationSubtypes(newVisualization, suggestion.visualizationState);
+    return suggestion.changeType !== 'extended' && subtypes.includes(subVisualizationId);
+  });
 
   return (
     suggestions.find((s) => s.changeType === 'unchanged' || s.changeType === 'reduced') ||
