@@ -32,7 +32,9 @@ describe('indices lib', () => {
     it('should create index with req', async () => {
       mockClient.indices.create.mockResolvedValue({});
 
-      expect(createIndex(client, logger, { indexName: 'test-index' })).resolves.toEqual({});
+      expect(createIndex(client, logger, { indexName: 'test-index' })).resolves.toEqual({
+        index: 'test-index',
+      });
 
       expect(mockClient.indices.create).toHaveBeenCalledTimes(1);
       expect(mockClient.indices.create).toHaveBeenCalledWith({ index: 'test-index' });
