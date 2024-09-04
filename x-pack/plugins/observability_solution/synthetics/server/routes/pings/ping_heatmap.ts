@@ -22,7 +22,7 @@ export const syntheticsGetPingHeatmapRoute: SyntheticsRestApiRouteFactory = () =
       location: schema.string(),
     }),
   },
-  handler: async ({ syntheticsEsClient, request, response }): Promise<any> => {
+  handler: async ({ syntheticsEsClient, request, response }) => {
     const { from, to, interval, monitorId, location } = request.query;
 
     const result = await queryMonitorHeatmap({
