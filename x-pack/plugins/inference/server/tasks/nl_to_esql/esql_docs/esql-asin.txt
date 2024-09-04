@@ -1,0 +1,15 @@
+## ASIN
+
+The `ASIN` function returns the arcsine of the input numeric expression as an angle, expressed in radians.
+
+### Examples
+
+```esql
+ROW a = .9
+| EVAL asin = ASIN(a)
+```
+
+```esql
+ROW a = -.5
+| EVAL asin = ASIN(a)
+```
