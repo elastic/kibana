@@ -23,7 +23,7 @@ import { TEMPLATE_HELP_TEXT, TEMPLATE_LABEL } from './translations';
 interface Props {
   isLoading: boolean;
   templates: CasesConfigurationUI['templates'];
-  templateToSelect?: CasesConfigurationUI['templates'][number];
+  initialTemplate?: CasesConfigurationUI['templates'][number];
   onTemplateChange: ({
     caseFields,
     key,
@@ -33,10 +33,12 @@ interface Props {
 export const TemplateSelectorComponent: React.FC<Props> = ({
   isLoading,
   templates,
-  templateToSelect,
+  initialTemplate,
   onTemplateChange,
 }) => {
-  const [selectedTemplate, onSelectTemplate] = useState<string>(templateToSelect?.key ?? '');
+  const [selectedTemplate, onSelectTemplate] = useState<string | undefined>(
+    initialTemplate?.key ?? undefined
+  );
   const isSmallScreen = useIsWithinMaxBreakpoint('s');
 
   const options: EuiSelectOption[] = templates.map((template) => ({

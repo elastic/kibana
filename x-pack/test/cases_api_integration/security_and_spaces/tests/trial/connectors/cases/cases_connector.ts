@@ -326,7 +326,7 @@ export default ({ getService }: FtrProviderContext): void => {
               "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id).",
             duration: null,
             external_service: null,
-            id: 'ee06877e50151293e75cd6c5bd81812c15c25be55ed970f91c6f7dc40e1eafa6',
+            id: theCase.id,
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
@@ -438,7 +438,7 @@ export default ({ getService }: FtrProviderContext): void => {
             description: 'case desc',
             duration: null,
             external_service: null,
-            id: 'ee06877e50151293e75cd6c5bd81812c15c25be55ed970f91c6f7dc40e1eafa6',
+            id: theCase.id,
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,

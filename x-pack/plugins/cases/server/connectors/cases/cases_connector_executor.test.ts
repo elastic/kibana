@@ -934,6 +934,7 @@ describe('CasesConnectorExecutor', () => {
                         value: 'this is a text field value',
                       },
                     ],
+                    settings: { syncAlerts: true },
                     connector: {
                       id: 'jira-1',
                       name: 'Jira',
@@ -997,7 +998,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-4",
                     "owner": "cases",
                     "settings": Object {
-                      "syncAlerts": false,
+                      "syncAlerts": true,
                     },
                     "severity": "high",
                     "tags": Array [

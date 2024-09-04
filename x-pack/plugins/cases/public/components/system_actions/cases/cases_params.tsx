@@ -230,10 +230,11 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
           <TemplateSelector
+            key={currentConfiguration.id}
             isLoading={isLoadingCaseConfiguration}
             templates={[defaultTemplate, ...currentConfiguration.templates]}
             onTemplateChange={onTemplateChange}
-            templateToSelect={selectedTemplate}
+            initialTemplate={selectedTemplate}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -73,7 +73,7 @@ describe('TemplateSelector', () => {
         isLoading={false}
         templates={templatesConfigurationMock}
         onTemplateChange={onTemplateChange}
-        templateToSelect={templateToSelect}
+        initialTemplate={templateToSelect}
       />
     );
 
@@ -89,7 +89,7 @@ describe('TemplateSelector', () => {
         isLoading={false}
         templates={templatesConfigurationMock}
         onTemplateChange={onTemplateChange}
-        templateToSelect={templateToSelect}
+        initialTemplate={templateToSelect}
       />
     );
 
