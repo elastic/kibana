@@ -130,7 +130,7 @@ describe('TaskPool', () => {
       expect(pool.availableCapacity()).toEqual(7);
     });
 
-    test('availableCapacity is 10 until capacity$ pushes a value', async () => {
+    test('availableCapacity is 0 until capacity$ pushes a value', async () => {
       const capacity$ = new Subject<number>();
       const pool = new TaskPool({
         capacity$,
@@ -139,9 +139,9 @@ describe('TaskPool', () => {
         strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
+      expect(pool.availableCapacity()).toEqual(0);
+      capacity$.next(10);
       expect(pool.availableCapacity()).toEqual(10);
-      capacity$.next(20);
-      expect(pool.availableCapacity()).toEqual(20);
     });
 
     test('does not run tasks that are beyond its available capacity', async () => {
@@ -517,11 +517,11 @@ describe('TaskPool', () => {
       expect(pool.availableCapacity()).toEqual(14);
     });
 
-    test('availableCapacity is 0 until capacity$ pushes a value', async () => {
+    test('availableCapacity is 10 until capacity$ pushes a value', async () => {
       const capacity$ = new Subject<number>();
       const pool = new TaskPool({ capacity$, definitions, logger, strategy: CLAIM_STRATEGY_MGET });
 
-      expect(pool.availableCapacity()).toEqual(0);
+      expect(pool.availableCapacity()).toEqual(10);
       capacity$.next(20);
       expect(pool.availableCapacity()).toEqual(40);
     });
