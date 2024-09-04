@@ -19,6 +19,7 @@ export const useIndicesStatusQuery = (pollingInterval = DEFAULT_INDICES_POLLING_
   return useQuery({
     refetchInterval: pollingInterval,
     refetchIntervalInBackground: true,
+    refetchOnWindowFocus: 'always',
     retry: true,
     queryKey: ['fetchSearchIndicesStatus'],
     queryFn: () => http.get<IndicesStatusResponse>(GET_STATUS_ROUTE),
