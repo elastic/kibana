@@ -82,12 +82,29 @@ describe("risk engine cleanup route", () => {
       expect(response.status).toBe(500);
       expect(response.body).toEqual({
         full_error: "{}",
-        message: "Error tearing down",
+        message: "Error tearing down Risk Engine",
         status_code: 500,
       });
     });
 
-    // it("returns a 500 when ")
+    it("returns a 500 when cleanup is unsuccessful with multiple errors", async () => {
+      mockRiskEngineDataClient.tearDown.mockImplementation(async () => {
+        return [
+          Error("Error while removing risk scoring task"),
+          Error("Error while deleting saved objects"),
+          Error("Error while removing risk score index"),
+        ];
+      });
+      const request = buildRequest();
+      const response = await server.inject(request, context);
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({
+        errors:
+          "Error: Error while removing risk scoring task\nError: Error while deleting saved objects\nError: Error while removing risk score index",
+        message: "Errors were encountered while tearing down Risk Engine",
+        status_code: 500,
+      });
+    });
   });
   describe("when task manager is unavailable", () => {
     beforeEach(() => {

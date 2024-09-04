@@ -6,7 +6,6 @@
  */
 
 import { buildSiemResponse } from "@kbn/lists-plugin/server/routes/utils";
-import { transformError } from "@kbn/securitysolution-es-utils";
 import type { IKibanaResponse } from "@kbn/core-http-server";
 import { withRiskEnginePrivilegeCheck } from "../risk_engine_privileges";
 import {
@@ -43,6 +42,8 @@ export const riskEngineCleanupRoute = (
           const siemResponse = buildSiemResponse(response);
           const securitySolution = await context.securitySolution;
           const [_, { taskManager }] = await getStartServices();
+          const riskEngineClient = securitySolution.getRiskEngineDataClient();
+          const riskScoreDataClient = securitySolution.getRiskScoreDataClient();
 
           if (!taskManager) {
             securitySolution.getAuditLogger()?.log({
@@ -66,21 +67,31 @@ export const riskEngineCleanupRoute = (
             });
           }
 
-          const riskEngineClient = securitySolution.getRiskEngineDataClient();
-          const riskScoreDataClient = securitySolution.getRiskScoreDataClient();
-
           try {
-            await riskEngineClient.tearDown({
+            const errors = await riskEngineClient.tearDown({
               taskManager,
               riskScoreDataClient,
             });
-
-            return response.ok({ body: { success: true } });
-          } catch (e) {
-            const error = transformError(e);
+            if (errors) {
+              return siemResponse.error({
+                statusCode: 500,
+                body: {
+                  message:
+                    "Errors were encountered while tearing down Risk Engine",
+                  errors: errors.join("\n"),
+                },
+                bypassErrorFormat: true,
+              });
+            } else {
+              return response.ok({ body: { success: true } });
+            }
+          } catch (error) {
             return siemResponse.error({
-              statusCode: error.statusCode,
-              body: { message: error.message, full_error: JSON.stringify(e) },
+              statusCode: 500,
+              body: {
+                message: "Error tearing down Risk Engine",
+                full_error: JSON.stringify(error),
+              },
               bypassErrorFormat: true,
             });
           }
