@@ -101,11 +101,10 @@ export class DataTelemetryService {
     this.esClient = core?.elasticsearch.client.asInternalUser;
 
     if (taskManager) {
-      this.scheduleTask(taskManager).then((taskInstance) => {
-        if (taskInstance) {
-          this.logger.debug(`Task ${taskInstance.id} scheduled.`);
-        }
-      });
+      const taskInstance = await this.scheduleTask(taskManager);
+      if (taskInstance) {
+        this.logger.debug(`Task ${taskInstance.id} scheduled.`);
+      }
     }
   }
 
