@@ -155,7 +155,7 @@ export async function queryMonitorStatus(
     }).body;
   });
 
-  const { responses } = await esClient.msearch<OverviewPing, StatusQueryParams>(
+  const { responses } = await esClient.msearch<StatusQueryParams, OverviewPing>(
     queries,
     'getCurrentStatusOverview'
   );
