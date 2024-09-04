@@ -80,7 +80,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
   const consoleTourStepProps: ConsoleTourStepProps[] = getConsoleTourStepProps(
     tourStepProps,
     actions,
-    tourState,
+    tourState
   );
 
   const { done, error, retry } = useDataInit();

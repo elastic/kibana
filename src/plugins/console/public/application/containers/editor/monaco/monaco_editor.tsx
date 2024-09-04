@@ -45,10 +45,8 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     config: { isDevMode },
   } = context;
   const { toasts } = notifications;
-  const {
-    settings,
-    restoreRequestFromHistory: requestToRestoreFromHistory,
-  } = useEditorReadContext();
+  const { settings, restoreRequestFromHistory: requestToRestoreFromHistory } =
+    useEditorReadContext();
   const [editorInstance, setEditorInstace] = useState<
     monaco.editor.IStandaloneCodeEditor | undefined
   >();

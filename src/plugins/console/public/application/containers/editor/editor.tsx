@@ -96,6 +96,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
 
       debouncedUpdateLocalStorageValue(textObject);
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [inputEditorValue, debouncedUpdateLocalStorageValue]);
 
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [

@@ -20,7 +20,7 @@ import { ConsoleTourStepProps } from '../../components';
 export const getConsoleTourStepProps = (
   stateTourStepProps: EuiTourStepProps[],
   actions: EuiTourActions,
-  tourState: EuiTourState,
+  tourState: EuiTourState
 ): ConsoleTourStepProps[] => {
   return stateTourStepProps.map((step: EuiTourStepProps) => {
     const nextTourStep = () => {
