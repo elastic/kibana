@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   IndicesIndexSettings,
+  MappingDynamicTemplate,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -1043,6 +1044,7 @@ const updateExistingDataStream = async ({
     if (currentBackingIndexConfig?.mappings?.subobjects !== mappings.subobjects) {
       subobjectsFieldChanged = true;
     }
+
     logger.info(`Attempt to update the mappings for the ${dataStreamName} (write_index_only)`);
     await retryTransientEsErrors(
       () =>
@@ -1086,16 +1088,36 @@ const updateExistingDataStream = async ({
     }
   }
 
+  const filterDimensionMappings = (templates?: Array<Record<string, MappingDynamicTemplate>>) =>
+    templates?.filter(
+      (template) => (Object.values(template)[0].mapping as any)?.time_series_dimension
+    ) ?? [];
+
+  const currentDynamicDimensionMappings = filterDimensionMappings(
+    currentBackingIndexConfig?.mappings?.dynamic_templates
+  );
+  const updatedDynamicDimensionMappings = filterDimensionMappings(mappings.dynamic_templates);
+
+  const dynamicDimensionMappingsChanged =
+    JSON.stringify(currentDynamicDimensionMappings) !==
+    JSON.stringify(updatedDynamicDimensionMappings);
+
   // Trigger a rollover if the index mode or source type has changed
-  if (currentIndexMode !== settings?.index?.mode || currentSourceType !== mappings?._source?.mode) {
+  if (
+    currentIndexMode !== settings?.index?.mode ||
+    currentSourceType !== mappings?._source?.mode ||
+    dynamicDimensionMappingsChanged
+  ) {
     if (options?.skipDataStreamRollover === true) {
       logger.info(
-        `Index mode or source type has changed for ${dataStreamName}, skipping rollover as "skipDataStreamRollover" is enabled`
+        `Index mode or source type or dynamic dimension mappings have changed for ${dataStreamName}, skipping rollover as "skipDataStreamRollover" is enabled`
       );
       return;
     } else {
       logger.info(
-        `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
+        dynamicDimensionMappingsChanged
+          ? `Dynamic dimension mappings changed for ${dataStreamName}, triggering a rollover`
+          : `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
       );
       await rolloverDataStream(dataStreamName, esClient);
     }
