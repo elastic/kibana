@@ -16,7 +16,6 @@ import { TransactionLink } from '../app/transaction_link';
 import { homeRoute } from './home';
 import { serviceDetailRoute } from './service_detail';
 import { mobileServiceDetailRoute } from './mobile_service_detail';
-import { logsServiceDetailsRoute } from './entities/logs_service_details';
 import { settingsRoute } from './settings';
 import { onboarding } from './onboarding';
 import { tutorialRedirectRoute } from './onboarding/redirect';
@@ -87,6 +86,7 @@ const apmRoutes = {
           defaultMessage: 'APM',
         })}
         href="/"
+        omitOnServerless
       >
         <Outlet />
       </Breadcrumb>
@@ -95,7 +95,7 @@ const apmRoutes = {
       // this route fails on navigation unless it's defined before home
       '/service-groups': {
         element: (
-          <Breadcrumb title={ServiceGroupsTitle} href={'/service-groups'}>
+          <Breadcrumb title={ServiceGroupsTitle} href={'/service-groups'} omitOnServerless>
             <ApmMainTemplate
               pageTitle={ServiceGroupsTitle}
               environmentFilter={false}
@@ -132,7 +132,6 @@ const apmRoutes = {
       ...settingsRoute,
       ...serviceDetailRoute,
       ...mobileServiceDetailRoute,
-      ...logsServiceDetailsRoute,
       ...homeRoute,
     },
   },

@@ -8,11 +8,18 @@
 
 import React, { FC, useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { debounce } from 'lodash';
-import { EuiRangeTick, EuiDualRange, EuiDualRangeProps, EuiToken, EuiToolTip } from '@elastic/eui';
+import {
+  EuiRangeTick,
+  EuiDualRange,
+  EuiDualRangeProps,
+  EuiToken,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { RangeValue } from '../types';
-import './range_slider.scss';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { RangeSliderStrings } from '../range_slider_strings';
+import { rangeSliderControlStyles } from './range_slider.styles';
 
 interface Props {
   fieldFormatter?: (value: string) => string;
@@ -123,6 +130,9 @@ export const RangeSliderControl: FC<Props> = ({
     [isLoading, displayedMin, displayedMax]
   );
 
+  const euiTheme = useEuiTheme();
+  const styles = rangeSliderControlStyles(euiTheme);
+
   const getCommonInputProps = useCallback(
     ({
       inputValue,
@@ -137,17 +147,17 @@ export const RangeSliderControl: FC<Props> = ({
         isInvalid: undefined, // disabling this prop to handle our own validation styling
         placeholder,
         readOnly: false, // overwrites `canOpenPopover` to ensure that the inputs are always clickable
-        className: `rangeSliderAnchor__fieldNumber ${
-          isInvalid
-            ? 'rangeSliderAnchor__fieldNumber--invalid'
-            : 'rangeSliderAnchor__fieldNumber--valid'
-        }`,
+        css: [
+          styles.fieldNumbers.rangeSliderFieldNumber,
+          isInvalid ? styles.fieldNumbers.invalid : styles.fieldNumbers.valid,
+        ],
+        className: 'rangeSliderAnchor__fieldNumber',
         'data-test-subj': `rangeSlider__${testSubj}`,
         value: inputValue === placeholder ? '' : inputValue,
         title: !isInvalid && step ? '' : undefined, // overwrites native number input validation error when the value falls between two steps
       };
     },
-    [isInvalid, step]
+    [isInvalid, step, styles]
   );
 
   const minInputProps = useMemo(() => {
@@ -167,7 +177,11 @@ export const RangeSliderControl: FC<Props> = ({
   }, [getCommonInputProps, max, displayedValue]);
 
   return (
-    <span className="rangeSliderAnchor__button" data-test-subj={`range-slider-control-${uuid}`}>
+    <span
+      css={[styles.rangeSliderControl, isInvalid && styles.invalid]}
+      className="rangeSliderAnchor__button"
+      data-test-subj={`range-slider-control-${uuid}`}
+    >
       <EuiDualRange
         ref={rangeSliderRef}
         id={uuid}
@@ -179,6 +193,7 @@ export const RangeSliderControl: FC<Props> = ({
         min={displayedMin}
         max={displayedMax}
         isLoading={isLoading}
+        compressed
         inputPopoverProps={{
           className: controlPanelClassName,
           panelMinWidth: MIN_POPOVER_WIDTH,

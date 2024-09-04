@@ -11,7 +11,7 @@ import {
   type DataFrameAnalysisConfigType,
   DATA_FRAME_TASK_STATE,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { ml } from '../../../../../services/ml_api_service';
+import { useMlApiContext } from '../../../../../contexts/kibana';
 import type {
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
@@ -106,7 +106,7 @@ export function getAnalyticsJobsStats(
   return resultStats;
 }
 
-export const getAnalyticsFactory = (
+export const useGetAnalytics = (
   setAnalytics: React.Dispatch<React.SetStateAction<DataFrameAnalyticsListRow[]>>,
   setAnalyticsStats: (update: AnalyticStatsBarStats | undefined) => void,
   setErrorMessage: React.Dispatch<
@@ -116,6 +116,8 @@ export const getAnalyticsFactory = (
   setJobsAwaitingNodeCount: React.Dispatch<React.SetStateAction<number>>,
   blockRefresh: boolean
 ): GetAnalytics => {
+  const ml = useMlApiContext();
+
   let concurrentLoads = 0;
 
   const getAnalytics = async (forceRefresh = false) => {
