@@ -82,7 +82,6 @@ import { _stateMachineInstallPackage } from './install_state_machine/_state_mach
 
 import { formatVerificationResultForSO } from './package_verification';
 import { getInstallation, getInstallationObject } from './get';
-import { removeInstallation } from './remove';
 import { getInstalledPackageWithAssets, getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
@@ -277,15 +276,9 @@ export async function handleInstallPackageFailure({
     latestAttempts: installedPkg?.attributes.latest_install_failed_attempts,
   });
 
-  // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
+  // if there is an unknown server error, reinstall the previous version if update or retry install where it left off
   try {
     const installType = getInstallType({ pkgVersion, installedPkg });
-    if (installType === 'install') {
-      logger.error(`uninstalling ${pkgkey} after error installing: [${error.toString()}]`);
-      await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
-      return;
-    }
-
     await updateInstallStatusToFailed({
       logger,
       savedObjectsClient,
@@ -293,6 +286,20 @@ export async function handleInstallPackageFailure({
       status: 'install_failed',
       latestInstallFailedAttempts,
     });
+
+    if (installType === 'install') {
+      // restart install where it left off
+      logger.error(`Retrying install of ${pkgkey} after error installing: [${error.toString()}]`);
+      await installPackage({
+        installSource: 'registry',
+        savedObjectsClient,
+        pkgkey,
+        esClient,
+        spaceId,
+        authorizationHeader,
+        retryFromLastState: true,
+      });
+    }
 
     if (installType === 'reinstall') {
       logger.error(`Failed to reinstall ${pkgkey}: [${error.toString()}]`, { error });
@@ -837,7 +844,6 @@ async function installPackageWithStateMachine(options: {
         logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {
           error: { stack_trace: err.stack },
         });
-        // TODO: check this code path
         await handleInstallPackageFailure({
           savedObjectsClient,
           error: err,

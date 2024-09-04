@@ -35,7 +35,6 @@ jest.mock('../../elasticsearch/ilm/install');
 jest.mock('../../elasticsearch/datastream_ilm/install');
 
 import { updateCurrentWriteIndices } from '../../elasticsearch/template/template';
-import { installKibanaAssetsAndReferencesMultispace } from '../../kibana/assets/install';
 
 import { installIndexTemplatesAndPipelines } from '../install_index_template_pipeline';
 
@@ -54,10 +53,6 @@ const mockedInstallIndexTemplatesAndPipelines =
 const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
   typeof updateCurrentWriteIndices
 >;
-const mockedInstallKibanaAssetsAndReferences =
-  installKibanaAssetsAndReferencesMultispace as jest.MockedFunction<
-    typeof installKibanaAssetsAndReferencesMultispace
-  >;
 const mockCleanupLatestExecutedState = cleanupLatestExecutedState as jest.MockedFunction<
   typeof cleanupLatestExecutedState
 >;
@@ -89,11 +84,12 @@ describe('_stateMachineInstallPackage', () => {
 
   afterEach(() => {
     mockedInstallIndexTemplatesAndPipelines.mockReset();
+    mockHandleState.mockClear();
   });
 
-  it('Handles errors from installKibanaAssets', async () => {
+  it('Handles errors coming from handleState', async () => {
     // force errors from this function
-    mockedInstallKibanaAssetsAndReferences.mockImplementation(async () => {
+    mockHandleState.mockImplementation(async () => {
       throw new Error('mocked async error A: should be caught');
     });
 
