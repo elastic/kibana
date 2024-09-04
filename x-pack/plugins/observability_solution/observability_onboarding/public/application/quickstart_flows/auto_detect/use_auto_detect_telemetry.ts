@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityOnboardingFlowStatus } from './get_onboarding_status';
-import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
+import { OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 
 interface IntegrationFields {
   installSource: string;
@@ -29,7 +29,7 @@ export function useAutoDetectTelemetry(
 
   useEffect(() => {
     if (status === 'awaitingData' && !waitingMessageSent) {
-      analytics?.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
+      analytics?.reportEvent(OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT.eventType, {
         uses_legacy_onboarding_page: false,
         flow: 'auto_detect',
         step: 'awaiting_data',
@@ -38,7 +38,7 @@ export function useAutoDetectTelemetry(
       setWaitingMessageSent(true);
     }
     if (status === 'dataReceived' && !dataShippedMessageSent) {
-      analytics?.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
+      analytics?.reportEvent(OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT.eventType, {
         uses_legacy_onboarding_page: false,
         flow: 'auto_detect',
         step: 'data_shipped',

@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useAutoDetectTelemetry } from './use_auto_detect_telemetry';
 import { ObservabilityOnboardingFlowStatus } from './get_onboarding_status';
-import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
+import { OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -43,7 +43,7 @@ describe('useAutoDetectTelemetry', () => {
     renderHook(() => useAutoDetectTelemetry('awaitingData', [expectedIntegration]));
 
     expect(reportEventMock).toHaveBeenCalledWith(
-      OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType,
+      OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT.eventType,
       {
         uses_legacy_onboarding_page: false,
         flow: 'auto_detect',
@@ -64,7 +64,7 @@ describe('useAutoDetectTelemetry', () => {
 
     // The effect runs after initial render
     expect(reportEventMock).toHaveBeenCalledWith(
-      OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType,
+      OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT.eventType,
       {
         uses_legacy_onboarding_page: false,
         flow: 'auto_detect',
@@ -88,7 +88,7 @@ describe('useAutoDetectTelemetry', () => {
     );
 
     expect(reportEventMock).toHaveBeenCalledWith(
-      OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType,
+      OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT.eventType,
       {
         uses_legacy_onboarding_page: false,
         flow: 'auto_detect',
@@ -102,7 +102,7 @@ describe('useAutoDetectTelemetry', () => {
 
     rerender({ status: 'dataReceived' });
     expect(reportEventMock).toHaveBeenCalledWith(
-      OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType,
+      OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT.eventType,
       {
         uses_legacy_onboarding_page: false,
         flow: 'auto_detect',
