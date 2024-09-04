@@ -57,7 +57,7 @@ export const SecurityTourStep = React.memo(
     );
 
     // EUI bug, will remove once bug resolve. will link issue here as soon as i have it
-    const onKeyDown = useCallback((e) => {
+    const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
       if (e.key === 'Enter') {
         e.stopPropagation();
       }
