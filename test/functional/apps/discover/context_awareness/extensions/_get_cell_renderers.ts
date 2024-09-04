@@ -8,6 +8,7 @@
 
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -18,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const queryBar = getService('queryBar');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('extension getCellRenderers', () => {
     before(async () => {
@@ -42,6 +44,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
         const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         const logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
         expect(await logLevelBadge.getVisibleText()).to.be('debug');
@@ -63,9 +68,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
-        const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
-        expect(await firstCell.getVisibleText()).to.be('debug');
-        await testSubjects.missingOrFail('*logLevelBadgeCell-');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.try(async () => {
+          const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          expect(await firstCell.getVisibleText()).to.be('debug');
+          await testSubjects.missingOrFail('*logLevelBadgeCell-');
+        });
       });
     });
 
@@ -79,14 +89,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataViews.switchToAndValidate('my-example-logs,logstash*');
         await queryBar.setQuery('log.level:*');
         await queryBar.submitQuery();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
-        let firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        let logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
-        expect(await logLevelBadge.getVisibleText()).to.be('debug');
-        expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
-          'rgba(190, 207, 227, 1)'
-        );
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        let firstCell: WebElementWrapper;
+        let logLevelBadge: WebElementWrapper;
+
+        await retry.try(async () => {
+          firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
+          expect(await logLevelBadge.getVisibleText()).to.be('debug');
+          expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
+            'rgba(190, 207, 227, 1)'
+          );
+        });
 
         // check Surrounding docs page
         await dataGrid.clickRowToggle();
@@ -96,12 +115,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
-        expect(await logLevelBadge.getVisibleText()).to.be('debug');
-        expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
-          'rgba(190, 207, 227, 1)'
-        );
+        await retry.try(async () => {
+          firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
+          expect(await logLevelBadge.getVisibleText()).to.be('debug');
+          expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
+            'rgba(190, 207, 227, 1)'
+          );
+        });
       });
 
       it("should not render log.level badge cell if it's not a logs data source", async () => {
@@ -113,11 +134,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataViews.switchToAndValidate('my-example-*');
         await queryBar.setQuery('log.level:*');
         await queryBar.submitQuery();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
-        let firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        expect(await firstCell.getVisibleText()).to.be('debug');
-        await testSubjects.missingOrFail('*logLevelBadgeCell-');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        let firstCell: WebElementWrapper;
+
+        await retry.try(async () => {
+          firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          expect(await firstCell.getVisibleText()).to.be('debug');
+          await testSubjects.missingOrFail('*logLevelBadgeCell-');
+        });
 
         // check Surrounding docs page
         await dataGrid.clickRowToggle();
@@ -127,9 +156,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        firstCell = await dataGrid.getCellElementExcludingControlColumns(1, 1);
-        expect(await firstCell.getVisibleText()).to.be('debug');
-        await testSubjects.missingOrFail('*logLevelBadgeCell-');
+        await retry.try(async () => {
+          firstCell = await dataGrid.getCellElementExcludingControlColumns(1, 1);
+          expect(await firstCell.getVisibleText()).to.be('debug');
+          await testSubjects.missingOrFail('*logLevelBadgeCell-');
+        });
       });
     });
   });
