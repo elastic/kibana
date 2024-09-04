@@ -15,9 +15,13 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { isApmSignal, isLogsSignal } from '../../../utils/get_signal_type';
+import { isApmSignal, isLogsSignal, isOnlyLogsSignal } from '../../../utils/get_signal_type';
 import { ApmOverview } from './apm_overview';
 import { LogsOverview } from './logs_overview';
+import { ServiceTabEmptyState } from '../service_tab_empty_state';
+import { logsOnlyEmptyStateContent } from './constants';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
+
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -49,6 +53,11 @@ export function ServiceOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  const [dismissedLogsOnlyEmptyState, setDismissedLogsOnlyEmptyState] = useLocalStorage(
+    `apm.dismissedLogsOnlyEmptyState.overview`,
+    false
+  );
+
   const hasLogsSignal =
     serviceEntitySummary?.signalTypes &&
     isLogsSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
@@ -56,6 +65,10 @@ export function ServiceOverview() {
   const hasApmSignal =
     serviceEntitySummary?.signalTypes &&
     isApmSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+
+  const hasOnlyLogsSignal =
+    serviceEntitySummary?.signalTypes &&
+    isOnlyLogsSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
 
   // Shows APM overview when entity has APM signal or when Entity centric is not enabled
   const showApmOverview = isEntityCentricExperienceViewEnabled === false || hasApmSignal;
@@ -73,6 +86,13 @@ export function ServiceOverview() {
           {/* Only shows Logs overview when entity has Logs signal */}
           {hasLogsSignal ? (
             <EuiFlexItem>
+              {hasOnlyLogsSignal && !dismissedLogsOnlyEmptyState && (
+                <ServiceTabEmptyState
+                  title={logsOnlyEmptyStateContent.title}
+                  content={logsOnlyEmptyStateContent.content}
+                  onDissmiss={() => setDismissedLogsOnlyEmptyState(true)}
+                />
+              )}
               <LogsOverview />
             </EuiFlexItem>
           ) : null}
