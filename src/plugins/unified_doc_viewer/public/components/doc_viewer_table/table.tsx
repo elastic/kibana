@@ -492,7 +492,7 @@ export const DocViewerTable = ({
           <EuiFlexItem grow={false}>
             <EuiSwitch
               label={i18n.translate('unifiedDocViewer.showOnlySelectedFields.switchLabel', {
-                defaultMessage: 'Selected fields only',
+                defaultMessage: 'Selected only',
                 description: 'Switch label to show only selected fields in the table',
               })}
               checked={showOnlySelectedFields ?? false}
@@ -506,8 +506,8 @@ export const DocViewerTable = ({
             <EuiFlexItem grow={false}>
               <EuiSwitch
                 label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
-                  defaultMessage: 'Hide null',
-                  description: 'Switch label to hide null values in the table',
+                  defaultMessage: 'Hide nulls',
+                  description: 'Switch label to hide fields with null values in the table',
                 })}
                 checked={areNullValuesHidden ?? false}
                 onChange={onHideNullValuesChange}
