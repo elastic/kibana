@@ -6,9 +6,9 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { ScriptInferenceClient, KibanaClient } from '../../util/kibana_client';
-import { InferenceEvaluationClient } from '../evaluation_client';
+import type { InferenceEvaluationClient } from '../evaluation_client';
 
 // make services globals so they can more easily be used in the tests
 
