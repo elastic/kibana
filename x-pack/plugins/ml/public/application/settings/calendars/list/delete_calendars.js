@@ -8,12 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-export async function deleteCalendars(
-  mlApiServices,
-  toastNotifications,
-  calendarsToDelete,
-  callback
-) {
+export async function deleteCalendars(mlApi, toastNotifications, calendarsToDelete, callback) {
   if (calendarsToDelete === undefined || calendarsToDelete.length === 0) {
     return;
   }
@@ -37,7 +32,7 @@ export async function deleteCalendars(
   for (const calendar of calendarsToDelete) {
     const calendarId = calendar.calendar_id;
     try {
-      await mlApiServices.deleteCalendar({ calendarId });
+      await mlApi.deleteCalendar({ calendarId });
     } catch (error) {
       console.log('Error deleting calendar:', error);
       toastNotifications.addDanger({
