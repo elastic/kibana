@@ -103,8 +103,8 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selecte
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
-              {selectedPageMode === PlaygroundPageMode.chat && (
+            {selectedPageMode === PlaygroundPageMode.chat && (
+              <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiSelect
                     options={[
@@ -115,22 +115,22 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selecte
                     value={selectedLanguage}
                   />
                 </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  color="primary"
-                  iconType="popout"
-                  href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
-                  data-test-subj="viewCodeManageApiKeys"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.searchPlayground.viewCode.flyout.apiKeysAction"
-                    defaultMessage="Manage API Keys"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color="primary"
+                    iconType="popout"
+                    href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
+                    data-test-subj="viewCodeManageApiKeys"
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.searchPlayground.viewCode.flyout.apiKeysAction"
+                      defaultMessage="Manage API Keys"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </EuiFlexItem>
           {selectedPageMode === PlaygroundPageMode.chat && (
             <EuiFlexItem grow={false}>{steps[selectedLanguage]}</EuiFlexItem>
