@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export * from './synthetics_monitor';
-export * from './monitor_validation';
-export * from './default_alerts';
-export * from './overview';
+export interface FlyoutParamProps {
+  id: string;
+  configId: string;
+  location: string;
+  locationId: string;
+}
