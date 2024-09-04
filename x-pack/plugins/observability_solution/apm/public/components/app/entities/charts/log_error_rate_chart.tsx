@@ -95,7 +95,7 @@ export function LogErrorRateChart({ height }: { height: number }) {
                     description={
                       <FormattedMessage
                         defaultMessage="Rate of error logs per minute observed for given {serviceName}."
-                        id="xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description"
+                        id="xpack.apm.logErrorRate.tooltip.description"
                         values={{
                           serviceName: (
                             <code
