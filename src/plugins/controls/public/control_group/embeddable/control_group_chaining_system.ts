@@ -123,7 +123,7 @@ export const ControlGroupChainingSystems: {
         }
 
         // recalculate filters when there are no chained controls to the right of the updated control
-        if (nextControl.id === childOrder.lastChildId) {
+        if (nextControl?.id === childOrder.lastChildId) {
           recalculateFilters$.next(null);
           return;
         }

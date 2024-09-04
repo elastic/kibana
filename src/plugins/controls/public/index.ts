@@ -35,6 +35,8 @@ export type {
   CanClearSelections,
 } from './types';
 
+export { isControlGroupApi, type ControlGroupApi } from './control_group/control_group_api';
+
 export type {
   ControlWidth,
   ControlStyle,

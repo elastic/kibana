@@ -27,6 +27,8 @@
     "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
+    "@kbn/controls-plugin",
+    "@kbn/presentation-containers",
   ],
   "exclude": [
     "target/**/*",

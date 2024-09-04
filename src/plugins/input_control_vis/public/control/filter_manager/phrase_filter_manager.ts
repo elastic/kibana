@@ -18,6 +18,7 @@ import {
   PhraseFilter,
 } from '@kbn/es-query';
 import { DataViewsContract, FilterManager as QueryFilterManager } from '@kbn/data-plugin/public';
+import { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
 import { FilterManager } from './filter_manager';
 
 export class PhraseFilterManager extends FilterManager {
@@ -59,7 +60,7 @@ export class PhraseFilterManager extends FilterManager {
 
     const values = kbnFilters
       .map((kbnFilter) => {
-        return this.getValueFromFilter(kbnFilter);
+        return getSelectedOptionsFromFilter(kbnFilter, this.fieldName);
       })
       .filter((value) => value != null);
 
@@ -67,49 +68,52 @@ export class PhraseFilterManager extends FilterManager {
       return;
     }
 
-    return values.reduce((accumulator, currentValue) => {
-      return accumulator.concat(currentValue);
+    return values.reduce((accumulator: PhraseFilterValue[], currentValue) => {
+      return currentValue ? accumulator.concat(currentValue) : accumulator;
     }, []);
   }
+}
 
-  /**
-   * Extract filtering value from kibana filters
-   *
-   * @param  {PhraseFilter} kbnFilter
-   * @return {Array.<string>} array of values pulled from filter
-   */
-  private getValueFromFilter(kbnFilter: Filter): any {
-    // bool filter - multiple phrase filters
-    if (_.has(kbnFilter, 'query.bool.should')) {
-      return _.get(kbnFilter, 'query.bool.should')
-        .map((kbnQueryFilter: PhraseFilter) => {
-          return this.getValueFromFilter(kbnQueryFilter);
-        })
-        .filter((value: any) => {
-          if (value) {
-            return true;
-          }
-          return false;
-        });
+/**
+ * Extract filtering value from kibana filters
+ *
+ * @param  {PhraseFilter} kbnFilter
+ * @return {Array.<string>} array of values pulled from filter
+ */
+export function getSelectedOptionsFromFilter(
+  kbnFilter: Filter,
+  fieldName: string
+): undefined | PhraseFilterValue | PhraseFilterValue[] {
+  // bool filter - multiple phrase filters
+  if (_.has(kbnFilter, 'query.bool.should')) {
+    return _.get(kbnFilter, 'query.bool.should')
+      .map((kbnQueryFilter: PhraseFilter) => {
+        return getSelectedOptionsFromFilter(kbnQueryFilter, fieldName);
+      })
+      .filter((value: any) => {
+        if (value) {
+          return true;
+        }
+        return false;
+      });
+  }
+
+  // scripted field filter
+  if (_.has(kbnFilter, 'query.script')) {
+    return _.get(kbnFilter, 'query.script.script.params.value');
+  }
+
+  // single phrase filter
+  if (isPhraseFilter(kbnFilter)) {
+    if (getPhraseFilterField(kbnFilter) !== fieldName) {
+      return;
     }
 
-    // scripted field filter
-    if (_.has(kbnFilter, 'query.script')) {
-      return _.get(kbnFilter, 'query.script.script.params.value');
-    }
+    return getPhraseFilterValue(kbnFilter);
+  }
 
-    // single phrase filter
-    if (isPhraseFilter(kbnFilter)) {
-      if (getPhraseFilterField(kbnFilter) !== this.fieldName) {
-        return;
-      }
-
-      return getPhraseFilterValue(kbnFilter);
-    }
-
-    // single phrase filter from bool filter
-    if (_.has(kbnFilter, ['match_phrase', this.fieldName])) {
-      return _.get(kbnFilter, ['match_phrase', this.fieldName]);
-    }
+  // single phrase filter from bool filter
+  if (_.has(kbnFilter, ['match_phrase', fieldName])) {
+    return _.get(kbnFilter, ['match_phrase', fieldName]);
   }
 }
