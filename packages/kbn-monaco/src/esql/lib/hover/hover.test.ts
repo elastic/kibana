@@ -211,16 +211,15 @@ describe('hover', () => {
     );
     testSuggestions(`from a | stats avg(round(numberField))`, 'round', () => {
       return [
-        '**Acceptable types**: _**integer**_ | _**counter_integer**_ | _**double**_ | _**unsigned_long**_ | _**long**_ | _**counter_long**_ | _**counter_double**_',
+        '**Acceptable types**: **integer** | **counter_integer** | **double** | **unsigned_long** | **long** | **counter_long** | **counter_double**',
         ...createFunctionContent('round'),
       ];
     });
     testSuggestions(`from a | stats avg(round(numberField))`, 'avg', createFunctionContent);
-    testSuggestions(
-      `from a | stats avg(nonExistentFn(numberField))`,
-      'nonExistentFn',
-      createFunctionContent
-    );
+    testSuggestions(`from a | stats avg(nonExistentFn(numberField))`, 'nonExistentFn', () => [
+      '**Acceptable types**: **integer** | **counter_integer** | **double** | **unsigned_long** | **long** | **counter_long** | **counter_double**',
+      ...createFunctionContent('nonExistentFn'),
+    ]);
     testSuggestions(`from a | where round(numberField) > 0`, 'round', createFunctionContent);
   });
 });
