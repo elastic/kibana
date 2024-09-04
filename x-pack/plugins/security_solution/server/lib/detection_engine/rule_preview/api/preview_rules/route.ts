@@ -322,7 +322,6 @@ export const previewRulesRoute = (
                 .filter((item) => item.newStatus === RuleExecutionStatusEnum['partial failure'])
                 .map((item) => item.message ?? 'Unknown Warning');
 
-              console.log('PREVIEW route', requests);
               logs.push({
                 errors,
                 warnings,
