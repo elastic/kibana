@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import defaultImgSrc from '../../../assets/service_tab_empty_state/service_tab_empty_state_default.png';
+import defaultImgSrc from '../../../assets/service_tab_empty_state/service_tab_empty_state_default_2.png';
+import { AddApmData } from '../../shared/add_data_buttons/buttons';
 
 export interface ServiceTabEmptyStateProps {
   title: string;
@@ -29,13 +29,6 @@ export interface ServiceTabEmptyStateProps {
   dismissable?: boolean;
   onDissmiss?: () => void;
 }
-
-const addAPMLinkButton = {
-  label: i18n.translate('xpack.apm.serviceTabEmptyState.addAPMButtonLabel', {
-    defaultMessage: 'Add APM',
-  }),
-  href: '/app/observabilityOnboarding/?category=apm',
-};
 
 const tryItNowButton = {
   label: i18n.translate('xpack.apm.serviceTabEmptyState.tryItNowButtonLabel', {
@@ -58,8 +51,6 @@ export function ServiceTabEmptyState({
   dismissable,
   onDissmiss,
 }: ServiceTabEmptyStateProps) {
-  const { core } = useApmPluginContext();
-  const { basePath } = core.http;
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -75,13 +66,11 @@ export function ServiceTabEmptyState({
             <EuiSpacer size="m" />
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiButton
+                <AddApmData
                   data-test-subj="ServiceTabEmptyStateAddApmButton"
-                  href={basePath.prepend(addAPMLinkButton.href)}
-                  fill
-                >
-                  {addAPMLinkButton.label}
-                </EuiButton>
+                  size="m"
+                  fill={true}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
