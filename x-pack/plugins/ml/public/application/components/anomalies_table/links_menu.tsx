@@ -43,8 +43,8 @@ import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
 import { isDefined } from '@kbn/ml-is-defined';
 import { escapeQuotes } from '@kbn/es-query';
 import { isQuery } from '@kbn/data-plugin/public';
-import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
@@ -109,7 +109,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       notifications: { toasts },
     },
   } = kibana;
-
   const { getDataViewById, getDataViewIdFromName } = useMlIndexUtils();
   const mlApi = useMlApi();
   const mlJobService = useMlJobService();
