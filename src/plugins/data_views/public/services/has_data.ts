@@ -7,11 +7,12 @@
  */
 
 import { CoreStart, HttpStart } from '@kbn/core/public';
-import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
+// import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
 import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
 import { IndicesResponse, IndicesResponseModified } from '../types';
 
 export class HasData {
+  /*
   private removeAliases = (source: IndicesResponseModified): boolean => !source.item.indices;
 
   private isUserDataSource = (source: IndicesResponseModified): boolean => {
@@ -23,6 +24,7 @@ export class HasData {
 
     return true;
   };
+  */
 
   start(core: CoreStart) {
     const { http } = core;
@@ -103,7 +105,18 @@ export class HasData {
         }),
       })
       .then((resp) => {
-        return !!(resp && resp.total >= 0);
+        // eslint-disable-next-line no-console
+        console.log('getIndicesViaSearch', JSON.stringify(resp, null, 2));
+        http
+          .get<IndicesResponse>(`/internal/index-pattern-management/resolve_index/${pattern}`, {
+            query: showAllIndices ? { expand_wildcards: 'all' } : undefined,
+          })
+          .then((response) => {
+            // eslint-disable-next-line no-console
+            console.log('resolve_index', JSON.stringify(response, null, 2));
+          });
+        // this was >= 0 - I have no idea why
+        return !!(resp && resp.total > 0);
       })
       .catch((e) => {
         // eslint-disable-next-line no-console
@@ -111,6 +124,7 @@ export class HasData {
         return true;
       });
 
+  /*
   private getIndices = async ({
     http,
     pattern,
@@ -131,28 +145,24 @@ export class HasData {
           return this.responseToItemArray(response);
         }
       });
+      */
 
   private checkLocalESData = (http: HttpStart): Promise<boolean> =>
-    this.getIndices({
+    // todo consider excluding DEFAULT_ASSETS_TO_IGNORE
+    this.getIndicesViaSearch({
       http,
-      pattern: '*',
+      pattern: '*,-.*,-logs-enterprise_search.api-default,-logs-enterprise_search.audit-default',
       showAllIndices: false,
-    })
-      .then((dataSources: IndicesResponseModified[]) => {
-        return dataSources.some(this.isUserDataSource);
-      })
-      .catch(() => this.getIndicesViaSearch({ http, pattern: '*', showAllIndices: false }));
+    });
 
   private checkRemoteESData = (http: HttpStart): Promise<boolean> =>
-    this.getIndices({
+    // todo consider excluding DEFAULT_ASSETS_TO_IGNORE
+    this.getIndicesViaSearch({
       http,
-      pattern: '*:*',
+      pattern:
+        '*:*,-*:.*,-*:logs-enterprise_search.api-default,-*:logs-enterprise_search.audit-default',
       showAllIndices: false,
-    })
-      .then((dataSources: IndicesResponseModified[]) => {
-        return !!dataSources.filter(this.removeAliases).length;
-      })
-      .catch(() => this.getIndicesViaSearch({ http, pattern: '*:*', showAllIndices: false }));
+    });
 
   // Data Views
 

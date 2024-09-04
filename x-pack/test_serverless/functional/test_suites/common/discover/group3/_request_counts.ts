@@ -95,14 +95,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       savedSearchesRequests?: number;
       setQuery: (query: string) => Promise<void>;
     }) => {
-      it('should send 2 search requests (documents + chart) on page load', async () => {
+      it('should send 3 search requests (documents + chart) on page load', async () => {
         await browser.refresh();
         await browser.execute(async () => {
           performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
         });
         await waitForLoadingToFinish();
         const searchCount = await getSearchCount(type);
-        expect(searchCount).to.be(2);
+        expect(searchCount).to.be(3);
       });
 
       it('should send 2 requests (documents + chart) when refreshing', async () => {
