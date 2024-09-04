@@ -262,7 +262,10 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
   return ret as FunctionDefinition;
 }
 
-function printGeneratedFunctionsFile(functionDefinitions: FunctionDefinition[]) {
+function printGeneratedFunctionsFile(
+  functionDefinitions: FunctionDefinition[],
+  functionsType: 'aggregation' | 'scalar'
+) {
   /**
    * Deals with asciidoc internal cross-references in the function descriptions
    *
@@ -340,10 +343,14 @@ function printGeneratedFunctionsFile(functionDefinitions: FunctionDefinition[]) 
  *
  */
 
-import type { ESQLFunction } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
-import { isLiteralItem } from '../../shared/helpers';
 import type { FunctionDefinition } from '../types';
+${
+  functionsType === 'scalar'
+    ? `import type { ESQLFunction } from '@kbn/esql-ast';
+import { isLiteralItem } from '../../shared/helpers';`
+    : ''
+}
 
 
 `;
@@ -358,7 +365,7 @@ import type { FunctionDefinition } from '../types';
     .join('\n\n');
 
   const fileContents = `${fileHeader}${functionDefinitionsString}
-  export const evalFunctionDefinitions = [${functionDefinitions
+  export const ${functionsType}FunctionDefinitions = [${functionDefinitions
     .map(({ name }) => getDefinitionName(name))
     .join(',\n')}];`;
 
@@ -398,10 +405,10 @@ import type { FunctionDefinition } from '../types';
 
   await writeFile(
     join(__dirname, '../src/definitions/generated/scalar_functions.ts'),
-    printGeneratedFunctionsFile(scalarFunctionDefinitions)
+    printGeneratedFunctionsFile(scalarFunctionDefinitions, 'scalar')
   );
-  // await writeFile(
-  //   join(__dirname, '../src/definitions/generated/aggs.ts'),
-  //   printGeneratedFunctionsFile(aggFunctionDefinitions)
-  // );
+  await writeFile(
+    join(__dirname, '../src/definitions/generated/aggregation_functions.ts'),
+    printGeneratedFunctionsFile(aggFunctionDefinitions, 'aggregation')
+  );
 })();

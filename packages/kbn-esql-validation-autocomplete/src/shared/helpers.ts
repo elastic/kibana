@@ -18,7 +18,7 @@ import type {
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
 import { ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
+import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
@@ -139,7 +139,7 @@ function buildFunctionLookup() {
     fnLookups = builtinFunctions
       .concat(
         scalarFunctionDefinitions,
-        statsAggregationFunctionDefinitions,
+        aggregationFunctionDefinitions,
         groupingFunctionDefinitions
       )
       .reduce((memo, def) => {

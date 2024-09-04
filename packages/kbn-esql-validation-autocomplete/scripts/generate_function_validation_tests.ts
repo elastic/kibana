@@ -11,7 +11,7 @@ import { join } from 'path';
 import * as recast from 'recast';
 import { camelCase } from 'lodash';
 import { getParamAtPosition } from '../src/autocomplete/helper';
-import { statsAggregationFunctionDefinitions } from '../src/definitions/aggs';
+import { aggregationFunctionDefinitions } from '../src/definitions/generated/aggregation_functions';
 import { scalarFunctionDefinitions } from '../src/definitions/generated/scalar_functions';
 import { groupingFunctionDefinitions } from '../src/definitions/grouping';
 import { getFunctionSignatures } from '../src/definitions/helpers';
@@ -38,7 +38,7 @@ function main() {
     testCasesByFunction.set(definition.name, generateTestsForEvalFunction(definition));
   }
 
-  for (const definition of statsAggregationFunctionDefinitions) {
+  for (const definition of aggregationFunctionDefinitions) {
     testCasesByFunction.set(definition.name, generateTestsForAggFunction(definition));
   }
 
@@ -1020,7 +1020,7 @@ function prepareNestedFunction(fnSignature: FunctionDefinition): string {
   )[0].declaration;
 }
 
-const toAvgSignature = statsAggregationFunctionDefinitions.find(({ name }) => name === 'avg')!;
+const toAvgSignature = aggregationFunctionDefinitions.find(({ name }) => name === 'avg')!;
 const toInteger = scalarFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
 const toDoubleSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_double')!;
 const toStringSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_string')!;

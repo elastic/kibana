@@ -10,7 +10,7 @@ import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { builtinFunctions } from '../../definitions/builtin';
-import { statsAggregationFunctionDefinitions } from '../../definitions/aggs';
+import { aggregationFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import { groupingFunctionDefinitions } from '../../definitions/grouping';
 import * as autocomplete from '../autocomplete';
@@ -148,7 +148,7 @@ export function getFunctionSignaturesByReturnType(
 
   const list = [];
   if (agg) {
-    list.push(...statsAggregationFunctionDefinitions);
+    list.push(...aggregationFunctionDefinitions);
     // right now all grouping functions are agg functions too
     list.push(...groupingFunctionDefinitions);
   }
