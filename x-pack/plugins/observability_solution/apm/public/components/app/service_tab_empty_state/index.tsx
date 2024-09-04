@@ -124,7 +124,7 @@ export function ServiceTabEmptyState({
       {imgSrc && (
         <>
           <EuiSpacer size="l" />
-          <EuiImage src={imgSrc} alt={content} size="fullWidth" style={{ opacity: 0.2 }} />
+          <EuiImage src={imgSrc} alt={content} size="fullWidth" style={{ opacity: 0.4 }} />
         </>
       )}
     </>
