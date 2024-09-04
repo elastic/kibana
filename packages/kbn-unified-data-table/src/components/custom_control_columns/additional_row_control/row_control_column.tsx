@@ -40,7 +40,7 @@ export const RowControlCell = ({
       }) => {
         return (
           <DataTableRowControl size={Size.normal}>
-            <EuiToolTip content={tooltipContent} delay="long">
+            <EuiToolTip content={tooltipContent ?? label} delay="long">
               <EuiButtonIcon
                 data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
                 disabled={disabled}

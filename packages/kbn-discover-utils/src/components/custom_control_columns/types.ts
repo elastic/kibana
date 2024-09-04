@@ -22,7 +22,7 @@ export interface RowControlProps {
   label: string;
   iconType: IconType;
   onClick: ((props: RowControlRowProps) => void) | undefined;
-  tooltipContent: React.ReactNode;
+  tooltipContent?: React.ReactNode;
 }
 
 export type RowControlComponent = FC<RowControlProps>;
