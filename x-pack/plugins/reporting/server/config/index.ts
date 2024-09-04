@@ -104,7 +104,11 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
   ],
   exposeToUsage: {
     capture: { maxAttempts: true },
-    csv: { maxSizeBytes: true, scroll: { size: true, duration: true } },
+    csv: {
+      enablePanelActionDownload: true,
+      maxSizeBytes: true,
+      scroll: { size: true, duration: true },
+    },
     kibanaServer: false, // show as [redacted]
     queue: { indexInterval: true, pollEnabled: true, timeout: true },
     roles: { enabled: true },
