@@ -228,12 +228,12 @@ export function getServiceColumns({
       name: (
         <ColumnHeader
           label={i18n.translate('xpack.apm.multiSignal.servicesTable.logErrorRate', {
-            defaultMessage: 'Log error %',
+            defaultMessage: 'Log error rate (per min.)',
           })}
           formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
           toolTip={
             <FormattedMessage
-              defaultMessage="% of logs where error detected for given {serviceName}."
+              defaultMessage="Rate of error logs per minute observed for given {serviceName}."
               id="xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description"
               values={{
                 serviceName: (
@@ -270,7 +270,7 @@ export function getServiceColumns({
             isLoading={timeseriesDataLoading}
             color={currentPeriodColor}
             series={timeseriesData?.currentPeriod?.[serviceName]?.logErrorRate}
-            valueLabel={asPercent(metrics.logErrorRate, 1)}
+            valueLabel={asDecimalOrInteger(metrics.logErrorRate)}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
