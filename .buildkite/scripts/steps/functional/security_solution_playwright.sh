@@ -11,6 +11,4 @@ echo "---ESS - Security Solution Playwright Tests"
 
 cd x-pack/test/security_solution_playwright
 
-set +e
-
 yarn run:ess; exit_code=$?; exit $exit_code
