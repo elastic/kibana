@@ -13,7 +13,7 @@ import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
 import { getServiceEntities } from './get_service_entities';
 import { getServiceEntitySummary } from './get_service_entity_summary';
-import { getServiceEntitiesHistoryTimeseries } from '../get_service_entities_history_timeseries';
+import { getEntityHistoryServicesTimeseries } from '../get_entity_history_services_timeseries';
 
 const serviceEntitiesSummaryRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/entities/services/{serviceName}/summary',
@@ -98,7 +98,7 @@ const servicesEntitiesDetailedStatisticsRoute = createApmServerRoute({
       throw Boom.badRequest(`serviceNames cannot be empty`);
     }
 
-    const serviceEntitiesTimeseries = await getServiceEntitiesHistoryTimeseries({
+    const serviceEntitiesTimeseries = await getEntityHistoryServicesTimeseries({
       start,
       end,
       serviceNames,

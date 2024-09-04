@@ -91,7 +91,7 @@ export function EntityManagerEnablementContextProvider({
         refetch,
         serviceInventoryViewLocalStorageSetting,
         setServiceInventoryViewLocalStorageSetting: handleServiceInventoryViewChange,
-        isEntityCentricExperienceViewEnabled,
+        isEntityCentricExperienceViewEnabled: true,
         tourState,
         updateTourState: handleTourStateUpdate,
       }}

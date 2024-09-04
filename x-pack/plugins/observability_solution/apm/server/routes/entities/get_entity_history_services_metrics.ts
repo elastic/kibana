@@ -26,7 +26,7 @@ interface Params {
   size: number;
 }
 
-export async function getServiceEntitiesHistoryMetrics({
+export async function getEntityHistoryServicesMetrics({
   end,
   entityIds,
   start,

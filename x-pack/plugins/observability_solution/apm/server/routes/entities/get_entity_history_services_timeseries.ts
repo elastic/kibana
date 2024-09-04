@@ -28,7 +28,7 @@ interface Params {
   environment: string;
 }
 
-export async function getServiceEntitiesHistoryTimeseries({
+export async function getEntityHistoryServicesTimeseries({
   start,
   end,
   serviceNames,

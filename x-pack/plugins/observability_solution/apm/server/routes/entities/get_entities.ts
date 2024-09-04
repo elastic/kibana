@@ -8,8 +8,8 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { FIRST_SEEN, LAST_SEEN } from '../../../common/es_fields/entities';
 import type { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { getEntityLatestServices } from './get_entity_latest_services';
-import { getServiceEntitiesHistoryMetrics } from './get_service_entities_history_metrics';
 import type { EntityLatestServiceRaw } from './types';
+import { getEntityHistoryServicesMetrics } from './get_entity_history_services_metrics';
 
 export function entitiesRangeQuery(start: number, end: number): QueryDslQueryContainer[] {
   return [
@@ -58,7 +58,7 @@ export async function getEntities({
   });
 
   const serviceEntitiesHistoryMetricsMap = entityLatestServices.length
-    ? await getServiceEntitiesHistoryMetrics({
+    ? await getEntityHistoryServicesMetrics({
         start,
         end,
         entitiesESClient,
