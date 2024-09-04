@@ -8,7 +8,7 @@
 import { useObservable } from 'react-use';
 import { useKibana } from '../../../../lib/kibana';
 
-export const useUserSettingsUrl = () => {
-  const { userSettingsUrl$ } = useKibana().services.onboarding;
-  return useObservable(userSettingsUrl$, undefined);
+export const useUsersUrl = () => {
+  const { usersUrl$ } = useKibana().services.onboarding;
+  return useObservable(usersUrl$, undefined);
 };

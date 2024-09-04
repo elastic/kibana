@@ -20,7 +20,7 @@ export const setOnboardingSettings = (services: Services) => {
     application: { getUrlForApp },
   } = services;
 
-  securitySolution.setOnboardingPageSettings.setUserSettingsUrl(
+  securitySolution.setOnboardingPageSettings.setUsersUrl(
     getUrlForApp('management', { path: 'security/users' })
   );
 

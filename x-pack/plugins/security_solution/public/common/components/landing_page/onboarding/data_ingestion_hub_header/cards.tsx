@@ -13,7 +13,7 @@ import darkTeammates from '../images/dark_data_ingestion_hub_teammates.png';
 import demo from '../images/data_ingestion_hub_demo.png';
 import darkDemo from '../images/dark_data_ingestion_hub_demo.png';
 import * as i18n from './translations';
-import { useUserSettingsUrl } from '../hooks/use_user_settings_url';
+import { useUsersUrl } from '../hooks/use_users_url';
 
 export enum HeaderCardAsTypeEnum {
   action = 'action',
@@ -39,7 +39,7 @@ export const useDataIngestionHubHeaderCards: (actions: {
   const { videoAction } = actions;
   const { colorMode } = useEuiTheme();
   const isDarkMode = colorMode === 'DARK';
-  const userSettingsUrl = useUserSettingsUrl();
+  const usersUrl = useUsersUrl();
 
   const cards = [
     {
@@ -58,7 +58,7 @@ export const useDataIngestionHubHeaderCards: (actions: {
       description: i18n.DATA_INGESTION_HUB_HEADER_TEAMMATES_DESCRIPTION,
       link: {
         title: i18n.DATA_INGESTION_HUB_HEADER_TEAMMATES_LINK_TITLE,
-        href: userSettingsUrl,
+        href: usersUrl,
       },
     },
     {

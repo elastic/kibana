@@ -52,7 +52,7 @@ jest.mock('../../../../lib/kibana', () => {
       ...original.useKibana(),
       services: {
         ...original.useKibana().services,
-        onboarding: { userSettingsUrl$: mockGetChromeStyle$() },
+        onboarding: { usersUrl$: mockGetChromeStyle$() },
       },
     }),
   };
