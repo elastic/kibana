@@ -63,16 +63,14 @@ export const esqlExecutor = async ({
   spaceId,
   experimentalFeatures,
   licensing,
-  isLoggedRequestsEnabled,
 }: {
   runOpts: RunOpts<EsqlRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  state: object;
+  state: Record<string, unknown>;
   spaceId: string;
   version: string;
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
-  isLoggedRequestsEnabled: boolean;
 }) => {
   const loggedRequests: RulePreviewLoggedRequest[] = [];
   const ruleParams = completeRule.ruleParams;
@@ -85,6 +83,7 @@ export const esqlExecutor = async ({
   return withSecuritySpan('esqlExecutor', async () => {
     const result = createSearchAfterReturnType();
     let size = tuple.maxSignals;
+    const isLoggedRequestsEnabled = state?.isLoggedRequestsEnabled;
     try {
       while (
         result.createdSignalsCount <= tuple.maxSignals &&
@@ -116,7 +115,6 @@ export const esqlExecutor = async ({
 
         const esqlSignalSearchStart = performance.now();
 
-        result.errors.push('Test 1');
         const response = await performEsqlRequest({
           esClient: services.scopedClusterClient.asCurrentUser,
           requestParams: esqlRequest,
@@ -257,7 +255,6 @@ export const esqlExecutor = async ({
       result.success = false;
     }
 
-    console.log('>>>> result', result);
-    return { ...result, state, requests: loggedRequests };
+    return { ...result, state, loggedRequests };
   });
 };

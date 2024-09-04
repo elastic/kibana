@@ -442,8 +442,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   },
                 });
 
-                //         console.log('>>>>>>>> runResult', JSON.stringify(runResult, null, 2));
-
                 const createdSignals = result.createdSignals.concat(runResult.createdSignals);
                 const warningMessages = result.warningMessages.concat(runResult.warningMessages);
                 result = {
@@ -460,7 +458,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   warning: warningMessages.length > 0,
                   warningMessages,
                   userError: runResult.userError,
-                  ...(runResult.requests ? { requests: runResult.requests } : {}),
+                  ...(runResult.loggedRequests ? { loggedRequests: runResult.loggedRequests } : {}),
                 };
                 runState = runResult.state;
               }
@@ -567,7 +565,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           return {
             state: result.state,
-            ...(result.requests ? { requests: result.requests } : {}),
+            ...(result.loggedRequests ? { loggedRequests: result.loggedRequests } : {}),
           };
         });
       },

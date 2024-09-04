@@ -35,6 +35,7 @@ import {
   RulePreviewRequestBody,
   RulePreviewRequestQuery,
 } from '../../../../../../common/api/detection_engine';
+import type { RulePreviewLoggedRequest } from '../../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -151,7 +152,9 @@ export const previewRulesRoute = (
           const username = security?.authc.getCurrentUser(request)?.username;
           const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
           const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
-          const runState: Record<string, unknown> = {};
+          const runState: Record<string, unknown> = {
+            isLoggedRequestsEnabled: request.query.enable_logged_requests,
+          };
           const logs: RulePreviewLogs[] = [];
           let isAborted = false;
 
@@ -232,7 +235,7 @@ export const previewRulesRoute = (
             }
           ) => {
             let statePreview = runState as TState;
-            let requests = [];
+            let loggedRequests = [];
 
             const abortController = new AbortController();
             setTimeout(() => {
@@ -277,8 +280,7 @@ export const previewRulesRoute = (
             while (invocationCount > 0 && !isAborted) {
               invocationStartTime = moment();
 
-              ({ state: statePreview, requests } = (await executor({
-                isLoggedRequestsEnabled: request.query.enable_logged_requests,
+              ({ state: statePreview, loggedRequests } = (await executor({
                 executionId: uuidv4(),
                 params,
                 previousStartedAt,
@@ -312,7 +314,7 @@ export const previewRulesRoute = (
                   const date = startedAt.toISOString();
                   return { dateStart: date, dateEnd: date };
                 },
-              })) as { state: TState });
+              })) as { state: TState; loggedRequests: RulePreviewLoggedRequest[] });
 
               const errors = loggedStatusChanges
                 .filter((item) => item.newStatus === RuleExecutionStatusEnum.failed)
@@ -327,7 +329,7 @@ export const previewRulesRoute = (
                 warnings,
                 startedAt: startedAt.toDate().toISOString(),
                 duration: moment().diff(invocationStartTime, 'milliseconds'),
-                requests,
+                requests: loggedRequests,
               });
 
               loggedStatusChanges.length = 0;

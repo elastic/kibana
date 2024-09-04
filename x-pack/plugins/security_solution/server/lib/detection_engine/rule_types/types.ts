@@ -35,6 +35,7 @@ import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map'
 import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { RulePreviewLoggedRequest } from '../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
@@ -74,6 +75,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   warning: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
+  loggedRequests?: RulePreviewLoggedRequest[];
 }
 
 export interface RunOpts<TParams extends RuleParams> {
@@ -126,7 +128,12 @@ export type SecurityAlertType<
       services: PersistenceServices;
       runOpts: RunOpts<TParams>;
     }
-  ) => Promise<SearchAfterAndBulkCreateReturnType & { state: TState }>;
+  ) => Promise<
+    SearchAfterAndBulkCreateReturnType & {
+      state: TState;
+      loggedRequests?: RulePreviewLoggedRequest[];
+    }
+  >;
 };
 
 export interface CreateSecurityRuleTypeWrapperProps {
