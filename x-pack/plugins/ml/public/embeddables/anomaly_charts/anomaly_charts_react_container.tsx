@@ -87,11 +87,11 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
       notifications: { toasts },
     },
     { data: dataServices, share, uiActions, charts: chartsService },
-    { mlApiServices },
+    { mlApi },
   ] = services;
 
   const mlJobService = useMemo(
-    () => mlJobServiceFactory(toastNotificationServiceProvider(toasts), mlApiServices),
+    () => mlJobServiceFactory(toastNotificationServiceProvider(toasts), mlApi),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
@@ -165,7 +165,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
         };
 
         const newTableData = await loadAnomaliesTableData(
-          mlApiServices,
+          mlApi,
           mlJobService,
           undefined,
           explorerJobs,
