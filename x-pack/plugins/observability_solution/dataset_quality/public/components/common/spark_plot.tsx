@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { ScaleType, Settings, Tooltip, Chart, BarSeries } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { Coordinate } from '../../../../../common/types';
+import { Coordinate } from '../../../common/types';
 
 export function SparkPlot({
   valueLabel,
