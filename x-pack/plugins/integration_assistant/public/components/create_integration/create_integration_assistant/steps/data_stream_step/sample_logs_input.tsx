@@ -70,19 +70,29 @@ export const parseJSONArray = (
  *
  * This is a generic function to apply to arrays of any type.
  *
- * The result will:
+ * The array is changed in-place so that it will:
  *   - have no more than MaxLogsSampleRows; and
  *   - be shuffled using the reproducible shuffle algorithm;
  *   - however, the first element will be kept in-place.
  *
+ * The idea is to perform the same amount of operations on the array
+ * regardless of its size and to not use any extra memory.
+ *
  * @param array - The array to select from (cannot be empty).
- * @returns The new array, truncated and shuffled.
  * @template T - The type of elements in the array.
+ * @returns Whether the array was truncated.
  */
-function selectFromLogsSample<T>(array: T[]): T[] {
-  const numElements = Math.min(MaxLogsSampleRows, array.length);
+function trimShuffleLogsSample<T>(array: T[]): boolean {
+  const willTruncate = array.length > MaxLogsSampleRows;
+  const numElements = willTruncate ? MaxLogsSampleRows : array.length;
+
   partialShuffleArray(array, 1, numElements);
-  return array.slice(0, numElements);
+
+  if (willTruncate) {
+    array.length = numElements;
+  }
+
+  return willTruncate;
 }
 
 // The error message structure.
@@ -170,18 +180,18 @@ const prepareLogsContent = (fileContent: string): PrepareLogsResult => {
           return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
         }
 
-        const logSamples = selectFromLogsSample(fileLines);
+        const isTruncated = trimShuffleLogsSample(fileLines);
 
         return {
           samplesFormat: undefined,
-          logSamples,
-          isTruncated: fileLines.length !== logSamples.length,
+          logSamples: fileLines,
+          isTruncated,
         };
       }
     }
   }
 
-  // This seems to be an ND(JSON), so perform additional checks and return samplesFormat.
+  // This seems to be an ND(JSON), so perform additional checks and return jsonSamplesFormat.
 
   if (parsedJSONContent.some((log) => !isPlainObject(log))) {
     return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT };
@@ -191,11 +201,12 @@ const prepareLogsContent = (fileContent: string): PrepareLogsResult => {
     return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
   }
 
-  const logSamples = selectFromLogsSample(parsedJSONContent).map((line) => JSON.stringify(line));
+  const isTruncated = trimShuffleLogsSample(parsedJSONContent);
+
   return {
-    logSamples,
     samplesFormat: jsonSamplesFormat,
-    isTruncated: parsedJSONContent.length !== logSamples.length,
+    logSamples: parsedJSONContent.map((line) => JSON.stringify(line)),
+    isTruncated,
   };
 };
 
