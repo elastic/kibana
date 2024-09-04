@@ -68,7 +68,7 @@ export class AnomaliesTableInternal extends Component {
   }
 
   toggleRow = async (item, tab = ANOMALIES_TABLE_TABS.DETAILS) => {
-    const ml = this.context.services.mlServices.mlApiServices;
+    const mlApi = this.context.services.mlServices.mlApi;
     const itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMap[item.rowId]) {
       delete itemIdToExpandedRowMap[item.rowId];
@@ -81,7 +81,7 @@ export class AnomaliesTableInternal extends Component {
 
       if (examples !== undefined) {
         try {
-          definition = await ml.results.getCategoryDefinition(
+          definition = await mlApi.results.getCategoryDefinition(
             item.jobId,
             item.source.mlcategory[0]
           );
