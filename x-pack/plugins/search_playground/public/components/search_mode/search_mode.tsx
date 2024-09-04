@@ -14,15 +14,18 @@ import {
   EuiForm,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
 import { Controller, useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { ResultList } from './result_list';
 import { ChatForm, ChatFormFields } from '../../types';
 import { useSearchPreview } from '../../hooks/use_search_preview';
+import { getPaginationFromPage } from '../../utils/pagination_helper';
+import { DEFAULT_PAGINATION } from '../../../common';
 
 export const SearchMode: React.FC = () => {
+  const formRef = useRef<HTMLFormElement>(null);
   const {
     data: { results, pagination, isInitialState },
     fetchSearchResults,
@@ -38,10 +41,21 @@ export const SearchMode: React.FC = () => {
 
   const updateSearchQuery = useCallback(
     (query: string) => {
-      searchBarOnChange({ query, pagination: searchBarValue.pagination });
+      searchBarOnChange(query);
     },
-    [searchBarOnChange, searchBarValue]
+    [searchBarOnChange]
   );
+  const handleSearch = async (query = searchBarValue, paginationParam = DEFAULT_PAGINATION) => {
+    try {
+      await fetchSearchResults({ query, pagination: paginationParam });
+    } catch (e) {
+      // TODO handle error ?
+    }
+  };
+
+  const onPagination = (page: number) => {
+    handleSearch(searchBarValue, getPaginationFromPage(page, pagination.size, pagination));
+  };
 
   return (
     <EuiFlexGroup direction="row" justifyContent="center">
@@ -53,23 +67,14 @@ export const SearchMode: React.FC = () => {
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiForm
-              component="form"
-              onSubmit={handleSubmit(async () => {
-                try {
-                  await fetchSearchResults(searchBarValue);
-                } catch (e) {
-                  // TODO handle error ?
-                }
-              })}
-            >
+            <EuiForm component="form" onSubmit={handleSubmit(() => handleSearch())} ref={formRef}>
               <Controller
                 control={control}
                 name={ChatFormFields.searchQuery}
                 render={({ field }) => (
                   <EuiFieldText
                     {...field}
-                    value={searchBarValue.query}
+                    value={searchBarValue}
                     icon="search"
                     fullWidth
                     placeholder="Search for documents"
@@ -84,7 +89,11 @@ export const SearchMode: React.FC = () => {
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
                 {!isInitialState ? (
-                  <ResultList searchResults={results} pagination={pagination} />
+                  <ResultList
+                    searchResults={results}
+                    pagination={pagination}
+                    onPaginationChange={onPagination}
+                  />
                 ) : (
                   <EuiEmptyPrompt
                     iconType={'checkInCircleFilled'}

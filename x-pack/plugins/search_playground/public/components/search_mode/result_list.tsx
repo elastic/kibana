@@ -31,9 +31,14 @@ import { useKibana } from '../../hooks/use_kibana';
 export interface ResultListArgs {
   searchResults: SearchHit[];
   pagination: Pagination;
+  onPaginationChange: (nextPage: number) => void;
 }
 
-export const ResultList: React.FC<ResultListArgs> = ({ searchResults, pagination }) => {
+export const ResultList: React.FC<ResultListArgs> = ({
+  searchResults,
+  pagination,
+  onPaginationChange,
+}) => {
   const {
     services: { data },
   } = useKibana();
@@ -76,7 +81,13 @@ export const ResultList: React.FC<ResultListArgs> = ({ searchResults, pagination
         })}
         {searchResults.length !== 0 && (
           <EuiFlexItem>
-            <EuiPagination pageCount={totalPage} activePage={page} onPageClick={(p) => {}} />
+            <EuiPagination
+              pageCount={totalPage}
+              activePage={page}
+              onPageClick={(p) => {
+                onPaginationChange(p);
+              }}
+            />
           </EuiFlexItem>
         )}
         {searchResults.length === 0 && (

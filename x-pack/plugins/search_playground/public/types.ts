@@ -22,7 +22,7 @@ import { AppMountParameters } from '@kbn/core/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ChatRequestData, MessageRole, Pagination } from '../common/types';
+import { ChatRequestData, MessageRole } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import { PlaygroundHeaderDocs } from './components/playground_header_docs';
@@ -90,7 +90,7 @@ export interface ChatForm {
   [ChatFormFields.sourceFields]: { [index: string]: string[] };
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
-  [ChatFormFields.searchQuery]: { query: string; pagination: Pagination };
+  [ChatFormFields.searchQuery]: string;
 }
 
 export interface Message {
