@@ -16,7 +16,11 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
-import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
+import {
+  METRICS_EXPLORER_LOCATOR_ID,
+  MetricsExplorerLocatorParams,
+  ObservabilityTriggerId,
+} from '@kbn/observability-shared-plugin/common';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
@@ -84,13 +88,17 @@ export class Plugin implements InfraClientPluginClass {
       pluginsSetup.share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
     const inventoryLocator =
       pluginsSetup.share.url.locators.get<InventoryLocatorParams>(INVENTORY_LOCATOR_ID);
+    const metricsExplorerLocator =
+      pluginsSetup.share.url.locators.get<MetricsExplorerLocatorParams>(
+        METRICS_EXPLORER_LOCATOR_ID
+      );
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createInventoryMetricRuleType({ assetDetailsLocator, inventoryLocator })
     );
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createMetricThresholdRuleType({ assetDetailsLocator })
+      createMetricThresholdRuleType({ assetDetailsLocator, metricsExplorerLocator })
     );
 
     if (this.config.featureFlags.logsUIEnabled) {

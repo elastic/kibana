@@ -3,12 +3,8 @@
 exports[`should render 3 tick slider when renderAs is HEX 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
     display="columnCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Resolution"
-    labelType="label"
   >
     <EuiRangeClass
       compressed={true}
@@ -44,12 +40,8 @@ exports[`should render 3 tick slider when renderAs is HEX 1`] = `
 exports[`should render 4 tick slider when renderAs is GRID 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
     display="columnCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Resolution"
-    labelType="label"
   >
     <EuiRangeClass
       compressed={true}
@@ -91,12 +83,8 @@ exports[`should render 4 tick slider when renderAs is GRID 1`] = `
 exports[`should render 4 tick slider when renderAs is HEATMAP 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
     display="columnCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Resolution"
-    labelType="label"
   >
     <EuiRangeClass
       compressed={true}
@@ -138,12 +126,8 @@ exports[`should render 4 tick slider when renderAs is HEATMAP 1`] = `
 exports[`should render 4 tick slider when renderAs is POINT 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
     display="columnCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Resolution"
-    labelType="label"
   >
     <EuiRangeClass
       compressed={true}
