@@ -96,6 +96,10 @@ export class StatusRuleExecutor {
     this.options = options;
   }
 
+  debug(message: string) {
+    this.logger.debug(`[Status Rule Executor][${this.ruleName}] ${message}`);
+  }
+
   async init() {
     const { uiSettingsClient } = this.options.services;
     this.dateFormat = await uiSettingsClient.get('dateFormat');
@@ -129,14 +133,14 @@ export class StatusRuleExecutor {
       filter: filtersStr,
     });
 
+    this.debug(`Found ${this.monitors.length} monitors for params ${JSON.stringify(this.params)}`);
     return processMonitors(this.monitors);
   }
 
   async getDownChecks(prevDownConfigs: StatusConfigs = {}): Promise<AlertOverviewStatus> {
     await this.init();
-    const { enabledMonitorQueryIds } = await this.getMonitors();
-
-    const { maxPeriod, monitorLocationIds, monitorLocationMap } = processMonitors(this.monitors);
+    const { enabledMonitorQueryIds, maxPeriod, monitorLocationIds, monitorLocationMap } =
+      await this.getMonitors();
 
     this.monitorLocationsMap = monitorLocationMap;
 
@@ -155,6 +159,12 @@ export class StatusRuleExecutor {
       );
 
       const { downConfigs, upConfigs } = currentStatus;
+
+      this.debug(
+        `Found ${Object.keys(downConfigs).length} down configs and ${
+          Object.keys(upConfigs).length
+        } up configs`
+      );
 
       Object.keys(prevDownConfigs).forEach((locId) => {
         if (!downConfigs[locId] && !upConfigs[locId]) {
@@ -192,15 +202,14 @@ export class StatusRuleExecutor {
         .subtract(maxPeriod * numberOfChecks, 'milliseconds')
         .subtract(5, 'minutes')
         .toISOString();
-      return { from, to: 'now' };
-    }
-
-    if (condition && 'time' in condition.window) {
+    } else if (condition && 'time' in condition.window) {
       const time = condition.window.time;
       const { unit, size } = time;
 
       from = moment().subtract(size, unit).toISOString();
     }
+
+    this.debug(`Using range from ${from} to now`);
 
     return { from, to: 'now' };
   };
