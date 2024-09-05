@@ -23,10 +23,14 @@ import { i18n } from '@kbn/i18n';
 import { pick } from 'lodash';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { v4 as uuidv4 } from 'uuid';
+import { useCreateInvestigation } from '../../hooks/use_create_investigation';
 import { useFetchInvestigation } from '../../hooks/use_fetch_investigation';
 import { useUpdateInvestigation } from '../../hooks/use_update_investigation';
 import { InvestigationNotFound } from '../investigation_not_found/investigation_not_found';
 import { StatusField } from './fields/status_field';
+import { useKibana } from '../../hooks/use_kibana';
+import { paths } from '../../../common/paths';
 
 export interface InvestigationForm {
   title: string;
@@ -34,11 +38,19 @@ export interface InvestigationForm {
 }
 
 interface Props {
-  investigationId: string;
+  investigationId?: string;
   onClose: () => void;
 }
 
 export function InvestigationEditForm({ investigationId, onClose }: Props) {
+  const {
+    core: {
+      http: { basePath },
+      application: { navigateToUrl },
+    },
+  } = useKibana();
+  const isEditing = Boolean(investigationId);
+
   const {
     data: investigation,
     isLoading,
@@ -47,9 +59,10 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
   } = useFetchInvestigation({ id: investigationId });
 
   const { mutateAsync: updateInvestigation } = useUpdateInvestigation();
+  const { mutateAsync: createInvestigation } = useCreateInvestigation();
 
   const methods = useForm<InvestigationForm>({
-    defaultValues: { title: 'new investigation', status: 'ongoing' },
+    defaultValues: { title: 'New investigation', status: 'ongoing' },
     values: investigation ? pick(investigation, ['title', 'status']) : undefined,
     mode: 'all',
   });
@@ -58,17 +71,34 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
     return <InvestigationNotFound />;
   }
 
-  if (isLoading || !investigation) {
+  if (isEditing && (isLoading || !investigation)) {
     return <EuiLoadingSpinner size="xl" />;
   }
 
   const onSubmit = async (data: InvestigationForm) => {
-    await updateInvestigation({
-      investigationId,
-      payload: { title: data.title, status: data.status },
-    });
-    refetch();
-    onClose();
+    if (isEditing) {
+      await updateInvestigation({
+        investigationId: investigationId!,
+        payload: { title: data.title, status: data.status },
+      });
+      refetch();
+      onClose();
+    } else {
+      const resp = await createInvestigation({
+        id: uuidv4(),
+        title: data.title,
+        params: {
+          timeRange: {
+            from: new Date(new Date().getTime() - 30 * 60 * 1000).getTime(),
+            to: new Date().getTime(),
+          },
+        },
+        origin: {
+          type: 'blank',
+        },
+      });
+      navigateToUrl(basePath.prepend(paths.investigationDetails(resp.id)));
+    }
   };
 
   return (
@@ -78,9 +108,13 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2>
-                {i18n.translate('xpack.investigateApp.investigationDetailsPage.h2.editLabel', {
-                  defaultMessage: 'Edit',
-                })}
+                {isEditing
+                  ? i18n.translate('xpack.investigateApp.investigationDetailsPage.h2.editLabel', {
+                      defaultMessage: 'Edit',
+                    })
+                  : i18n.translate('xpack.investigateApp.investigationDetailsPage.h2.createLabel', {
+                      defaultMessage: 'Create',
+                    })}
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
