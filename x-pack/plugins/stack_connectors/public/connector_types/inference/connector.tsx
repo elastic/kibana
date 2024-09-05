@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 import {
   EuiFormRow,
   EuiSpacer,
-  EuiComboBoxOptionOption,
   EuiTitle,
   EuiAccordion,
   EuiInputPopover,
@@ -20,6 +19,12 @@ import {
   EuiSelectableOption,
   EuiFormControlLayout,
   keys,
+  useEuiTheme,
+  EuiTextColor,
+  EuiButtonGroup,
+  EuiPanel,
+  EuiHorizontalRule,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import {
   getFieldValidityAndErrorMessage,
@@ -27,7 +32,6 @@ import {
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ConnectorFormSchema,
@@ -45,6 +49,7 @@ import { InferenceProvider } from './providers/get_providers';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
 
 interface TaskTypeOption {
+  id: string;
   value: string;
   label: string;
 }
@@ -54,6 +59,7 @@ export const getTaskTypeOptions = (providers: InferenceTaskType[]): TaskTypeOpti
 
   providers.forEach((p: InferenceTaskType) => {
     options.push({
+      id: p.task_type,
       label: p.task_type,
       value: p.task_type,
     });
@@ -67,6 +73,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
   // registerPreSubmitValidator
 }) => {
   const { http } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
   const { updateFieldValues, setFieldValue } = useFormContext();
   const [{ config, secrets }] = useFormData<ConnectorFormSchema<Config, Secrets>>({
     watch: [
@@ -83,7 +90,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
   });
 
   const [selectedProvider, setSelectedProvider] = useState<InferenceProvider>();
-  const [taskTypeOptions, setTaskTypeOptions] = useState<EuiComboBoxOptionOption[]>([]);
+  const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   // const [providers, setProviders] = useState<InferenceProvider[]>([]);
   const [taskTypes, setTaskTypes] = useState<InferenceTaskType[]>([]);
   const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
@@ -341,53 +348,101 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
 
       <EuiAccordion
         id="inferenceAdditionalOptions"
-        buttonProps={{ paddingSize: 's', css: buttonCss }}
+        buttonProps={{ css: buttonCss }}
+        css={css`
+          .euiAccordion__triggerWrapper {
+            display: inline-flex;
+          }
+        `}
         element="fieldset"
         arrowDisplay="right"
+        arrowProps={{
+          color: 'primary',
+        }}
         buttonElement="button"
         borders="none"
         buttonContent={
-          <FormattedMessage
-            id="xpack.stackConnectors.components.inference.additionalOptionsLabel"
-            defaultMessage="Additional options"
-          />
+          <EuiTextColor color={euiTheme.colors.primary}>
+            <FormattedMessage
+              id="xpack.stackConnectors.components.inference.additionalOptionsLabel"
+              defaultMessage="Additional options"
+            />
+          </EuiTextColor>
         }
         initialIsOpen={true}
       >
-        <>
-          <UseField
-            path="config.taskType"
-            component={SelectField}
-            defaultValue={DEFAULT_TASK_TYPE}
-            isDisabled={readOnly || isEdit}
-            config={{
-              label: i18n.TASK_TYPE,
-            }}
-            onChange={onTaskTypeOptionsSelect}
-            componentProps={{
-              euiFieldProps: {
-                'data-test-subj': 'taskTypeSelect',
-                options: taskTypeOptions,
-                fullWidth: true,
-                readOnly,
-              },
-              helpText: (
+        <EuiSpacer size="m" />
+        <EuiPanel hasBorder={true}>
+          {providerForm.length > 0 ? (
+            <>
+              <EuiTitle size="xxs" data-test-subj="task-type-details-label">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.stackConnectors.components.inference.providerDetailsLabel"
+                    defaultMessage="Provider settings"
+                  />
+                </h4>
+              </EuiTitle>
+              <div className="euiFormHelpText euiFormRow__text">
                 <FormattedMessage
-                  defaultMessage="Inference endpoints have configurable task types of 'completion', 'rerank' and more. Configuration of an AI Assistant will require a 'completion' task type to the model provider of your choice."
-                  id="xpack.stackConnectors.components.inference.inferenceTaskTypeDocumentation"
+                  id="xpack.stackConnectors.components.inference.providerHelpLabel"
+                  defaultMessage="Configure the inference provider. These settings are optional provider settings."
                 />
-              ),
-            }}
-          />
-          <EuiSpacer size="m" />
+              </div>
+            </>
+          ) : null}
           <EuiTitle size="xxs" data-test-subj="task-type-details-label">
             <h4>
               <FormattedMessage
                 id="xpack.stackConnectors.components.inference.taskTypeDetailsLabel"
-                defaultMessage="Task type details"
+                defaultMessage="Task settings"
               />
             </h4>
           </EuiTitle>
+          <div className="euiFormHelpText euiFormRow__text">
+            <FormattedMessage
+              id="xpack.stackConnectors.components.inference.taskTypeHelpLabel"
+              defaultMessage="Configure the inference task. These settings are specific to the task type you specified."
+            />
+          </div>
+          <EuiSpacer size="m" />
+
+          <UseField path="config.taskType">
+            {(field) => {
+              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
+              return (
+                <EuiFormRow
+                  id="taskTypeSelect"
+                  label={
+                    <FormattedMessage
+                      id="xpack.stackConnectors.components.inference.taskTypeLabel"
+                      defaultMessage="Task type"
+                    />
+                  }
+                  isInvalid={isInvalid}
+                  error={errorMessage}
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.stackConnectors.components.inference.taskTypeSelectHelpLabel"
+                      defaultMessage="Configuration of AI Assistants requires a 'completion' task type."
+                    />
+                  }
+                >
+                  <EuiButtonGroup
+                    data-test-subj="taskTypeSelect"
+                    legend="Task type"
+                    defaultValue={DEFAULT_TASK_TYPE}
+                    isDisabled={readOnly || isEdit}
+                    idSelected={selectedTaskType}
+                    onChange={onTaskTypeOptionsSelect}
+                    options={taskTypeOptions}
+                    color="text"
+                  />
+                </EuiFormRow>
+              );
+            }}
+          </UseField>
           <EuiSpacer size="s" />
           <ConnectorConfigurationFormItems
             itemsGrow={false}
@@ -402,8 +457,61 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
             items={getTaskTypeForm(false)}
             setConfigEntry={onSetConfigEntry}
           />
-        </>
+          <EuiHorizontalRule />
+          <EuiTitle size="xxs" data-test-subj="task-type-details-label">
+            <h4>
+              <FormattedMessage
+                id="xpack.stackConnectors.components.inference.inferenceEndpointLabel"
+                defaultMessage="Inference Endpoint"
+              />
+            </h4>
+          </EuiTitle>
+          <div className="euiFormHelpText euiFormRow__text">
+            <FormattedMessage
+              id="xpack.stackConnectors.components.inference.inferenceEndpointHelpLabel"
+              defaultMessage="Inference endpoints provide a simplified method for using this configuration, ecpecially from the API"
+            />
+          </div>
+          <EuiSpacer size="s" />
+
+          <UseField path="config.taskType">
+            {(field) => {
+              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
+              return (
+                <EuiFormRow
+                  id="taskTypeSelect"
+                  isInvalid={isInvalid}
+                  error={errorMessage}
+                  fullWidth
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.stackConnectors.components.inference.inferenceIdHelpLabel"
+                      defaultMessage="This ID cannot be changed once created."
+                    />
+                  }
+                >
+                  <EuiFieldText
+                    fullWidth
+                    prepend="_inference"
+                    append={
+                      <EuiButtonEmpty onClick={() => {}} iconType="copy" size="s">
+                        <FormattedMessage
+                          id="xpack.stackConnectors.components.inference.inferenceCopyLabel"
+                          defaultMessage="Copy"
+                        />
+                      </EuiButtonEmpty>
+                    }
+                    aria-label="Use aria labels when no actual label is in use"
+                  />
+                </EuiFormRow>
+              );
+            }}
+          </UseField>
+        </EuiPanel>
       </EuiAccordion>
+      <EuiSpacer size="l" />
+      <EuiHorizontalRule />
     </>
   );
 };
