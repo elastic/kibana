@@ -47,11 +47,21 @@ info:
     GET kbn:/api/data_views
 
     ```
-  license:
-    name: Attribution-NonCommercial-NoDerivatives 4.0 International
-    url: 'https://creativecommons.org/licenses/by-nc-nd/4.0/'
+
+
+    ## Documentation source and versions
+
+
+    This documentation is derived from the `main` branch of the
+    [kibana](https://github.com/elastic/kibana) repository.
+
+    It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0
+    International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
   title: Kibana Serverless APIs
   version: 1.0.2
+  x-doc-license:
+    name: Attribution-NonCommercial-NoDerivatives 4.0 International
+    url: 'https://creativecommons.org/licenses/by-nc-nd/4.0/'
   x-feedbackLink:
     label: Feedback
     url: >-
@@ -64,10 +74,6 @@ servers:
       port:
         default: '5601'
   - url: 'http://localhost:5622'
-  - url: 'https://{kibanaUrl}'
-    variables:
-      kibanaUrl:
-        default: 'localhost:5601'
   - url: 'https://{kibana_url}'
     variables:
       kibana_url:
@@ -231,6 +237,7 @@ paths:
         - $ref: '#/components/parameters/Fleet_page_size'
         - $ref: '#/components/parameters/Fleet_page_index'
         - $ref: '#/components/parameters/Fleet_kuery'
+        - $ref: '#/components/parameters/Fleet_format'
         - description: >-
             When set to true, retrieve the related package policies for each
             agent policy.
@@ -302,7 +309,8 @@ paths:
   /agent_policies/_bulk_get:
     post:
       operationId: bulk-get-agent-policies
-      parameters: []
+      parameters:
+        - $ref: '#/components/parameters/Fleet_format'
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
@@ -368,6 +376,7 @@ paths:
         required: true
         schema:
           type: string
+      - $ref: '#/components/parameters/Fleet_format'
     put:
       operationId: update-agent-policy
       parameters:
@@ -401,6 +410,7 @@ paths:
         required: true
         schema:
           type: string
+      - $ref: '#/components/parameters/Fleet_format'
     post:
       operationId: agent-policy-copy
       parameters:
@@ -1440,7 +1450,7 @@ paths:
                 - agent2
               rollout_duration_seconds: 3600
               source_uri: 'https://artifacts.elastic.co/downloads/beats/elastic-agent'
-              start_time: '2022-08-03T14:00:00.000Z'
+              start_time: 2022-08-03T14:00:00.000Z
               version: 8.4.0
             schema:
               $ref: '#/components/schemas/Fleet_bulk_upgrade_agents'
@@ -1583,254 +1593,484 @@ paths:
       summary: List agent tags
       tags:
         - Elastic Agents
-  /api/actions/connector:
-    post:
-      description: The connector identifier is randomly generated.
-      operationId: createConnector
+  /api/actions:
+    get:
+      deprecated: true
+      operationId: '%2Fapi%2Factions#0'
       parameters:
-        - $ref: '#/components/parameters/Connectors_kbn_xsrf'
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+      responses: {}
+      summary: Get all connectors
+      tags:
+        - connectors
+  /api/actions/action:
+    post:
+      deprecated: true
+      operationId: '%2Fapi%2Factions%2Faction#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
-            examples:
-              createEmailConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_create_email_connector_request
-              createIndexConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_create_index_connector_request
-              createWebhookConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_create_webhook_connector_request
-              createXmattersConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_create_xmatters_connector_request
             schema:
-              $ref: '#/components/schemas/Connectors_create_connector_request'
-        required: true
+              additionalProperties: false
+              type: object
+              properties:
+                actionTypeId:
+                  description: The connector type identifier.
+                  type: string
+                config:
+                  additionalProperties: {}
+                  default: {}
+                  type: object
+                name:
+                  description: The display name for the connector.
+                  type: string
+                secrets:
+                  additionalProperties: {}
+                  default: {}
+                  type: object
+              required:
+                - name
+                - actionTypeId
       responses:
         '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              examples:
-                createEmailConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_create_email_connector_response
-                createIndexConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_create_index_connector_response
-                createWebhookConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_create_webhook_connector_response
-                createXmattersConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_create_xmatters_connector_response
-              schema:
-                $ref: '#/components/schemas/Connectors_connector_response_properties'
           description: Indicates a successful call.
-        '401':
-          $ref: '#/components/responses/Connectors_401'
-      summary: Create a connector with a random ID
+      summary: Create a connector
+      tags:
+        - connectors
+  '/api/actions/action/{id}':
+    delete:
+      deprecated: true
+      description: 'WARNING: When you delete a connector, it cannot be recovered.'
+      operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: An identifier for the connector.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Indicates a successful call.
+      summary: Delete a connector
+      tags:
+        - connectors
+    get:
+      deprecated: true
+      operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D#1'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: An identifier for the connector.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Get connector information
+      tags:
+        - connectors
+    put:
+      deprecated: true
+      operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D#2'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: An identifier for the connector.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                config:
+                  additionalProperties: {}
+                  default: {}
+                  type: object
+                name:
+                  type: string
+                secrets:
+                  additionalProperties: {}
+                  default: {}
+                  type: object
+              required:
+                - name
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Update a connector
+      tags:
+        - connectors
+  '/api/actions/action/{id}/_execute':
+    post:
+      deprecated: true
+      operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D%2F_execute#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: An identifier for the connector.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                params:
+                  additionalProperties: {}
+                  type: object
+              required:
+                - params
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Run a connector
       tags:
         - connectors
   /api/actions/connector_types:
     get:
-      operationId: getConnectorTypes
+      description: You do not need any Kibana feature privileges to run this API.
+      operationId: '%2Fapi%2Factions%2Fconnector_types#0'
       parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
         - description: >-
             A filter to limit the retrieved connector types to those that
             support a specific feature (such as alerting or cases).
           in: query
           name: feature_id
+          required: false
           schema:
-            $ref: '#/components/schemas/Connectors_features'
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              examples:
-                getConnectorTypesServerlessResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_get_connector_types_generativeai_response
-              schema:
-                description: The properties vary for each connector type.
-                items:
-                  type: object
-                  properties:
-                    enabled:
-                      description: >-
-                        Indicates whether the connector type is enabled in
-                        Kibana.
-                      example: true
-                      type: boolean
-                    enabled_in_config:
-                      description: >-
-                        Indicates whether the connector type is enabled in the
-                        Kibana configuration file.
-                      example: true
-                      type: boolean
-                    enabled_in_license:
-                      description: >-
-                        Indicates whether the connector is enabled in the
-                        license.
-                      example: true
-                      type: boolean
-                    id:
-                      $ref: '#/components/schemas/Connectors_connector_types'
-                    is_system_action_type:
-                      example: false
-                      type: boolean
-                    minimum_license_required:
-                      description: The license that is required to use the connector type.
-                      example: basic
-                      type: string
-                    name:
-                      description: The name of the connector type.
-                      example: Index
-                      type: string
-                    supported_feature_ids:
-                      description: The features that are supported by the connector type.
-                      example:
-                        - alerting
-                        - cases
-                        - siem
-                      items:
-                        $ref: '#/components/schemas/Connectors_features'
-                      type: array
-                title: Get connector types response body properties
-                type: array
-          description: Indicates a successful call.
-        '401':
-          $ref: '#/components/responses/Connectors_401'
-      summary: Get all connector types
+            type: string
+      responses: {}
+      summary: Get connector types
       tags:
         - connectors
-  '/api/actions/connector/{connectorId}':
+  '/api/actions/connector/{id}':
     delete:
-      operationId: deleteConnector
+      description: 'WARNING: When you delete a connector, it cannot be recovered.'
+      operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#0'
       parameters:
-        - $ref: '#/components/parameters/Connectors_kbn_xsrf'
-        - $ref: '#/components/parameters/Connectors_connector_id'
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: An identifier for the connector.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           description: Indicates a successful call.
-        '401':
-          $ref: '#/components/responses/Connectors_401'
-        '404':
-          $ref: '#/components/responses/Connectors_404'
       summary: Delete a connector
       tags:
         - connectors
     get:
-      operationId: getConnector
+      operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#1'
       parameters:
-        - $ref: '#/components/parameters/Connectors_connector_id'
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: An identifier for the connector.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              examples:
-                getConnectorResponse:
-                  $ref: '#/components/examples/Connectors_get_connector_response'
-              schema:
-                $ref: '#/components/schemas/Connectors_connector_response_properties'
           description: Indicates a successful call.
-        '401':
-          $ref: '#/components/responses/Connectors_401'
-        '404':
-          $ref: '#/components/responses/Connectors_404'
-      summary: Get a connector information
+      summary: Get connector information
       tags:
         - connectors
     post:
-      operationId: createConnectorId
+      operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%3F%7D#0'
       parameters:
-        - $ref: '#/components/parameters/Connectors_kbn_xsrf'
-        - description: >
-            A UUID v1 or v4 identifier for the connector. If you omit this
-            parameter, an identifier is randomly generated.
-          in: path
-          name: connectorId
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
           required: true
           schema:
-            example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+            example: 'true'
+            type: string
+        - in: path
+          name: id
+          required: false
+          schema:
             type: string
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
-            examples:
-              createIndexConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_create_index_connector_request
             schema:
-              $ref: '#/components/schemas/Connectors_create_connector_request'
-        required: true
+              additionalProperties: false
+              type: object
+              properties:
+                config:
+                  additionalProperties: {}
+                  default: {}
+                  type: object
+                connector_type_id:
+                  description: The type of connector.
+                  type: string
+                name:
+                  description: The display name for the connector.
+                  type: string
+                secrets:
+                  additionalProperties: {}
+                  default: {}
+                  type: object
+              required:
+                - name
+                - connector_type_id
       responses:
         '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              examples:
-                createIndexConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_create_index_connector_response
-              schema:
-                $ref: '#/components/schemas/Connectors_connector_response_properties'
           description: Indicates a successful call.
-        '401':
-          $ref: '#/components/responses/Connectors_401'
       summary: Create a connector
       tags:
         - connectors
     put:
-      operationId: updateConnector
+      operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#2'
       parameters:
-        - $ref: '#/components/parameters/Connectors_kbn_xsrf'
-        - $ref: '#/components/parameters/Connectors_connector_id'
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: An identifier for the connector.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
-            examples:
-              updateIndexConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_update_index_connector_request
             schema:
-              $ref: '#/components/schemas/Connectors_update_connector_request'
-        required: true
+              additionalProperties: false
+              type: object
+              properties:
+                config:
+                  additionalProperties: {}
+                  default: {}
+                  type: object
+                name:
+                  description: The display name for the connector.
+                  type: string
+                secrets:
+                  additionalProperties: {}
+                  default: {}
+                  type: object
+              required:
+                - name
       responses:
         '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Connectors_connector_response_properties'
           description: Indicates a successful call.
-        '400':
-          $ref: '#/components/responses/Connectors_401'
-        '401':
-          $ref: '#/components/responses/Connectors_401'
-        '404':
-          $ref: '#/components/responses/Connectors_404'
       summary: Update a connector
+      tags:
+        - connectors
+  '/api/actions/connector/{id}/_execute':
+    post:
+      description: >-
+        You can use this API to test an action that involves interaction with
+        Kibana services or integrations with third-party systems.
+      operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%7D%2F_execute#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: An identifier for the connector.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                params:
+                  additionalProperties: {}
+                  type: object
+              required:
+                - params
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Run a connector
       tags:
         - connectors
   /api/actions/connectors:
     get:
-      operationId: getConnectors
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              examples:
-                getConnectorsResponse:
-                  $ref: '#/components/examples/Connectors_get_connectors_response'
-              schema:
-                items:
-                  $ref: >-
-                    #/components/schemas/Connectors_connector_response_properties
-                type: array
-          description: Indicates a successful call.
-        '401':
-          $ref: '#/components/responses/Connectors_401'
+      operationId: '%2Fapi%2Factions%2Fconnectors#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+      responses: {}
       summary: Get all connectors
+      tags:
+        - connectors
+  /api/actions/list_action_types:
+    get:
+      deprecated: true
+      operationId: '%2Fapi%2Factions%2Flist_action_types#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+      responses: {}
+      summary: Get connector types
       tags:
         - connectors
   '/api/alerting/rule/{id}':
@@ -7107,7 +7347,10 @@ paths:
   /enrollment_api_keys:
     get:
       operationId: get-enrollment-api-keys
-      parameters: []
+      parameters:
+        - $ref: '#/components/parameters/Fleet_page_size'
+        - $ref: '#/components/parameters/Fleet_page_index'
+        - $ref: '#/components/parameters/Fleet_kuery'
       responses:
         '200':
           content:
@@ -7145,6 +7388,22 @@ paths:
       operationId: create-enrollment-api-keys
       parameters:
         - $ref: '#/components/parameters/Fleet_kbn_xsrf'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                name:
+                  description: The name of the enrollment API key. Must be unique.
+                  type: string
+                policy_id:
+                  description: >-
+                    The ID of the agent policy the Elastic Agent will be
+                    enrolled in.
+                  type: string
+              required:
+                - policy_id
       responses:
         '200':
           content:
@@ -7185,7 +7444,7 @@ paths:
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
-      summary: Delete enrollment API key by ID
+      summary: Revoke enrollment API key by ID by marking it as inactive
       tags:
         - Fleet enrollment API keys
     get:
@@ -9729,189 +9988,6 @@ paths:
         - Fleet uninstall tokens
 components:
   examples:
-    Connectors_create_email_connector_request:
-      summary: Create an email connector.
-      value:
-        config:
-          from: tester@example.com
-          hasAuth: true
-          host: 'https://example.com'
-          port: 1025
-          secure: false
-          service: other
-        connector_type_id: .email
-        name: email-connector-1
-        secrets:
-          password: password
-          user: username
-    Connectors_create_email_connector_response:
-      summary: A new email connector.
-      value:
-        config:
-          clientId: null
-          from: tester@example.com
-          hasAuth: true
-          host: 'https://example.com'
-          oauthTokenUrl: null
-          port: 1025
-          secure: false
-          service: other
-          tenantId: null
-        connector_type_id: .email
-        id: 90a82c60-478f-11ee-a343-f98a117c727f
-        is_deprecated: false
-        is_missing_secrets: false
-        is_preconfigured: false
-        is_system_action: false
-        name: email-connector-1
-    Connectors_create_index_connector_request:
-      summary: Create an index connector.
-      value:
-        config:
-          index: test-index
-        connector_type_id: .index
-        name: my-connector
-    Connectors_create_index_connector_response:
-      summary: A new index connector.
-      value:
-        config:
-          executionTimeField: null
-          index: test-index
-          refresh: false
-        connector_type_id: .index
-        id: c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
-        is_deprecated: false
-        is_missing_secrets: false
-        is_preconfigured: false
-        is_system_action: false
-        name: my-connector
-    Connectors_create_webhook_connector_request:
-      summary: Create a webhook connector with SSL authentication.
-      value:
-        config:
-          authType: webhook-authentication-ssl
-          certType: ssl-crt-key
-          method: post
-          url: 'https://example.com'
-        connector_type_id: .webhook
-        name: my-webhook-connector
-        secrets:
-          crt: QmFnIEF0dH...
-          key: LS0tLS1CRUdJ...
-          password: my-passphrase
-    Connectors_create_webhook_connector_response:
-      summary: A new webhook connector.
-      value:
-        config:
-          authType: webhook-authentication-ssl
-          certType: ssl-crt-key
-          hasAuth: true
-          headers: null
-          method: post
-          url: 'https://example.com'
-          verificationMode: full
-        connector_type_id: .webhook
-        id: 900eb010-3b9d-11ee-a642-8ffbb94e38bd
-        is_deprecated: false
-        is_missing_secrets: false
-        is_preconfigured: false
-        is_system_action: false
-        name: my-webhook-connector
-    Connectors_create_xmatters_connector_request:
-      summary: Create an xMatters connector with URL authentication.
-      value:
-        config:
-          usesBasic: false
-        connector_type_id: .xmatters
-        name: my-xmatters-connector
-        secrets:
-          secretsUrl: 'https://example.com?apiKey=xxxxx'
-    Connectors_create_xmatters_connector_response:
-      summary: A new xMatters connector.
-      value:
-        config:
-          configUrl: null
-          usesBasic: false
-        connector_type_id: .xmatters
-        id: 4d2d8da0-4d1f-11ee-9367-577408be4681
-        is_deprecated: false
-        is_missing_secrets: false
-        is_preconfigured: false
-        is_system_action: false
-        name: my-xmatters-connector
-    Connectors_get_connector_response:
-      summary: Get connector details.
-      value:
-        config: {}
-        connector_type_id: .server-log
-        id: df770e30-8b8b-11ed-a780-3b746c987a81
-        is_deprecated: false
-        is_missing_secrets: false
-        is_preconfigured: false
-        is_system_action: false
-        name: my_server_log_connector
-    Connectors_get_connector_types_generativeai_response:
-      summary: A list of connector types for the `generativeAI` feature.
-      value:
-        - enabled: true
-          enabled_in_config: true
-          enabled_in_license: true
-          id: .gen-ai
-          is_system_action_type: false
-          minimum_license_required: enterprise
-          name: OpenAI
-          supported_feature_ids:
-            - generativeAIForSecurity
-            - generativeAIForObservability
-            - generativeAIForSearchPlayground
-        - enabled: true
-          enabled_in_config: true
-          enabled_in_license: true
-          id: .bedrock
-          is_system_action_type: false
-          minimum_license_required: enterprise
-          name: AWS Bedrock
-          supported_feature_ids:
-            - generativeAIForSecurity
-            - generativeAIForObservability
-            - generativeAIForSearchPlayground
-        - enabled: true
-          enabled_in_config: true
-          enabled_in_license: true
-          id: .gemini
-          is_system_action_type: false
-          minimum_license_required: enterprise
-          name: Google Gemini
-          supported_feature_ids:
-            - generativeAIForSecurity
-    Connectors_get_connectors_response:
-      summary: A list of connectors
-      value:
-        - connector_type_id: .email
-          id: preconfigured-email-connector
-          is_deprecated: false
-          is_preconfigured: true
-          is_system_action: false
-          name: my-preconfigured-email-notification
-          referenced_by_count: 0
-        - config:
-            executionTimeField: null
-            index: test-index
-            refresh: false
-          connector_type_id: .index
-          id: e07d0c80-8b8b-11ed-a780-3b746c987a81
-          is_deprecated: false
-          is_missing_secrets: false
-          is_preconfigured: false
-          is_system_action: false
-          name: my-index-connector
-          referenced_by_count: 2
-    Connectors_update_index_connector_request:
-      summary: Update an index connector.
-      value:
-        config:
-          index: updated-index
-        name: updated-connector
     Data_views_create_data_view_request:
       summary: Create a data view with runtime fields.
       value:
@@ -11509,21 +11585,6 @@ components:
               title: Kibana Sample Data Logs
             type: index-pattern
   parameters:
-    Connectors_connector_id:
-      description: An identifier for the connector.
-      in: path
-      name: connectorId
-      required: true
-      schema:
-        example: df770e30-8b8b-11ed-a780-3b746c987a81
-        type: string
-    Connectors_kbn_xsrf:
-      description: Cross-site request forgery protection
-      in: header
-      name: kbn-xsrf
-      required: true
-      schema:
-        type: string
     Data_views_field_name:
       description: The name of the runtime field.
       in: path
@@ -11663,49 +11724,6 @@ components:
         example: default
         type: string
   responses:
-    Connectors_401:
-      content:
-        application/json; Elastic-Api-Version=2023-10-31:
-          schema:
-            properties:
-              error:
-                enum:
-                  - Unauthorized
-                example: Unauthorized
-                type: string
-              message:
-                type: string
-              statusCode:
-                enum:
-                  - 401
-                example: 401
-                type: integer
-            title: Unauthorized response
-            type: object
-      description: Authorization information is missing or invalid.
-    Connectors_404:
-      content:
-        application/json; Elastic-Api-Version=2023-10-31:
-          schema:
-            properties:
-              error:
-                enum:
-                  - Not Found
-                example: Not Found
-                type: string
-              message:
-                example: >-
-                  Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not
-                  found
-                type: string
-              statusCode:
-                enum:
-                  - 404
-                example: 404
-                type: integer
-            title: Not found response
-            type: object
-      description: Object is not found.
     Fleet_error:
       content:
         application/json; Elastic-Api-Version=2023-10-31:
@@ -11720,3056 +11738,6 @@ components:
                 type: number
       description: Generic Error
   schemas:
-    Connectors_config_properties_bedrock:
-      description: Defines properties for connectors when type is `.bedrock`.
-      properties:
-        apiUrl:
-          description: The Amazon Bedrock request URL.
-          type: string
-        defaultModel:
-          default: 'anthropic.claude-3-5-sonnet-20240620-v1:0'
-          description: >
-            The generative artificial intelligence model for Amazon Bedrock to
-            use. Current support is for the Anthropic Claude models.
-          type: string
-      required:
-        - apiUrl
-      title: Connector request properties for an Amazon Bedrock connector
-      type: object
-    Connectors_config_properties_cases_webhook:
-      description: Defines properties for connectors when type is `.cases-webhook`.
-      type: object
-      properties:
-        createCommentJson:
-          description: >
-            A JSON payload sent to the create comment URL to create a case
-            comment. You can use variables to add Kibana Cases data to the
-            payload. The required variable is `case.comment`. Due to Mustache
-            template variables (the text enclosed in triple braces, for example,
-            `{{{case.title}}}`), the JSON is not validated when you create the
-            connector. The JSON is validated once the Mustache variables have
-            been placed when the REST method runs. Manually ensure that the JSON
-            is valid, disregarding the Mustache variables, so the later
-            validation will pass.
-          example: '{"body": {{{case.comment}}}}'
-          type: string
-        createCommentMethod:
-          default: put
-          description: >
-            The REST API HTTP request method to create a case comment in the
-            third-party system. Valid values are `patch`, `post`, and `put`.
-          enum:
-            - patch
-            - post
-            - put
-          type: string
-        createCommentUrl:
-          description: >
-            The REST API URL to create a case comment by ID in the third-party
-            system. You can use a variable to add the external system ID to the
-            URL. If you are using the `xpack.actions.allowedHosts setting`, add
-            the hostname to the allowed hosts.
-          example: 'https://example.com/issue/{{{external.system.id}}}/comment'
-          type: string
-        createIncidentJson:
-          description: >
-            A JSON payload sent to the create case URL to create a case. You can
-            use variables to add case data to the payload. Required variables
-            are `case.title` and `case.description`. Due to Mustache template
-            variables (which is the text enclosed in triple braces, for example,
-            `{{{case.title}}}`), the JSON is not validated when you create the
-            connector. The JSON is validated after the Mustache variables have
-            been placed when REST method runs. Manually ensure that the JSON is
-            valid to avoid future validation errors; disregard Mustache
-            variables during your review.
-          example: >-
-            {"fields": {"summary": {{{case.title}}},"description":
-            {{{case.description}}},"labels": {{{case.tags}}}}}
-          type: string
-        createIncidentMethod:
-          default: post
-          description: >
-            The REST API HTTP request method to create a case in the third-party
-            system. Valid values are `patch`, `post`, and `put`.
-          enum:
-            - patch
-            - post
-            - put
-          type: string
-        createIncidentResponseKey:
-          description: >-
-            The JSON key in the create external case response that contains the
-            case ID.
-          type: string
-        createIncidentUrl:
-          description: >
-            The REST API URL to create a case in the third-party system. If you
-            are using the `xpack.actions.allowedHosts` setting, add the hostname
-            to the allowed hosts.
-          type: string
-        getIncidentResponseExternalTitleKey:
-          description: >-
-            The JSON key in get external case response that contains the case
-            title.
-          type: string
-        getIncidentUrl:
-          description: >
-            The REST API URL to get the case by ID from the third-party system.
-            If you are using the `xpack.actions.allowedHosts` setting, add the
-            hostname to the allowed hosts. You can use a variable to add the
-            external system ID to the URL. Due to Mustache template variables
-            (the text enclosed in triple braces, for example,
-            `{{{case.title}}}`), the JSON is not validated when you create the
-            connector. The JSON is validated after the Mustache variables have
-            been placed when REST method runs. Manually ensure that the JSON is
-            valid, disregarding the Mustache variables, so the later validation
-            will pass.
-          example: 'https://example.com/issue/{{{external.system.id}}}'
-          type: string
-        hasAuth:
-          default: true
-          description: >-
-            If true, a username and password for login type authentication must
-            be provided.
-          type: boolean
-        headers:
-          description: >
-            A set of key-value pairs sent as headers with the request URLs for
-            the create case, update case, get case, and create comment methods.
-          type: string
-        updateIncidentJson:
-          description: >
-            The JSON payload sent to the update case URL to update the case. You
-            can use variables to add Kibana Cases data to the payload. Required
-            variables are `case.title` and `case.description`. Due to Mustache
-            template variables (which is the text enclosed in triple braces, for
-            example, `{{{case.title}}}`), the JSON is not validated when you
-            create the connector. The JSON is validated after the Mustache
-            variables have been placed when REST method runs. Manually ensure
-            that the JSON is valid to avoid future validation errors; disregard
-            Mustache variables during your review.
-          example: >-
-            {"fields": {"summary": {{{case.title}}},"description":
-            {{{case.description}}},"labels": {{{case.tags}}}}}
-          type: string
-        updateIncidentMethod:
-          default: put
-          description: >
-            The REST API HTTP request method to update the case in the
-            third-party system. Valid values are `patch`, `post`, and `put`.
-          enum:
-            - patch
-            - post
-            - put
-          type: string
-        updateIncidentUrl:
-          description: >
-            The REST API URL to update the case by ID in the third-party system.
-            You can use a variable to add the external system ID to the URL. If
-            you are using the `xpack.actions.allowedHosts` setting, add the
-            hostname to the allowed hosts.
-          example: 'https://example.com/issue/{{{external.system.ID}}}'
-          type: string
-        viewIncidentUrl:
-          description: >
-            The URL to view the case in the external system. You can use
-            variables to add the external system ID or external system title to
-            the URL.
-          example: >-
-            https://testing-jira.atlassian.net/browse/{{{external.system.title}}}
-          type: string
-      required:
-        - createIncidentJson
-        - createIncidentResponseKey
-        - createIncidentUrl
-        - getIncidentResponseExternalTitleKey
-        - getIncidentUrl
-        - updateIncidentJson
-        - updateIncidentUrl
-        - viewIncidentUrl
-      title: Connector request properties for Webhook - Case Management connector
-    Connectors_config_properties_d3security:
-      description: Defines properties for connectors when type is `.d3security`.
-      properties:
-        url:
-          description: >
-            The D3 Security API request URL. If you are using the
-            `xpack.actions.allowedHosts` setting, add the hostname to the
-            allowed hosts.
-          type: string
-      required:
-        - url
-      title: Connector request properties for a D3 Security connector
-      type: object
-    Connectors_config_properties_email:
-      description: Defines properties for connectors when type is `.email`.
-      type: object
-      properties:
-        clientId:
-          description: >
-            The client identifier, which is a part of OAuth 2.0 client
-            credentials authentication, in GUID format. If `service` is
-            `exchange_server`, this property is required.
-          nullable: true
-          type: string
-        from:
-          description: >
-            The from address for all emails sent by the connector. It must be
-            specified in `user@host-name` format.
-          type: string
-        hasAuth:
-          default: true
-          description: >
-            Specifies whether a user and password are required inside the
-            secrets configuration.
-          type: boolean
-        host:
-          description: >
-            The host name of the service provider. If the `service` is
-            `elastic_cloud` (for Elastic Cloud notifications) or one of
-            Nodemailer's well-known email service providers, this property is
-            ignored. If `service` is `other`, this property must be defined.
-          type: string
-        oauthTokenUrl:
-          nullable: true
-          type: string
-        port:
-          description: >
-            The port to connect to on the service provider. If the `service` is
-            `elastic_cloud` (for Elastic Cloud notifications) or one of
-            Nodemailer's well-known email service providers, this property is
-            ignored. If `service` is `other`, this property must be defined.
-          type: integer
-        secure:
-          description: >
-            Specifies whether the connection to the service provider will use
-            TLS. If the `service` is `elastic_cloud` (for Elastic Cloud
-            notifications) or one of Nodemailer's well-known email service
-            providers, this property is ignored.
-          type: boolean
-        service:
-          description: |
-            The name of the email service.
-          enum:
-            - elastic_cloud
-            - exchange_server
-            - gmail
-            - other
-            - outlook365
-            - ses
-          type: string
-        tenantId:
-          description: >
-            The tenant identifier, which is part of OAuth 2.0 client credentials
-            authentication, in GUID format. If `service` is `exchange_server`,
-            this property is required.
-          nullable: true
-          type: string
-      required:
-        - from
-      title: Connector request properties for an email connector
-    Connectors_config_properties_gemini:
-      description: Defines properties for connectors when type is `.gemini`.
-      properties:
-        apiUrl:
-          description: The Google Gemini request URL.
-          type: string
-        defaultModel:
-          default: gemini-1.5-pro-001
-          description: >-
-            The generative artificial intelligence model for Google Gemini to
-            use.
-          type: string
-        gcpProjectID:
-          description: The Google ProjectID that has Vertex AI endpoint enabled.
-          type: string
-        gcpRegion:
-          description: The GCP region where the Vertex AI endpoint enabled.
-          type: string
-      required:
-        - apiUrl
-        - gcpRegion
-        - gcpProjectID
-      title: Connector request properties for an Google Gemini connector
-      type: object
-    Connectors_config_properties_genai:
-      description: Defines properties for connectors when type is `.gen-ai`.
-      discriminator:
-        mapping:
-          Azure OpenAI: '#/components/schemas/Connectors_config_properties_genai_azure'
-          OpenAI: '#/components/schemas/Connectors_config_properties_genai_openai'
-        propertyName: apiProvider
-      oneOf:
-        - $ref: '#/components/schemas/Connectors_config_properties_genai_azure'
-        - $ref: '#/components/schemas/Connectors_config_properties_genai_openai'
-      title: Connector request properties for an OpenAI connector
-    Connectors_config_properties_genai_azure:
-      description: >
-        Defines properties for connectors when type is `.gen-ai` and the API
-        provider is `Azure OpenAI'.
-      properties:
-        apiProvider:
-          description: The OpenAI API provider.
-          enum:
-            - Azure OpenAI
-          type: string
-        apiUrl:
-          description: The OpenAI API endpoint.
-          type: string
-      required:
-        - apiProvider
-        - apiUrl
-      title: >-
-        Connector request properties for an OpenAI connector that uses Azure
-        OpenAI
-      type: object
-    Connectors_config_properties_genai_openai:
-      description: >
-        Defines properties for connectors when type is `.gen-ai` and the API
-        provider is `OpenAI'.
-      properties:
-        apiProvider:
-          description: The OpenAI API provider.
-          enum:
-            - OpenAI
-          type: string
-        apiUrl:
-          description: The OpenAI API endpoint.
-          type: string
-        defaultModel:
-          description: The default model to use for requests.
-          type: string
-      required:
-        - apiProvider
-        - apiUrl
-      title: Connector request properties for an OpenAI connector
-      type: object
-    Connectors_config_properties_index:
-      description: Defines properties for connectors when type is `.index`.
-      type: object
-      properties:
-        executionTimeField:
-          default: null
-          description: A field that indicates when the document was indexed.
-          nullable: true
-          type: string
-        index:
-          description: The Elasticsearch index to be written to.
-          type: string
-        refresh:
-          default: false
-          description: >
-            The refresh policy for the write request, which affects when changes
-            are made visible to search. Refer to the refresh setting for
-            Elasticsearch document APIs.
-          type: boolean
-      required:
-        - index
-      title: Connector request properties for an index connector
-    Connectors_config_properties_jira:
-      description: Defines properties for connectors when type is `.jira`.
-      type: object
-      properties:
-        apiUrl:
-          description: The Jira instance URL.
-          type: string
-        projectKey:
-          description: The Jira project key.
-          type: string
-      required:
-        - apiUrl
-        - projectKey
-      title: Connector request properties for a Jira connector
-    Connectors_config_properties_opsgenie:
-      description: Defines properties for connectors when type is `.opsgenie`.
-      type: object
-      properties:
-        apiUrl:
-          description: >
-            The Opsgenie URL. For example, `https://api.opsgenie.com` or
-            `https://api.eu.opsgenie.com`. If you are using the
-            `xpack.actions.allowedHosts` setting, add the hostname to the
-            allowed hosts.
-          type: string
-      required:
-        - apiUrl
-      title: Connector request properties for an Opsgenie connector
-    Connectors_config_properties_pagerduty:
-      description: Defines properties for connectors when type is `.pagerduty`.
-      properties:
-        apiUrl:
-          description: The PagerDuty event URL.
-          example: 'https://events.pagerduty.com/v2/enqueue'
-          nullable: true
-          type: string
-      title: Connector request properties for a PagerDuty connector
-      type: object
-    Connectors_config_properties_resilient:
-      description: Defines properties for connectors when type is `.resilient`.
-      type: object
-      properties:
-        apiUrl:
-          description: The IBM Resilient instance URL.
-          type: string
-        orgId:
-          description: The IBM Resilient organization ID.
-          type: string
-      required:
-        - apiUrl
-        - orgId
-      title: Connector request properties for a IBM Resilient connector
-    Connectors_config_properties_sentinelone:
-      description: Defines properties for connectors when type is `.sentinelone`.
-      type: object
-      properties:
-        url:
-          description: >
-            The SentinelOne tenant URL. If you are using the
-            `xpack.actions.allowedHosts` setting, add the hostname to the
-            allowed hosts.
-          type: string
-      required:
-        - url
-      title: Connector request properties for a SentinelOne connector
-    Connectors_config_properties_servicenow:
-      description: Defines properties for connectors when type is `.servicenow`.
-      type: object
-      properties:
-        apiUrl:
-          description: The ServiceNow instance URL.
-          type: string
-        clientId:
-          description: >
-            The client ID assigned to your OAuth application. This property is
-            required when `isOAuth` is `true`.
-          type: string
-        isOAuth:
-          default: false
-          description: >
-            The type of authentication to use. The default value is false, which
-            means basic authentication is used instead of open authorization
-            (OAuth).
-          type: boolean
-        jwtKeyId:
-          description: >
-            The key identifier assigned to the JWT verifier map of your OAuth
-            application. This property is required when `isOAuth` is `true`.
-          type: string
-        userIdentifierValue:
-          description: >
-            The identifier to use for OAuth authentication. This identifier
-            should be the user field you selected when you created an OAuth JWT
-            API endpoint for external clients in your ServiceNow instance. For
-            example, if the selected user field is `Email`, the user identifier
-            should be the user's email address. This property is required when
-            `isOAuth` is `true`.
-          type: string
-        usesTableApi:
-          default: true
-          description: >
-            Determines whether the connector uses the Table API or the Import
-            Set API. This property is supported only for ServiceNow ITSM and
-            ServiceNow SecOps connectors.  NOTE: If this property is set to
-            `false`, the Elastic application should be installed in ServiceNow.
-          type: boolean
-      required:
-        - apiUrl
-      title: Connector request properties for a ServiceNow ITSM connector
-    Connectors_config_properties_servicenow_itom:
-      description: Defines properties for connectors when type is `.servicenow`.
-      type: object
-      properties:
-        apiUrl:
-          description: The ServiceNow instance URL.
-          type: string
-        clientId:
-          description: >
-            The client ID assigned to your OAuth application. This property is
-            required when `isOAuth` is `true`.
-          type: string
-        isOAuth:
-          default: false
-          description: >
-            The type of authentication to use. The default value is false, which
-            means basic authentication is used instead of open authorization
-            (OAuth).
-          type: boolean
-        jwtKeyId:
-          description: >
-            The key identifier assigned to the JWT verifier map of your OAuth
-            application. This property is required when `isOAuth` is `true`.
-          type: string
-        userIdentifierValue:
-          description: >
-            The identifier to use for OAuth authentication. This identifier
-            should be the user field you selected when you created an OAuth JWT
-            API endpoint for external clients in your ServiceNow instance. For
-            example, if the selected user field is `Email`, the user identifier
-            should be the user's email address. This property is required when
-            `isOAuth` is `true`.
-          type: string
-      required:
-        - apiUrl
-      title: Connector request properties for a ServiceNow ITSM connector
-    Connectors_config_properties_slack_api:
-      description: Defines properties for connectors when type is `.slack_api`.
-      properties:
-        allowedChannels:
-          description: A list of valid Slack channels.
-          items:
-            maxItems: 25
-            type: object
-            properties:
-              id:
-                description: The Slack channel ID.
-                example: C123ABC456
-                minLength: 1
-                type: string
-              name:
-                description: The Slack channel name.
-                minLength: 1
-                type: string
-            required:
-              - id
-              - name
-          type: array
-      title: Connector request properties for a Slack connector
-      type: object
-    Connectors_config_properties_swimlane:
-      description: Defines properties for connectors when type is `.swimlane`.
-      type: object
-      properties:
-        apiUrl:
-          description: The Swimlane instance URL.
-          type: string
-        appId:
-          description: The Swimlane application ID.
-          type: string
-        connectorType:
-          description: >-
-            The type of connector. Valid values are `all`, `alerts`, and
-            `cases`.
-          enum:
-            - all
-            - alerts
-            - cases
-          type: string
-        mappings:
-          description: The field mapping.
-          properties:
-            alertIdConfig:
-              description: Mapping for the alert ID.
-              properties:
-                fieldType:
-                  description: The type of field in Swimlane.
-                  type: string
-                id:
-                  description: The identifier for the field in Swimlane.
-                  type: string
-                key:
-                  description: The key for the field in Swimlane.
-                  type: string
-                name:
-                  description: The name of the field in Swimlane.
-                  type: string
-              required:
-                - fieldType
-                - id
-                - key
-                - name
-              title: Alert identifier mapping
-              type: object
-            caseIdConfig:
-              description: Mapping for the case ID.
-              properties:
-                fieldType:
-                  description: The type of field in Swimlane.
-                  type: string
-                id:
-                  description: The identifier for the field in Swimlane.
-                  type: string
-                key:
-                  description: The key for the field in Swimlane.
-                  type: string
-                name:
-                  description: The name of the field in Swimlane.
-                  type: string
-              required:
-                - fieldType
-                - id
-                - key
-                - name
-              title: Case identifier mapping
-              type: object
-            caseNameConfig:
-              description: Mapping for the case name.
-              properties:
-                fieldType:
-                  description: The type of field in Swimlane.
-                  type: string
-                id:
-                  description: The identifier for the field in Swimlane.
-                  type: string
-                key:
-                  description: The key for the field in Swimlane.
-                  type: string
-                name:
-                  description: The name of the field in Swimlane.
-                  type: string
-              required:
-                - fieldType
-                - id
-                - key
-                - name
-              title: Case name mapping
-              type: object
-            commentsConfig:
-              description: Mapping for the case comments.
-              properties:
-                fieldType:
-                  description: The type of field in Swimlane.
-                  type: string
-                id:
-                  description: The identifier for the field in Swimlane.
-                  type: string
-                key:
-                  description: The key for the field in Swimlane.
-                  type: string
-                name:
-                  description: The name of the field in Swimlane.
-                  type: string
-              required:
-                - fieldType
-                - id
-                - key
-                - name
-              title: Case comment mapping
-              type: object
-            descriptionConfig:
-              description: Mapping for the case description.
-              properties:
-                fieldType:
-                  description: The type of field in Swimlane.
-                  type: string
-                id:
-                  description: The identifier for the field in Swimlane.
-                  type: string
-                key:
-                  description: The key for the field in Swimlane.
-                  type: string
-                name:
-                  description: The name of the field in Swimlane.
-                  type: string
-              required:
-                - fieldType
-                - id
-                - key
-                - name
-              title: Case description mapping
-              type: object
-            ruleNameConfig:
-              description: Mapping for the name of the alert's rule.
-              properties:
-                fieldType:
-                  description: The type of field in Swimlane.
-                  type: string
-                id:
-                  description: The identifier for the field in Swimlane.
-                  type: string
-                key:
-                  description: The key for the field in Swimlane.
-                  type: string
-                name:
-                  description: The name of the field in Swimlane.
-                  type: string
-              required:
-                - fieldType
-                - id
-                - key
-                - name
-              title: Rule name mapping
-              type: object
-            severityConfig:
-              description: Mapping for the severity.
-              properties:
-                fieldType:
-                  description: The type of field in Swimlane.
-                  type: string
-                id:
-                  description: The identifier for the field in Swimlane.
-                  type: string
-                key:
-                  description: The key for the field in Swimlane.
-                  type: string
-                name:
-                  description: The name of the field in Swimlane.
-                  type: string
-              required:
-                - fieldType
-                - id
-                - key
-                - name
-              title: Severity mapping
-              type: object
-          title: Connector mappings properties for a Swimlane connector
-          type: object
-      required:
-        - apiUrl
-        - appId
-        - connectorType
-      title: Connector request properties for a Swimlane connector
-    Connectors_config_properties_tines:
-      description: Defines properties for connectors when type is `.tines`.
-      properties:
-        url:
-          description: >
-            The Tines tenant URL. If you are using the
-            `xpack.actions.allowedHosts` setting, make sure this hostname is
-            added to the allowed hosts.
-          type: string
-      required:
-        - url
-      title: Connector request properties for a Tines connector
-      type: object
-    Connectors_config_properties_torq:
-      description: Defines properties for connectors when type is `.torq`.
-      properties:
-        webhookIntegrationUrl:
-          description: The endpoint URL of the Elastic Security integration in Torq.
-          type: string
-      required:
-        - webhookIntegrationUrl
-      title: Connector request properties for a Torq connector
-      type: object
-    Connectors_config_properties_webhook:
-      description: Defines properties for connectors when type is `.webhook`.
-      properties:
-        authType:
-          description: |
-            The type of authentication to use: basic, SSL, or none.
-          enum:
-            - webhook-authentication-basic
-            - webhook-authentication-ssl
-          nullable: true
-          type: string
-        ca:
-          description: >
-            A base64 encoded version of the certificate authority file that the
-            connector can trust to sign and validate certificates. This option
-            is available for all authentication types.
-          type: string
-        certType:
-          description: >
-            If the `authType` is `webhook-authentication-ssl`, specifies whether
-            the certificate authentication data is in a CRT and key file format
-            or a PFX file format.
-          enum:
-            - ssl-crt-key
-            - ssl-pfx
-          type: string
-        hasAuth:
-          description: >
-            If `true`, a user name and password must be provided for login type
-            authentication.
-          type: boolean
-        headers:
-          description: A set of key-value pairs sent as headers with the request.
-          nullable: true
-          type: object
-        method:
-          default: post
-          description: |
-            The HTTP request method, either `post` or `put`.
-          enum:
-            - post
-            - put
-          type: string
-        url:
-          description: >
-            The request URL. If you are using the `xpack.actions.allowedHosts`
-            setting, add the hostname to the allowed hosts.
-          type: string
-        verificationMode:
-          default: full
-          description: >
-            Controls the verification of certificates. Use `full` to validate
-            that the certificate has an issue date within the `not_before` and
-            `not_after` dates, chains to a trusted certificate authority (CA),
-            and has a hostname or IP address that matches the names within the
-            certificate. Use `certificate` to validate the certificate and
-            verify that it is signed by a trusted authority; this option does
-            not check the certificate hostname. Use `none` to skip certificate
-            validation.
-          enum:
-            - certificate
-            - full
-            - none
-          type: string
-      title: Connector request properties for a Webhook connector
-      type: object
-    Connectors_config_properties_xmatters:
-      description: Defines properties for connectors when type is `.xmatters`.
-      properties:
-        configUrl:
-          description: >
-            The request URL for the Elastic Alerts trigger in xMatters. It is
-            applicable only when `usesBasic` is `true`.
-          nullable: true
-          type: string
-        usesBasic:
-          default: true
-          description: >-
-            Specifies whether the connector uses HTTP basic authentication
-            (`true`) or URL authentication (`false`).
-          type: boolean
-      title: Connector request properties for an xMatters connector
-      type: object
-    Connectors_connector_response_properties:
-      description: The properties vary depending on the connector type.
-      discriminator:
-        mapping:
-          .bedrock: >-
-            #/components/schemas/Connectors_connector_response_properties_bedrock
-          .cases-webhook: >-
-            #/components/schemas/Connectors_connector_response_properties_cases_webhook
-          .d3security: >-
-            #/components/schemas/Connectors_connector_response_properties_d3security
-          .email: '#/components/schemas/Connectors_connector_response_properties_email'
-          .gemini: '#/components/schemas/Connectors_connector_response_properties_gemini'
-          .gen-ai: '#/components/schemas/Connectors_connector_response_properties_genai'
-          .index: '#/components/schemas/Connectors_connector_response_properties_index'
-          .jira: '#/components/schemas/Connectors_connector_response_properties_jira'
-          .opsgenie: >-
-            #/components/schemas/Connectors_connector_response_properties_opsgenie
-          .pagerduty: >-
-            #/components/schemas/Connectors_connector_response_properties_pagerduty
-          .resilient: >-
-            #/components/schemas/Connectors_connector_response_properties_resilient
-          .sentinelone: >-
-            #/components/schemas/Connectors_connector_response_properties_sentinelone
-          .server-log: >-
-            #/components/schemas/Connectors_connector_response_properties_serverlog
-          .servicenow: >-
-            #/components/schemas/Connectors_connector_response_properties_servicenow
-          .servicenow-itom: >-
-            #/components/schemas/Connectors_connector_response_properties_servicenow_itom
-          .servicenow-sir: >-
-            #/components/schemas/Connectors_connector_response_properties_servicenow_sir
-          .slack: >-
-            #/components/schemas/Connectors_connector_response_properties_slack_webhook
-          .slack_api: >-
-            #/components/schemas/Connectors_connector_response_properties_slack_api
-          .swimlane: >-
-            #/components/schemas/Connectors_connector_response_properties_swimlane
-          .teams: '#/components/schemas/Connectors_connector_response_properties_teams'
-          .tines: '#/components/schemas/Connectors_connector_response_properties_tines'
-          .torq: '#/components/schemas/Connectors_connector_response_properties_torq'
-          .webhook: >-
-            #/components/schemas/Connectors_connector_response_properties_webhook
-          .xmatters: >-
-            #/components/schemas/Connectors_connector_response_properties_xmatters
-        propertyName: connector_type_id
-      oneOf:
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_bedrock
-        - $ref: '#/components/schemas/Connectors_connector_response_properties_gemini'
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_cases_webhook
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_d3security
-        - $ref: '#/components/schemas/Connectors_connector_response_properties_email'
-        - $ref: '#/components/schemas/Connectors_connector_response_properties_genai'
-        - $ref: '#/components/schemas/Connectors_connector_response_properties_index'
-        - $ref: '#/components/schemas/Connectors_connector_response_properties_jira'
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_opsgenie
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_pagerduty
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_resilient
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_sentinelone
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_serverlog
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_servicenow
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_servicenow_itom
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_servicenow_sir
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_slack_api
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_slack_webhook
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_swimlane
-        - $ref: '#/components/schemas/Connectors_connector_response_properties_teams'
-        - $ref: '#/components/schemas/Connectors_connector_response_properties_tines'
-        - $ref: '#/components/schemas/Connectors_connector_response_properties_torq'
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_webhook
-        - $ref: >-
-            #/components/schemas/Connectors_connector_response_properties_xmatters
-      title: Connector response properties
-    Connectors_connector_response_properties_bedrock:
-      title: Connector response properties for an Amazon Bedrock connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_bedrock'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .bedrock
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-      required:
-        - config
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_cases_webhook:
-      title: Connector request properties for a Webhook - Case Management connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_cases_webhook'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .cases-webhook
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_d3security:
-      title: Connector response properties for a D3 Security connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_d3security'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .d3security
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_email:
-      title: Connector response properties for an email connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_email'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .email
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_gemini:
-      title: Connector response properties for a Google Gemini connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_gemini'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .gemini
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_genai:
-      title: Connector response properties for an OpenAI connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_genai'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .gen-ai
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_index:
-      title: Connector response properties for an index connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_index'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .index
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_jira:
-      title: Connector response properties for a Jira connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_jira'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .jira
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_opsgenie:
-      title: Connector response properties for an Opsgenie connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_opsgenie'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .opsgenie
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_pagerduty:
-      title: Connector response properties for a PagerDuty connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_pagerduty'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .pagerduty
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_resilient:
-      title: Connector response properties for a IBM Resilient connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_resilient'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .resilient
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_sentinelone:
-      title: Connector response properties for a SentinelOne connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_sentinelone'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .sentinelone
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_serverlog:
-      title: Connector response properties for a server log connector
-      type: object
-      properties:
-        config:
-          nullable: true
-          type: object
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .server-log
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_servicenow:
-      title: Connector response properties for a ServiceNow ITSM connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_servicenow'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .servicenow
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_servicenow_itom:
-      title: Connector response properties for a ServiceNow ITOM connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_servicenow_itom'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .servicenow-itom
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_servicenow_sir:
-      title: Connector response properties for a ServiceNow SecOps connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_servicenow'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .servicenow-sir
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_slack_api:
-      title: Connector response properties for a Slack connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_slack_api'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .slack_api
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_slack_webhook:
-      title: Connector response properties for a Slack connector
-      type: object
-      properties:
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .slack
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_swimlane:
-      title: Connector response properties for a Swimlane connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_swimlane'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .swimlane
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_teams:
-      title: Connector response properties for a Microsoft Teams connector
-      type: object
-      properties:
-        config:
-          type: object
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .teams
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_tines:
-      title: Connector response properties for a Tines connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_tines'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .tines
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_torq:
-      title: Connector response properties for a Torq connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_torq'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .torq
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_webhook:
-      title: Connector response properties for a Webhook connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_webhook'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .webhook
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_response_properties_xmatters:
-      title: Connector response properties for an xMatters connector
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_xmatters'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .xmatters
-          type: string
-        id:
-          description: The identifier for the connector.
-          type: string
-        is_deprecated:
-          $ref: '#/components/schemas/Connectors_is_deprecated'
-        is_missing_secrets:
-          $ref: '#/components/schemas/Connectors_is_missing_secrets'
-        is_preconfigured:
-          $ref: '#/components/schemas/Connectors_is_preconfigured'
-        is_system_action:
-          $ref: '#/components/schemas/Connectors_is_system_action'
-        name:
-          description: The display name for the connector.
-          type: string
-        referenced_by_count:
-          $ref: '#/components/schemas/Connectors_referenced_by_count'
-      required:
-        - connector_type_id
-        - id
-        - is_deprecated
-        - is_preconfigured
-        - name
-    Connectors_connector_types:
-      description: >-
-        The type of connector. For example, `.email`, `.index`, `.jira`,
-        `.opsgenie`, or `.server-log`.
-      enum:
-        - .bedrock
-        - .gemini
-        - .cases-webhook
-        - .d3security
-        - .email
-        - .gen-ai
-        - .index
-        - .jira
-        - .opsgenie
-        - .pagerduty
-        - .resilient
-        - .sentinelone
-        - .servicenow
-        - .servicenow-itom
-        - .servicenow-sir
-        - .server-log
-        - .slack
-        - .slack_api
-        - .swimlane
-        - .teams
-        - .tines
-        - .torq
-        - .webhook
-        - .xmatters
-      example: .server-log
-      title: Connector types
-      type: string
-    Connectors_create_connector_request:
-      description: The properties vary depending on the connector type.
-      discriminator:
-        mapping:
-          .bedrock: '#/components/schemas/Connectors_create_connector_request_bedrock'
-          .cases-webhook: >-
-            #/components/schemas/Connectors_create_connector_request_cases_webhook
-          .d3security: '#/components/schemas/Connectors_create_connector_request_d3security'
-          .email: '#/components/schemas/Connectors_create_connector_request_email'
-          .gemini: '#/components/schemas/Connectors_create_connector_request_gemini'
-          .gen-ai: '#/components/schemas/Connectors_create_connector_request_genai'
-          .index: '#/components/schemas/Connectors_create_connector_request_index'
-          .jira: '#/components/schemas/Connectors_create_connector_request_jira'
-          .opsgenie: '#/components/schemas/Connectors_create_connector_request_opsgenie'
-          .pagerduty: '#/components/schemas/Connectors_create_connector_request_pagerduty'
-          .resilient: '#/components/schemas/Connectors_create_connector_request_resilient'
-          .sentinelone: '#/components/schemas/Connectors_create_connector_request_sentinelone'
-          .server-log: '#/components/schemas/Connectors_create_connector_request_serverlog'
-          .servicenow: '#/components/schemas/Connectors_create_connector_request_servicenow'
-          .servicenow-itom: >-
-            #/components/schemas/Connectors_create_connector_request_servicenow_itom
-          .servicenow-sir: >-
-            #/components/schemas/Connectors_create_connector_request_servicenow_sir
-          .slack: >-
-            #/components/schemas/Connectors_create_connector_request_slack_webhook
-          .slack_api: '#/components/schemas/Connectors_create_connector_request_slack_api'
-          .swimlane: '#/components/schemas/Connectors_create_connector_request_swimlane'
-          .teams: '#/components/schemas/Connectors_create_connector_request_teams'
-          .tines: '#/components/schemas/Connectors_create_connector_request_tines'
-          .torq: '#/components/schemas/Connectors_create_connector_request_torq'
-          .webhook: '#/components/schemas/Connectors_create_connector_request_webhook'
-          .xmatters: '#/components/schemas/Connectors_create_connector_request_xmatters'
-        propertyName: connector_type_id
-      oneOf:
-        - $ref: '#/components/schemas/Connectors_create_connector_request_bedrock'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_gemini'
-        - $ref: >-
-            #/components/schemas/Connectors_create_connector_request_cases_webhook
-        - $ref: '#/components/schemas/Connectors_create_connector_request_d3security'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_email'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_genai'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_index'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_jira'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_opsgenie'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_pagerduty'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_resilient'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_sentinelone'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_serverlog'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_servicenow'
-        - $ref: >-
-            #/components/schemas/Connectors_create_connector_request_servicenow_itom
-        - $ref: >-
-            #/components/schemas/Connectors_create_connector_request_servicenow_sir
-        - $ref: '#/components/schemas/Connectors_create_connector_request_slack_api'
-        - $ref: >-
-            #/components/schemas/Connectors_create_connector_request_slack_webhook
-        - $ref: '#/components/schemas/Connectors_create_connector_request_swimlane'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_teams'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_tines'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_torq'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_webhook'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_xmatters'
-      title: Create connector request body properties
-    Connectors_create_connector_request_bedrock:
-      description: >-
-        The Amazon Bedrock connector uses axios to send a POST request to Amazon
-        Bedrock.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_bedrock'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .bedrock
-          example: .bedrock
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_bedrock'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create Amazon Bedrock connector request
-      type: object
-    Connectors_create_connector_request_cases_webhook:
-      description: >
-        The Webhook - Case Management connector uses axios to send POST, PUT,
-        and GET requests to a case management RESTful API web service.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_cases_webhook'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .cases-webhook
-          example: .cases-webhook
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_cases_webhook'
-      required:
-        - config
-        - connector_type_id
-        - name
-      title: Create Webhook - Case Managment connector request
-      type: object
-    Connectors_create_connector_request_d3security:
-      description: >
-        The connector uses axios to send a POST request to a D3 Security
-        endpoint.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_d3security'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .d3security
-          example: .d3security
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_d3security'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create D3 Security connector request
-      type: object
-    Connectors_create_connector_request_email:
-      description: >
-        The email connector uses the SMTP protocol to send mail messages, using
-        an integration of Nodemailer. An exception is Microsoft Exchange, which
-        uses HTTP protocol for sending emails, Send mail. Email message text is
-        sent as both plain text and html text.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_email'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .email
-          example: .email
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_email'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create email connector request
-      type: object
-    Connectors_create_connector_request_gemini:
-      description: >-
-        The Google Gemini connector uses axios to send a POST request to Google
-        Gemini.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_gemini'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .gemini
-          example: .gemini
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_gemini'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create Google Gemini connector request
-      type: object
-    Connectors_create_connector_request_genai:
-      description: >
-        The OpenAI connector uses axios to send a POST request to either OpenAI
-        or Azure OpenAPI.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_genai'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .gen-ai
-          example: .gen-ai
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_genai'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create OpenAI connector request
-      type: object
-    Connectors_create_connector_request_index:
-      description: The index connector indexes a document into Elasticsearch.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_index'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .index
-          example: .index
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-      required:
-        - config
-        - connector_type_id
-        - name
-      title: Create index connector request
-      type: object
-    Connectors_create_connector_request_jira:
-      description: The Jira connector uses the REST API v2 to create Jira issues.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_jira'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .jira
-          example: .jira
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_jira'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create Jira connector request
-      type: object
-    Connectors_create_connector_request_opsgenie:
-      description: The Opsgenie connector uses the Opsgenie alert API.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_opsgenie'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .opsgenie
-          example: .opsgenie
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_opsgenie'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create Opsgenie connector request
-      type: object
-    Connectors_create_connector_request_pagerduty:
-      description: >
-        The PagerDuty connector uses the v2 Events API to trigger, acknowledge,
-        and resolve PagerDuty alerts.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_pagerduty'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .pagerduty
-          example: .pagerduty
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_pagerduty'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create PagerDuty connector request
-      type: object
-    Connectors_create_connector_request_resilient:
-      description: >-
-        The IBM Resilient connector uses the RESILIENT REST v2 to create IBM
-        Resilient incidents.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_resilient'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .resilient
-          example: .resilient
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_resilient'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create IBM Resilient connector request
-      type: object
-    Connectors_create_connector_request_sentinelone:
-      description: >
-        The SentinelOne connector communicates with SentinelOne Management
-        Console via REST API. This functionality is in technical preview and may
-        be changed or removed in a future release. Elastic will work to fix any
-        issues, but features in technical preview are not subject to the support
-        SLA of official GA features.
-      title: Create SentinelOne connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_sentinelone'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .sentinelone
-          example: .sentinelone
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_sentinelone'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      x-technical-preview: true
-    Connectors_create_connector_request_serverlog:
-      description: This connector writes an entry to the Kibana server log.
-      properties:
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .server-log
-          example: .server-log
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-      required:
-        - connector_type_id
-        - name
-      title: Create server log connector request
-      type: object
-    Connectors_create_connector_request_servicenow:
-      description: >
-        The ServiceNow ITSM connector uses the import set API to create
-        ServiceNow incidents. You can use the connector for rule actions and
-        cases.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_servicenow'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .servicenow
-          example: .servicenow
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_servicenow'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create ServiceNow ITSM connector request
-      type: object
-    Connectors_create_connector_request_servicenow_itom:
-      description: >
-        The ServiceNow ITOM connector uses the event API to create ServiceNow
-        events. You can use the connector for rule actions.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_servicenow_itom'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .servicenow-itom
-          example: .servicenow-itom
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_servicenow'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create ServiceNow ITOM connector request
-      type: object
-    Connectors_create_connector_request_servicenow_sir:
-      description: >
-        The ServiceNow SecOps connector uses the import set API to create
-        ServiceNow security incidents. You can use the connector for rule
-        actions and cases.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_servicenow'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .servicenow-sir
-          example: .servicenow-sir
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_servicenow'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create ServiceNow SecOps connector request
-      type: object
-    Connectors_create_connector_request_slack_api:
-      description: The Slack connector uses an API method to send Slack messages.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_slack_api'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .slack_api
-          example: .slack_api
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_slack_api'
-      required:
-        - connector_type_id
-        - name
-        - secrets
-      title: Create Slack connector request
-      type: object
-    Connectors_create_connector_request_slack_webhook:
-      description: The Slack connector uses Slack Incoming Webhooks.
-      properties:
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .slack
-          example: .slack
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_slack_webhook'
-      required:
-        - connector_type_id
-        - name
-        - secrets
-      title: Create Slack connector request
-      type: object
-    Connectors_create_connector_request_swimlane:
-      description: >-
-        The Swimlane connector uses the Swimlane REST API to create Swimlane
-        records.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_swimlane'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .swimlane
-          example: .swimlane
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_swimlane'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create Swimlane connector request
-      type: object
-    Connectors_create_connector_request_teams:
-      description: The Microsoft Teams connector uses Incoming Webhooks.
-      properties:
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .teams
-          example: .teams
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_teams'
-      required:
-        - connector_type_id
-        - name
-        - secrets
-      title: Create Microsoft Teams connector request
-      type: object
-    Connectors_create_connector_request_tines:
-      description: >
-        The Tines connector uses Tines Webhook actions to send events via POST
-        request.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_tines'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .tines
-          example: .tines
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_tines'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create Tines connector request
-      type: object
-    Connectors_create_connector_request_torq:
-      description: >
-        The Torq connector uses a Torq webhook to trigger workflows with Kibana
-        actions.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_torq'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .torq
-          example: .torq
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_torq'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create Torq connector request
-      type: object
-    Connectors_create_connector_request_webhook:
-      description: >
-        The Webhook connector uses axios to send a POST or PUT request to a web
-        service.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_webhook'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .webhook
-          example: .webhook
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_webhook'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create Webhook connector request
-      type: object
-    Connectors_create_connector_request_xmatters:
-      description: >
-        The xMatters connector uses the xMatters Workflow for Elastic to send
-        actionable alerts to on-call xMatters resources.
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_xmatters'
-        connector_type_id:
-          description: The type of connector.
-          enum:
-            - .xmatters
-          example: .xmatters
-          type: string
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_xmatters'
-      required:
-        - config
-        - connector_type_id
-        - name
-        - secrets
-      title: Create xMatters connector request
-      type: object
-    Connectors_features:
-      description: |
-        The feature that uses the connector.
-      enum:
-        - alerting
-        - cases
-        - generativeAIForSecurity
-        - generativeAIForObservability
-        - generativeAIForSearchPlayground
-        - siem
-        - uptime
-      type: string
-    Connectors_is_deprecated:
-      description: Indicates whether the connector type is deprecated.
-      example: false
-      type: boolean
-    Connectors_is_missing_secrets:
-      description: >-
-        Indicates whether secrets are missing for the connector. Secrets
-        configuration properties vary depending on the connector type.
-      example: false
-      type: boolean
-    Connectors_is_preconfigured:
-      description: >
-        Indicates whether it is a preconfigured connector. If true, the `config`
-        and `is_missing_secrets` properties are omitted from the response.
-      example: false
-      type: boolean
-    Connectors_is_system_action:
-      description: Indicates whether the connector is used for system actions.
-      example: false
-      type: boolean
-    Connectors_referenced_by_count:
-      description: >
-        Indicates the number of saved objects that reference the connector. If
-        `is_preconfigured` is true, this value is not calculated. This property
-        is returned only by the get all connectors API.
-      example: 2
-      type: integer
-    Connectors_secrets_properties_bedrock:
-      description: Defines secrets for connectors when type is `.bedrock`.
-      properties:
-        accessKey:
-          description: The AWS access key for authentication.
-          type: string
-        secret:
-          description: The AWS secret for authentication.
-          type: string
-      required:
-        - accessKey
-        - secret
-      title: Connector secrets properties for an Amazon Bedrock connector
-      type: object
-    Connectors_secrets_properties_cases_webhook:
-      title: Connector secrets properties for Webhook - Case Management connector
-      type: object
-      properties:
-        password:
-          description: >-
-            The password for HTTP basic authentication. If `hasAuth` is set to
-            `true`, this property is required.
-          type: string
-        user:
-          description: >-
-            The username for HTTP basic authentication. If `hasAuth` is set to
-            `true`, this property is required.
-          type: string
-    Connectors_secrets_properties_d3security:
-      description: Defines secrets for connectors when type is `.d3security`.
-      type: object
-      properties:
-        token:
-          description: The D3 Security token.
-          type: string
-      required:
-        - token
-      title: Connector secrets properties for a D3 Security connector
-    Connectors_secrets_properties_email:
-      description: Defines secrets for connectors when type is `.email`.
-      properties:
-        clientSecret:
-          description: >
-            The Microsoft Exchange Client secret for OAuth 2.0 client
-            credentials authentication. It must be URL-encoded. If `service` is
-            `exchange_server`, this property is required.
-          type: string
-        password:
-          description: >
-            The password for HTTP basic authentication. If `hasAuth` is set to
-            `true`, this property is required.
-          type: string
-        user:
-          description: >
-            The username for HTTP basic authentication. If `hasAuth` is set to
-            `true`, this property is required.
-          type: string
-      title: Connector secrets properties for an email connector
-      type: object
-    Connectors_secrets_properties_gemini:
-      description: Defines secrets for connectors when type is `.gemini`.
-      properties:
-        credentialsJSON:
-          description: >-
-            The service account credentials JSON file. The service account
-            should have Vertex AI user IAM role assigned to it.
-          type: string
-      required:
-        - credentialsJSON
-      title: Connector secrets properties for a Google Gemini connector
-      type: object
-    Connectors_secrets_properties_genai:
-      description: Defines secrets for connectors when type is `.gen-ai`.
-      properties:
-        apiKey:
-          description: The OpenAI API key.
-          type: string
-      title: Connector secrets properties for an OpenAI connector
-      type: object
-    Connectors_secrets_properties_jira:
-      description: Defines secrets for connectors when type is `.jira`.
-      type: object
-      properties:
-        apiToken:
-          description: The Jira API authentication token for HTTP basic authentication.
-          type: string
-        email:
-          description: The account email for HTTP Basic authentication.
-          type: string
-      required:
-        - apiToken
-        - email
-      title: Connector secrets properties for a Jira connector
-    Connectors_secrets_properties_opsgenie:
-      description: Defines secrets for connectors when type is `.opsgenie`.
-      type: object
-      properties:
-        apiKey:
-          description: The Opsgenie API authentication key for HTTP Basic authentication.
-          type: string
-      required:
-        - apiKey
-      title: Connector secrets properties for an Opsgenie connector
-    Connectors_secrets_properties_pagerduty:
-      description: Defines secrets for connectors when type is `.pagerduty`.
-      properties:
-        routingKey:
-          description: >
-            A 32 character PagerDuty Integration Key for an integration on a
-            service.
-          type: string
-      required:
-        - routingKey
-      title: Connector secrets properties for a PagerDuty connector
-      type: object
-    Connectors_secrets_properties_resilient:
-      description: Defines secrets for connectors when type is `.resilient`.
-      type: object
-      properties:
-        apiKeyId:
-          description: The authentication key ID for HTTP Basic authentication.
-          type: string
-        apiKeySecret:
-          description: The authentication key secret for HTTP Basic authentication.
-          type: string
-      required:
-        - apiKeyId
-        - apiKeySecret
-      title: Connector secrets properties for IBM Resilient connector
-    Connectors_secrets_properties_sentinelone:
-      description: Defines secrets for connectors when type is `.sentinelone`.
-      properties:
-        token:
-          description: The A SentinelOne API token.
-          type: string
-      required:
-        - token
-      title: Connector secrets properties for a SentinelOne connector
-      type: object
-    Connectors_secrets_properties_servicenow:
-      description: >-
-        Defines secrets for connectors when type is `.servicenow`,
-        `.servicenow-sir`, or `.servicenow-itom`.
-      properties:
-        clientSecret:
-          description: >-
-            The client secret assigned to your OAuth application. This property
-            is required when `isOAuth` is `true`.
-          type: string
-        password:
-          description: >-
-            The password for HTTP basic authentication. This property is
-            required when `isOAuth` is `false`.
-          type: string
-        privateKey:
-          description: >-
-            The RSA private key that you created for use in ServiceNow. This
-            property is required when `isOAuth` is `true`.
-          type: string
-        privateKeyPassword:
-          description: >-
-            The password for the RSA private key. This property is required when
-            `isOAuth` is `true` and you set a password on your private key.
-          type: string
-        username:
-          description: >-
-            The username for HTTP basic authentication. This property is
-            required when `isOAuth` is `false`.
-          type: string
-      title: >-
-        Connector secrets properties for ServiceNow ITOM, ServiceNow ITSM, and
-        ServiceNow SecOps connectors
-      type: object
-    Connectors_secrets_properties_slack_api:
-      description: Defines secrets for connectors when type is `.slack`.
-      type: object
-      properties:
-        token:
-          description: Slack bot user OAuth token.
-          type: string
-      required:
-        - token
-      title: Connector secrets properties for a Web API Slack connector
-    Connectors_secrets_properties_slack_webhook:
-      description: Defines secrets for connectors when type is `.slack`.
-      type: object
-      properties:
-        webhookUrl:
-          description: Slack webhook url.
-          type: string
-      required:
-        - webhookUrl
-      title: Connector secrets properties for a Webhook Slack connector
-    Connectors_secrets_properties_swimlane:
-      description: Defines secrets for connectors when type is `.swimlane`.
-      properties:
-        apiToken:
-          description: Swimlane API authentication token.
-          type: string
-      title: Connector secrets properties for a Swimlane connector
-      type: object
-    Connectors_secrets_properties_teams:
-      description: Defines secrets for connectors when type is `.teams`.
-      properties:
-        webhookUrl:
-          description: >
-            The URL of the incoming webhook. If you are using the
-            `xpack.actions.allowedHosts` setting, add the hostname to the
-            allowed hosts.
-          type: string
-      required:
-        - webhookUrl
-      title: Connector secrets properties for a Microsoft Teams connector
-      type: object
-    Connectors_secrets_properties_tines:
-      description: Defines secrets for connectors when type is `.tines`.
-      properties:
-        email:
-          description: The email used to sign in to Tines.
-          type: string
-        token:
-          description: The Tines API token.
-          type: string
-      required:
-        - email
-        - token
-      title: Connector secrets properties for a Tines connector
-      type: object
-    Connectors_secrets_properties_torq:
-      description: Defines secrets for connectors when type is `.torq`.
-      properties:
-        token:
-          description: The secret of the webhook authentication header.
-          type: string
-      required:
-        - token
-      title: Connector secrets properties for a Torq connector
-      type: object
-    Connectors_secrets_properties_webhook:
-      description: Defines secrets for connectors when type is `.webhook`.
-      properties:
-        crt:
-          description: >-
-            If `authType` is `webhook-authentication-ssl` and `certType` is
-            `ssl-crt-key`, it is a base64 encoded version of the CRT or CERT
-            file.
-          type: string
-        key:
-          description: >-
-            If `authType` is `webhook-authentication-ssl` and `certType` is
-            `ssl-crt-key`, it is a base64 encoded version of the KEY file.
-          type: string
-        password:
-          description: >
-            The password for HTTP basic authentication or the passphrase for the
-            SSL certificate files. If `hasAuth` is set to `true` and `authType`
-            is `webhook-authentication-basic`, this property is required.
-          type: string
-        pfx:
-          description: >-
-            If `authType` is `webhook-authentication-ssl` and `certType` is
-            `ssl-pfx`, it is a base64 encoded version of the PFX or P12 file.
-          type: string
-        user:
-          description: >
-            The username for HTTP basic authentication. If `hasAuth` is set to
-            `true`  and `authType` is `webhook-authentication-basic`, this
-            property is required.
-          type: string
-      title: Connector secrets properties for a Webhook connector
-      type: object
-    Connectors_secrets_properties_xmatters:
-      description: Defines secrets for connectors when type is `.xmatters`.
-      properties:
-        password:
-          description: >
-            A user name for HTTP basic authentication. It is applicable only
-            when `usesBasic` is `true`.
-          type: string
-        secretsUrl:
-          description: >
-            The request URL for the Elastic Alerts trigger in xMatters with the
-            API key included in the URL. It is applicable only when `usesBasic`
-            is `false`.
-          type: string
-        user:
-          description: >
-            A password for HTTP basic authentication. It is applicable only when
-            `usesBasic` is `true`.
-          type: string
-      title: Connector secrets properties for an xMatters connector
-      type: object
-    Connectors_update_connector_request:
-      description: The properties vary depending on the connector type.
-      oneOf:
-        - $ref: '#/components/schemas/Connectors_update_connector_request_bedrock'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_gemini'
-        - $ref: >-
-            #/components/schemas/Connectors_update_connector_request_cases_webhook
-        - $ref: '#/components/schemas/Connectors_update_connector_request_d3security'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_email'
-        - $ref: '#/components/schemas/Connectors_create_connector_request_genai'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_index'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_jira'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_opsgenie'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_pagerduty'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_resilient'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_sentinelone'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_serverlog'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_servicenow'
-        - $ref: >-
-            #/components/schemas/Connectors_update_connector_request_servicenow_itom
-        - $ref: '#/components/schemas/Connectors_update_connector_request_slack_api'
-        - $ref: >-
-            #/components/schemas/Connectors_update_connector_request_slack_webhook
-        - $ref: '#/components/schemas/Connectors_update_connector_request_swimlane'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_teams'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_tines'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_torq'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_webhook'
-        - $ref: '#/components/schemas/Connectors_update_connector_request_xmatters'
-      title: Update connector request body properties
-    Connectors_update_connector_request_bedrock:
-      title: Update Amazon Bedrock connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_bedrock'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_bedrock'
-      required:
-        - config
-        - name
-    Connectors_update_connector_request_cases_webhook:
-      title: Update Webhook - Case Managment connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_cases_webhook'
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_cases_webhook'
-      required:
-        - config
-        - name
-    Connectors_update_connector_request_d3security:
-      title: Update D3 Security connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_d3security'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_d3security'
-      required:
-        - config
-        - name
-        - secrets
-    Connectors_update_connector_request_email:
-      title: Update email connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_email'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_email'
-      required:
-        - config
-        - name
-    Connectors_update_connector_request_gemini:
-      title: Update Google Gemini connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_gemini'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_gemini'
-      required:
-        - config
-        - name
-    Connectors_update_connector_request_index:
-      title: Update index connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_index'
-        name:
-          description: The display name for the connector.
-          type: string
-      required:
-        - config
-        - name
-    Connectors_update_connector_request_jira:
-      title: Update Jira connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_jira'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_jira'
-      required:
-        - config
-        - name
-        - secrets
-    Connectors_update_connector_request_opsgenie:
-      title: Update Opsgenie connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_opsgenie'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_opsgenie'
-      required:
-        - config
-        - name
-        - secrets
-    Connectors_update_connector_request_pagerduty:
-      title: Update PagerDuty connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_pagerduty'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_pagerduty'
-      required:
-        - config
-        - name
-        - secrets
-    Connectors_update_connector_request_resilient:
-      title: Update IBM Resilient connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_resilient'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_resilient'
-      required:
-        - config
-        - name
-        - secrets
-    Connectors_update_connector_request_sentinelone:
-      title: Update SentinelOne connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_sentinelone'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_sentinelone'
-      required:
-        - config
-        - name
-        - secrets
-    Connectors_update_connector_request_serverlog:
-      title: Update server log connector request
-      type: object
-      properties:
-        name:
-          description: The display name for the connector.
-          type: string
-      required:
-        - name
-    Connectors_update_connector_request_servicenow:
-      title: Update ServiceNow ITSM connector or ServiceNow SecOps request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_servicenow'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_servicenow'
-      required:
-        - config
-        - name
-        - secrets
-    Connectors_update_connector_request_servicenow_itom:
-      title: Create ServiceNow ITOM connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_servicenow_itom'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_servicenow'
-      required:
-        - config
-        - name
-        - secrets
-    Connectors_update_connector_request_slack_api:
-      title: Update Slack connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_slack_api'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_slack_api'
-      required:
-        - name
-        - secrets
-    Connectors_update_connector_request_slack_webhook:
-      title: Update Slack connector request
-      type: object
-      properties:
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_slack_webhook'
-      required:
-        - name
-        - secrets
-    Connectors_update_connector_request_swimlane:
-      title: Update Swimlane connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_swimlane'
-        name:
-          description: The display name for the connector.
-          example: my-connector
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_swimlane'
-      required:
-        - config
-        - name
-        - secrets
-    Connectors_update_connector_request_teams:
-      title: Update Microsoft Teams connector request
-      type: object
-      properties:
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_teams'
-      required:
-        - name
-        - secrets
-    Connectors_update_connector_request_tines:
-      title: Update Tines connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_tines'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_tines'
-      required:
-        - config
-        - name
-        - secrets
-    Connectors_update_connector_request_torq:
-      title: Update Torq connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_torq'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_torq'
-      required:
-        - config
-        - name
-        - secrets
-    Connectors_update_connector_request_webhook:
-      title: Update Webhook connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_webhook'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_webhook'
-      required:
-        - config
-        - name
-        - secrets
-    Connectors_update_connector_request_xmatters:
-      title: Update xMatters connector request
-      type: object
-      properties:
-        config:
-          $ref: '#/components/schemas/Connectors_config_properties_xmatters'
-        name:
-          description: The display name for the connector.
-          type: string
-        secrets:
-          $ref: '#/components/schemas/Connectors_secrets_properties_xmatters'
-      required:
-        - config
-        - name
-        - secrets
     Data_views_400_response:
       title: Bad request
       type: object
@@ -15611,18 +12579,25 @@ components:
       type: object
       properties:
         active:
+          description: >-
+            When false, the enrollment API key is revoked and cannot be used for
+            enrolling Elastic Agents.
           type: boolean
         api_key:
+          description: The enrollment API key (token) used for enrolling Elastic Agents.
           type: string
         api_key_id:
+          description: The ID of the API key in the Security API.
           type: string
         created_at:
           type: string
         id:
           type: string
         name:
+          description: The name of the enrollment API key.
           type: string
         policy_id:
+          description: The ID of the agent policy the Elastic Agent will be enrolled in.
           type: string
       required:
         - id
@@ -16279,6 +13254,7 @@ components:
             - version
         policy_id:
           deprecated: true
+          nullable: true
           type: string
         policy_ids:
           items:
@@ -17163,6 +14139,11 @@ components:
             policy's namespace.
           example: customnamespace
           type: string
+        output_id:
+          description: Output ID to send package data to
+          example: output-id
+          nullable: true
+          type: string
         overrides:
           description: >-
             Override settings that are defined in the package policy. The
@@ -17191,6 +14172,7 @@ components:
           deprecated: true
           description: Agent policy ID where that package policy will be added
           example: agent-policy-id
+          nullable: true
           type: string
         policy_ids:
           description: Agent policy IDs where that package policy will be added
@@ -19007,8 +15989,7 @@ tags:
       Annotations enable you to easily see how events are impacting the
       performance of your applications.
     name: APM annotations
-  - description: Connector APIs enable you to create and manage connectors.
-    name: connectors
+  - name: connectors
   - name: Data streams
   - description: >-
       Data view APIs enable you to manage data views, formerly known as Kibana
