@@ -82,7 +82,7 @@ export class RoleValidator {
           'xpack.security.management.editRole.validateRole.serverlessNameAllowedCharactersWarningMessage',
           {
             defaultMessage:
-              'Name must contain only letters, numbers and trailing dots, hyphens or underscores.',
+              'Name must contain only alphanumeric characters, and non-leading dots, hyphens, or underscores.',
           }
         )
       );

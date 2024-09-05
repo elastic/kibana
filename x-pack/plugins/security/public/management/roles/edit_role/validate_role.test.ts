@@ -114,7 +114,7 @@ describe('validateRoleName for serverless', () => {
     };
     expect(validator.validateRoleName(role)).toEqual({
       isInvalid: true,
-      error: `Name must contain only letters, numbers and trailing dots, hyphens or underscores.`,
+      error: `Name must contain only alphanumeric characters, and non-leading dots, hyphens, or underscores.`,
     });
   });
   test('should not allow leading symbols', () => {
@@ -129,27 +129,12 @@ describe('validateRoleName for serverless', () => {
     };
     expect(validator.validateRoleName(role)).toEqual({
       isInvalid: true,
-      error: `Name must contain only letters, numbers and trailing dots, hyphens or underscores.`,
+      error: `Name must contain only alphanumeric characters, and non-leading dots, hyphens, or underscores.`,
     });
   });
-  test('should not allow symbols in the middle', () => {
+  test('should allow underscores contained', () => {
     const role = {
-      name: 'role.name',
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-        run_as: [],
-      },
-      kibana: [],
-    };
-    expect(validator.validateRoleName(role)).toEqual({
-      isInvalid: true,
-      error: `Name must contain only letters, numbers and trailing dots, hyphens or underscores.`,
-    });
-  });
-  test('should allow valid names', () => {
-    const role = {
-      name: 'rolename._-',
+      name: 'role_name',
       elasticsearch: {
         cluster: [],
         indices: [],
@@ -159,6 +144,35 @@ describe('validateRoleName for serverless', () => {
     };
     expect(validator.validateRoleName(role)).toEqual({
       isInvalid: false,
+    });
+  });
+  test('should allow valid names', () => {
+    const role = {
+      name: 'rolename_',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [],
+    };
+    expect(validator.validateRoleName(role)).toEqual({
+      isInvalid: false,
+    });
+  });
+  test('should not allow any special characters except for underscore, dots and hyphens', () => {
+    const role = {
+      name: 'role+name',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [],
+    };
+    expect(validator.validateRoleName(role)).toEqual({
+      isInvalid: true,
+      error: `Name must contain only alphanumeric characters, and non-leading dots, hyphens, or underscores.`,
     });
   });
 });
