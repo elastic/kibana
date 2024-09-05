@@ -25,15 +25,18 @@ export function ServiceDependencies() {
     serviceEntitySummary?.signalTypes &&
     isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
 
+  if (hasLogsOnlySignal) {
+    return (
+      <ServiceTabEmptyState
+        title={logsOnlyEmptyStateContent.title}
+        content={logsOnlyEmptyStateContent.content}
+        imgSrc={logsOnlyEmptyStateContent.imgSrc}
+      />
+    );
+  }
+
   return (
     <>
-      {hasLogsOnlySignal && (
-        <ServiceTabEmptyState
-          title={logsOnlyEmptyStateContent.title}
-          content={logsOnlyEmptyStateContent.content}
-          imgSrc={logsOnlyEmptyStateContent.imgSrc}
-        />
-      )}
       <ChartPointerEventContextProvider>
         <EuiPanel hasBorder={true}>
           <EuiTitle size="xs">
