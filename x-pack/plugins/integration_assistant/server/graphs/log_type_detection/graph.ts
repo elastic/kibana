@@ -103,7 +103,7 @@ export async function getLogFormatDetectionGraph({ model }: LogDetectionGraphPar
       }
     );
 
-  const compiledLogFormatDetectionGraph = workflow.compile();
+  const compiledLogFormatDetectionGraph = workflow.compile().withConfig({ runName: 'Log Format' });
 
   return compiledLogFormatDetectionGraph;
 }

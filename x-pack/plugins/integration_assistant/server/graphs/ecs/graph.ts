@@ -118,7 +118,7 @@ export async function getEcsGraph({ model }: EcsGraphParams) {
     })
     .addEdge('modelOutput', END);
 
-  const compiledEcsGraph = workflow.compile();
+  const compiledEcsGraph = workflow.compile().withConfig({ runName: 'ECS Mapping' });
 
   return compiledEcsGraph;
 }
