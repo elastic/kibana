@@ -14,16 +14,9 @@
  *   version: 1
  */
 
-import type { ZodTypeDef } from '@kbn/zod';
 import { z } from '@kbn/zod';
-import {
-  requiredOptional,
-  isValidDateMath,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers';
 
-import { EntityType, IndexPattern, EngineStatus } from '../common.gen';
+import { EntityType, IndexPattern, EngineStatus } from './common.gen';
 
 export type GetEntityStoreStatsRequestParams = z.infer<typeof GetEntityStoreStatsRequestParams>;
 export const GetEntityStoreStatsRequestParams = z.object({

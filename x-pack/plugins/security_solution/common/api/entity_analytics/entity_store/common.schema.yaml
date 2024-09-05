@@ -23,7 +23,7 @@ components:
         status:
           $ref: '#/components/schemas/EngineStatus'
         filter:
-          type: object
+          type: string
 
     EngineStatus:
       type: string

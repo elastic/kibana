@@ -14,14 +14,7 @@
  *   version: 1
  */
 
-import type { ZodTypeDef } from '@kbn/zod';
 import { z } from '@kbn/zod';
-import {
-  requiredOptional,
-  isValidDateMath,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers';
 
 export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = z.enum(['user', 'host']);
@@ -32,7 +25,7 @@ export type IndexPattern = z.infer<typeof IndexPattern>;
 export const IndexPattern = z.string();
 
 export type EngineStatus = z.infer<typeof EngineStatus>;
-export const EngineStatus = z.enum(['started', 'stopped', 'installing']);
+export const EngineStatus = z.enum(['installing', 'started', 'stopped']);
 export type EngineStatusEnum = typeof EngineStatus.enum;
 export const EngineStatusEnum = EngineStatus.enum;
 
@@ -41,5 +34,5 @@ export const EngineDescriptor = z.object({
   type: EntityType.optional(),
   indexPattern: IndexPattern.optional(),
   status: EngineStatus.optional(),
-  filter: z.object({}).optional(),
+  filter: z.string().optional(),
 });

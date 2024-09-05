@@ -54,15 +54,9 @@ export const listEntityEnginesRoute = (
 
         try {
           const secSol = await context.securitySolution;
+          const body = await secSol.getEntityStoreDataClient().list();
 
-          const { saved_objects: engines } = await secSol.getEntityStoreDataClient().list();
-
-          return response.ok({
-            body: {
-              engines,
-              count: engines.length,
-            },
-          });
+          return response.ok({ body });
         } catch (e) {
           logger.error('Error in ListEntityStoreEngines:', e);
           const error = transformError(e);
