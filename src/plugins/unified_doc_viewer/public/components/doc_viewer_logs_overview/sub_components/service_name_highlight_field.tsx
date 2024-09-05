@@ -9,16 +9,17 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { HighlightField, HighlightFieldProps } from './highlight_field';
+import { useLogsOverviewContext } from '../../../hooks/use_logs_overview_provider';
 
 export function ServiceNameHighlightField(props: HighlightFieldProps) {
-  // Locator would be defined here
+  const { isEntityManagerEnabled } = useLogsOverviewContext();
   const href = `/foo/app/apm/services/${props.value}`;
-  // context
-  // kibana settings is enabled
-  // EEM is enabled
+
   return (
     <HighlightField {...props}>
-      {({ content }) => <EuiLink href={href}>{content}</EuiLink>}
+      {isEntityManagerEnabled
+        ? ({ content }) => <EuiLink href={href}>{content}</EuiLink>
+        : undefined}
     </HighlightField>
   );
 }

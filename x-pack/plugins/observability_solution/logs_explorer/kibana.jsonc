@@ -21,6 +21,7 @@
       "unifiedSearch",
       "unifiedDocViewer",
       "discoverShared",
+      "entityManager"
     ],
     "optionalPlugins": [],
     "requiredBundles": ["controls","embeddable","fleet", "kibanaReact", "kibanaUtils"],

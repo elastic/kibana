@@ -17,6 +17,7 @@ import type { LogsExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { createCustomSearchBar } from './custom_search_bar';
 import { createCustomUnifiedHistogram } from './custom_unified_histogram';
+import { entityManagerEnabled } from '../services/entity_manager/entity_manager_enabled';
 
 const LazyCustomDataSourceFilters = dynamic(() => import('./custom_data_source_filters'));
 const LazyCustomDataSourceSelector = dynamic(() => import('./custom_data_source_selector'));
@@ -41,6 +42,11 @@ export const createLogsExplorerProfileCustomizations =
     };
     const { data, dataViews, navigation, unifiedSearch } = pluginsWithOverrides;
     service.send('RECEIVED_STATE_CONTAINER', { discoverStateContainer: stateContainer });
+
+    const isEntityManagerEnabled = await entityManagerEnabled({
+      core,
+      entityManager: plugins.entityManager,
+    });
 
     /**
      * Wait for the machine to be fully initialized to set the restored selection
@@ -145,6 +151,7 @@ export const createLogsExplorerProfileCustomizations =
             <UnifiedDocViewerLogsOverview
               {...props}
               renderAIAssistant={logsAIAssistantFeature?.render}
+              isEntityManagerEnabled={isEntityManagerEnabled}
             />
           ),
         });

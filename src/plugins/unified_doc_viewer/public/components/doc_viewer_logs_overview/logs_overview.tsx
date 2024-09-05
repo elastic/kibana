@@ -17,9 +17,11 @@ import { LogsOverviewHighlights } from './logs_overview_highlights';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { LogsOverviewDegradedFields } from './logs_overview_degraded_fields';
+import { LogsOverviewProvider } from '../../hooks/use_logs_overview_provider';
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
+  isEntityManagerEnabled?: boolean;
 };
 
 export function LogsOverview({
@@ -30,24 +32,27 @@ export function LogsOverview({
   onAddColumn,
   onRemoveColumn,
   renderAIAssistant,
+  isEntityManagerEnabled = false,
 }: LogsOverviewProps) {
   const { fieldFormats } = getUnifiedDocViewerServices();
   const parsedDoc = getLogDocumentOverview(hit, { dataView, fieldFormats });
   const LogsOverviewAIAssistant = renderAIAssistant;
 
   return (
-    <FieldActionsProvider
-      columns={columns}
-      filter={filter}
-      onAddColumn={onAddColumn}
-      onRemoveColumn={onRemoveColumn}
-    >
-      <EuiSpacer size="m" />
-      <LogsOverviewHeader doc={parsedDoc} />
-      <EuiHorizontalRule margin="xs" />
-      <LogsOverviewHighlights formattedDoc={parsedDoc} flattenedDoc={hit.flattened} />
-      <LogsOverviewDegradedFields rawDoc={hit.raw} />
-      {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
-    </FieldActionsProvider>
+    <LogsOverviewProvider isEntityManagerEnabled={isEntityManagerEnabled}>
+      <FieldActionsProvider
+        columns={columns}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      >
+        <EuiSpacer size="m" />
+        <LogsOverviewHeader doc={parsedDoc} />
+        <EuiHorizontalRule margin="xs" />
+        <LogsOverviewHighlights formattedDoc={parsedDoc} flattenedDoc={hit.flattened} />
+        <LogsOverviewDegradedFields rawDoc={hit.raw} />
+        {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
+      </FieldActionsProvider>
+    </LogsOverviewProvider>
   );
 }
