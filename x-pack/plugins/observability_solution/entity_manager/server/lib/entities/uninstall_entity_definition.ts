@@ -13,17 +13,25 @@ import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteIndices } from './delete_index';
 import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
 import { findEntityDefinitions } from './find_entity_definition';
-import {
-  stopAndDeleteHistoryBackfillTransform,
-  stopAndDeleteHistoryTransform,
-  stopAndDeleteLatestTransform,
-} from './stop_and_delete_transform';
+
 import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 import {
   generateHistoryIndexTemplateId,
   generateLatestIndexTemplateId,
 } from './helpers/generate_component_id';
 import { deleteTemplate } from '../manage_index_templates';
+
+import {
+  stopHistoryTransform,
+  stopLatestTransform,
+  stopHistoryBackfillTransform,
+} from './stop_transforms';
+
+import {
+  deleteHistoryTransform,
+  deleteLatestTransform,
+  deleteHistoryBackfillTransform,
+} from './delete_transforms';
 
 export async function uninstallEntityDefinition({
   definition,
@@ -39,10 +47,17 @@ export async function uninstallEntityDefinition({
   deleteData?: boolean;
 }) {
   await Promise.all([
-    stopAndDeleteHistoryTransform(esClient, definition, logger),
-    stopAndDeleteLatestTransform(esClient, definition, logger),
+    stopHistoryTransform(esClient, definition, logger),
+    stopLatestTransform(esClient, definition, logger),
     isBackfillEnabled(definition)
-      ? stopAndDeleteHistoryBackfillTransform(esClient, definition, logger)
+      ? stopHistoryBackfillTransform(esClient, definition, logger)
+      : Promise.resolve(),
+  ]);
+  await Promise.all([
+    deleteHistoryTransform(esClient, definition, logger),
+    deleteLatestTransform(esClient, definition, logger),
+    isBackfillEnabled(definition)
+      ? deleteHistoryBackfillTransform(esClient, definition, logger)
       : Promise.resolve(),
   ]);
 

@@ -7,14 +7,15 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
+
 import {
-  generateHistoryBackfillTransformId,
   generateHistoryTransformId,
+  generateHistoryBackfillTransformId,
   generateLatestTransformId,
 } from './helpers/generate_component_id';
 import { retryTransientEsErrors } from './helpers/retry';
 
-export async function stopAndDeleteHistoryTransform(
+export async function stopHistoryTransform(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
@@ -29,21 +30,13 @@ export async function stopAndDeleteHistoryTransform(
         ),
       { logger }
     );
-    await retryTransientEsErrors(
-      () =>
-        esClient.transform.deleteTransform(
-          { transform_id: historyTransformId, force: true },
-          { ignore: [404] }
-        ),
-      { logger }
-    );
   } catch (e) {
-    logger.error(`Cannot stop or delete history transform [${definition.id}]: ${e}`);
+    logger.error(`Cannot stop history transform [${definition.id}]: ${e}`);
     throw e;
   }
 }
 
-export async function stopAndDeleteHistoryBackfillTransform(
+export async function stopHistoryBackfillTransform(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
@@ -58,21 +51,13 @@ export async function stopAndDeleteHistoryBackfillTransform(
         ),
       { logger }
     );
-    await retryTransientEsErrors(
-      () =>
-        esClient.transform.deleteTransform(
-          { transform_id: historyBackfillTransformId, force: true },
-          { ignore: [404] }
-        ),
-      { logger }
-    );
   } catch (e) {
-    logger.error(`Cannot stop or delete history backfill transform [${definition.id}]: ${e}`);
+    logger.error(`Cannot stop history backfill transform [${definition.id}]: ${e}`);
     throw e;
   }
 }
 
-export async function stopAndDeleteLatestTransform(
+export async function stopLatestTransform(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
@@ -87,16 +72,8 @@ export async function stopAndDeleteLatestTransform(
         ),
       { logger }
     );
-    await retryTransientEsErrors(
-      () =>
-        esClient.transform.deleteTransform(
-          { transform_id: latestTransformId, force: true },
-          { ignore: [404] }
-        ),
-      { logger }
-    );
   } catch (e) {
-    logger.error(`Cannot stop or delete latest transform [${definition.id}]`);
+    logger.error(`Cannot stop latest transform [${definition.id}]`);
     throw e;
   }
 }

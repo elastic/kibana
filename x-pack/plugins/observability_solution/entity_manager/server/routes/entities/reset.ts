@@ -7,6 +7,16 @@
 
 import { resetEntityDefinitionParamsSchema } from '@kbn/entities-schema';
 import { z } from '@kbn/zod';
+import { SetupRouteOptions } from '../types';
+import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
+import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
+import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
+
+import {
+  deleteHistoryIngestPipeline,
+  deleteLatestIngestPipeline,
+} from '../../lib/entities/delete_ingest_pipeline';
+import { deleteIndices } from '../../lib/entities/delete_index';
 import {
   createAndInstallHistoryIngestPipeline,
   createAndInstallLatestIngestPipeline,
@@ -26,12 +36,16 @@ import { EntitySecurityException } from '../../lib/entities/errors/entity_securi
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
 import { isBackfillEnabled } from '../../lib/entities/helpers/is_backfill_enabled';
 import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
-import { startTransform } from '../../lib/entities/start_transform';
 import {
-  stopAndDeleteHistoryBackfillTransform,
-  stopAndDeleteHistoryTransform,
-  stopAndDeleteLatestTransform,
-} from '../../lib/entities/stop_and_delete_transform';
+  deleteHistoryBackfillTransform,
+  deleteHistoryTransform,
+  deleteLatestTransform,
+} from '../../lib/entities/delete_transforms';
+import {
+  stopHistoryBackfillTransform,
+  stopHistoryTransform,
+  stopLatestTransform,
+} from '../../lib/entities/stop_transforms';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
@@ -47,11 +61,18 @@ export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
       const definition = await readEntityDefinition(soClient, params.path.id, logger);
 
       // Delete the transform and ingest pipeline
-      await stopAndDeleteHistoryTransform(esClient, definition, logger);
+      await stopHistoryTransform(esClient, definition, logger);
+      await deleteHistoryTransform(esClient, definition, logger);
+
       if (isBackfillEnabled(definition)) {
-        await stopAndDeleteHistoryBackfillTransform(esClient, definition, logger);
+        await stopHistoryBackfillTransform(esClient, definition, logger);
+        await deleteHistoryBackfillTransform(esClient, definition, logger);
+        // await stopAndDeleteHistoryBackfillTransform(esClient, definition, logger);
       }
-      await stopAndDeleteLatestTransform(esClient, definition, logger);
+
+      await stopLatestTransform(esClient, definition, logger);
+      await deleteLatestTransform(esClient, definition, logger);
+
       await deleteHistoryIngestPipeline(esClient, definition, logger);
       await deleteLatestIngestPipeline(esClient, definition, logger);
       await deleteIndices(esClient, definition, logger);

@@ -15,6 +15,14 @@ import { findEntityDefinitions } from './entities/find_entity_definition';
 import { uninstallEntityDefinition } from './entities/uninstall_entity_definition';
 import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
 
+import {
+  stopHistoryTransform,
+  stopLatestTransform,
+  stopHistoryBackfillTransform,
+} from './entities/stop_transforms';
+
+import { isBackfillEnabled } from './entities/helpers/is_backfill_enabled';
+
 export class EntityClient {
   constructor(
     private options: {
@@ -77,5 +85,19 @@ export class EntityClient {
     });
 
     return { definitions };
+  }
+
+  async startTransforms(definition: EntityDefinition) {
+    return startTransform(this.options.esClient, definition, this.options.logger);
+  }
+
+  async stopTransforms(definition: EntityDefinition) {
+    return Promise.all([
+      stopHistoryTransform(this.options.esClient, definition, this.options.logger),
+      stopLatestTransform(this.options.esClient, definition, this.options.logger),
+      isBackfillEnabled(definition)
+        ? stopHistoryBackfillTransform(this.options.esClient, definition, this.options.logger)
+        : Promise.resolve(),
+    ]);
   }
 }
