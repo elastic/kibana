@@ -121,9 +121,10 @@ export function DashboardApp({
    */
   useEffect(() => {
     return () => {
+      dashboardAPI?.expandedPanelId.unsubscribe();
       search.session.clear();
     };
-  }, [search.session]);
+  }, [dashboardAPI?.expandedPanelId, search.session]);
 
   /**
    * Validate saved object load outcome
