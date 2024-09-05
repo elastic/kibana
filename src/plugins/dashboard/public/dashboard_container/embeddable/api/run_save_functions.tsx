@@ -7,6 +7,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   EmbeddableInput,
@@ -88,17 +89,13 @@ export async function runQuickSave(this: DashboardContainer) {
   const { panels: nextPanels, references } = await serializeAllPanelState(this);
   const dashboardStateToSave: DashboardContainerInput = { ...currentState, panels: nextPanels };
   let stateToSave: SavedDashboardInput = dashboardStateToSave;
-  const controlGroupApi = this.controlGroupApi$.value;
-  let controlGroupReferences: Reference[] | undefined;
-  if (controlGroupApi) {
-    const { rawState: controlGroupSerializedState, references: extractedReferences } =
-      await controlGroupApi.serializeState();
-    controlGroupReferences = extractedReferences;
-    stateToSave = { ...stateToSave, controlGroupInput: controlGroupSerializedState };
+  let persistableControlGroupInput: PersistableControlGroupInput | undefined;
+  if (this.controlGroup) {
+    persistableControlGroupInput = this.controlGroup.getPersistableInput();
+    stateToSave = { ...stateToSave, controlGroupInput: persistableControlGroupInput };
   }
 
   const saveResult = await saveDashboardState({
-    controlGroupReferences,
     panelReferences: references,
     currentState: stateToSave,
     saveOptions: {},
@@ -108,6 +105,9 @@ export async function runQuickSave(this: DashboardContainer) {
   this.savedObjectReferences = saveResult.references ?? [];
   this.dispatch.setLastSavedInput(dashboardStateToSave);
   this.saveNotification$.next();
+  if (this.controlGroup && persistableControlGroupInput) {
+    this.controlGroup.setSavedState(persistableControlGroupInput);
+  }
 
   return saveResult;
 }
@@ -180,20 +180,19 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
           stateFromSaveModal.tags = newTags;
         }
 
-        let dashboardStateToSave: SavedDashboardInput = {
+        let dashboardStateToSave: DashboardContainerInput & {
+          controlGroupInput?: PersistableControlGroupInput;
+        } = {
           ...currentState,
           ...stateFromSaveModal,
         };
 
-        const controlGroupApi = this.controlGroupApi$.value;
-        let controlGroupReferences: Reference[] | undefined;
-        if (controlGroupApi) {
-          const { rawState: controlGroupSerializedState, references } =
-            await controlGroupApi.serializeState();
-          controlGroupReferences = references;
+        let persistableControlGroupInput: PersistableControlGroupInput | undefined;
+        if (this.controlGroup) {
+          persistableControlGroupInput = this.controlGroup.getPersistableInput();
           dashboardStateToSave = {
             ...dashboardStateToSave,
-            controlGroupInput: controlGroupSerializedState,
+            controlGroupInput: persistableControlGroupInput,
           };
         }
 
@@ -226,7 +225,6 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
         const beforeAddTime = window.performance.now();
 
         const saveResult = await saveDashboardState({
-          controlGroupReferences,
           panelReferences: references,
           saveOptions,
           currentState: {
@@ -253,6 +251,9 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
           batch(() => {
             this.dispatch.setStateFromSaveModal(stateFromSaveModal);
             this.dispatch.setLastSavedInput(dashboardStateToSave);
+            if (this.controlGroup && persistableControlGroupInput) {
+              this.controlGroup.setSavedState(persistableControlGroupInput);
+            }
           });
         }
 
