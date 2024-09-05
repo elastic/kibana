@@ -7,7 +7,7 @@
  */
 import { infra, LogDocument, log } from '@kbn/apm-synthtrace-client';
 import { fakerEN as faker } from '@faker-js/faker';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import {
