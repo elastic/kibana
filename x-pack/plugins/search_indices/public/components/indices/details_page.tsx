@@ -32,7 +32,7 @@ export const SearchIndexDetailsPage = () => {
           onClick={() => {}}
         >
           <FormattedMessage
-            id="xpack.idxMgmt.searchIndexDetails.backToIndicesButtonLabel"
+            id="xpack.searchIndices.backToIndicesButtonLabel"
             defaultMessage="Back to indices"
           />
         </EuiButton>
