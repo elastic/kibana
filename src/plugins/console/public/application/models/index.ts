@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './legacy_core_editor/legacy_core_editor';
 export * from './sense_editor';
