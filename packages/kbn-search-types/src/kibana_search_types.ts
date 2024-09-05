@@ -68,4 +68,14 @@ export interface IKibanaSearchResponse<RawResponse = any> {
    * HTTP request parameters from elasticsearch transport client t
    */
   requestParams?: SanitizedConnectionRequestParams;
+
+  /**
+   * The time in milliseconds it took to execute the request
+   */
+  esTiming?: number;
+
+  /**
+   * The time in milliseconds it took to parse the request
+   */
+  serializeTiming?: number;
 }

@@ -526,21 +526,100 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return deps.searchSessionsClient.extend(sessionId, expires);
   };
 
+  private setupRequestDiagnostics = (esClient: SearchStrategyDependencies['esClient']) => {
+    // keep the two things dinstict for now
+    const requestDepatureTimings = new Map<string, number>();
+    const responseTimings = new Map<string, number>();
+    const responseIdMapping = new Map<string, string[]>();
+    const serializationTimings = new Map<string, number>();
+    const recordRequestTiming = (_err, result) => {
+      requestDepatureTimings.set(result.meta.request.id, Date.now());
+      // console.log('request', { meta: result.meta });
+    };
+    const recordResponseTimings = (_err, result) => {
+      if (result.requestId) {
+        const requestTiming = requestDepatureTimings.get(result.requestId);
+        if (requestTiming) {
+          responseTimings.set(result.requestId, Date.now() - requestTiming);
+          // console.log(
+          //   `Time on the wire for request ${requestId}: ${Date.now() - requestTiming} ms`
+          // );
+        }
+      }
+      // console.log('deserialization', { result });
+    };
+    const recordSerializationTimings = (_err, result) => {
+      const requestTiming = requestDepatureTimings.get(result.meta.request.id);
+      const deserializedTiming = responseTimings.get(result.meta.request.id);
+      if (requestTiming != null && deserializedTiming != null) {
+        serializationTimings.set(
+          result.meta.request.id,
+          Date.now() - requestTiming - deserializedTiming
+        );
+      }
+    };
+    try {
+      esClient.asCurrentUser.diagnostic.on('request', recordRequestTiming);
+      esClient.asCurrentUser.diagnostic.on('deserialization', recordResponseTimings);
+      esClient.asCurrentUser.diagnostic.on('response', recordSerializationTimings);
+      esClient.asInternalUser.diagnostic.on('request', recordRequestTiming);
+      esClient.asInternalUser.diagnostic.on('deserialization', recordResponseTimings);
+      esClient.asInternalUser.diagnostic.on('response', recordSerializationTimings);
+    } catch (e) {
+      console.log(e);
+      // console.log(esClient.asInternalUser);
+    }
+    return {
+      /**
+       * Register the request id coming from ES for the async search
+       * and associate with the the raw id that esClient is using
+       * This is useful for async searches where the ES id is the only reference at hand
+       */
+      registerRequestId: (esId: string, clientId: string) => {
+        const ids = responseIdMapping.get(esId) || [];
+        responseIdMapping.set(esId, ids.concat(clientId));
+      },
+      /**
+       *
+       * @param id
+       * @returns
+       */
+      getTimings: (esId: string) => {
+        const requestTimings = responseIdMapping.get(esId)?.map((reqId) => ({
+          network: responseTimings.get(reqId),
+          serialize: serializationTimings.get(reqId),
+        }));
+        return {
+          networkTime: requestTimings?.reduce(
+            (acc: number, { network }) => acc + (network || 0),
+            0
+          ),
+          serializeTime: requestTimings?.reduce(
+            (acc: number, { serialize }) => acc + (serialize || 0),
+            0
+          ),
+        };
+      },
+    };
+  };
+
   private asScopedProvider = (core: CoreStart, rollupsEnabled: boolean = false) => {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const getSessionAsScoped = this.sessionService.asScopedProvider(core);
     return (request: KibanaRequest): IScopedSearchClient => {
       const savedObjectsClient = savedObjects.getScopedClient(request);
       const searchSessionsClient = getSessionAsScoped(request);
+      const esClient = elasticsearch.client.asScoped(request);
       const deps = {
         searchSessionsClient,
         savedObjectsClient,
-        esClient: elasticsearch.client.asScoped(request),
+        esClient,
         uiSettingsClient: new CachedUiSettingsClient(
           uiSettings.asScopedToClient(savedObjectsClient)
         ),
         request,
         rollupsEnabled,
+        diagnostics: this.setupRequestDiagnostics(esClient),
       };
       return {
         search: <
