@@ -10,16 +10,23 @@ import React from 'react';
 export function LoadingPanel({
   loading,
   size,
+  className,
 }: {
   loading: boolean;
   size?: React.ComponentProps<typeof EuiLoadingSpinner>['size'];
+  className?: string;
 }) {
   if (!loading) {
     return null;
   }
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none">
+    <EuiFlexGroup
+      className={className}
+      alignItems="center"
+      justifyContent="center"
+      gutterSize="none"
+    >
       <EuiSpacer size="xl" />
       <EuiLoadingSpinner size={size} />
       <EuiSpacer size="xl" />

@@ -8,8 +8,13 @@
 
 import { useContext, useEffect, useRef } from 'react';
 import { castArray } from 'lodash';
-import { useCurrentRoute } from '../..';
+import { RouteMap, useCurrentRoute } from '../..';
 import { Breadcrumb, BreadcrumbsContext } from './context';
+
+type UseBreadcrumbs<TRouteMap extends RouteMap> = (
+  callback: () => Breadcrumb<TRouteMap> | Array<Breadcrumb<TRouteMap>>,
+  fnDeps: unknown[]
+) => void;
 
 export function useRouterBreadcrumb(callback: () => Breadcrumb | Breadcrumb[], fnDeps: any[]) {
   const api = useContext(BreadcrumbsContext);
@@ -40,4 +45,8 @@ export function useRouterBreadcrumb(callback: () => Breadcrumb | Breadcrumb[], f
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matchedRoute.current, match?.route, ...fnDeps]);
+}
+
+export function createUseBreadcrumbs<TRouteMap extends RouteMap>(): UseBreadcrumbs<TRouteMap> {
+  return useRouterBreadcrumb;
 }

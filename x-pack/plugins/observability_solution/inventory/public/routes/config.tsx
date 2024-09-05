@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { createRouter, Outlet, RouterBreadcrumb } from '@kbn/typed-react-router-config';
+import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
@@ -16,6 +16,8 @@ import { DatasetDetailView } from '../components/dataset_detail_view';
 import { DatasetMetricsView } from '../components/dataset_metrics_view';
 import { RedirectTo } from '../components/redirect_to';
 import { AllInventoryView } from '../components/all_inventory_view';
+import { DatasetManagementView } from '../components/dataset_management_view';
+import { InventoryRouterBreadcrumb } from '../components/inventory_router_breadcrumb';
 
 /**
  * The array of route definitions to be used when the application
@@ -24,16 +26,16 @@ import { AllInventoryView } from '../components/all_inventory_view';
 const inventoryRoutes = {
   '/': {
     element: (
-      <RouterBreadcrumb
+      <InventoryRouterBreadcrumb
         title={i18n.translate('xpack.inventory.appBreadcrumbTitle', {
           defaultMessage: 'Entities',
         })}
-        href="/"
+        path="/"
       >
         <InventoryPageTemplate>
           <Outlet />
         </InventoryPageTemplate>
-      </RouterBreadcrumb>
+      </InventoryRouterBreadcrumb>
     ),
     children: {
       '/updates': {
@@ -41,14 +43,14 @@ const inventoryRoutes = {
       },
       '/all': {
         element: (
-          <RouterBreadcrumb
+          <InventoryRouterBreadcrumb
             title={i18n.translate('xpack.inventory.allInventoryView.breadcrumbTitle', {
               defaultMessage: 'All',
             })}
-            href="/"
+            path="/all"
           >
             <AllInventoryView />
-          </RouterBreadcrumb>
+          </InventoryRouterBreadcrumb>
         ),
       },
       '/datastream/analyze': {
@@ -61,14 +63,14 @@ const inventoryRoutes = {
       },
       '/datastream': {
         element: (
-          <RouterBreadcrumb
+          <InventoryRouterBreadcrumb
             title={i18n.translate('xpack.inventory.datastreamsBreadcrumbTitle', {
               defaultMessage: 'Datastreams',
             })}
-            href="/datastream"
+            path="/datastream"
           >
             <Outlet />
-          </RouterBreadcrumb>
+          </InventoryRouterBreadcrumb>
         ),
         children: {
           '/datastream': {
@@ -91,6 +93,9 @@ const inventoryRoutes = {
               },
               '/datastream/{id}/metrics': {
                 element: <DatasetMetricsView />,
+              },
+              '/datastream/{id}/management': {
+                element: <DatasetManagementView />,
               },
               '/datastream/{id}': {
                 element: <RedirectTo path="/datastream/{id}/overview" />,

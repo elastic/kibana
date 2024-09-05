@@ -26,6 +26,7 @@ import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_
 import { EsqlQueryResult } from '../../hooks/use_esql_query_result';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useKibana } from '../../hooks/use_kibana';
+import { LoadingPanel } from '../loading_panel';
 
 const END_ZONE_LABEL = i18n.translate('xpack.inventory.esqlChart.endzone', {
   defaultMessage:
@@ -69,6 +70,17 @@ export function ControlledEsqlChart<T extends string>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [result, ...metricNames]
   );
+
+  if (result.loading) {
+    return (
+      <LoadingPanel
+        loading
+        className={css`
+          height: 200;
+        `}
+      />
+    );
+  }
 
   const xValues = allTimeseries.flatMap(({ data }) => data.map(({ x }) => x));
 

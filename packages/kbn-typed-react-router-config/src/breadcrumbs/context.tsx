@@ -6,35 +6,54 @@
  * Side Public License, v 1.
  */
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import { ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { compact, isEqual } from 'lodash';
 import React, { createContext, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from './use_breadcrumbs';
-import { Route, RouteMatch, useMatchRoutes } from '../..';
+import {
+  PathsOf,
+  Route,
+  RouteMap,
+  RouteMatch,
+  TypeAsArgs,
+  TypeAsParams,
+  TypeOf,
+  useMatchRoutes,
+  useRouter,
+} from '../..';
 
-export interface Breadcrumb {
+export type Breadcrumb<TRouteMap extends RouteMap = RouteMap> = {
   title: string;
-  href: string;
-}
+  path: PathsOf<TRouteMap>;
+} & TypeAsParams<TypeOf<TRouteMap, PathsOf<TRouteMap>, false>>;
 
-interface BreadcrumbApi {
-  set(route: Route, breadcrumb: Breadcrumb[]): void;
+interface BreadcrumbApi<TRouteMap extends RouteMap = RouteMap> {
+  set(route: Route, breadcrumb: Array<Breadcrumb<TRouteMap>>): void;
   unset(route: Route): void;
-  getBreadcrumbs(matches: RouteMatch[]): Breadcrumb[];
+  getBreadcrumbs(matches: RouteMatch[]): Array<Breadcrumb<TRouteMap>>;
 }
 
 export const BreadcrumbsContext = createContext<BreadcrumbApi | undefined>(undefined);
 
-export function BreadcrumbsContextProvider({ children }: { children: React.ReactNode }) {
+export function BreadcrumbsContextProvider<TRouteMap extends RouteMap>({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [, forceUpdate] = useState({});
 
   const breadcrumbs = useMemo(() => {
-    return new Map<Route, Breadcrumb[]>();
+    return new Map<Route, Array<Breadcrumb<TRouteMap>>>();
   }, []);
+
+  const history = useHistory() as ScopedHistory;
+
+  const router = useRouter<TRouteMap>();
 
   const matches: RouteMatch[] = useMatchRoutes();
 
-  const api = useMemo<BreadcrumbApi>(
+  const api = useMemo<BreadcrumbApi<TRouteMap>>(
     () => ({
       set(route, breadcrumb) {
         if (!isEqual(breadcrumbs.get(route), breadcrumb)) {
@@ -69,7 +88,14 @@ export function BreadcrumbsContextProvider({ children }: { children: React.React
         ...(index === array.length - 1
           ? {}
           : {
-              href: breadcrumb.href,
+              href: history.createHref({
+                pathname: router.link(
+                  breadcrumb.path,
+                  ...(('params' in breadcrumb ? [breadcrumb.params] : []) as TypeAsArgs<
+                    TypeOf<TRouteMap, PathsOf<TRouteMap>, false>
+                  >)
+                ),
+              }),
             }),
       };
     });

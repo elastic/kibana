@@ -5,6 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { RouteMap } from '../types';
+import { RouterBreadcrumb } from './breadcrumb';
 
-export { createRouterBreadcrumbComponent } from './create_router_breadcrumb_component';
-export { createUseBreadcrumbs } from './use_router_breadcrumb';
+export function createRouterBreadcrumbComponent<
+  TRouteMap extends RouteMap
+>(): RouterBreadcrumb<TRouteMap> {
+  return RouterBreadcrumb as RouterBreadcrumb<TRouteMap>;
+}

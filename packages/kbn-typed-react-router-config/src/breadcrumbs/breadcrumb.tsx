@@ -7,27 +7,44 @@
  */
 
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useHistory } from 'react-router-dom';
-import { ScopedHistory } from '@kbn/core-application-browser';
+import { RequiredKeys } from 'utility-types';
 import { useRouterBreadcrumb } from './use_router_breadcrumb';
+import { PathsOf, RouteMap, TypeOf } from '../types';
 
-export const RouterBreadcrumb = ({
+type AsParamsProps<TObject extends Record<string, any>> = RequiredKeys<TObject> extends never
+  ? {}
+  : { params: TObject };
+
+export type RouterBreadcrumb<TRouteMap extends RouteMap> = <
+  TRoutePath extends PathsOf<TRouteMap>
+>({}: {
+  title: string;
+  children: React.ReactNode;
+  path: TRoutePath;
+} & AsParamsProps<TypeOf<TRouteMap, TRoutePath, false>>) => React.ReactElement;
+
+export function RouterBreadcrumb<
+  TRouteMap extends RouteMap,
+  TRoutePath extends PathsOf<TRouteMap>
+>({
   title,
-  href,
+  path,
+  params,
   children,
 }: {
   title: string;
-  href: string;
+  path: TRoutePath;
   children: React.ReactElement;
-}) => {
-  const {
-    services: { http },
-  } = useKibana();
-
-  const history = useHistory() as ScopedHistory;
-
-  useRouterBreadcrumb(() => ({ title, href: history.createHref({ pathname: href }) }), []);
+  params?: Record<string, any>;
+}) {
+  useRouterBreadcrumb(
+    () => ({
+      title,
+      path,
+      params,
+    }),
+    []
+  );
 
   return children;
-};
+}

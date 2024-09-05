@@ -13,6 +13,7 @@ import { ControlledEsqlGrid } from '../esql_grid/controlled_esql_grid';
 import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
 import { getInitialColumnsForLogs } from '../../util/get_initial_columns_for_logs';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
+import { useInventoryBreadcrumbs } from '../../hooks/use_inventory_breadcrumbs';
 
 export function DatasetOverview() {
   const {
@@ -28,6 +29,15 @@ export function DatasetOverview() {
   const histogramQuery = `${baseQuery} | STATS count = COUNT(*) BY @timestamp = BUCKET(@timestamp, 1 minute)`;
 
   const histogramQueryResult = useEsqlQueryResult({ query: histogramQuery });
+
+  useInventoryBreadcrumbs(() => {
+    return {
+      path: '/datastream/{id}/overview',
+      title: i18n.translate('xpack.inventory.datastreamOverview.breadcrumbTitle', {
+        defaultMessage: 'Overview',
+      }),
+    };
+  }, []);
 
   const columnAnalysis = useMemo(() => {
     if (logsQueryResult.value) {

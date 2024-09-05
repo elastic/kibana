@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup } from '@elastic/eui';
-import React from 'react';
 
-export function EntityOverviewHeader({ children }: { children: React.ReactNode }) {
-  return <EuiFlexGroup direction="row">{children}</EuiFlexGroup>;
-}
+import { createRouterBreadcrumbComponent } from '@kbn/typed-react-router-config';
+import type { InventoryRoutes } from '../../routes/config';
+
+export const InventoryRouterBreadcrumb = createRouterBreadcrumbComponent<InventoryRoutes>();
