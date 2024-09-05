@@ -58,15 +58,12 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
     const fleetPluginStart = await plugins.fleet.start();
     const packageClient = fleetPluginStart.packageService.asScoped(request);
 
-    await Promise.all([
+    const [{ encoded: apiKeyEncoded }] = await Promise.all([
+      createShipperApiKey(client.asCurrentUser, 'firehose_onboarding'),
       packageClient.ensureInstalledPackage({ pkgName: 'awsfirehose' }),
       packageClient.ensureInstalledPackage({ pkgName: 'aws' }),
     ]);
 
-    const { encoded: apiKeyEncoded } = await createShipperApiKey(
-      client.asCurrentUser,
-      'firehose_onboarding'
-    );
     const elasticsearchUrlList = plugins.cloud?.setup?.elasticsearchUrl
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(services.esLegacyConfigService);

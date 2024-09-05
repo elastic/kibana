@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom-v5-compat';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AutoDetectPage,
   CustomLogsPage,
@@ -18,11 +19,17 @@ import {
   SystemLogsPage,
   FirehosePage,
 } from './pages';
+import { ObservabilityOnboardingAppServices } from '..';
 
 const queryClient = new QueryClient();
 
 export function ObservabilityOnboardingFlow() {
   const { pathname } = useLocation();
+  const {
+    services: {
+      context: { isDev, isCloud },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -46,9 +53,11 @@ export function ObservabilityOnboardingFlow() {
         <Route path="/otel-logs">
           <OtelLogsPage />
         </Route>
-        <Route path="/firehose">
-          <FirehosePage />
-        </Route>
+        {(isCloud || isDev) && (
+          <Route path="/firehose">
+            <FirehosePage />
+          </Route>
+        )}
         <Route>
           <LandingPage />
         </Route>

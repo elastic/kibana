@@ -22,9 +22,13 @@ import { VisualizeData } from './visualize_data';
 
 export function FirehosePanel() {
   const [windowLostFocus, setWindowLostFocus] = useState(false);
-  const { data, status, error, refetch } = useFetcher((callApi) => {
-    return callApi('POST /internal/observability_onboarding/firehose/flow');
-  }, []);
+  const { data, status, error, refetch } = useFetcher(
+    (callApi) => {
+      return callApi('POST /internal/observability_onboarding/firehose/flow');
+    },
+    [],
+    { showToastOnError: false }
+  );
 
   useEvent('blur', () => setWindowLostFocus(true), window);
 
