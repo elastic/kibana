@@ -576,13 +576,22 @@ describe('bulkEnableRules', () => {
 
       await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
 
-      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
-
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id1', 'id2']);
     });
 
-    test('should enable task for an already enabled rule', async () => {
+    test('should should call task manager bulkEnable only for one task, if one rule have an error', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1, savedObjectWith500Error],
+      });
+
+      await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id1']);
+    });
+
+    test('should skip task if rule is already enabled', async () => {
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [disabledRule1, enabledRuleForBulkOps2],
       });
@@ -593,21 +602,19 @@ describe('bulkEnableRules', () => {
       taskManager.bulkEnable.mockImplementation(
         async () =>
           ({
-            tasks: [{ id: 'id1' }, { id: 'id2' }],
+            tasks: [{ id: 'id1' }],
             errors: [],
           } as unknown as BulkUpdateTaskResult)
       );
 
       await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
 
-      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
-
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id1', 'id2']);
+      expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id1']);
 
       expect(logger.debug).toBeCalledTimes(1);
       expect(logger.debug).toBeCalledWith(
-        'Successfully enabled schedules for underlying tasks: id1, id2'
+        'Successfully enabled schedules for underlying tasks: id1'
       );
       expect(logger.error).toBeCalledTimes(0);
     });
@@ -643,10 +650,6 @@ describe('bulkEnableRules', () => {
           scope: ['alerting'],
         },
       ]);
-
-      // check existing task is enabled
-      expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id2']);
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -719,10 +722,6 @@ describe('bulkEnableRules', () => {
           scope: ['alerting'],
         },
       ]);
-
-      // check existing task is enabled
-      expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id2']);
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -798,106 +797,6 @@ describe('bulkEnableRules', () => {
           scope: ['alerting'],
         },
       ]);
-
-      // check existing task is enabled
-      expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id2']);
-
-      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({
-            id: 'id1',
-            attributes: expect.objectContaining({
-              enabled: true,
-            }),
-          }),
-          expect.objectContaining({
-            id: 'id2',
-            attributes: expect.objectContaining({
-              enabled: true,
-            }),
-          }),
-        ]),
-        { overwrite: true }
-      );
-
-      expect(result).toStrictEqual({
-        errors: [],
-        rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps2],
-        total: 2,
-        taskIdsFailedToBeEnabled: [],
-      });
-    });
-
-    test('should schedule multiple tasks when scheduledTaskId is not defined', async () => {
-      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
-        .fn()
-        .mockResolvedValueOnce({
-          close: jest.fn(),
-          find: function* asyncGenerator() {
-            yield {
-              saved_objects: [
-                {
-                  ...disabledRule1,
-                  attributes: { ...disabledRule1.attributes, scheduledTaskId: null },
-                },
-                {
-                  ...disabledRule2,
-                  attributes: { ...disabledRule2.attributes, scheduledTaskId: null },
-                },
-              ],
-            };
-          },
-        });
-      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
-      });
-      const result = await rulesClient.bulkEnableRules({ ids: ['id1', 'id2'] });
-
-      expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkSchedule).toHaveBeenCalledWith([
-        {
-          id: 'id1',
-          taskType: `alerting:fakeType`,
-          params: {
-            alertId: 'id1',
-            spaceId: 'default',
-            consumer: 'fakeConsumer',
-          },
-          schedule: {
-            interval: '5m',
-          },
-          enabled: false,
-          state: {
-            alertInstances: {},
-            alertTypeState: {},
-            previousStartedAt: null,
-          },
-          scope: ['alerting'],
-        },
-        {
-          id: 'id2',
-          taskType: 'alerting:fakeType',
-          params: {
-            alertId: 'id2',
-            consumer: 'fakeConsumer',
-            spaceId: 'default',
-          },
-          schedule: {
-            interval: '5m',
-          },
-          enabled: false,
-          scope: ['alerting'],
-          state: {
-            alertInstances: {},
-            alertTypeState: {},
-            previousStartedAt: null,
-          },
-        },
-      ]);
-
-      expect(taskManager.bulkEnable).not.toHaveBeenCalled();
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
