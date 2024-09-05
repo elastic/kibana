@@ -97,18 +97,26 @@ export class EntityStoreDataClient {
   }
 
   public async get(entityType: EntityType) {
-    return this.engineClient.get(entityType).then((res) => {
-      if (res.total === 0) {
-        throw new Error(`Entity engine for ${entityType} does not exist`);
-      }
-      return res.saved_objects[0].attributes;
-    });
+    return this.engineClient.get(entityType).then(ensureEngineExists(entityType));
   }
 
+  /**
+   * LIST
+    curl -H 'Content-Type: application/json' \
+      -X GET \
+      -H 'kbn-xsrf: true' \
+      -H 'elastic-api-version: 2023-10-31' \
+      http:///elastic:changeme@localhost:5601/api/entity_store/engines
+  */
   public async list() {
-    return this.options.soClient.find<EngineDescriptor>({
-      type: entityEngineDescriptorTypeName,
-    });
+    return this.options.soClient
+      .find<EngineDescriptor>({
+        type: entityEngineDescriptorTypeName,
+      })
+      .then(({ saved_objects: engines }) => ({
+        engines: engines.map((engine) => engine.attributes),
+        count: engines.length,
+      }));
   }
 
   public async delete(entityType: EntityType) {
@@ -117,6 +125,8 @@ export class EntityStoreDataClient {
     this.options.logger.debug(`Deleting entity store for ${entityType}`);
 
     // TODO: Delete definition
+
+    await this.engineClient.delete(savedObj.id);
     return { deleted: true };
   }
 }

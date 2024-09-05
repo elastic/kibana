@@ -55,4 +55,8 @@ export class EngineDescriptorClient {
       filter: getByEntityTypeQuery(entityType),
     });
   }
+
+  async delete(id: string) {
+    return this.soClient.delete(entityEngineDescriptorTypeName, id);
+  }
 }
