@@ -32,7 +32,7 @@ export type ParentApi = PresentationContainer &
   PublishesDataLoading &
   PublishesViewMode &
   Pick<PublishesPanelTitle, 'hidePanelTitle'> &
-  PublishesReload & 
+  PublishesReload &
   PublishesTimeRange &
   PublishesUnsavedChanges;
 

@@ -10,34 +10,46 @@ import { BehaviorSubject, Subject, combineLatest, map, merge } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { asyncForEach } from '@kbn/std';
 import { TimeRange } from '@kbn/es-query';
-import { PanelPackage, apiHasSerializableState, childrenUnsavedChanges$, combineCompatibleChildrenApis, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import {
+  PanelPackage,
+  apiHasSerializableState,
+  childrenUnsavedChanges$,
+  combineCompatibleChildrenApis,
+} from '@kbn/presentation-containers';
 import { isEqual, omit } from 'lodash';
-import { PublishesDataLoading, ViewMode, apiPublishesDataLoading } from '@kbn/presentation-publishing';
+import {
+  PublishesDataLoading,
+  ViewMode,
+  apiPublishesDataLoading,
+} from '@kbn/presentation-publishing';
 import { DEFAULT_STATE, lastSavedState } from './last_saved_state';
 import { unsavedChanges } from './unsaved_changes';
 import { LastSavedState, ParentApi, UnsavedChanges } from './types';
 
 export function getParentApi() {
+  const initialUnsavedChanges = unsavedChanges.load();
+  let newPanels: Record<string, object> = {};
   const lastSavedState$ = new BehaviorSubject<LastSavedState>(lastSavedState.load());
-  const unsavedChanges$ = new BehaviorSubject<UnsavedChanges>(unsavedChanges.load());
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
   const panels$ = new BehaviorSubject<Array<{ id: string; type: string }>>(
-    unsavedChanges$.value.panels ??
+    initialUnsavedChanges.panels ??
       lastSavedState$.value.panelsState.map(({ id, type }) => {
         return { id, type };
       })
   );
   const timeRange$ = new BehaviorSubject<TimeRange | undefined>(
-    unsavedChanges$.value.timeRange ?? lastSavedState$.value.timeRange
+    initialUnsavedChanges.timeRange ?? lastSavedState$.value.timeRange
   );
   // One could use `initializeUnsavedChanges` to set up unsaved changes observable.
   // Instead, decided to manually setup unsaved changes observable
   // since only timeRange state needs to be monitored.
-  const timeRangeUnsavedChanges$ = timeRange$.pipe(map((currentTimeRange) => {
-    const hasChanges = !isEqual(currentTimeRange, lastSavedState$.value.timeRange);
-    return hasChanges ? { timeRange: currentTimeRange } : undefined;
-  }));
+  const timeRangeUnsavedChanges$ = timeRange$.pipe(
+    map((currentTimeRange) => {
+      const hasChanges = !isEqual(currentTimeRange, lastSavedState$.value.timeRange);
+      return hasChanges ? { timeRange: currentTimeRange } : undefined;
+    })
+  );
   const reload$ = new Subject<void>();
 
   const saveNotification$ = new Subject<void>();
@@ -65,7 +77,10 @@ export function getParentApi() {
     });
   }
 
-  const childrenDataLoadingSubscripiton = combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
+  const childrenDataLoadingSubscripiton = combineCompatibleChildrenApis<
+    PublishesDataLoading,
+    boolean | undefined
+  >(
     { children$ },
     'dataLoading',
     apiPublishesDataLoading,
@@ -98,18 +113,18 @@ export function getParentApi() {
               panelsState.push({
                 id,
                 type,
-                panelState: await childApi.serializeState()
+                panelState: await childApi.serializeState(),
               });
             }
           } catch (error) {
             // Unable to serialize panel state, just ignore since this is an example
           }
-        })
+        });
 
         const savedState = {
           timeRange: timeRange$.value ?? DEFAULT_STATE.timeRange,
-          panelsState
-        }
+          panelsState,
+        };
         lastSavedState$.next(savedState);
         lastSavedState.save(savedState);
         saveNotification$.next();
@@ -123,20 +138,13 @@ export function getParentApi() {
       },
       setTimeRange: (timeRange: TimeRange) => {
         timeRange$.next(timeRange);
-      }
+      },
     },
     parentApi: {
       addNewPanel: async ({ panelType, initialState }: PanelPackage) => {
         const id = generateId();
         panels$.next([...panels$.value, { id, type: panelType }]);
-        const currentUnsavedChanges = unsavedChanges$.value;
-        unsavedChanges$.next({
-          ...currentUnsavedChanges,
-          panelUnsavedChanges: {
-            ...(currentUnsavedChanges.panelUnsavedChanges ?? {}),
-            [id]: initialState ?? {},
-          },
-        });
+        newPanels[id] = initialState ?? {};
         return await untilChildLoaded(id);
       },
       canRemovePanels: () => true,
@@ -152,13 +160,6 @@ export function getParentApi() {
       reload$,
       removePanel: (id: string) => {
         panels$.next(panels$.value.filter(({ id: panelId }) => panelId !== id));
-
-        const currentUnsavedChanges = unsavedChanges$.value;
-        unsavedChanges$.next({
-          ...currentUnsavedChanges,
-          panelUnsavedChanges: omit(currentUnsavedChanges.panelUnsavedChanges ?? {}, id),
-        });
-
         children$.next(omit(children$.value, id));
       },
       saveNotification$,
@@ -176,12 +177,11 @@ export function getParentApi() {
        * return previous session's unsaved changes for embeddable
        */
       getRuntimeStateForChild: (childId: string) => {
-        const panelUnsavedChanges = unsavedChanges$.value.panelUnsavedChanges;
-        return panelUnsavedChanges ? panelUnsavedChanges[childId] : undefined;
+        return newPanels[childId] ?? initialUnsavedChanges.panelUnsavedChanges?.[childId];
       },
       resetUnsavedChanges: () => {
         timeRange$.next(lastSavedState$.value.timeRange);
-        unsavedChanges$.next({});
+        newPanels = {};
       },
       timeRange$,
       unsavedChanges: combineLatest([
@@ -189,14 +189,14 @@ export function getParentApi() {
         childrenUnsavedChanges$(children$),
       ]).pipe(
         map(([timeRangeUnsavedChanges, childrenUnsavedChanges]) => {
-          const unsavedChanges: UnsavedChanges = {};
+          const nextUnsavedChanges: UnsavedChanges = {};
           if (timeRangeUnsavedChanges) {
-            unsavedChanges.timeRange = timeRangeUnsavedChanges.timeRange;
+            nextUnsavedChanges.timeRange = timeRangeUnsavedChanges.timeRange;
           }
           if (childrenUnsavedChanges) {
-            unsavedChanges.panelUnsavedChanges = childrenUnsavedChanges;
+            nextUnsavedChanges.panelUnsavedChanges = childrenUnsavedChanges;
           }
-          return Object.keys(unsavedChanges).length ? unsavedChanges : undefined;
+          return Object.keys(nextUnsavedChanges).length ? nextUnsavedChanges : undefined;
         })
       ),
     } as unknown as ParentApi,

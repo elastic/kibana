@@ -22,12 +22,12 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
 
   useEffect(() => {
     cleanUp();
-  }, []);
+  }, [cleanUp]);
 
   const [dataLoading, panels, timeRange] = useBatchedPublishingSubjects(
     parentApi.dataLoading,
     componentApi.panels$,
-    parentApi.timeRange$,
+    parentApi.timeRange$
   );
 
   return (

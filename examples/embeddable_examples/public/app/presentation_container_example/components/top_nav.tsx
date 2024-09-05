@@ -8,10 +8,17 @@
 
 import React, { useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { EuiBadge, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
-import { unsavedChanges } from '../unsaved_changes';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
 import { TimeRange } from '@kbn/es-query';
 import { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
+import { unsavedChanges } from '../unsaved_changes';
 
 interface Props {
   dataLoading: boolean;
@@ -37,8 +44,8 @@ export function TopNav(props: Props) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [unsavedChanges, props.unsavedChanges$]);
-  
+  }, [props.unsavedChanges$]);
+
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
@@ -57,7 +64,7 @@ export function TopNav(props: Props) {
           }}
         />
       </EuiFlexItem>
-      
+
       <EuiFlexItem grow={false}>
         <EuiFlexGroup>
           {hasUnsavedChanges && (
@@ -66,14 +73,10 @@ export function TopNav(props: Props) {
                 <EuiBadge color="warning">Unsaved changes</EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  disabled={isSaving}
-                  onClick={props.resetUnsavedChanges}
-                >
+                <EuiButtonEmpty disabled={isSaving} onClick={props.resetUnsavedChanges}>
                   Reset
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              
             </>
           )}
           <EuiFlexItem grow={false}>
@@ -92,5 +95,4 @@ export function TopNav(props: Props) {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-
 }
