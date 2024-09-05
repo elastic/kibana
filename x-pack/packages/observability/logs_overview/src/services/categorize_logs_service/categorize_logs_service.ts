@@ -119,7 +119,7 @@ export const categorizeLogsService = setup({
         input: ({ context }) => ({
           ...context.parameters,
           samplingProbability: context.samplingProbability,
-          ignoredQueries: [],
+          ignoredCategoryTerms: [],
           minDocsPerCategory: 10,
         }),
         onDone: {
@@ -162,7 +162,7 @@ export const categorizeLogsService = setup({
         input: ({ context }) => ({
           ...context.parameters,
           samplingProbability: context.samplingProbability,
-          ignoredQueries: context.categories.map((category) => category.terms),
+          ignoredCategoryTerms: context.categories.map((category) => category.terms),
           minDocsPerCategory: 0,
         }),
         onDone: {
