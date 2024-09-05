@@ -8,6 +8,7 @@ import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
 import { safeLoad } from 'js-yaml';
 import deepEqual from 'fast-deep-equal';
+import { indexBy } from 'lodash/fp';
 
 import type {
   ElasticsearchClient,
@@ -37,7 +38,7 @@ import type {
   PolicySecretReference,
 } from '../types';
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
@@ -52,6 +53,9 @@ import {
   kafkaCompressionType,
   kafkaAcknowledgeReliabilityLevel,
   RESERVED_CONFIG_YML_KEYS,
+  FLEET_APM_PACKAGE,
+  FLEET_SYNTHETICS_PACKAGE,
+  FLEET_SERVER_PACKAGE,
 } from '../../common/constants';
 import { normalizeHostsForAgents } from '../../common/services';
 import {
@@ -133,13 +137,13 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${outputId}"`;
   if (outputId) {
     if (isDefault) {
-      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
-      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
+      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
     }
   } else {
     if (isDefault) {
-      agentPoliciesKuery = `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
       return;
     }
@@ -149,7 +153,6 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const directAgentPolicies = await agentPolicyService.list(internalSoClientWithoutSpaceExtension, {
     kuery: agentPoliciesKuery,
     perPage: SO_SEARCH_LIMIT,
-    withPackagePolicies: true,
   });
   const directAgentPolicyIds = directAgentPolicies?.items.map((policy) => policy.id);
 
@@ -172,13 +175,38 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   ];
   const agentPoliciesFromPackagePolicies = await agentPolicyService.getByIDs(
     internalSoClientWithoutSpaceExtension,
-    agentPolicyIdsFromPackagePolicies,
-    {
-      withPackagePolicies: true,
-    }
+    agentPolicyIdsFromPackagePolicies
   );
 
-  return [...directAgentPolicies.items, ...agentPoliciesFromPackagePolicies];
+  const agentPoliciesIndexedById = indexBy(
+    (policy) => policy.id,
+    [...directAgentPolicies.items, ...agentPoliciesFromPackagePolicies]
+  );
+
+  // Bulk fetch package policies with only needed fields
+  if (Object.keys(agentPoliciesIndexedById).length) {
+    const { items: packagePolicies } = await packagePolicyService.list(
+      internalSoClientWithoutSpaceExtension,
+      {
+        fields: ['policy_ids', 'package.name'],
+        kuery: [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE, FLEET_SERVER_PACKAGE]
+          .map((packageName) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`)
+          .join(' or '),
+      }
+    );
+    for (const packagePolicy of packagePolicies) {
+      for (const policyId of packagePolicy.policy_ids) {
+        if (agentPoliciesIndexedById[policyId]) {
+          if (!agentPoliciesIndexedById[policyId].package_policies) {
+            agentPoliciesIndexedById[policyId].package_policies = [];
+          }
+          agentPoliciesIndexedById[policyId].package_policies?.push(packagePolicy);
+        }
+      }
+    }
+  }
+
+  return Object.values(agentPoliciesIndexedById);
 }
 
 async function validateLogstashOutputNotUsedInAPMPolicy(outputId?: string, isDefault?: boolean) {
@@ -198,15 +226,38 @@ async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefa
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
-  // find agent policies by outputId
-  // otherwise query all the policies
-  const agentPolicies = outputId
-    ? await getAgentPoliciesPerOutput(outputId, isDefault)
-    : (
-        await agentPolicyService.list(internalSoClientWithoutSpaceExtension, {
-          withPackagePolicies: true,
-        })
-      )?.items;
+  let agentPolicies: AgentPolicy[] | undefined;
+  if (outputId) {
+    agentPolicies = await getAgentPoliciesPerOutput(outputId, isDefault);
+  } else {
+    const { items: packagePolicies } = await packagePolicyService.list(
+      internalSoClientWithoutSpaceExtension,
+      {
+        fields: ['policy_ids', 'package.name'],
+        kuery: [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE, FLEET_SERVER_PACKAGE]
+          .map((packageName) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`)
+          .join(' or '),
+      }
+    );
+    const agentPolicyIds = _.uniq(packagePolicies.flatMap((p) => p.policy_ids));
+    if (agentPolicyIds.length) {
+      agentPolicies = await agentPolicyService.getByIDs(
+        internalSoClientWithoutSpaceExtension,
+        agentPolicyIds
+      );
+      for (const packagePolicy of packagePolicies) {
+        for (const policyId of packagePolicy.policy_ids) {
+          const agentPolicy = agentPolicies.find((p) => p.id === policyId);
+          if (agentPolicy) {
+            if (!agentPolicy.package_policies) {
+              agentPolicy.package_policies = [];
+            }
+            agentPolicy.package_policies?.push(packagePolicy);
+          }
+        }
+      }
+    }
+  }
 
   const policiesWithFleetServer =
     agentPolicies?.filter((policy) => agentPolicyService.hasFleetServerIntegration(policy)) || [];
@@ -844,15 +895,18 @@ class OutputService {
     }
 
     const mergedType = data.type ?? originalOutput.type;
+    const mergedIsDefault = data.is_default ?? originalOutput.is_default;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
-    await validateTypeChanges(
-      esClient,
-      id,
-      updateData,
-      originalOutput,
-      defaultDataOutputId,
-      fromPreconfiguration
-    );
+    if (mergedType !== originalOutput.type || originalOutput.is_default !== mergedIsDefault) {
+      await validateTypeChanges(
+        esClient,
+        id,
+        updateData,
+        originalOutput,
+        defaultDataOutputId,
+        fromPreconfiguration
+      );
+    }
 
     const removeKafkaFields = (target: Nullable<Partial<OutputSoKafkaAttributes>>) => {
       target.version = null;

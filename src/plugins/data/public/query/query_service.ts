@@ -39,6 +39,7 @@ interface QueryServiceSetupDependencies {
   storage: IStorageWrapper;
   uiSettings: IUiSettingsClient;
   nowProvider: NowProviderInternalContract;
+  minRefreshInterval?: number;
 }
 
 interface QueryServiceStartDependencies {
@@ -81,13 +82,21 @@ export class QueryService implements PersistableStateService<QueryState> {
 
   state$!: QueryState$;
 
-  public setup({ storage, uiSettings, nowProvider }: QueryServiceSetupDependencies): QuerySetup {
+  constructor(private minRefreshInterval: number = 5000) {}
+
+  public setup({
+    storage,
+    uiSettings,
+    nowProvider,
+    minRefreshInterval = this.minRefreshInterval,
+  }: QueryServiceSetupDependencies): QuerySetup {
     this.filterManager = new FilterManager(uiSettings);
 
     const timefilterService = new TimefilterService(nowProvider);
     this.timefilter = timefilterService.setup({
       uiSettings,
       storage,
+      minRefreshInterval,
     });
 
     this.queryStringManager = new QueryStringManager(storage, uiSettings);

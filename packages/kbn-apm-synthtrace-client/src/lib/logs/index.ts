@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { randomInt } from 'crypto';
 import { Fields } from '../entity';
 import { Serializable } from '../serializable';
+
+export const LONG_FIELD_NAME =
+  'thisisaverylongfieldnamethatevendoesnotcontainanyspaceswhyitcouldpotentiallybreakouruiinseveralplaces';
 
 const LOGSDB_DATASET_PREFIX = 'logsdb.';
 
@@ -55,6 +59,20 @@ export type LogDocument = Fields &
     'error.exception.stacktrace'?: string;
     'error.log.stacktrace'?: string;
     'log.custom': Record<string, unknown>;
+    'host.geo.location': number[];
+    'host.ip': string;
+    'network.bytes': number;
+    'tls.established': boolean;
+    'event.duration': number;
+    'event.start': Date;
+    'event.end': Date;
+    test_field: string | string[];
+    date: Date;
+    severity: string;
+    msg: string;
+    svc: string;
+    hostname: string;
+    [LONG_FIELD_NAME]: string;
   }>;
 
 class Log extends Serializable<LogDocument> {
@@ -100,6 +118,26 @@ class Log extends Serializable<LogDocument> {
     this.fields.message = message;
     return this;
   }
+
+  setGeoLocation(geoCoordinates: number[]) {
+    this.fields['host.geo.location'] = geoCoordinates;
+    return this;
+  }
+
+  setHostIp(hostIp: string) {
+    this.fields['host.ip'] = hostIp;
+    return this;
+  }
+
+  timestamp(time: number) {
+    super.timestamp(time);
+    return this;
+  }
+
+  deleteField(fieldName: keyof LogDocument) {
+    delete this.fields[fieldName];
+    return this;
+  }
 }
 
 function create(logsOptions: LogsOptions = defaultLogsOptions): Log {
@@ -109,6 +147,8 @@ function create(logsOptions: LogsOptions = defaultLogsOptions): Log {
       'data_stream.namespace': 'default',
       'data_stream.type': 'logs',
       'host.name': 'synth-host',
+      'network.bytes': randomInt(500, 10000),
+      'tls.established': Math.random() < 0.5,
     },
     logsOptions
   ).dataset('synth');

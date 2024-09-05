@@ -9,7 +9,6 @@
 import path from 'path';
 import { format as formatUrl } from 'url';
 import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
-import { services } from './services';
 
 export default function () {
   const servers = {
@@ -42,6 +41,7 @@ export default function () {
         `--elasticsearch.password=${kibanaServerTestUser.password}`,
         // Needed for async search functional tests to introduce a delay
         `--data.search.aggs.shardDelay.enabled=true`,
+        `--data.query.timefilter.minRefreshInterval=1000`,
         `--security.showInsecureClusterWarning=false`,
         '--telemetry.banner=false',
         '--telemetry.optIn=false',
@@ -84,6 +84,5 @@ export default function () {
         })}`,
       ],
     },
-    services,
   };
 }

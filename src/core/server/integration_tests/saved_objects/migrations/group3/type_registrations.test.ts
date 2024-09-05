@@ -67,6 +67,8 @@ const previouslyRegisteredTypes = [
   'file-upload-usage-collection-telemetry',
   'fleet-agent-actions',
   'fleet-agent-events',
+  'fleet-agent-policies',
+  'fleet-package-policies',
   'fleet-agents',
   'fleet-enrollment-api-keys',
   'fleet-fleet-server-host',

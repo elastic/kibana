@@ -46,12 +46,12 @@ import {
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  UserInstructionOrPlainText,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   type KnowledgeBaseEntry,
   type Message,
+  type AdHocInstruction,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
@@ -159,18 +159,30 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  complete = (params: {
+  complete = ({
+    functionClient,
+    connectorId,
+    simulateFunctionCalling,
+    instructions: adHocInstructions = [],
+    messages: initialMessages,
+    signal,
+    persist,
+    kibanaPublicUrl,
+    isPublic,
+    title: predefinedTitle,
+    conversationId: predefinedConversationId,
+    disableFunctions = false,
+  }: {
     messages: Message[];
     connectorId: string;
     signal: AbortSignal;
     functionClient: ChatFunctionClient;
     persist: boolean;
-    responseLanguage?: string;
     conversationId?: string;
     title?: string;
     isPublic?: boolean;
     kibanaPublicUrl?: string;
-    instructions?: UserInstructionOrPlainText[];
+    instructions?: AdHocInstruction[];
     simulateFunctionCalling?: boolean;
     disableFunctions?:
       | boolean
@@ -181,41 +193,20 @@ export class ObservabilityAIAssistantClient {
     return new LangTracer(context.active()).startActiveSpan(
       'complete',
       ({ tracer: completeTracer }) => {
-        const {
-          functionClient,
-          connectorId,
-          simulateFunctionCalling,
-          instructions: requestInstructions = [],
-          messages: initialMessages,
-          signal,
-          responseLanguage = 'English',
-          persist,
-          kibanaPublicUrl,
-          isPublic,
-          title: predefinedTitle,
-          conversationId: predefinedConversationId,
-          disableFunctions = false,
-        } = params;
-
-        if (responseLanguage) {
-          requestInstructions.push(
-            `You MUST respond in the users preferred language which is: ${responseLanguage}.`
-          );
-        }
-
         const isConversationUpdate = persist && !!predefinedConversationId;
 
         const conversationId = persist ? predefinedConversationId || v4() : '';
 
         if (persist && !isConversationUpdate && kibanaPublicUrl) {
-          requestInstructions.push(
-            `This conversation will be persisted in Kibana and available at this url: ${
+          adHocInstructions.push({
+            instruction_type: 'application_instruction',
+            text: `This conversation will be persisted in Kibana and available at this url: ${
               kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-            }.`
-          );
+            }.`,
+          });
         }
 
-        const userInstructions$ = from(this.fetchUserInstructions()).pipe(shareReplay());
+        const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
 
         // from the initial messages, override any system message with
         // the one that is based on the instructions (registered, request, kb)
@@ -224,9 +215,9 @@ export class ObservabilityAIAssistantClient {
             // this is what we eventually store in the conversation
             const messagesWithUpdatedSystemMessage = replaceSystemMessage(
               getSystemMessageFromInstructions({
-                registeredInstructions: functionClient.getInstructions(),
+                applicationInstructions: functionClient.getInstructions(),
                 userInstructions,
-                requestInstructions,
+                adHocInstructions,
                 availableFunctionNames: functionClient
                   .getFunctions()
                   .map((fn) => fn.definition.name),
@@ -252,7 +243,6 @@ export class ObservabilityAIAssistantClient {
                 switchMap((messages) =>
                   getGeneratedTitle({
                     messages,
-                    responseLanguage,
                     logger: this.dependencies.logger,
                     chat: (name, chatParams) => {
                       return this.chat(name, {
@@ -303,11 +293,12 @@ export class ObservabilityAIAssistantClient {
                 functionCallsLeft: MAX_FUNCTION_CALLS,
                 functionClient,
                 userInstructions,
-                requestInstructions,
+                adHocInstructions,
                 signal,
                 logger: this.dependencies.logger,
                 disableFunctions,
                 tracer: completeTracer,
+                connectorId,
               })
             );
           }),
@@ -731,7 +722,7 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.setup();
   };
 
-  createKnowledgeBaseEntry = async ({
+  addKnowledgeBaseEntry = async ({
     entry,
   }: {
     entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
@@ -772,7 +763,7 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 
-  fetchUserInstructions = async () => {
+  getKnowledgeBaseUserInstructions = async () => {
     return this.dependencies.knowledgeBaseService.getUserInstructions(
       this.dependencies.namespace,
       this.dependencies.user

@@ -69,6 +69,7 @@ export function updateSavedSearch({
     savedSearch.headerRowHeight = state.headerRowHeight;
     savedSearch.rowsPerPage = state.rowsPerPage;
     savedSearch.sampleSize = state.sampleSize;
+    savedSearch.density = state.density;
 
     if (state.viewMode) {
       savedSearch.viewMode = state.viewMode;

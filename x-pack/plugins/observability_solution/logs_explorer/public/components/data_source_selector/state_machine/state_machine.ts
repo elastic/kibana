@@ -7,7 +7,6 @@
 
 import { actions, assign, createMachine, raise } from 'xstate';
 import {
-  AllDatasetSelection,
   DataViewSelection,
   isAllDatasetSelection,
   isDataViewSelection,
@@ -233,7 +232,7 @@ export const createPureDataSourceSelectorStateMachine = (
           return {};
         }),
         storeAllSelection: assign((_context) => ({
-          selection: AllDatasetSelection.create(),
+          selection: _context.allSelection,
         })),
         storeSingleSelection: assign((_context, event) =>
           event.type === 'SELECT_DATASET'

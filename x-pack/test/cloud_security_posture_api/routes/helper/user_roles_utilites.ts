@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import {
-  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_PATTERN,
-  LATEST_VULNERABILITIES_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   ALERTS_INDEX_PATTERN,
   FINDINGS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
@@ -28,7 +28,7 @@ const alertsSecurityUserIndices = [
     privileges: ['read'],
   },
   {
-    names: [LATEST_VULNERABILITIES_INDEX_PATTERN],
+    names: [CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN],
     privileges: ['all'],
   },
   {
@@ -51,7 +51,7 @@ const securityUserIndinces = [
     privileges: ['read'],
   },
   {
-    names: [LATEST_VULNERABILITIES_INDEX_PATTERN],
+    names: [CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN],
     privileges: ['all'],
   },
 ];

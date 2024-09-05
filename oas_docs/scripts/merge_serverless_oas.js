@@ -14,26 +14,20 @@ const { REPO_ROOT } = require('@kbn/repo-info');
   await merge({
     sourceGlobs: [
       `${REPO_ROOT}/oas_docs/bundle.serverless.json`,
-      `${REPO_ROOT}/x-pack/plugins/actions/docs/openapi/bundled_serverless.yaml`,
       `${REPO_ROOT}/src/plugins/data_views/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/plugins/ml/common/openapi/ml_apis_serverless.yaml`,
       `${REPO_ROOT}/packages/core/saved-objects/docs/openapi/bundled_serverless.yaml`,
+      `${REPO_ROOT}/x-pack/plugins/fleet/common/openapi/bundled.yaml`,
 
       // Observability Solution
       `${REPO_ROOT}/x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml`,
       `${REPO_ROOT}/x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml`,
 
       // Security solution
-      `${REPO_ROOT}/x-pack/plugins/security_solution/docs/openapi/serverless/*.schema.yaml`,
-      `${REPO_ROOT}/packages/kbn-securitysolution-lists-common/docs/openapi/serverless/*.schema.yaml`,
-      `${REPO_ROOT}/packages/kbn-securitysolution-exceptions-common/docs/openapi/serverless/*.schema.yaml`,
-      `${REPO_ROOT}/packages/kbn-securitysolution-endpoint-exceptions-common/docs/openapi/serverless/*.schema.yaml`,
-      `${REPO_ROOT}/x-pack/packages/kbn-elastic-assistant-common/docs/openapi/serverless/*.schema.yaml`,
-      `${REPO_ROOT}/x-pack/plugins/osquery/docs/openapi/serverless/*.schema.yaml`,
     ],
     outputFilePath: `${REPO_ROOT}/oas_docs/output/kibana.serverless.yaml`,
     options: {
-      prototypeDocument: `${REPO_ROOT}/oas_docs/kibana.info.yaml`,
+      prototypeDocument: `${REPO_ROOT}/oas_docs/kibana.info.serverless.yaml`,
     },
   });
 })();

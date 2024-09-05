@@ -153,9 +153,6 @@ export function LensEditConfigurationFlyout({
       }
     };
     getESQLGridAttrs();
-    return () => {
-      abortController.abort();
-    };
   }, [adHocDataViews, dataGridAttrs, query, startDependencies]);
 
   const attributesChanged: boolean = useMemo(() => {
@@ -324,7 +321,7 @@ export function LensEditConfigurationFlyout({
   });
 
   const runQuery = useCallback(
-    async (q, abortController) => {
+    async (q: AggregateQuery, abortController?: AbortController) => {
       const attrs = await getSuggestions(
         q,
         startDependencies,

@@ -28,6 +28,13 @@ import { TransformHealthColoredDot } from './transform_health_colored_dot';
 import type { SectionConfig, SectionItem } from './expanded_row_column_view';
 import { ExpandedRowColumnView } from './expanded_row_column_view';
 
+const notAvailableMessage = i18n.translate(
+  'xpack.transform.transformList.transformDetails.notAvailable',
+  {
+    defaultMessage: 'n/a',
+  }
+);
+
 interface ExpandedRowDetailsPaneProps {
   item: TransformListRow;
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
@@ -166,17 +173,23 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
       if (displayStats.checkpointing.next.checkpoint_progress !== undefined) {
         checkpointingItems.push({
           title: 'next.checkpoint_progress.total_docs',
-          description: displayStats.checkpointing.next.checkpoint_progress.total_docs,
+          description:
+            displayStats.checkpointing.next.checkpoint_progress.total_docs ?? notAvailableMessage,
         });
         checkpointingItems.push({
           title: 'next.checkpoint_progress.docs_remaining',
-          description: displayStats.checkpointing.next.checkpoint_progress.docs_remaining,
+          description:
+            displayStats.checkpointing.next.checkpoint_progress.docs_remaining ??
+            notAvailableMessage,
         });
         checkpointingItems.push({
           title: 'next.checkpoint_progress.percent_complete',
-          description: `${Math.round(
-            displayStats.checkpointing.next.checkpoint_progress.percent_complete
-          )}%`,
+          description:
+            typeof displayStats.checkpointing.next.checkpoint_progress.percent_complete === 'number'
+              ? `${Math.round(
+                  displayStats.checkpointing.next.checkpoint_progress.percent_complete
+                )}%`
+              : notAvailableMessage,
         });
       }
     }

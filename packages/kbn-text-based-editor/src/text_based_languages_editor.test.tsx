@@ -71,22 +71,14 @@ describe('TextBasedLanguagesEditor', () => {
   });
 
   it('should  render the date info with no @timestamp found', async () => {
-    const newProps = {
-      ...props,
-      isCodeEditorExpanded: true,
-    };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
     expect(
       component.find('[data-test-subj="TextBasedLangEditor-date-info"]').at(0).text()
     ).toStrictEqual('@timestamp not found');
   });
 
   it('should  render the feedback link', async () => {
-    const newProps = {
-      ...props,
-      isCodeEditorExpanded: true,
-    };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-feedback-link"]').length).not.toBe(
       0
     );
@@ -95,7 +87,6 @@ describe('TextBasedLanguagesEditor', () => {
   it('should not render the date info if hideTimeFilterInfo is set to true', async () => {
     const newProps = {
       ...props,
-      isCodeEditorExpanded: true,
       hideTimeFilterInfo: true,
     };
     const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
@@ -105,7 +96,6 @@ describe('TextBasedLanguagesEditor', () => {
   it('should render the date info with @timestamp found if detectedTimestamp is given', async () => {
     const newProps = {
       ...props,
-      isCodeEditorExpanded: true,
       detectedTimestamp: '@timestamp',
     };
     const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
@@ -114,10 +104,16 @@ describe('TextBasedLanguagesEditor', () => {
     ).toStrictEqual('@timestamp found');
   });
 
+  it('should  render the limit information', async () => {
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
+    expect(
+      component.find('[data-test-subj="TextBasedLangEditor-limit-info"]').at(0).text()
+    ).toStrictEqual('LIMIT 1000 rows');
+  });
+
   it('should render the query history action if isLoading is defined', async () => {
     const newProps = {
       ...props,
-      isCodeEditorExpanded: true,
       isLoading: true,
     };
     const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
@@ -128,11 +124,7 @@ describe('TextBasedLanguagesEditor', () => {
   });
 
   it('should not render the query history action if isLoading is undefined', async () => {
-    const newProps = {
-      ...props,
-      isCodeEditorExpanded: true,
-    };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
     expect(
       component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]')
         .length
@@ -142,7 +134,6 @@ describe('TextBasedLanguagesEditor', () => {
   it('should not render the query history action if hideQueryHistory is set to true', async () => {
     const newProps = {
       ...props,
-      isCodeEditorExpanded: true,
       hideQueryHistory: true,
     };
     const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
@@ -153,13 +144,9 @@ describe('TextBasedLanguagesEditor', () => {
   });
 
   it('should render the correct buttons for the expanded code editor mode', async () => {
-    const newProps = {
-      ...props,
-      isCodeEditorExpanded: true,
-    };
     let component: ReactWrapper;
     await act(async () => {
-      component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+      component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
     });
     component!.update();
     expect(
@@ -171,20 +158,12 @@ describe('TextBasedLanguagesEditor', () => {
   });
 
   it('should render the resize for the expanded code editor mode', async () => {
-    const newProps = {
-      ...props,
-      isCodeEditorExpanded: true,
-    };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-resize"]').length).not.toBe(0);
   });
 
   it('should render the footer for the expanded code editor mode', async () => {
-    const newProps = {
-      ...props,
-      isCodeEditorExpanded: true,
-    };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-footer"]').length).not.toBe(0);
     expect(component.find('[data-test-subj="TextBasedLangEditor-footer-lines"]').at(0).text()).toBe(
       '1 line'
@@ -192,18 +171,13 @@ describe('TextBasedLanguagesEditor', () => {
   });
 
   it('should render the run query text', async () => {
-    const newProps = {
-      ...props,
-      isCodeEditorExpanded: true,
-    };
-    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
     expect(component.find('[data-test-subj="TextBasedLangEditor-run-query"]').length).not.toBe(0);
   });
 
   it('should not render the run query text if the hideRunQueryText prop is set to true', async () => {
     const newProps = {
       ...props,
-      isCodeEditorExpanded: true,
       hideRunQueryText: true,
     };
     const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
@@ -214,7 +188,6 @@ describe('TextBasedLanguagesEditor', () => {
     const onTextLangQuerySubmit = jest.fn();
     const newProps = {
       ...props,
-      isCodeEditorExpanded: true,
       hideRunQueryText: true,
       editorIsInline: true,
       onTextLangQuerySubmit,

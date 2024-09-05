@@ -239,7 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
     });
 
-    describe('Hierarchical chaining off', async () => {
+    describe('Hierarchical chaining off', () => {
       before(async () => {
         await dashboardControls.updateChainingSystem('NONE');
       });
