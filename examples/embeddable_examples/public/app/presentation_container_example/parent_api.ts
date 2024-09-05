@@ -21,6 +21,7 @@ import {
   PublishesDataLoading,
   ViewMode,
   apiPublishesDataLoading,
+  apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { DEFAULT_STATE, lastSavedStateSessionStorage } from './session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from './session_storage/unsaved_changes';
@@ -93,15 +94,15 @@ export function getParentApi() {
   // One could use `initializeUnsavedChanges` to set up unsaved changes observable.
   // Instead, decided to manually setup unsaved changes observable
   // since only timeRange and panels array need to be monitored.
-  const timeRangeUnsavedChanges$ = timeRange$.pipe(
-    map((currentTimeRange) => {
-      const hasChanges = !isEqual(currentTimeRange, lastSavedState$.value.timeRange);
+  const timeRangeUnsavedChanges$ = combineLatest([timeRange$, lastSavedState$]).pipe(
+    map(([currentTimeRange, lastSavedState]) => {
+      const hasChanges = !isEqual(currentTimeRange, lastSavedState.timeRange);
       return hasChanges ? { timeRange: currentTimeRange } : undefined;
     })
   );
-  const panelsUnsavedChanges$ = panels$.pipe(
-    map((currentPanels) => {
-      const hasChanges = !isEqual(currentPanels, lastSavedState$.value.panels);
+  const panelsUnsavedChanges$ = combineLatest([panels$, lastSavedState$]).pipe(
+    map(([currentPanels, lastSavedState]) => {
+      const hasChanges = !isEqual(currentPanels, lastSavedState.panels);
       return hasChanges ? { panels: currentPanels } : undefined;
     })
   );
@@ -224,6 +225,12 @@ export function getParentApi() {
       resetUnsavedChanges: () => {
         timeRange$.next(lastSavedState$.value.timeRange);
         panels$.next(lastSavedState$.value.panels);
+        lastSavedState$.value.panels.forEach(({ id }) => {
+          const childApi = children$.value[id];
+          if (apiPublishesUnsavedChanges(childApi)) {
+            childApi.resetUnsavedChanges();
+          }
+        });
         newPanels = {};
       },
       timeRange$,
