@@ -9,6 +9,11 @@ import rison from '@kbn/rison';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { type AlertStatus } from '@kbn/rule-data-utils';
 
+export enum SupportedAssetTypes {
+  container = 'container',
+  host = 'host',
+}
+
 export type AssetDetailsLocator = LocatorPublic<AssetDetailsLocatorParams>;
 
 export interface AssetDetailsLocatorParams extends SerializableRecord {
@@ -48,8 +53,9 @@ export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDet
     params: AssetDetailsLocatorParams & { state?: SerializableRecord }
   ) => {
     // Check which asset types are currently supported
-    const isSupportedByAssetDetails =
-      params.assetType === 'host' || params.assetType === 'container';
+    const isSupportedByAssetDetails = Object.values(SupportedAssetTypes).includes(
+      params.assetType as SupportedAssetTypes
+    );
 
     const legacyNodeDetailsQueryParams = !isSupportedByAssetDetails
       ? rison.encodeUnknown({
