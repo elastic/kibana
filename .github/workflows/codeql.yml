@@ -1,9 +1,8 @@
 name: "CodeQL"
 
 on:
-  push:
-    branches:
-      - codeql-branch-references
+  schedule:
+    - cron: '27 21 * * *' # At 21:27 every day
 
 jobs:
   analyze:
@@ -19,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'javascript' ]
-        branch: [ 'codeql-branch-references' ]
+        branch: [ 'main', '7.17' ]
 
     steps:
     - name: Checkout repository
