@@ -31,6 +31,13 @@ describe('AutocompleteFieldMatchComponent', () => {
     .fn()
     .mockResolvedValue([false, true, ['value 3', 'value 4'], jest.fn()]);
 
+  const findEuiComboBox = () =>
+    wrapper.find(EuiComboBox).props() as unknown as {
+      onChange: (a: EuiComboBoxOptionOption[]) => void;
+      onSearchChange: (a: string) => void;
+      onCreateOption: (a: string) => void;
+    };
+
   beforeEach(() => {
     (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
       false,
@@ -191,11 +198,7 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
 
-    (
-      wrapper.find(EuiComboBox).props() as unknown as {
-        onCreateOption: (a: string) => void;
-      }
-    ).onCreateOption('127.0.0.1');
+    findEuiComboBox().onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith('127.0.0.1');
   });
@@ -221,11 +224,7 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
 
-    (
-      wrapper.find(EuiComboBox).props() as unknown as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }
-    ).onChange([{ label: 'value 1' }]);
+    findEuiComboBox().onChange([{ label: 'value 1' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith('value 1');
   });
@@ -252,11 +251,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     );
 
     act(() => {
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onSearchChange: (a: string) => void;
-        }
-      ).onSearchChange('value 12');
+      findEuiComboBox().onSearchChange('value 12');
     });
 
     expect(mockOnChange).toHaveBeenCalledWith('');
@@ -290,13 +285,7 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
 
-    await waitFor(() =>
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onChange: (a: EuiComboBoxOptionOption[]) => void;
-        }
-      ).onChange([{ label: ' value 1 ' }])
-    );
+    await waitFor(() => findEuiComboBox().onChange([{ label: ' value 1 ' }]));
     wrapper.update();
     expect(mockOnChange).toHaveBeenCalledWith(' value 1 ');
 
@@ -324,11 +313,7 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
     act(() => {
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onSearchChange: (a: string) => void;
-        }
-      ).onSearchChange('value 1');
+      findEuiComboBox().onSearchChange('value 1');
     });
 
     expect(useFieldValueAutocomplete).toHaveBeenCalledWith({
@@ -366,18 +351,10 @@ describe('AutocompleteFieldMatchComponent', () => {
     );
 
     act(() => {
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onSearchChange: (a: string) => void;
-        }
-      ).onSearchChange('value 1');
+      findEuiComboBox().onSearchChange('value 1');
     });
     act(() => {
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onSearchChange: (a: string) => void;
-        }
-      ).onSearchChange('');
+      findEuiComboBox().onSearchChange('');
     });
 
     // 1st call is initial render, 2nd call sets the search query:
@@ -420,11 +397,7 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
     act(() => {
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onSearchChange: (a: string) => void;
-        }
-      ).onSearchChange(' value 1');
+      findEuiComboBox().onSearchChange(' value 1');
     });
 
     wrapper.update();
