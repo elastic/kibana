@@ -102,7 +102,12 @@ export function AddInvestigationItem({ onItemAdd: onItemAdd, timeRange }: Props)
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <AddFromLibraryButton onWidgetAdd={(item) => onItemAdd(item)} />
+                <AddFromLibraryButton
+                  onWidgetAdd={(item) => {
+                    resetState();
+                    return onItemAdd(item);
+                  }}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
             {!isPreviewOpen ? (

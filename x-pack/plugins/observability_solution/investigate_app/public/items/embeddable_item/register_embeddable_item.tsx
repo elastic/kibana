@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
@@ -184,7 +184,18 @@ export function registerEmbeddableItem({
         timeRange: option.globalParams.timeRange,
       };
 
-      return <EmbeddableWidget {...parameters} />;
+      return (
+        <EuiFlexItem
+          grow={true}
+          className={css`
+            > div {
+              height: 128px;
+            }
+          `}
+        >
+          <EmbeddableWidget {...parameters} />
+        </EuiFlexItem>
+      );
     },
   });
 }
