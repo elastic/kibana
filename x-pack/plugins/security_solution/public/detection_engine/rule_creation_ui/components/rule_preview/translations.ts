@@ -158,6 +158,13 @@ export const VIEW_DETAILS = i18n.translate(
   }
 );
 
+export const ENABLED_LOGGED_REQUESTS_CHECKBOX = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.enabledLoggedRequestsLabel',
+  {
+    defaultMessage: 'Show Elasticsearch requests, ran during rule executions',
+  }
+);
+
 export const VIEW_DETAILS_FOR_ROW = ({
   ariaRowindex,
   columnValues,

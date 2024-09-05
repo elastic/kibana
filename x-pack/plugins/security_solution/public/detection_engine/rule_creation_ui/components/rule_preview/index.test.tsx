@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 import type { DataViewBase } from '@kbn/es-query';
 import { fields } from '@kbn/data-plugin/common/mocks';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { TestProviders } from '../../../../common/mock';
 import type { RulePreviewProps } from '.';
@@ -34,6 +35,16 @@ jest.mock('../../../../common/containers/use_global_time', () => ({
   }),
 }));
 jest.mock('./use_preview_invocation_count');
+
+// rule types that do not support logged requests
+const ruleTypes: Type[] = [
+  'eql',
+  'threshold',
+  'threat_match',
+  'machine_learning',
+  'query',
+  'new_terms',
+];
 
 const getMockIndexPattern = (): DataViewBase => ({
   fields,
@@ -136,5 +147,33 @@ describe('PreviewQuery', () => {
     );
 
     expect(await wrapper.findByTestId('previewInvocationCountWarning')).toBeTruthy();
+  });
+
+  test('renders "Show Elasticsearch requests" for ES|QL rule type', () => {
+    render(
+      <TestProviders>
+        <RulePreview
+          {...defaultProps}
+          defineRuleData={{ ...defaultProps.defineRuleData, ruleType: 'esql' }}
+        />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('show-elasticsearch-requests')).toBeInTheDocument();
+  });
+
+  ruleTypes.forEach((ruleType) => {
+    test(`does not render "Show Elasticsearch requests" for ${ruleType} rule type`, () => {
+      render(
+        <TestProviders>
+          <RulePreview
+            {...defaultProps}
+            defineRuleData={{ ...defaultProps.defineRuleData, ruleType }}
+          />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('show-elasticsearch-requests')).toBeNull();
+    });
   });
 });
