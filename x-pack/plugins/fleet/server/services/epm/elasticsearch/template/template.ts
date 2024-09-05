@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import deepEqual from 'fast-deep-equal';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   IndicesIndexSettings,
@@ -1098,9 +1098,10 @@ const updateExistingDataStream = async ({
   );
   const updatedDynamicDimensionMappings = filterDimensionMappings(mappings.dynamic_templates);
 
-  const dynamicDimensionMappingsChanged =
-    JSON.stringify(currentDynamicDimensionMappings) !==
-    JSON.stringify(updatedDynamicDimensionMappings);
+  const dynamicDimensionMappingsChanged = !deepEqual(
+    currentDynamicDimensionMappings.sort(),
+    updatedDynamicDimensionMappings.sort()
+  );
 
   // Trigger a rollover if the index mode or source type has changed
   if (
