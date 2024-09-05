@@ -13,7 +13,8 @@ export const NEW_CHAT = i18n.translate('xpack.elasticAssistantPlugin.server.newC
 export const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT = i18n.translate(
   'xpack.elasticAssistantPlugin.server.prompts.youAreAHelpfulExpertAssistant',
   {
-    defaultMessage: 'You are an assistant who answers questions about Elastic Security.',
+    defaultMessage:
+      'You are a security analyst and expert in resolving security incidents. Your role is to assist by answering questions about Elastic Security.',
   }
 );
 
