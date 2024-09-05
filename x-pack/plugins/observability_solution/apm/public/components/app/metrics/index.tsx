@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { SignalTypes } from '../../../../common/entities/types';
 import {
   isJavaAgentName,
   isJRubyAgentName,
@@ -18,11 +19,30 @@ import { JvmMetricsOverview } from './jvm_metrics_overview';
 import { JsonMetricsDashboard } from './static_dashboard';
 import { hasDashboardFile } from './static_dashboard/helper';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
+import { isLogsOnlySignal } from '../../../utils/get_signal_type';
+import { ServiceTabEmptyState } from '../service_tab_empty_state';
+import { logsOnlyEmptyStateContent } from './constants';
 
 export function Metrics() {
   const { agentName, runtimeName, serverlessType } = useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView } = useAdHocApmDataView();
+  const { serviceEntitySummary } = useApmServiceContext();
+
+  const hasLogsOnlySignal =
+    serviceEntitySummary?.signalTypes &&
+    isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+
+  if (hasLogsOnlySignal) {
+    return (
+      <ServiceTabEmptyState
+        title={logsOnlyEmptyStateContent.title}
+        content={logsOnlyEmptyStateContent.content}
+        imgSrc={logsOnlyEmptyStateContent.imgSrc}
+      />
+    );
+  }
+
   if (isAWSLambda) {
     return <ServerlessMetrics />;
   }
