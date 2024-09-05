@@ -106,7 +106,7 @@ export interface PluginsStart {
   searchHomepage?: SearchHomepagePluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
   share?: SharePluginStart;
 }
 

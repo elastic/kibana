@@ -98,7 +98,7 @@ interface PluginsSetup {
   ml?: MlPluginSetup;
   licensing: LicensingPluginStart;
   searchConnectors?: SearchConnectorsPluginSetup;
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
