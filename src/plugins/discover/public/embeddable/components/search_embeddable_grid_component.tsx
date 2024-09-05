@@ -16,7 +16,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   isLegacyTableEnabled,
 } from '@kbn/discover-utils';
-import { Filter, isOfAggregateQueryType } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import {
   FetchContext,
   useBatchedOptionalPublishingSubjects,
@@ -39,8 +39,8 @@ import { DiscoverGridEmbeddable } from './saved_search_grid';
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import { DISCOVER_CELL_ACTIONS_TRIGGER, useAdditionalCellActions } from '../../context_awareness';
-import { createDataViewDataSource, createEsqlDataSource } from '../../../common/data_sources';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
+import { createDataSource } from '../utils/create_data_source';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
@@ -135,13 +135,7 @@ export function SearchEmbeddableGridComponent({
     settings: grid,
   });
 
-  const dataSource = useMemo(() => {
-    return isOfAggregateQueryType(query)
-      ? createEsqlDataSource()
-      : dataView.id
-      ? createDataViewDataSource({ dataViewId: dataView.id })
-      : undefined;
-  }, [dataView.id, query]);
+  const dataSource = useMemo(() => createDataSource({ dataView, query }), [dataView, query]);
 
   const timeRange = useMemo(
     () => (fetchContext ? getTimeRangeFromFetchContext(fetchContext) : undefined),
