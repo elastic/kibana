@@ -238,6 +238,7 @@ kibana_vars=(
     xpack.alerting.rules.run.actions.max
     xpack.alerting.rules.run.alerts.max
     xpack.alerting.rules.run.actions.connectorTypeOverrides
+    xpack.alerting.maxScheduledPerMinute
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
@@ -431,6 +432,8 @@ kibana_vars=(
     xpack.task_manager.event_loop_delay.monitor
     xpack.task_manager.event_loop_delay.warn_threshold
     xpack.task_manager.worker_utilization_running_average_window
+    xpack.discovery.active_nodes_lookback
+    xpack.discovery.interval
     xpack.uptime.index
     serverless
 )
