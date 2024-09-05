@@ -239,9 +239,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/rule_management.yml')
       );
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/playwright.yml')
-      );
     }
 
     if (
@@ -270,9 +267,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
-      );
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/playwright.yml')
       );
     }
 
