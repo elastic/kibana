@@ -23,7 +23,7 @@ import LogRateAnalysisEmbeddable from '../../components/log_rate_analysis/log_ra
  * @param timeRange
  * @constructor
  */
-export const PatternAnalysisEmbeddableWrapper: FC<LogRateAnalysisProps> = ({
+export const LogRateAnalysisEmbeddableWrapper: FC<LogRateAnalysisProps> = ({
   dataViewId,
   lastReloadRequestTime,
   onError,
