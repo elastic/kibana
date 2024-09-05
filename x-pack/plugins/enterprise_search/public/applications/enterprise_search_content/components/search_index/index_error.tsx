@@ -122,7 +122,9 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
           if (isLocalModel(model)) {
             const modelId = model.service_settings.model_id;
             const modelStats = trainedModelStats?.trained_model_stats.find(
-              (value) => value.model_id === modelId
+              (value) =>
+                value.model_id === modelId &&
+                value.deployment_stats?.deployment_id === field.source.inference_id
             );
             if (!modelStats || modelStats.deployment_stats?.state !== 'started') {
               return {
