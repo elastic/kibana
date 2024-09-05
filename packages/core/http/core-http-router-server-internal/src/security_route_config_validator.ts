@@ -10,10 +10,19 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import type { DeepPartial } from '@kbn/utility-types';
 
-const privilegeSetSchema = schema.object({
-  anyRequired: schema.maybe(schema.arrayOf(schema.string(), { minSize: 2 })),
-  allRequired: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-});
+const privilegeSetSchema = schema.object(
+  {
+    anyRequired: schema.maybe(schema.arrayOf(schema.string(), { minSize: 2 })),
+    allRequired: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+  },
+  {
+    validate: (value) => {
+      if (!value.anyRequired && !value.allRequired) {
+        return 'either anyRequired or allRequired must be specified';
+      }
+    },
+  }
+);
 
 const requiredPrivilegesSchema = schema.arrayOf(
   schema.oneOf([privilegeSetSchema, schema.string()]),

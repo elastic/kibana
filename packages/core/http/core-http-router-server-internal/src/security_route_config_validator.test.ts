@@ -49,6 +49,20 @@ describe('RouteSecurity validation', () => {
     );
   });
 
+  it('should fail when requiredPrivileges include an empty privilege set', () => {
+    const routeSecurity = {
+      authz: {
+        requiredPrivileges: [{}],
+      },
+    };
+
+    expect(() => validRouteSecurity(routeSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges.0]: types that failed validation:
+      - [authz.requiredPrivileges.0.0]: either anyRequired or allRequired must be specified
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+    `);
+  });
+
   it('should fail validation when requiredPrivileges array is empty', () => {
     const routeSecurity = {
       authz: {
