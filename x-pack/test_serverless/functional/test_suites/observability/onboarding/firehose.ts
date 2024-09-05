@@ -38,6 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
+      await (await testSubjects.find('createCloudFormationOptionAWSCLI')).click();
       await testSubjects.existOrFail('observabilityOnboardingFirehoseCreateStackCommand');
     });
 
