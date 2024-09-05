@@ -189,8 +189,7 @@ describe('es_query executor', () => {
         params: { ...defaultProps, searchType: 'searchSource' },
         latestTimestamp: undefined,
         services: {
-          getSearchSourceClient: expect.any(Function),
-          getDataViews: expect.any(Function),
+          searchSourceClient: searchSourceClientMock,
           logger,
           share: undefined,
         },
