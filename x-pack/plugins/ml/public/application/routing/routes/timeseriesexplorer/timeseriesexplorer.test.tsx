@@ -113,7 +113,7 @@ jest.mock('../../../contexts/kibana/kibana_context', () => {
               timefilter: getMockedTimefilter(),
             },
           },
-          mlServices: { mlApiServices: {} },
+          mlServices: { mlApi: {} },
           notifications: {
             toasts: {
               addDanger: () => {},

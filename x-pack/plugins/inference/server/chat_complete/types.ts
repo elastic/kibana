@@ -6,6 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
@@ -26,6 +27,7 @@ export interface InferenceConnectorAdapter {
       messages: Message[];
       system?: string;
       executor: InferenceExecutor;
+      logger: Logger;
     } & ToolOptions
   ) => Observable<InferenceConnectorAdapterChatCompleteEvent>;
 }

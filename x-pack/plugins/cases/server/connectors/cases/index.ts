@@ -14,10 +14,11 @@ import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_acti
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
-import type { Owner } from '../../../common/constants/types';
 import { CasesConnector } from './cases_connector';
 import { DEFAULT_MAX_OPEN_CASES } from './constants';
-import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE, OWNER_INFO } from '../../../common/constants';
+import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE } from '../../../common/constants';
+import { getOwnerFromRuleConsumerProducer } from '../../../common/utils/owner';
+
 import type {
   CasesConnectorConfig,
   CasesConnectorParams,
@@ -98,6 +99,7 @@ export const getCasesConnectorAdapter = (): ConnectorAdapter<
         reopenClosedCases: params.subActionParams.reopenClosedCases,
         timeWindow: params.subActionParams.timeWindow,
         maximumCasesToOpen: DEFAULT_MAX_OPEN_CASES,
+        templateId: params.subActionParams.templateId,
       };
 
       return { subAction: 'run', subActionParams };
@@ -107,18 +109,4 @@ export const getCasesConnectorAdapter = (): ConnectorAdapter<
       return constructRequiredKibanaPrivileges(owner);
     },
   };
-};
-
-const getOwnerFromRuleConsumerProducer = (consumer: string, producer: string): Owner => {
-  for (const value of Object.values(OWNER_INFO)) {
-    const foundedConsumer = value.validRuleConsumers?.find(
-      (validConsumer) => validConsumer === consumer || validConsumer === producer
-    );
-
-    if (foundedConsumer) {
-      return value.id;
-    }
-  }
-
-  return OWNER_INFO.cases.id;
 };
