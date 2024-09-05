@@ -237,6 +237,7 @@ export class AlertsService implements IAlertsService {
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       ruleType: opts.ruleType,
+      maintenanceWindowService: opts.maintenanceWindowService,
       namespace: opts.namespace,
       rule: opts.rule,
       kibanaVersion: this.options.kibanaVersion,

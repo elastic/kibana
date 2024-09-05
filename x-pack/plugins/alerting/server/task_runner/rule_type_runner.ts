@@ -15,7 +15,6 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { IAlertsClient } from '../alerts_client/types';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { ErrorWithReason } from '../lib';
 import { getTimeRange } from '../lib/get_time_range';
 import { NormalizedRuleType } from '../rule_type_registry';
@@ -32,6 +31,7 @@ import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleRunnerErrorStackTraceLog, RuleTypeRunnerContext, TaskRunnerContext } from './types';
 import { withAlertingSpan } from './lib';
 import { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
+import { MaintenanceWindowService } from './maintenance_window';
 
 interface ConstructorOpts<
   Params extends RuleTypeParams,
@@ -89,8 +89,7 @@ interface RunOpts<
       nowDate?: string
     ) => { dateStart: string; dateEnd: string };
   };
-  maintenanceWindows?: MaintenanceWindow[];
-  maintenanceWindowsWithoutScopedQueryIds?: string[];
+  maintenanceWindowService: MaintenanceWindowService;
   rule: RuleData<Params>;
   ruleType: NormalizedRuleType<
     Params,
@@ -147,8 +146,7 @@ export class RuleTypeRunner<
     alertsClient,
     executionId,
     executorServices,
-    maintenanceWindows = [],
-    maintenanceWindowsWithoutScopedQueryIds = [],
+    maintenanceWindowService,
     rule,
     ruleType,
     startedAt,
@@ -270,10 +268,10 @@ export class RuleTypeRunner<
                 },
                 logger: this.options.logger,
                 flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
-                // passed in so the rule registry knows about maintenance windows
-                ...(maintenanceWindowsWithoutScopedQueryIds.length
-                  ? { maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds }
-                  : {}),
+                // // passed in so the rule registry knows about maintenance windows
+                // ...(maintenanceWindowsWithoutScopedQueryIds.length
+                //   ? { maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds }
+                //   : {}),
                 getTimeRange: (timeWindow) =>
                   getTimeRange({
                     logger: this.options.logger,
@@ -333,9 +331,8 @@ export class RuleTypeRunner<
 
     await withAlertingSpan('alerting:process-alerts', () =>
       this.options.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-        alertsClient.processAlerts({
+        await alertsClient.processAlerts({
           flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
-          maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
           alertDelay: alertDelay?.active ?? 0,
           ruleRunMetricsStore: context.ruleRunMetricsStore,
         });
@@ -344,9 +341,7 @@ export class RuleTypeRunner<
 
     await withAlertingSpan('alerting:index-alerts-as-data', () =>
       this.options.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
-        const updateAlertsMaintenanceWindowResult = await alertsClient.persistAlerts(
-          maintenanceWindows
-        );
+        const updateAlertsMaintenanceWindowResult = await alertsClient.persistAlerts();
 
         // Set the event log MW ids again, this time including the ids that matched alerts with
         // scoped query

@@ -20,6 +20,7 @@ import {
   SanitizedRule,
 } from '../../types';
 import { RuleTaskInstance, RuleTypeRunnerContext } from '../../task_runner/types';
+import { MaintenanceWindowService } from '../../task_runner/maintenance_window';
 
 export type RuleData<Params extends RuleTypeParams> = Pick<
   SanitizedRule<Params>,
@@ -32,6 +33,7 @@ interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
   executionId: string;
   logger: Logger;
   maxAlerts: number;
+  maintenanceWindowService: MaintenanceWindowService;
   rule: RuleData<Params>;
   ruleType: UntypedNormalizedRuleType;
   runTimestamp?: Date;
@@ -52,6 +54,7 @@ export const initializeAlertsClient = async <
   executionId,
   logger,
   maxAlerts,
+  maintenanceWindowService,
   rule,
   ruleType,
   runTimestamp,
@@ -65,7 +68,7 @@ export const initializeAlertsClient = async <
     },
   } = taskInstance;
 
-  const alertsClientParams = { logger, ruleType };
+  const alertsClientParams = { logger, ruleType, maintenanceWindowService };
 
   // Create AlertsClient if rule type has registered an alerts context
   // with the framework. The AlertsClient will handle reading and

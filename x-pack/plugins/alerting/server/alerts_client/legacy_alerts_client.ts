@@ -29,17 +29,18 @@ import {
 import {
   IAlertsClient,
   InitializeExecutionOpts,
-  ProcessAndLogAlertsOpts,
   ProcessAlertsOpts,
   LogAlertsOpts,
   TrackedAlerts,
 } from './types';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { MaintenanceWindowService } from '../task_runner/maintenance_window';
 
 export interface LegacyAlertsClientParams {
   logger: Logger;
   ruleType: UntypedNormalizedRuleType;
+  maintenanceWindowService: MaintenanceWindowService;
 }
 
 export class LegacyAlertsClient<
@@ -141,9 +142,8 @@ export class LegacyAlertsClient<
     return !!this.trackedAlerts.active[id];
   }
 
-  public processAlerts({
+  public async processAlerts({
     flappingSettings,
-    maintenanceWindowIds,
     alertDelay,
     ruleRunMetricsStore,
   }: ProcessAlertsOpts) {
@@ -152,7 +152,7 @@ export class LegacyAlertsClient<
       activeAlerts: processedAlertsActive,
       currentRecoveredAlerts: processedAlertsRecoveredCurrent,
       recoveredAlerts: processedAlertsRecovered,
-    } = processAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
+    } = await processAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
       alerts: this.reportedAlerts,
       existingAlerts: this.trackedAlerts.active,
       previouslyRecoveredAlerts: this.trackedAlerts.recovered,
@@ -160,9 +160,19 @@ export class LegacyAlertsClient<
       alertLimit: this.maxAlerts,
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       flappingSettings,
-      maintenanceWindowIds,
       startedAt: this.startedAtString,
     });
+
+    if (keys(processedAlertsNew).length > 0) {
+      const { maintenanceWindowsWithoutScopedQueryIds } =
+        await this.options.maintenanceWindowService.loadMaintenanceWindows();
+
+      for (const id in processedAlertsNew) {
+        if (Object.hasOwn(processedAlertsNew, id)) {
+          processedAlertsNew[id].setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
+        }
+      }
+    }
 
     const { trimmedAlertsRecovered, earlyRecoveredAlerts } = trimRecoveredAlerts(
       this.options.logger,
@@ -201,28 +211,6 @@ export class LegacyAlertsClient<
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
-    });
-  }
-
-  public processAndLogAlerts({
-    eventLogger,
-    ruleRunMetricsStore,
-    shouldLogAlerts,
-    flappingSettings,
-    maintenanceWindowIds,
-    alertDelay,
-  }: ProcessAndLogAlertsOpts) {
-    this.processAlerts({
-      flappingSettings,
-      maintenanceWindowIds,
-      alertDelay,
-      ruleRunMetricsStore,
-    });
-
-    this.logAlerts({
-      eventLogger,
-      ruleRunMetricsStore,
-      shouldLogAlerts,
     });
   }
 
