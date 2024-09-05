@@ -6,15 +6,16 @@
  */
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { ROOT_PATH, SEARCH_INDICES_DETAILS_PATH } from '../../routes';
+import { SEARCH_INDICES_DETAILS_PATH } from '../../routes';
 import { SearchIndexDetailsPage } from './details_page';
-import { ElasticsearchStartPage } from '../start/start_page';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const SearchIndicesRouter: React.FC = () => {
+  const { application } = useKibana().services;
   return (
     <Routes>
       <Route exact path={SEARCH_INDICES_DETAILS_PATH} component={SearchIndexDetailsPage} />
-      <Route path={ROOT_PATH} component={ElasticsearchStartPage} />
+      <Route render={() => application.navigateToApp('elasticsearchStart')} />
     </Routes>
   );
 };
