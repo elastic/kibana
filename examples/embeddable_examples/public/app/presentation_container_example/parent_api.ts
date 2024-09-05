@@ -19,6 +19,7 @@ import {
 import { isEqual, omit } from 'lodash';
 import {
   PublishesDataLoading,
+  PublishingSubject,
   ViewMode,
   apiPublishesDataLoading,
   apiPublishesUnsavedChanges,
@@ -199,8 +200,9 @@ export function getParentApi() {
       hidePanelTitle: new BehaviorSubject<boolean | undefined>(false),
       replacePanel: async (idToRemove: string, newPanel: PanelPackage<object>) => {
         // TODO remove method from interface? It should not be required
+        return '';
       },
-      reload$,
+      reload$: reload$ as unknown as PublishingSubject<void>,
       removePanel: (id: string) => {
         panels$.next(panels$.value.filter(({ id: panelId }) => panelId !== id));
         children$.next(omit(children$.value, id));
@@ -234,7 +236,7 @@ export function getParentApi() {
         newPanels = {};
       },
       timeRange$,
-      unsavedChanges: unsavedChanges$,
-    } as unknown as ParentApi,
+      unsavedChanges: unsavedChanges$ as PublishingSubject<object | undefined>,
+    } as ParentApi,
   };
 }
