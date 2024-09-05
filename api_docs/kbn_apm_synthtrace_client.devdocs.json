@@ -2782,6 +2782,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.SyntheticsMonitorDocument",
+        "type": "Type",
+        "tags": [],
+        "label": "SyntheticsMonitorDocument",
+        "description": [],
+        "signature": [
+          "{ '@timestamp'?: number | undefined; } & Partial<{ 'data_stream.namespace': string; 'data_stream.type': string; 'data_stream.dataset': string; 'monitor.id': string; 'monitor.origin': string; 'monitor.name': string; 'monitor.type': string; 'monitor.check_group': string; 'monitor.timespan.lt': string; 'monitor.timespan.gte': string; 'monitor.duration.us'?: number | undefined; 'monitor.ip'?: string | undefined; 'monitor.project.name'?: string | undefined; 'monitor.project.id'?: string | undefined; 'monitor.fleet_managed'?: boolean | undefined; 'monitor.status'?: string | undefined; 'synthetics.type'?: string | undefined; 'synthetics.step.index'?: number | undefined; 'observer.os.name'?: string | undefined; 'observer.product'?: string | undefined; }>"
+        ],
+        "path": "packages/kbn-apm-synthtrace-client/src/lib/synthetics/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
         "id": "def-common.SynthtraceESAction",
         "type": "Type",
         "tags": [],
@@ -3341,6 +3356,36 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.syntheticsMonitor",
+        "type": "Object",
+        "tags": [],
+        "label": "syntheticsMonitor",
+        "description": [],
+        "path": "packages/kbn-apm-synthtrace-client/src/lib/synthetics/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.syntheticsMonitor.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => SyntheticsMonitor"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/synthetics/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
