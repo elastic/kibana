@@ -27,11 +27,15 @@ export function registerDeployAgentPoliciesTask(taskManagerSetup: TaskManagerSet
       createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
         const agentPolicyIdsWithSpace: Array<{ id: string; spaceId?: string }> =
           taskInstance.params.agentPolicyIdsWithSpace;
+        let cancelled = false;
         return {
           async run() {
             if (!agentPolicyIdsWithSpace.length) {
               return;
             }
+            appContextService
+              .getLogger()
+              .debug(`Deploying ${agentPolicyIdsWithSpace.length} policies`);
             const agentPoliciesIdsIndexedBySpace = agentPolicyIdsWithSpace.reduce(
               (acc, { id, spaceId = DEFAULT_SPACE_ID }) => {
                 if (!acc[spaceId]) {
@@ -49,6 +53,9 @@ export function registerDeployAgentPoliciesTask(taskManagerSetup: TaskManagerSet
               for (const [spaceId, agentPolicyIds] of Object.entries(
                 agentPoliciesIdsIndexedBySpace
               )) {
+                if (cancelled) {
+                  throw new Error('Task has been cancelled');
+                }
                 await agentPolicyService.deployPolicies(
                   appContextService.getInternalUserSOClientForSpaceId(spaceId),
                   agentPolicyIds
@@ -56,7 +63,9 @@ export function registerDeployAgentPoliciesTask(taskManagerSetup: TaskManagerSet
               }
             });
           },
-          async cancel() {},
+          async cancel() {
+            cancelled = true;
+          },
         };
       },
     },
