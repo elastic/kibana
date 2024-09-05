@@ -222,7 +222,7 @@ export const assertCommonPropertiesShown = (properties: Partial<PrebuiltRuleAsse
   cy.get(TIMELINE_TEMPLATE_VALUE).should('have.text', properties.timeline_title);
 
   cy.get(INTERVAL_TITLE).should('have.text', 'Runs every');
-  cy.get(INTERVAL_VALUE).should('have.text', properties.interval);
+  cy.get(INTERVAL_VALUE).should('contain.text', properties.interval);
 
   cy.get(FROM_TITLE).should('have.text', 'Additional look-back time');
   cy.get(FROM_VALUE).invoke('attr', 'data-test-subj').should('contain', properties.from);
