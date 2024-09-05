@@ -1,0 +1,41 @@
+summary: Response from retrieving the list of choices for a ServiceNow ITOM connector.
+value:
+  connector_id: 9d9be270-2fd2-11ed-b0e0-87533c532698
+  data:
+    - dependent_value: ""
+      element: severity
+      label: Critical
+      value: 1
+    - dependent_value: ""
+      element: severity
+      label: Major
+      value: 2
+    - dependent_value: ""
+      element: severity
+      label: Minor
+      value: 3
+    - dependent_value: ""
+      element: severity
+      label: Warning
+      value: 4
+    - dependent_value: ""
+      element: severity
+      label: OK
+      value: 5
+    - dependent_value: ""
+      element: severity
+      label: Clear
+      value: 0
+    - dependent_value: ""
+      element: urgency
+      label: 1 - High
+      value: 1
+    - dependent_value: ""
+      element: urgency
+      label: 2 - Medium
+      value: 2
+    - dependent_value: ""
+      element: urgency
+      label: 3 - Low
+      value: 3
+  status: ok
