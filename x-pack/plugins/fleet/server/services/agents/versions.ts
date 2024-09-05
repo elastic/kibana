@@ -15,6 +15,7 @@ import semverGte from 'semver/functions/gte';
 import semverGt from 'semver/functions/gt';
 import semverRcompare from 'semver/functions/rcompare';
 import semverLt from 'semver/functions/lt';
+import semverCoerce from 'semver/functions/coerce';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -112,6 +113,7 @@ export const getAvailableVersions = async ({
   // only want support versions in the final result. We'll also sort by newest version first.
   availableVersions = uniq(
     [...availableVersions, ...apiVersions]
+      .map((item: any) => (item.includes('+build') ? item : semverCoerce(item)?.version || ''))
       .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
       .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1))
   );
