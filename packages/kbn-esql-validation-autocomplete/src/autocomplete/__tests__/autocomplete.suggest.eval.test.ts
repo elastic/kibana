@@ -557,19 +557,16 @@ describe('autocomplete.suggest', () => {
         .concat(',');
 
       // case( / ) suggest any field/eval function in this position as first argument
-      await assertSuggestions(
-        'from a | eval case(/)',
-        [
-          // With extra space after field name to open suggestions
-          ...getFieldNamesByType('any').map((field) => `${field} `),
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }, undefined, [
-            'case',
-          ]),
-        ],
-        {
-          triggerCharacter: ' ',
-        }
-      );
+
+      const allSuggestions = [
+        // With extra space after field name to open suggestions
+        ...getFieldNamesByType('any').map((field) => `${field} `),
+        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }, undefined, ['case']),
+      ];
+      await assertSuggestions('from a | eval case(/)', allSuggestions, {
+        triggerCharacter: ' ',
+      });
+      await assertSuggestions('from a | eval case(/)', allSuggestions);
 
       // case( field /) suggest comparison operators at this point to converge to a boolean
       await assertSuggestions('from a | eval case( textField /)', comparisonOperators, {
@@ -600,23 +597,26 @@ describe('autocomplete.suggest', () => {
           triggerCharacter: ' ',
         }
       );
+
+      const expectedNumericSuggestions = [
+        // Notice no extra space after field name
+        ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES).map((field) => `${field}`),
+        ...getFunctionSignaturesByReturnType(
+          'eval',
+          ESQL_COMMON_NUMERIC_TYPES,
+          { scalar: true },
+          undefined,
+          []
+        ),
+      ];
       await assertSuggestions(
         'from a | eval case( integerField != /)',
-        [
-          // Notice no extra space after field name
-          ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES).map((field) => `${field}`),
-          ...getFunctionSignaturesByReturnType(
-            'eval',
-            ESQL_COMMON_NUMERIC_TYPES,
-            { scalar: true },
-            undefined,
-            []
-          ),
-        ],
+        expectedNumericSuggestions,
         {
           triggerCharacter: ' ',
         }
       );
+      await assertSuggestions('from a | eval case( integerField != /)', expectedNumericSuggestions);
 
       // case( field > 0, >) suggests fields like normal
       await assertSuggestions(
