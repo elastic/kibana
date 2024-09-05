@@ -219,6 +219,7 @@ class AnnotationsTableUI extends Component {
   openSingleMetricView = async (annotation = {}) => {
     const {
       services: {
+        chrome: { recentlyAccessed },
         application: { navigateToUrl },
         share,
       },
@@ -303,7 +304,12 @@ class AnnotationsTableUI extends Component {
       { absolute: true }
     );
 
-    addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, singleMetricViewerLink);
+    addItemToRecentlyAccessed(
+      'timeseriesexplorer',
+      job.job_id,
+      singleMetricViewerLink,
+      recentlyAccessed
+    );
     await navigateToUrl(singleMetricViewerLink);
   };
 

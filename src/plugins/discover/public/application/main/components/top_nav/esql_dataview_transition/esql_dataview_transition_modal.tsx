@@ -34,7 +34,7 @@ export default function ESQLToDataViewTransitionModal({
   onClose,
 }: ESQLToDataViewTransitionModalProps) {
   const [dismissModalChecked, setDismissModalChecked] = useState(false);
-  const onTransitionModalDismiss = useCallback((e) => {
+  const onTransitionModalDismiss = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setDismissModalChecked(e.target.checked);
   }, []);
 
