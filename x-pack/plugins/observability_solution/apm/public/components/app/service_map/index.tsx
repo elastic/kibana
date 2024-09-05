@@ -8,6 +8,7 @@
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import React, { ReactNode } from 'react';
+import { SignalTypes } from '../../../../common/entities/types';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
@@ -29,7 +30,10 @@ import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
-import { ServiceTabContent } from '../service_tab_content';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { isLogsOnlySignal } from '../../../utils/get_signal_type';
+import { logsOnlyEmptyStateContent } from './constants';
+import { ServiceTabEmptyState } from '../service_tab_empty_state';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -53,15 +57,12 @@ function LoadingSpinner() {
   return <EuiLoadingSpinner size="xl" style={{ position: 'absolute', top: '50%', left: '50%' }} />;
 }
 
-function wrapReturn(content: JSX.Element) {
-  return <ServiceTabContent tabName="service-map">{content}</ServiceTabContent>;
-}
-
 export function ServiceMapHome() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo, serviceGroup },
   } = useApmParams('/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   return (
     <ServiceMap
       environment={environment}
@@ -81,6 +82,21 @@ export function ServiceMapServiceDetail() {
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { serviceEntitySummary } = useApmServiceContext();
+
+  const hasLogsOnlySignal =
+    serviceEntitySummary?.signalTypes &&
+    isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+
+  if (hasLogsOnlySignal) {
+    return (
+      <ServiceTabEmptyState
+        title={logsOnlyEmptyStateContent.title}
+        content={logsOnlyEmptyStateContent.content}
+        imgSrc={logsOnlyEmptyStateContent.imgSrc}
+      />
+    );
+  }
   return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
 }
 
@@ -142,7 +158,7 @@ export function ServiceMap({
   }
 
   if (!isActivePlatinumLicense(license)) {
-    return wrapReturn(
+    return (
       <PromptContainer>
         <LicensePrompt text={invalidLicenseMessage} />
       </PromptContainer>
@@ -150,7 +166,7 @@ export function ServiceMap({
   }
 
   if (!config.serviceMapEnabled) {
-    return wrapReturn(
+    return (
       <PromptContainer>
         <DisabledPrompt />
       </PromptContainer>
@@ -158,7 +174,7 @@ export function ServiceMap({
   }
 
   if (status === FETCH_STATUS.SUCCESS && data.elements.length === 0) {
-    return wrapReturn(
+    return (
       <PromptContainer>
         <EmptyPrompt />
       </PromptContainer>
@@ -172,7 +188,7 @@ export function ServiceMap({
     error.body?.statusCode === 500 &&
     error.body?.message === SERVICE_MAP_TIMEOUT_ERROR
   ) {
-    return wrapReturn(
+    return (
       <PromptContainer>
         <TimeoutPrompt isGlobalServiceMap={!serviceName} />
       </PromptContainer>
@@ -183,7 +199,7 @@ export function ServiceMap({
     onPageReady();
   }
 
-  return wrapReturn(
+  return (
     <>
       <SearchBar showTimeComparison />
       <EuiPanel hasBorder={true} paddingSize="none">
