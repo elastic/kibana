@@ -12,9 +12,14 @@ import { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
-import path from 'path';
+import path, { resolve } from 'path';
 
 const JOURNEY_BASE_PATH = 'x-pack/performance/journeys_e2e';
+
+const journeyGroups = {
+  start: ['login.ts'],
+  dashboard: ['flight_dashboard.ts', 'data_stress_test_lens.ts'],
+};
 
 export interface Journey {
   name: string;
@@ -114,6 +119,7 @@ run(
     const skipWarmup = flagsReader.boolean('skip-warmup');
     const kibanaInstallDir = flagsReader.path('kibana-install-dir');
     const journeyPath = flagsReader.path('journey-path');
+    const groups = flagsReader.string('groups');
 
     if (kibanaInstallDir && !fs.existsSync(kibanaInstallDir)) {
       throw createFlagError('--kibana-install-dir must be an existing directory');
@@ -125,18 +131,25 @@ run(
 
     const journeys: Journey[] = [];
 
-    if (journeyPath && fs.statSync(journeyPath).isFile()) {
-      journeys.push({ name: path.parse(journeyPath).name, path: journeyPath });
-    } else {
-      // default dir is x-pack/performance/journeys_e2e
-      const dir = journeyPath ?? path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
-      readFilesRecursively(dir, (filePath: string) =>
-        journeys.push({
-          name: path.parse(filePath).name,
-          path: path.resolve(dir, filePath),
-        })
-      );
+    if (groups) {
+      journeys.push({
+        name: 'login',
+        path: resolve(JOURNEY_BASE_PATH, 'login.ts'),
+      });
     }
+
+    // if (journeyPath && fs.statSync(journeyPath).isFile()) {
+    //   journeys.push({ name: path.parse(journeyPath).name, path: journeyPath });
+    // } else {
+    //   // default dir is x-pack/performance/journeys_e2e
+    //   const dir = journeyPath ?? path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
+    //   readFilesRecursively(dir, (filePath: string) =>
+    //     journeys.push({
+    //       name: path.parse(filePath).name,
+    //       path: path.resolve(dir, filePath),
+    //     })
+    //   );
+    // }
 
     if (journeys.length === 0) {
       throw new Error('No journeys found');
@@ -190,7 +203,7 @@ run(
   },
   {
     flags: {
-      string: ['kibana-install-dir', 'journey-path'],
+      string: ['kibana-install-dir', 'journey-path', 'groups'],
       boolean: ['skip-warmup'],
       help: `
       --kibana-install-dir=dir      Run Kibana from existing install directory instead of from source

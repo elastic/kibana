@@ -1,0 +1,12 @@
+steps:
+  - command: .buildkite/scripts/steps/functional/performance_playwright.sh
+    label: 'Run single user performance journeys'
+    env:
+      PERFORMANCE_ENABLE_TELEMETRY: true
+    agents:
+      queue: kb-static-ubuntu
+    depends_on:
+      - build
+      - quick_checks
+    timeout_in_minutes: 30
+    soft_fail: true
