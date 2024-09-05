@@ -64,6 +64,7 @@ import { getAllSyntheticsMonitorRoute } from './monitor_cruds/get_monitors_list'
 import { getLocationMonitors } from './settings/private_locations/get_location_monitors';
 import { addSyntheticsParamsRoute } from './settings/params/add_param';
 import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
+import { createOverviewTrendsRoute } from './overview_trends/overview_trends';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsProjectMonitorRoute,
@@ -106,6 +107,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
   syntheticsGetPingHeatmapRoute,
+  createOverviewTrendsRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
