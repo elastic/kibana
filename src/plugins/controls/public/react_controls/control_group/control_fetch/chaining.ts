@@ -36,9 +36,6 @@ export function chaining$(
 ) {
   return combineLatest([chainingSystem$, controlsInOrder$, children$]).pipe(
     skipWhile(([chainingSystem, controlsInOrder, children]) => {
-      // wait until all children are available before you start chaining
-      if (controlsInOrder.length !== Object.keys(children).length) return true;
-
       if (chainingSystem === 'HIERARCHICAL') {
         for (let i = 0; i < controlsInOrder.length; i++) {
           if (controlsInOrder[i].id === uuid) {
