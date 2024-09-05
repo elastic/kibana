@@ -83,9 +83,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const { euiTheme } = useEuiTheme();
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application, core, fieldsMetadata } =
-    kibana.services;
+  const {
+    dataViews,
+    expressions,
+    indexManagementApiService,
+    application,
+    core,
+    fieldsMetadata,
+    uiSettings,
+  } = kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
+  const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
@@ -245,10 +253,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const containerRef = useRef<HTMLElement>(null);
 
   // When the editor is on full size mode, the user can resize the height of the editor.
-  const onMouseDownResizeHandler = useCallback(
+  const onMouseDownResizeHandler = useCallback<
+    React.ComponentProps<typeof ResizableButton>['onMouseDownResizeHandler']
+  >(
     (mouseDownEvent) => {
+      function isMouseEvent(e: React.TouchEvent | React.MouseEvent): e is React.MouseEvent {
+        return e && 'pageY' in e;
+      }
       const startSize = editorHeight;
-      const startPosition = mouseDownEvent.pageY;
+      const startPosition = isMouseEvent(mouseDownEvent)
+        ? mouseDownEvent?.pageY
+        : mouseDownEvent?.touches[0].pageY;
 
       function onMouseMove(mouseMoveEvent: MouseEvent) {
         const height = startSize - startPosition + mouseMoveEvent.pageY;
@@ -265,7 +280,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [editorHeight]
   );
 
-  const onKeyDownResizeHandler = useCallback(
+  const onKeyDownResizeHandler = useCallback<
+    React.ComponentProps<typeof ResizableButton>['onKeyDownResizeHandler']
+  >(
     (keyDownEvent) => {
       let height = editorHeight;
       if (
@@ -355,6 +372,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return policies.map(({ type, query: policyQuery, ...rest }) => rest);
       },
+      getPreferences: async () => {
+        return {
+          histogramBarTarget,
+        };
+      },
     };
     return callbacks;
   }, [
@@ -369,6 +391,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     abortController,
     indexManagementApiService,
     fieldsMetadata,
+    histogramBarTarget,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
