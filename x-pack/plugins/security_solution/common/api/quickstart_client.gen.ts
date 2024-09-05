@@ -245,6 +245,7 @@ import type {
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
 import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
+import type { ScheduleRiskEngineNowResponse } from './entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type { ReadRiskEngineSettingsResponse } from './entity_analytics/risk_engine/engine_settings_route.gen';
 import type { GetRiskEngineStatusResponse } from './entity_analytics/risk_engine/engine_status_route.gen';
 import type {
@@ -703,7 +704,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Execute a given command on an endpoint
+   * Run a shell command on an endpoint.
    */
   async endpointExecuteAction(props: EndpointExecuteActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointExecuteAction`);
@@ -719,14 +720,14 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Download a file from an endpoint
+   * Download a file from an endpoint.
    */
   async endpointFileDownload(props: EndpointFileDownloadProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointFileDownload`);
     return this.kbnClient
       .request<EndpointFileDownloadResponse>({
         path: replaceParams(
-          '/api/endpoint/action/{action_id}/file/{file_id}/download&#x60;',
+          '/api/endpoint/action/{action_id}/file/{file_id}/download',
           props.params
         ),
         headers: {
@@ -737,13 +738,13 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get file info
+   * Get information for the specified file using the file ID.
    */
   async endpointFileInfo(props: EndpointFileInfoProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointFileInfo`);
     return this.kbnClient
       .request<EndpointFileInfoResponse>({
-        path: replaceParams('/api/endpoint/action/{action_id}/file/{file_id}&#x60;', props.params),
+        path: replaceParams('/api/endpoint/action/{action_id}/file/{file_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -752,7 +753,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get action details
+   * Get the details of a response action using the action ID.
    */
   async endpointGetActionsDetails(props: EndpointGetActionsDetailsProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointGetActionsDetails`);
@@ -767,7 +768,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get a list of action requests and their responses
+   * Get a list of all response actions.
    */
   async endpointGetActionsList(props: EndpointGetActionsListProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointGetActionsList`);
@@ -783,6 +784,9 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a response actions state, which reports whether encryption is enabled.
+   */
   async endpointGetActionsState() {
     this.log.info(`${new Date().toISOString()} Calling API EndpointGetActionsState`);
     return this.kbnClient
@@ -796,7 +800,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get action status
+   * Get the status of response actions for the specified agent IDs.
    */
   async endpointGetActionsStatus(props: EndpointGetActionsStatusProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointGetActionsStatus`);
@@ -813,7 +817,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get a file from an endpoint
+   * Get a file from an endpoint.
    */
   async endpointGetFileAction(props: EndpointGetFileActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointGetFileAction`);
@@ -829,7 +833,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get list of running processes on an endpoint
+   * Get a list of all processes running on an endpoint.
    */
   async endpointGetProcessesAction(props: EndpointGetProcessesActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointGetProcessesAction`);
@@ -845,7 +849,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Isolate an endpoint
+   * Isolate an endpoint from the network. The endpoint remains isolated until it's released.
    */
   async endpointIsolateAction(props: EndpointIsolateActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointIsolateAction`);
@@ -860,6 +864,12 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Isolate an endpoint from the network.
+> info
+> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/isolate`.
+
+    */
   async endpointIsolateRedirect(props: EndpointIsolateRedirectProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointIsolateRedirect`);
     return this.kbnClient
@@ -874,7 +884,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Kill a running process on an endpoint
+   * Terminate a running process on an endpoint.
    */
   async endpointKillProcessAction(props: EndpointKillProcessActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointKillProcessAction`);
@@ -890,7 +900,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Scan a file or directory
+   * Scan a specific file or directory on an endpoint for malware.
    */
   async endpointScanAction(props: EndpointScanActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointScanAction`);
@@ -906,7 +916,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Suspend a running process on an endpoint
+   * Suspend a running process on an endpoint.
    */
   async endpointSuspendProcessAction(props: EndpointSuspendProcessActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointSuspendProcessAction`);
@@ -922,7 +932,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Release an endpoint
+   * Release an isolated endpoint, allowing it to rejoin a network.
    */
   async endpointUnisolateAction(props: EndpointUnisolateActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointUnisolateAction`);
@@ -937,6 +947,12 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Release an isolated endpoint, allowing it to rejoin a network.
+> info
+> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/unisolate`.
+
+    */
   async endpointUnisolateRedirect(props: EndpointUnisolateRedirectProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointUnisolateRedirect`);
     return this.kbnClient
@@ -951,7 +967,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Upload a file to an endpoint
+   * Upload a file to an endpoint.
    */
   async endpointUploadAction(props: EndpointUploadActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointUploadAction`);
@@ -1598,6 +1614,18 @@ detection engine rules.
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async scheduleRiskEngineNow() {
+    this.log.info(`${new Date().toISOString()} Calling API ScheduleRiskEngineNow`);
+    return this.kbnClient
+      .request<ScheduleRiskEngineNowResponse>({
+        path: '/api/risk_score/engine/schedule_now',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
