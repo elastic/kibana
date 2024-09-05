@@ -87,7 +87,7 @@ interface PluginsSetup {
   licensing: LicensingPluginStart;
   home?: HomePublicPluginSetup;
   searchHomepage?: SearchHomepagePluginSetup;
-  security: SecurityPluginSetup;
+  security?: SecurityPluginSetup;
   share?: SharePluginSetup;
 }
 
@@ -106,7 +106,7 @@ export interface PluginsStart {
   searchHomepage?: SearchHomepagePluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
-  security: SecurityPluginStart;
+  security?: SecurityPluginStart;
   share?: SharePluginStart;
 }
 
