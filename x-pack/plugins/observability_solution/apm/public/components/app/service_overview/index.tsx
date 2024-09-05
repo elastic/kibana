@@ -66,7 +66,7 @@ export function ServiceOverview() {
     serviceEntitySummary?.signalTypes &&
     isApmSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
 
-  const hasOnlyLogsSignal =
+  const hasLogsOnlySignal =
     serviceEntitySummary?.signalTypes &&
     isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
 
@@ -86,7 +86,7 @@ export function ServiceOverview() {
           {/* Only shows Logs overview when entity has Logs signal */}
           {hasLogsSignal ? (
             <EuiFlexItem>
-              {hasOnlyLogsSignal && !dismissedLogsOnlyEmptyState && (
+              {hasLogsOnlySignal && !dismissedLogsOnlyEmptyState && (
                 <ServiceTabEmptyState
                   title={logsOnlyEmptyStateContent.title}
                   content={logsOnlyEmptyStateContent.content}
