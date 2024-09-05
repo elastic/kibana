@@ -9,4 +9,4 @@
 export { LanguageDocumentationPopover } from './src/components/documentation_popover';
 export { LanguageDocumentationFlyout } from './src/components/documentation_flyout';
 export { LanguageDocumentationPopoverContent } from './src/components/documentation_content';
-export type { LanguageDocumentationSections } from './src/components/documentation_content';
+export type { LanguageDocumentationSections } from './src/types';

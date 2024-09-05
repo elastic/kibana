@@ -21,7 +21,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { elementToString } from '../utils/element_to_string';
-import type { LanguageDocumentationSections } from './types';
+import type { LanguageDocumentationSections } from '../types';
 
 import './documentation.scss';
 

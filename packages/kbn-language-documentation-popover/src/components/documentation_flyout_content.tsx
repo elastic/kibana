@@ -20,7 +20,7 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import { elementToString } from '../utils/element_to_string';
-import { LanguageDocumentationSections } from './types';
+import { LanguageDocumentationSections } from '../types';
 
 interface DocumentationFlyoutProps {
   sections?: LanguageDocumentationSections;
@@ -84,7 +84,7 @@ function DocumentationFlyoutContent({
             grow={false}
             css={css`
               align-items: flex-end;
-              padding-top: ${euiTheme.size.xs}
+              padding-top: ${euiTheme.size.xs};
             `}
           >
             <EuiLink external href={linkToDocumentation} target="_blank">

@@ -290,7 +290,6 @@ export const EditorFooter = memo(function EditorFooter({
               {documentationSections && !editorIsInline && (
                 <EuiFlexItem grow={false}>
                   <LanguageDocumentationFlyout
-                    language="ES|QL"
                     sections={documentationSections}
                     searchInDescription
                     linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
@@ -327,7 +326,6 @@ export const EditorFooter = memo(function EditorFooter({
                   {documentationSections && (
                     <EuiFlexItem grow={false}>
                       <LanguageDocumentationFlyout
-                        language="ES|QL"
                         sections={documentationSections}
                         searchInDescription
                         linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}

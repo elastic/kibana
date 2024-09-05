@@ -7,11 +7,10 @@
  */
 import React, { useCallback, useEffect } from 'react';
 import { EuiFlyout, EuiButtonIcon, EuiButtonIconProps, useEuiTheme } from '@elastic/eui';
-import { LanguageDocumentationSections } from './types';
+import { LanguageDocumentationSections } from '../types';
 import { LanguageDocumentationFlyoutContent } from './documentation_flyout_content';
 
 interface DocumentationFlyoutProps {
-  language: string;
   isHelpMenuOpen: boolean;
   onHelpMenuVisibilityChange: (status: boolean) => void;
   sections?: LanguageDocumentationSections;
@@ -21,7 +20,6 @@ interface DocumentationFlyoutProps {
 }
 
 function DocumentationFlyout({
-  language,
   sections,
   buttonProps,
   searchInDescription,
