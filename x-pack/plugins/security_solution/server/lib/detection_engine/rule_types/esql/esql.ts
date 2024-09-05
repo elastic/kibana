@@ -59,7 +59,7 @@ export const esqlExecutor = async ({
     alertWithSuppression,
   },
   services,
-  state: stateWithLoggedRequests,
+  state,
   spaceId,
   experimentalFeatures,
   licensing,
@@ -80,7 +80,7 @@ export const esqlExecutor = async ({
    * we don't want to overload ES/Kibana with large responses
    */
   const ESQL_PAGE_SIZE_CIRCUIT_BREAKER = tuple.maxSignals * 3;
-  const { isLoggedRequestsEnabled, ...state } = stateWithLoggedRequests;
+  const isLoggedRequestsEnabled = state?.isLoggedRequestsEnabled ?? false;
 
   return withSecuritySpan('esqlExecutor', async () => {
     const result = createSearchAfterReturnType();
