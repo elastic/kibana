@@ -122,6 +122,7 @@ describe('request logging', () => {
               xsrfRequired: false,
               access: 'internal',
               tags: [],
+              security: undefined,
               timeout: [Object],
               body: undefined
             }
