@@ -38,7 +38,7 @@ const rulesSchema = schema.object({
     }),
     enforce: schema.boolean({ defaultValue: false }), // if enforce is false, only warnings will be shown
   }),
-  maxScheduledPerMinute: schema.number({ defaultValue: 100000, max: 100000, min: 0 }),
+  maxScheduledPerMinute: schema.number({ defaultValue: 1000000, max: 1000000, min: 0 }),
   overwriteProducer: schema.maybe(
     schema.oneOf([
       schema.literal('observability'),
