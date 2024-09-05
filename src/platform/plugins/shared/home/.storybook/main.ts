@@ -10,7 +10,7 @@ import { defaultConfig } from '@kbn/storybook';
 
 module.exports = {
   ...defaultConfig,
-  stories: ['../../../../packages/home/**/*.stories.+(tsx|mdx)', '../**/*.stories.+(tsx|mdx)'],
+  stories: ['../../../../../../packages/home/**/*.stories.+(tsx|mdx)', '../**/*.stories.+(tsx|mdx)'],
   reactOptions: {
     strictMode: true,
   },
