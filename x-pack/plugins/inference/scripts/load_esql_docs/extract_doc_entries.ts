@@ -7,10 +7,13 @@
 
 import Fs from 'fs/promises';
 import Path from 'path';
+import fastGlob from 'fast-glob';
 import $, { load, Cheerio, AnyNode } from 'cheerio';
 import { partition } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
-import { extractSections } from './extract_sections';
+import pLimit from 'p-limit';
+import { ScriptInferenceClient } from '../util/kibana_client';
+import { convertToMarkdown } from './convert_to_markdown';
 
 interface ExtractedDocEntry {
   /** the title of the page **/
@@ -25,7 +28,233 @@ interface ExtractedDocEntry {
   skip?: boolean;
 }
 
+/**
+ * The pages that will be extracted but only used as context
+ * for the LLM for the enhancement tasks of the documentation entries.
+ */
+const contextArticles = [
+  'esql-kibana.html',
+  'esql-query-api.html',
+  'esql-limitations.html',
+  'esql-cross-clusters.html',
+  'esql-examples.html',
+  'esql-metadata-fields.html',
+  'esql-multi-index.html',
+];
+
+interface ExtractedPage {
+  sourceFile: string;
+  name: string;
+  content: string;
+}
+
+export interface ExtractedCommandOrFunc {
+  name: string;
+  markdownContent: string;
+}
+
+export interface ExtractionOutput {
+  commands: ExtractedCommandOrFunc[];
+  functions: ExtractedCommandOrFunc[];
+  pages: ExtractedPage[];
+  /**
+   * The list of file that were not processed
+   */
+  skippedFile: string[];
+}
+
 export async function extractDocEntries({
+  builtDocsDir,
+  log,
+  inferenceClient,
+}: {
+  builtDocsDir: string;
+  log: ToolingLog;
+  inferenceClient: ScriptInferenceClient;
+}): Promise<ExtractionOutput> {
+  const files = await fastGlob(`${builtDocsDir}/html/en/elasticsearch/reference/master/esql*.html`);
+  if (!files.length) {
+    throw new Error('No files found');
+  }
+
+  const output: ExtractionOutput = {
+    commands: [],
+    functions: [],
+    pages: [],
+    skippedFile: [],
+  };
+
+  const limiter = pLimit(10);
+
+  await Promise.all(
+    files.map(async (file) => {
+      return await processFile({
+        file,
+        log,
+        inferenceClient,
+        output,
+        limiter,
+      });
+    })
+  );
+
+  return output;
+}
+
+async function processFile({
+  file: fileFullPath,
+  output,
+  inferenceClient,
+  log,
+  limiter,
+}: {
+  file: string;
+  output: ExtractionOutput;
+  inferenceClient: ScriptInferenceClient;
+  log: ToolingLog;
+  limiter: pLimit.Limit;
+}) {
+  const basename = Path.basename(fileFullPath);
+  const fileContent = (await Fs.readFile(fileFullPath)).toString('utf-8');
+
+  // TODO: esql-syntax.html
+  // TODO: esql.html
+
+  if (basename === 'esql-commands.html') {
+    // process commands
+    await processCommands({
+      fileContent,
+      log,
+      output,
+      limiter,
+      inferenceClient,
+    });
+  } else if (basename === 'esql-functions-operators.html') {
+    // process functions / operators
+    await processFunctionsAndOperators({
+      fileContent,
+      log,
+      output,
+      limiter,
+      inferenceClient,
+    });
+  } else if (contextArticles.includes(basename)) {
+    const $element = load(fileContent)('*');
+    output.pages.push({
+      sourceFile: basename,
+      name: basename.substring(5, basename.length - 5),
+      content: getSimpleText($element),
+    });
+  } else {
+    output.skippedFile.push(basename);
+  }
+}
+
+async function processFunctionsAndOperators({
+  fileContent,
+  output,
+  inferenceClient,
+  log,
+  limiter,
+}: {
+  fileContent: string;
+  output: ExtractionOutput;
+  inferenceClient: ScriptInferenceClient;
+  log: ToolingLog;
+  limiter: pLimit.Limit;
+}) {
+  const $element = load(fileContent.toString())('*');
+
+  const sections = extractSections($element);
+
+  const searches = [
+    'Binary operators',
+    'Equality',
+    'Inequality',
+    'Less than',
+    'Less than or equal to',
+    'Greater than',
+    'Greater than or equal to',
+    'Add +',
+    'Subtract -',
+    'Multiply *',
+    'Divide /',
+    'Modulus %',
+    'Unary operators',
+    'Logical operators',
+    'IS NULL and IS NOT NULL',
+    'Cast (::)',
+  ];
+
+  const matches = ['IN', 'LIKE', 'RLIKE'];
+
+  const [operatorSections, allOtherSections] = partition(sections, (section) => {
+    return (
+      matches.includes(section.title) ||
+      searches.some((search) => section.title.toLowerCase().startsWith(search.toLowerCase()))
+    );
+  });
+
+  const functionSections = allOtherSections.filter(({ title }) => !!title.match(/^[A-Z_]+$/));
+
+  const markdownFiles = await Promise.all(
+    functionSections.map(async (section) => {
+      return limiter(async () => {
+        return {
+          name: section.title,
+          markdownContent: await convertToMarkdown({
+            htmlContent: section.content,
+            client: inferenceClient,
+          }),
+        };
+      });
+    })
+  );
+
+  output.functions.push(...markdownFiles);
+
+  output.pages.push({
+    sourceFile: 'esql-functions-operators.html',
+    name: 'operators',
+    content: operatorSections.map(({ title, content }) => `${title}\n${content}`).join('\n'),
+  });
+}
+
+async function processCommands({
+  fileContent,
+  output,
+  inferenceClient,
+  log,
+  limiter,
+}: {
+  fileContent: string;
+  output: ExtractionOutput;
+  inferenceClient: ScriptInferenceClient;
+  log: ToolingLog;
+  limiter: pLimit.Limit;
+}) {
+  const $element = load(fileContent.toString())('*');
+
+  const sections = extractSections($element).filter(({ title }) => !!title.match(/^[A-Z_]+$/));
+
+  const markdownFiles = await Promise.all(
+    sections.map(async (section) => {
+      return limiter(async () => {
+        return {
+          name: section.title,
+          markdownContent: await convertToMarkdown({
+            htmlContent: section.content,
+            client: inferenceClient,
+          }),
+        };
+      });
+    })
+  );
+
+  output.commands.push(...markdownFiles);
+}
+
+export async function extractDocEntriesOld({
   file,
   log,
 }: {
@@ -41,31 +270,6 @@ export async function extractDocEntries({
   }
 
   switch (Path.basename(file)) {
-    case 'esql-commands.html':
-      return extractSections($element)
-        .slice(0, 5) // TODO: remove
-        .filter(({ title }) => !!title.match(/^[A-Z_]+$/))
-        .map((doc) => ({
-          ...doc,
-          instructions: `For this command, generate a Markdown document containing the following sections:
-
-                    ## {Title}
-
-                    {What this command does, the use cases, and any limitations from this document or esql-limitations.txt}
-
-                    ### Syntax
-
-                    {the content of the "Syntax" section of the document}
-
-                    ### Parameters
-
-                    {the content of the "Parameters" section of the document}
-
-                    ### Examples
-
-                    {example ES|QL queries using this command. prefer to copy mentioned queries, but make sure there are at least three different examples, focusing on different usages of this command}`,
-        }));
-
     case 'esql-syntax.html':
       return [
         {
@@ -95,93 +299,6 @@ export async function extractDocEntries({
         },
       ];
 
-    case 'esql-functions-operators.html':
-      const sections = extractSections($element);
-
-      const searches = [
-        'Binary operators',
-        'Equality',
-        'Inequality',
-        'Less than',
-        'Greater than',
-        'Add +',
-        'Subtract -',
-        'Multiply *',
-        'Divide /',
-        'Modulus %',
-        'Unary operators',
-        'Logical operators',
-        'IS NULL',
-        'IS NOT NULL',
-        'Cast (::)',
-      ];
-
-      const matches = ['IN', 'LIKE', 'RLIKE'];
-
-      const [operatorSections, allOtherSections] = partition(sections, (section) => {
-        return (
-          matches.includes(section.title) ||
-          searches.some((search) => section.title.toLowerCase().startsWith(search.toLowerCase()))
-        );
-      });
-
-      return allOtherSections
-        .map((section) => ({
-          ...section,
-          instructions: `For each function, use the following template:
-
-                  ## {Title}
-
-                  {description of what this function does}
-
-                  ### Examples
-
-                  {at least two examples of full ES|QL queries. prefer the ones in the document verbatim}
-                  `,
-        }))
-        .concat({
-          title: 'Operators',
-          content: operatorSections.map(({ title, content }) => `${title}\n${content}`).join('\n'),
-          instructions:
-            'Generate a document describing the operators. For each type of operator (binary, unary, logical, and the remaining), generate a section. For each operator, generate at least one full ES|QL query as an example of its usage. Keep it short, e.g. only a ```esql\nFROM ...\n| WHERE ... ```',
-        });
-
-    case 'esql-cross-clusters.html':
-      return [
-        {
-          title: 'CROSS_CLUSTER',
-          content: getSimpleText($element),
-          skip: true,
-        },
-      ];
-
-    case 'esql-limitations.html':
-      return [
-        {
-          title: 'Limitations',
-          content: getSimpleText($element),
-          skip: true,
-        },
-      ];
-
-    case 'esql-query-api.html':
-      return [
-        {
-          title: 'API',
-          content: getSimpleText($element),
-          skip: true,
-        },
-      ];
-
-    case 'esql-kibana.html':
-      return [
-        {
-          title: 'Kibana',
-          content: getSimpleText($element),
-          skip: true,
-        },
-      ];
-
     default:
       log.debug('Dropping file', file);
       return [];
@@ -191,6 +308,7 @@ export async function extractDocEntries({
 function getSimpleText($element: Cheerio<AnyNode>) {
   $element.remove('.navfooter');
   $element.remove('#sticky_content');
+  $element.remove('.edit_me');
   $element.find('code').each(function () {
     $(this).replaceWith('`' + $(this).text() + '`');
   });
@@ -199,4 +317,32 @@ function getSimpleText($element: Cheerio<AnyNode>) {
     .last()
     .text()
     .replaceAll(/([\n]\s*){2,}/g, '\n');
+}
+
+export function extractSections(cheerio: Cheerio<AnyNode>) {
+  const sections: Array<{
+    title: string;
+    content: string;
+  }> = [];
+  cheerio.find('.section .position-relative').each((index, element) => {
+    const untilNextHeader = $(element).nextUntil('.position-relative');
+
+    const title = $(element).text().trim().replace('edit', '');
+
+    untilNextHeader.find('svg defs').remove();
+    untilNextHeader.find('.console_code_copy').remove();
+    untilNextHeader.find('.imageblock').remove();
+
+    const htmlContent = untilNextHeader
+      .map((i, node) => $(node).prop('outerHTML'))
+      .toArray()
+      .join('');
+
+    sections.push({
+      title: title === 'STATS ... BY' ? 'STATS' : title,
+      content: `<div><h1>${title}</h1> ${htmlContent}</div>`,
+    });
+  });
+
+  return sections;
 }
