@@ -30,6 +30,7 @@ import {
   createPermissionFailureMessage,
 } from '../../capabilities/check_capabilities';
 import type { Module, RecognizeModuleResult } from '../../../../common/types/modules';
+import { useEnabledFeatures } from '../../contexts/ml/serverless_context';
 import { useMlKibana } from '../../contexts/kibana';
 import type { TabIdType, KibanaAssetType } from './flyout';
 import { TAB_IDS } from './flyout';
@@ -117,6 +118,7 @@ export const OverviewTabContent: FC<Props> = ({
   const logsConfigsUrl = docLinks.links.ml.logsAnomalyDetectionConfigs;
   const metricsConfigsUrl = docLinks.links.ml.metricsAnomalyDetectionConfigs;
   const canCreateJob = usePermissionCheck('canCreateJob');
+  const { showContextualInsights: isServerless } = useEnabledFeatures();
 
   const runDataRecongizer = async () => {
     setRunningDataRecognizer(true);
@@ -299,13 +301,15 @@ export const OverviewTabContent: FC<Props> = ({
                   </h2>
                 }
                 body={
-                  <p>
-                    <FormattedMessage
-                      id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.unableToUseModuleHelpMessage"
-                      defaultMessage="These supplied configurations can be used in {appName}."
-                      values={{ appName: module.type }}
-                    />
-                  </p>
+                  isServerless === false ? (
+                    <p>
+                      <FormattedMessage
+                        id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.unableToUseModuleHelpMessage"
+                        defaultMessage="These supplied configurations can be used in {appName}."
+                        values={{ appName: module.type }}
+                      />
+                    </p>
+                  ) : undefined
                 }
                 footer={
                   <>
