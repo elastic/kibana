@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect } from 'react';
-import { EuiFlyout, EuiFlyoutBody, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiButtonIcon,
+  EuiButtonIconProps,
+  useEuiTheme,
+} from '@elastic/eui';
 import { LanguageDocumentationSections } from './types';
 import { LanguageDocumentationFlyoutContent } from './documentation_flyout_content';
 
@@ -29,6 +35,8 @@ function DocumentationFlyout({
   isHelpMenuOpen,
   onHelpMenuVisibilityChange,
 }: DocumentationFlyoutProps) {
+  const { euiTheme } = useEuiTheme();
+  const DEFAULT_WIDTH = euiTheme.base * 34;
   const toggleDocumentationFlyout = useCallback(() => {
     onHelpMenuVisibilityChange?.(!isHelpMenuOpen);
   }, [isHelpMenuOpen, onHelpMenuVisibilityChange]);
@@ -50,7 +58,7 @@ function DocumentationFlyout({
           onClose={() => onHelpMenuVisibilityChange(false)}
           aria-labelledby="esqlInlineDocumentationFlyout"
           type="push"
-          size="s"
+          size={DEFAULT_WIDTH}
         >
           <EuiFlyoutBody>
             <LanguageDocumentationFlyoutContent
