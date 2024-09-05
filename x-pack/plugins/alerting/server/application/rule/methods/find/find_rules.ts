@@ -150,14 +150,17 @@ export async function findRules<Params extends RuleParams = never>(
     }
 
     const rule = getAlertFromRaw<Params>(
-      context,
+      context.ruleTypeRegistry,
       id,
       attributes.alertTypeId,
       (fields ? pick(attributes, fields) : attributes) as RawRule,
       references,
       false,
       excludeFromPublicApi,
-      includeSnoozeData
+      includeSnoozeData,
+      true,
+      context.isSystemAction,
+      context.logger
     );
 
     // collect SIEM rule for further formatting legacy actions

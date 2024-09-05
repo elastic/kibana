@@ -142,12 +142,16 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
   }
 
   return getAlertFromRaw<Params>(
-    context,
+    context.ruleTypeRegistry,
     createdAlert.id,
     createdAlert.attributes.alertTypeId,
     createdAlert.attributes,
     references,
     false,
-    true
+    true,
+    false,
+    true,
+    context.isSystemAction,
+    context.logger
   );
 }

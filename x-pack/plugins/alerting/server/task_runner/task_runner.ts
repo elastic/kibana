@@ -515,6 +515,7 @@ export class TaskRunner<
         spaceId,
         context: this.context,
         ruleTypeRegistry: this.ruleTypeRegistry,
+        logger: this.logger,
       });
 
       // Update the consumer
@@ -537,17 +538,17 @@ export class TaskRunner<
         ruleTypeCategory: this.ruleType.category,
       });
 
-      (async () => {
-        try {
-          await runRuleParams.rulesClient.clearExpiredSnoozes({
-            rule: runRuleParams.rule,
-            version: runRuleParams.version,
-          });
-        } catch (e) {
-          // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
-          this.logger.debug(`Failed to clear expired snoozes: ${e.message}`);
-        }
-      })().catch(() => {});
+      // (async () => {
+      //   try {
+      //     await runRuleParams.rulesClient.clearExpiredSnoozes({
+      //       rule: runRuleParams.rule,
+      //       version: runRuleParams.version,
+      //     });
+      //   } catch (e) {
+      //     // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
+      //     this.logger.debug(`Failed to clear expired snoozes: ${e.message}`);
+      //   }
+      // })().catch(() => {});
 
       return runRuleParams;
     });
@@ -659,7 +660,6 @@ export class TaskRunner<
       stateWithMetrics = asOk(
         await withAlertingSpan('alerting:run', () => this.runRule(validatedRuleData))
       );
-
       schedule = asOk(validatedRuleData.rule.schedule);
     } catch (err) {
       stateWithMetrics = asErr(err);

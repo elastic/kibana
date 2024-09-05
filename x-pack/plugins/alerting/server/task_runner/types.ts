@@ -74,7 +74,6 @@ export interface RunRuleParams<Params extends RuleTypeParams> {
   apiKey: RawRule['apiKey'];
   fakeRequest: KibanaRequest;
   rule: SanitizedRule<Params>;
-  rulesClient: RulesClientApi;
   validatedParams: Params;
   version: string | undefined;
 }

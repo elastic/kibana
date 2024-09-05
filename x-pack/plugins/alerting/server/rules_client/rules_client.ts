@@ -84,7 +84,7 @@ export type ConstructorOptions = Omit<
   'fieldsToExcludeFromPublicApi' | 'minimumScheduleIntervalInMs'
 >;
 
-const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
+export const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
   'monitoring',
   'mapped_params',
   'snoozeSchedule',
@@ -217,7 +217,7 @@ export class RulesClient {
 
   public getAlertFromRaw = (params: GetAlertFromRawParams) =>
     getAlertFromRaw(
-      this.context,
+      this.context.ruleTypeRegistry,
       params.id,
       params.ruleTypeId,
       params.rawRule,
@@ -225,6 +225,8 @@ export class RulesClient {
       params.includeLegacyId,
       params.excludeFromPublicApi,
       params.includeSnoozeData,
-      params.omitGeneratedValues
+      params.omitGeneratedValues,
+      this.context.isSystemAction,
+      this.context.logger
     );
 }

@@ -6,7 +6,7 @@
  */
 
 import { omit, isEmpty } from 'lodash';
-import { SavedObjectReference } from '@kbn/core/server';
+import { Logger, SavedObjectReference } from '@kbn/core/server';
 import {
   Rule,
   PartialRule,
@@ -15,6 +15,7 @@ import {
   RuleTypeParams,
   RuleWithLegacyId,
   PartialRuleWithLegacyId,
+  RuleTypeRegistry,
 } from '../../types';
 import {
   ruleExecutionStatusFromRaw,
@@ -24,11 +25,11 @@ import {
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
 import { injectReferencesIntoParams } from '../common';
-import { RulesClientContext } from '../types';
 import {
   transformRawActionsToDomainActions,
   transformRawActionsToDomainSystemActions,
 } from '../../application/rule/transforms/transform_raw_actions_to_domain_actions';
+import { fieldsToExcludeFromPublicApi } from '../rules_client';
 
 export interface GetAlertFromRawParams {
   id: string;
@@ -45,7 +46,7 @@ export interface GetAlertFromRawParams {
  * @deprecated in favor of transformRuleAttributesToRuleDomain
  */
 export function getAlertFromRaw<Params extends RuleTypeParams>(
-  context: RulesClientContext,
+  ruleTypeRegistry: RuleTypeRegistry,
   id: string,
   ruleTypeId: string,
   rawRule: RawRule,
@@ -53,14 +54,15 @@ export function getAlertFromRaw<Params extends RuleTypeParams>(
   includeLegacyId: boolean = false,
   excludeFromPublicApi: boolean = false,
   includeSnoozeData: boolean = false,
-  omitGeneratedValues: boolean = true
+  omitGeneratedValues: boolean = true,
+  isSystemAction: (actionId: string) => boolean,
+  logger: Logger
 ): Rule | RuleWithLegacyId {
-  const ruleType = context.ruleTypeRegistry.get(ruleTypeId);
+  const ruleType = ruleTypeRegistry.get(ruleTypeId);
   // In order to support the partial update API of Saved Objects we have to support
   // partial updates of an Alert, but when we receive an actual RawRule, it is safe
   // to cast the result to an Alert
   const res = getPartialRuleFromRaw<Params>(
-    context,
     id,
     ruleType,
     rawRule,
@@ -68,7 +70,9 @@ export function getAlertFromRaw<Params extends RuleTypeParams>(
     includeLegacyId,
     excludeFromPublicApi,
     includeSnoozeData,
-    omitGeneratedValues
+    omitGeneratedValues,
+    isSystemAction,
+    logger
   );
   // include to result because it is for internal rules client usage
   if (includeLegacyId) {
@@ -79,7 +83,6 @@ export function getAlertFromRaw<Params extends RuleTypeParams>(
 }
 
 export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
-  context: RulesClientContext,
   id: string,
   ruleType: UntypedNormalizedRuleType,
   {
@@ -104,7 +107,9 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
   includeLegacyId: boolean = false,
   excludeFromPublicApi: boolean = false,
   includeSnoozeData: boolean = false,
-  omitGeneratedValues: boolean = true
+  omitGeneratedValues: boolean = true,
+  isSystemAction: (actionId: string) => boolean,
+  logger: Logger
 ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
   const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
     ...s,
@@ -127,7 +132,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
   const rule: PartialRule<Params> = {
     id,
     notifyWhen,
-    ...omit(partialRawRule, excludeFromPublicApi ? [...context.fieldsToExcludeFromPublicApi] : ''),
+    ...omit(partialRawRule, excludeFromPublicApi ? [...fieldsToExcludeFromPublicApi] : ''),
     // we currently only support the Interval Schedule type
     // Once we support additional types, this type signature will likely change
     schedule: schedule as IntervalSchedule,
@@ -136,7 +141,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
           ruleId: id,
           actions,
           references: references || [],
-          isSystemAction: context.isSystemAction,
+          isSystemAction,
           omitGeneratedValues,
         })
       : [],
@@ -145,7 +150,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
           ruleId: id,
           actions,
           references: references || [],
-          isSystemAction: context.isSystemAction,
+          isSystemAction,
           omitGeneratedValues,
         })
       : [],
@@ -164,10 +169,10 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
     ...(scheduledTaskId ? { scheduledTaskId } : {}),
     ...(executionStatus
-      ? { executionStatus: ruleExecutionStatusFromRaw(context.logger, id, executionStatus) }
+      ? { executionStatus: ruleExecutionStatusFromRaw(logger, id, executionStatus) }
       : {}),
     ...(includeMonitoring
-      ? { monitoring: convertMonitoringFromRawAndVerify(context.logger, id, monitoring) }
+      ? { monitoring: convertMonitoringFromRawAndVerify(logger, id, monitoring) }
       : {}),
     ...(nextRun ? { nextRun: new Date(nextRun) } : {}),
     ...(lastRun

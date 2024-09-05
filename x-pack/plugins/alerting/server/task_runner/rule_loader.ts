@@ -10,6 +10,7 @@ import {
   CoreKibanaRequest,
   FakeRawRequest,
   Headers,
+  Logger,
   SavedObject,
   SavedObjectReference,
   SavedObjectsErrorHelpers,
@@ -25,6 +26,7 @@ import {
 } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { getAlertFromRaw } from '../rules_client/lib';
 
 interface RuleData {
   rawRule: RawRule;
@@ -34,6 +36,7 @@ interface RuleData {
 
 interface ValidateRuleAndCreateFakeRequestParams<Params extends RuleTypeParams> {
   context: TaskRunnerContext;
+  logger: Logger;
   paramValidator?: RuleTypeParamsValidator<Params>;
   ruleData: RuleData;
   ruleId: string;
@@ -52,15 +55,14 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
 ): RunRuleParams<Params> {
   const {
     context,
+    logger,
     paramValidator,
     ruleData: { rawRule, references, version },
     ruleId,
     ruleTypeRegistry,
     spaceId,
   } = params;
-
   const { enabled, apiKey, alertTypeId: ruleTypeId } = rawRule;
-
   if (!enabled) {
     throw createTaskRunError(
       new ErrorWithReason(
@@ -70,18 +72,22 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
       TaskErrorSource.FRAMEWORK
     );
   }
-
   const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey);
-  const rulesClient = context.getRulesClientWithRequest(fakeRequest);
-  const rule = rulesClient.getAlertFromRaw({
-    id: ruleId,
+  const rule = getAlertFromRaw(
+    ruleTypeRegistry,
+    ruleId,
     ruleTypeId,
     rawRule,
     references,
-    includeLegacyId: false,
-    omitGeneratedValues: false,
-  });
-
+    false,
+    undefined,
+    undefined,
+    false,
+    (actionId: string) => {
+      return context.actionsPlugin.isSystemActionConnector(actionId);
+    },
+    logger
+  );
   try {
     ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
   } catch (err) {
@@ -90,7 +96,6 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
       TaskErrorSource.USER
     );
   }
-
   let validatedParams: Params;
   try {
     validatedParams = validateRuleTypeParams<Params>(rule.params, paramValidator);
@@ -100,19 +105,16 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
       TaskErrorSource.USER
     );
   }
-
   if (rule.monitoring) {
     if (rule.monitoring.run.history.length >= MONITORING_HISTORY_LIMIT) {
       // Remove the first (oldest) record
       rule.monitoring.run.history.shift();
     }
   }
-
   return {
     apiKey,
     fakeRequest,
     rule,
-    rulesClient,
     validatedParams,
     version,
   };
