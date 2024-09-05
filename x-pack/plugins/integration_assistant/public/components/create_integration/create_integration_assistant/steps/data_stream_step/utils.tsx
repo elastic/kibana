@@ -13,8 +13,9 @@ const DEFAULT_PARTIAL_SHUFFLE_SEED = 'seed';
  * Partially shuffles an array using the modified Fisher-Yates algorithm.
  *
  * The array is partially shuffled in place, meaning that:
- *   - the first `start` elements are kept in place;
- *   - the slice from `start` to `end` is filled with the random sample from remaining elements.
+ *   - the first `start` elements are kept in their place;
+ *   - the slice from `start` to `end` is filled with the sample from the remaining element;
+ *   - the sample is guaranteed to be reasonably unbiased (any bias only come from the random function).
  * We do not make any guarantees regarding the order of elements after `end`.
  *
  * Reproducibility:
@@ -26,11 +27,19 @@ const DEFAULT_PARTIAL_SHUFFLE_SEED = 'seed';
  *     - possibly an array element swap; also
  *   - we use constant extra memory.
  *
- * Implementation note:
- *   - A naive implementation would be to shuffle the whole array starting from `start` using
- *     the Fisher-Yates algorithm. We modify it to stop once we reach the end so the result on
- *     the slice from `start` to `end` is indistinguishable (samples from the same distribution)
- *     from the naive one, while still being more efficient.
+ * Implementation notes:
+ * 1. A naïve implementation would be to shuffle the whole array starting from `start`. We
+ *    simply modify the modern version of Fisher-Yates algorithm doing it to stop once we reach
+ *    the `end`, so the results returned on the slice from `start` to `end` are statistically
+ *    indistinguishable from the results returned by the naïve implementation.
+ * 2. Thus due to the properties of the original Fisher-Yates shuffle, the sampling would be
+ *    unbiased, meaning that the probability of any given shuffle order is the same as that of
+ *    any other, provided the random function has no bias itself, that is, is uniform.
+ * 3. The actual pseudorandom function we use (from `seedrandom`), plus the modulo operation,
+ *    are not perfectly uniform, but are good enough, so the bias are negligible for our purposes.
+ *
+ * Reference:
+ *   - https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle, especially bias description.
  *
  * Examples:
  *   - shuffle the whole array: partialShuffleArray(arr)
