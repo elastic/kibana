@@ -53,7 +53,13 @@ interface Props {
 }
 
 export const Editor = memo(
-  ({ loading, setEditorInstance, inputEditorValue, setInputEditorValue }: Props) => {
+  ({
+    loading,
+    setEditorInstance,
+    containerWidth,
+    inputEditorValue,
+    setInputEditorValue,
+  }: Props) => {
     const { euiTheme } = useEuiTheme();
     const {
       services: { storage },
