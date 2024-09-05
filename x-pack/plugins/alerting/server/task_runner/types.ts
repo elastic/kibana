@@ -48,7 +48,6 @@ import {
   MaintenanceWindowClientApi,
   RawRule,
   RulesClientApi,
-  RulesSettingsClientApi,
   RuleTypeRegistry,
   SpaceIdToNamespaceFunction,
 } from '../types';
@@ -57,6 +56,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { BackfillClient } from '../backfill_client/backfill_client';
 import { ElasticsearchError } from '../lib';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { RulesSettingsService } from './rules-settings/rules_settings_service';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -168,7 +168,6 @@ export interface TaskRunnerContext {
   executionContext: ExecutionContextStart;
   getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
   getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
-  getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
   kibanaBaseUrl: string | undefined;
   logger: Logger;
   maxAlerts: number;
@@ -180,5 +179,6 @@ export interface TaskRunnerContext {
   supportsEphemeralTasks: boolean;
   uiSettings: UiSettingsServiceStart;
   usageCounter?: UsageCounter;
+  rulesSettingsService: RulesSettingsService;
   connectorAdapterRegistry: ConnectorAdapterRegistry;
 }
