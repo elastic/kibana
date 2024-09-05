@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 
 import { escapeForElasticsearchQuery } from '../../../../util/string_utils';
-import type { MlApiServices } from '../../../../services/ml_api_service';
+import type { MlApi } from '../../../../services/ml_api_service';
 
 interface SplitFieldWithValue {
   name: string;
@@ -30,7 +30,7 @@ interface ProcessedResults {
 
 // detector swimlane search
 export function getScoresByRecord(
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   jobId: string,
   earliestMs: number,
   latestMs: number,
@@ -54,7 +54,7 @@ export function getScoresByRecord(
       jobIdFilterStr += `"${String(firstSplitField.value).replace(/\\/g, '\\\\')}"`;
     }
 
-    mlApiServices.results
+    mlApi.results
       .anomalySearch(
         {
           body: {
