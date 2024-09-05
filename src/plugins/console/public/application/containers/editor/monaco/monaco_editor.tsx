@@ -45,8 +45,11 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     config: { isDevMode },
   } = context;
   const { toasts } = notifications;
-  const { settings, restoreRequestFromHistory: requestToRestoreFromHistory } =
-    useEditorReadContext();
+  const {
+    settings,
+    restoreRequestFromHistory: requestToRestoreFromHistory,
+    fileToImport,
+  } = useEditorReadContext();
   const [editorInstance, setEditorInstace] = useState<
     monaco.editor.IStandaloneCodeEditor | undefined
   >();
@@ -55,8 +58,8 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useKeyboardCommandsUtils();
 
-  const editorDispatch = useEditorActionContext();
   const dispatch = useRequestActionContext();
+  const editorDispatch = useEditorActionContext();
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
@@ -138,7 +141,13 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
         context
       );
     }
-  }, [requestToRestoreFromHistory, dispatch, context, editorDispatch]);
+
+    // Import a request file if one is provided
+    if (fileToImport) {
+      editorDispatch({ type: 'setFileToImport', payload: null });
+      await actionsProvider.current?.importRequestsToEditor(fileToImport);
+    }
+  }, [fileToImport, requestToRestoreFromHistory, dispatch, context, editorDispatch]);
 
   useEffect(() => {
     updateEditor();

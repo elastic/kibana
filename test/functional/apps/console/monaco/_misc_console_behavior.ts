@@ -7,7 +7,7 @@
  */
 import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { existsSync, readFileSync, unlinkSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { resolve } from 'path';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -212,6 +212,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('import/export file', () => {
+      it('can import file into the editor', async () => {
+        await PageObjects.console.monaco.clearEditorText();
+
+        // Create input file path
+        const filePath = resolve(REPO_ROOT, `target/functional-tests/downloads/console_import`);
+        writeFileSync(filePath, 'GET _search', 'utf8');
+
+        // Set file to upload and wait for the editor to be updated
+        await PageObjects.console.setFileToUpload(filePath);
+        await PageObjects.common.sleep(1000);
+
+        await retry.try(async () => {
+          const request = await PageObjects.console.monaco.getEditorText();
+          expect(request).to.be.eql('GET _search');
+        });
+
+        // Clean up input file
+        unlinkSync(filePath);
+      });
+
       it('can export input as file', async () => {
         await PageObjects.console.monaco.enterText('GET _search');
         await PageObjects.console.clickExportButton();

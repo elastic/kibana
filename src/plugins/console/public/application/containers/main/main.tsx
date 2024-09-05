@@ -13,11 +13,12 @@ import {
   EuiTitle,
   EuiPageTemplate,
   EuiSplitPanel,
+  EuiToolTip,
   useEuiTour,
   EuiButtonEmpty,
   EuiHorizontalRule,
-  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import { getConsoleTourStepProps } from './get_console_tour_step_props';
 import { useServicesContext } from '../../contexts';
@@ -65,7 +66,10 @@ export function Main({ isEmbeddable = false }: MainProps) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
 
-  const { docLinks } = useServicesContext();
+  const {
+    docLinks,
+    services: { notifications },
+  } = useServicesContext();
 
   const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
   const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
@@ -100,6 +104,42 @@ export function Main({ isEmbeddable = false }: MainProps) {
       document.querySelector('#consoleRoot')?.requestFullscreen();
     } else {
       document.exitFullscreen();
+    }
+  };
+
+  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    const file = files && files[0];
+    // Clear the input value so that a file can be imported again
+    event.target.value = '';
+
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const fileContent = e?.target?.result;
+
+        if (fileContent) {
+          dispatch({
+            type: 'setFileToImport',
+            payload: fileContent as string,
+          });
+
+          notifications.toasts.addSuccess(
+            i18n.translate('console.notification.error.fileImportedSuccessfully', {
+              defaultMessage: `The file you selected has been imported successfully.`,
+            })
+          );
+        } else {
+          notifications.toasts.add(
+            i18n.translate('console.notification.error.fileImportNoContent', {
+              defaultMessage: `The file you selected doesn't appear to have any content. Please select a different file.`,
+            })
+          );
+        }
+      };
+
+      reader.readAsText(file);
     }
   };
 
@@ -157,25 +197,50 @@ export function Main({ isEmbeddable = false }: MainProps) {
                     tourStepProps={consoleTourStepProps}
                   />
                 </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
                   <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
-                    <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
-                      <EuiButtonEmpty
-                        iconType="exportAction"
-                        onClick={() =>
-                          downloadFileAs(EXPORT_FILE_NAME, {
-                            content: inputEditorValue,
-                            type: 'text/plain',
-                          })
-                        }
-                        size="xs"
-                        data-test-subj="consoleExportButton"
-                      >
-                        {MAIN_PANEL_LABELS.exportButton}
-                      </EuiButtonEmpty>
-                    </EuiToolTip>
+                    <>
+                      <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
+                        <EuiButtonEmpty
+                          iconType="exportAction"
+                          onClick={() =>
+                            downloadFileAs(EXPORT_FILE_NAME, {
+                              content: inputEditorValue,
+                              type: 'text/plain',
+                            })
+                          }
+                          size="xs"
+                          data-test-subj="consoleExportButton"
+                        >
+                          {MAIN_PANEL_LABELS.exportButton}
+                        </EuiButtonEmpty>
+                      </EuiToolTip>
+                      <>
+                        <EuiToolTip content={MAIN_PANEL_LABELS.importButtonTooltip}>
+                          <EuiButtonEmpty
+                            iconType="importAction"
+                            onClick={() => document.getElementById('importConsoleFile')?.click()}
+                            size="xs"
+                            data-test-subj="consoleImportButton"
+                          >
+                            {MAIN_PANEL_LABELS.importButton}
+                          </EuiButtonEmpty>
+                        </EuiToolTip>
+                        {/* This input is hidden by CSS in the UI, but the NavIcon button activates it */}
+                        <input
+                          type="file"
+                          accept="text/*"
+                          multiple={false}
+                          name="consoleSnippets"
+                          id="importConsoleFile"
+                          onChange={onFileChange}
+                        />
+                      </>
+                    </>
                   </ConsoleTourStep>
                 </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
                   <ShortcutsPopover
                     button={shortcutsButton}
