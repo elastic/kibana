@@ -21,38 +21,15 @@ You can configure the following settings in the `kibana.yml` file.
 [[general-alert-action-settings]]
 === General settings
 
-include::../settings-gen/source/kibana-config-settings.asciidoc[tag=xpack.encryptedSavedObjects.encryptionKey]
+include::../settings-gen/source/kibana-config-settings.asciidoc[]
 
 [float]
 [[action-settings]]
 === Action settings
 
-Some contextual content....
-
-include::../settings-gen/source/kibana-config-settings.asciidoc[tag=xpack.actions.allowedHosts]
-
-include::../settings-gen/source/kibana-config-settings.asciidoc[tag=xpack.actions.customHostSettings]
-
-Potentially more contextual content...
-
-include::../settings-gen/source/kibana-config-settings.asciidoc[tag=xpack.actions.customHostSettings[n].url]
-
-include::../settings-gen/source/kibana-config-settings.asciidoc[tag=xpack.actions.customHostSettings[n].smtp.ignoreTLS]
-
-include::../settings-gen/source/kibana-config-settings.asciidoc[tag=xpack.actions.customHostSettings[n].smtp.requireTLS]
-
-include::../settings-gen/source/kibana-config-settings.asciidoc[tag=xpack.actions.customHostSettings[n].ssl.rejectUnauthorized]
-
-[[action-config-custom-host-verification-mode]]
-include::../settings-gen/source/kibana-config-settings.asciidoc[tag=action-config-custom-host-verification-mode]
-
-include::../settings-gen/source/kibana-config-settings.asciidoc[tag=xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesFiles]
-
-include::../settings-gen/source/kibana-config-settings.asciidoc[tag=xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData]
 
 
-[[action-config-email-domain-allowlist]]
-include::../settings-gen/source/kibana-config-settings.asciidoc[tag=xpack.actions.email.domain_allowlist]
+
 
 
 **====================================**
