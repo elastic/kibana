@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import path, { resolve } from 'path';
-
-import { FtrConfigProviderContext, defineDockerServersConfig } from '@kbn/test';
-
-import { dockerImage } from '@kbn/test-suites-xpack/fleet_api_integration/config.base';
+import { FtrConfigProviderContext } from '@kbn/test';
+import { resolve } from 'path';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
@@ -17,16 +14,6 @@ import type { CreateTestConfigOptions } from '../shared/types';
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
-    const packageRegistryConfig = path.join(__dirname, './common/package_registry_config.yml');
-    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
-    /**
-     * This is used by CI to set the docker registry port
-     * you can also define this environment variable locally when running tests which
-     * will spin up a local docker package registry locally for you
-     * if this is defined it takes precedence over the `packageRegistryOverride` variable
-     */
-    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     return {
       ...svlSharedConfig.getAll(),
@@ -49,17 +36,6 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ],
       },
       testFiles: options.testFiles,
-      dockerServers: defineDockerServersConfig({
-        registry: {
-          enabled: !!dockerRegistryPort,
-          image: dockerImage,
-          portInContainer: 8080,
-          port: dockerRegistryPort,
-          args: dockerArgs,
-          waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes
-        },
-      }),
       uiSettings: {
         defaults: {
           'accessibility:disableAnimations': true,
