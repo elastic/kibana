@@ -6,14 +6,29 @@
  */
 import React, { useCallback, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiMarkdownFormat,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useTheme } from '@kbn/observability-utils-browser/hooks/use_theme';
 import { useKibana } from '../../hooks/use_kibana';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { ErrorCallOut } from '../error_call_out';
 import { LoadingPanel } from '../loading_panel';
-import { MetricDefinition } from '../../../common/metrics';
+import type { ExtractMetricDefinitionProcess } from '../../../server/lib/datasets/extract_metric_definitions';
+import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
+import { UncontrolledEsqlChart } from '../esql_chart/uncontrolled_esql_chart';
 
 export function DatasetMetricsView() {
   const {
@@ -24,6 +39,8 @@ export function DatasetMetricsView() {
     core: { notifications },
     services: { inventoryAPIClient },
   } = useKibana();
+
+  const theme = useTheme();
 
   const { loading, value, error } = useAbortableAsync(
     ({ signal }) => {
@@ -44,9 +61,8 @@ export function DatasetMetricsView() {
 
   const fetchMetricDefinitionsController = useAbortController();
 
-  const [metricDefinitionSuggestions, setMetricDefinitionSuggestions] = useState<
-    MetricDefinition[]
-  >([]);
+  const [metricDefinitionSuggestions, setMetricDefinitionSuggestions] =
+    useLocalStorage<ExtractMetricDefinitionProcess>('inventory.metricDefinitions');
 
   const [metricExtractionLoading, setMetricExtractionLoading] = useState(false);
 
@@ -66,7 +82,7 @@ export function DatasetMetricsView() {
         })
         .subscribe({
           next: (event) => {
-            setMetricDefinitionSuggestions(event.data.process.result ?? []);
+            setMetricDefinitionSuggestions(event.data.process);
           },
           complete: () => {
             resolve();
@@ -76,7 +92,12 @@ export function DatasetMetricsView() {
           },
         });
     });
-  }, [id, inventoryAPIClient, fetchMetricDefinitionsController.signal]);
+  }, [
+    id,
+    inventoryAPIClient,
+    fetchMetricDefinitionsController.signal,
+    setMetricDefinitionSuggestions,
+  ]);
 
   if (error) {
     return <ErrorCallOut error={error} />;
@@ -86,20 +107,47 @@ export function DatasetMetricsView() {
     return <LoadingPanel size="xl" loading={true} />;
   }
 
-  if (!value?.metrics.length) {
-    return (
+  return (
+    <>
       <EuiCallOut
-        title={i18n.translate('xpack.inventory.datasetMetricsView.noMetricsCalloutTitle', {
-          defaultMessage: 'No metrics defined',
-        })}
+        title={
+          value?.metrics.length
+            ? i18n.translate('xpack.inventory.datasetMetricsView.noMetricsCalloutTitle', {
+                defaultMessage: 'No metrics defined',
+              })
+            : i18n.translate('xpack.inventory.datasetMetricsView.suggestMetricsCalloutTitle', {
+                defaultMessage: 'Suggest metrics ',
+              })
+        }
       >
         <EuiFlexGroup direction="column" alignItems="flexStart">
           <EuiText>
             {i18n.translate('xpack.inventory.datasetMetricsView.noMetricsCalloutContent', {
               defaultMessage:
-                'No metrics have been defined for this dataset. Defined metrics help us understand how to visualize your data. Do you want to automatically extract metrics from this dataset?',
+                'Defined metrics help us understand how to visualize your data. Do you want to automatically extract metrics from this dataset?',
             })}
           </EuiText>
+          {metricDefinitionSuggestions ? (
+            <EuiFlexGroup direction="column">
+              {Object.entries(metricDefinitionSuggestions.steps).map(
+                ([stepName, { status, label }]) => {
+                  return (
+                    <EuiFlexGroup key={stepName} direction="row" gutterSize="s" alignItems="center">
+                      {status === 'running' ? (
+                        <EuiLoadingSpinner size="s" />
+                      ) : (
+                        <EuiIcon
+                          color={status === 'completed' ? theme.colors.successText : undefined}
+                          type={status === 'completed' ? 'checkInCircleFilled' : 'dotInCircle'}
+                        />
+                      )}
+                      {label}
+                    </EuiFlexGroup>
+                  );
+                }
+              )}
+            </EuiFlexGroup>
+          ) : null}
           <EuiButton
             isLoading={metricExtractionLoading}
             disabled={metricExtractionLoading}
@@ -130,8 +178,70 @@ export function DatasetMetricsView() {
           </EuiButton>
         </EuiFlexGroup>
       </EuiCallOut>
-    );
-  }
+      {metricDefinitionSuggestions?.result?.description ? (
+        <EuiPanel hasBorder>
+          <EuiMarkdownFormat>{metricDefinitionSuggestions.result.description}</EuiMarkdownFormat>
+        </EuiPanel>
+      ) : null}
+      {metricDefinitionSuggestions?.result?.metrics.length ? (
+        <EuiFlexGrid columns={3}>
+          {metricDefinitionSuggestions.result.metrics.map((suggestion) => {
+            let aggregations: string = 'metric = ';
 
-  return <></>;
+            switch (suggestion.metric.type) {
+              case 'avg':
+                aggregations += `AVG(${suggestion.metric.field})`;
+                break;
+
+              case 'count':
+                aggregations += `COUNT(*)`;
+                break;
+
+              case 'sum':
+                aggregations += `SUM(${suggestion.metric.field})`;
+                break;
+
+              case 'count_distinct':
+                aggregations += `COUNT_DISTINCT(${suggestion.metric.field})`;
+                break;
+
+              case 'min':
+                aggregations += `MIN(${suggestion.metric.field})`;
+                break;
+
+              case 'max':
+                aggregations += `MAX(${suggestion.metric.field})`;
+                break;
+
+              case 'percentile':
+                aggregations += `PERCENTILE(${suggestion.metric.field}, ${suggestion.metric.percentile})`;
+                break;
+
+              case 'weighted_avg':
+                aggregations += `WEIGHTED_AVG(${suggestion.metric.field}, ${suggestion.metric.by})`;
+                break;
+            }
+            const esqlQuery = `FROM "${id}" | WHERE @timestamp >= NOW() - 30 minutes AND @timestamp <= NOW() | STATS ${aggregations} BY @timestamp = BUCKET(@timestamp, 1 minute)${
+              suggestion.metric.groupBy ? `, ${suggestion.metric.groupBy}` : ''
+            }`;
+            return (
+              <EuiPanel hasBorder>
+                <EuiFlexGroup direction="column">
+                  <EuiTitle size="s">
+                    <h4>{suggestion.metric.label}</h4>
+                  </EuiTitle>
+                  <UncontrolledEsqlChart
+                    query={esqlQuery}
+                    height={200}
+                    id={suggestion.metric.label}
+                    metricNames={['metric']}
+                  />
+                </EuiFlexGroup>
+              </EuiPanel>
+            );
+          })}
+        </EuiFlexGrid>
+      ) : null}
+    </>
+  );
 }

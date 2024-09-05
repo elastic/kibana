@@ -24,6 +24,7 @@ interface Format {
 export interface BaseMetric {
   label: string;
   type: MetricType;
+  groupBy?: string;
   format?: Format;
   filter?: string;
 }
@@ -32,6 +33,7 @@ export interface CountMetric extends BaseMetric {
   type: 'count';
 }
 export interface CountDistinctMetric extends BaseMetric {
+  field: string;
   type: 'count_distinct';
 }
 
@@ -79,6 +81,5 @@ export type Metric =
 
 export interface MetricDefinition {
   filter?: string;
-  labels: string[];
   metric: Metric;
 }

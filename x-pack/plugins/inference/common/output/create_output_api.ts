@@ -42,7 +42,8 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
         return {
           data: {
             id,
-            output: event.toolCalls[0].function.arguments,
+            output: event.toolCalls[0]?.function.arguments,
+            content: event.content,
           },
           type: OutputEventType.OutputComplete,
         };

@@ -32,6 +32,7 @@ export type OutputCompleteEvent<
   {
     id: TId;
     output: TOutput;
+    content?: string;
   }
 >;
 
