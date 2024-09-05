@@ -9,7 +9,6 @@
 import path from 'path';
 import { format as formatUrl } from 'url';
 import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
-import { services } from './services';
 
 export default function () {
   const servers = {
@@ -85,6 +84,5 @@ export default function () {
         })}`,
       ],
     },
-    services,
   };
 }
