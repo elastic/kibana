@@ -324,7 +324,7 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
 
                 if (isOpen) {
                   await execa.command(
-                    `npx playwright test --config ${playwrightConfigFilePath} --ui --project ${project}`,
+                    `../../../node_modules/.bin/playwright test --config ${playwrightConfigFilePath} --ui --project ${project}`,
                     {
                       env: {
                         ...playwrightCustomEnv,
@@ -334,7 +334,7 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
                   );
                 } else {
                   await execa.command(
-                    `npx playwright test --config ${playwrightConfigFilePath} --project ${project} --grep @${project}`,
+                    `../../../node_modules/.bin/playwright test --config ${playwrightConfigFilePath} --project ${project} --grep @${project}`,
                     {
                       env: {
                         ...playwrightCustomEnv,
