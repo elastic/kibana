@@ -6,16 +6,24 @@
  */
 
 import { EuiPageSection, EuiSpacer, EuiButton, EuiPageTemplate } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIndex } from '../../hooks/api/use_index';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
+  const { console: consolePlugin, application } = useKibana().services;
 
   const { data: index } = useIndex(indexName);
-
+  const embeddableConsole = useMemo(
+    () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
+    [consolePlugin]
+  );
+  const navigateToIndexListPage = useCallback(() => {
+    application.navigateToApp('management', { deepLinkId: 'index_management' });
+  }, [application]);
   return (
     <EuiPageTemplate
       offset={0}
@@ -29,7 +37,7 @@ export const SearchIndexDetailsPage = () => {
           data-test-subj="searchIndexDetailsBackToIndicesButton"
           color="text"
           iconType="arrowLeft"
-          onClick={() => {}}
+          onClick={navigateToIndexListPage}
         >
           <FormattedMessage
             id="xpack.searchIndices.backToIndicesButtonLabel"
@@ -39,20 +47,13 @@ export const SearchIndexDetailsPage = () => {
       </EuiPageSection>
       <EuiPageTemplate.Header
         data-test-subj="searchIndexDetailsHeader"
-        pageTitle={
-          <FormattedMessage
-            id="xpack.searchIndices.detailsPage.title"
-            defaultMessage="{indexName}"
-            values={{
-              indexName: index?.name,
-            }}
-          />
-        }
+        pageTitle={index?.name}
         rightSideItems={[]}
       />
       <EuiSpacer size="l" />
 
       <div data-test-subj="searchIndexDetailsContent" />
+      {embeddableConsole}
     </EuiPageTemplate>
   );
 };

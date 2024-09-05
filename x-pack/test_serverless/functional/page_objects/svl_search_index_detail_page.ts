@@ -24,6 +24,12 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     },
     async expectBackToIndicesButtonExists(){
       await testSubjects.existOrFail('searchIndexDetailsBackToIndicesButton', { timeout: 2000 })
+    },
+    async clickBackToIndicesButton() {
+      await testSubjects.click('searchIndexDetailsBackToIndicesButton')
+    },
+    async expectBackToIndicesButtonRedirectsToListPage(){
+      await testSubjects.existOrFail('indicesList')
     }
 
   };

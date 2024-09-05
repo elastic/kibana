@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { FtrProviderContext } from "../../ftr_provider_context";
+import { testHasEmbeddedConsole } from './embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
@@ -22,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('search index detail page', () =>{
     before(async ()=>{
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      await pageObjects.svlCommonPage.loginWithRole('developer');
       await es.indices.create({ index: indexName });
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
@@ -38,8 +39,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('loads index detail page', async () =>{
       await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
       await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPage();
+    });
+    it('shoould redirect to indices list page', async () => {
       await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonExists();
-
+      await pageObjects.svlSearchIndexDetailPage.clickBackToIndicesButton();
+      await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonRedirectsToListPage();
+    })
+    it('should have embedded dev console', async () => {
+      await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPage();
+      await testHasEmbeddedConsole(pageObjects);
     });
   })
 }
