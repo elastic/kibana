@@ -15,7 +15,7 @@ import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-import { LogRateAnalysisEmbeddableWrapper } from '../embeddables/log_rate_analysis/log_rate__analysis_component_wrapper';
+import { LogRateAnalysisEmbeddableWrapper } from '../embeddables/log_rate_analysis/log_rate_analysis_component_wrapper';
 import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { FilterQueryContextProvider } from '../hooks/use_filters_query';
