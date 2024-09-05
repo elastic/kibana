@@ -183,6 +183,7 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
     dataViewSpec: {
       id: dataViewId,
       title: dataViewId,
+      timeFieldName: '@timestamp',
     },
     query,
     breakdownField,
