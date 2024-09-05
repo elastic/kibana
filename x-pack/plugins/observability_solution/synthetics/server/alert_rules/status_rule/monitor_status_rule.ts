@@ -75,7 +75,7 @@ export const registerSyntheticsStatusCheckRule = (
 
       const { locationsThreshold, numberOfChecks } = getConditionType(params.condition);
 
-      await statusRule.handleDownMonitorThresholdAlert({
+      statusRule.handleDownMonitorThresholdAlert({
         downConfigs,
       });
 

@@ -301,7 +301,7 @@ describe('StatusRuleExecutor', () => {
           monitorUrl: 'https://www.google.com',
           monitorUrlLabel: 'URL',
           reason:
-            'Monitor "test monitor" from Test location is down. Checked at May 13, 2024 8:33 AM. Monitor is down 1 time within the last 1 checks. Alert when 1 out of last 1 checks are down from at least 1 location.',
+            'Monitor "test monitor" from Test location is down. Checked at May 13, 2024 8:33 AM. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.',
           stateId: null,
           status: 'down',
           timestamp: '2024-05-13T12:33:37.000Z',
