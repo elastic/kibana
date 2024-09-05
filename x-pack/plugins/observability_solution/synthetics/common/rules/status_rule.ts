@@ -34,8 +34,16 @@ export const StatusRuleConditionSchema = schema.object({
       defaultValue: 'locationId',
     })
   ),
-  downThreshold: schema.maybe(schema.number()),
-  locationsThreshold: schema.maybe(schema.number()),
+  downThreshold: schema.maybe(
+    schema.number({
+      defaultValue: 1,
+    })
+  ),
+  locationsThreshold: schema.maybe(
+    schema.number({
+      defaultValue: 1,
+    })
+  ),
   window: schema.oneOf([
     schema.object({
       time: TimeWindowSchema,
@@ -70,7 +78,6 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
       numberOfChecks,
       downThreshold: 1,
       locationsThreshold: 1,
-      numberOfLocations: 1,
     };
   }
   const conWindow = condition.window;

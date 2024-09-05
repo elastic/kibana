@@ -73,6 +73,9 @@ describe('StatusRuleExecutor', () => {
       savedObjectsClient: soClient,
       scopedClusterClient: { asCurrentUser: mockEsClient },
     },
+    rule: {
+      name: 'test',
+    },
   } as any);
 
   describe('DefaultRule', () => {
@@ -262,7 +265,7 @@ describe('StatusRuleExecutor', () => {
       jest.clearAllMocks();
     });
 
-    it('should alert if monitor  meet location threshold', async () => {
+    it('should alert if monitor meet location threshold', async () => {
       const spy = jest.spyOn(statusRule, 'scheduleAlert');
       statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
@@ -477,7 +480,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
     it('should return false if monitor does not meets location threshold', () => {
       const matchesByLocation: AlertStatusMetaDataCodec[] = [
         {
-          checks: { down: 0, downWithinXChecks: 1 },
+          checks: { down: 0, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
           ping: testPing,
           configId: 'id1',
