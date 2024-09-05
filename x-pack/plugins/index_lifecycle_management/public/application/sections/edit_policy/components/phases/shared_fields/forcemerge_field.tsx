@@ -34,14 +34,7 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
 
   return (
     <DescribedFormRow
-      title={
-        <h3>
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableText"
-            defaultMessage="Force merge"
-          />
-        </h3>
-      }
+      title={<h3>{i18nTexts.editPolicy.forceMergeLabel}</h3>}
       description={
         <>
           <FormattedMessage

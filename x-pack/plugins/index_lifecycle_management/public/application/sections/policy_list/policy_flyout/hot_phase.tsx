@@ -6,31 +6,32 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { SerializedHotPhase } from '../../../../../common/types';
-import { i18nTexts } from '../../edit_policy/i18n_texts';
-import { Rollover } from './rollover';
-import { Forcemerge } from './forcemerge';
-import { Shrink } from './shrink';
-import { Downsample } from './downsample';
-import { IndexPriority } from './index_priority';
-import { Readonly } from './readonly';
-import { SearchableSnapshot } from './searchable_snapshot';
+import { PhaseDescription } from './phase_description';
+import { Phases } from '../../../../../common/types';
+import {
+  Rollover,
+  Forcemerge,
+  Shrink,
+  SearchableSnapshot,
+  Downsample,
+  Readonly,
+  IndexPriority,
+} from './components';
 
-export const HotPhase = ({ phase }: { phase: SerializedHotPhase }) => {
+export const HotPhase = ({ phases }: { phases: Phases }) => {
   return (
-    <>
-      <EuiTitle size="s">
-        <h2>{i18nTexts.editPolicy.titles.hot}</h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <Rollover rollover={phase.actions.rollover} />
-      <Forcemerge forcemerge={phase.actions.forcemerge} />
-      <Shrink shrink={phase.actions.shrink} />
-      <SearchableSnapshot searchableSnapshot={phase.actions.searchable_snapshot} />
-      <Downsample downsample={phase.actions.downsample} />
-      <Readonly readonly={phase.actions.readonly} />
-      <IndexPriority indexPriority={phase.actions.set_priority} />
-    </>
+    <PhaseDescription
+      phase={'hot'}
+      phases={phases}
+      components={[
+        Rollover,
+        Forcemerge,
+        Shrink,
+        SearchableSnapshot,
+        Downsample,
+        Readonly,
+        IndexPriority,
+      ]}
+    />
   );
 };

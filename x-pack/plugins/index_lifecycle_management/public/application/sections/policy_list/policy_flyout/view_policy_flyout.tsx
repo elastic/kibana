@@ -36,8 +36,8 @@ import { HotPhase } from './hot_phase';
 import { WarmPhase } from './warm_phase';
 import { Timeline } from './timeline';
 import { ColdPhase } from './cold_phase';
-import { FrozenPhase } from './frozen_phase';
 import { DeletePhase } from './delete_phase';
+import { FrozenPhase } from './frozen_phase';
 
 export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
   const isReadOnly = useIsReadOnly();
@@ -136,43 +136,21 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
         {/* Timeline */}
         <Timeline policy={policy} />
 
-        <EuiSpacer />
+        <EuiSpacer size="xxl" />
         {/* Hot phase */}
-        {policy.policy.phases.hot && <HotPhase phase={policy.policy.phases.hot} />}
+        {policy.policy.phases.hot && <HotPhase phases={policy.policy.phases} />}
 
         {/* Warm phase */}
-        {policy.policy.phases.warm && (
-          <>
-            <EuiSpacer size="m" />
-            <WarmPhase phase={policy.policy.phases.warm} />
-          </>
-        )}
+        {policy.policy.phases.warm && <WarmPhase phases={policy.policy.phases} />}
 
         {/* Cold phase */}
-        {policy.policy.phases.cold && (
-          <>
-            <>
-              <EuiSpacer size="m" />
-              <ColdPhase phase={policy.policy.phases.cold} />
-            </>
-          </>
-        )}
+        {policy.policy.phases.cold && <ColdPhase phases={policy.policy.phases} />}
 
         {/* Frozen phase */}
-        {policy.policy.phases.frozen && (
-          <>
-            <EuiSpacer size="m" />
-            <FrozenPhase phase={policy.policy.phases.frozen} />
-          </>
-        )}
+        {policy.policy.phases.frozen && <FrozenPhase phases={policy.policy.phases} />}
 
         {/* Delete phase */}
-        {policy.policy.phases.delete && (
-          <>
-            <EuiSpacer size="m" />
-            <DeletePhase phase={policy.policy.phases.delete} />
-          </>
-        )}
+        {policy.policy.phases.delete && <DeletePhase phases={policy.policy.phases} />}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

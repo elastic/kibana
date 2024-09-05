@@ -63,6 +63,9 @@ export const i18nTexts = {
         ),
       },
     },
+    forceMergeLabel: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableText', {
+      defaultMessage: 'Force merge',
+    }),
     forceMergeEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.enableLabel', {
       defaultMessage: 'Force merge data',
     }),
@@ -162,6 +165,9 @@ export const i18nTexts = {
       'xpack.indexLifecycleMgmt.editPolicy.minimumAge.minimumAgeFieldLabel',
       { defaultMessage: 'Move data into phase when:' }
     ),
+    rolloverLabel: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.rolloverFieldTitle', {
+      defaultMessage: 'Rollover',
+    }),
     rolloverToolTipDescription: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.minimumAge.rolloverToolTipDescription',
       {
@@ -194,6 +200,12 @@ export const i18nTexts = {
     waitForSnapshotLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotTitle',
       { defaultMessage: 'Wait for snapshot policy' }
+    ),
+    deleteSearchableSnapshotLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.deletePhase.deleteSearchableSnapshotTitle',
+      {
+        defaultMessage: 'Delete searchable snapshot',
+      }
     ),
     errors: {
       numberRequired: i18n.translate(

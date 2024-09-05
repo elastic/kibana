@@ -6,19 +6,20 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiCode,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+
+import { EuiBadge, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { determineDataTierAllocationType } from '../../../lib';
-import { AllocateAction, MigrateAction, PhaseWithAllocation } from '../../../../../common/types';
-import { i18nTexts } from '../../edit_policy/i18n_texts';
+import {
+  AllocateAction,
+  PhaseWithAllocation,
+  SerializedColdPhase,
+  SerializedWarmPhase,
+} from '../../../../../../common/types';
+import { determineDataTierAllocationType } from '../../../../lib';
+import type { ActionComponentProps } from './types';
+import { ActionDescription } from './action_description';
+import { i18nTexts } from '../../../edit_policy/i18n_texts';
 
 const getAllocationDescription = (
   type: ReturnType<typeof determineDataTierAllocationType>,
@@ -26,14 +27,9 @@ const getAllocationDescription = (
   allocate?: AllocateAction
 ) => {
   if (type === 'none') {
-    return (
-      <EuiText color="subdued">
-        <EuiSpacer size="s" />
-        {i18n.translate('xpack.indexLifecycleMgmt.policyFlyout.dataAllocationDisabledLabel', {
-          defaultMessage: 'Disabled',
-        })}
-      </EuiText>
-    );
+    return i18n.translate('xpack.indexLifecycleMgmt.policyFlyout.dataAllocationDisabledLabel', {
+      defaultMessage: 'Disabled',
+    });
   }
   if (type === 'node_roles') {
     const label =
@@ -45,8 +41,7 @@ const getAllocationDescription = (
             defaultMessage: 'Using cold nodes',
           });
     return (
-      <EuiText color="subdued">
-        <EuiSpacer size="s" />
+      <>
         {label}{' '}
         <EuiBadge color="success">
           <FormattedMessage
@@ -54,37 +49,37 @@ const getAllocationDescription = (
             defaultMessage="Recommended"
           />
         </EuiBadge>
-      </EuiText>
+      </>
     );
   }
   if (type === 'node_attrs') {
     return (
-      <EuiText color="subdued">
-        <EuiSpacer size="s" />
+      <>
         {i18n.translate('xpack.indexLifecycleMgmt.policyFlyout.dataAllocationAttributtesLabel', {
           defaultMessage: 'Node attributes',
         })}
         {': '}
         <EuiCode>{JSON.stringify(allocate?.require)}</EuiCode>
-      </EuiText>
+      </>
     );
   }
 };
-export const DataAllocation = ({
-  allocate,
-  migrate,
-  phase,
-}: {
-  allocate?: AllocateAction;
-  migrate?: MigrateAction;
-  phase: PhaseWithAllocation;
-}) => {
+
+export const DataAllocation = ({ phase, phases }: ActionComponentProps) => {
+  const phaseConfig = phases[phase];
+  const allocate = (phaseConfig as SerializedWarmPhase | SerializedColdPhase)?.actions.allocate;
+  const migrate = (phaseConfig as SerializedWarmPhase | SerializedColdPhase)?.actions.migrate;
   const allocationType = determineDataTierAllocationType({ allocate, migrate });
-  const allocationDescription = getAllocationDescription(allocationType, phase, allocate);
+  const allocationDescription = getAllocationDescription(
+    allocationType,
+    phase as PhaseWithAllocation,
+    allocate
+  );
+
   return (
-    <>
-      <EuiDescriptionListTitle>{i18nTexts.editPolicy.dataAllocationLabel}</EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>{allocationDescription}</EuiDescriptionListDescription>
-    </>
+    <ActionDescription
+      title={i18nTexts.editPolicy.dataAllocationLabel}
+      descriptionItems={allocationDescription ? [allocationDescription] : []}
+    />
   );
 };
