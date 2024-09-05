@@ -13,11 +13,13 @@
 [[share-a-direct-link]]
 == Share with a direct link
 
-You can share direct links to saved searches, dashboards, and visualizations. When clicking **Share**, look for the **Links** tab to get the shareable link and copy it. When sharing an object with unsaved changes, you're getting a temporary link that might break in the future for example in case of upgrade. Save the object to get a permanent link instead.
+You can share direct links to saved searches, dashboards, and visualizations. When clicking **Share**, look for the **Links** tab to get the shareable link and copy it. 
+
+TIP: When sharing an object with unsaved changes, you get a temporary link that might break in the future, for example in case of upgrade. Save the object to get a permanent link instead.
 
 To access the object shared with the link, users need to authenticate.
 
-TIP: Anonymous users can also access the link if you have configured <<anonymous-authentication,Anonymous authentication>> and your anonymous service account has privileges to access what you want to share.
+Anonymous users can also access the link if you have configured <<anonymous-authentication,Anonymous authentication>> and your anonymous service account has privileges to access what you want to share.
 
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt49f2b5a80ec89a34/66b9e919af508f4ac182c194/share-dashboard.gif[getting a shareable link for a dashboard]
 
