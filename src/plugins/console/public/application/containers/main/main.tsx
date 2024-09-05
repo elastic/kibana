@@ -17,7 +17,6 @@ import {
   useEuiTour,
   EuiButtonEmpty,
   EuiHorizontalRule,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { downloadFileAs } from '@kbn/share-plugin/public';
@@ -198,9 +197,10 @@ export function Main({ isEmbeddable = false }: MainProps) {
                     tourStepProps={consoleTourStepProps}
                   />
                 </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
                   <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
-                      <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
+                    <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
                       <EuiButtonEmpty
                         iconType="exportAction"
                         onClick={() =>
@@ -215,6 +215,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
                         {MAIN_PANEL_LABELS.exportButton}
                       </EuiButtonEmpty>
                     </EuiToolTip>
+                    <>
                       <EuiToolTip content={MAIN_PANEL_LABELS.importButtonTooltip}>
                         <EuiButtonEmpty
                           iconType="importAction"
@@ -234,8 +235,10 @@ export function Main({ isEmbeddable = false }: MainProps) {
                         id="importConsoleFile"
                         onChange={onFileChange}
                       />
+                    </>
                   </ConsoleTourStep>
                 </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
                   <ShortcutsPopover
                     button={shortcutsButton}

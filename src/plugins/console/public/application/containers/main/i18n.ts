@@ -17,6 +17,7 @@ export const MAIN_PANEL_LABELS = {
   }),
   importButtonTooltip: i18n.translate('console.importButtonTooltipLabel', {
     defaultMessage: 'Import requests from a file into the editor',
+  }),
   exportButton: i18n.translate('console.exportButton', {
     defaultMessage: 'Export requests',
   }),
