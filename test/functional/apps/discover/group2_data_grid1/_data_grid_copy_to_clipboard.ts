@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       if (canReadClipboard) {
         const copiedSourceData = await browser.getClipboardValue();
-        expect(copiedSourceData.startsWith('Document\n{"@message":["238.171.34.42')).to.be(true);
+        expect(copiedSourceData.startsWith('Summary\n{"@message":["238.171.34.42')).to.be(true);
         expect(copiedSourceData.endsWith('}')).to.be(true);
       }
 
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       if (canReadClipboard) {
         const copiedSourceName = await browser.getClipboardValue();
-        expect(copiedSourceName).to.be('Document');
+        expect(copiedSourceName).to.be('Summary');
       }
 
       expect(await toasts.getCount()).to.be(1);

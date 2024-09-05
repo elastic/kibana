@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render initial columns for non-transformational commands correctly', async () => {
-      const columns = ['@timestamp', 'Document'];
+      const columns = ['@timestamp', 'Summary'];
       expect(await dataGrid.getHeaderFields()).to.eql(columns);
 
       await browser.refresh();
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reset columns only if index pattern changes in non-transformational query', async () => {
-      const columns = ['@timestamp', 'Document'];
+      const columns = ['@timestamp', 'Summary'];
       expect(await dataGrid.getHeaderFields()).to.eql(columns);
 
       await monacoEditor.setCodeEditorValue('from logstash-* | limit 500');
@@ -219,7 +219,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_INITIAL_COLUMNS);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Document']);
+      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Summary']);
 
       await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_CUSTOM_COLUMNS);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -239,7 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickNewSearchButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Document']);
+      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Summary']);
     });
   });
 }

@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '48 available fields. 5 empty fields. 4 meta fields.'
         );
         expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
-          '@timestamp, Document'
+          '@timestamp, Summary'
         );
 
         await PageObjects.discover.dragFieldToTable('extension');
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '48 available fields. 5 empty fields. 4 meta fields.'
         );
         expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
-          '@timestamp, Document'
+          '@timestamp, Summary'
         );
 
         await PageObjects.discover.dragFieldWithKeyboardToTable('@message');
