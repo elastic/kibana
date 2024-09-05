@@ -15,14 +15,19 @@ import { useApplication } from '../../../common/lib/kibana/use_application';
 import { CasesParamsFields } from './cases_params';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { useGetAllCaseConfigurations } from '../../../containers/configure/use_get_all_case_configurations';
+import { useGetAllCaseConfigurationsResponse } from '../../configure_cases/__mock__';
+import { templatesConfigurationMock } from '../../../containers/mock';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('../../../common/lib/kibana/use_application');
 jest.mock('../../../common/lib/kibana/kibana_react');
+jest.mock('../../../containers/configure/use_get_all_case_configurations');
 
 const useKibanaMock = jest.mocked(useKibana);
 const useAlertsDataViewMock = jest.mocked(useAlertsDataView);
 const useApplicationMock = useApplication as jest.Mock;
+const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
 
 useKibanaMock.mockReturnValue({
   services: { ...createStartServicesMock(), data: { dataViews: {} } },
@@ -92,6 +97,7 @@ describe('CasesParamsFields renders', () => {
         ],
       },
     });
+    useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
   });
 
   afterEach(() => {
@@ -104,6 +110,7 @@ describe('CasesParamsFields renders', () => {
     expect(await screen.findByTestId('group-by-alert-field-combobox')).toBeInTheDocument();
     expect(await screen.findByTestId('time-window-size-input')).toBeInTheDocument();
     expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
+    expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
     expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
   });
 
@@ -144,6 +151,7 @@ describe('CasesParamsFields renders', () => {
       timeWindow: '7d',
       reopenClosedCases: false,
       groupingBy: [],
+      templateId: null,
     });
   });
 
@@ -222,6 +230,67 @@ describe('CasesParamsFields renders', () => {
       await user.type(await screen.findByTestId('comboBoxSearchInput'), 'alert.name{enter}');
 
       expect(editAction.mock.calls[0][1].groupingBy).toEqual(['alert.name']);
+    });
+
+    it('renders default template correctly', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
+      expect(await screen.findByText('No template selected')).toBeInTheDocument();
+    });
+
+    it('renders selected templates correctly', async () => {
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            templates: templatesConfigurationMock,
+          },
+        ],
+      }));
+
+      const newProps = {
+        ...defaultProps,
+        producerId: 'siem',
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            ...actionParams.subActionParams,
+            templateId: templatesConfigurationMock[1].key,
+          },
+        },
+      };
+
+      render(<CasesParamsFields {...newProps} />);
+
+      expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
+      expect(await screen.findByText(templatesConfigurationMock[1].name)).toBeInTheDocument();
+    });
+
+    it('updates template correctly', async () => {
+      useGetAllCaseConfigurationsMock.mockReturnValueOnce({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            templates: templatesConfigurationMock,
+          },
+        ],
+      });
+
+      const selectedTemplate = templatesConfigurationMock[4];
+      const newProps = { ...defaultProps, producerId: 'siem' };
+
+      render(<CasesParamsFields {...newProps} />);
+
+      await user.selectOptions(
+        screen.getByTestId('create-case-template-select'),
+        selectedTemplate.name
+      );
+
+      expect(editAction.mock.calls[0][1].templateId).toEqual(selectedTemplate.key);
+      expect(await screen.findByText(selectedTemplate.name)).toBeInTheDocument();
     });
 
     it('updates time window size', async () => {
