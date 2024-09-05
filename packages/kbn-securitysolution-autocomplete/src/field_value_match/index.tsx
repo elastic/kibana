@@ -167,12 +167,13 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
         handleWarning(warning);
 
         if (!err) handleSpacesWarning(searchVal);
-        setSearchQuery(searchVal);
       }
 
       if (searchVal) {
         onChange('');
       }
+
+      setSearchQuery(searchVal);
     },
     [
       selectedField,

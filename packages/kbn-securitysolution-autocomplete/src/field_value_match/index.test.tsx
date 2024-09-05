@@ -345,6 +345,61 @@ describe('AutocompleteFieldMatchComponent', () => {
     });
   });
 
+  test('it refreshes autocomplete with search query when input field is cleared', () => {
+    wrapper = mount(
+      <AutocompleteFieldMatchComponent
+        autocompleteService={autocompleteStartMock}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        onError={jest.fn()}
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        selectedValue="windows"
+      />
+    );
+
+    act(() => {
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onSearchChange: (a: string) => void;
+        }
+      ).onSearchChange('value 1');
+    });
+    act(() => {
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onSearchChange: (a: string) => void;
+        }
+      ).onSearchChange('');
+    });
+
+    // 1st call is initial render, 2nd call sets the search query:
+    expect(useFieldValueAutocomplete).toHaveBeenNthCalledWith(2, {
+      autocompleteService: autocompleteStartMock,
+      fieldValue: 'windows',
+      indexPattern: { fields, id: '1234', title: 'logstash-*' },
+      operatorType: 'match',
+      query: 'value 1',
+      selectedField: getField('machine.os.raw'),
+    });
+    // last call is the refresh when input field is cleared
+    expect(useFieldValueAutocomplete).toHaveBeenLastCalledWith({
+      autocompleteService: autocompleteStartMock,
+      fieldValue: 'windows',
+      indexPattern: { fields, id: '1234', title: 'logstash-*' },
+      operatorType: 'match',
+      query: '',
+      selectedField: getField('machine.os.raw'),
+    });
+  });
+
   test('should show the warning helper text if the new value contains spaces when searching a new query', () => {
     wrapper = mount(
       <AutocompleteFieldMatchComponent
