@@ -1184,7 +1184,16 @@ class AgentPolicyService {
       });
     }
 
-    await soClient.delete(savedObjectType, id);
+    try {
+      await soClient.delete(savedObjectType, id);
+    } catch (error) {
+      // Temporarily ignore 404 until we resolve save object 404 errors with agentless policy
+      if (error.statusCode === 404 && !agentPolicy.supports_agentless) {
+        throw error;
+      }
+      logger.error(`Error deleting  save object for agent policy ${id}`);
+    }
+
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
       spaceId: soClient.getCurrentNamespace(),
     });
