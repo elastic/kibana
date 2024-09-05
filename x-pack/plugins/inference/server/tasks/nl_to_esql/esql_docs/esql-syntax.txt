@@ -1,0 +1,181 @@
+## Syntax
+
+### Instructions
+
+Generate a description of ES|QL syntax. Be as complete as possible.
+For timespan literals, generate at least five examples of full ES|QL queries, using a mix of commands and functions, using different intervals and units.
+**Make sure you use timespan literals, such as `1 day` or `24h` or `7 weeks` in these examples**.
+Combine ISO timestamps with time span literals and NOW().
+Make sure the example queries are using different combinations of syntax, commands, and functions for each.
+When using DATE_TRUNC, make sure you DO NOT wrap the timespan in single or double quotes.
+Do not use the Cast operator.
+
+### Content of file
+
+### ES|QL Syntax Reference
+
+#### Basic Syntax
+
+An ES|QL query is composed of a source command followed by an optional series of processing commands, separated by a pipe character: `|`. For example:
+
+```
+source-command
+| processing-command1
+| processing-command2
+```
+
+The result of a query is the table produced by the final processing command. For an overview of all supported commands, functions, and operators, refer to Commands and Functions and operators.
+
+For readability, this documentation puts each processing command on a new line. However, you can write an ES|QL query as a single line. The following query is identical to the previous one:
+
+```
+source-command
+| processing-command1
+| processing-command2
+```
+
+#### Identifiers
+
+Identifiers need to be quoted with backticks (```) if:
+- They don’t start with a letter, `_` or `@`
+- Any of the other characters is not a letter, number, or `_`
+
+For example:
+
+```esql
+FROM index
+| KEEP `1.field`
+```
+
+When referencing a function alias that itself uses a quoted identifier, the backticks of the quoted identifier need to be escaped with another backtick. For example:
+
+```esql
+FROM index
+| STATS COUNT(`1.field`)
+| EVAL my_count = `COUNT(``1.field``)`
+```
+
+#### Literals
+
+ES|QL currently supports numeric and string literals.
+
+##### String Literals
+
+A string literal is a sequence of unicode characters delimited by double quotes (`"`).
+
+```esql
+// Filter by a string value
+FROM index
+| WHERE first_name == "Georgi"
+```
+
+If the literal string itself contains quotes, these need to be escaped (`\\"`). ES|QL also supports the triple-quotes (`"""`) delimiter, for convenience:
+
+```esql
+ROW name = """Indiana "Indy" Jones"""
+```
+
+The special characters CR, LF, and TAB can be provided with the usual escaping: `\r`, `\n`, `\t`, respectively.
+
+##### Numerical Literals
+
+The numeric literals are accepted in decimal and in the scientific notation with the exponent marker (`e` or `E`), starting either with a digit, decimal point `.` or the negative sign `-`:
+
+- `1969`    -- integer notation
+- `3.14`    -- decimal notation
+- `.1234`   -- decimal notation starting with decimal point
+- `4E5`     -- scientific notation (with exponent marker)
+- `1.2e-3`  -- scientific notation with decimal point
+- `-.1e2`   -- scientific notation starting with the negative sign
+
+The integer numeric literals are implicitly converted to the `integer`, `long` or the `double` type, whichever can first accommodate the literal’s value. The floating point literals are implicitly converted to the `double` type. To obtain constant values of different types, use one of the numeric conversion functions.
+
+#### Comments
+
+ES|QL uses C++ style comments:
+- Double slash `//` for single line comments
+- `/*` and `*/` for block comments
+
+```esql
+// Query the employees index
+FROM employees
+| WHERE height > 2
+```
+
+```esql
+FROM /* Query the employees index */ employees
+| WHERE height > 2
+```
+
+```esql
+FROM employees
+/* Query the
+ * employees
+ * index */
+| WHERE height > 2
+```
+
+#### Timespan Literals
+
+Datetime intervals and timespans can be expressed using timespan literals. Timespan literals are a combination of a number and a qualifier. These qualifiers are supported:
+- `millisecond`/`milliseconds`/`ms`
+- `second`/`seconds`/`sec`/`s`
+- `minute`/`minutes`/`min`
+- `hour`/`hours`/`h`
+- `day`/`days`/`d`
+- `week`/`weeks`/`w`
+- `month`/`months`/`mo`
+- `quarter`/`quarters`/`q`
+- `year`/`years`/`yr`/`y`
+
+Timespan literals are not whitespace sensitive. These expressions are all valid:
+- `1day`
+- `1 day`
+- `1       day`
+
+#### Example Queries Using Timespan Literals
+
+1. Retrieve logs from the last 24 hours and calculate the average response time:
+
+    ```esql
+FROM logs-*
+| WHERE @timestamp > NOW() - 24h
+| STATS avg_response_time = AVG(response_time)
+```
+
+2. Get the count of events per day for the last 7 days:
+
+    ```esql
+FROM events
+| WHERE @timestamp > NOW() - 7 days
+| STATS daily_count = COUNT(*) BY day = DATE_TRUNC(1 day, @timestamp)
+| SORT day
+```
+
+3. Find the maximum temperature recorded in the last month:
+
+    ```esql
+FROM weather_data
+| WHERE @timestamp > NOW() - 1 month
+| STATS max_temp = MAX(temperature)
+```
+
+4. Calculate the total sales for each week in the last quarter:
+
+    ```esql
+FROM sales
+| WHERE @timestamp > NOW() - 1 quarter
+| STATS weekly_sales = SUM(sales_amount) BY week = DATE_TRUNC(1 week, @timestamp)
+| SORT week
+```
+
+5. Retrieve error logs from the last 15 minutes and group by error type:
+
+    ```esql
+FROM error_logs
+| WHERE @timestamp > NOW() - 15 minutes
+| STATS error_count = COUNT(*) BY error_type
+| SORT error_count DESC
+```
+
+These examples demonstrate the use of timespan literals in combination with various ES|QL commands and functions to perform different types of data queries and transformations.

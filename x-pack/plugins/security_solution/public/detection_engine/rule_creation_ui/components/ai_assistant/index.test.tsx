@@ -26,14 +26,14 @@ describe('AiAssistant', () => {
   it('does not render chat component when does not have hasAssistantPrivilege', () => {
     useAssistantAvailabilityMock.mockReturnValue({ hasAssistantPrivilege: false });
 
-    const { container } = render(<AiAssistant getFields={jest.fn()} />, {
+    const { container } = render(<AiAssistant getFields={jest.fn()} setFieldValue={jest.fn()} />, {
       wrapper: TestProviders,
     });
 
     expect(container).toBeEmptyDOMElement();
   });
   it('renders chat component when has hasAssistantPrivilege', () => {
-    render(<AiAssistant getFields={jest.fn()} />, {
+    render(<AiAssistant getFields={jest.fn()} setFieldValue={jest.fn()} />, {
       wrapper: TestProviders,
     });
 

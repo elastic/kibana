@@ -6,7 +6,7 @@
  */
 
 import { map, OperatorFunction, pipe, switchMap, tap } from 'rxjs';
-import { InferenceTaskEvent, InferenceTaskEventType } from '../../common/tasks';
+import { InferenceTaskEvent, InferenceTaskEventType } from '../../common/inference_task';
 import {
   createObservableFromHttpResponse,
   StreamedHttpResponse,

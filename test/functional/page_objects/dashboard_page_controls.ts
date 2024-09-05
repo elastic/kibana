@@ -475,11 +475,7 @@ export class DashboardPageControls extends FtrService {
     await this.optionsListWaitForLoading(controlId);
     if (!skipOpen) await this.optionsListOpenPopover(controlId);
     await this.retry.try(async () => {
-      const availableOptions = await this.optionsListPopoverGetAvailableOptions();
-      expect(availableOptions.suggestions).to.eql(expectation.suggestions);
-      expect(availableOptions.invalidSelections.sort()).to.eql(
-        expectation.invalidSelections.sort()
-      );
+      expect(await this.optionsListPopoverGetAvailableOptions()).to.eql(expectation);
     });
     if (await this.testSubjects.exists('optionsList-cardinality-label')) {
       expect(await this.optionsListGetCardinalityValue()).to.be(
@@ -500,9 +496,7 @@ export class DashboardPageControls extends FtrService {
   public async optionsListPopoverSearchForOption(search: string) {
     this.log.debug(`searching for ${search} in options list`);
     await this.optionsListPopoverAssertOpen();
-    await this.testSubjects.setValue(`optionsList-control-search-input`, search, {
-      typeCharByChar: true,
-    });
+    await this.testSubjects.setValue(`optionsList-control-search-input`, search);
     await this.optionsListPopoverWaitForLoading();
   }
 

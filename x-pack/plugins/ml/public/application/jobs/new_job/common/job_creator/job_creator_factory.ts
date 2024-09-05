@@ -8,7 +8,7 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { MlJobService } from '../../../../services/job_service';
-import type { MlApiServices } from '../../../../services/ml_api_service';
+import type { MlApi } from '../../../../services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { SingleMetricJobCreator } from './single_metric_job_creator';
 import { MultiMetricJobCreator } from './multi_metric_job_creator';
@@ -23,7 +23,7 @@ import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 export const jobCreatorFactory =
   (jobType: JOB_TYPE) =>
   (
-    mlApiServices: MlApiServices,
+    mlApi: MlApi,
     mlJobService: MlJobService,
     newJobCapsService: NewJobCapsService,
     indexPattern: DataView,
@@ -57,5 +57,5 @@ export const jobCreatorFactory =
         jc = SingleMetricJobCreator;
         break;
     }
-    return new jc(mlApiServices, mlJobService, newJobCapsService, indexPattern, savedSearch, query);
+    return new jc(mlApi, mlJobService, newJobCapsService, indexPattern, savedSearch, query);
   };

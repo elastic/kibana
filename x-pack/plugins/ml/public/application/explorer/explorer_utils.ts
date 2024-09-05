@@ -52,7 +52,7 @@ import {
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { MlResultsService } from '../services/results_service';
 import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
-import type { MlApiServices } from '../services/ml_api_service';
+import type { MlApi } from '../services/ml_api_service';
 
 export interface ExplorerJob {
   id: string;
@@ -352,7 +352,7 @@ export function getSelectionJobIds(
 }
 
 export function loadOverallAnnotations(
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   selectedJobs: ExplorerJob[],
   bounds: TimeRangeBounds
 ): Promise<AnnotationsTable> {
@@ -361,7 +361,7 @@ export function loadOverallAnnotations(
 
   return new Promise((resolve) => {
     lastValueFrom(
-      mlApiServices.annotations.getAnnotations$({
+      mlApi.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
@@ -407,7 +407,7 @@ export function loadOverallAnnotations(
 }
 
 export function loadAnnotationsTableData(
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   selectedCells: AppStateSelectedCells | undefined | null,
   selectedJobs: ExplorerJob[],
   bounds: Required<TimeRangeBounds>
@@ -417,7 +417,7 @@ export function loadAnnotationsTableData(
 
   return new Promise((resolve) => {
     lastValueFrom(
-      mlApiServices.annotations.getAnnotations$({
+      mlApi.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
@@ -466,7 +466,7 @@ export function loadAnnotationsTableData(
 }
 
 export async function loadAnomaliesTableData(
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   mlJobService: MlJobService,
   selectedCells: AppStateSelectedCells | undefined | null,
   selectedJobs: ExplorerJob[],
@@ -482,7 +482,7 @@ export async function loadAnomaliesTableData(
   const timeRange = getSelectionTimeRange(selectedCells, bounds);
 
   return new Promise((resolve, reject) => {
-    mlApiServices.results
+    mlApi.results
       .getAnomaliesTableData(
         jobIds,
         [],

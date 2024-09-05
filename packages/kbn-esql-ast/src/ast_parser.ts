@@ -14,7 +14,7 @@ import type { ESQLAst, EditorError } from './types';
 
 // These will need to be manually updated whenever the relevant grammar changes.
 const SYNTAX_ERRORS_TO_IGNORE = [
-  `SyntaxError: mismatched input '<EOF>' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
+  `SyntaxError: mismatched input '<EOF>' expecting {'explain', 'from', 'meta', 'row', 'show'}`,
 ];
 
 export function getAstAndSyntaxErrors(text: string | undefined): {

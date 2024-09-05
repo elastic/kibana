@@ -82,7 +82,7 @@ export class ForecastingModal extends Component {
   static contextType = context;
 
   componentDidMount() {
-    this.mlForecastService = forecastServiceFactory(this.context.services.mlServices.mlApiServices);
+    this.mlForecastService = forecastServiceFactory(this.context.services.mlServices.mlApi);
   }
 
   addMessage = (message, status, clearFirst = false) => {
@@ -170,7 +170,7 @@ export class ForecastingModal extends Component {
       jobOpeningState: PROGRESS_STATES.WAITING,
     });
 
-    this.context.services.mlServices.mlApiServices
+    this.context.services.mlServices.mlApi
       .openJob({ jobId: this.props.job.job_id })
       .then(() => {
         // If open was successful run the forecast, then close the job again.
@@ -227,7 +227,7 @@ export class ForecastingModal extends Component {
 
     if (closeJob === true) {
       this.setState({ jobClosingState: PROGRESS_STATES.WAITING });
-      this.context.services.mlServices.mlApiServices
+      this.context.services.mlServices.mlApi
         .closeJob({ jobId: this.props.job.job_id })
         .then(() => {
           this.setState({ jobClosingState: PROGRESS_STATES.DONE });
@@ -308,7 +308,7 @@ export class ForecastingModal extends Component {
 
             if (closeJobAfterRunning === true) {
               this.setState({ jobClosingState: PROGRESS_STATES.WAITING });
-              this.context.services.mlServices.mlApiServices
+              this.context.services.mlServices.mlApi
                 .closeJob({ jobId: this.props.job.job_id })
                 .then(() => {
                   this.setState({
@@ -434,7 +434,7 @@ export class ForecastingModal extends Component {
       // of partitioning fields.
       const entityFieldNames = entities.map((entity) => entity.fieldName);
       if (entityFieldNames.length > 0) {
-        this.context.services.mlServices.mlApiServices
+        this.context.services.mlServices.mlApi
           .getCardinalityOfFields({
             index: job.datafeed_config.indices,
             fieldNames: entityFieldNames,

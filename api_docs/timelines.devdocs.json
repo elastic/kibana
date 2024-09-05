@@ -4279,7 +4279,7 @@
         "label": "TimelineEventsAllOptionsInput",
         "description": [],
         "signature": [
-          "{ sort: { field: string; esTypes: string[]; direction: ",
+          "{ sort: { field: string; direction: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4287,7 +4287,7 @@
             "section": "def-common.Direction",
             "text": "Direction"
           },
-          "; type?: string | undefined; }[]; fields: (string | { field: string; include_unmapped: boolean; })[]; language: \"kuery\" | \"lucene\"; fieldRequested: string[]; factoryQueryType: ",
+          "; esTypes: string[]; type?: string | undefined; }[]; fields: (string | { field: string; include_unmapped: boolean; })[]; language: \"kuery\" | \"lucene\"; fieldRequested: string[]; factoryQueryType: ",
           {
             "pluginId": "timelines",
             "scope": "common",

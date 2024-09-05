@@ -51,11 +51,7 @@ export const embeddableInputToSubject = <
     subscription.add(
       embeddable
         .getInput$()
-        .pipe(
-          distinctUntilKeyChanged(key, (prev, current) => {
-            return deepEqual(prev, current);
-          })
-        )
+        .pipe(distinctUntilKeyChanged(key))
         .subscribe(() => subject.next(embeddable.getInput()?.[key] as ValueType))
     );
   }

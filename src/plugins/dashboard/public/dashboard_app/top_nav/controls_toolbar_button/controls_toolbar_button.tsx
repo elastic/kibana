@@ -10,18 +10,18 @@ import React from 'react';
 
 import { EuiContextMenuPanel, useEuiTheme } from '@elastic/eui';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
+import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { getControlButtonTitle } from '../../_dashboard_app_strings';
 import { AddDataControlButton } from './add_data_control_button';
 import { AddTimeSliderControlButton } from './add_time_slider_control_button';
 import { EditControlGroupButton } from './edit_control_group_button';
 
 export function ControlsToolbarButton({
-  controlGroupApi,
+  controlGroup,
   isDisabled,
 }: {
-  controlGroupApi?: ControlGroupApi;
+  controlGroup: ControlGroupContainer;
   isDisabled?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -43,17 +43,17 @@ export function ControlsToolbarButton({
           items={[
             <AddDataControlButton
               key="addControl"
-              controlGroupApi={controlGroupApi}
+              controlGroup={controlGroup}
               closePopover={closePopover}
             />,
             <AddTimeSliderControlButton
               key="addTimeSliderControl"
-              controlGroupApi={controlGroupApi}
+              controlGroup={controlGroup}
               closePopover={closePopover}
             />,
             <EditControlGroupButton
               key="manageControls"
-              controlGroupApi={controlGroupApi}
+              controlGroup={controlGroup}
               closePopover={closePopover}
             />,
           ]}

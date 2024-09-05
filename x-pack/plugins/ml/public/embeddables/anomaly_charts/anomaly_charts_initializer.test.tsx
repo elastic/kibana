@@ -7,7 +7,7 @@
 
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { MlApiServices } from '../../application/services/ml_api_service';
+import type { MlApi } from '../../application/services/ml_api_service';
 
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -44,7 +44,7 @@ describe('AnomalyChartsInitializer', () => {
           initialInput={input}
           onCreate={(params) => onCreate(params)}
           onCancel={onCancel}
-          adJobsApiService={adJobsApiService as unknown as MlApiServices['jobs']}
+          adJobsApiService={adJobsApiService as unknown as MlApi['jobs']}
         />
       </KibanaContextProvider>,
       defaultOptions

@@ -45,9 +45,17 @@ describe('ESQL Theme', () => {
     // see packages/kbn-monaco/src/esql/lib/esql_token_helpers.ts
     const syntheticNames = ['functions', 'nulls_order', 'timespan_literal'];
 
+    const rulesWithNoName: string[] = [];
     for (const rule of theme.rules) {
-      expect([...lexicalNames, ...syntheticNames]).toContain(
-        rule.token.replace(ESQL_TOKEN_POSTFIX, '').toLowerCase()
+      const token = rule.token.replace(ESQL_TOKEN_POSTFIX, '');
+      if (![...lexicalNames, ...syntheticNames].includes(token)) {
+        rulesWithNoName.push(token);
+      }
+    }
+
+    if (rulesWithNoName.length) {
+      throw new Error(
+        `These rules have no corresponding lexical name: ${rulesWithNoName.join(', ')}`
       );
     }
   });
@@ -87,19 +95,38 @@ describe('ESQL Theme', () => {
       'setting_ws',
       'metrics_ws',
       'closing_metrics_ws',
-      'match_operator',
     ];
 
     // First, check that every valid exception is actually valid
+    const invalidExceptions: string[] = [];
     for (const name of validExceptions) {
-      expect(lexicalNames).toContain(name);
+      if (!lexicalNames.includes(name)) {
+        invalidExceptions.push(name);
+      }
+    }
+
+    if (invalidExceptions.length) {
+      throw new Error(
+        `These rule requirement exceptions are not valid lexical names: ${invalidExceptions.join(
+          ', '
+        )}`
+      );
     }
 
     const namesToCheck = lexicalNames.filter((name) => !validExceptions.includes(name));
 
     // Now, check that every lexical name has a corresponding rule
+    const missingRules: string[] = [];
     for (const name of namesToCheck) {
-      expect(tokenIDs).toContain(name);
+      if (!tokenIDs.includes(name)) {
+        missingRules.push(name);
+      }
+    }
+
+    if (missingRules.length) {
+      throw new Error(
+        `These lexical names are missing corresponding rules: ${missingRules.join(', ')}`
+      );
     }
   });
 });

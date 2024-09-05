@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -25,6 +25,8 @@ import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
+
+const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 export const getRenderCellValueFn = ({
   dataView,
@@ -49,7 +51,7 @@ export const getRenderCellValueFn = ({
   isPlainRecord?: boolean;
   isCompressed?: boolean;
 }) => {
-  return function UnifiedDataTableRenderCellValue({
+  const UnifiedDataTableRenderCellValue = ({
     rowIndex,
     columnId,
     isDetails,
@@ -57,7 +59,7 @@ export const getRenderCellValueFn = ({
     colIndex,
     isExpandable,
     isExpanded,
-  }: EuiDataGridCellValueElementProps) {
+  }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
@@ -153,6 +155,14 @@ export const getRenderCellValueFn = ({
       />
     );
   };
+
+  // When memoizing renderCellValue, the following warning is logged in Jest tests:
+  // Failed prop type: Invalid prop `renderCellValue` supplied to `EuiDataGridCellContent`, expected one of type [function].
+  // This is due to incorrect prop type validation that EUI generates for testing components in Jest,
+  // but is not an actual issue encountered outside of tests
+  return IS_JEST_ENVIRONMENT
+    ? UnifiedDataTableRenderCellValue
+    : memo(UnifiedDataTableRenderCellValue);
 };
 
 /**

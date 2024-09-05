@@ -15,7 +15,7 @@ import {
   NetworkTopNFlowStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-import { BsearchService } from '@kbn/test-suites-src/common/services/bsearch';
+import { BsearchService } from '@kbn/ftr-common-functional-services';
 
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 

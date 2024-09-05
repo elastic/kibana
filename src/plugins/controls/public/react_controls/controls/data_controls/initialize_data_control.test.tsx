@@ -51,7 +51,6 @@ describe('initializeDataControl', () => {
         dataControl = initializeDataControl(
           'myControlId',
           'myControlType',
-          'referenceNameSuffix',
           dataControlState,
           editorStateManager,
           controlGroupApi,
@@ -83,7 +82,6 @@ describe('initializeDataControl', () => {
         dataControl = initializeDataControl(
           'myControlId',
           'myControlType',
-          'referenceNameSuffix',
           {
             ...dataControlState,
             dataViewId: 'notGonnaFindMeDataViewId',
@@ -122,7 +120,6 @@ describe('initializeDataControl', () => {
         dataControl = initializeDataControl(
           'myControlId',
           'myControlType',
-          'referenceNameSuffix',
           {
             ...dataControlState,
             fieldName: 'notGonnaFindMeFieldName',

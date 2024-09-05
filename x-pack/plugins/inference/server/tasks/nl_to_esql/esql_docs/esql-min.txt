@@ -1,0 +1,15 @@
+## MIN
+
+The `MIN` function returns the minimum value of a specified field.
+
+### Examples
+
+```esql
+FROM employees
+| STATS MIN(languages)
+```
+
+```esql
+FROM employees
+| STATS min_avg_salary_change = MIN(MV_AVG(salary_change))
+```

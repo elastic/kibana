@@ -7,18 +7,8 @@
 
 import './chart_switch.scss';
 import React, { useState, useMemo, memo } from 'react';
-import {
-  EuiIcon,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelectable,
-  EuiSelectableOption,
-} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { ChartSwitchTrigger } from '@kbn/visualization-ui-components';
+import { ExperimentalBadge } from '../../../../shared_components';
 import {
   Visualization,
   FramePublicAPI,
@@ -26,6 +16,7 @@ import {
   VisualizationMap,
   DatasourceMap,
   Suggestion,
+  DatasourcePublicAPI,
 } from '../../../../types';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
 import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
@@ -41,7 +32,13 @@ import {
   selectDatasourceStates,
 } from '../../../../state_management';
 import { generateId } from '../../../../id_generator/id_generator';
-import { ChartOptionAppend } from './chart_option_append';
+import { ChartSwitchSelectable, SelectableEntry } from './chart_switch_selectable';
+import { ChartSwitchOptionPrepend } from './chart_option';
+
+type VisChartSwitchPosition = VisualizationType & {
+  visualizationId: string;
+  selection: VisualizationSelection;
+};
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -59,19 +56,23 @@ export interface ChartSwitchProps {
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
   layerId: string;
+  onChartSelect: () => void;
 }
 
-type SelectableEntry = EuiSelectableOption<{ value: string }>;
+const sortByPriority = (a: VisualizationType, b: VisualizationType) => {
+  return a.sortPriority - b.sortPriority;
+};
 
-const MAX_LIST_HEIGHT = 380;
-const ENTRY_HEIGHT = 32;
-
-function computeListHeight(list: SelectableEntry[], maxHeight: number): number {
-  if (list.length === 0) {
-    return 0;
-  }
-  return Math.min(list.length * ENTRY_HEIGHT, maxHeight);
-}
+const deprecatedGroupChartSwitchElement = {
+  key: 'deprecated',
+  value: 'deprecated',
+  label: i18n.translate('xpack.lens.configPanel.deprecated', {
+    defaultMessage: 'Deprecated',
+  }),
+  isGroupLabel: true,
+  'aria-label': 'deprecated',
+  'data-test-subj': `lnsChartSwitchPopover_deprecated`,
+};
 
 function safeFnCall<TReturn>(action: () => TReturn, defaultReturnValue: TReturn): TReturn {
   try {
@@ -82,27 +83,19 @@ function safeFnCall<TReturn>(action: () => TReturn, defaultReturnValue: TReturn)
   }
 }
 
-function getCurrentVisualizationId(
-  activeVisualization: Visualization,
-  visualizationState: unknown
-) {
-  return safeFnCall(
-    () => activeVisualization.getVisualizationTypeId(visualizationState),
-    undefined
-  );
-}
-
 export const ChartSwitch = memo(function ChartSwitch({
   framePublicAPI,
   visualizationMap,
   datasourceMap,
   layerId,
+  onChartSelect,
 }: ChartSwitchProps) {
-  const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const visualization = useLensSelector(selectVisualization);
   const datasourceStates = useLensSelector(selectDatasourceStates);
+
+  const [searchTerm, setSearchTerm] = useState('');
 
   const commitSelection = (selection: VisualizationSelection) => {
     switchToSuggestion(
@@ -142,9 +135,6 @@ export const ChartSwitch = memo(function ChartSwitch({
       return state;
     };
     const layers = Object.entries(framePublicAPI.datasourceLayers);
-    const containsData = layers.some(
-      ([_layerId, datasource]) => datasource && datasource.getTableSpec().length > 0
-    );
 
     // Always show the active visualization as a valid selection
     if (
@@ -183,19 +173,7 @@ export const ChartSwitch = memo(function ChartSwitch({
       layerId
     );
 
-    let dataLoss: VisualizationSelection['dataLoss'];
-
-    if (!containsData) {
-      dataLoss = 'nothing';
-    } else if (!topSuggestion) {
-      dataLoss = 'everything';
-    } else if (layers.length > 1 && layers.length > topSuggestion.keptLayerIds.length) {
-      dataLoss = 'layers';
-    } else if (topSuggestion.columns !== layers[0][1]?.getTableSpec().length) {
-      dataLoss = 'columns';
-    } else {
-      dataLoss = 'nothing';
-    }
+    const dataLoss = getDataLoss(layers, topSuggestion);
 
     function addNewLayer() {
       const newLayerId = generateId();
@@ -238,31 +216,18 @@ export const ChartSwitch = memo(function ChartSwitch({
     };
   }
 
-  const [searchTerm, setSearchTerm] = useState('');
-
   const { visualizationTypes, visualizationsLookup } = useMemo(
     () => {
-      if (!flyoutOpen) {
-        return { visualizationTypes: [], visualizationsLookup: {} };
-      }
       const subVisualizationId =
         visualization.activeId && visualizationMap[visualization.activeId]
-          ? getCurrentVisualizationId(visualizationMap[visualization.activeId], visualization.state)
+          ? getVisualizationTypeId(
+              visualizationMap[visualization.activeId],
+              visualization.state,
+              layerId
+            )
           : undefined;
       const lowercasedSearchTerm = searchTerm.toLowerCase();
-      // reorganize visualizations in groups
-      const grouped: Record<
-        string,
-        {
-          priority: number;
-          visualizations: Array<
-            VisualizationType & {
-              visualizationId: string;
-              selection: VisualizationSelection;
-            }
-          >;
-        }
-      > = {};
+
       // Will need it later on to quickly pick up the metadata from it
       const lookup: Record<
         string,
@@ -271,175 +236,130 @@ export const ChartSwitch = memo(function ChartSwitch({
           selection: VisualizationSelection;
         }
       > = {};
+
+      const chartSwitchPositions: VisChartSwitchPosition[] = [];
+      const deprecatedChartSwitchPositions: VisChartSwitchPosition[] = [];
       Object.entries(visualizationMap).forEach(([visualizationId, v]) => {
-        for (const visualizationType of v.visualizationTypes) {
+        const chartSwitchOptions = v.visualizationTypes;
+        for (const visualizationType of chartSwitchOptions) {
           const isSearchMatch =
             visualizationType.label.toLowerCase().includes(lowercasedSearchTerm) ||
-            visualizationType.fullLabel?.toLowerCase().includes(lowercasedSearchTerm);
+            visualizationType.description?.toLowerCase().includes(lowercasedSearchTerm);
           if (isSearchMatch) {
-            grouped[visualizationType.groupLabel] = grouped[visualizationType.groupLabel] || {
-              priority: 0,
-              visualizations: [],
-            };
+            const subtypeId = findSubtypeId(visualizationType, subVisualizationId);
+
             const visualizationEntry = {
               ...visualizationType,
               visualizationId,
-              selection: getSelection(visualizationId, visualizationType.id),
+              selection: getSelection(visualizationId, subtypeId),
             };
-            grouped[visualizationType.groupLabel].priority += visualizationType.sortPriority || 0;
-            grouped[visualizationType.groupLabel].visualizations.push(visualizationEntry);
+            if (visualizationEntry.isDeprecated) {
+              deprecatedChartSwitchPositions.push(visualizationEntry);
+            } else {
+              chartSwitchPositions.push(visualizationEntry);
+            }
             lookup[`${visualizationId}:${visualizationType.id}`] = visualizationEntry;
           }
         }
       });
 
+      const toSelectableEntry = (v: VisChartSwitchPosition): SelectableEntry => {
+        const isChecked = subVisualizationId === v.id;
+        return {
+          'aria-label': v.label,
+          className: 'lnsChartSwitch__option',
+          key: `${v.visualizationId}:${v.id}`, // todo: should we simplify?
+          value: `${v.visualizationId}:${v.id}`,
+          'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
+          label: v.label,
+          prepend: (
+            <ChartSwitchOptionPrepend
+              isChecked={isChecked}
+              dataLoss={v.selection.dataLoss}
+              subtypeId={v.selection.subVisualizationId}
+            />
+          ),
+          data: {
+            description: v.description,
+            icon: v.icon,
+          },
+          append: v.showExperimentalBadge ? <ExperimentalBadge size="m" /> : null,
+          // Apparently checked: null is not valid for TS
+          ...(isChecked && { checked: 'on' }),
+        };
+      };
+
       return {
-        visualizationTypes: Object.keys(grouped)
-          .sort((groupA, groupB) => {
-            return grouped[groupB].priority - grouped[groupA].priority;
-          })
-          .flatMap((group): SelectableEntry[] => {
-            const { visualizations } = grouped[group];
-            if (visualizations.length === 0) {
-              return [];
-            }
-            return [
-              {
-                key: group,
-                label: group,
-                isGroupLabel: true,
-                'aria-label': group,
-                'data-test-subj': `lnsChartSwitchPopover_${group}`,
-              } as SelectableEntry,
-            ].concat(
-              visualizations
-                // alphabetical order within each group
-                .sort((a, b) => {
-                  return (
-                    (b.sortOrder ?? 0) - (a.sortOrder ?? 0) ||
-                    (a.fullLabel || a.label).localeCompare(b.fullLabel || b.label)
-                  );
-                })
-                .map((v): SelectableEntry => {
-                  return {
-                    'aria-label': v.fullLabel || v.label,
-                    className: 'lnsChartSwitch__option',
-                    isGroupLabel: false,
-                    key: `${v.visualizationId}:${v.id}`,
-                    value: `${v.visualizationId}:${v.id}`,
-                    'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
-                    label: v.fullLabel || v.label,
-                    prepend: (
-                      <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
-                    ),
-                    append:
-                      v.selection.dataLoss !== 'nothing' || v.showExperimentalBadge ? (
-                        <ChartOptionAppend
-                          dataLoss={v.selection.dataLoss}
-                          showExperimentalBadge={v.showExperimentalBadge}
-                          id={v.selection.subVisualizationId}
-                        />
-                      ) : null,
-                    // Apparently checked: null is not valid for TS
-                    ...(subVisualizationId === v.id && { checked: 'on' }),
-                  };
-                })
-            );
-          }),
+        visualizationTypes: chartSwitchPositions
+          .sort(sortByPriority)
+          .map(toSelectableEntry)
+          .concat(
+            deprecatedChartSwitchPositions.length
+              ? [
+                  deprecatedGroupChartSwitchElement,
+                  ...deprecatedChartSwitchPositions.map(toSelectableEntry),
+                ]
+              : []
+          ),
         visualizationsLookup: lookup,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      flyoutOpen,
-      visualizationMap,
-      framePublicAPI,
-      visualization.activeId,
-      visualization.state,
-      searchTerm,
-    ]
+    [visualizationMap, framePublicAPI, visualization.activeId, visualization.state, searchTerm]
   );
-
-  const { icon, label } = (visualization.activeId &&
-    visualizationMap[visualization.activeId]?.getDescription(visualization.state, layerId)) || {
-    label: i18n.translate('xpack.lens.configPanel.selectVisualization', {
-      defaultMessage: 'Select a visualization',
-    }),
-    icon: undefined,
-  };
 
   return (
-    <div className="lnsChartSwitch__header">
-      <EuiPopover
-        id="lnsChartSwitchPopover"
-        ownFocus
-        initialFocus=".lnsChartSwitch__popoverPanel"
-        panelClassName="lnsChartSwitch__popoverPanel"
-        panelPaddingSize="s"
-        button={
-          <ChartSwitchTrigger
-            icon={icon}
-            label={label}
-            dataTestSubj="lnsChartSwitchPopover"
-            onClick={() => setFlyoutOpen(!flyoutOpen)}
-          />
+    <ChartSwitchSelectable
+      searchable
+      options={visualizationTypes}
+      onChange={(newOptions: Array<{ label: string; value?: string; checked?: string }>) => {
+        onChartSelect();
+        const chosenType = newOptions.find(({ checked }) => checked === 'on');
+        if (!chosenType || !chosenType.value) {
+          return;
         }
-        isOpen={flyoutOpen}
-        closePopover={() => setFlyoutOpen(false)}
-        anchorPosition="downLeft"
-      >
-        <EuiPopoverTitle>
-          <EuiFlexGroup alignItems="center" responsive={false}>
-            <EuiFlexItem>
-              {i18n.translate('xpack.lens.configPanel.visualizationType', {
-                defaultMessage: 'Visualization type',
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
-        <EuiSelectable
-          className="lnsChartSwitch__options"
-          height={computeListHeight(visualizationTypes, MAX_LIST_HEIGHT)}
-          searchable
-          singleSelection
-          isPreFiltered
-          data-test-subj="lnsChartSwitchList"
-          searchProps={{
-            className: 'lnsChartSwitch__search',
-            'data-test-subj': 'lnsChartSwitchSearch',
-            onChange: (value) => setSearchTerm(value),
-          }}
-          options={visualizationTypes}
-          onChange={(newOptions) => {
-            setFlyoutOpen(false);
-            const chosenType = newOptions.find(({ checked }) => checked === 'on');
-            if (!chosenType) {
-              return;
-            }
-            const id = chosenType.value!;
-            commitSelection(visualizationsLookup[id].selection);
-          }}
-          noMatchesMessage={
-            <FormattedMessage
-              id="xpack.lens.chartSwitch.noResults"
-              defaultMessage="No results found for {term}."
-              values={{
-                term: <strong>{searchTerm}</strong>,
-              }}
-            />
-          }
-        >
-          {(list, search) => (
-            <>
-              {search}
-              {list}
-            </>
-          )}
-        </EuiSelectable>
-      </EuiPopover>
-    </div>
+        const id = chosenType.value;
+        commitSelection(visualizationsLookup[id].selection);
+      }}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
+    />
   );
 });
+
+const getVisualizationSubtypes = (
+  visualization: Visualization,
+  state: unknown,
+  layerId?: string
+) => {
+  const typeId = safeFnCall(() => visualization.getVisualizationTypeId(state, layerId), undefined);
+  const type = visualization.visualizationTypes.find((t) => t.id === typeId);
+  if (type?.subtypes) {
+    return type.subtypes;
+  }
+  return [typeId];
+};
+
+const getVisualizationTypeId = (
+  activeVisualization: Visualization,
+  visualizationState: unknown,
+  layerId?: string
+) =>
+  safeFnCall(
+    () => activeVisualization.getVisualizationTypeId(visualizationState, layerId),
+    undefined
+  );
+
+const findSubtypeId = (visType: VisualizationType, subtypeId?: string) => {
+  if (visType.subtypes) {
+    return (
+      visType.subtypes.find((subtype) => subtype === subtypeId) ||
+      visType.getCompatibleSubtype?.(subtypeId) ||
+      visType.subtypes[0]
+    );
+  }
+  return visType.id;
+};
 
 function getTopSuggestion(
   visualizationMap: VisualizationMap,
@@ -475,15 +395,9 @@ function getTopSuggestion(
   const suggestions = unfilteredSuggestions.filter((suggestion) => {
     // don't use extended versions of current data table on switching between visualizations
     // to avoid confusing the user.
-    return (
-      suggestion.changeType !== 'extended' &&
-      safeFnCall(
-        () =>
-          newVisualization.getVisualizationTypeId(suggestion.visualizationState) ===
-          subVisualizationId,
-        false
-      )
-    );
+
+    const subtypes = getVisualizationSubtypes(newVisualization, suggestion.visualizationState);
+    return suggestion.changeType !== 'extended' && subtypes.includes(subVisualizationId);
   });
 
   return (
@@ -492,3 +406,23 @@ function getTopSuggestion(
     suggestions[0]
   );
 }
+
+const getDataLoss = (
+  layers: Array<[string, DatasourcePublicAPI | undefined]>,
+  topSuggestion: Suggestion<unknown, unknown> | undefined
+) => {
+  const containsData = layers.some(
+    ([_layerId, datasource]) => datasource && datasource.getTableSpec().length > 0
+  );
+  if (!containsData) {
+    return 'nothing';
+  } else if (!topSuggestion) {
+    return 'everything';
+  } else if (layers.length > 1 && layers.length > topSuggestion.keptLayerIds.length) {
+    return 'layers';
+  } else if (topSuggestion.columns !== layers[0][1]?.getTableSpec().length) {
+    return 'columns';
+  } else {
+    return 'nothing';
+  }
+};

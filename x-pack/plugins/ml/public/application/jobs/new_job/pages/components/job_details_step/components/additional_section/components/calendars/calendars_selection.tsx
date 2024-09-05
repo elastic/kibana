@@ -24,7 +24,7 @@ import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app';
 import type { Calendar } from '../../../../../../../../../../../common/types/calendars';
-import { useMlApiContext, useMlKibana } from '../../../../../../../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../../../../../../../contexts/kibana';
 import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../../../../../../../common/constants/locator';
 
@@ -34,7 +34,7 @@ export const CalendarsSelection: FC = () => {
       application: { getUrlForApp },
     },
   } = useMlKibana();
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
 
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [selectedCalendars, setSelectedCalendars] = useState<Calendar[]>(jobCreator.calendars);
@@ -46,7 +46,7 @@ export const CalendarsSelection: FC = () => {
 
   async function loadCalendars() {
     setIsLoading(true);
-    const calendars = (await ml.calendars()).filter(
+    const calendars = (await mlApi.calendars()).filter(
       (c) => c.job_ids.includes(GLOBAL_CALENDAR) === false
     );
     setOptions(calendars.map((c) => ({ label: c.calendar_id, value: c })));

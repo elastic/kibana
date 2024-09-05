@@ -21,6 +21,7 @@ export const getPublicStateFromContext = (
     timeRange: context.timeRange,
     breakdownField: context.breakdownField,
     integration: context.integration,
+    expandedDegradedField: context.expandedDegradedField,
   };
 };
 
@@ -49,4 +50,5 @@ export const getContextFromPublicState = (
     },
   },
   dataStream: publicState.dataStream,
+  expandedDegradedField: publicState.expandedDegradedField,
 });

@@ -12,4 +12,3 @@ export {
   type InferenceExecutor,
 } from './inference_executor';
 export { chunksIntoMessage } from './chunks_into_message';
-export { generateFakeToolCallId } from './generate_fake_tool_call_id';

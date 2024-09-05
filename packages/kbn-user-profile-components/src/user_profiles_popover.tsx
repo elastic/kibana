@@ -45,7 +45,7 @@ export const UserProfilesPopover = <Option extends UserProfileWithAvatar | null>
   });
 
   return (
-    <EuiPopover panelPaddingSize="none" initialFocus={`#${searchInputId}`} {...popoverProps}>
+    <EuiPopover panelPaddingSize="none" initialFocus={`[id="${searchInputId}"]`} {...popoverProps}>
       <EuiContextMenuPanel title={title}>
         <UserProfilesSelectable {...selectableProps} searchInputId={searchInputId} />
       </EuiContextMenuPanel>

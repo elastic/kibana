@@ -1,0 +1,17 @@
+## ROUND
+
+The `ROUND` function rounds a number to the specified number of decimal places. By default, it rounds to 0 decimal places, which returns the nearest integer. If the precision is a negative number, it rounds to the number of digits left of the decimal point. If the input value is null, the function returns null.
+
+### Examples
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| EVAL height_ft = ROUND(height * 3.281, 1)
+```
+
+```esql
+FROM sales
+| KEEP product_name, revenue
+| EVAL rounded_revenue = ROUND(revenue, -2)
+```

@@ -77,13 +77,13 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
   const { selectedTabId, defaultSelectedTabId } = state.meta;
-  const tabbedModalHTMLId = useGeneratedHtmlId();
-  const tabbedModalHeadingHTMLId = useGeneratedHtmlId();
+  const tabbedModalHTMLId = useGeneratedHtmlId({ prefix: 'tabbedModal' });
+  const tabbedModalHeadingHTMLId = useGeneratedHtmlId({ prefix: 'tabbedModal' });
   const defaultTabCoordinates = useRef(new Map<string, Pick<DOMRect, 'top'>>());
   const [translateYValue, setTranslateYValue] = useState(0);
 
   const onTabContentRender = useCallback(() => {
-    const tabbedModal = document.querySelector(`#${tabbedModalHTMLId}`) as HTMLDivElement;
+    const tabbedModal = document.querySelector(`[id="${tabbedModalHTMLId}"]`) as HTMLDivElement;
 
     if (!defaultTabCoordinates.current.get(defaultSelectedTabId)) {
       // on initial render the modal animates into it's final position

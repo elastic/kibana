@@ -81,7 +81,7 @@ export function cardinalityValidator(
       }),
       switchMap(({ jobCreator }) => {
         // Perform a cardinality check only with enabled model plot.
-        return jobCreator.mlApiServices
+        return jobCreator.mlApi
           .validateCardinality$({
             ...jobCreator.jobConfig,
             datafeed_config: jobCreator.datafeedConfig,
@@ -117,7 +117,7 @@ export function jobIdValidator(jobCreator$: Subject<JobCreator>): Observable<Job
     distinctUntilChanged(
       (prevJobCreator, currJobCreator) => prevJobCreator.jobId === currJobCreator.jobId
     ),
-    switchMap((jobCreator) => jobCreator.mlApiServices.jobs.jobsExist$([jobCreator.jobId], true)),
+    switchMap((jobCreator) => jobCreator.mlApi.jobs.jobsExist$([jobCreator.jobId], true)),
     map((jobExistsResults) => {
       const jobs = Object.values(jobExistsResults);
       const valid = jobs?.[0].exists === false;
@@ -139,7 +139,7 @@ export function groupIdsValidator(jobCreator$: Subject<JobCreator>): Observable<
         JSON.stringify(prevJobCreator.groups) === JSON.stringify(currJobCreator.groups)
     ),
     switchMap((jobCreator) => {
-      return jobCreator.mlApiServices.jobs.jobsExist$(jobCreator.groups, true);
+      return jobCreator.mlApi.jobs.jobsExist$(jobCreator.groups, true);
     }),
     map((jobExistsResults) => {
       const groups = Object.values(jobExistsResults);

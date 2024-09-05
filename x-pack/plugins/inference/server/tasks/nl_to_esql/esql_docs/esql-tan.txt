@@ -1,0 +1,15 @@
+## TAN
+
+The `TAN` function returns the Tangent trigonometric function of an angle.
+
+### Examples
+
+```esql
+ROW a=1.8
+| EVAL tan = TAN(a)
+```
+
+```esql
+ROW angle=0.5
+| EVAL tangent = TAN(angle)
+```

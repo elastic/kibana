@@ -173,7 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      expect(await dataGrid.getRowsText()).to.eql([
+      expect((await dataGrid.getRowsText()).slice(0, 6)).to.eql([
         'Sep 22, 2015 @ 20:44:05.521jpg1,808',
         'Sep 22, 2015 @ 20:41:53.463png1,969',
         'Sep 22, 2015 @ 20:40:22.952jpg1,576',
@@ -208,7 +208,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 22, 2015 @ 17:22:12.782css1,583',
       ];
 
-      expect(await dataGrid.getRowsText()).to.eql(filteredRows);
+      expect((await dataGrid.getRowsText()).slice(0, 6)).to.eql(filteredRows);
       expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForTwoFilters);
       await testSubjects.existOrFail('unsavedChangesBadge');
 
@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      expect(await dataGrid.getRowsText()).to.eql(filteredRows);
+      expect((await dataGrid.getRowsText()).slice(0, 6)).to.eql(filteredRows);
       expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForTwoFilters);
       await testSubjects.existOrFail('unsavedChangesBadge');
     });

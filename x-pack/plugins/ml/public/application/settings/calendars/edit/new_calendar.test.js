@@ -84,7 +84,7 @@ const mockKibanaContext = {
     docLinks: { links: { ml: { calendars: 'test' } } },
     notifications: { toasts: { addDanger: mockAddDanger, addError: jest.fn() } },
     mlServices: {
-      mlApiServices: {
+      mlApi: {
         calendars: () => {
           return Promise.resolve([]);
         },

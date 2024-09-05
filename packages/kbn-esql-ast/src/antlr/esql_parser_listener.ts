@@ -4,6 +4,14 @@
 import {ParseTreeListener} from "antlr4";
 
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+
 import { SingleStatementContext } from "./esql_parser.js";
 import { CompositeQueryContext } from "./esql_parser.js";
 import { SingleCommandQueryContext } from "./esql_parser.js";
@@ -44,7 +52,6 @@ import { Deprecated_metadataContext } from "./esql_parser.js";
 import { MetricsCommandContext } from "./esql_parser.js";
 import { EvalCommandContext } from "./esql_parser.js";
 import { StatsCommandContext } from "./esql_parser.js";
-import { InlinestatsCommandContext } from "./esql_parser.js";
 import { QualifiedNameContext } from "./esql_parser.js";
 import { QualifiedNamePatternContext } from "./esql_parser.js";
 import { QualifiedNamePatternsContext } from "./esql_parser.js";
@@ -87,6 +94,7 @@ import { MetaFunctionsContext } from "./esql_parser.js";
 import { EnrichCommandContext } from "./esql_parser.js";
 import { EnrichWithClauseContext } from "./esql_parser.js";
 import { LookupCommandContext } from "./esql_parser.js";
+import { InlinestatsCommandContext } from "./esql_parser.js";
 import { MatchCommandContext } from "./esql_parser.js";
 import { MatchQueryContext } from "./esql_parser.js";
 
@@ -537,16 +545,6 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitStatsCommand?: (ctx: StatsCommandContext) => void;
 	/**
-	 * Enter a parse tree produced by `esql_parser.inlinestatsCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.inlinestatsCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
-	/**
 	 * Enter a parse tree produced by `esql_parser.qualifiedName`.
 	 * @param ctx the parse tree
 	 */
@@ -994,6 +992,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitLookupCommand?: (ctx: LookupCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.inlinestatsCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.inlinestatsCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.matchCommand`.
 	 * @param ctx the parse tree

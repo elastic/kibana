@@ -13,13 +13,10 @@ import type {
   MlSummaryJob,
 } from '../../../../../common/types/anomaly_detection_jobs';
 import type { MlJobService } from '../../../services/job_service';
-import type { MlApiServices } from '../../../services/ml_api_service';
+import type { MlApi } from '../../../services/ml_api_service';
 
-export function loadFullJob(
-  mlApiServices: MlApiServices,
-  jobId: string
-): Promise<CombinedJobWithStats>;
-export function loadJobForCloning(mlApiServices: MlApiServices, jobId: string): Promise<any>;
+export function loadFullJob(mlApi: MlApi, jobId: string): Promise<CombinedJobWithStats>;
+export function loadJobForCloning(mlApi: MlApi, jobId: string): Promise<any>;
 export function isStartable(jobs: CombinedJobWithStats[]): boolean;
 export function isClosable(jobs: CombinedJobWithStats[]): boolean;
 export function isResettable(jobs: CombinedJobWithStats[]): boolean;
@@ -45,7 +42,7 @@ export function showResults(
 export function cloneJob(
   toastNotifications: ToastsStart,
   application: ApplicationStart,
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   mlJobService: MlJobService,
   jobId: string
 ): Promise<void>;

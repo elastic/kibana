@@ -88,7 +88,11 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
     it('Add prompt from system prompt selector and set multiple conversations (including current) as default conversation', () => {
       visitGetStartedPage();
       openAssistant();
-      createSystemPrompt(testPrompt.title, testPrompt.prompt, ['Welcome', 'Alert summary']);
+      createSystemPrompt(testPrompt.title, testPrompt.prompt, [
+        'Welcome',
+        'Alert summary',
+        'Data Quality Dashboard',
+      ]);
       assertSystemPrompt(testPrompt.title);
       typeAndSendMessage('hello');
       assertMessageSent('hello', true, testPrompt.prompt);

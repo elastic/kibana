@@ -13,6 +13,7 @@
     "@kbn/ux-plugin/e2e",
     "@kbn/ftr-common-functional-services",
     "@kbn/apm-plugin",
-    "@kbn/es-archiver"
+    "@kbn/es-archiver",
+    "@kbn/ftr-common-functional-ui-services"
   ]
 }

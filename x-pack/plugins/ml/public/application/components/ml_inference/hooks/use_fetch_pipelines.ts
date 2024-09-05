@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 
 export const useFetchPipelines = () => {
   const [pipelineNames, setPipelineNames] = useState<string[]>([]);
@@ -17,7 +17,7 @@ export const useFetchPipelines = () => {
 
   const {
     trainedModels: { getAllIngestPipelines },
-  } = useMlApiContext();
+  } = useMlApi();
 
   useEffect(() => {
     async function fetchPipelines() {

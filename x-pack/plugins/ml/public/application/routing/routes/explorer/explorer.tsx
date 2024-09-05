@@ -56,7 +56,7 @@ export const explorerRouteFactory = (
 const PageWrapper: FC<PageProps> = () => {
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
       uiSettings,
     },
   } = useMlKibana();
@@ -65,7 +65,7 @@ const PageWrapper: FC<PageProps> = () => {
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {
     ...basicResolvers(),
     jobs: mlJobService.loadJobsWrapper,
-    jobsWithTimeRange: () => mlApiServices.jobs.jobsWithTimerange(getDateFormatTz(uiSettings)),
+    jobsWithTimeRange: () => mlApi.jobs.jobsWithTimerange(getDateFormatTz(uiSettings)),
   });
 
   const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);

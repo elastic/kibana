@@ -42,8 +42,12 @@ import {
   EuiIconLegend,
   IconRegionMap,
   IconChartHeatmap,
+  IconChartGauge,
   IconChartHorizontalBullet,
   IconChartVerticalBullet,
+  IconDonutHoleLarge,
+  IconDonutHoleMedium,
+  IconDonutHoleSmall,
 } from '../..';
 
 export default {
@@ -184,9 +188,16 @@ const IconsArray: Array<{
     Component: IconChartHorizontalBullet,
   },
   {
+    title: 'IconChartGauge',
+    Component: IconChartGauge,
+  },
+  {
     title: 'IconChartVerticalBullet',
     Component: IconChartVerticalBullet,
   },
+  { title: 'IconDonutHoleLarge', Component: IconDonutHoleLarge },
+  { title: 'IconDonutHoleMedium', Component: IconDonutHoleMedium },
+  { title: 'IconDonutHoleSmall', Component: IconDonutHoleSmall },
 ];
 
 interface RootComponentProps {

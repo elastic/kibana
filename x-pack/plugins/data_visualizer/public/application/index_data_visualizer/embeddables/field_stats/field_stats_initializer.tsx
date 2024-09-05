@@ -95,7 +95,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViewId, viewType, esqlQuery.esql, isEsqlMode]);
   const onESQLQuerySubmit = useCallback(
-    async (query: AggregateQuery, abortController: AbortController) => {
+    async (query: AggregateQuery, abortController?: AbortController) => {
       const adhocDataView = await getESQLAdHocDataview(query.esql, dataViews);
       if (adhocDataView && adhocDataView.id) {
         setDataViewId(adhocDataView.id);

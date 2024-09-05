@@ -80,7 +80,7 @@ describe('UserProfilesPopover', () => {
         closePopover={[MockFunction]}
         display="inline-block"
         hasArrow={true}
-        initialFocus="#searchInput_generated-id"
+        initialFocus="[id=\\"searchInput_generated-id\\"]"
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
@@ -140,7 +140,7 @@ describe('UserProfilesPopover', () => {
       />
     );
 
-    expect(wrapper.find('EuiPopover').prop('initialFocus')).toBe('#searchInput_generated-id');
+    expect(wrapper.find('EuiPopover').prop('initialFocus')).toBe('[id="searchInput_generated-id"]');
     expect(wrapper.find('UserProfilesSelectable').prop('searchInputId')).toBe(
       'searchInput_generated-id'
     );

@@ -78,7 +78,12 @@ export const InvokeAIActionResponseSchema = schema.object({
 });
 
 export const InvokeAIRawActionParamsSchema = schema.object({
-  messages: schema.arrayOf(BedrockMessageSchema),
+  messages: schema.arrayOf(
+    schema.object({
+      role: schema.string(),
+      content: schema.any(),
+    })
+  ),
   model: schema.maybe(schema.string()),
   temperature: schema.maybe(schema.number()),
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),

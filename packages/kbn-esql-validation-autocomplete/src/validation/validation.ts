@@ -1099,6 +1099,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getFieldsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
+  getPreferences: [],
 };
 
 /**

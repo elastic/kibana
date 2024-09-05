@@ -21,7 +21,7 @@ import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_manag
 import type { DataFrameAnalyticsListRow } from '../../../analytics_management/components/analytics_list/common';
 import { DATA_FRAME_MODE } from '../../../analytics_management/components/analytics_list/common';
 import { ExpandedRow } from '../../../analytics_management/components/analytics_list/expanded_row';
-import { useMlApiContext } from '../../../../../contexts/kibana';
+import { useMlApi } from '../../../../../contexts/kibana';
 import type { ExpandableSectionProps } from './expandable_section';
 import { ExpandableSection, HEADER_ITEMS_LOADING } from './expandable_section';
 
@@ -75,13 +75,13 @@ interface ExpandableSectionAnalyticsProps {
 }
 
 export const ExpandableSectionAnalytics: FC<ExpandableSectionAnalyticsProps> = ({ jobId }) => {
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
 
   const [expandedRowItem, setExpandedRowItem] = useState<DataFrameAnalyticsListRow | undefined>();
 
   const fetchStats = async () => {
-    const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
-    const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
+    const analyticsConfigs = await mlApi.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+    const analyticsStats = await mlApi.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
 
     const config = analyticsConfigs.data_frame_analytics[0];
     const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)

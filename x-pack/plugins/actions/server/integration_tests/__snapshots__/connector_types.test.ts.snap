@@ -1083,51 +1083,14 @@ Object {
           "keys": Object {
             "content": Object {
               "flags": Object {
-                "default": [Function],
                 "error": [Function],
-                "presence": "optional",
               },
               "metas": Array [
                 Object {
-                  "x-oas-optional": true,
+                  "x-oas-any-type": true,
                 },
               ],
-              "rules": Array [
-                Object {
-                  "args": Object {
-                    "method": [Function],
-                  },
-                  "name": "custom",
-                },
-              ],
-              "type": "string",
-            },
-            "rawContent": Object {
-              "flags": Object {
-                "default": [Function],
-                "error": [Function],
-                "presence": "optional",
-              },
-              "items": Array [
-                Object {
-                  "flags": Object {
-                    "error": [Function],
-                    "presence": "optional",
-                  },
-                  "metas": Array [
-                    Object {
-                      "x-oas-any-type": true,
-                    },
-                  ],
-                  "type": "any",
-                },
-              ],
-              "metas": Array [
-                Object {
-                  "x-oas-optional": true,
-                },
-              ],
-              "type": "array",
+              "type": "any",
             },
             "role": Object {
               "flags": Object {
@@ -1144,14 +1107,6 @@ Object {
               "type": "string",
             },
           },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
           "type": "object",
         },
       ],

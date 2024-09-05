@@ -218,5 +218,8 @@
     "@kbn/config",
     "@kbn/cbor",
     "@kbn/zod",
+    "@kbn/cloud-security-posture",
+    "@kbn/security-solution-distribution-bar",
+    "@kbn/cloud-security-posture-common",
   ]
 }

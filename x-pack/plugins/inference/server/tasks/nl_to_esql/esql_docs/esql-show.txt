@@ -1,0 +1,24 @@
+## SHOW
+
+The `SHOW` source command returns information about the deployment and its capabilities. This command is useful for retrieving metadata about the Elasticsearch deployment, such as the version, build date, and hash. It is particularly helpful for administrators and developers who need to verify the deployment details or troubleshoot issues. The `SHOW` command has a limitation in that it can only be used with the `INFO` item.
+
+### Examples
+
+Here are some example ES|QL queries using the `SHOW` command:
+
+1. Retrieve the deployment’s version, build date, and hash:
+    ```esql
+SHOW INFO
+```
+
+2. Use the `SHOW` command in a multi-line query for better readability:
+    ```esql
+SHOW INFO
+```
+
+3. Another example of using the `SHOW` command to get deployment information:
+    ```esql
+SHOW INFO
+```
+
+These examples demonstrate the primary usage of the `SHOW` command to retrieve deployment information.

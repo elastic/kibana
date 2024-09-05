@@ -91,8 +91,8 @@ export class GroupSelectorUI extends Component {
     if (this.state.isPopoverOpen) {
       this.closePopover();
     } else {
-      const ml = this.props.kibana.services.mlServices.mlApiServices;
-      ml.jobs
+      const mlApi = this.props.kibana.services.mlServices.mlApi;
+      mlApi.jobs
         .groups()
         .then((groups) => {
           const selectedGroups = createSelectedGroups(this.props.jobs, groups);
@@ -158,7 +158,7 @@ export class GroupSelectorUI extends Component {
     }
 
     const tempJobs = newJobs.map((j) => ({ jobId: j.id, groups: j.newGroups }));
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const ml = this.props.kibana.services.mlServices.mlApi;
     ml.jobs
       .updateGroups(tempJobs)
       .then((resp) => {

@@ -29,7 +29,7 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { debounce } from 'lodash';
-import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 import { isValidIndexName } from '../../../../../common/util/es_utils';
 import { createKibanaDataView, checkIndexExists } from '../retry_create_data_view';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
@@ -85,8 +85,8 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
       docLinks: { links },
     },
   } = useMlKibana();
-  const ml = useMlApiContext();
-  const { getIndices, reindexWithPipeline, hasPrivileges } = ml;
+  const mlApi = useMlApi();
+  const { getIndices, reindexWithPipeline, hasPrivileges } = mlApi;
 
   const { displayErrorToast } = useToastNotificationService();
 
@@ -123,7 +123,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
   );
 
   const debouncedIndexCheck = debounce(async () => {
-    const checkResp = await checkIndexExists(destinationIndex, ml);
+    const checkResp = await checkIndexExists(destinationIndex, mlApi);
     if (checkResp.errorMessage !== undefined) {
       displayErrorToast(
         checkResp.errorMessage,
@@ -239,7 +239,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
         const dataViewCreationResult = await createKibanaDataView(
           destinationIndex,
           data.dataViews,
-          ml
+          mlApi
         );
         if (
           dataViewCreationResult?.success === true &&

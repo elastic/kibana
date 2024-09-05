@@ -5,33 +5,25 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import React from 'react';
-import { useFetchInvestigation } from '../../../../hooks/use_fetch_investigation';
 import { InvestigationItems } from '../investigation_items/investigation_items';
 import { InvestigationNotes } from '../investigation_notes/investigation_notes';
 
 interface Props {
   user: AuthenticatedUser;
-  investigationId: string;
 }
 
-export function InvestigationDetails({ user, investigationId }: Props) {
-  const { data: investigation, isLoading } = useFetchInvestigation({ id: investigationId });
-
-  if (isLoading || !investigation) {
-    return <EuiLoadingSpinner />;
-  }
-
+export function InvestigationDetails({ user }: Props) {
   return (
     <EuiFlexGroup direction="row">
       <EuiFlexItem grow={8}>
-        <InvestigationItems investigation={investigation} />
+        <InvestigationItems />
       </EuiFlexItem>
 
       <EuiFlexItem grow={2}>
-        <InvestigationNotes investigation={investigation} user={user} />
+        <InvestigationNotes user={user} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

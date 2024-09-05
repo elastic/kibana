@@ -29,6 +29,7 @@ export const LineCurveOption: React.FC<LineCurveOptionProps> = ({
       label={i18n.translate('xpack.lens.xyChart.lineInterpolationLabel', {
         defaultMessage: 'Line interpolation',
       })}
+      fullWidth
     >
       <EuiSuperSelect
         data-test-subj="lnsCurveStyleSelect"

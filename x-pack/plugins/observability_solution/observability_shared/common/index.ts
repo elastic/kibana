@@ -188,3 +188,5 @@ export {
   TopNFunctionsLocatorDefinition,
   HOSTS_LOCATOR_ID,
 } from './locators';
+
+export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';

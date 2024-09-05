@@ -53,7 +53,7 @@ function getTimeseriesChartPropsMock() {
 
 const kibanaReactContextMock = createKibanaReactContext({
   mlServices: {
-    mlApiServices: {},
+    mlApi: {},
     mlResultsService: {},
   },
   notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } },

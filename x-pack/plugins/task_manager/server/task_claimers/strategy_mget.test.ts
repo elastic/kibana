@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 import { filter, take, toArray } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -55,6 +56,7 @@ jest.mock('../constants', () => ({
   ],
 }));
 
+let fakeTimer: sinon.SinonFakeTimers;
 const taskManagerLogger = mockLogger();
 
 beforeEach(() => jest.clearAllMocks());
@@ -109,6 +111,12 @@ const taskPartitioner = new TaskPartitioner({
 
 // needs more tests in the similar to the `strategy_default.test.ts` test suite
 describe('TaskClaiming', () => {
+  beforeAll(() => {
+    fakeTimer = sinon.useFakeTimers();
+  });
+
+  afterAll(() => fakeTimer.restore());
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest
@@ -398,21 +406,27 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[0],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[0].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[1],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[1].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[2],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -491,9 +505,11 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[2],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -598,9 +614,11 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[2],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -698,9 +716,11 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[2],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -846,15 +866,19 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[1],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[1].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[2],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -932,15 +956,19 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[1],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[1].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[2],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -1018,15 +1046,19 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[1],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[1].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[2],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -1117,27 +1149,35 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[0],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[1].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[1],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[1].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[2],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[4],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[1].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -1235,27 +1275,35 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[0],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[0].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[1],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[2],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[3],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[3].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -1330,27 +1378,35 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[0],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[0].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[1],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[2],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[3],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[3].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -1441,27 +1497,35 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[0],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[0].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[1],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[1].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[2],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[3],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[3].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -1534,27 +1598,35 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[0],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[0].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[1],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[1].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[2],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[2].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
           {
             ...fetchedTasks[3],
+            attempts: 1,
             ownerId: 'test-test',
-            retryAt: fetchedTasks[3].runAt,
-            status: 'claiming',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
           },
         ],
         { validate: false, excludeLargeFields: true }

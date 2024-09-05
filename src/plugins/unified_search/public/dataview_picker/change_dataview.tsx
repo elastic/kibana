@@ -262,7 +262,7 @@ export function ChangeDataView({
               isOpen={isPopoverOpen}
               closePopover={() => setPopoverIsOpen(false)}
               panelPaddingSize="none"
-              initialFocus={`#${searchListInputId}`}
+              initialFocus={`[id="${searchListInputId}"]`}
               display="block"
               buffer={8}
             >

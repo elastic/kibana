@@ -100,6 +100,7 @@ export const mockState: SyntheticsAppState = {
       sortOrder: 'asc',
       sortField: 'name.keyword',
     },
+    trendStats: {},
     data: {
       total: 0,
       allMonitorIds: [],

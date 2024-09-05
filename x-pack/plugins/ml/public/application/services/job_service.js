@@ -13,7 +13,7 @@ import { validateTimeRange, TIME_FORMAT } from '@kbn/ml-date-utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 
 import { isWebUrl } from '../util/url_utils';
-import { useMlApiContext } from '../contexts/kibana';
+import { useMlApi } from '../contexts/kibana';
 
 import { useToastNotificationService } from './toast_notification_service';
 
@@ -596,15 +596,15 @@ function createResultsUrl(jobIds, start, end, resultsPage, mode = 'absolute') {
 
 // This is to retain the singleton behavior of the previous direct instantiation and export.
 let mlJobService;
-export const mlJobServiceFactory = (toastNotificationService, mlApiServices) => {
+export const mlJobServiceFactory = (toastNotificationService, mlApi) => {
   if (mlJobService) return mlJobService;
 
-  mlJobService = new JobService(toastNotificationService, mlApiServices);
+  mlJobService = new JobService(toastNotificationService, mlApi);
   return mlJobService;
 };
 
 export const useMlJobService = () => {
   const toastNotificationService = useToastNotificationService();
-  const mlApiServices = useMlApiContext();
-  return mlJobServiceFactory(toastNotificationService, mlApiServices);
+  const mlApi = useMlApi();
+  return mlJobServiceFactory(toastNotificationService, mlApi);
 };

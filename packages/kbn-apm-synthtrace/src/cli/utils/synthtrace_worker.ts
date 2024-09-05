@@ -17,6 +17,7 @@ import { RunOptions } from './parse_run_cli_flags';
 import { getLogsEsClient } from './get_logs_es_client';
 import { getInfraEsClient } from './get_infra_es_client';
 import { getAssetsEsClient } from './get_assets_es_client';
+import { getSyntheticsEsClient } from './get_synthetics_es_client';
 
 export interface WorkerData {
   bucketFrom: Date;
@@ -56,6 +57,12 @@ async function start() {
     logger,
   });
 
+  const syntheticsEsClient = getSyntheticsEsClient({
+    concurrency: runOptions.concurrency,
+    target: esUrl,
+    logger,
+  });
+
   const file = runOptions.file;
 
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
@@ -70,6 +77,7 @@ async function start() {
       logsEsClient,
       infraEsClient,
       assetsEsClient,
+      syntheticsEsClient,
     });
   }
 
@@ -78,7 +86,7 @@ async function start() {
   const generatorsAndClients = logger.perf('generate_scenario', () =>
     generate({
       range: timerange(bucketFrom, bucketTo),
-      clients: { logsEsClient, apmEsClient, infraEsClient, assetsEsClient },
+      clients: { logsEsClient, apmEsClient, infraEsClient, assetsEsClient, syntheticsEsClient },
     })
   );
 

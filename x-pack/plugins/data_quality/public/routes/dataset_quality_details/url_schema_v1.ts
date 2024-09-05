@@ -18,6 +18,7 @@ export const getStateFromUrlValue = (
     timeRange: urlValue.timeRange,
     degradedFields: urlValue.degradedFields,
     breakdownField: urlValue.breakdownField,
+    expandedDegradedField: urlValue.expandedDegradedField,
   });
 
 export const getUrlValueFromState = (
@@ -28,6 +29,7 @@ export const getUrlValueFromState = (
     timeRange: state.timeRange,
     degradedFields: state.degradedFields,
     breakdownField: state.breakdownField,
+    expandedDegradedField: state.expandedDegradedField,
     v: 1,
   });
 

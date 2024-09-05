@@ -1,0 +1,17 @@
+## TRIM
+
+Removes leading and trailing whitespaces from a string.
+
+### Examples
+
+```esql
+ROW message = "   some text  ",  color = " red "
+| EVAL message = TRIM(message)
+| EVAL color = TRIM(color)
+```
+
+```esql
+ROW text = "   example text  ",  label = " label "
+| EVAL text = TRIM(text)
+| EVAL label = TRIM(label)
+```

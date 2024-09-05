@@ -9,7 +9,7 @@ import { difference } from 'lodash';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { processCreatedBy } from '../../../../../../common/util/job_utils';
 
-export function saveJob(mlApiServices, job, newJobData, finish) {
+export function saveJob(mlApi, job, newJobData, finish) {
   return new Promise((resolve, reject) => {
     const jobData = {
       ...extractDescription(job, newJobData),
@@ -29,7 +29,7 @@ export function saveJob(mlApiServices, job, newJobData, finish) {
     }
 
     const saveDatafeedWrapper = () => {
-      saveDatafeed(mlApiServices, datafeedData, job, finish)
+      saveDatafeed(mlApi, datafeedData, job, finish)
         .then(() => {
           resolve();
         })
@@ -40,7 +40,7 @@ export function saveJob(mlApiServices, job, newJobData, finish) {
 
     // if anything has changed, post the changes
     if (Object.keys(jobData).length) {
-      mlApiServices
+      mlApi
         .updateJob({ jobId: job.job_id, job: jobData })
         .then(() => {
           saveDatafeedWrapper();
@@ -54,11 +54,11 @@ export function saveJob(mlApiServices, job, newJobData, finish) {
   });
 }
 
-function saveDatafeed(mlApiServices, datafeedConfig, job) {
+function saveDatafeed(mlApi, datafeedConfig, job) {
   return new Promise((resolve, reject) => {
     if (Object.keys(datafeedConfig).length) {
       const datafeedId = job.datafeed_config.datafeed_id;
-      mlApiServices
+      mlApi
         .updateDatafeed({ datafeedId, datafeedConfig })
         .then(() => {
           resolve();

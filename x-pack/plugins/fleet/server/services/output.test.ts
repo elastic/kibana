@@ -261,6 +261,18 @@ describe('Output Service', () => {
     ],
   } as unknown as ReturnType<typeof mockedAgentPolicyService.list>;
 
+  const mockedPackagePolicyWithFleetServerResolvedValue = {
+    items: [
+      {
+        name: 'fleet-server-123',
+        policy_ids: ['fleet_server_policy'],
+        package: {
+          name: 'fleet_server',
+        },
+      },
+    ],
+  } as unknown as ReturnType<typeof mockedPackagePolicyService.list>;
+
   const mockedAgentPolicyWithSyntheticsResolvedValue = {
     items: [
       {
@@ -291,9 +303,22 @@ describe('Output Service', () => {
     ],
   } as unknown as ReturnType<typeof mockedAgentPolicyService.list>;
 
+  const mockedPackagePolicyWithSyntheticsResolvedValue = {
+    items: [
+      {
+        name: 'synthetics-123',
+        policy_ids: ['synthetics_policy'],
+        package: {
+          name: 'synthetics',
+        },
+      },
+    ],
+  } as unknown as ReturnType<typeof mockedPackagePolicyService.list>;
+
   beforeEach(() => {
     mockedAgentPolicyService.getByIDs.mockResolvedValue([]);
     mockedAgentPolicyService.list.mockClear();
+    mockedPackagePolicyService.list.mockReset();
     mockedAgentPolicyService.hasAPMIntegration.mockClear();
     mockedAgentPolicyService.hasFleetServerIntegration.mockClear();
     mockedAgentPolicyService.hasSyntheticsIntegration.mockClear();
@@ -303,6 +328,9 @@ describe('Output Service', () => {
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReset();
     mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
     mockedAgentPolicyService.update.mockReset();
+    mockedPackagePolicyService.list.mockResolvedValue({
+      items: [],
+    } as any);
   });
 
   afterEach(() => {
@@ -657,6 +685,12 @@ describe('Output Service', () => {
           mockedAgentPolicyWithFleetServerResolvedValue
         );
         mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+        mockedPackagePolicyService.list.mockResolvedValue(
+          mockedPackagePolicyWithFleetServerResolvedValue
+        );
+        mockedAgentPolicyService.getByIDs.mockResolvedValue(
+          (await mockedAgentPolicyWithFleetServerResolvedValue).items
+        );
 
         await outputService.create(
           soClient,
@@ -690,6 +724,12 @@ describe('Output Service', () => {
           mockedAgentPolicyWithSyntheticsResolvedValue
         );
         mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+        mockedPackagePolicyService.list.mockResolvedValue(
+          mockedPackagePolicyWithSyntheticsResolvedValue
+        );
+        mockedAgentPolicyService.getByIDs.mockResolvedValue(
+          (await mockedAgentPolicyWithSyntheticsResolvedValue).items
+        );
 
         await outputService.create(
           soClient,
@@ -802,6 +842,12 @@ describe('Output Service', () => {
           mockedAgentPolicyWithFleetServerResolvedValue
         );
         mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+        mockedPackagePolicyService.list.mockResolvedValue(
+          mockedPackagePolicyWithFleetServerResolvedValue
+        );
+        mockedAgentPolicyService.getByIDs.mockResolvedValue(
+          (await mockedAgentPolicyWithFleetServerResolvedValue).items
+        );
 
         await outputService.create(
           soClient,
@@ -835,6 +881,12 @@ describe('Output Service', () => {
           mockedAgentPolicyWithSyntheticsResolvedValue
         );
         mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+        mockedPackagePolicyService.list.mockResolvedValue(
+          mockedPackagePolicyWithSyntheticsResolvedValue
+        );
+        mockedAgentPolicyService.getByIDs.mockResolvedValue(
+          (await mockedAgentPolicyWithSyntheticsResolvedValue).items
+        );
 
         await outputService.create(
           soClient,
@@ -911,6 +963,7 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'existing-default-output',
       });
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
 
       await outputService.update(soClient, esClientMock, 'output-test', {
         is_default: true,
@@ -931,6 +984,7 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'existing-default-output',
       });
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
 
       await outputService.update(soClient, esClientMock, 'existing-default-output', {
         is_default: true,
@@ -1036,6 +1090,7 @@ describe('Output Service', () => {
 
     it('Allow to update preconfigured output allowed to edit field from preconfiguration', async () => {
       const soClient = getMockedSoClient();
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
       await outputService.update(
         soClient,
         esClientMock,
@@ -1055,6 +1110,7 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'existing-preconfigured-default-output',
       });
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
 
       await expect(
         outputService.update(soClient, esClientMock, 'output-test', {
@@ -1072,6 +1128,7 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'existing-default-output',
       });
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
 
       await outputService.update(
         soClient,
@@ -1101,6 +1158,7 @@ describe('Output Service', () => {
         items: [{}],
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
 
       await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
         type: 'elasticsearch',
@@ -1121,6 +1179,7 @@ describe('Output Service', () => {
         items: [{}],
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
 
       await outputService.update(soClient, esClientMock, 'existing-kafka-output', {
         type: 'elasticsearch',
@@ -1162,6 +1221,7 @@ describe('Output Service', () => {
         items: [{}],
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
 
       await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
         is_default: true,
@@ -1176,6 +1236,7 @@ describe('Output Service', () => {
         items: [{}],
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
 
       await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
         is_default: true,
@@ -1201,6 +1262,7 @@ describe('Output Service', () => {
         items: [{}],
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(true);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
 
       await expect(
         outputService.update(soClient, esClientMock, 'existing-logstash-output', {
@@ -1214,6 +1276,7 @@ describe('Output Service', () => {
       mockedAgentPolicyService.list.mockResolvedValue({
         items: [{}],
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
       mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);
@@ -1238,6 +1301,7 @@ describe('Output Service', () => {
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
 
       await outputService.update(soClient, esClientMock, 'existing-kafka-output', {
         type: 'logstash',
@@ -1280,6 +1344,9 @@ describe('Output Service', () => {
       mockedAgentPolicyService.list.mockResolvedValue(
         mockedAgentPolicyWithFleetServerResolvedValue
       );
+      mockedPackagePolicyService.list.mockResolvedValue(
+        mockedPackagePolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.update(soClient, esClientMock, 'output-test', {
@@ -1312,6 +1379,9 @@ describe('Output Service', () => {
         mockedAgentPolicyWithFleetServerResolvedValue
       );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+      mockedPackagePolicyService.list.mockResolvedValue(
+        mockedPackagePolicyWithFleetServerResolvedValue
+      );
 
       await outputService.update(
         soClient,
@@ -1349,6 +1419,9 @@ describe('Output Service', () => {
       });
       mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithSyntheticsResolvedValue);
       mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+      mockedPackagePolicyService.list.mockResolvedValue(
+        mockedPackagePolicyWithSyntheticsResolvedValue
+      );
 
       await outputService.update(soClient, esClientMock, 'output-test', {
         type: 'logstash',
@@ -1378,6 +1451,9 @@ describe('Output Service', () => {
       });
       mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithSyntheticsResolvedValue);
       mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+      mockedPackagePolicyService.list.mockResolvedValue(
+        mockedPackagePolicyWithSyntheticsResolvedValue
+      );
 
       await outputService.update(
         soClient,
@@ -1415,6 +1491,9 @@ describe('Output Service', () => {
         mockedAgentPolicyWithFleetServerResolvedValue
       );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+      mockedPackagePolicyService.list.mockResolvedValue(
+        mockedPackagePolicyWithFleetServerResolvedValue
+      );
 
       await expect(
         outputService.update(soClient, esClientMock, 'existing-es-output', {
@@ -1431,6 +1510,9 @@ describe('Output Service', () => {
       mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithSyntheticsResolvedValue);
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
       mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+      mockedPackagePolicyService.list.mockResolvedValue(
+        mockedPackagePolicyWithSyntheticsResolvedValue
+      );
 
       await expect(
         outputService.update(soClient, esClientMock, 'existing-es-output', {
@@ -1465,6 +1547,9 @@ describe('Output Service', () => {
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
       mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [],
+      } as any);
 
       await outputService.update(soClient, esClientMock, 'existing-es-output', {
         type: 'kafka',
@@ -1498,6 +1583,9 @@ describe('Output Service', () => {
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [],
+      } as any);
 
       await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
         type: 'kafka',
@@ -1532,6 +1620,9 @@ describe('Output Service', () => {
         mockedAgentPolicyWithFleetServerResolvedValue
       );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+      mockedPackagePolicyService.list.mockResolvedValue(
+        mockedPackagePolicyWithFleetServerResolvedValue
+      );
 
       await outputService.update(soClient, esClientMock, 'output-test', {
         type: 'kafka',
@@ -1575,6 +1666,9 @@ describe('Output Service', () => {
         mockedAgentPolicyWithFleetServerResolvedValue
       );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+      mockedPackagePolicyService.list.mockResolvedValue(
+        mockedPackagePolicyWithFleetServerResolvedValue
+      );
 
       await outputService.update(
         soClient,
@@ -1624,6 +1718,9 @@ describe('Output Service', () => {
       });
       mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithSyntheticsResolvedValue);
       mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+      mockedPackagePolicyService.list.mockResolvedValue(
+        mockedPackagePolicyWithSyntheticsResolvedValue
+      );
 
       await outputService.update(soClient, esClientMock, 'output-test', {
         type: 'kafka',
@@ -1665,6 +1762,9 @@ describe('Output Service', () => {
       });
       mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithSyntheticsResolvedValue);
       mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+      mockedPackagePolicyService.list.mockResolvedValue(
+        mockedPackagePolicyWithSyntheticsResolvedValue
+      );
 
       await outputService.update(
         soClient,
@@ -1975,6 +2075,7 @@ describe('Output Service', () => {
 
   describe('backfillAllOutputPresets', () => {
     it('should update non-preconfigured output', async () => {
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
       const soClient = getMockedSoClient({});
 
       soClient.find.mockResolvedValue({
@@ -2005,6 +2106,7 @@ describe('Output Service', () => {
     });
 
     it('should update preconfigured output', async () => {
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
       const soClient = getMockedSoClient({});
 
       soClient.find.mockResolvedValue({

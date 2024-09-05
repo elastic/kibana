@@ -24,19 +24,43 @@ export class HasData {
     return true;
   };
 
-  start(core: CoreStart) {
+  start(core: CoreStart, callResolveCluster: boolean) {
     const { http } = core;
+
+    const hasESDataViaResolveIndex = async () => {
+      // fallback to previous implementation
+      const hasLocalESData = await this.checkLocalESData(http);
+      if (!hasLocalESData) {
+        const hasRemoteESData = await this.checkRemoteESData(http);
+        return hasRemoteESData;
+      }
+      return hasLocalESData;
+    };
+
+    const hasESDataViaResolveCluster = async () => {
+      try {
+        const { hasEsData } = await http.get<{ hasEsData: boolean }>(
+          '/internal/data_views/has_es_data',
+          {
+            version: '1',
+          }
+        );
+        return hasEsData;
+      } catch (e) {
+        // fallback to previous implementation
+        return hasESDataViaResolveIndex();
+      }
+    };
+
     return {
       /**
        * Check to see if ES data exists
        */
       hasESData: async (): Promise<boolean> => {
-        const hasLocalESData = await this.checkLocalESData(http);
-        if (!hasLocalESData) {
-          const hasRemoteESData = await this.checkRemoteESData(http);
-          return hasRemoteESData;
+        if (callResolveCluster) {
+          return hasESDataViaResolveCluster();
         }
-        return hasLocalESData;
+        return hasESDataViaResolveIndex();
       },
       /**
        * Check to see if a data view exists

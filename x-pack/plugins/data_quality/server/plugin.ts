@@ -39,6 +39,13 @@ export class DataQualityPlugin implements Plugin<void, void, any, any> {
             ['metrics-*-*']: ['read'],
           },
         },
+        {
+          ui: [],
+          requiredClusterPrivileges: [],
+          requiredIndexPrivileges: {
+            ['synthetics-*-*']: ['read'],
+          },
+        },
       ],
     });
   }

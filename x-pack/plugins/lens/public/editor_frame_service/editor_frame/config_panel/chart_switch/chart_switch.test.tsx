@@ -18,8 +18,10 @@ import {
 } from '../../../../mocks';
 
 import { DatasourcePublicAPI, SuggestionRequest, DatasourceSuggestion } from '../../../../types';
-import { ChartSwitch, ChartSwitchProps } from './chart_switch';
+import { ChartSwitchProps } from './chart_switch';
+import { ChartSwitchPopover } from './chart_switch_popover';
 import { LensAppState, applyChanges } from '../../../../state_management';
+import faker from 'faker';
 
 const mockFrame = (layers: string[]) => ({
   ...createMockFramePublicAPI(),
@@ -189,7 +191,8 @@ describe('chart_switch', () => {
           icon: 'empty',
           id,
           label: id,
-          groupLabel: `${id}Group`,
+          sortPriority: 1,
+          description: faker.lorem.sentence(),
         })),
         getVisualizationTypeId: jest.fn((state) => state.type),
         getSuggestions: jest.fn((options) => {
@@ -224,7 +227,7 @@ describe('chart_switch', () => {
     }
   ) => {
     const { store, ...rtlRender } = renderWithReduxStore(
-      <ChartSwitch
+      <ChartSwitchPopover
         framePublicAPI={frame}
         visualizationMap={visualizationMap}
         datasourceMap={datasourceMap}

@@ -202,7 +202,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       organizationId,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId,
-      elasticsearchUrl: decodedId?.elasticsearchUrl,
+      elasticsearchUrl: core.elasticsearch.publicBaseUrl || decodedId?.elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,

@@ -42,9 +42,9 @@ export class JobDetailsUI extends Component {
   }
 
   componentDidMount() {
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     // load groups to populate the select options
-    ml.jobs
+    mlApi.jobs
       .groups()
       .then((resp) => {
         const groups = resp.map((g) => ({ label: g.id, color: tabColor(g.id) }));

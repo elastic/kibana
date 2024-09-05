@@ -11,15 +11,17 @@ import { riskEngineStatusRoute } from './status';
 import { riskEnginePrivilegesRoute } from './privileges';
 import { riskEngineSettingsRoute } from './settings';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { riskEngineScheduleNowRoute } from './schedule_now';
 
 export const registerRiskEngineRoutes = ({
   router,
   getStartServices,
 }: EntityAnalyticsRoutesDeps) => {
-  riskEngineStatusRoute(router);
+  riskEngineStatusRoute(router, getStartServices);
   riskEngineInitRoute(router, getStartServices);
   riskEngineEnableRoute(router, getStartServices);
   riskEngineDisableRoute(router, getStartServices);
+  riskEngineScheduleNowRoute(router, getStartServices);
   riskEngineSettingsRoute(router);
   riskEnginePrivilegesRoute(router, getStartServices);
 };

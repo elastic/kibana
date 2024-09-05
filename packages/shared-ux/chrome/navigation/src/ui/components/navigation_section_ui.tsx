@@ -342,7 +342,7 @@ function nodeToEuiCollapsibleNavProps(
   if (renderAs === 'panelOpener') {
     // Render as a panel opener (button to open a panel as a second navigation)
     return {
-      items: [...renderPanelOpener(navNode, deps)],
+      items: [...renderPanelOpener(navNode, { spaceBefore, ...deps })],
       isVisible: true,
     };
   }

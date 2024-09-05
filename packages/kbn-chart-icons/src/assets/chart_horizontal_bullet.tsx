@@ -9,31 +9,17 @@
 import React from 'react';
 import type { EuiIconProps } from '@elastic/eui';
 import { colors } from './common_styles';
+import { ChartIconWrapper } from './icon_simple_wrapper';
 
-export const IconChartHorizontalBullet = ({
-  title,
-  titleId,
-  ...props
-}: Omit<EuiIconProps, 'type'>) => {
-  return (
-    <svg
-      width="30"
-      height="22"
-      viewBox="0 0 30 22"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-labelledby={titleId}
-      {...props}
-    >
-      {title ? <title id={titleId}>{title}</title> : null}
-      <path
-        className={colors.subdued}
-        d="M1 13a1 1 0 00-1 1v2a1 1 0 102 0v-1h5v1a1 1 0 102 0v-1h5v1a1 1 0 102 0v-1h5v1a1 1 0 102 0v-1h5v1a1 1 0 102 0v-2a1 1 0 00-1-1H1z"
-      />
-      <path
-        className={colors.accent}
-        d="M0 6a1 1 0 011-1h24a1 1 0 011 1v4a1 1 0 01-1 1H1a1 1 0 01-1-1V6z"
-      />
-    </svg>
-  );
-};
+export const IconChartHorizontalBullet = (props: Omit<EuiIconProps, 'type'>) => (
+  <ChartIconWrapper {...props}>
+    <path
+      className={colors.subdued}
+      d="M1 13a1 1 0 00-1 1v2a1 1 0 102 0v-1h5v1a1 1 0 102 0v-1h5v1a1 1 0 102 0v-1h5v1a1 1 0 102 0v-1h5v1a1 1 0 102 0v-2a1 1 0 00-1-1H1z"
+    />
+    <path
+      className={colors.accent}
+      d="M0 6a1 1 0 011-1h24a1 1 0 011 1v4a1 1 0 01-1 1H1a1 1 0 01-1-1V6z"
+    />
+  </ChartIconWrapper>
+);

@@ -24,6 +24,7 @@ import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import { removeRiskScoringTask, startRiskScoringTask } from '../risk_score/tasks';
 import { RiskEngineAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
+import { getRiskScoringTaskStatus, scheduleNow } from '../risk_score/tasks/risk_scoring_task';
 
 interface InitOpts {
   namespace: string;
@@ -109,10 +110,21 @@ export class RiskEngineDataClient {
       savedObjectsClient: this.options.soClient,
     });
 
-  public async getStatus({ namespace }: { namespace: string }) {
+  public async getStatus({
+    namespace,
+    taskManager,
+  }: {
+    namespace: string;
+    taskManager?: TaskManagerStartContract;
+  }) {
     const riskEngineStatus = await this.getCurrentStatus();
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
     const isMaxAmountOfRiskEnginesReached = await this.getIsMaxAmountOfRiskEnginesReached();
+
+    const taskStatus =
+      riskEngineStatus === 'ENABLED' && taskManager
+        ? await getRiskScoringTaskStatus({ namespace, taskManager })
+        : undefined;
 
     this.options.auditLogger?.log({
       message: 'User checked if the risk engine is enabled',
@@ -124,7 +136,12 @@ export class RiskEngineDataClient {
       },
     });
 
-    return { riskEngineStatus, legacyRiskEngineStatus, isMaxAmountOfRiskEnginesReached };
+    return {
+      riskEngineStatus,
+      legacyRiskEngineStatus,
+      isMaxAmountOfRiskEnginesReached,
+      taskStatus,
+    };
   }
 
   public async enableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
@@ -196,6 +213,32 @@ export class RiskEngineDataClient {
       attributes: {
         enabled: false,
       },
+    });
+  }
+
+  public async scheduleNow({ taskManager }: { taskManager: TaskManagerStartContract }) {
+    const riskEngineStatus = await this.getCurrentStatus();
+
+    if (riskEngineStatus !== 'ENABLED') {
+      throw new Error(
+        `The risk engine must be enable to schedule a run. Current status: ${riskEngineStatus}`
+      );
+    }
+
+    this.options.auditLogger?.log({
+      message: 'User scheduled a risk engine run',
+      event: {
+        action: RiskEngineAuditActions.RISK_ENGINE_SCHEDULE_NOW,
+        category: AUDIT_CATEGORY.DATABASE,
+        type: AUDIT_TYPE.ACCESS,
+        outcome: AUDIT_OUTCOME.SUCCESS,
+      },
+    });
+
+    return scheduleNow({
+      taskManager,
+      namespace: this.options.namespace,
+      logger: this.options.logger,
     });
   }
 

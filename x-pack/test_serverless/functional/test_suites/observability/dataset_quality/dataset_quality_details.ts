@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'navigationalSearch',
     'observabilityLogsExplorer',
     'datasetQuality',
-    'svlCommonNavigation',
     'svlCommonPage',
   ]);
   const testSubjects = getService('testSubjects');
@@ -375,7 +374,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const rows =
           await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
-        expect(rows.length).to.eql(2);
+        expect(rows.length).to.eql(3);
       });
 
       it('should display Spark Plot for every row of degraded fields', async () => {

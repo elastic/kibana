@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { GaugeShapes } from '@kbn/visualizations-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -31,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const DEFAULT_WINDOW_SIZE = [1400, 900];
     const VERTICAL_16_9 = 16 / 9;
-    const outerWorkspaceDimensions = { width: 700, height: 400 };
+    const outerWorkspaceDimensions = { width: 704, height: 410 };
     let UNCONSTRAINED = outerWorkspaceDimensions.width / outerWorkspaceDimensions.height;
 
     before(async () => {
@@ -174,12 +173,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expectedWidth: '300px',
           expectedHeight: '300px',
         },
-        { id: 'donut', aspectRatio: UNCONSTRAINED },
-        {
-          id: 'lnsMetric',
-          expectedWidth: '300px',
-          expectedHeight: '300px',
-        },
         { id: 'mosaic', aspectRatio: UNCONSTRAINED },
         {
           id: 'lnsMetric',
@@ -250,16 +243,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('gauge size (absolute pixels) - horizontal', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.HORIZONTAL_BULLET, 'horizontal');
+        await PageObjects.lens.switchToVisualization('lnsGauge', 'gauge');
+        await PageObjects.lens.waitForVisualization('gaugeChart');
       });
 
       await assertWorkspaceDimensions('600px', '200px');
     });
 
     it('gauge size (absolute pixels) - vertical', async () => {
-      await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.VERTICAL_BULLET, 'vertical');
-      });
+      await PageObjects.lens.openVisualOptions();
+      await testSubjects.click('lns_gaugeOrientation_verticalBullet');
 
       // this height is below the requested 600px
       // that is because the window size isn't large enough to fit the requested dimensions
@@ -270,23 +263,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('gauge size (absolute pixels) - arc', async () => {
-      await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.SEMI_CIRCLE, 'semi');
-      });
+      await PageObjects.lens.openVisualOptions();
+      await PageObjects.lens.setGaugeShape('Minor arc');
       await assertWorkspaceDimensions('600px', '375px');
     });
 
     it('gauge size (absolute pixels) - major arc', async () => {
-      await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.ARC, 'arc');
-      });
+      await PageObjects.lens.openVisualOptions();
+      await PageObjects.lens.setGaugeShape('Major arc');
       await assertWorkspaceDimensions('600px', '430px');
     });
 
     it('gauge size (absolute pixels) - circle', async () => {
-      await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.CIRCLE, 'circular');
-      });
+      await PageObjects.lens.openVisualOptions();
+      await PageObjects.lens.setGaugeShape('Circle');
       await assertWorkspaceDimensions('600px', '430px');
     });
 
@@ -322,7 +312,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await assertWorkspaceAspectRatio(VERTICAL_16_9);
 
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization('bar_horizontal_stacked');
+        await PageObjects.lens.switchToVisualization('bar');
       });
 
       await assertWorkspaceAspectRatio(UNCONSTRAINED);

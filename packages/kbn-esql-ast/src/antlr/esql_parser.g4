@@ -1,23 +1,26 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 // DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.
 
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 parser grammar esql_parser;
 
-options {tokenVocab=esql_lexer;}
+@header {
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+}
+
+options {
+  superClass=parser_config;
+  tokenVocab=esql_lexer;
+}
 
 singleStatement
     : query EOF
@@ -31,28 +34,30 @@ query
 sourceCommand
     : explainCommand
     | fromCommand
-    | rowCommand
-    | metricsCommand
-    | showCommand
     | metaCommand
+    | rowCommand
+    | showCommand
+    // in development
+    | {this.isDevVersion()}? metricsCommand
     ;
 
 processingCommand
     : evalCommand
-    | inlinestatsCommand
-    | limitCommand
-    | lookupCommand
-    | keepCommand
-    | sortCommand
-    | statsCommand
     | whereCommand
+    | keepCommand
+    | limitCommand
+    | statsCommand
+    | sortCommand
     | dropCommand
     | renameCommand
     | dissectCommand
     | grokCommand
     | enrichCommand
     | mvExpandCommand
-    | matchCommand
+    // in development
+    | {this.isDevVersion()}? inlinestatsCommand
+    | {this.isDevVersion()}? lookupCommand
+    | {this.isDevVersion()}? matchCommand
     ;
 
 whereCommand
@@ -63,11 +68,11 @@ booleanExpression
     : NOT booleanExpression                                                      #logicalNot
     | valueExpression                                                            #booleanDefault
     | regexBooleanExpression                                                     #regexExpression
-    | matchBooleanExpression                                                     #matchExpression
     | left=booleanExpression operator=AND right=booleanExpression                #logicalBinary
     | left=booleanExpression operator=OR right=booleanExpression                 #logicalBinary
     | valueExpression (NOT)? IN LP valueExpression (COMMA valueExpression)* RP   #logicalIn
     | valueExpression IS NOT? NULL                                               #isNull
+    | {this.isDevVersion()}? matchBooleanExpression                              #matchExpression
     ;
 
 regexBooleanExpression
@@ -76,7 +81,7 @@ regexBooleanExpression
     ;
 
 matchBooleanExpression
-    : qualifiedName MATCH_OPERATOR queryString=string
+    : valueExpression DEV_MATCH queryString=string
     ;
 
 valueExpression
@@ -152,7 +157,7 @@ deprecated_metadata
     ;
 
 metricsCommand
-    : METRICS indexPattern (COMMA indexPattern)* aggregates=fields? (BY grouping=fields)?
+    : DEV_METRICS indexPattern (COMMA indexPattern)* aggregates=fields? (BY grouping=fields)?
     ;
 
 evalCommand
@@ -162,11 +167,6 @@ evalCommand
 statsCommand
     : STATS stats=fields? (BY grouping=fields)?
     ;
-
-inlinestatsCommand
-    : INLINESTATS stats=fields (BY grouping=fields)?
-    ;
-
 
 qualifiedName
     : identifier (DOT identifier)*
@@ -304,12 +304,19 @@ enrichWithClause
     : (newName=qualifiedNamePattern ASSIGN)? enrichField=qualifiedNamePattern
     ;
 
+//
+// In development
+//
 lookupCommand
-    : LOOKUP tableName=indexPattern ON matchFields=qualifiedNamePatterns
+    : DEV_LOOKUP tableName=indexPattern ON matchFields=qualifiedNamePatterns
+    ;
+
+inlinestatsCommand
+    : DEV_INLINESTATS stats=fields (BY grouping=fields)?
     ;
 
 matchCommand
-    : MATCH matchQuery
+    : DEV_MATCH matchQuery
     ;
 
 matchQuery

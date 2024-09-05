@@ -9753,22 +9753,6 @@
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.EmbeddableContainerSettings.untilContainerInitialized",
-            "type": "Function",
-            "tags": [],
-            "label": "untilContainerInitialized",
-            "description": [],
-            "signature": [
-              "(() => Promise<void>) | undefined"
-            ],
-            "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -13733,57 +13717,6 @@
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy",
-            "type": "Object",
-            "tags": [],
-            "label": "legacy",
-            "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.getDisplayName",
-                "type": "Function",
-                "tags": [],
-                "label": "getDisplayName",
-                "description": [],
-                "signature": [
-                  "() => string"
-                ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.order",
-                "type": "number",
-                "tags": [],
-                "label": "order",
-                "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "embeddable",
             "id": "def-public.COMMON_EMBEDDABLE_GROUPING.annotation",
             "type": "Object",
             "tags": [],
@@ -13819,6 +13752,17 @@
                 "trackAdoption": false,
                 "children": [],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.annotation.order",
+                "type": "number",
+                "tags": [],
+                "label": "order",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -13879,6 +13823,57 @@
               {
                 "parentPluginId": "embeddable",
                 "id": "def-public.COMMON_EMBEDDABLE_GROUPING.other.order",
+                "type": "number",
+                "tags": [],
+                "label": "order",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy",
+            "type": "Object",
+            "tags": [],
+            "label": "legacy",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.getDisplayName",
+                "type": "Function",
+                "tags": [],
+                "label": "getDisplayName",
+                "description": [],
+                "signature": [
+                  "() => string"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.order",
                 "type": "number",
                 "tags": [],
                 "label": "order",
@@ -14862,6 +14857,14 @@
             },
             {
               "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.ts"
+            },
+            {
+              "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
             },
             {
@@ -14895,6 +14898,26 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
             },
             {
               "plugin": "dashboard",

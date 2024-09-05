@@ -15,6 +15,7 @@ export { InfraSynthtraceKibanaClient } from './src/lib/infra/infra_synthtrace_ki
 export { MonitoringSynthtraceEsClient } from './src/lib/monitoring/monitoring_synthtrace_es_client';
 export { LogsSynthtraceEsClient } from './src/lib/logs/logs_synthtrace_es_client';
 export { AssetsSynthtraceEsClient } from './src/lib/assets/assets_synthtrace_es_client';
+export { SyntheticsSynthtraceEsClient } from './src/lib/synthetics/synthetics_synthtrace_es_client';
 export {
   addObserverVersionTransform,
   deleteSummaryFieldTransform,

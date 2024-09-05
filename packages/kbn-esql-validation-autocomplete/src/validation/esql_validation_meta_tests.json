@@ -160,63 +160,63 @@
     {
       "query": "eval",
       "error": [
-        "SyntaxError: mismatched input 'eval' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+        "SyntaxError: mismatched input 'eval' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "stats",
       "error": [
-        "SyntaxError: mismatched input 'stats' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+        "SyntaxError: mismatched input 'stats' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "rename",
       "error": [
-        "SyntaxError: mismatched input 'rename' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+        "SyntaxError: mismatched input 'rename' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "limit",
       "error": [
-        "SyntaxError: mismatched input 'limit' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+        "SyntaxError: mismatched input 'limit' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "keep",
       "error": [
-        "SyntaxError: mismatched input 'keep' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+        "SyntaxError: mismatched input 'keep' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "drop",
       "error": [
-        "SyntaxError: mismatched input 'drop' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+        "SyntaxError: mismatched input 'drop' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "mv_expand",
       "error": [
-        "SyntaxError: mismatched input 'mv_expand' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+        "SyntaxError: mismatched input 'mv_expand' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "dissect",
       "error": [
-        "SyntaxError: mismatched input 'dissect' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+        "SyntaxError: mismatched input 'dissect' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "grok",
       "error": [
-        "SyntaxError: mismatched input 'grok' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+        "SyntaxError: mismatched input 'grok' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
@@ -2252,28 +2252,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
@@ -37672,14 +37672,14 @@
     {
       "query": "f",
       "error": [
-        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "from ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
       ],
       "warning": []
     },
@@ -37851,14 +37851,14 @@
     {
       "query": "from index,",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
       ],
       "warning": []
     },
     {
       "query": "FROM index\n, \tother_index\t,\n \t ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
       ],
       "warning": []
     },

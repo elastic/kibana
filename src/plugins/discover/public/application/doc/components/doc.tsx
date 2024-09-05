@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import type { EsDocSearchProps } from '@kbn/unified-doc-viewer-plugin/public/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { SingleDocViewer } from './single_doc_viewer';
@@ -43,7 +44,7 @@ export function Doc(props: DocProps) {
   }, [profilesManager, core, dataView]);
 
   const onProcessRecord = useCallback(
-    (record) => {
+    (record: DataTableRecord) => {
       return profilesManager.resolveDocumentProfile({ record });
     },
     [profilesManager]

@@ -72,7 +72,7 @@ export const openEditControlGroupFlyout = (
           Object.keys(controlGroupApi.children$.getValue()).forEach((childId) => {
             controlGroupApi.removePanel(childId);
           });
-        closeOverlay(ref);
+        ref.close();
       });
   };
 

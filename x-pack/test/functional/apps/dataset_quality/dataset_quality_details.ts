@@ -371,7 +371,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         const rows =
           await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
-        expect(rows.length).to.eql(2);
+        expect(rows.length).to.eql(3);
       });
 
       it('should display Spark Plot for every row of degraded fields', async () => {

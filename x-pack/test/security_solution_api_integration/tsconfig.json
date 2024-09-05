@@ -49,6 +49,6 @@
     "@kbn/dev-cli-runner",
     "@kbn/search-types",
     "@kbn/security-plugin",
-    "@kbn/test-suites-src",
+    "@kbn/ftr-common-functional-ui-services",
   ]
 }

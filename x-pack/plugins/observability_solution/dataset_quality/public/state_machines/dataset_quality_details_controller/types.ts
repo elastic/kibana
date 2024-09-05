@@ -13,6 +13,7 @@ import {
   DataStreamSettings,
   DegradedField,
   DegradedFieldResponse,
+  DegradedFieldValues,
   NonAggregatableDatasets,
 } from '../../../common/api_types';
 import { TableCriteria, TimeRangeConfig } from '../../../common/types';
@@ -43,6 +44,7 @@ export interface WithDefaultControllerState {
   isBreakdownFieldEcs?: boolean;
   isIndexNotFoundError?: boolean;
   integration?: Integration;
+  expandedDegradedField?: string;
 }
 
 export interface WithDataStreamDetails {
@@ -72,6 +74,10 @@ export interface WithDataStreamSettings {
 export interface WithIntegration {
   integration: Integration;
   integrationDashboards?: Dashboard[];
+}
+
+export interface WithDegradedFieldValues {
+  degradedFieldValues: DegradedFieldValues;
 }
 
 export type DefaultDatasetQualityDetailsContext = Pick<
@@ -111,6 +117,14 @@ export type DatasetQualityDetailsControllerTypeState =
       context: WithDefaultControllerState & WithDegradedFieldsData;
     }
   | {
+      value: 'initializing.initializeFixItFlow.ignoredValues.fetching';
+      context: WithDefaultControllerState & WithDegradedFieldsData;
+    }
+  | {
+      value: 'initializing.initializeFixItFlow.ignoredValues.done';
+      context: WithDefaultControllerState & WithDegradedFieldsData & WithDegradedFieldValues;
+    }
+  | {
       value:
         | 'initializing.dataStreamSettings.initializeIntegrations'
         | 'initializing.dataStreamSettings.initializeIntegrations.integrationDetails.fetching'
@@ -134,6 +148,13 @@ export type DatasetQualityDetailsControllerEvent =
       timeRange: TimeRangeConfig;
     }
   | {
+      type: 'OPEN_DEGRADED_FIELD_FLYOUT';
+      fieldName: string | undefined;
+    }
+  | {
+      type: 'CLOSE_DEGRADED_FIELD_FLYOUT';
+    }
+  | {
       type: 'BREAKDOWN_FIELD_CHANGE';
       breakdownField: string | undefined;
     }
@@ -146,6 +167,7 @@ export type DatasetQualityDetailsControllerEvent =
   | DoneInvokeEvent<Error>
   | DoneInvokeEvent<boolean>
   | DoneInvokeEvent<DegradedFieldResponse>
+  | DoneInvokeEvent<DegradedFieldValues>
   | DoneInvokeEvent<DataStreamSettings>
   | DoneInvokeEvent<Integration>
   | DoneInvokeEvent<Dashboard[]>;

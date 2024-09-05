@@ -37,11 +37,7 @@ import type {
 } from '../../../../../../../../../common/types/anomaly_detection_jobs';
 import type { DatafeedValidationResponse } from '../../../../../../../../../common/types/job_validation';
 
-import {
-  useMlKibana,
-  useMlApiContext,
-  useNavigateToPath,
-} from '../../../../../../../contexts/kibana';
+import { useMlKibana, useMlApi, useNavigateToPath } from '../../../../../../../contexts/kibana';
 
 const fixedPageSize: number = 8;
 
@@ -63,7 +59,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
     },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
-  const { validateDatafeedPreview } = useMlApiContext();
+  const { validateDatafeedPreview } = useMlApi();
 
   const { jobCreator: jc } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;

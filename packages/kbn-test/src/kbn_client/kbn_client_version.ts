@@ -19,6 +19,13 @@ export class KbnClientVersion {
     }
 
     const status = await this.status.get();
+
+    if (!status.version) {
+      throw new Error(
+        `Unable to get version from Kibana, invalid response from server: ${JSON.stringify(status)}`
+      );
+    }
+
     this.versionCache = status.version.number + (status.version.build_snapshot ? '-SNAPSHOT' : '');
     return this.versionCache;
   }

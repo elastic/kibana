@@ -1722,6 +1722,8 @@ export const functions = {
 
   ### LOCATE
   Returns an integer that indicates the position of a keyword substring within another string.
+  Returns \`0\` if the substring cannot be found.
+  Note that string positions start from \`1\`.
 
   \`\`\`
   row a = "hello"

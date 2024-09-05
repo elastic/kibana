@@ -1,0 +1,15 @@
+## TO_GEOPOINT
+
+Converts an input value to a `geo_point` value. A string will only be successfully converted if it respects the WKT Point format.
+
+### Examples
+
+```esql
+ROW wkt = "POINT(42.97109630194 14.7552534413725)"
+| EVAL pt = TO_GEOPOINT(wkt)
+```
+
+```esql
+ROW wkt = "POINT(34.052235 -118.243683)"
+| EVAL pt = TO_GEOPOINT(wkt)
+```

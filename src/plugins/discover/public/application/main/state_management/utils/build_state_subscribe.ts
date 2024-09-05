@@ -25,6 +25,7 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../../common/data_sources';
+import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
 
 /**
  * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL
@@ -160,6 +161,11 @@ export const buildStateSubscribe =
         '[buildStateSubscribe] state changes triggers data fetching',
         JSON.stringify(logData, null, 2)
       );
+
+      // Set documents loading to true immediately on state changes since there's a delay
+      // on the fetch and we don't want to see state changes reflected in the data grid
+      // until the fetch is complete (it also helps to minimize data grid re-renders)
+      sendLoadingMsg(dataState.data$.documents$, dataState.data$.documents$.getValue());
 
       dataState.fetch();
     }

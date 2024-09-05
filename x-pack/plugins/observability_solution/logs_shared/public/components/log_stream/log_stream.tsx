@@ -24,7 +24,7 @@ import { LogViewsClient } from '../../services/log_views';
 import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
 import { useKibanaQuerySettings } from '../../utils/use_kibana_query_settings';
 import { useLogEntryFlyout } from '../logging/log_entry_flyout';
-import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
+import { ScrollableLogTextStreamView, VisibleInterval } from '../logging/log_text_stream';
 import { LogStreamErrorBoundary } from './log_stream_error_boundary';
 
 interface LogStreamPluginDeps {
@@ -251,7 +251,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
 
   // Pagination handler
   const handlePagination = useCallback(
-    ({ fromScroll, pagesBeforeStart, pagesAfterEnd }) => {
+    ({ fromScroll, pagesBeforeStart, pagesAfterEnd }: VisibleInterval) => {
       if (!fromScroll) {
         return;
       }

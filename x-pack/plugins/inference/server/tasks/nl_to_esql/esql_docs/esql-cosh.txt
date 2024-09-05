@@ -1,0 +1,15 @@
+## COSH
+
+Returns the hyperbolic cosine of an angle.
+
+### Examples
+
+```esql
+ROW a=1.8
+| EVAL cosh = COSH(a)
+```
+
+```esql
+ROW angle=0.5
+| EVAL hyperbolic_cosine = COSH(angle)
+```

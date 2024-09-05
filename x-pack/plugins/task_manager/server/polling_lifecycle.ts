@@ -222,6 +222,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       usageCounter: this.usageCounter,
       eventLoopDelayConfig: { ...this.config.event_loop_delay },
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
+      strategy: this.config.claim_strategy,
     });
   };
 

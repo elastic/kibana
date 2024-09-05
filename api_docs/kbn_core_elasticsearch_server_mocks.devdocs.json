@@ -22,7 +22,7 @@
         "label": "MockedElasticSearchServiceSetup",
         "description": [],
         "signature": [
-          "{ setUnauthorizedErrorHandler: jest.MockInstance<void, [handler: ",
+          "{ readonly publicBaseUrl?: string | undefined; setUnauthorizedErrorHandler: jest.MockInstance<void, [handler: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
             "scope": "server",

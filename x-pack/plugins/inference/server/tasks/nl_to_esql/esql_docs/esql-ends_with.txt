@@ -1,0 +1,17 @@
+## ENDS_WITH
+
+The `ENDS_WITH` function returns a boolean that indicates whether a keyword string ends with another string.
+
+### Examples
+
+```esql
+FROM employees
+| KEEP last_name
+| EVAL ln_E = ENDS_WITH(last_name, "d")
+```
+
+```esql
+FROM employees
+| KEEP first_name
+| EVAL fn_E = ENDS_WITH(first_name, "a")
+```

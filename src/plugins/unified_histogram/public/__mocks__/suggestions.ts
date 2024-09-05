@@ -134,7 +134,7 @@ export const currentSuggestionMock = {
 } as Suggestion;
 
 export const histogramESQLSuggestionMock = {
-  title: 'Bar vertical stacked',
+  title: 'Bar',
   score: 0.16666666666666666,
   hide: false,
   incomplete: false,

@@ -121,7 +121,6 @@ export function ControlGroup({
       paddingSize="none"
       color={draggingId ? 'success' : 'transparent'}
       className="controlsWrapper"
-      data-test-subj="controls-group-wrapper"
     >
       <EuiFlexGroup
         gutterSize="s"

@@ -85,7 +85,7 @@ export class ResultsLoader {
     this._chartInterval = chartInterval;
     this._results$ = new BehaviorSubject(this._results);
     this._chartLoader = chartLoader;
-    this._mlResultsService = mlResultsServiceProvider(jobCreator.mlApiServices);
+    this._mlResultsService = mlResultsServiceProvider(jobCreator.mlApi);
 
     jobCreator.subscribeToProgress(this.progressSubscriber);
   }
@@ -242,7 +242,7 @@ export class ResultsLoader {
 
   private async _loadDetectorsAnomalyData(): Promise<Record<number, Anomaly[]>> {
     const resp = await getScoresByRecord(
-      this._jobCreator.mlApiServices,
+      this._jobCreator.mlApi,
       this._jobCreator.jobId,
       this._jobCreator.start,
       this._jobCreator.end,

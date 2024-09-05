@@ -1,0 +1,16 @@
+## LENGTH
+
+The `LENGTH` function returns the character length of a string. If the input string is null, the function returns null.
+
+### Examples
+
+```esql
+FROM employees
+| KEEP first_name, last_name
+| EVAL fn_length = LENGTH(first_name)
+```
+
+```esql
+ROW message = "Hello, World!"
+| EVAL message_length = LENGTH(message)
+```

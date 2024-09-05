@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await PageObjects.lens.removeDimension('lnsDatatable_rows');
-      await PageObjects.lens.switchToVisualization('bar_stacked');
+      await PageObjects.lens.switchToVisualization('area');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.getLayerType(0)).to.eql('Line');
       // expect first layer to be line, second layer to be bar chart
-      expect(await PageObjects.lens.getLayerType(1)).to.eql('Bar vertical stacked');
+      expect(await PageObjects.lens.getLayerType(1)).to.eql('Bar');
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
@@ -165,7 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.createLayer('data', undefined, 'bar');
-      expect(await PageObjects.lens.getLayerType(1)).to.eql('Bar vertical');
+      expect(await PageObjects.lens.getLayerType(1)).to.eql('Bar');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -181,13 +181,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // only changes one layer for compatible chart
       await PageObjects.lens.switchToVisualization('line', undefined, 1);
-      expect(await PageObjects.lens.getLayerType(0)).to.eql('Bar vertical stacked');
+      expect(await PageObjects.lens.getLayerType(0)).to.eql('Bar');
       expect(await PageObjects.lens.getLayerType(1)).to.eql('Line');
-
-      // changes all layers for multilayer chart
-      await PageObjects.lens.switchToVisualization('bar_horizontal_stacked', undefined, 0);
-      expect(await PageObjects.lens.getLayerType(0)).to.eql('Bar horizontal stacked');
-      expect(await PageObjects.lens.getLayerType(1)).to.eql('Bar horizontal stacked');
 
       // generates new one layer chart based on selected layer
       await PageObjects.lens.switchToVisualization('pie', undefined, 1);
@@ -308,18 +303,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
-      await PageObjects.lens.openVisualOptions();
+      await PageObjects.lens.openTextOptions();
       await testSubjects.click('lns_valueLabels_inside');
 
       // check for value labels
-      let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-      expect(data?.bars?.[0].labels).not.to.eql(0);
-
-      // switch to stacked bar chart
-      await PageObjects.lens.switchToVisualization('bar_stacked');
-
-      // check for value labels
-      data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.bars?.[0].labels).not.to.eql(0);
     });
 
@@ -383,13 +371,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should transition from line chart to donut chart and to bar chart', async () => {
+    it('should transition from line chart to pie chart and to bar chart', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
-      expect(await PageObjects.lens.hasChartSwitchWarning('donut')).to.eql(true);
-      await PageObjects.lens.switchToVisualization('donut');
+      expect(await PageObjects.lens.hasChartSwitchWarning('pie')).to.eql(true);
+      await PageObjects.lens.switchToVisualization('pie');
 
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
@@ -402,7 +390,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('bar')).to.eql(false);
       await PageObjects.lens.switchToVisualization('bar');
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
         'Top 3 values of ip'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
@@ -798,10 +786,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.removeFilter('extension.raw');
     });
 
-    it('should show visual options button group for a donut chart', async () => {
+    it('should show visual options button group for a pie chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.switchToVisualization('donut');
+      await PageObjects.lens.switchToVisualization('pie');
 
       const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
       expect(hasVisualOptionsButton).to.be(true);
@@ -810,15 +798,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await PageObjects.lens.hasEmptySizeRatioButtonGroup()).to.be(true);
       });
-    });
-
-    it('should not show visual options button group for a pie chart', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.switchToVisualization('pie');
-
-      const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
-      expect(hasVisualOptionsButton).to.be(false);
     });
 
     it('should allow edit meta-data for Lens chart on listing page', async () => {

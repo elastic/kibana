@@ -8,6 +8,7 @@
 import { processVertexStreamMock } from './gemini_adapter.test.mocks';
 import { PassThrough } from 'stream';
 import { noop, tap, lastValueFrom, toArray, Subject } from 'rxjs';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import { MessageRole } from '../../../../common/chat_complete';
@@ -15,6 +16,7 @@ import { ToolChoiceType } from '../../../../common/chat_complete/tools';
 import { geminiAdapter } from './gemini_adapter';
 
 describe('geminiAdapter', () => {
+  const logger = loggerMock.create();
   const executorMock = {
     invoke: jest.fn(),
   } as InferenceExecutor & { invoke: jest.MockedFn<InferenceExecutor['invoke']> };
@@ -47,6 +49,7 @@ describe('geminiAdapter', () => {
 
     it('calls `executor.invoke` with the right fixed parameters', () => {
       geminiAdapter.chatComplete({
+        logger,
         executor: executorMock,
         messages: [
           {
@@ -75,6 +78,7 @@ describe('geminiAdapter', () => {
 
     it('correctly format tools', () => {
       geminiAdapter.chatComplete({
+        logger,
         executor: executorMock,
         messages: [
           {
@@ -138,6 +142,7 @@ describe('geminiAdapter', () => {
 
     it('correctly format messages', () => {
       geminiAdapter.chatComplete({
+        logger,
         executor: executorMock,
         messages: [
           {
@@ -236,6 +241,7 @@ describe('geminiAdapter', () => {
 
     it('groups messages from the same user', () => {
       geminiAdapter.chatComplete({
+        logger,
         executor: executorMock,
         messages: [
           {
@@ -304,6 +310,7 @@ describe('geminiAdapter', () => {
 
     it('correctly format system message', () => {
       geminiAdapter.chatComplete({
+        logger,
         executor: executorMock,
         system: 'Some system message',
         messages: [
@@ -322,6 +329,7 @@ describe('geminiAdapter', () => {
 
     it('correctly format tool choice', () => {
       geminiAdapter.chatComplete({
+        logger,
         executor: executorMock,
         messages: [
           {
@@ -340,6 +348,7 @@ describe('geminiAdapter', () => {
 
     it('correctly format tool choice for named function', () => {
       geminiAdapter.chatComplete({
+        logger,
         executor: executorMock,
         messages: [
           {
@@ -366,11 +375,12 @@ describe('geminiAdapter', () => {
         return {
           actionId: '',
           status: 'ok',
-          data: observableIntoEventSourceStream(source$),
+          data: observableIntoEventSourceStream(source$, logger),
         };
       });
 
       const response$ = geminiAdapter.chatComplete({
+        logger,
         executor: executorMock,
         messages: [
           {

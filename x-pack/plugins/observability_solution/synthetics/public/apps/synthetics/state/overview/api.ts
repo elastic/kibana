@@ -13,8 +13,9 @@ import {
   OverviewStatus,
   OverviewStatusCodec,
 } from '../../../../../common/runtime_types';
+import type { TrendRequest, TrendTable } from '../../../../../common/types';
 import { apiService } from '../../../../utils/api_service';
-import { MonitorOverviewPageState } from './models';
+import type { MonitorOverviewPageState } from './models';
 
 function toMonitorOverviewQueryArgs(
   pageState: MonitorOverviewPageState
@@ -58,3 +59,6 @@ export const fetchOverviewStatus = async (
   const params = toStatusOverviewQueryArgs(pageState);
   return apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, params, OverviewStatusCodec);
 };
+
+export const fetchOverviewTrendStats = async (monitors: TrendRequest[]): Promise<TrendTable> =>
+  monitors.length ? apiService.post(SYNTHETICS_API_URLS.OVERVIEW_TRENDS, monitors) : {};

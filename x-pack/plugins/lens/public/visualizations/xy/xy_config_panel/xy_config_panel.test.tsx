@@ -6,30 +6,19 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
-import { EuiButtonGroupProps, EuiButtonGroup } from '@elastic/eui';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { XyToolbar } from '.';
-import { DataDimensionEditor } from './dimension_editor';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { FramePublicAPI, DatasourcePublicAPI } from '../../../types';
+import { FramePublicAPI, DatasourcePublicAPI, VisualizationToolbarProps } from '../../../types';
 import { State, XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { EuiColorPicker } from '@elastic/eui';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { act } from 'react-dom/test-utils';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
-
-  return {
-    ...original,
-    debounce: (fn: unknown) => fn,
-  };
-});
-
-describe('XY Config panels', () => {
+describe('XY Toolbar', () => {
   let frame: FramePublicAPI;
 
   function testState(): State {
@@ -44,7 +33,7 @@ describe('XY Config panels', () => {
           layerId: 'first',
           splitAccessor: 'baz',
           xAccessor: 'foo',
-          accessors: ['bar'],
+          accessors: ['one'],
         },
       ],
     };
@@ -57,54 +46,98 @@ describe('XY Config panels', () => {
     };
   });
 
-  describe('XyToolbar', () => {
-    it('should disable the popover if there is no right axis', () => {
-      const state = testState();
-      const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
+  const renderToolbar = (
+    overrideProps?: Partial<
+      VisualizationToolbarProps<XYState> & {
+        useLegacyTimeAxis?: boolean;
+      }
+    >
+  ) => {
+    const state = testState();
+    const rtlRender = render(
+      <XyToolbar
+        frame={frame}
+        setState={jest.fn()}
+        state={state}
+        {...overrideProps}
+        useLegacyTimeAxis={false}
+      />
+    );
+    return rtlRender;
+  };
 
-      expect(component.find(AxisSettingsPopover).at(2).prop('isDisabled')).toEqual(true);
+  const getRightAxisButton = () => screen.getByRole('button', { name: 'Right axis' });
+  const getLeftAxisButton = () => screen.getByRole('button', { name: 'Left axis' });
+  const getBottomAxisButton = () => screen.getByRole('button', { name: 'Bottom axis' });
+  const queryTitlesAndTextButton = () => screen.queryByRole('button', { name: 'Titles and text' });
+
+  describe('Titles and text settings', () => {
+    it.each<{ seriesType: string[]; disallowed?: boolean }>([
+      { seriesType: ['bar'] },
+      { seriesType: ['bar_horizontal'] },
+      { seriesType: ['bar_horizontal', 'line', 'area'] },
+      { seriesType: ['bar_horizontal', 'bar'] },
+      { seriesType: ['area'], disallowed: true },
+      { seriesType: ['line'], disallowed: true },
+      { seriesType: ['line', 'area'], disallowed: true },
+    ])(
+      `should show titles and text settings when seriesType is $seriesType when bar series exist`,
+      ({ seriesType, disallowed = false }) => {
+        const state = testState();
+        seriesType.forEach((type, i) => {
+          state.layers[i] = { ...state.layers[0], seriesType: type } as XYDataLayerConfig;
+        });
+        renderToolbar({ state });
+
+        if (disallowed) {
+          expect(queryTitlesAndTextButton()).not.toBeInTheDocument();
+        } else {
+          expect(queryTitlesAndTextButton()).toBeInTheDocument();
+        }
+      }
+    );
+  });
+  describe('Axis settings', () => {
+    it('should disable the popover if there is no right axis', () => {
+      renderToolbar();
+      expect(screen.getByRole('button', { name: 'Right axis' })).toBeDisabled();
     });
 
     it('should enable the popover if there is right axis', () => {
       const state = testState();
-      const component = shallow(
-        <XyToolbar
-          frame={frame}
-          setState={jest.fn()}
-          state={{
-            ...state,
-            layers: [
-              {
-                ...state.layers[0],
-                yConfig: [{ axisMode: 'right', forAccessor: 'bar' }],
-              } as XYDataLayerConfig,
-            ],
-          }}
-        />
-      );
+      renderToolbar({
+        state: {
+          ...state,
+          layers: [
+            {
+              ...state.layers[0],
+              yConfig: [{ axisMode: 'right', forAccessor: 'one' }],
+            } as XYDataLayerConfig,
+          ],
+        },
+      });
 
-      expect(component.find(AxisSettingsPopover).at(2).prop('isDisabled')).toEqual(false);
+      expect(getRightAxisButton()).toBeEnabled();
     });
 
-    it('should render the AxisSettingsPopover 3 times', () => {
+    it('should render the settings for all 3 axes', () => {
       const state = testState();
-      const component = shallow(
-        <XyToolbar
-          frame={frame}
-          setState={jest.fn()}
-          state={{
-            ...state,
-            layers: [
-              {
-                ...state.layers[0],
-                yConfig: [{ axisMode: 'right', forAccessor: 'foo' }],
-              } as XYDataLayerConfig,
-            ],
-          }}
-        />
-      );
+      renderToolbar({
+        state: {
+          ...state,
+          layers: [
+            {
+              ...state.layers[0],
+              accessors: ['one', 'two'],
+              yConfig: [{ axisMode: 'right', forAccessor: 'bar' }],
+            } as XYDataLayerConfig,
+          ],
+        },
+      });
 
-      expect(component.find(AxisSettingsPopover).length).toEqual(3);
+      expect(getLeftAxisButton()).toBeInTheDocument();
+      expect(getBottomAxisButton()).toBeEnabled();
+      expect(getRightAxisButton()).toBeEnabled();
     });
 
     it('should pass in endzone visibility setter and current sate for time chart', () => {
@@ -113,27 +146,33 @@ describe('XY Config panels', () => {
         dataType: 'date',
       });
       const state = testState();
-      const component = shallow(
-        <XyToolbar
-          frame={frame}
-          setState={jest.fn()}
-          state={{
-            ...state,
-            hideEndzones: true,
-            layers: [
-              {
-                ...state.layers[0],
-                yConfig: [{ axisMode: 'right', forAccessor: 'foo' }],
-              } as XYDataLayerConfig,
-            ],
-          }}
-        />
-      );
+      renderToolbar({
+        frame,
+        state: {
+          ...state,
+          layers: [
+            {
+              ...state.layers[0],
+              accessors: ['one', 'two'],
+              yConfig: [{ axisMode: 'right', forAccessor: 'one' }],
+            } as XYDataLayerConfig,
+          ],
+        },
+      });
 
-      expect(component.find(AxisSettingsPopover).at(0).prop('setEndzoneVisibility')).toBeFalsy();
-      expect(component.find(AxisSettingsPopover).at(1).prop('setEndzoneVisibility')).toBeTruthy();
-      expect(component.find(AxisSettingsPopover).at(1).prop('endzonesVisible')).toBe(false);
-      expect(component.find(AxisSettingsPopover).at(2).prop('setEndzoneVisibility')).toBeFalsy();
+      userEvent.click(getRightAxisButton());
+      expect(
+        within(screen.getByRole('dialog', { name: 'Right axis' })).queryByTestId('lnsshowEndzones')
+      ).not.toBeInTheDocument();
+
+      userEvent.click(getBottomAxisButton());
+      expect(
+        within(screen.getByRole('dialog', { name: 'Bottom axis' })).queryByTestId('lnsshowEndzones')
+      ).toBeInTheDocument();
+      userEvent.click(getLeftAxisButton());
+      expect(
+        within(screen.getByRole('dialog', { name: 'Left axis' })).queryByTestId('lnsshowEndzones')
+      ).not.toBeInTheDocument();
     });
 
     it('should pass in current time marker visibility setter and current state for time chart', () => {
@@ -172,61 +211,57 @@ describe('XY Config panels', () => {
       frame.activeData = {
         first: {
           type: 'datatable',
-          rows: [{ bar: -5 }, { bar: 50 }],
+          rows: [{ one: -5 }, { one: 50 }],
           columns: [
             {
-              id: 'baz',
+              id: 'one',
               meta: {
                 type: 'number',
               },
-              name: 'baz',
-            },
-            {
-              id: 'foo',
-              meta: {
-                type: 'number',
-              },
-              name: 'foo',
-            },
-            {
-              id: 'bar',
-              meta: {
-                type: 'number',
-              },
-              name: 'bar',
+              name: 'one',
             },
           ],
         },
       };
-      const component = shallow(
+
+      render(
         <XyToolbar
           frame={frame}
           setState={jest.fn()}
           state={{
             ...state,
+            preferredSeriesType: 'line',
             yLeftExtent: {
-              mode: 'custom',
-              lowerBound: 123,
-              upperBound: 456,
+              mode: 'dataBounds',
             },
           }}
         />
       );
-
-      expect(component.find(AxisSettingsPopover).at(0).prop('dataBounds')).toEqual({
-        min: -5,
-        max: 50,
-      });
+      userEvent.click(getLeftAxisButton());
+      fireEvent.click(screen.getByTestId('lnsXY_axisExtent_groups_custom'));
+      expect(screen.getByTestId('lnsXY_axisExtent_lowerBound')).toHaveValue(-5);
+      expect(screen.getByTestId('lnsXY_axisExtent_upperBound')).toHaveValue(50);
     });
 
     it('should pass in extent information', () => {
       const state = testState();
-      const component = shallow(
+      render(
         <XyToolbar
           frame={frame}
           setState={jest.fn()}
           state={{
             ...state,
+            preferredSeriesType: 'line',
+            layers: [
+              {
+                ...state.layers[0],
+                accessors: ['one', 'two'],
+                yConfig: [
+                  { axisMode: 'right', forAccessor: 'two' },
+                  { axisMode: 'left', forAccessor: 'one' },
+                ],
+              } as XYDataLayerConfig,
+            ],
             yLeftExtent: {
               mode: 'custom',
               lowerBound: 123,
@@ -235,237 +270,16 @@ describe('XY Config panels', () => {
           }}
         />
       );
+      userEvent.click(getLeftAxisButton());
+      expect(screen.getByTestId('lnsXY_axisExtent_lowerBound')).toHaveValue(123);
+      expect(screen.getByTestId('lnsXY_axisExtent_upperBound')).toHaveValue(456);
+      userEvent.click(getRightAxisButton());
+      const selectedButton = getSelectedButtonInGroup(
+        'lnsXY_axisBounds_groups',
+        within(screen.getByRole('dialog', { name: 'Right axis' }))
+      )();
 
-      expect(component.find(AxisSettingsPopover).at(0).prop('extent')).toEqual({
-        mode: 'custom',
-        lowerBound: 123,
-        upperBound: 456,
-      });
-      expect(component.find(AxisSettingsPopover).at(0).prop('setExtent')).toBeTruthy();
-      expect(component.find(AxisSettingsPopover).at(1).prop('extent')).toBeFalsy();
-      expect(component.find(AxisSettingsPopover).at(1).prop('setExtent')).toBeTruthy();
-      // default extent
-      expect(component.find(AxisSettingsPopover).at(2).prop('extent')).toEqual({
-        mode: 'full',
-      });
-      expect(component.find(AxisSettingsPopover).at(2).prop('setExtent')).toBeTruthy();
-    });
-  });
-
-  describe('Dimension Editor', () => {
-    test('shows the correct axis side options when in horizontal mode', () => {
-      const state = testState();
-      const component = mount(
-        <DataDimensionEditor
-          layerId={state.layers[0].layerId}
-          frame={frame}
-          setState={jest.fn()}
-          accessor="bar"
-          groupId="left"
-          state={{
-            ...state,
-            layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
-          }}
-          formatFactory={jest.fn()}
-          paletteService={chartPluginMock.createPaletteRegistry()}
-          panelRef={React.createRef()}
-          addLayer={jest.fn()}
-          removeLayer={jest.fn()}
-          datasource={{} as DatasourcePublicAPI}
-          isDarkMode={false}
-        />
-      );
-
-      const options = component
-        .find(EuiButtonGroup)
-        .first()
-        .prop('options') as EuiButtonGroupProps['options'];
-
-      expect(options!.map(({ label }) => label)).toEqual(['Bottom', 'Auto', 'Top']);
-    });
-
-    test('shows the default axis side options when not in horizontal mode', () => {
-      const state = testState();
-      const component = mount(
-        <DataDimensionEditor
-          layerId={state.layers[0].layerId}
-          frame={frame}
-          setState={jest.fn()}
-          accessor="bar"
-          groupId="left"
-          state={state}
-          formatFactory={jest.fn()}
-          paletteService={chartPluginMock.createPaletteRegistry()}
-          panelRef={React.createRef()}
-          addLayer={jest.fn()}
-          removeLayer={jest.fn()}
-          datasource={{} as DatasourcePublicAPI}
-          isDarkMode={false}
-        />
-      );
-
-      const options = component
-        .find(EuiButtonGroup)
-        .first()
-        .prop('options') as EuiButtonGroupProps['options'];
-
-      expect(options!.map(({ label }) => label)).toEqual(['Left', 'Auto', 'Right']);
-    });
-
-    test('sets the color of a dimension to the color from palette service if not set explicitly', () => {
-      const state = {
-        ...testState(),
-        layers: [
-          {
-            seriesType: 'bar',
-            layerType: LayerTypes.DATA,
-            layerId: 'first',
-            splitAccessor: undefined,
-            xAccessor: 'foo',
-            accessors: ['bar'],
-          },
-        ],
-      } as XYState;
-      const component = mount(
-        <DataDimensionEditor
-          layerId={state.layers[0].layerId}
-          frame={{
-            ...frame,
-            activeData: {
-              first: {
-                type: 'datatable',
-                columns: [],
-                rows: [{ bar: 123 }],
-              },
-            },
-          }}
-          setState={jest.fn()}
-          accessor="bar"
-          groupId="left"
-          state={state}
-          formatFactory={jest.fn()}
-          paletteService={chartPluginMock.createPaletteRegistry()}
-          panelRef={React.createRef()}
-          addLayer={jest.fn()}
-          removeLayer={jest.fn()}
-          datasource={{} as DatasourcePublicAPI}
-          isDarkMode={false}
-        />
-      );
-
-      expect(component.find(EuiColorPicker).prop('color')).toEqual('black');
-    });
-
-    test('uses the overwrite color if set', () => {
-      const state = {
-        ...testState(),
-        layers: [
-          {
-            seriesType: 'bar',
-            layerType: LayerTypes.DATA,
-            layerId: 'first',
-            splitAccessor: undefined,
-            xAccessor: 'foo',
-            accessors: ['bar'],
-            yConfig: [{ forAccessor: 'bar', color: 'red' }],
-          },
-        ],
-      } as XYState;
-
-      const component = mount(
-        <DataDimensionEditor
-          layerId={state.layers[0].layerId}
-          frame={{
-            ...frame,
-            activeData: {
-              first: {
-                type: 'datatable',
-                columns: [],
-                rows: [{ bar: 123 }],
-              },
-            },
-          }}
-          setState={jest.fn()}
-          accessor="bar"
-          groupId="left"
-          state={state}
-          formatFactory={jest.fn()}
-          paletteService={chartPluginMock.createPaletteRegistry()}
-          panelRef={React.createRef()}
-          addLayer={jest.fn()}
-          removeLayer={jest.fn()}
-          datasource={{} as DatasourcePublicAPI}
-          isDarkMode={false}
-        />
-      );
-
-      expect(component.find(EuiColorPicker).prop('color')).toEqual('red');
-    });
-    test('does not apply incorrect color', () => {
-      const setState = jest.fn();
-      const state = {
-        ...testState(),
-        layers: [
-          {
-            seriesType: 'bar',
-            layerType: LayerTypes.DATA,
-            layerId: 'first',
-            splitAccessor: undefined,
-            xAccessor: 'foo',
-            accessors: ['bar'],
-            yConfig: [{ forAccessor: 'bar', color: 'red' }],
-          },
-        ],
-      } as XYState;
-
-      const component = mount(
-        <DataDimensionEditor
-          layerId={state.layers[0].layerId}
-          frame={{
-            ...frame,
-            activeData: {
-              first: {
-                type: 'datatable',
-                columns: [],
-                rows: [{ bar: 123 }],
-              },
-            },
-          }}
-          setState={setState}
-          accessor="bar"
-          groupId="left"
-          state={state}
-          formatFactory={jest.fn()}
-          paletteService={chartPluginMock.createPaletteRegistry()}
-          panelRef={React.createRef()}
-          addLayer={jest.fn()}
-          removeLayer={jest.fn()}
-          datasource={{} as DatasourcePublicAPI}
-          isDarkMode={false}
-        />
-      );
-
-      act(() => {
-        component
-          .find('input[data-test-subj="euiColorPickerAnchor indexPattern-dimension-colorPicker"]')
-          .simulate('change', {
-            target: { value: 'INCORRECT_COLOR' },
-          });
-      });
-      component.update();
-      expect(component.find(EuiColorPicker).prop('color')).toEqual('INCORRECT_COLOR');
-      expect(setState).not.toHaveBeenCalled();
-
-      act(() => {
-        component
-          .find('input[data-test-subj="euiColorPickerAnchor indexPattern-dimension-colorPicker"]')
-          .simulate('change', {
-            target: { value: '666666' },
-          });
-      });
-      component.update();
-      expect(component.find(EuiColorPicker).prop('color')).toEqual('666666');
-      expect(setState).toHaveBeenCalled();
+      expect(selectedButton).toHaveTextContent('Full');
     });
   });
 });

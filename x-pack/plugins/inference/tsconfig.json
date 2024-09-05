@@ -10,6 +10,7 @@
     "typings/**/*",
     "public/**/*.json",
     "server/**/*",
+    "scripts/**/*",
     ".storybook/**/*"
   ],
   "exclude": [
@@ -23,6 +24,16 @@
     "@kbn/core-http-server",
     "@kbn/actions-plugin",
     "@kbn/config-schema",
-    "@kbn/stack-connectors-plugin"
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-ast",
+    "@kbn/dev-cli-runner",
+    "@kbn/babel-register",
+    "@kbn/expect",
+    "@kbn/tooling-log",
+    "@kbn/es-types",
+    "@kbn/field-types",
+    "@kbn/expressions-plugin",
+    "@kbn/logging-mocks",
+    "@kbn/repo-info"
   ]
 }

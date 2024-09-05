@@ -117,7 +117,7 @@ export const Assignees: FC<AssigneesProps> = memo(
       return (
         <EuiPopover
           panelPaddingSize="none"
-          initialFocus={`#${searchInputId}`}
+          initialFocus={`[id="${searchInputId}"]`}
           button={
             <UpdateAssigneesButton
               togglePopover={togglePopover}

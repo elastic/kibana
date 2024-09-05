@@ -114,8 +114,8 @@ export class EditFilterListUI extends Component {
   };
 
   loadFilterList = (filterId) => {
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
-    ml.filters
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
+    mlApi.filters
       .filters({ filterId })
       .then((filter) => {
         this.setLoadedFilterState(filter);
@@ -286,7 +286,7 @@ export class EditFilterListUI extends Component {
     const filterId = this.props.filterId !== undefined ? this.props.filterId : newFilterId;
     saveFilterList(
       this.props.kibana.services.notifications.toasts,
-      this.props.kibana.services.mlServices.mlApiServices,
+      this.props.kibana.services.mlServices.mlApi,
       filterId,
       description,
       items,

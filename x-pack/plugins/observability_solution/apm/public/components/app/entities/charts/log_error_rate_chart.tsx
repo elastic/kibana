@@ -94,7 +94,7 @@ export function LogErrorRateChart({ height }: { height: number }) {
                     formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
                     description={
                       <FormattedMessage
-                        defaultMessage="% of logs where error detected for given {serviceName}."
+                        defaultMessage="Rate of error logs per minute observed for given {serviceName}."
                         id="xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description"
                         values={{
                           serviceName: (

@@ -21,7 +21,7 @@ export default meta;
 
 const defaultProps: ComponentStoryObj<typeof Component> = {
   args: {},
-  render: (props) => <Component user={mockAuthenticatedUser()} investigationId="123" />,
+  render: (props) => <Component user={mockAuthenticatedUser()} />,
 };
 
 export const InvestigateViewStory: ComponentStoryObj<typeof Component> = {

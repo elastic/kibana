@@ -10,20 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { UiActionsPresentableGroup } from '@kbn/ui-actions-plugin/public';
 
 export const COMMON_EMBEDDABLE_GROUPING: { [key: string]: UiActionsPresentableGroup<unknown> } = {
-  legacy: {
-    id: 'legacy',
-    getDisplayName: () =>
-      i18n.translate('embeddableApi.common.constants.grouping.legacy', {
-        defaultMessage: 'Legacy',
-      }),
-    order: -2,
-  },
   annotation: {
     id: 'annotation-and-navigation',
     getDisplayName: () =>
       i18n.translate('embeddableApi.common.constants.grouping.annotations', {
         defaultMessage: 'Annotations and Navigation',
       }),
+    order: 900, // This is the order of the group in the context menu
   },
   other: {
     id: 'other',
@@ -32,6 +25,14 @@ export const COMMON_EMBEDDABLE_GROUPING: { [key: string]: UiActionsPresentableGr
         defaultMessage: 'Other',
       }),
     getIconType: () => 'empty',
-    order: -1,
+    order: -1, // Given an item that doesn't specify a group is assigned zero, this forces other to come after all intentionally grouped section
+  },
+  legacy: {
+    id: 'legacy',
+    getDisplayName: () =>
+      i18n.translate('embeddableApi.common.constants.grouping.legacy', {
+        defaultMessage: 'Legacy',
+      }),
+    order: -2, // Given an item that doesn't specify a group is assigned zero, this forces it to the bottom of the list
   },
 };

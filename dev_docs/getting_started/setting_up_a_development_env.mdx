@@ -99,7 +99,7 @@ Kibana also supports using a [dev container](https://containers.dev/) which can 
 
 ### Setting up the Dev Container
 
-1. Make a copy of `.devcontainer/.env.template` and rename it to `.devcontainer/.env`. Edit any values you're interested in.
+1. Make a copy of [`<repo_root>/.devcontainer/.env.template`](https://github.com/elastic/kibana/blob/main/.devcontainer/.env.template) and rename it to `<repo_root>/.devcontainer/.env`. Edit any values you're interested in.
 1. There are three options for mounting the Kibana repo into the container:
     - **Local Filesystem**: Clone the repo locally, or use an existing copy, and open it in VS Code. When prompted, select "Reopen in Dev Container". This uses a bind mount, allowing the container to access and modify files directly on your local filesystem. Your git credentials should be automatically mounted in the container as well. Note that Bazel will create symlinks and a cache inside the container file system. So, if switching to working on your local filesystem afterwards, you will need to bootstrap again.
     - **Docker Repo Volume**: Use the `Dev Containers: Clone Repository in Named Container Volume...` command from the Command Palette (`F1`). This clones the repo into a Docker volume, isolating it from your local filesystem. You will need to configure your git credentials manually in this isolated environment.

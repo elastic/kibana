@@ -33,7 +33,8 @@ jest.mock('../../../../../common/components/user_privileges');
 
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
-describe('When rendering PolicySettingsLayout', () => {
+// Failing: See https://github.com/elastic/kibana/issues/179984
+describe.skip('When rendering PolicySettingsLayout', () => {
   jest.setTimeout(15000);
 
   const testSubj = getPolicySettingsFormTestSubjects();

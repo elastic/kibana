@@ -33,7 +33,7 @@ import {
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
-import { useMlApiContext, useMlKibana } from '../../../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 
 import { getIndexData, getIndexFields } from '../../../../common';
 
@@ -50,7 +50,7 @@ export const useOutlierData = (
       notifications: { toasts },
     },
   } = useMlKibana();
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
   const needsDestIndexFields =
     dataView !== undefined && dataView.title === jobConfig?.source.index[0];
 
@@ -59,7 +59,7 @@ export const useOutlierData = (
 
     if (jobConfig !== undefined && dataView !== undefined) {
       const resultsField = jobConfig.dest.results_field;
-      const { fieldTypes } = getIndexFields(ml, jobConfig, needsDestIndexFields);
+      const { fieldTypes } = getIndexFields(mlApi, jobConfig, needsDestIndexFields);
       newColumns.push(
         ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField!).sort((a: any, b: any) =>
           sortExplorationResultsFields(a.id, b.id, jobConfig)
@@ -92,7 +92,7 @@ export const useOutlierData = (
   // passed on to `getIndexData`.
   useEffect(() => {
     const options = { didCancel: false };
-    getIndexData(ml, jobConfig, dataGrid, searchQuery, options);
+    getIndexData(mlApi, jobConfig, dataGrid, searchQuery, options);
     return () => {
       options.didCancel = true;
     };
@@ -101,7 +101,7 @@ export const useOutlierData = (
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
-    () => (dataView !== undefined ? new DataLoader(dataView, ml) : undefined),
+    () => (dataView !== undefined ? new DataLoader(dataView, mlApi) : undefined),
     // skip ml API services from deps check
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dataView]

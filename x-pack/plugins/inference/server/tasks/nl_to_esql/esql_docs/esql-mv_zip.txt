@@ -1,0 +1,17 @@
+## MV_ZIP
+
+The `MV_ZIP` function combines the values from two multivalued fields with a delimiter that joins them together.
+
+### Examples
+
+```esql
+ROW a = ["x", "y", "z"], b = ["1", "2"]
+| EVAL c = mv_zip(a, b, "-")
+| KEEP a, b, c
+```
+
+```esql
+ROW names = ["Alice", "Bob", "Charlie"], ids = ["001", "002", "003"]
+| EVAL combined = mv_zip(names, ids, ":")
+| KEEP names, ids, combined
+```

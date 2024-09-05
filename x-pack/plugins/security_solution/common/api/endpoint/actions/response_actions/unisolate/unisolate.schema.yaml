@@ -5,9 +5,9 @@ info:
 paths:
   /api/endpoint/action/unisolate:
     post:
-      summary: Unisolate Action
+      summary: Release an isolated endpoint
       operationId: EndpointUnisolateAction
-      description: Release an endpoint
+      description: Release an isolated endpoint, allowing it to rejoin a network.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       requestBody:

@@ -142,7 +142,7 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
   );
 
   const onChangeTimezone = useCallback(
-    (value) => {
+    (value: Array<{ label: string }>) => {
       setSelectedTimezone(value);
       if (value[0].label) updateTimeframe({ timezone: value[0].label });
     },

@@ -193,6 +193,7 @@ export const RangeSliderControl: FC<Props> = ({
         min={displayedMin}
         max={displayedMax}
         isLoading={isLoading}
+        compressed
         inputPopoverProps={{
           className: controlPanelClassName,
           panelMinWidth: MIN_POPOVER_WIDTH,

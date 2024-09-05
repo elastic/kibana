@@ -22,6 +22,7 @@ import {
   DataStreamDetails,
   DataStreamSettings,
   DegradedFieldResponse,
+  DegradedFieldValues,
   NonAggregatableDatasets,
 } from '../../../common/api_types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
@@ -175,6 +176,15 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       target: 'done',
                       actions: ['storeDegradedFieldTableOptions'],
                     },
+                    OPEN_DEGRADED_FIELD_FLYOUT: {
+                      target:
+                        '#DatasetQualityDetailsController.initializing.initializeFixItFlow.ignoredValues',
+                      actions: ['storeExpandedDegradedField'],
+                    },
+                    CLOSE_DEGRADED_FIELD_FLYOUT: {
+                      target: 'done',
+                      actions: ['storeExpandedDegradedField'],
+                    },
                   },
                 },
               },
@@ -267,6 +277,42 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 },
               },
             },
+            initializeFixItFlow: {
+              initial: 'closed',
+              type: 'parallel',
+              states: {
+                ignoredValues: {
+                  initial: 'fetching',
+                  states: {
+                    fetching: {
+                      invoke: {
+                        src: 'loadDegradedFieldValues',
+                        onDone: {
+                          target: 'done',
+                          actions: ['storeDegradedFieldValues'],
+                        },
+                        onError: [
+                          {
+                            target: '#DatasetQualityDetailsController.indexNotFound',
+                            cond: 'isIndexNotFoundError',
+                          },
+                          {
+                            target: 'done',
+                          },
+                        ],
+                      },
+                    },
+                    done: {
+                      on: {
+                        UPDATE_TIME_RANGE: {
+                          target: 'fetching',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         indexNotFound: {
@@ -317,6 +363,13 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               }
             : {};
         }),
+        storeDegradedFieldValues: assign((_, event: DoneInvokeEvent<DegradedFieldValues>) => {
+          return 'data' in event
+            ? {
+                degradedFieldValues: event.data,
+              }
+            : {};
+        }),
         storeDegradedFieldTableOptions: assign((context, event) => {
           return 'degraded_field_criteria' in event
             ? {
@@ -326,6 +379,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 },
               }
             : {};
+        }),
+        storeExpandedDegradedField: assign((context, event) => {
+          return {
+            expandedDegradedField: 'fieldName' in event ? event.fieldName : undefined,
+          };
         }),
         resetDegradedFieldPageAndRowsPerPage: assign((context, _event) => ({
           degradedFields: {
@@ -470,6 +528,13 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
           dataStream: context.dataStream,
           start,
           end,
+        });
+      },
+
+      loadDegradedFieldValues: (context) => {
+        return dataStreamDetailsClient.getDataStreamDegradedFieldValues({
+          dataStream: context.dataStream,
+          degradedField: context.expandedDegradedField!,
         });
       },
       loadDataStreamSettings: (context) => {

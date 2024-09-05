@@ -16,10 +16,10 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
           const { expectErrors } = await setup();
 
           await expectErrors('m', [
-            "SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}",
+            "SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'meta', 'row', 'show'}",
           ]);
           await expectErrors('metrics ', [
-            "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
           ]);
         });
 
@@ -61,10 +61,10 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
             const { expectErrors } = await setup();
 
             await expectErrors('metrics index,', [
-              "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
+              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
             ]);
             await expectErrors(`metrics index\n, \tother_index\t,\n \t `, [
-              "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
+              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
             ]);
           });
 

@@ -9,18 +9,10 @@
 import React from 'react';
 import { EuiIconProps } from '@elastic/eui';
 import { colors } from './common_styles';
+import { ChartIconWrapper } from './icon_simple_wrapper';
 
-export const IconChartTreemap = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => (
-  <svg
-    viewBox="0 0 30 22"
-    width={30}
-    height={22}
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-labelledby={titleId}
-    {...props}
-  >
-    {title ? <title id={titleId}>{title}</title> : null}
+export const IconChartTreemap = (props: Omit<EuiIconProps, 'type'>) => (
+  <ChartIconWrapper {...props}>
     <path
       d="M0 1a1 1 0 011-1h13a1 1 0 011 1v20a1 1 0 01-1 1H1a1 1 0 01-1-1V1z"
       className={colors.subdued}
@@ -33,5 +25,5 @@ export const IconChartTreemap = ({ title, titleId, ...props }: Omit<EuiIconProps
       d="M29 16H18a1 1 0 00-1 1v4a1 1 0 001 1h11a1 1 0 001-1v-4a1 1 0 00-1-1z"
       className={colors.subdued}
     />
-  </svg>
+  </ChartIconWrapper>
 );

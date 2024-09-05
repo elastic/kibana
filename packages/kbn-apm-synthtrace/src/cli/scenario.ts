@@ -7,7 +7,12 @@
  */
 
 import { Timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient, InfraSynthtraceEsClient, LogsSynthtraceEsClient } from '../..';
+import {
+  ApmSynthtraceEsClient,
+  InfraSynthtraceEsClient,
+  LogsSynthtraceEsClient,
+  SyntheticsSynthtraceEsClient,
+} from '../..';
 import { AssetsSynthtraceEsClient } from '../lib/assets/assets_synthtrace_es_client';
 import { Logger } from '../lib/utils/create_logger';
 import { ScenarioReturnType } from '../lib/utils/with_client';
@@ -18,6 +23,7 @@ interface EsClients {
   logsEsClient: LogsSynthtraceEsClient;
   infraEsClient: InfraSynthtraceEsClient;
   assetsEsClient: AssetsSynthtraceEsClient;
+  syntheticsEsClient: SyntheticsSynthtraceEsClient;
 }
 
 type Generate<TFields> = (options: {

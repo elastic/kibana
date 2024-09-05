@@ -35,5 +35,5 @@ export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
 export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;
 export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
 export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
-export type BedRockMessage = TypeOf<typeof BedrockMessageSchema>;
+export type BedrockMessage = TypeOf<typeof BedrockMessageSchema>;
 export type BedrockToolChoice = TypeOf<typeof BedrockToolChoiceSchema>;

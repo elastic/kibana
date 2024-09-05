@@ -12,7 +12,7 @@ import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IndexPatternTitle } from '../../../../../common/types/kibana';
-import type { MlApiServices } from '../../../services/ml_api_service';
+import type { MlApi } from '../../../services/ml_api_service';
 
 import type { FieldHistogramRequestConfig } from '../common/request';
 
@@ -24,7 +24,7 @@ export class DataLoader {
   private _indexPatternTitle: IndexPatternTitle = '';
   private _maxExamples: number = MAX_EXAMPLES_DEFAULT;
 
-  constructor(private _indexPattern: DataView, private _mlApiServices: MlApiServices) {
+  constructor(private _indexPattern: DataView, private _mlApi: MlApi) {
     this._runtimeMappings = this._indexPattern.getComputedFields().runtimeFields as RuntimeMappings;
     this._indexPatternTitle = _indexPattern.title;
   }
@@ -35,7 +35,7 @@ export class DataLoader {
     samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE,
     editorRuntimeMappings?: RuntimeMappings
   ): Promise<any[]> {
-    const stats = await this._mlApiServices.getVisualizerFieldHistograms({
+    const stats = await this._mlApi.getVisualizerFieldHistograms({
       indexPattern: this._indexPatternTitle,
       query,
       fields,

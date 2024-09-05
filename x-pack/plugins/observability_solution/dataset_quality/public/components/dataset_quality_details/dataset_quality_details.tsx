@@ -6,16 +6,20 @@
  */
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { useDatasetDetailsTelemetry, useDatasetQualityDetailsState } from '../../hooks';
 import { DataStreamNotFoundPrompt } from './index_not_found_prompt';
 import { Header } from './header';
 import { Overview } from './overview';
 import { Details } from './details';
 
+const DegradedFieldFlyout = dynamic(() => import('./degraded_field_flyout'));
+
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DatasetQualityDetails() {
-  const { isIndexNotFoundError, dataStream } = useDatasetQualityDetailsState();
+  const { isIndexNotFoundError, dataStream, expandedDegradedField } =
+    useDatasetQualityDetailsState();
   const { startTracking } = useDatasetDetailsTelemetry();
 
   useEffect(() => {
@@ -24,14 +28,17 @@ export default function DatasetQualityDetails() {
   return isIndexNotFoundError ? (
     <DataStreamNotFoundPrompt dataStream={dataStream} />
   ) : (
-    <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="datasetDetailsContainer">
-      <EuiFlexItem grow={false}>
-        <Header />
-        <EuiHorizontalRule />
-        <Overview />
-        <EuiHorizontalRule />
-        <Details />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="datasetDetailsContainer">
+        <EuiFlexItem grow={false}>
+          <Header />
+          <EuiHorizontalRule />
+          <Overview />
+          <EuiHorizontalRule />
+          <Details />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {expandedDegradedField && <DegradedFieldFlyout />}
+    </>
   );
 }

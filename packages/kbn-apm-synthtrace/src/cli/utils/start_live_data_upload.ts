@@ -25,9 +25,8 @@ export async function startLiveDataUpload({
 }) {
   const file = runOptions.file;
 
-  const { logger, apmEsClient, logsEsClient, infraEsClient, assetsEsClient } = await bootstrap(
-    runOptions
-  );
+  const { logger, apmEsClient, logsEsClient, infraEsClient, assetsEsClient, syntheticsEsClient } =
+    await bootstrap(runOptions);
 
   const scenario = await getScenario({ file, logger });
   const { generate } = await scenario({ ...runOptions, logger });
@@ -65,7 +64,7 @@ export async function startLiveDataUpload({
 
       const generatorsAndClients = generate({
         range: timerange(bucketFrom.getTime(), bucketTo.getTime()),
-        clients: { logsEsClient, apmEsClient, infraEsClient, assetsEsClient },
+        clients: { logsEsClient, apmEsClient, infraEsClient, assetsEsClient, syntheticsEsClient },
       });
 
       const generatorsAndClientsArray = castArray(generatorsAndClients);

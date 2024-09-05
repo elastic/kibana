@@ -92,7 +92,7 @@ describe('MaintenanceWindowsList', () => {
     const result = appMockRenderer.render(
       <MaintenanceWindowsList
         refreshData={() => {}}
-        loading={false}
+        isLoading={false}
         items={items}
         readOnly={false}
       />
@@ -125,7 +125,7 @@ describe('MaintenanceWindowsList', () => {
     const result = appMockRenderer.render(
       <MaintenanceWindowsList
         refreshData={() => {}}
-        loading={false}
+        isLoading={false}
         items={items}
         readOnly={true}
       />
@@ -142,7 +142,7 @@ describe('MaintenanceWindowsList', () => {
     const result = appMockRenderer.render(
       <MaintenanceWindowsList
         refreshData={refreshData}
-        loading={false}
+        isLoading={false}
         items={items}
         readOnly={false}
       />

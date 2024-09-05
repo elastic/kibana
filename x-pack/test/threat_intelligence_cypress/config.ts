@@ -6,9 +6,8 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-
+import { services } from './services';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('@kbn/test-suites-src/common/config')
@@ -19,6 +18,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
+
+    services,
 
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
