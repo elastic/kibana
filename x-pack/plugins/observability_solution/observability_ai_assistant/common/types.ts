@@ -101,6 +101,7 @@ export interface UserInstruction {
 export type UserInstructionOrPlainText = string | UserInstruction;
 
 export interface ObservabilityAIAssistantScreenContextRequest {
+  starterPrompts?: StarterPrompt[];
   screenDescription?: string;
   data?: Array<{
     name: string;
