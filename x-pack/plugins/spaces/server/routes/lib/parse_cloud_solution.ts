@@ -7,7 +7,7 @@
 
 import type { SolutionView } from '../../../common';
 
-export const CLOUD_TO_KIBANA_SOLUTION_MAP = new Map<string, SolutionView>([
+const CLOUD_TO_KIBANA_SOLUTION_MAP = new Map<string, SolutionView>([
   ['elasticsearch', 'es'],
   ['observability', 'oblt'],
   ['security', 'security'],
