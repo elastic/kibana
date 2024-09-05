@@ -40,10 +40,10 @@ export function createAddLogRateAnalysisEmbeddableAction(
           i18n.translate('xpack.aiops.navMenu.mlAppNameText', {
             defaultMessage: 'Machine Learning and Analytics',
           }),
-        getIconType: () => 'logLogRateAnalysis',
+        getIconType: () => 'logRateAnalysis',
       },
     ],
-    getIconType: () => 'logLogRateAnalysis',
+    getIconType: () => 'logRateAnalysis',
     getDisplayName: () =>
       i18n.translate('xpack.aiops.embeddableLogRateAnalysisDisplayName', {
         defaultMessage: 'Log rate analysis',
