@@ -7,13 +7,15 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { getParentApi } from '../parent_api';
 import { AddButton } from './add_button';
 import { TopNav } from './top_nav';
+import { lastSavedStateSessionStorage } from '../session_storage/last_saved_state';
+import { unsavedChangesSessionStorage } from '../session_storage/unsaved_changes';
 
 export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActionsStart }) => {
   const { cleanUp, componentApi, parentApi } = useMemo(() => {
@@ -48,6 +50,16 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
         <p>
           This example uses session storage to persist saved state and unsaved changes while a
           production implemenation may choose to persist state elsewhere.
+          <EuiButtonEmpty
+            color={'warning'}
+            onClick={() => {
+              lastSavedStateSessionStorage.clear();
+              unsavedChangesSessionStorage.clear();
+              window.location.reload();
+            }}
+          >
+            Reset
+          </EuiButtonEmpty>
         </p>
       </EuiCallOut>
 

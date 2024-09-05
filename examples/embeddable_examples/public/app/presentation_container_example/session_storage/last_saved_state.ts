@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LastSavedState } from './types';
+import { LastSavedState } from '../types';
 
 const SAVED_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.embeddables.presentationContainerExample.savedState';
@@ -19,16 +19,15 @@ export const DEFAULT_STATE: LastSavedState = {
   panelsState: [],
 };
 
-function load(): LastSavedState {
-  const savedState = sessionStorage.getItem(SAVED_STATE_SESSION_STORAGE_KEY);
-  return savedState ? JSON.parse(savedState) : { ...DEFAULT_STATE };
-}
-
-function save(state: LastSavedState) {
-  sessionStorage.setItem(SAVED_STATE_SESSION_STORAGE_KEY, JSON.stringify(state));
-}
-
-export const lastSavedState = {
-  load,
-  save,
+export const lastSavedStateSessionStorage = {
+  clear: () => {
+    sessionStorage.removeItem(SAVED_STATE_SESSION_STORAGE_KEY);
+  },
+  load: (): LastSavedState => {
+    const savedState = sessionStorage.getItem(SAVED_STATE_SESSION_STORAGE_KEY);
+    return savedState ? JSON.parse(savedState) : { ...DEFAULT_STATE };
+  },
+  save: (state: LastSavedState) => {
+    sessionStorage.setItem(SAVED_STATE_SESSION_STORAGE_KEY, JSON.stringify(state));
+  },
 };

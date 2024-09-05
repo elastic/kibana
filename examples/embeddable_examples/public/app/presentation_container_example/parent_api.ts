@@ -22,13 +22,13 @@ import {
   ViewMode,
   apiPublishesDataLoading,
 } from '@kbn/presentation-publishing';
-import { DEFAULT_STATE, lastSavedState } from './last_saved_state';
-import { unsavedChanges } from './unsaved_changes';
+import { DEFAULT_STATE, lastSavedStateSessionStorage } from './session_storage/last_saved_state';
+import { unsavedChangesSessionStorage } from './session_storage/unsaved_changes';
 import { LastSavedState, ParentApi, UnsavedChanges } from './types';
 
 export function getParentApi() {
-  const initialUnsavedChanges = unsavedChanges.load();
-  const initialSavedState = lastSavedState.load();
+  const initialUnsavedChanges = unsavedChangesSessionStorage.load();
+  const initialSavedState = lastSavedStateSessionStorage.load();
   let newPanels: Record<string, object> = {};
   const lastSavedState$ = new BehaviorSubject<
     LastSavedState & { panels: Array<{ id: string; type: string }> }
@@ -126,7 +126,7 @@ export function getParentApi() {
   );
 
   const unsavedChangesSubscription = unsavedChanges$.subscribe((nextUnsavedChanges) => {
-    unsavedChanges.save(nextUnsavedChanges ?? {});
+    unsavedChangesSessionStorage.save(nextUnsavedChanges ?? {});
   });
 
   return {
@@ -168,7 +168,7 @@ export function getParentApi() {
             return { id, type };
           }),
         });
-        lastSavedState.save(savedState);
+        lastSavedStateSessionStorage.save(savedState);
         saveNotification$.next();
       },
       panels$,
