@@ -36,7 +36,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
       );
       await userEvent.click(getByText('Alerts and rules'));
       await waitForEuiPopoverOpen();
-      userEvent.hover(getByText(ToggleFlyoutTranslations.openAlertContextPanelLabel));
+      await userEvent.hover(getByText(ToggleFlyoutTranslations.openAlertContextPanelLabel));
       await new Promise((r) => setTimeout(r, 250)); // wait for the default time for tooltips to show up
       await expect(
         queryByText('You need read-write access to Uptime to create alerts in this app.')
@@ -64,7 +64,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
       await userEvent.click(getByText('Alerts and rules'));
       await waitForEuiPopoverOpen();
 
-      userEvent.hover(
+      await userEvent.hover(
         screen
           .getByTestSubject('xpack.synthetics.openAlertContextPanel')
           .closest('span') as HTMLElement

@@ -555,7 +555,7 @@ describe('Event filter form', () => {
       expect(renderResult.getByTestId(tooltipIconSelector)).toBeInTheDocument();
       expect(renderResult.queryByTestId(tooltipTextSelector)).not.toBeInTheDocument();
 
-      userEvent.hover(renderResult.getByTestId(tooltipIconSelector));
+      await userEvent.hover(renderResult.getByTestId(tooltipIconSelector));
 
       expect(await renderResult.findByTestId(tooltipTextSelector)).toBeInTheDocument();
     });

@@ -56,7 +56,7 @@ describe('Manage ML Job', () => {
       await userEvent.click(anomalyDetectionBtn as HTMLElement);
       await waitForEuiPopoverOpen();
 
-      userEvent.hover(getByText(labels.ENABLE_ANOMALY_ALERT));
+      await userEvent.hover(getByText(labels.ENABLE_ANOMALY_ALERT));
       expect(
         await queryByText('You need write access to Uptime to create anomaly alerts.')
       ).toBeNull();
@@ -94,7 +94,7 @@ describe('Manage ML Job', () => {
       await userEvent.click(anomalyDetectionBtn as HTMLElement);
       await waitForEuiPopoverOpen();
 
-      userEvent.hover(
+      await userEvent.hover(
         screen.getByTestSubject('uptimeEnableAnomalyAlertBtn').closest('span') as HTMLElement
       );
       expect(

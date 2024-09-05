@@ -136,7 +136,7 @@ describe('When on the Event Filters list page', () => {
       expect(renderResult.getAllByTestId(`${prefix}-tooltipIcon`)).toHaveLength(2);
       expect(renderResult.queryByTestId(`${prefix}-tooltipText`)).not.toBeInTheDocument();
 
-      userEvent.hover(renderResult.getAllByTestId(`${prefix}-tooltipIcon`)[0]);
+      await userEvent.hover(renderResult.getAllByTestId(`${prefix}-tooltipIcon`)[0]);
 
       expect(await renderResult.findByTestId(`${prefix}-tooltipText`)).toBeInTheDocument();
       expect(renderResult.getByTestId(`${prefix}-tooltipText`).textContent).toContain(

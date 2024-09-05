@@ -300,7 +300,7 @@ describe('Dashboard link component', () => {
     );
 
     const link = screen.getByTestId('dashboardLink--foo');
-    userEvent.hover(link);
+    await userEvent.hover(link);
     const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
     expect(tooltip).toHaveTextContent('another dashboard'); // title
     expect(tooltip).toHaveTextContent('something awesome'); // description
@@ -358,7 +358,7 @@ describe('Dashboard link component', () => {
     );
     const link = screen.getByTestId('dashboardLink--foo');
     expect(link).toHaveTextContent(label);
-    userEvent.hover(link);
+    await userEvent.hover(link);
     const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
     expect(tooltip).toHaveTextContent(label);
   });

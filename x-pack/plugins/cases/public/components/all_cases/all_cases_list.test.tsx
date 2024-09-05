@@ -213,7 +213,11 @@ describe('AllCasesListGeneric', () => {
 
     appMockRenderer.render(<AllCasesList />);
 
-    userEvent.hover((await screen.findAllByTestId('case-user-profile-avatar-damaged_raccoon'))[0]);
+    await userEvent.hover(
+      (
+        await screen.findAllByTestId('case-user-profile-avatar-damaged_raccoon')
+      )[0]
+    );
 
     expect(await screen.findByText('damaged_raccoon@elastic.co')).toBeInTheDocument();
   });
@@ -221,7 +225,7 @@ describe('AllCasesListGeneric', () => {
   it('should show a tooltip with all tags when hovered', async () => {
     appMockRenderer.render(<AllCasesList />);
 
-    userEvent.hover((await screen.findAllByTestId('case-table-column-tags'))[0]);
+    await userEvent.hover((await screen.findAllByTestId('case-table-column-tags'))[0]);
 
     expect(await screen.findByTestId('case-table-column-tags-tooltip')).toBeTruthy();
   });

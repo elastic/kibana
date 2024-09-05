@@ -81,7 +81,7 @@ describe('IlmPhaseFilter', () => {
         </TestExternalProviders>
       );
 
-      userEvent.hover(screen.getByTestId('comboBoxSearchInput'));
+      await userEvent.hover(screen.getByTestId('comboBoxSearchInput'));
 
       await waitFor(() =>
         expect(screen.getByRole('tooltip')).toHaveTextContent(INDEX_LIFECYCLE_MANAGEMENT_PHASES)
@@ -120,7 +120,7 @@ describe('IlmPhaseFilter', () => {
 
         const searchInput = screen.getByTestId('comboBoxSearchInput');
         await userEvent.click(searchInput);
-        userEvent.hover(screen.getByText(option.toLowerCase()), { pointerEventsCheck: 0 });
+        await userEvent.hover(screen.getByText(option.toLowerCase()), { pointerEventsCheck: 0 });
 
         await waitFor(() =>
           expect(screen.getByRole('tooltip')).toHaveTextContent(tooltipDescription)
