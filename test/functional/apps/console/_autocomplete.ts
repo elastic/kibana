@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -17,17 +17,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
 
   async function runTemplateTest(type: string, template: string) {
-    await PageObjects.console.monaco.enterText(`{\n\t"type": "${type}",\n`);
+    await PageObjects.console.enterText(`{\n\t"type": "${type}",\n`);
     await PageObjects.console.sleepForDebouncePeriod();
     // Prompt autocomplete for 'settings'
-    await PageObjects.console.monaco.promptAutocomplete('s');
+    await PageObjects.console.promptAutocomplete('s');
 
     await retry.waitFor('autocomplete to be visible', () =>
-      PageObjects.console.monaco.isAutocompleteVisible()
+      PageObjects.console.isAutocompleteVisible()
     );
-    await PageObjects.console.monaco.pressEnter();
+    await PageObjects.console.pressEnter();
     await retry.try(async () => {
-      const request = await PageObjects.console.monaco.getEditorText();
+      const request = await PageObjects.console.getEditorText();
       log.debug(request);
       expect(request).to.contain(`${template}`);
     });
@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
       await PageObjects.console.skipTourIfExists();
-      await PageObjects.console.monaco.clearEditorText();
+      await PageObjects.console.clearEditorText();
       log.debug('setAutocompleteTrace true');
       await PageObjects.console.setAutocompleteTrace(true);
     });
@@ -51,19 +51,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should provide basic auto-complete functionality', async () => {
-      await PageObjects.console.monaco.enterText(`GET _search\n`);
-      await PageObjects.console.monaco.pressEnter();
-      await PageObjects.console.monaco.enterText(`{\n\t"query": {`);
-      await PageObjects.console.monaco.pressEnter();
+      await PageObjects.console.enterText(`GET _search\n`);
+      await PageObjects.console.pressEnter();
+      await PageObjects.console.enterText(`{\n\t"query": {`);
+      await PageObjects.console.pressEnter();
       await PageObjects.console.sleepForDebouncePeriod();
-      await PageObjects.console.monaco.promptAutocomplete();
-      expect(PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
+      await PageObjects.console.promptAutocomplete();
+      expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/186501
     describe.skip('Autocomplete behavior', () => {
       beforeEach(async () => {
-        await PageObjects.console.monaco.clearEditorText();
+        await PageObjects.console.clearEditorText();
       });
 
       it('HTTP methods', async () => {
@@ -76,19 +76,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         for (const [char, methods] of Object.entries(suggestions)) {
           await PageObjects.console.sleepForDebouncePeriod();
           log.debug('Key type "%s"', char);
-          await PageObjects.console.monaco.enterText(char);
+          await PageObjects.console.enterText(char);
 
           await retry.waitFor('autocomplete to be visible', () =>
-            PageObjects.console.monaco.isAutocompleteVisible()
+            PageObjects.console.isAutocompleteVisible()
           );
-          expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
+          expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
 
           for (const [i, method] of methods.entries()) {
-            expect(await PageObjects.console.monaco.getAutocompleteSuggestion(i)).to.be.eql(method);
+            expect(await PageObjects.console.getAutocompleteSuggestion(i)).to.be.eql(method);
           }
 
-          await PageObjects.console.monaco.pressEscape();
-          await PageObjects.console.monaco.clearEditorText();
+          await PageObjects.console.pressEscape();
+          await PageObjects.console.clearEditorText();
         }
       });
 
@@ -104,43 +104,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           for (const char of text) {
             await PageObjects.console.sleepForDebouncePeriod();
             log.debug('Key type "%s"', char);
-            await PageObjects.console.monaco.enterText(char);
+            await PageObjects.console.enterText(char);
           }
 
           await retry.waitFor('autocomplete to be visible', () =>
-            PageObjects.console.monaco.isAutocompleteVisible()
+            PageObjects.console.isAutocompleteVisible()
           );
-          expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
+          expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
 
           for (const [i, endpoint] of endpoints.entries()) {
-            expect(await PageObjects.console.monaco.getAutocompleteSuggestion(i)).to.be.eql(
+            expect(await PageObjects.console.getAutocompleteSuggestion(i)).to.be.eql(
               endpoint
             );
           }
 
-          await PageObjects.console.monaco.pressEscape();
-          await PageObjects.console.monaco.pressEnter();
+          await PageObjects.console.pressEscape();
+          await PageObjects.console.pressEnter();
         }
       });
 
       it('JSON autocompletion with placeholder fields', async () => {
-        await PageObjects.console.monaco.enterText('GET _search\n');
-        await PageObjects.console.monaco.enterText('{');
-        await PageObjects.console.monaco.pressEnter();
+        await PageObjects.console.enterText('GET _search\n');
+        await PageObjects.console.enterText('{');
+        await PageObjects.console.pressEnter();
 
         for (const char of '"ag') {
           await PageObjects.console.sleepForDebouncePeriod();
           log.debug('Key type "%s"', char);
-          await PageObjects.console.monaco.enterText(char);
+          await PageObjects.console.enterText(char);
         }
         await retry.waitFor('autocomplete to be visible', () =>
-          PageObjects.console.monaco.isAutocompleteVisible()
+          PageObjects.console.isAutocompleteVisible()
         );
-        expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
-        await PageObjects.console.monaco.pressEnter();
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+        await PageObjects.console.pressEnter();
         await PageObjects.console.sleepForDebouncePeriod();
 
-        expect((await PageObjects.console.monaco.getEditorText()).replace(/\s/g, '')).to.be.eql(
+        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.be.eql(
           `
 GET _search
 {
@@ -155,36 +155,36 @@ GET _search
       });
 
       it('Dynamic autocomplete', async () => {
-        await PageObjects.console.monaco.enterText('POST test/_doc\n{}');
+        await PageObjects.console.enterText('POST test/_doc\n{}');
         await PageObjects.console.clickPlay();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await PageObjects.console.getResponseStatus()).to.be('201');
 
-        await PageObjects.console.monaco.pressEnter();
+        await PageObjects.console.pressEnter();
         for (const char of 'POST t') {
           await PageObjects.console.sleepForDebouncePeriod();
           log.debug('Key type "%s"', char);
-          await PageObjects.console.monaco.enterText(char);
+          await PageObjects.console.enterText(char);
         }
         await retry.waitFor('autocomplete to be visible', () =>
-          PageObjects.console.monaco.isAutocompleteVisible()
+          PageObjects.console.isAutocompleteVisible()
         );
-        expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
 
-        expect(await PageObjects.console.monaco.getAutocompleteSuggestion(0)).to.be.eql('test');
+        expect(await PageObjects.console.getAutocompleteSuggestion(0)).to.be.eql('test');
       });
     });
 
     describe('anti-regression watchdogs', () => {
       beforeEach(async () => {
-        await PageObjects.console.monaco.clearEditorText();
+        await PageObjects.console.clearEditorText();
       });
 
       // flaky
       it.skip('should suppress auto-complete on arrow keys', async () => {
-        await PageObjects.console.monaco.enterText(`\nGET _search\nGET _search`);
-        await PageObjects.console.monaco.pressEnter();
+        await PageObjects.console.enterText(`\nGET _search\nGET _search`);
+        await PageObjects.console.pressEnter();
         const keyPresses = [
           'pressUp',
           'pressUp',
@@ -199,7 +199,7 @@ GET _search
           await PageObjects.console.sleepForDebouncePeriod();
           log.debug('Key', keyPress);
           await PageObjects.console.monaco[keyPress]();
-          expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(false);
+          expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
         }
       });
 
@@ -221,61 +221,61 @@ GET _search
         );
 
         for (const method of methods) {
-          await PageObjects.console.monaco.clearEditorText();
+          await PageObjects.console.clearEditorText();
 
           for (const char of method.slice(0, -1)) {
             await PageObjects.console.sleepForDebouncePeriod();
             log.debug('Key type "%s"', char);
-            await PageObjects.console.monaco.enterText(char); // e.g. 'P' -> 'Po' -> 'Pos'
+            await PageObjects.console.enterText(char); // e.g. 'P' -> 'Po' -> 'Pos'
             await retry.waitFor('autocomplete to be visible', () =>
-              PageObjects.console.monaco.isAutocompleteVisible()
+              PageObjects.console.isAutocompleteVisible()
             );
-            expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
+            expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
           }
 
           for (const char of [method.at(-1), ' ', '_']) {
             await PageObjects.console.sleepForDebouncePeriod();
             log.debug('Key type "%s"', char);
-            await PageObjects.console.monaco.enterText(char!); // e.g. 'Post ' -> 'Post _'
+            await PageObjects.console.enterText(char!); // e.g. 'Post ' -> 'Post _'
           }
 
           await retry.waitFor('autocomplete to be visible', () =>
-            PageObjects.console.monaco.isAutocompleteVisible()
+            PageObjects.console.isAutocompleteVisible()
           );
-          expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
+          expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
         }
       });
 
       it('should activate auto-complete for a single character immediately following a slash in URL', async () => {
-        await PageObjects.console.monaco.enterText('GET .kibana');
+        await PageObjects.console.enterText('GET .kibana');
 
         for (const char of ['/', '_']) {
           await PageObjects.console.sleepForDebouncePeriod();
           log.debug('Key type "%s"', char);
-          await PageObjects.console.monaco.enterText(char); // i.e. 'GET .kibana/' -> 'GET .kibana/_'
+          await PageObjects.console.enterText(char); // i.e. 'GET .kibana/' -> 'GET .kibana/_'
         }
 
         await retry.waitFor('autocomplete to be visible', () =>
-          PageObjects.console.monaco.isAutocompleteVisible()
+          PageObjects.console.isAutocompleteVisible()
         );
-        expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
       });
 
       it('should activate auto-complete for multiple indices after comma in URL', async () => {
-        await PageObjects.console.monaco.enterText('GET _cat/indices/.kibana');
+        await PageObjects.console.enterText('GET _cat/indices/.kibana');
 
         await PageObjects.console.sleepForDebouncePeriod();
         log.debug('Key type ","');
-        await PageObjects.console.monaco.enterText(','); // i.e. 'GET /_cat/indices/.kibana,'
+        await PageObjects.console.enterText(','); // i.e. 'GET /_cat/indices/.kibana,'
 
         await PageObjects.console.sleepForDebouncePeriod();
         log.debug('Key type Ctrl+SPACE');
-        await PageObjects.console.monaco.pressCtrlSpace();
+        await PageObjects.console.pressCtrlSpace();
 
         await retry.waitFor('autocomplete to be visible', () =>
-          PageObjects.console.monaco.isAutocompleteVisible()
+          PageObjects.console.isAutocompleteVisible()
         );
-        expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
       });
     });
 
@@ -333,8 +333,8 @@ GET _search
 
     describe('with conditional templates', () => {
       beforeEach(async () => {
-        await PageObjects.console.monaco.clearEditorText();
-        await PageObjects.console.monaco.enterText('POST _snapshot/test_repo\n');
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText('POST _snapshot/test_repo\n');
       });
 
       it('should insert fs template', async () => {
@@ -359,25 +359,25 @@ GET _search
       const indexName = `index_field_test-${Date.now()}-${Math.random()}`;
 
       before(async () => {
-        await PageObjects.console.monaco.clearEditorText();
+        await PageObjects.console.clearEditorText();
         // create an index with only 1 field
-        await PageObjects.console.monaco.enterText(`PUT ${indexName}/_doc/1\n{\n"test":1\n}`);
+        await PageObjects.console.enterText(`PUT ${indexName}/_doc/1\n{\n"test":1\n}`);
         await PageObjects.console.clickPlay();
       });
 
       after(async () => {
-        await PageObjects.console.monaco.clearEditorText();
+        await PageObjects.console.clearEditorText();
         // delete the test index
-        await PageObjects.console.monaco.enterText(`DELETE ${indexName}`);
+        await PageObjects.console.enterText(`DELETE ${indexName}`);
         await PageObjects.console.clickPlay();
       });
 
       it('fields autocomplete only shows fields of the index', async () => {
-        await PageObjects.console.monaco.clearEditorText();
-        await PageObjects.console.monaco.enterText('GET _search\n{\n"fields": ["');
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText('GET _search\n{\n"fields": ["');
 
-        expect(await PageObjects.console.monaco.getAutocompleteSuggestion(0)).to.be.eql('test');
-        expect(await PageObjects.console.monaco.getAutocompleteSuggestion(1)).to.be.eql(undefined);
+        expect(await PageObjects.console.getAutocompleteSuggestion(0)).to.be.eql('test');
+        expect(await PageObjects.console.getAutocompleteSuggestion(1)).to.be.eql(undefined);
       });
     });
   });

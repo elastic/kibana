@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -21,12 +21,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
       await PageObjects.console.skipTourIfExists();
-      await PageObjects.console.monaco.clearEditorText();
+      await PageObjects.console.clearEditorText();
     });
 
     it('displays the a11y overlay', async () => {
-      await PageObjects.console.monaco.pressEscape();
-      const isOverlayVisible = await PageObjects.console.monaco.isA11yOverlayVisible();
+      await PageObjects.console.pressEscape();
+      const isOverlayVisible = await PageObjects.console.isA11yOverlayVisible();
       expect(isOverlayVisible).to.be(true);
     });
 
@@ -36,8 +36,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.openConsole();
 
       await retry.try(async () => {
-        await PageObjects.console.monaco.pressEscape();
-        const isOverlayVisible = await PageObjects.console.monaco.isA11yOverlayVisible();
+        await PageObjects.console.pressEscape();
+        const isOverlayVisible = await PageObjects.console.isA11yOverlayVisible();
         expect(isOverlayVisible).to.be(false);
       });
     });

@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const retry = getService('retry');
@@ -21,7 +21,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       await PageObjects.console.skipTourIfExists();
-      await PageObjects.console.monaco.clearEditorText();
+      await PageObjects.console.clearEditorText();
     });
 
     it('should allow creating a new variable', async () => {
@@ -53,7 +53,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.console.openConsole();
 
         await PageObjects.console.clickClearInput();
-        await PageObjects.console.monaco.enterText('\n GET ${index3}');
+        await PageObjects.console.enterText('\n GET ${index3}');
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -68,8 +68,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       // bug in monaco https://github.com/elastic/kibana/issues/185999
       it.skip('should send a successful request', async () => {
         await PageObjects.console.addNewVariable({ name: 'query1', value: '{"match_all": {}}' });
-        await PageObjects.console.monaco.enterText('\n GET _search\n');
-        await PageObjects.console.monaco.enterText(`{\n\t"query": "\${query1}"`);
+        await PageObjects.console.enterText('\n GET _search\n');
+        await PageObjects.console.enterText(`{\n\t"query": "\${query1}"`);
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
 

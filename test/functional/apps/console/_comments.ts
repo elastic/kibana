@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -25,8 +25,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('with comments', () => {
       const enterRequest = async (url: string, body: string) => {
-        await PageObjects.console.monaco.clearEditorText();
-        await PageObjects.console.monaco.enterText(`${url}\n${body}`);
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText(`${url}\n${body}`);
       };
 
       async function runTests(
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             },
           ],
           async () => {
-            expect(await PageObjects.console.monaco.hasInvalidSyntax()).to.be(false);
+            expect(await PageObjects.console.hasInvalidSyntax()).to.be(false);
           }
         );
       });
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             },
           ],
           async () => {
-            expect(await PageObjects.console.monaco.hasInvalidSyntax()).to.be(false);
+            expect(await PageObjects.console.hasInvalidSyntax()).to.be(false);
           }
         );
       });
@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ],
 
           async () => {
-            expect(await PageObjects.console.monaco.hasInvalidSyntax()).to.be(true);
+            expect(await PageObjects.console.hasInvalidSyntax()).to.be(true);
           }
         );
       });
@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             },
           ],
           async () => {
-            expect(await PageObjects.console.monaco.hasInvalidSyntax()).to.be(true);
+            expect(await PageObjects.console.hasInvalidSyntax()).to.be(true);
           }
         );
       });

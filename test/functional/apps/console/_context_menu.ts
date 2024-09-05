@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -22,8 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
       await PageObjects.console.skipTourIfExists();
-      await PageObjects.console.monaco.clearEditorText();
-      await PageObjects.console.monaco.enterText('GET _search');
+      await PageObjects.console.clearEditorText();
+      await PageObjects.console.enterText('GET _search');
     });
 
     it('should open context menu', async () => {
@@ -44,8 +44,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('console');
         await PageObjects.console.skipTourIfExists();
-        await PageObjects.console.monaco.clearEditorText();
-        await PageObjects.console.monaco.enterText('GET _search');
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText('GET _search');
       });
 
       it('by default it should copy as curl and show toast when copy as button is clicked', async () => {
@@ -113,8 +113,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open documentation when open documentation button is clicked', async () => {
-      await PageObjects.console.monaco.clearEditorText();
-      await PageObjects.console.monaco.enterText('GET _search');
+      await PageObjects.console.clearEditorText();
+      await PageObjects.console.enterText('GET _search');
       await PageObjects.console.clickContextMenu();
       await PageObjects.console.clickOpenDocumentationButton();
 
@@ -134,26 +134,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should auto indent when auto indent button is clicked', async () => {
-      await PageObjects.console.monaco.clearEditorText();
-      await PageObjects.console.monaco.enterText('GET _search\n{"query": {"match_all": {}}}');
+      await PageObjects.console.clearEditorText();
+      await PageObjects.console.enterText('GET _search\n{"query": {"match_all": {}}}');
       await PageObjects.console.clickContextMenu();
       await PageObjects.console.clickAutoIndentButton();
       // Retry until the request is auto indented
       await retry.try(async () => {
-        const request = await PageObjects.console.monaco.getEditorText();
+        const request = await PageObjects.console.getEditorText();
         expect(request).to.be.eql('GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}');
       });
     });
 
     // not implemented for monaco yet https://github.com/elastic/kibana/issues/185891
     it.skip('should collapse the request when auto indent button is clicked again', async () => {
-      await PageObjects.console.monaco.clearEditorText();
-      await PageObjects.console.monaco.enterText('GET _search\n{"query": {"match_all": {}}}');
+      await PageObjects.console.clearEditorText();
+      await PageObjects.console.enterText('GET _search\n{"query": {"match_all": {}}}');
       await PageObjects.console.clickContextMenu();
       await PageObjects.console.clickAutoIndentButton();
       // Retry until the request is auto indented
       await retry.try(async () => {
-        const request = await PageObjects.console.monaco.getEditorText();
+        const request = await PageObjects.console.getEditorText();
         expect(request).to.be.eql('GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}');
       });
 
@@ -162,7 +162,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.clickAutoIndentButton();
       // Retry until the request is condensed
       await retry.try(async () => {
-        const request = await PageObjects.console.monaco.getEditorText();
+        const request = await PageObjects.console.getEditorText();
         expect(request).to.be.eql('GET _search\n{"query":{"match_all":{}}}');
       });
     });

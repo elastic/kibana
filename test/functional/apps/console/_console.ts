@@ -9,7 +9,7 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { DEFAULT_INPUT_VALUE } from '@kbn/console-plugin/common/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the default request', async () => {
       await retry.try(async () => {
-        const actualRequest = await PageObjects.console.monaco.getEditorText();
+        const actualRequest = await PageObjects.console.getEditorText();
         log.debug(actualRequest);
         expect(DEFAULT_INPUT_VALUE.replace(/\s/g, '')).to.contain(actualRequest.replace(/\s/g, ''));
       });
@@ -41,10 +41,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('default request response should include `"timed_out" : false`', async () => {
       await PageObjects.console.clickClearOutput();
       const expectedResponseContains = `"timed_out": false`;
-      await PageObjects.console.monaco.selectAllRequests();
+      await PageObjects.console.selectAllRequests();
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
-        const actualResponse = await PageObjects.console.monaco.getOutputText();
+        const actualResponse = await PageObjects.console.getOutputText();
         log.debug(actualResponse);
         expect(actualResponse).to.contain(expectedResponseContains);
       });
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // the resizer doesn't work the same as in ace https://github.com/elastic/kibana/issues/184352
     it.skip('should resize the editor', async () => {
-      const editor = await PageObjects.console.monaco.getEditor();
+      const editor = await PageObjects.console.getEditor();
       await browser.setWindowSize(1300, 1100);
       const initialSize = await editor.getSize();
       await browser.setWindowSize(1000, 1100);
@@ -63,26 +63,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow clearing the input editor', async () => {
-      await PageObjects.console.monaco.enterText('GET _all');
+      await PageObjects.console.enterText('GET _all');
 
       // Check current input is not empty
-      const input = await PageObjects.console.monaco.getEditorText();
+      const input = await PageObjects.console.getEditorText();
       expect(input).to.not.be.empty();
 
       // Clear the output
       await PageObjects.console.clickClearInput();
 
       // Check that after clearing the input, the editor is empty
-      expect(await PageObjects.console.monaco.getEditorText()).to.be.empty();
+      expect(await PageObjects.console.getEditorText()).to.be.empty();
     });
 
     it('should return statusCode 400 to unsupported HTTP verbs', async () => {
       const expectedResponseContains = '"statusCode": 400';
-      await PageObjects.console.monaco.clearEditorText();
-      await PageObjects.console.monaco.enterText('OPTIONS /');
+      await PageObjects.console.clearEditorText();
+      await PageObjects.console.enterText('OPTIONS /');
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
-        const actualResponse = await PageObjects.console.monaco.getOutputText();
+        const actualResponse = await PageObjects.console.getOutputText();
         log.debug(actualResponse);
         expect(actualResponse).to.contain(expectedResponseContains);
 
@@ -92,14 +92,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('with kbn: prefix in request', () => {
       before(async () => {
-        await PageObjects.console.monaco.clearEditorText();
+        await PageObjects.console.clearEditorText();
       });
       it('it should send successful request to Kibana API', async () => {
         const expectedResponseContains = 'default space';
-        await PageObjects.console.monaco.enterText('GET kbn:/api/spaces/space');
+        await PageObjects.console.enterText('GET kbn:/api/spaces/space');
         await PageObjects.console.clickPlay();
         await retry.try(async () => {
-          const actualResponse = await PageObjects.console.monaco.getOutputText();
+          const actualResponse = await PageObjects.console.getOutputText();
           log.debug(actualResponse);
           expect(actualResponse).to.contain(expectedResponseContains);
         });
@@ -109,8 +109,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // Status badge is not yet implented in phase 2
     describe.skip('with query params', () => {
       it('should issue a successful request', async () => {
-        await PageObjects.console.monaco.clearEditorText();
-        await PageObjects.console.monaco.enterText(
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText(
           'GET _cat/aliases?format=json&v=true&pretty=true'
         );
         await PageObjects.console.clickPlay();
@@ -128,9 +128,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('multiple requests output', function () {
       const sendMultipleRequests = async (requests: string[]) => {
         await asyncForEach(requests, async (request) => {
-          await PageObjects.console.monaco.enterText(request);
+          await PageObjects.console.enterText(request);
         });
-        await PageObjects.console.monaco.selectAllRequests();
+        await PageObjects.console.selectAllRequests();
         await PageObjects.console.clickPlay();
       };
 
@@ -143,13 +143,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await PageObjects.console.monaco.clearEditorText();
+        await PageObjects.console.clearEditorText();
       });
 
       it('should contain comments starting with # symbol', async () => {
         await sendMultipleRequests(['\n PUT test-index', '\n DELETE test-index']);
         await retry.try(async () => {
-          const response = await PageObjects.console.monaco.getOutputText();
+          const response = await PageObjects.console.getOutputText();
           log.debug(response);
           expect(response).to.contain('# 2: PUT test-index 200');
           expect(response).to.contain('# 3: DELETE test-index 200');

@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header', 'home']);
@@ -25,16 +25,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.navigateToApp('console');
       await PageObjects.console.skipTourIfExists();
-      await PageObjects.console.monaco.clearEditorText();
+      await PageObjects.console.clearEditorText();
     });
 
     it('should validate response', async () => {
-      await PageObjects.console.monaco.enterText(
+      await PageObjects.console.enterText(
         `GET kibana_sample_data_logs/_mvt/geo.coordinates/0/0/0`
       );
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
-        const actualResponse = await PageObjects.console.monaco.getOutputText();
+        const actualResponse = await PageObjects.console.getOutputText();
         expect(actualResponse).to.contain('"meta": [');
       });
     });

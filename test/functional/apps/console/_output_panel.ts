@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -25,20 +25,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await PageObjects.console.monaco.clearEditorText();
+      await PageObjects.console.clearEditorText();
     });
 
     const sendRequest = async (request: string) => {
-      await PageObjects.console.monaco.enterText(request);
+      await PageObjects.console.enterText(request);
       await PageObjects.console.clickPlay();
       await PageObjects.header.waitUntilLoadingHasFinished();
     };
 
     const sendMultipleRequests = async (requests: string[]) => {
       await asyncForEach(requests, async (request) => {
-        await PageObjects.console.monaco.enterText(request);
+        await PageObjects.console.enterText(request);
       });
-      await PageObjects.console.monaco.selectAllRequests();
+      await PageObjects.console.selectAllRequests();
       await PageObjects.console.clickPlay();
       await PageObjects.header.waitUntilLoadingHasFinished();
     };
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show the original request line number in the comment above response', async () => {
       await sendMultipleRequests(['\n GET /_search?pretty', '\n GET /_search?pretty']);
 
-      const response = await PageObjects.console.monaco.getOutputText();
+      const response = await PageObjects.console.getOutputText();
       expect(response).to.contain('# 2: GET /_search?pretty');
     });
 
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await sendRequest('GET /_search?pretty');
 
       // Check current output is not empty
-      const response = await PageObjects.console.monaco.getOutputText();
+      const response = await PageObjects.console.getOutputText();
       expect(response).to.not.be.empty();
 
       // Clear the output
