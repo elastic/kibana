@@ -275,10 +275,6 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
                 const ftrEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
                   retries: 1,
                 });
-                log.debug(
-                  `Env. variables returned by [functionalTestRunner.run()]:\n`,
-                  JSON.stringify(ftrEnv, null, 2)
-                );
 
                 // Normalized the set of available env vars in Playwright
                 const playwrightCustomEnv = {
