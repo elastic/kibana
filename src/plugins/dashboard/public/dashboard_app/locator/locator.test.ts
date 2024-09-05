@@ -9,7 +9,9 @@
 import { DashboardAppLocatorDefinition } from './locator';
 import { hashedItemStore } from '@kbn/kibana-utils-plugin/public';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
+import { mockControlGroupInput } from '@kbn/controls-plugin/common/mocks';
 import { FilterStateStore } from '@kbn/es-query';
+import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 
 describe('dashboard locator', () => {
   beforeEach(() => {
@@ -191,18 +193,16 @@ describe('dashboard locator', () => {
       useHashedUrl: false,
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
-    const controlGroupState = {
-      autoApplySelections: false,
-    };
+    const controlGroupInput = mockControlGroupInput() as unknown as SerializableControlGroupInput;
     const location = await definition.getLocation({
-      controlGroupState,
+      controlGroupInput,
     });
 
     expect(location).toMatchObject({
       app: 'dashboards',
       path: `#/create?_g=()`,
       state: {
-        controlGroupState,
+        controlGroupInput,
       },
     });
   });
