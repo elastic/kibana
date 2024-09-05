@@ -28,6 +28,7 @@ import { DataGridDensity, DataLoadingState, useColumns } from '@kbn/unified-data
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
 import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getSortForEmbeddable } from '../../utils';
@@ -150,6 +151,11 @@ export function SearchEmbeddableGridComponent({
     timeRange,
   });
 
+  // Security Solution overrides our cell actions -- this is a temporary workaroud to keep
+  // things working as they do currently until we can migrate their actions to One Discover
+  const isInSecuritySolution =
+    useObservable(discoverServices.application.currentAppId$) === 'securitySolutionUI';
+
   const onStateEditedProps = useMemo(
     () => ({
       onAddColumn,
@@ -238,12 +244,12 @@ export function SearchEmbeddableGridComponent({
       settings={savedSearch.grid}
       ariaLabelledBy={'documentsAriaLabel'}
       cellActionsTriggerId={
-        cellActionsMetadata
-          ? DISCOVER_CELL_ACTIONS_TRIGGER.id
-          : SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID
+        isInSecuritySolution
+          ? SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID
+          : DISCOVER_CELL_ACTIONS_TRIGGER.id
       }
-      cellActionsMetadata={cellActionsMetadata}
-      cellActionsHandling={cellActionsMetadata ? 'append' : 'replace'}
+      cellActionsMetadata={isInSecuritySolution ? undefined : cellActionsMetadata}
+      cellActionsHandling={isInSecuritySolution ? 'replace' : 'append'}
       columnsMeta={columnsMeta}
       configHeaderRowHeight={defaults.headerRowHeight}
       configRowHeight={defaults.rowHeight}
