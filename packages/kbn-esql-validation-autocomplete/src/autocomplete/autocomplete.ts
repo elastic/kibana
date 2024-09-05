@@ -1329,15 +1329,17 @@ async function getFunctionArgsSuggestions(
   // Whether to prepend comma to suggestion string
   // E.g. if true, "fieldName" -> "fieldName, "
   const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
-  const shouldBeBooleanCondition = typesToSuggestNext.some(
-    (t) => t && t.type === 'boolean' && t.name === 'condition'
-  );
+  const canBeBooleanCondition =
+    // For `CASE()`, there can be multiple conditions, so keep suggesting fields and functions if possible
+    fnDefinition.name === 'case' ||
+    // If the type is explicitly a boolean condition
+    typesToSuggestNext.some((t) => t && t.type === 'boolean' && t.name === 'condition');
 
   const shouldAddComma =
     hasMoreMandatoryArgs &&
     fnDefinition.type !== 'builtin' &&
     !alreadyHasComma &&
-    !shouldBeBooleanCondition;
+    !canBeBooleanCondition;
   const shouldAdvanceCursor = hasMoreMandatoryArgs && fnDefinition.type !== 'builtin';
 
   const suggestedConstants = uniq(
@@ -1429,7 +1431,7 @@ async function getFunctionArgsSuggestions(
         await getFieldsByType(
           // For example, in case() where we are expecting a boolean condition
           // we can accept any field types (field1 !== field2)
-          shouldBeBooleanCondition
+          canBeBooleanCondition
             ? ['any']
             : // @TODO: have a way to better suggest constant only params
               (getTypesFromParamDefs(
@@ -1451,7 +1453,7 @@ async function getFunctionArgsSuggestions(
       ...getCompatibleFunctionDefinition(
         command.name,
         option?.name,
-        getTypesFromParamDefs(typesToSuggestNext) as string[],
+        canBeBooleanCondition ? ['any'] : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
         fnToIgnore
       ).map((suggestion) => ({
         ...suggestion,
@@ -1486,7 +1488,7 @@ async function getFunctionArgsSuggestions(
       }
     }
     // Suggest comparison functions for boolean conditions
-    if (shouldBeBooleanCondition && isColumnItem(arg)) {
+    if (canBeBooleanCondition) {
       suggestions.push(
         ...comparisonFunctions.map<SuggestionRawDefinition>(({ name, description }) => ({
           label: name,

@@ -562,7 +562,9 @@ describe('autocomplete.suggest', () => {
         [
           // With extra space after field name to open suggestions
           ...getFieldNamesByType('any').map((field) => `${field} `),
-          ...getFunctionSignaturesByReturnType('eval', 'boolean', { scalar: true }, undefined, []),
+          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }, undefined, [
+            'case',
+          ]),
         ],
         {
           triggerCharacter: ' ',
@@ -622,6 +624,21 @@ describe('autocomplete.suggest', () => {
         [
           // With extra space after field name to open suggestions
           ...getFieldNamesByType('any').map((field) => `${field}`),
+          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }, undefined, [
+            'case',
+          ]),
+        ],
+        {
+          triggerCharacter: ' ',
+        }
+      );
+
+      // case( multiple conditions ) suggests fields like normal
+      await assertSuggestions(
+        'from a | eval case(integerField < 0, "negative", integerField > 0, "positive", /)',
+        [
+          // With extra space after field name to open suggestions
+          ...getFieldNamesByType('any').map((field) => `${field} `),
           ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }, undefined, [
             'case',
           ]),
