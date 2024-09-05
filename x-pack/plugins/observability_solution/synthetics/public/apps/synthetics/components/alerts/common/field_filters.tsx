@@ -22,7 +22,11 @@ export const FieldFilters = ({ ruleParams, setRuleParams }: Props) => {
   const [search, setSearch] = useState<string>('');
   const [selectedField, setSelectedField] = useState<string>();
 
-  const { suggestions = [], isLoading } = useFetchSyntheticsSuggestions({
+  const {
+    suggestions = [],
+    isLoading,
+    allSuggestions,
+  } = useFetchSyntheticsSuggestions({
     search,
     fieldName: selectedField,
   });
@@ -45,6 +49,7 @@ export const FieldFilters = ({ ruleParams, setRuleParams }: Props) => {
             value={ruleParams.monitorIds}
             setSearch={setSearch}
             suggestions={suggestions}
+            allSuggestions={allSuggestions}
             isLoading={isLoading}
             setSelectedField={setSelectedField}
             selectedField={selectedField}
@@ -58,6 +63,7 @@ export const FieldFilters = ({ ruleParams, setRuleParams }: Props) => {
             value={ruleParams.monitorTypes}
             setSearch={setSearch}
             suggestions={suggestions}
+            allSuggestions={allSuggestions}
             isLoading={isLoading}
             setSelectedField={setSelectedField}
             selectedField={selectedField}
@@ -74,6 +80,7 @@ export const FieldFilters = ({ ruleParams, setRuleParams }: Props) => {
             value={ruleParams.tags}
             setSearch={setSearch}
             suggestions={suggestions}
+            allSuggestions={allSuggestions}
             isLoading={isLoading}
             setSelectedField={setSelectedField}
             selectedField={selectedField}
@@ -87,6 +94,7 @@ export const FieldFilters = ({ ruleParams, setRuleParams }: Props) => {
             value={ruleParams.projects}
             setSearch={setSearch}
             suggestions={suggestions}
+            allSuggestions={allSuggestions}
             isLoading={isLoading}
             setSelectedField={setSelectedField}
             selectedField={selectedField}
@@ -103,6 +111,7 @@ export const FieldFilters = ({ ruleParams, setRuleParams }: Props) => {
             value={ruleParams.locations}
             setSearch={setSearch}
             suggestions={suggestions}
+            allSuggestions={allSuggestions}
             isLoading={isLoading}
             setSelectedField={setSelectedField}
             selectedField={selectedField}

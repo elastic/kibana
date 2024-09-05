@@ -18,6 +18,7 @@ export interface Suggestion {
 export interface UseFetchSyntheticsSuggestions {
   suggestions: Suggestion[];
   isLoading: boolean;
+  allSuggestions?: Record<string, Suggestion[]>;
 }
 
 export interface Params {
@@ -59,6 +60,7 @@ export function useFetchSyntheticsSuggestions({
 
   return {
     suggestions: fieldName ? data?.[fieldName] ?? [] : [],
+    allSuggestions: data,
     isLoading: Boolean(loading),
   };
 }
