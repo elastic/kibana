@@ -57,8 +57,10 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
         dataLoading={dataLoading ?? false}
         onReload={componentApi.onReload}
         onSave={componentApi.onSave}
+        resetUnsavedChanges={parentApi.resetUnsavedChanges}
         setTimeRange={componentApi.setTimeRange}
         timeRange={timeRange}
+        unsavedChanges$={parentApi.unsavedChanges}
       />
 
       <EuiSpacer size="m" />

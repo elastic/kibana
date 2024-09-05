@@ -11,7 +11,7 @@ import { LastSavedState } from './types';
 const SAVED_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.embeddables.presentationContainerExample.savedState';
 
-const DEFAULT_STATE: LastSavedState = {
+export const DEFAULT_STATE: LastSavedState = {
   timeRange: {
     from: 'now-15m',
     to: 'now',

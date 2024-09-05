@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, Subject, merge } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, map, merge } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { asyncForEach } from '@kbn/std';
 import { TimeRange } from '@kbn/es-query';
-import { PanelPackage, apiHasSerializableState, combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import { omit } from 'lodash';
+import { PanelPackage, apiHasSerializableState, childrenUnsavedChanges$, combineCompatibleChildrenApis, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { isEqual, omit } from 'lodash';
 import { PublishesDataLoading, ViewMode, apiPublishesDataLoading } from '@kbn/presentation-publishing';
 import { DEFAULT_STATE, lastSavedState } from './last_saved_state';
 import { unsavedChanges } from './unsaved_changes';
@@ -31,6 +31,13 @@ export function getParentApi() {
   const timeRange$ = new BehaviorSubject<TimeRange | undefined>(
     unsavedChanges$.value.timeRange ?? lastSavedState$.value.timeRange
   );
+  // One could use `initializeUnsavedChanges` to set up unsaved changes observable.
+  // Instead, decided to manually setup unsaved changes observable
+  // since only timeRange state needs to be monitored.
+  const timeRangeUnsavedChanges$ = timeRange$.pipe(map((currentTimeRange) => {
+    const hasChanges = !isEqual(currentTimeRange, lastSavedState$.value.timeRange);
+    return hasChanges ? { timeRange: currentTimeRange } : undefined;
+  }));
   const reload$ = new Subject<void>();
 
   const saveNotification$ = new Subject<void>();
@@ -172,7 +179,26 @@ export function getParentApi() {
         const panelUnsavedChanges = unsavedChanges$.value.panelUnsavedChanges;
         return panelUnsavedChanges ? panelUnsavedChanges[childId] : undefined;
       },
+      resetUnsavedChanges: () => {
+        timeRange$.next(lastSavedState$.value.timeRange);
+        unsavedChanges$.next({});
+      },
       timeRange$,
-    } as ParentApi,
+      unsavedChanges: combineLatest([
+        timeRangeUnsavedChanges$,
+        childrenUnsavedChanges$(children$),
+      ]).pipe(
+        map(([timeRangeUnsavedChanges, childrenUnsavedChanges]) => {
+          const unsavedChanges: UnsavedChanges = {};
+          if (timeRangeUnsavedChanges) {
+            unsavedChanges.timeRange = timeRangeUnsavedChanges.timeRange;
+          }
+          if (childrenUnsavedChanges) {
+            unsavedChanges.panelUnsavedChanges = childrenUnsavedChanges;
+          }
+          return Object.keys(unsavedChanges).length ? unsavedChanges : undefined;
+        })
+      ),
+    } as unknown as ParentApi,
   };
 }

@@ -11,22 +11,25 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { EuiBadge, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import { unsavedChanges } from '../unsaved_changes';
 import { TimeRange } from '@kbn/es-query';
+import { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 
 interface Props {
   dataLoading: boolean;
   onReload: () => void;
   onSave: () => Promise<void>;
+  resetUnsavedChanges: () => void;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange | undefined;
+  unsavedChanges$: PublishesUnsavedChanges['unsavedChanges'];
 }
 
 export function TopNav(props: Props) {
   const isMounted = useMountedState();
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  /*useEffect(() => {
-    return;
-    const subscription = props.parentApi.unsavedChanges.subscribe((nextUnsavedChanges) => {
+  useEffect(() => {
+    const subscription = props.unsavedChanges$.subscribe((nextUnsavedChanges) => {
+      console.log('nextUnsavedChanges', nextUnsavedChanges);
       setHasUnsavedChanges(nextUnsavedChanges !== undefined);
       unsavedChanges.save(nextUnsavedChanges ?? {});
     });
@@ -34,7 +37,7 @@ export function TopNav(props: Props) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [props.parentApi]);*/
+  }, [unsavedChanges, props.unsavedChanges$]);
   
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
@@ -65,9 +68,7 @@ export function TopNav(props: Props) {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   disabled={isSaving}
-                  onClick={async () => {
-                    
-                  }}
+                  onClick={props.resetUnsavedChanges}
                 >
                   Reset
                 </EuiButtonEmpty>
@@ -77,7 +78,7 @@ export function TopNav(props: Props) {
           )}
           <EuiFlexItem grow={false}>
             <EuiButton
-              disabled={isSaving}
+              disabled={isSaving || !hasUnsavedChanges}
               onClick={async () => {
                 setIsSaving(true);
                 await props.onSave();

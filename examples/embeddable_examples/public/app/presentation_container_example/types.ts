@@ -19,6 +19,7 @@ import {
   PublishesDataLoading,
   PublishesPanelTitle,
   PublishesTimeRange,
+  PublishesUnsavedChanges,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
@@ -32,7 +33,8 @@ export type ParentApi = PresentationContainer &
   PublishesViewMode &
   Pick<PublishesPanelTitle, 'hidePanelTitle'> &
   PublishesReload & 
-  PublishesTimeRange;
+  PublishesTimeRange &
+  PublishesUnsavedChanges;
 
 export interface LastSavedState {
   timeRange: TimeRange;
