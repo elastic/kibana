@@ -7,10 +7,13 @@
 
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
+import { ESProcessorItem } from '../../../common';
 import type { KVState } from '../../types';
 import { handleKV } from './kv';
 import type { KVGraphParams, KVBaseNodeParams } from './types';
 import { handleHeader } from './header';
+import { handleKVError } from './error';
+import { handleKVValidate } from './validate';
 
 const graphState: StateGraphArgs<KVState>['channels'] = {
   lastExecutedChain: {
@@ -41,6 +44,18 @@ const graphState: StateGraphArgs<KVState>['channels'] = {
     value: (x: boolean, y?: boolean) => y ?? x,
     default: () => false,
   },
+  header: {
+    value: (x: boolean, y?: boolean) => y ?? x,
+    default: () => false,
+  },
+  errors: {
+    value: (x: object, y?: object) => y ?? x,
+    default: () => [],
+  },
+  kvProcessor: {
+    value: (x: ESProcessorItem, y?: ESProcessorItem) => y ?? x,
+    default: () => ({ kv: {} }),
+  },
   additionalProcessors: {
     value: (x: object[], y?: object[]) => y ?? x,
     default: () => [],
@@ -62,18 +77,42 @@ function modelOutput({ state }: KVBaseNodeParams): Partial<KVState> {
   };
 }
 
+function headerRouter({ state }: KVBaseNodeParams): string {
+  if (state.header === true) {
+    return 'header';
+  }
+  return 'noHeader';
+}
+
+function kvRouter({ state }: KVBaseNodeParams): string {
+  if (Object.keys(state.errors).length === 0) {
+    return 'modelOutput';
+  }
+  return 'handleKVError';
+}
+
 export async function getKVGraph({ model, client }: KVGraphParams) {
   const workflow = new StateGraph({
     channels: graphState,
   })
-    .addNode('modelInput', modelInput)
+    .addNode('modelInput', (state: KVState) => modelInput({ state }))
     .addNode('modelOutput', (state: KVState) => modelOutput({ state }))
     .addNode('handleHeader', (state: KVState) => handleHeader({ state, model, client }))
+    .addNode('handleKVError', (state: KVState) => handleKVError({ state, model, client }))
     .addNode('handleKV', (state: KVState) => handleKV({ state, model, client }))
+    .addNode('handleKVValidate', (state: KVState) => handleKVValidate({ state, model, client }))
     .addEdge(START, 'modelInput')
-    .addEdge('modelInput', 'handleHeader')
+    .addConditionalEdges('modelInput', (state: KVState) => headerRouter({ state }), {
+      header: 'handleHeader',
+      noHeader: 'handleKV',
+    })
     .addEdge('handleHeader', 'handleKV')
-    .addEdge('handleKV', 'modelOutput')
+    .addEdge('handleKVError', 'handleKVValidate')
+    .addEdge('handleKV', 'handleKVValidate')
+    .addConditionalEdges('handleKVValidate', (state: KVState) => kvRouter({ state }), {
+      handleKVError: 'handleKVError',
+      modelOutput: 'modelOutput',
+    })
     .addEdge('modelOutput', END);
 
   const compiledCategorizationGraph = workflow.compile();

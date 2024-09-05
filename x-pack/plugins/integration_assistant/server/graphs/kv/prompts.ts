@@ -19,7 +19,7 @@ export const KV_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
   ],
   [
     'human',
-    `Looking at the multiple log samples provided in the context, the logs contain key-value (KV) pairs that we want to extract and index for easier search and analysis. Our goal is to write a KV processor for Elasticsearch's ingest node, which will parse these KV pairs and make them available as structured fields in our Elasticsearch index.
+    `Looking at the multiple log samples provided in the context, our goal is to create a KV processor that can parse the logs. Ana;yze the logs  to understand their structure, including any key-value pairs, delimiters, and patterns.
 
  Follow these steps to help improve the KV processor and apply it to each field step by step:
 
@@ -27,8 +27,8 @@ export const KV_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
  2. Recognize and properly format different data types such as strings, numbers, and timestamps.
  3. Handle quoted values correctly (e.g., error="Insufficient funds").
  4. The \`value_split\` is the delimeter regex pattern to use for splitting the key from the value within a key-value pair (e.g., ':' or '=' )
- 5. The \`field_split\` is the delimeter regex pattern to use for splitting key-value pairs in the log (e.g.,' ' or ';'  or '|' )
- 6. Do not use whitespace character in regex for \`field_split\` or \`value_split\`. Instead use the \`trim_key\` and \`trim_value\` fields.
+ 5. The \`field_split\` is the regex pattern to use for splitting key-value pairs in the log. Make sure the regex pattern breaks the log into key-value pairs.
+ 6. Ensure that the KV processor can handle different scenarios, such as: Optional or missing fields in the logs , Varying delimiters between keys and values (e.g., = or :), Complex log structures (e.g., nested key-value pairs or key-value pairs within strings, whitespaces , urls, ipv4 , ipv6 address, mac address etc.,).
  7. Use \`trim_key\` for string of characters to trim from extracted keys.
  8. Use \`trim_value\` for string of characters to trim from extracted values.
 
@@ -73,6 +73,9 @@ You then have to create a grok pattern using the regex pattern.
  You ALWAYS follow these guidelines when writing your response:
  <guidelines>
  - If you cannot match all the logs to the same RFC, return 'Custom Format' for RFC and provide the regex and grok patterns accordingly.
+ - If the message part contains any unstructured data , make sure to add this in regex pattern and grok pattern.
+ - Do not parse the message part in the regex. Just the header part should be in regex nad grok_pattern.
+ - Make sure to map the remaining message part to \'message\' in grok pattern.
  - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
  </guidelines>
 
@@ -86,4 +89,56 @@ You then have to create a grok pattern using the regex pattern.
  </example_response>`,
   ],
   ['ai', 'Please find the JSON object below:'],
+]);
+
+export const KV_ERROR_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `You are a helpful, expert assistant on Elasticsearch Ingest Pipelines, focusing on resolving errors and issues with append processors used for related field categorization.
+Here is some context that you can reference for your task, read it carefully as you will get questions about it later:
+<context>
+<current_processor>
+{current_processor}
+</current_processor>
+<common_errors>
+{common_errors}
+</common_errors>
+</context>`,
+  ],
+  [
+    'human',
+    `Please go through each error below, carefully review the provided current kv processor, and resolve the most likely cause to the supplied error by returning an updated version of the current_processor.
+
+<errors>
+{errors}
+</errors>
+  
+Follow these steps to help resolve the current ingest pipeline issues:
+1. Check first if any of the errors are similar to the common errors provided above, if one is found follow the recommended action.
+2. When multiple errors are involved, try to resolve them all one by one.
+3. If this is not a common error, analyze the error message and the current processor to identify the root cause.
+4. Recognize and properly format different data types such as strings, numbers, and timestamps and handle quoted values correctly.
+5. The \`value_split\` is the delimeter regex pattern to use for splitting the key from the value within a key-value pair (e.g., ':' or '=' )
+6. The \`field_split\` is the regex pattern to use for splitting key-value pairs in the log. Make sure the regex pattern breaks the log into key-value pairs.
+7. Ensure that the KV processor can handle different scenarios, such as: Optional or missing fields in the logs , Varying delimiters between keys and values (e.g., = or :), Complex log structures (e.g., nested key-value pairs or key-value pairs within strings, whitespaces , urls, ipv4 , ipv6 address, mac address etc.,). 
+8. Apply the relevant changes to the current processors and return the updated version.
+
+You ALWAYS follow these guidelines when writing your response:
+<guidelines>
+- Do not use the special characters like \`\s\` or \`\\s+\` in the \`field_split\` or \`value_split\` regular expressions.
+- Do not add brackets (), <>, [] as well as single or double quotes in \`trim_value\`.
+- Do not add multiple delimeters in the \`value_split\` regular expression.
+- Make sure to trim whitespaces in \`trim_key\`. 
+- Do not respond with anything except the complete updated processor as a valid JSON object enclosed with 3 backticks (\`), see example response below.
+</guidelines>
+
+Example response format:
+<example>
+A: Please find the updated KV processor below:
+\`\`\`json
+{ex_answer}
+\`\`\`
+</example>`,
+  ],
+  ['ai', 'Please find the updated KV processor below:'],
 ]);

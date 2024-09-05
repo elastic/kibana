@@ -108,10 +108,13 @@ export interface KVState {
   lastExecutedChain: string;
   packageName: string;
   dataStreamName: string;
+  kvProcessor: ESProcessorItem;
   logSamples: string[];
   kvLogMessages: string[];
   jsonSamples: string[];
   finalized: boolean;
+  header: boolean;
+  errors: object;
   additionalProcessors: object[];
 }
 
