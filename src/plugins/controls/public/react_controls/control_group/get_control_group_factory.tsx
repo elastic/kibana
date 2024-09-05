@@ -7,7 +7,8 @@
  */
 
 import React, { useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import deepEqual from 'fast-deep-equal';
+import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { CoreStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -133,7 +134,7 @@ export const getControlGroupEmbeddableFactory = (services: {
               controlsManager.api.children$
             ),
             controlGroupFetch$(ignoreParentSettings$, parentApi ? parentApi : {})
-          ),
+          ).pipe(distinctUntilChanged((a, b) => deepEqual(a, b))),
         ignoreParentSettings$,
         autoApplySelections$,
         allowExpensiveQueries$,
