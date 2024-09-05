@@ -20,7 +20,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     'agentTamperProtectionEnabled',
     'enableStrictKQLValidation',
     'subfeaturePrivileges',
-    'enablePackagesStateMachine',
     'useSpaceAwareness',
   ])}`;
 

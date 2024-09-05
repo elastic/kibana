@@ -96,7 +96,7 @@ export const ArgumentFileSelector = memo<
         isOpen={state.isPopoverOpen}
         closePopover={handleClosePopover}
         anchorPosition="upCenter"
-        initialFocus={`#${filePickerUUID}`}
+        initialFocus={`[id="${filePickerUUID}"]`}
         button={
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>

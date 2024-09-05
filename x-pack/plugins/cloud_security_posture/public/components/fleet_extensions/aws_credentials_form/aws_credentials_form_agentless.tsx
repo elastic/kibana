@@ -184,7 +184,7 @@ export const AwsCredentialsFormAgentless = ({
   const options = getAwsCredentialsFormOptions();
   const group = options[awsCredentialsType];
   const fields = getInputVarsFields(input, group.fields);
-  const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
+  const documentationLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
   const isValidSemantic = semverValid(packageInfo.version);
@@ -209,7 +209,7 @@ export const AwsCredentialsFormAgentless = ({
             defaultMessage="Utilize AWS Access Keys to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
             values={{
               gettingStartedLink: (
-                <EuiLink href={integrationLink} target="_blank">
+                <EuiLink href={documentationLink} target="_blank">
                   <FormattedMessage
                     id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
                     defaultMessage="Getting Started"
@@ -283,7 +283,7 @@ export const AwsCredentialsFormAgentless = ({
           updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
         }}
       />
-      <ReadDocumentation url={integrationLink} />
+      <ReadDocumentation url={documentationLink} />
     </>
   );
 };

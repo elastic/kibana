@@ -23,8 +23,9 @@ import { useKey } from 'react-use';
 import { OverviewLoader } from '../overview_loader';
 import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
 import { MonitorOverviewItem } from '../../types';
-import { FlyoutParamProps, OverviewGridItem } from '../overview_grid_item';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
+import { MetricItem } from '../metric_item';
+import { FlyoutParamProps } from '../types';
 
 const PER_ROW = 4;
 const DEFAULT_ROW_SIZE = 2;
@@ -163,7 +164,7 @@ export const GroupGridItem = ({
               key={`${monitor.id}-${monitor.location?.id}`}
               data-test-subj="syntheticsOverviewGridItem"
             >
-              <OverviewGridItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+              <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>

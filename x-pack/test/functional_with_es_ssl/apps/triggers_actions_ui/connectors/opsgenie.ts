@@ -67,7 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const updatedConnectorName = `${connectorName}updated`;
         const createdAction = await createOpsgenieConnector(connectorName);
         objectRemover.add(createdAction.id, 'action', 'actions');
-        browser.refresh();
+        await browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -100,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const connectorName = generateUniqueKey();
         const createdAction = await createOpsgenieConnector(connectorName);
         objectRemover.add(createdAction.id, 'action', 'actions');
-        browser.refresh();
+        await browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -128,7 +128,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const connectorName = generateUniqueKey();
         const createdAction = await createOpsgenieConnector(connectorName);
         objectRemover.add(createdAction.id, 'action', 'actions');
-        browser.refresh();
+        await browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 

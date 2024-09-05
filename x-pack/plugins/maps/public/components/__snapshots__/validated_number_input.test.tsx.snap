@@ -2,18 +2,13 @@
 
 exports[`should render with error 1`] = `
 <EuiFormRow
-  describedByIds={Array []}
-  display="row"
   error={
     Array [
       "Must be between 0 and 20",
     ]
   }
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   isInvalid={true}
   label="foobar"
-  labelType="label"
 >
   <EuiFieldNumber
     aria-label="foobar number input"
@@ -28,14 +23,9 @@ exports[`should render with error 1`] = `
 
 exports[`should render without error 1`] = `
 <EuiFormRow
-  describedByIds={Array []}
-  display="row"
   error={Array []}
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   isInvalid={false}
   label="foobar"
-  labelType="label"
 >
   <EuiFieldNumber
     aria-label="foobar number input"

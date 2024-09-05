@@ -35,15 +35,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   ];
 
   async function callApiAs() {
-    const user = 'datasetQualityLogsUser' as DatasetQualityApiClientKey;
+    const user = 'datasetQualityMonitorUser' as DatasetQualityApiClientKey;
 
     return await datasetQualityApiClient[user]({
       endpoint: 'GET /internal/dataset_quality/integrations',
-      params: {
-        query: {
-          type: 'logs',
-        },
-      },
     });
   }
 
@@ -53,12 +48,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await Promise.all(integrationPackages.map((pkg) => installPackage({ supertest, pkg })));
       });
 
-      it('returns only log based integrations and its datasets map', async () => {
+      it('returns all installed integrations and its datasets map', async () => {
         const resp = await callApiAs();
 
         expect(resp.body.integrations.map((integration) => integration.name)).to.eql([
           'apm',
           'endpoint',
+          'synthetics',
           'system',
         ]);
 
