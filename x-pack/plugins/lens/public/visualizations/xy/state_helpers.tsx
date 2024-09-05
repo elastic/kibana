@@ -18,7 +18,7 @@ import { validateQuery } from '@kbn/visualization-ui-components';
 import { DataViewsState } from '../../state_management';
 import { FramePublicAPI, DatasourcePublicAPI, UserMessage } from '../../types';
 import {
-  visualizationTypes,
+  visualizationSubtypes,
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
@@ -48,6 +48,26 @@ export function isHorizontalSeries(seriesType: SeriesType) {
   );
 }
 
+export function flipSeriesType(seriesType: SeriesType) {
+  switch (seriesType) {
+    case 'bar':
+      return 'bar_horizontal';
+    case 'bar_stacked':
+      return 'bar_horizontal_stacked';
+    case 'bar_percentage_stacked':
+      return 'bar_horizontal_percentage_stacked';
+    case 'bar_horizontal':
+      return 'bar';
+    case 'bar_horizontal_stacked':
+      return 'bar_stacked';
+    case 'bar_horizontal_percentage_stacked':
+      return 'bar_percentage_stacked';
+
+    default:
+      return 'bar_horizontal';
+  }
+}
+
 export function isPercentageSeries(seriesType: SeriesType) {
   return (
     seriesType === 'bar_percentage_stacked' ||
@@ -56,16 +76,52 @@ export function isPercentageSeries(seriesType: SeriesType) {
   );
 }
 
+export const AREA_SERIES = ['area_stacked', 'area', 'area_percentage_stacked'];
+export const NON_BAR_SERIES = [...AREA_SERIES, 'line'];
+export const BAR_SERIES = [
+  'bar',
+  'bar_stacked',
+  'bar_percentage_stacked',
+  'bar_horizontal',
+  'bar_horizontal_stacked',
+  'bar_horizontal_percentage_stacked',
+];
+
+export const hasNonBarSeries = (layers: XYLayerConfig[]) =>
+  layers.some((layer) => isDataLayer(layer) && NON_BAR_SERIES.includes(layer.seriesType));
+
+export const hasBarSeries = (layers: XYLayerConfig[]) => {
+  return layers.some((layer) => isDataLayer(layer) && BAR_SERIES.includes(layer.seriesType));
+};
+
+export const hasAreaSeries = (layers: XYLayerConfig[]) =>
+  layers.some((layer) => isDataLayer(layer) && AREA_SERIES.includes(layer.seriesType));
+
+export const getBarSeriesLayers = (layers: XYLayerConfig[]): XYDataLayerConfig[] =>
+  getDataLayers(layers).filter((layer) => BAR_SERIES.includes(layer.seriesType));
+
 export function isStackedChart(seriesType: SeriesType) {
   return seriesType.includes('stacked');
 }
+
+export const isAreaLayer = (layer: XYLayerConfig) => {
+  return isDataLayer(layer) && AREA_SERIES.includes(layer.seriesType);
+};
+
+export function isBarLayer(layer: XYLayerConfig) {
+  return isDataLayer(layer) && BAR_SERIES.includes(layer.seriesType);
+}
+
+export const getUniqueSeriesTypes = (layers: XYLayerConfig[]) => {
+  return [...new Set(getDataLayers(layers).map(({ seriesType }) => seriesType))];
+};
 
 export function isHorizontalChart(layers: XYLayerConfig[]) {
   return getDataLayers(layers).every((l) => isHorizontalSeries(l.seriesType));
 }
 
 export function getIconForSeries(type: SeriesType): EuiIconType {
-  const definition = visualizationTypes.find((t) => t.id === type);
+  const definition = visualizationSubtypes.find((t) => t.id === type);
 
   if (!definition) {
     throw new Error(`Unknown series type ${type}`);
