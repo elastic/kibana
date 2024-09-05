@@ -31,6 +31,8 @@ export async function retryIfDeleteByQueryConflicts<T>(
   }
 
   for (const failure of operationResult.failures) {
+    logger.error(`Unable to delete by query ${name} caused by ${failure.cause}`);
+
     if (failure.status === 409) {
       // if no retries left, throw it
       if (retries <= 0) {
