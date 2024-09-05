@@ -15,7 +15,6 @@ const {
   esArchiver,
   kibanaServer,
   retry,
-  supertestWithoutAuth,
   deployment,
   randomness,
   esDeleteAllIndices,
@@ -23,6 +22,9 @@ const {
   indexPatterns,
   bsearch,
   console,
+  supertest,
+  esSupertest,
+  supertestWithoutAuth,
 } = commonFunctionalServices;
 
 // pick what was there previously
@@ -33,7 +35,6 @@ export const services = {
   esArchiver,
   kibanaServer,
   retry,
-  supertestWithoutAuth,
   deployment,
   randomness,
   security,
@@ -42,4 +43,7 @@ export const services = {
   indexPatterns,
   bsearch,
   console,
+  supertest,
+  esSupertest,
+  supertestWithoutAuth,
 };
