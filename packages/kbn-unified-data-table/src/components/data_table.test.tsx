@@ -1127,7 +1127,7 @@ describe('UnifiedDataTable', () => {
     it(
       'should not allow comparison if less than 2 documents are selected',
       async () => {
-        renderDataTable({ enableComparisonMode: true });
+        await renderDataTable({ enableComparisonMode: true });
         expect(getSelectedDocumentsButton()).not.toBeInTheDocument();
         await selectDocument(esHitsMock[0]);
         expect(getSelectedDocumentsButton()).toBeInTheDocument();
@@ -1148,7 +1148,7 @@ describe('UnifiedDataTable', () => {
     it(
       'should not allow comparison if comparison mode is disabled',
       async () => {
-        renderDataTable({ enableComparisonMode: false });
+        await renderDataTable({ enableComparisonMode: false });
         await selectDocument(esHitsMock[0]);
         await selectDocument(esHitsMock[1]);
         await openSelectedRowsMenu();
