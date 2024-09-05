@@ -9,16 +9,17 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import Fsp from 'fs/promises';
+import { join } from 'path';
 
 /**
  * Extracts logs from Docker nodes, writes them to files, and returns the file paths.
- * @param log
- * @param nodeNames
  */
 export async function extractAndArchiveLogs({
+  outputFolder,
   log,
   nodeNames,
 }: {
+  outputFolder: string;
   log: ToolingLog;
   nodeNames: string[];
 }) {
@@ -33,11 +34,12 @@ export async function extractAndArchiveLogs({
     ]);
     const { stdout } = await execa('docker', ['logs', name]);
     const targetFile = `${name}-${nodeId}.log`;
+    const targetPath = join(outputFolder, targetFile);
 
-    await Fsp.writeFile(targetFile, stdout);
+    await Fsp.writeFile(targetPath, stdout);
     logFiles.push(targetFile);
 
-    log.info(`Archived logs for ${name} to ${name}-${nodeId}.log`);
+    log.info(`Archived logs for ${name} to ${targetPath}`);
   }
 
   return logFiles;

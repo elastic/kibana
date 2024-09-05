@@ -444,7 +444,11 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
 
   try {
     if (ARCHIVE_LOGS) {
-      await extractAndArchiveLogs({ log, nodeNames: SERVERLESS_NODES.map(({ name }) => name) });
+      await extractAndArchiveLogs({
+        outputFolder: REPO_ROOT,
+        log,
+        nodeNames: SERVERLESS_NODES.map(({ name }) => name),
+      });
     }
 
     const { stdout } = await execa('docker', ['container', 'prune', '--force']);
@@ -863,7 +867,11 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     log.info('Waiting until ES is ready to serve requests...');
     await readyPromise.catch(async (e) => {
       if (ARCHIVE_LOGS) {
-        await extractAndArchiveLogs({ log, nodeNames: SERVERLESS_NODES.map(({ name }) => name) });
+        await extractAndArchiveLogs({
+          outputFolder: REPO_ROOT,
+          log,
+          nodeNames: SERVERLESS_NODES.map(({ name }) => name),
+        });
       }
       throw e;
     });
