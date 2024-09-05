@@ -169,8 +169,21 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
         if (!err) handleSpacesWarning(searchVal);
         setSearchQuery(searchVal);
       }
+
+      if (searchVal) {
+        onChange('');
+      }
     },
-    [handleError, handleSpacesWarning, isRequired, selectedField, touched, handleWarning, warning]
+    [
+      selectedField,
+      onChange,
+      isRequired,
+      touched,
+      handleError,
+      handleWarning,
+      warning,
+      handleSpacesWarning,
+    ]
   );
 
   const handleCreateOption = useCallback(

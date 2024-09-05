@@ -230,6 +230,38 @@ describe('AutocompleteFieldMatchComponent', () => {
     expect(mockOnChange).toHaveBeenCalledWith('value 1');
   });
 
+  test('it invokes "onChange" with empty value (i.e. clears selection) when new value searched', async () => {
+    const mockOnChange = jest.fn();
+    wrapper = mount(
+      <AutocompleteFieldMatchComponent
+        autocompleteService={autocompleteStartMock}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={mockOnChange}
+        onError={jest.fn()}
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        selectedValue="value 1"
+      />
+    );
+
+    act(() => {
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onSearchChange: (a: string) => void;
+        }
+      ).onSearchChange('value 12');
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith('');
+  });
+
   test('should show the warning helper text if the new value contains spaces when change', async () => {
     (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
       false,
@@ -312,6 +344,7 @@ describe('AutocompleteFieldMatchComponent', () => {
       selectedField: getField('machine.os.raw'),
     });
   });
+
   test('should show the warning helper text if the new value contains spaces when searching a new query', () => {
     wrapper = mount(
       <AutocompleteFieldMatchComponent
@@ -344,6 +377,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     expect(euiFormHelptext.length).toBeTruthy();
     expect(euiFormHelptext.text()).toEqual('Warning: there is a space');
   });
+
   test('should show the warning helper text if selectedValue contains spaces when editing', () => {
     wrapper = mount(
       <AutocompleteFieldMatchComponent
@@ -367,6 +401,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     expect(euiFormHelptext.length).toBeTruthy();
     expect(euiFormHelptext.text()).toEqual('Warning: there is a space');
   });
+
   test('should not show the warning helper text if selectedValue is falsy', () => {
     wrapper = mount(
       <AutocompleteFieldMatchComponent
