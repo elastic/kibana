@@ -5,22 +5,20 @@
 <titleabbrev>Search sessions settings</titleabbrev>
 ++++
 
+deprecated::[8.15.0,Search Sessions are deprecated and will be removed in a future version.]
+
 Configure the search session settings in your `kibana.yml` configuration file.
 
-`data.search.sessions.enabled` {ess-icon}::
+deprecated:[8.15.0] `data.search.sessions.enabled` {ess-icon}::
 Set to `true` (default) to enable search sessions.
 
-`data.search.sessions.pageSize` {ess-icon}::
-How many search sessions {kib} processes at once while monitoring
-session progress. The default is `100`.
-
-`data.search.sessions.notTouchedTimeout` {ess-icon}::
+deprecated:[8.15.0] `data.search.sessions.notTouchedTimeout` {ess-icon}::
 How long {kib} stores search results from unsaved sessions,
 after the last search in the session completes. The default is `5m`.
 
-`data.search.sessions.maxUpdateRetries` {ess-icon}::
+deprecated:[8.15.0] `data.search.sessions.maxUpdateRetries` {ess-icon}::
 How many retries {kib} can perform while attempting to save a search session. The default is `10`.
 
-`data.search.sessions.defaultExpiration` {ess-icon}::
+deprecated:[8.15.0] `data.search.sessions.defaultExpiration` {ess-icon}::
 How long search session results are stored before they are deleted.
 Extending a search session resets the expiration by the same value. The default is `7d`.
