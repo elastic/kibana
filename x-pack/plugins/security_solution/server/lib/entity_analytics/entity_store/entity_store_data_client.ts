@@ -119,14 +119,14 @@ export class EntityStoreDataClient {
       }));
   }
 
-  public async delete(entityType: EntityType) {
+  public async delete(entityType: EntityType, deleteData: boolean) {
     const savedObj = await this.engineClient.get(entityType).then(ensureEngineExists(entityType));
 
     this.options.logger.debug(`Deleting entity store for ${entityType}`);
 
-    // TODO: Delete definition
+    await this.options.entityClient.deleteEntityDefinition({ id: savedObj.id, deleteData });
+    await this.engineClient.delete(savedObj.id); // QUESTION: What happens if this fails but the entity definition is successfully deleted?
 
-    await this.engineClient.delete(savedObj.id);
     return { deleted: true };
   }
 }
