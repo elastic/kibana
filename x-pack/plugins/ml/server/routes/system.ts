@@ -173,7 +173,7 @@ export function systemRoutes(
           const isCloudTrial = cloud?.trialEndDate && Date.now() < cloud.trialEndDate.getTime();
 
           return response.ok({
-            body: { ...body, cloudId, isCloudTrial },
+            body: { ...body, cloudId, isCloudTrial, cloudUrl: cloud.baseUrl },
           });
         } catch (error) {
           return response.customError(wrapError(error));
