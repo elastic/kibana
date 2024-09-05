@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { getParentApi } from '../parent_api';
@@ -16,11 +16,19 @@ import { AddButton } from './add_button';
 import { TopNav } from './top_nav';
 
 export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActionsStart }) => {
-  const { parentApi, componentApi } = useMemo(() => {
+  const { cleanUp, componentApi, parentApi } = useMemo(() => {
     return getParentApi();
   }, []);
 
-  const panels = useStateFromPublishingSubject(componentApi.panels$);
+  useEffect(() => {
+    cleanUp();
+  }, []);
+
+  const [dataLoading, panels, timeRange] = useBatchedPublishingSubjects(
+    parentApi.dataLoading,
+    componentApi.panels$,
+    parentApi.timeRange$,
+  );
 
   return (
     <div>
@@ -45,7 +53,13 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
 
       <EuiSpacer size="m" />
 
-      <TopNav onSave={componentApi.onSave} />
+      <TopNav
+        dataLoading={dataLoading ?? false}
+        onReload={componentApi.onReload}
+        onSave={componentApi.onSave}
+        setTimeRange={componentApi.setTimeRange}
+        timeRange={timeRange}
+      />
 
       <EuiSpacer size="m" />
 

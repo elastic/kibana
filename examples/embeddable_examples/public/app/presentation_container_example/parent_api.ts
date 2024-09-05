@@ -10,9 +10,9 @@ import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { asyncForEach } from '@kbn/std';
 import { TimeRange } from '@kbn/es-query';
-import { PanelPackage, apiHasSerializableState } from '@kbn/presentation-containers';
+import { PanelPackage, apiHasSerializableState, combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
-import { ViewMode } from '@kbn/presentation-publishing';
+import { PublishesDataLoading, ViewMode, apiPublishesDataLoading } from '@kbn/presentation-publishing';
 import { DEFAULT_STATE, lastSavedState } from './last_saved_state';
 import { unsavedChanges } from './unsaved_changes';
 import { LastSavedState, ParentApi, UnsavedChanges } from './types';
@@ -20,18 +20,18 @@ import { LastSavedState, ParentApi, UnsavedChanges } from './types';
 export function getParentApi() {
   const lastSavedState$ = new BehaviorSubject<LastSavedState>(lastSavedState.load());
   const unsavedChanges$ = new BehaviorSubject<UnsavedChanges>(unsavedChanges.load());
-
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
+  const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
   const panels$ = new BehaviorSubject<Array<{ id: string; type: string }>>(
     unsavedChanges$.value.panels ??
       lastSavedState$.value.panelsState.map(({ id, type }) => {
         return { id, type };
       })
   );
-
   const timeRange$ = new BehaviorSubject<TimeRange | undefined>(
     unsavedChanges$.value.timeRange ?? lastSavedState$.value.timeRange
   );
+  const reload$ = new Subject<void>();
 
   const saveNotification$ = new Subject<void>();
 
@@ -58,11 +58,30 @@ export function getParentApi() {
     });
   }
 
+  const childrenDataLoadingSubscripiton = combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
+    { children$ },
+    'dataLoading',
+    apiPublishesDataLoading,
+    undefined,
+    // flatten method
+    (values) => {
+      return values.some((isLoading) => isLoading);
+    }
+  ).subscribe((isAtLeastOneChildLoading) => {
+    dataLoading$.next(isAtLeastOneChildLoading);
+  });
+
   return {
+    cleanUp: () => {
+      childrenDataLoadingSubscripiton.unsubscribe();
+    },
     /**
      * api's needed by component that should not be shared with children
      */
     componentApi: {
+      onReload: () => {
+        reload$.next();
+      },
       onSave: async () => {
         const panelsState: LastSavedState['panelsState'] = [];
         await asyncForEach(panels$.value, async ({ id, type }) => {
@@ -115,6 +134,7 @@ export function getParentApi() {
       },
       canRemovePanels: () => true,
       children$,
+      dataLoading: dataLoading$,
       getPanelCount: () => {
         return panels$.value.length;
       },
@@ -122,6 +142,7 @@ export function getParentApi() {
       replacePanel: async (idToRemove: string, newPanel: PanelPackage<object>) => {
         // TODO remove method from interface? It should not be required
       },
+      reload$,
       removePanel: (id: string) => {
         panels$.next(panels$.value.filter(({ id: panelId }) => panelId !== id));
 

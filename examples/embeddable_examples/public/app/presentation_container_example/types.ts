@@ -16,18 +16,22 @@ import {
   HasSaveNotification,
 } from '@kbn/presentation-containers';
 import {
+  PublishesDataLoading,
   PublishesPanelTitle,
   PublishesTimeRange,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
+import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 
 export type ParentApi = PresentationContainer &
   CanAddNewPanel &
   HasSaveNotification &
   HasSerializedChildState &
   HasRuntimeChildState &
+  PublishesDataLoading &
   PublishesViewMode &
   Pick<PublishesPanelTitle, 'hidePanelTitle'> &
+  PublishesReload & 
   PublishesTimeRange;
 
 export interface LastSavedState {
