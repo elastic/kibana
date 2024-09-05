@@ -527,4 +527,46 @@ describe('mergeEntities', () => {
       },
     ]);
   });
+
+  it('has no logs when log rate is not returned', () => {
+    const entities: EntityLatestServiceRaw[] = [
+      {
+        service: {
+          name: 'service-1',
+          environment: 'test',
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: ['metrics'] },
+        entity: {
+          firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          metrics: {
+            throughput: 0,
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+          },
+          identityFields: ['service.name', 'service.environment'],
+          id: 'service-1:test',
+        },
+      },
+    ];
+    const result = mergeEntities({ entities });
+    expect(result).toEqual([
+      {
+        agentName: 'nodejs' as AgentName,
+        dataStreamTypes: ['metrics'],
+        environments: ['test'],
+        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        hasLogMetrics: false,
+        metrics: [
+          {
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+            throughput: 0,
+          },
+        ],
+        serviceName: 'service-1',
+      },
+    ]);
+  });
 });
