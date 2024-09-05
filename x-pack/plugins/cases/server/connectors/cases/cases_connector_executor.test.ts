@@ -913,6 +913,25 @@ describe('CasesConnectorExecutor', () => {
                   required: true,
                   defaultValue: 'default value',
                 },
+                {
+                  key: 'second_key',
+                  type: CustomFieldTypes.TOGGLE,
+                  label: 'toggle 2',
+                  required: false,
+                },
+                {
+                  key: 'third_key',
+                  type: CustomFieldTypes.TEXT,
+                  label: 'text 3',
+                  required: true,
+                },
+                {
+                  key: 'fourth_key',
+                  type: CustomFieldTypes.TOGGLE,
+                  label: 'toggle 4',
+                  required: false,
+                  defaultValue: true,
+                },
               ],
               templates: [
                 {
@@ -932,6 +951,21 @@ describe('CasesConnectorExecutor', () => {
                         key: 'first_key',
                         type: CustomFieldTypes.TEXT,
                         value: 'this is a text field value',
+                      },
+                      {
+                        key: 'second_key',
+                        type: CustomFieldTypes.TOGGLE,
+                        value: true,
+                      },
+                      {
+                        key: 'third_key',
+                        type: CustomFieldTypes.TEXT,
+                        value: null,
+                      },
+                      {
+                        key: 'fourth_key',
+                        type: CustomFieldTypes.TOGGLE,
+                        value: null,
                       },
                     ],
                     settings: { syncAlerts: true },
@@ -992,6 +1026,21 @@ describe('CasesConnectorExecutor', () => {
                         "key": "first_key",
                         "type": "text",
                         "value": "this is a text field value",
+                      },
+                      Object {
+                        "key": "second_key",
+                        "type": "toggle",
+                        "value": true,
+                      },
+                      Object {
+                        "key": "third_key",
+                        "type": "text",
+                        "value": "N/A",
+                      },
+                      Object {
+                        "key": "fourth_key",
+                        "type": "toggle",
+                        "value": null,
                       },
                     ],
                     "description": "case desc",

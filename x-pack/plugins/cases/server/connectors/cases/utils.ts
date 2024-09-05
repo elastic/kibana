@@ -56,29 +56,32 @@ export const buildCustomFieldsForRequest = (
   customFieldsConfiguration?: CustomFieldsConfiguration,
   templateCustomFields?: CaseCustomFields
 ): CaseRequestCustomFields => {
+  // populate with template's custom fields
   if (templateCustomFields && templateCustomFields.length) {
-    return templateCustomFields.map((templateCustomField) => {
-      let customFieldValue = templateCustomField.value;
+    return customFieldsConfiguration
+      ? customFieldsConfiguration.map((customFieldConfig) => {
+          const templateCustomField = templateCustomFields?.find(
+            (item) => item.key === customFieldConfig.key
+          );
 
-      if (customFieldValue === undefined || customFieldValue === null) {
-        const customFieldConfig = customFieldsConfiguration?.find(
-          (config) => config.key === templateCustomField.key
-        );
-        if (
-          customFieldConfig &&
-          customFieldConfig.required &&
-          VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS[templateCustomField.type]
-        ) {
-          customFieldValue = VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS[templateCustomField.type];
-        }
-      }
+          let customFieldValue = templateCustomField?.value ?? null;
+          if (
+            customFieldConfig.required &&
+            customFieldConfig.type in VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS &&
+            customFieldValue === null
+          ) {
+            customFieldValue = VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS[customFieldConfig.type];
+          }
 
-      return {
-        ...templateCustomField,
-        value: customFieldValue,
-      } as CaseRequestCustomField;
-    });
+          return {
+            key: customFieldConfig.key,
+            type: customFieldConfig.type,
+            value: customFieldValue,
+          } as CaseRequestCustomField;
+        })
+      : [];
   }
+
   // only populate with the default value required custom fields missing from the request
   return customFieldsConfiguration
     ? customFieldsConfiguration
