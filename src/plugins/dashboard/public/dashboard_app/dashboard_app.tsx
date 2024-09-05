@@ -121,8 +121,8 @@ export function DashboardApp({
    */
   useEffect(() => {
     return () => {
-      dashboardAPI?.expandedPanelId.unsubscribe();
       search.session.clear();
+      dashboardAPI?.expandedPanelId.unsubscribe();
     };
   }, [dashboardAPI?.expandedPanelId, search.session]);
 
