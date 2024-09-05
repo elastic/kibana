@@ -200,41 +200,43 @@ export function Main({ isEmbeddable = false }: MainProps) {
 
                 <EuiFlexItem grow={false}>
                   <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
-                    <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
-                      <EuiButtonEmpty
-                        iconType="exportAction"
-                        onClick={() =>
-                          downloadFileAs(EXPORT_FILE_NAME, {
-                            content: inputEditorValue,
-                            type: 'text/plain',
-                          })
-                        }
-                        size="xs"
-                        data-test-subj="consoleExportButton"
-                      >
-                        {MAIN_PANEL_LABELS.exportButton}
-                      </EuiButtonEmpty>
-                    </EuiToolTip>
                     <>
-                      <EuiToolTip content={MAIN_PANEL_LABELS.importButtonTooltip}>
+                      <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
                         <EuiButtonEmpty
-                          iconType="importAction"
-                          onClick={() => document.getElementById('importConsoleFile')?.click()}
+                          iconType="exportAction"
+                          onClick={() =>
+                            downloadFileAs(EXPORT_FILE_NAME, {
+                              content: inputEditorValue,
+                              type: 'text/plain',
+                            })
+                          }
                           size="xs"
-                          data-test-subj="consoleImportButton"
+                          data-test-subj="consoleExportButton"
                         >
-                          {MAIN_PANEL_LABELS.importButton}
+                          {MAIN_PANEL_LABELS.exportButton}
                         </EuiButtonEmpty>
                       </EuiToolTip>
-                      {/* This input is hidden by CSS in the UI, but the NavIcon button activates it */}
-                      <input
-                        type="file"
-                        accept="text/*"
-                        multiple={false}
-                        name="consoleSnippets"
-                        id="importConsoleFile"
-                        onChange={onFileChange}
-                      />
+                      <>
+                        <EuiToolTip content={MAIN_PANEL_LABELS.importButtonTooltip}>
+                          <EuiButtonEmpty
+                            iconType="importAction"
+                            onClick={() => document.getElementById('importConsoleFile')?.click()}
+                            size="xs"
+                            data-test-subj="consoleImportButton"
+                          >
+                            {MAIN_PANEL_LABELS.importButton}
+                          </EuiButtonEmpty>
+                        </EuiToolTip>
+                        {/* This input is hidden by CSS in the UI, but the NavIcon button activates it */}
+                        <input
+                          type="file"
+                          accept="text/*"
+                          multiple={false}
+                          name="consoleSnippets"
+                          id="importConsoleFile"
+                          onChange={onFileChange}
+                        />
+                      </>
                     </>
                   </ConsoleTourStep>
                 </EuiFlexItem>
