@@ -32,6 +32,10 @@ export async function extractAndArchiveLogs({
       '--filter',
       `name=${name}`,
     ]);
+    if (!nodeId) {
+      continue;
+    }
+
     const { stdout } = await execa('docker', ['logs', name]);
     const targetFile = `${name}-${nodeId}.log`;
     const targetPath = join(outputFolder, targetFile);
