@@ -1,0 +1,13 @@
+summary: Create a webhook connector with SSL authentication.
+value:
+  name: my-webhook-connector
+  connector_type_id: .webhook
+  config:
+    method: post
+    url: https://example.com
+    authType: webhook-authentication-ssl
+    certType: ssl-crt-key
+  secrets: 
+    crt: QmFnIEF0dH...
+    key: LS0tLS1CRUdJ...
+    password: my-passphrase

@@ -1,0 +1,17 @@
+summary: A new webhook connector.
+value:
+  id: 900eb010-3b9d-11ee-a642-8ffbb94e38bd
+  name: my-webhook-connector
+  config: 
+    method: post
+    url: https://example.com
+    authType: webhook-authentication-ssl
+    certType: ssl-crt-key
+    verificationMode: full
+    headers: null
+    hasAuth: true
+  connector_type_id: .webhook
+  is_preconfigured: false
+  is_deprecated: false
+  is_missing_secrets: false
+  is_system_action: false

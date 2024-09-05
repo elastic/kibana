@@ -1,0 +1,19 @@
+summary: A new email connector.
+value:
+  id: 90a82c60-478f-11ee-a343-f98a117c727f
+  connector_type_id: .email
+  name: email-connector-1
+  config:
+    from: tester@example.com
+    service: other
+    host: https://example.com
+    port: 1025
+    secure: false
+    hasAuth: true
+    tenantId: null
+    clientId: null
+    oauthTokenUrl: null
+  is_preconfigured: false
+  is_deprecated: false
+  is_missing_secrets: false
+  is_system_action: false

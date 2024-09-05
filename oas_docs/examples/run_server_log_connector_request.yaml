@@ -1,0 +1,5 @@
+summary: Run a server log connector.
+value:
+  params:
+    level: warn
+    message: Test warning message.
