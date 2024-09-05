@@ -90,6 +90,7 @@ export interface ActionParamsProps<TParams> {
   executionMode?: ActionConnectorMode;
   onBlur?: (field?: string) => void;
   producerId?: string;
+  featureId?: string;
 }
 
 export interface ActionReadOnlyElementProps {

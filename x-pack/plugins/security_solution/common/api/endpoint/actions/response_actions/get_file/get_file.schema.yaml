@@ -6,9 +6,9 @@ info:
 paths:
   /api/endpoint/action/get_file:
     post:
-      summary: Get File Action
+      summary: Get a file
       operationId: EndpointGetFileAction
-      description: Get a file from an endpoint
+      description: Get a file from an endpoint.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       requestBody:
