@@ -190,7 +190,7 @@ export function DashboardApp({
     getScreenshotContext,
   ]);
 
-  useEffect(() => {
+  useMemo(() => {
     if (!dashboardAPI) return;
     dashboardAPI?.expandedPanelId.subscribe(() => {
       const expandedPanel = dashboardAPI.expandedPanelId.value;
@@ -206,7 +206,7 @@ export function DashboardApp({
         });
       }
     });
-  }, [dashboardAPI, history, savedDashboardId]);
+  }, [dashboardAPI, history]);
 
   /**
    * When the dashboard container is created, or re-created, start syncing dashboard state with the URL
