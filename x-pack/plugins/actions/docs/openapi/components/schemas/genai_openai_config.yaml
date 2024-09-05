@@ -1,6 +1,6 @@
 title: Connector request properties for an OpenAI connector
 description: > 
-  Defines properties for connectors when type is `.gen-ai` and the API provider is `OpenAI'.
+  Defines properties for connectors when type is `.gen-ai` and the API provider is `OpenAI`.
 type: object
 required:
   - apiProvider
