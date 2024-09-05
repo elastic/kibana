@@ -33,6 +33,7 @@ import {
   isMapboxVectorTile,
   safeExpandLiteralStrings,
   languageForContentType,
+  convertMapboxVectorTileToJson,
 } from './utils';
 import { useEditorReadContext, useRequestReadContext, useServicesContext } from '../../contexts';
 import { MonacoEditorOutputActionsProvider } from './monaco_editor_output_actions_provider';

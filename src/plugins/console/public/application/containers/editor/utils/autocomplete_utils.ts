@@ -13,13 +13,13 @@ import {
   getGlobalAutocompleteComponents,
   getTopLevelUrlCompleteComponents,
   getUnmatchedEndpointComponents,
-} from '../../../../../lib/kb';
+} from '../../../../lib/kb';
 import {
   AutoCompleteContext,
   type DataAutoCompleteRulesOneOf,
   ResultTerm,
-} from '../../../../../lib/autocomplete/types';
-import { populateContext } from '../../../../../lib/autocomplete/engine';
+} from '../../../../lib/autocomplete/types';
+import { populateContext } from '../../../../lib/autocomplete/engine';
 import type { EditorRequest } from '../types';
 import { parseBody, parseLine, parseUrl } from './tokens_utils';
 import {

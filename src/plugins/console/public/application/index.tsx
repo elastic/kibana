@@ -35,7 +35,6 @@ export interface BootDependencies extends ConsoleStartServices {
   element: HTMLElement;
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
-  isMonacoEnabled: boolean;
   isDevMode: boolean;
 }
 
@@ -47,7 +46,6 @@ export async function renderApp({
   http,
   docLinks,
   autocompleteInfo,
-  isMonacoEnabled,
   isDevMode,
   ...startServices
 }: BootDependencies) {
@@ -87,7 +85,6 @@ export async function renderApp({
             autocompleteInfo,
           },
           config: {
-            isMonacoEnabled,
             isDevMode,
           },
         }}

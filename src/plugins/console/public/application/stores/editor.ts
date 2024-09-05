@@ -13,7 +13,7 @@ import { DevToolsSettings, DEFAULT_SETTINGS } from '../../services';
 import { TextObject } from '../../../common/text_object';
 import { SenseEditor } from '../models';
 import { SHELL_TAB_ID } from '../containers/main/constants';
-import { MonacoEditorActionsProvider } from '../containers/editor/monaco/monaco_editor_actions_provider';
+import { MonacoEditorActionsProvider } from '../containers/editor/monaco_editor_actions_provider';
 import { RequestToRestore } from '../../types';
 
 export interface Store {

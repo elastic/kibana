@@ -30,7 +30,7 @@ const schemaLatest = schema.object(
       endpointsAvailability: schema.oneOf([schema.literal('stack'), schema.literal('serverless')], {
         defaultValue: 'stack',
       }),
-    })
+    }),
   },
   { defaultValue: undefined }
 );
@@ -39,7 +39,6 @@ const configLatest: PluginConfigDescriptor<ConsoleConfig> = {
   exposeToBrowser: {
     ui: true,
     autocompleteDefinitions: true,
-    dev: true,
   },
   schema: schemaLatest,
   deprecations: () => [],

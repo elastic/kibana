@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AVAILABLE_LANGUAGES } from '../../../../../../../common/constants';
+import { AVAILABLE_LANGUAGES } from '../../../../../../common/constants';
 
 interface Props {
   closeModal: () => void;

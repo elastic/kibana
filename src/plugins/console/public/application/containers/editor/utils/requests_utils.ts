@@ -8,9 +8,9 @@
 
 import { monaco, ParsedRequest } from '@kbn/monaco';
 import { parse } from 'hjson';
-import { constructUrl } from '../../../../../lib/es';
-import type { MetricsTracker } from '../../../../../types';
-import type { DevToolsVariable } from '../../../../components';
+import { constructUrl } from '../../../../lib/es';
+import type { MetricsTracker } from '../../../../types';
+import type { DevToolsVariable } from '../../../components';
 import type { EditorRequest, AdjustedParsedRequest } from '../types';
 import {
   urlVariableTemplateRegex,

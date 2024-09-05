@@ -7,7 +7,7 @@
  */
 
 import { formatRequestBodyDoc } from '../../../lib/utils';
-import { MonacoEditorActionsProvider } from '../../containers/editor/monaco/monaco_editor_actions_provider';
+import { MonacoEditorActionsProvider } from '../../containers/editor/monaco_editor_actions_provider';
 import { ESRequest } from '../../../types';
 
 export async function restoreRequestFromHistoryToMonaco(

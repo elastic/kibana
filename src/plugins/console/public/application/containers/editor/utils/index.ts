@@ -40,3 +40,4 @@ export {
   safeExpandLiteralStrings,
   isJSONContentType,
 } from './output_data';
+export { convertMapboxVectorTileToJson } from './mapbox_vector_tile';

@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-export interface ClientConfigType {
-  ui: {
-    enabled: boolean;
-    embeddedEnabled: boolean;
-  };
-}
+export { convertMapboxVectorTileToJson } from './convert_mapbox_vector_tile_to_json';

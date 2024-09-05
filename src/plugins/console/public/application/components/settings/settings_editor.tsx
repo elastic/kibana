@@ -24,8 +24,6 @@ import {
 import { SettingsGroup } from './settings_group';
 import { SettingsFormRow } from './settings_form_row';
 import { DevToolsSettings } from '../../../services';
-import { unregisterCommands } from '../../containers/editor/legacy/console_editor/keyboard_shortcuts';
-import type { SenseEditor } from '../../models';
 
 const DEBOUNCE_DELAY = 500;
 const ON_LABEL = i18n.translate('console.settingsPage.onLabel', { defaultMessage: 'On' });
@@ -62,7 +60,6 @@ export interface Props {
   onSaveSettings: (newSettings: DevToolsSettings) => void;
   refreshAutocompleteSettings: (selectedSettings: DevToolsSettings['autocomplete']) => void;
   settings: DevToolsSettings;
-  editorInstance: SenseEditor | null;
 }
 
 export const SettingsEditor = (props: Props) => {
@@ -169,16 +166,9 @@ export const SettingsEditor = (props: Props) => {
     setPollInterval(sanitizedValue);
   }, []);
 
-  const toggleKeyboardShortcuts = useCallback(
-    (isEnabled: boolean) => {
-      if (props.editorInstance) {
-        unregisterCommands(props.editorInstance);
-      }
-
-      setIsKeyboardShortcutsEnabled(isEnabled);
-    },
-    [props.editorInstance]
-  );
+  const toggleKeyboardShortcuts = useCallback((isEnabled: boolean) => {
+    setIsKeyboardShortcutsEnabled(isEnabled);
+  }, []);
 
   const toggleAccessibilityOverlay = useCallback(
     (isEnabled: boolean) => setIsAccessibilityOverlayEnabled(isEnabled),
