@@ -130,7 +130,7 @@ export class ValidateJobUI extends Component {
       if (typeof duration === 'object' && duration.start !== null && duration.end !== null) {
         let shouldShowLoadingIndicator = true;
 
-        this.props.kibana.services.mlServices.mlApiServices
+        this.props.kibana.services.mlServices.mlApi
           .validateJob({ duration, fields, job })
           .then((validationMessages) => {
             const messages = parseMessages(validationMessages, docLinks);
