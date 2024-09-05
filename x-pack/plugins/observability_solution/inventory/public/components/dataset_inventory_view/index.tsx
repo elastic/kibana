@@ -76,7 +76,7 @@ export function DatasetInventoryView() {
           return (
             <EuiLink
               data-test-subj="inventoryColumnsLink"
-              href={router.link('/dataset/{id}', {
+              href={router.link('/datastream/{id}', {
                 path: {
                   id: name,
                 },

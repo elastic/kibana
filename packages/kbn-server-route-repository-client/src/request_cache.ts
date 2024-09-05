@@ -56,9 +56,9 @@ export function createRequestCache(): RequestCache {
 
   return {
     fetch: async (request, options, cb) => {
-      const method = request.method ?? 'GET';
+      const method = request.method || 'GET';
 
-      const shouldCache = options.mode === 'always' || method === 'GET';
+      const shouldCache = options.mode === 'always' || method.toLowerCase() === 'get';
 
       if (!shouldCache) {
         return cb();

@@ -18,7 +18,7 @@ import { MetricDefinition } from '../../../common/metrics';
 export function DatasetMetricsView() {
   const {
     path: { id },
-  } = useInventoryParams('/dataset/{id}/metrics');
+  } = useInventoryParams('/datastream/{id}/metrics');
 
   const {
     core: { notifications },

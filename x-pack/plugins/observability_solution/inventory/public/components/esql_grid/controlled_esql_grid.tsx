@@ -6,7 +6,10 @@
  */
 import React from 'react';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
-import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import {
+  AbortableAsyncState,
+  useAbortableAsync,
+} from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { EsqlQueryResult } from '../../hooks/use_esql_query_result';
@@ -19,7 +22,7 @@ export function ControlledEsqlGrid({
   initialColumns,
 }: {
   query: string;
-  result: EsqlQueryResult;
+  result: AbortableAsyncState<EsqlQueryResult>;
   initialColumns?: DatatableColumn[];
 }) {
   const {

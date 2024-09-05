@@ -5,38 +5,92 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { EsqlQueryResult } from '../hooks/use_esql_query_result';
 
-export function getInitialColumnsForLogs({ result }: { result: EsqlQueryResult }) {
-  const datatable = result.value;
-  if (!datatable) {
-    return [];
-  }
+type Column = EsqlQueryResult['columns'][number];
 
-  const timestampColumnIndex = datatable.columns.findIndex(
+interface ColumnExtraction {
+  constants: Array<{ name: string; value: unknown }>;
+  initialColumns: Column[];
+}
+
+function analyzeColumnValues(datatable: EsqlQueryResult): Array<{
+  name: string;
+  unique: boolean;
+  constant: boolean;
+  empty: boolean;
+  index: number;
+  column: Column;
+}> {
+  return datatable.columns.map((column, index) => {
+    const values = new Set<unknown>();
+    for (const row of datatable.rows) {
+      values.add(row[index]);
+    }
+    return {
+      name: column.name,
+      unique: values.size === datatable.rows.length,
+      constant: values.size === 1,
+      empty: Array.from(values.values()).every((value) => !value),
+      index,
+      column,
+    };
+  });
+}
+
+export function getInitialColumnsForLogs({
+  datatable,
+}: {
+  datatable: EsqlQueryResult;
+}): ColumnExtraction {
+  const analyzedColumns = analyzeColumnValues(datatable);
+
+  const withoutUselessColumns = analyzedColumns.filter(({ column, empty, constant, unique }) => {
+    return empty === false && constant === false && !(column.meta.esType === 'keyword' && unique);
+  });
+
+  const constantColumns = analyzedColumns.filter(({ constant }) => constant);
+
+  const timestampColumnIndex = withoutUselessColumns.findIndex(
     (column) => column.name === '@timestamp'
   );
 
-  let messageColumnIndex = datatable.columns.findIndex((column) => column.name === 'message');
+  const messageColumnIndex = withoutUselessColumns.findIndex(
+    (column) => column.name === 'message' || column.name === 'msg'
+  );
 
-  if (messageColumnIndex === -1) {
-    messageColumnIndex = datatable.columns.findIndex(
-      (column) => column.meta.esType === ES_FIELD_TYPES.TEXT
-    );
+  const initialColumns = new Set<Column>();
+
+  if (timestampColumnIndex !== -1) {
+    initialColumns.add(withoutUselessColumns[timestampColumnIndex].column);
   }
 
-  if (datatable.columns.length > 20 && timestampColumnIndex !== -1 && messageColumnIndex !== -1) {
-    const hasDataForBothColumns = datatable.rows.every((row) => {
-      const timestampValue = row[timestampColumnIndex];
-      const messageValue = row[messageColumnIndex];
+  if (messageColumnIndex !== -1) {
+    initialColumns.add(withoutUselessColumns[messageColumnIndex].column);
+  }
 
-      return timestampValue !== null && timestampValue !== undefined && !!messageValue;
-    });
-
-    if (hasDataForBothColumns) {
-      return [datatable.columns[timestampColumnIndex], datatable.columns[messageColumnIndex]];
+  for (const { column } of withoutUselessColumns) {
+    if (initialColumns.size <= 8) {
+      initialColumns.add(column);
+    } else {
+      break;
     }
   }
-  return datatable.columns;
+
+  for (const { column } of constantColumns) {
+    if (initialColumns.size <= 8) {
+      initialColumns.add(column);
+    } else {
+      break;
+    }
+  }
+
+  const constants = constantColumns.map(({ name, index, column }) => {
+    return { name, value: datatable.rows[0][index] };
+  });
+
+  return {
+    initialColumns: Array.from(initialColumns.values()),
+    constants,
+  };
 }

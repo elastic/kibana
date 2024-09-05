@@ -17,6 +17,9 @@ export type AbortableAsyncState<T> = (T extends Promise<infer TReturn>
   ? State<TReturn>
   : State<T>) & { refresh: () => void };
 
+export type AbortableAsyncStateOf<T extends AbortableAsyncState<any>> =
+  T extends AbortableAsyncState<infer TResponse> ? Awaited<TResponse> : never;
+
 export function useAbortableAsync<T>(
   fn: ({}: { signal: AbortSignal }) => T | Promise<T>,
   deps: any[],

@@ -267,7 +267,7 @@ const listEntityTypesRoute = createInventoryServerRoute({
             defaultMessage: 'Datastreams',
           }),
           icon: 'pipeNoBreaks',
-          name: 'dataset',
+          name: 'datastream',
           count: 0,
         },
       ],
@@ -303,7 +303,7 @@ const listEntitiesRoute = createInventoryServerRoute({
     } = params;
 
     const [datasets] = await Promise.all([
-      type === 'all' || type === 'dataset'
+      type === 'all' || type === 'datastream'
         ? getDatasets({
             esClient,
           })
@@ -315,7 +315,7 @@ const listEntitiesRoute = createInventoryServerRoute({
         (dataset): DatasetEntity => ({
           id: dataset.name,
           name: dataset.name,
-          type: 'dataset',
+          type: 'datastream',
           properties: {
             'dataset.type': dataset.type,
           },

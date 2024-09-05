@@ -18,16 +18,20 @@ import { useKibana } from './use_kibana';
 
 type EsFieldType = Values<typeof ES_FIELD_TYPES>;
 
-export type EsqlQueryResult = AbortableAsyncState<{
+export interface EsqlQueryResult {
   columns: Array<{
     id: string;
     name: string;
     meta: { type: DatatableColumnType; esType: EsFieldType };
   }>;
   rows: ESQLRow[];
-}>;
+}
 
-export function useEsqlQueryResult({ query }: { query: string }): EsqlQueryResult {
+export function useEsqlQueryResult({
+  query,
+}: {
+  query: string;
+}): AbortableAsyncState<EsqlQueryResult> {
   const {
     dependencies: {
       start: { data },

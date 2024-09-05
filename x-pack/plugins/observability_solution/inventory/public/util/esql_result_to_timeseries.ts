@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { orderBy } from 'lodash';
+import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { EsqlQueryResult } from '../hooks/use_esql_query_result';
 
 interface Timeseries<T extends string> {
@@ -18,7 +19,7 @@ export function esqlResultToTimeseries<T extends string>({
   result,
   metricNames,
 }: {
-  result: EsqlQueryResult;
+  result: AbortableAsyncState<EsqlQueryResult>;
   metricNames: T[];
 }): Array<Timeseries<T>> {
   const columns = result.value?.columns;

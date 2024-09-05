@@ -7,6 +7,7 @@
 import React from 'react';
 import {
   CriteriaWithPagination,
+  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
@@ -62,6 +63,15 @@ export function ControlledEntityTable<TEntity extends { id: string; name: string
               {name}
             </EuiLink>
           );
+        },
+      },
+      {
+        field: 'type',
+        name: i18n.translate('xpack.inventory.entityTable.typeColumnLabel', {
+          defaultMessage: 'Type',
+        }),
+        render: (_, { type }) => {
+          return <EuiBadge>{type}</EuiBadge>;
         },
       },
     ];

@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useRouterBreadcrumb } from '@kbn/typed-react-router-config';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { EntityOverviewHeader } from '../entity_overview_header';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
@@ -21,7 +22,7 @@ type TabMap = Record<
 export function DatasetDetailView({ children }: { children: React.ReactNode }) {
   const {
     path: { id },
-  } = useInventoryParams('/dataset/{id}/*');
+  } = useInventoryParams('/datastream/{id}/*');
 
   const router = useInventoryRouter();
 
@@ -29,22 +30,24 @@ export function DatasetDetailView({ children }: { children: React.ReactNode }) {
 
   const tabs = {
     overview: {
-      selected: routePath === '/dataset/{id}/overview',
-      href: router.link('/dataset/{id}/overview', { path: { id } }),
+      selected: routePath === '/datastream/{id}/overview',
+      href: router.link('/datastream/{id}/overview', { path: { id } }),
       label: i18n.translate('xpack.inventory.datasetOverview.overviewTabLabel', {
         defaultMessage: 'Overview',
       }),
       content: <></>,
     },
     metrics: {
-      selected: routePath === '/dataset/{id}/metrics',
-      href: router.link('/dataset/{id}/metrics', { path: { id } }),
+      selected: routePath === '/datastream/{id}/metrics',
+      href: router.link('/datastream/{id}/metrics', { path: { id } }),
       label: i18n.translate('xpack.inventory.datasetOverview.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
       content: <></>,
     },
   } satisfies TabMap;
+
+  useRouterBreadcrumb(() => ({ title: id, href: `/datastream/${id}` }), [id]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">

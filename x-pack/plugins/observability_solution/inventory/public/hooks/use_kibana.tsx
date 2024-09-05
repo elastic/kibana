@@ -16,8 +16,16 @@ export interface InventoryKibanaContext {
   services: InventoryServices;
 }
 
-const useTypedKibana = () => {
-  return useKibana<InventoryKibanaContext>().services;
+const useTypedKibana = (): InventoryKibanaContext => {
+  const context = useKibana<CoreStart & Omit<InventoryKibanaContext, 'core'>>();
+
+  const { dependencies, services, ...core } = context.services;
+
+  return {
+    core,
+    dependencies,
+    services,
+  };
 };
 
 export { useTypedKibana as useKibana };

@@ -22,6 +22,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getTimeZone } from '@kbn/observability-utils-browser/utils/ui_settings/get_timezone';
 import { css } from '@emotion/css';
+import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { EsqlQueryResult } from '../../hooks/use_esql_query_result';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useKibana } from '../../hooks/use_kibana';
@@ -50,7 +51,7 @@ export function ControlledEsqlChart<T extends string>({
   height,
 }: {
   id: string;
-  result: EsqlQueryResult;
+  result: AbortableAsyncState<EsqlQueryResult>;
   metricNames: T[];
   chartType?: 'area' | 'bar' | 'line';
   height: number;
