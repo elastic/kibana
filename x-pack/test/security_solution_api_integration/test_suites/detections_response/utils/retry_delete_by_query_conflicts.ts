@@ -27,6 +27,7 @@ export async function retryIfDeleteByQueryConflicts<T>(
 ): Promise<DeleteByQueryResponse> {
   const operationResult = await operation();
   if (!operationResult.failures || operationResult.failures?.length === 0) {
+    logger.info(`${name} finished successfully`);
     return operationResult;
   }
 
