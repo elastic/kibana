@@ -61,7 +61,11 @@ import {
   PackageNotFoundError,
   FleetTooManyRequestsError,
 } from '../../../errors';
-import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
+import {
+  PACKAGES_SAVED_OBJECT_TYPE,
+  MAX_TIME_COMPLETE_INSTALL,
+  MAX_REINSTALL_RETRIES,
+} from '../../../constants';
 import { dataStreamService, licenseService } from '../..';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
@@ -96,6 +100,7 @@ import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
+import { removeInstallation } from './remove';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
@@ -279,6 +284,8 @@ export async function handleInstallPackageFailure({
   // if there is an unknown server error, reinstall the previous version if update or retry install where it left off
   try {
     const installType = getInstallType({ pkgVersion, installedPkg });
+    const latestAttempts = installedPkg?.attributes.latest_install_failed_attempts;
+
     await updateInstallStatusToFailed({
       logger,
       savedObjectsClient,
@@ -288,8 +295,26 @@ export async function handleInstallPackageFailure({
     });
 
     if (installType === 'install') {
-      // restart install where it left off
-      logger.error(`Retrying install of ${pkgkey} after error installing: [${error.toString()}]`);
+      logger.error(
+        `Uninstalling ${pkgkey} after error installing: [${error.toString()}] with install type: ${installType}`
+      );
+      await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
+      return;
+    }
+
+    // in case of reinstall, restart install where it left off
+    // retry MAX_REINSTALL_RETRIES before exiting, in case the error persists
+    if (
+      installType === 'reinstall' &&
+      latestAttempts &&
+      latestAttempts.length < MAX_REINSTALL_RETRIES
+    ) {
+      logger.error(`Error installing ${pkgkey}: [${error.toString()}]`);
+      logger.debug(
+        `Retrying install of ${pkgkey}  with install type: ${installType} - Attempt ${
+          latestAttempts.length + 1
+        } `
+      );
       await installPackage({
         installSource: 'registry',
         savedObjectsClient,
@@ -301,19 +326,15 @@ export async function handleInstallPackageFailure({
       });
     }
 
-    if (installType === 'reinstall') {
-      logger.error(`Failed to reinstall ${pkgkey}: [${error.toString()}]`, { error });
-    }
-
     if (installType === 'update') {
       if (!installedPkg) {
         logger.error(
-          `failed to rollback package after installation error ${error} because saved object was undefined`
+          `Failed to rollback package with install type: ${installType} after installation error ${error} because saved object was undefined`
         );
         return;
       }
       const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
-      logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
+      logger.error(`Rolling back to ${prevVersion} after error installing ${pkgkey}`);
       await installPackage({
         installSource: 'registry',
         savedObjectsClient,
@@ -322,7 +343,6 @@ export async function handleInstallPackageFailure({
         spaceId,
         force: true,
         authorizationHeader,
-        retryFromLastState,
       });
     }
   } catch (e) {
@@ -341,7 +361,7 @@ export async function handleInstallPackageFailure({
           })
         : [],
     });
-    logger.error(`failed to uninstall or rollback package after installation error ${e}`);
+    logger.error(`Failed to uninstall or rollback package after installation error ${e}`);
   }
 }
 
@@ -989,6 +1009,9 @@ export type InstallPackageParams = {
   | ({ installSource: Extract<InstallSource, 'custom'> } & InstallCustomPackageParams)
 );
 
+/**
+ * Entrypoint function for installing packages; this function gets also called by the POST epm/packages handler
+ */
 export async function installPackage(args: InstallPackageParams): Promise<InstallResult> {
   if (!('installSource' in args)) {
     throw new FleetError('installSource is required');
