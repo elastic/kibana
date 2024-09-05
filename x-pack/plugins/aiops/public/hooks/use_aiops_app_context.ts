@@ -98,7 +98,7 @@ export interface AiopsAppContextValue {
   /**
    * Used to create deep links to other plugins.
    */
-  share: SharePluginStart;
+  share?: SharePluginStart;
   /**
    * Used to create lens embeddables.
    */
