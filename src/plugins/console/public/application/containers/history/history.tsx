@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FixedSizeList } from 'react-window';
 import { i18n } from '@kbn/i18n';
-import { memoize } from 'lodash';
 import moment from 'moment';
 import {
   EuiSpacer,
@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiButton,
   useEuiTheme,
+  EuiAutoSizer,
   EuiSplitPanel,
   EuiButtonEmpty,
   EuiFormFieldset,
@@ -37,26 +38,42 @@ import { ESRequest, RestoreMethod } from '../../../types';
 
 const CHILD_ELEMENT_PREFIX = 'historyReq';
 
-const CheckeableCardLabel = ({
-  endpoint,
-  formattedDate,
-}: {
+interface HistoryProps {
+  data: string;
   endpoint: string;
-  formattedDate: string;
-}) => (
-  <EuiFlexGroup>
-    <EuiFlexItem>
-      <EuiText size="s">
-        <b>{endpoint}</b>
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="s" color="subdued">
-        {formattedDate}
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+  method: string;
+  time: string;
+}
+
+interface RowProps {
+  index: number;
+  style: React.CSSProperties;
+  data: HistoryProps[];
+}
+
+const CheckeableCardLabel = ({ historyItem }: { historyItem: HistoryProps }) => {
+  const date = moment(historyItem.time);
+
+  let formattedDate = date.format('MMM D');
+  if (date.diff(moment(), 'days') > -7) {
+    formattedDate = date.fromNow();
+  }
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiText size="s">
+          <b>{historyItem.endpoint}</b>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued">
+          {formattedDate}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 interface Props {
   containerWidth: number;
@@ -71,7 +88,7 @@ export function History({ containerWidth }: Props) {
 
   const { settings: readOnlySettings } = useEditorReadContext();
 
-  const [requests, setPastRequests] = useState<any[]>(history.getHistory());
+  const [requests, setPastRequests] = useState<HistoryProps[]>(history.getHistory());
 
   const clearHistory = useCallback(() => {
     history.clearHistory();
@@ -80,32 +97,10 @@ export function History({ containerWidth }: Props) {
 
   const [viewingReq, setViewingReq] = useState<any>(null);
 
-  const describeReq = useMemo(() => {
-    const _describeReq = (req: { endpoint: string; time: string }) => {
-      const endpoint = req.endpoint;
-      const date = moment(req.time);
-
-      let formattedDate = date.format('MMM D');
-      if (date.diff(moment(), 'days') > -7) {
-        formattedDate = date.fromNow();
-      }
-
-      return {
-        endpoint,
-        formattedDate,
-      };
-    };
-
-    (_describeReq as any).cache = new WeakMap();
-
-    return memoize(_describeReq);
-  }, []);
-
   const initialize = useCallback(() => {
     const nextSelectedIndex = 0;
-    (describeReq as any).cache = new WeakMap();
     setViewingReq(requests[nextSelectedIndex]);
-  }, [describeReq, requests]);
+  }, [requests]);
 
   const clear = () => {
     clearHistory();
@@ -131,6 +126,25 @@ export function History({ containerWidth }: Props) {
     initialize();
   }, [initialize]);
 
+  const Row = useCallback(
+    ({ data, index, style }: RowProps) => (
+      <EuiFormFieldset key={index} data-test-subj="historyItemFieldset" style={style}>
+        <EuiCheckableCard
+          id={`${CHILD_ELEMENT_PREFIX}${index}`}
+          label={<CheckeableCardLabel historyItem={data[index]} />}
+          data-test-subj={`historyItem-${index}`}
+          checkableType="radio"
+          checked={viewingReq === data[index]}
+          onChange={() => {
+            setViewingReq(data[index]);
+          }}
+        />
+        <EuiSpacer size="s" />
+      </EuiFormFieldset>
+    ),
+    [viewingReq, setViewingReq]
+  );
+
   return (
     <EuiPanel
       color="subdued"
@@ -151,6 +165,7 @@ export function History({ containerWidth }: Props) {
               tabIndex={0}
               borderRadius="none"
               hasShadow={false}
+              paddingSize="none"
             >
               <EuiSplitPanel.Outer
                 grow
@@ -160,8 +175,8 @@ export function History({ containerWidth }: Props) {
                   paddingRight: euiTheme.size.s,
                 }}
               >
-                <EuiSplitPanel.Inner paddingSize="none">
-                  <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiSplitPanel.Inner paddingSize="m">
+                  <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
                     <EuiFlexItem grow={false}>
                       <EuiSpacer size="s" />
                       <EuiTitle>
@@ -184,31 +199,33 @@ export function History({ containerWidth }: Props) {
                       <EuiSpacer size="l" />
                     </EuiFlexItem>
 
-                    <EuiFlexItem
-                      grow={false}
-                      css={{ height: 'calc(100vh - 415px)', overflowY: 'auto' }}
-                    >
+                    <EuiFlexItem grow={true} css={{ height: '100%' }}>
                       {requests.length === 0 && <HistoryEmptyPrompt />}
 
-                      {requests.map((req, idx) => (
-                        <EuiFormFieldset key={idx} data-test-subj="historyItemFieldset">
-                          <EuiCheckableCard
-                            id={`${CHILD_ELEMENT_PREFIX}${idx}`}
-                            label={<CheckeableCardLabel {...describeReq(req)} />}
-                            data-test-subj={`historyItem-${idx}`}
-                            checkableType="radio"
-                            checked={viewingReq === req}
-                            onChange={() => {
-                              setViewingReq(req);
-                            }}
-                          />
-                          <EuiSpacer size="s" />
-                        </EuiFormFieldset>
-                      ))}
+                      {requests.length > 0 && (
+                        <EuiAutoSizer>
+                          {({ height, width }) => (
+                            <FixedSizeList
+                              height={height}
+                              itemCount={requests.length}
+                              itemSize={62}
+                              itemData={requests}
+                              width={width}
+                            >
+                              {Row}
+                            </FixedSizeList>
+                          )}
+                        </EuiAutoSizer>
+                      )}
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiSplitPanel.Inner>
-                <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="none">
+                <EuiSplitPanel.Inner
+                  grow={false}
+                  color="subdued"
+                  paddingSize="s"
+                  css={{ paddingTop: euiTheme.size.l }}
+                >
                   <EuiText>
                     <EuiButtonEmpty
                       size="xs"

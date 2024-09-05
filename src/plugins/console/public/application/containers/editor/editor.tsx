@@ -20,6 +20,7 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
+import { TextObject } from '../../../../common/text_object';
 
 import {
   EditorContentSpinner,
@@ -33,6 +34,7 @@ import {
   useServicesContext,
   useRequestReadContext,
   useRequestActionContext,
+  useEditorActionContext,
 } from '../../contexts';
 import type { SenseEditor } from '../../models';
 import { MonacoEditor, MonacoEditorOutput } from './monaco';
@@ -40,20 +42,24 @@ import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
 const INITIAL_PANEL_SIZE = 50;
 const PANEL_MIN_SIZE = '20%';
+const DEBOUNCE_DELAY = 500;
 
 interface Props {
   loading: boolean;
   setEditorInstance: (instance: SenseEditor) => void;
   containerWidth: number;
+  inputEditorValue: string;
+  setInputEditorValue: (value: string) => void;
 }
 
-export const Editor = memo(({ loading, setEditorInstance, containerWidth }: Props) => {
-  const { euiTheme } = useEuiTheme();
-  const {
-    services: { storage },
-    config: { isMonacoEnabled } = {},
-  } = useServicesContext();
-
+export const Editor = memo(
+  ({ loading, setEditorInstance, inputEditorValue, setInputEditorValue }: Props) => {
+    const { euiTheme } = useEuiTheme();
+    const {
+      services: { storage },
+      config: { isMonacoEnabled } = {},
+    } = useServicesContext();
+    
   const { currentTextObject } = useEditorReadContext();
   const {
     requestInFlight,
@@ -61,6 +67,7 @@ export const Editor = memo(({ loading, setEditorInstance, containerWidth }: Prop
   } = useRequestReadContext();
 
   const dispatch = useRequestActionContext();
+      const editorDispatch = useEditorActionContext();
 
   const [fetchingMappings, setFetchingMappings] = useState(false);
 
@@ -85,6 +92,31 @@ export const Editor = memo(({ loading, setEditorInstance, containerWidth }: Prop
     }, 300),
     []
   );
+      
+          /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    const debouncedUpdateLocalStorageValue = useCallback(
+      debounce((textObject: TextObject) => {
+        editorDispatch({ type: 'setCurrentTextObject', payload: textObject });
+      }, DEBOUNCE_DELAY),
+      []
+    );
+
+    // Always keep the currentTextObject in sync with the value in the editor
+    // to avoid losing the text object when the user navigates away from the shell
+    useEffect(() => {
+      // Only update when its not empty, this is to avoid setting the currentTextObject
+      // to the example text when the user clears the editor.
+      if (inputEditorValue !== '') {
+        const textObject = {
+          ...currentTextObject,
+          text: inputEditorValue,
+          updatedAt: Date.now(),
+        } as TextObject;
+
+        debouncedUpdateLocalStorageValue(textObject);
+      }
+      /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    }, [inputEditorValue, debouncedUpdateLocalStorageValue]);
 
   const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
   const isLoading = loading || requestInFlight;
@@ -205,6 +237,7 @@ export const Editor = memo(({ loading, setEditorInstance, containerWidth }: Prop
                     className="consoleEditorPanel"
                   >
                     <EuiFlexGroup gutterSize="none" responsive={false}>
+
                       <EuiFlexItem grow={false}>
                         <EuiButtonEmpty
                           size="xs"

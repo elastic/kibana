@@ -17,7 +17,9 @@ import {
   EuiHorizontalRule,
   EuiScreenReaderOnly,
   useResizeObserver,
+  EuiToolTip,
 } from '@elastic/eui';
+import { downloadFileAs } from '@kbn/share-plugin/public';
 import { getConsoleTourStepProps } from './get_console_tour_step_props';
 import { useServicesContext } from '../../contexts';
 import { MAIN_PANEL_LABELS } from './i18n';
@@ -49,6 +51,7 @@ import {
   TOUR_STORAGE_KEY,
   INITIAL_TOUR_CONFIG,
   FILES_TOUR_STEP,
+  EXPORT_FILE_NAME,
 } from './constants';
 
 interface MainProps {
@@ -84,11 +87,13 @@ export function Main({ isEmbeddable = false }: MainProps) {
   const consoleTourStepProps: ConsoleTourStepProps[] = getConsoleTourStepProps(
     tourStepProps,
     actions,
-    tourState,
-    currentView
+    tourState
   );
 
   const { done, error, retry } = useDataInit();
+
+  const { currentTextObject } = useEditorReadContext();
+  const [inputEditorValue, setInputEditorValue] = useState<string>(currentTextObject?.text ?? '');
 
   const toggleFullscreen = () => {
     const isEnabled = !isFullscreenOpen;
@@ -154,13 +159,21 @@ export function Main({ isEmbeddable = false }: MainProps) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
-                <NavIconButton
-                  iconType="save"
-                  onClick={() => {}}
-                  ariaLabel={MAIN_PANEL_LABELS.importExportButton}
-                  dataTestSubj="consoleImportExportButton"
-                  toolTipContent={MAIN_PANEL_LABELS.importExportButton}
-                />
+                     <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
+                      <EuiButtonEmpty
+                        iconType="exportAction"
+                        onClick={() =>
+                          downloadFileAs(EXPORT_FILE_NAME, {
+                            content: inputEditorValue,
+                            type: 'text/plain',
+                          })
+                        }
+                        size="xs"
+                        data-test-subj="consoleExportButton"
+                      >
+                        {MAIN_PANEL_LABELS.exportButton}
+                      </EuiButtonEmpty>
+                    </EuiToolTip>
               </ConsoleTourStep>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -176,9 +189,10 @@ export function Main({ isEmbeddable = false }: MainProps) {
                 isOpen={isHelpOpen}
                 closePopover={() => setIsHelpOpen(false)}
                 resetTour={() => {
-                  setIsHelpOpen(false);
-                  actions.resetTour();
-                }}
+                      setIsHelpOpen(false);
+                      dispatch({ type: 'setCurrentView', payload: SHELL_TAB_ID });
+                      actions.resetTour();
+                    }}
               />
             </EuiFlexItem>
             {isEmbeddable && (
@@ -209,6 +223,8 @@ export function Main({ isEmbeddable = false }: MainProps) {
               loading={!done}
               setEditorInstance={() => {}}
               containerWidth={containerDimensions.width}
+                inputEditorValue={inputEditorValue}
+                  setInputEditorValue={setInputEditorValue}
             />
           )}
           {currentView === HISTORY_TAB_ID && <History containerWidth={containerDimensions.width} />}

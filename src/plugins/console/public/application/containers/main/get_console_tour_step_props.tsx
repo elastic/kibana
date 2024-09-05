@@ -16,23 +16,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ConsoleTourStepProps } from '../../components';
-import { SHELL_TAB_ID } from './constants';
 
 export const getConsoleTourStepProps = (
   stateTourStepProps: EuiTourStepProps[],
   actions: EuiTourActions,
-  tourState: EuiTourState,
-  selectedTab: string
+  tourState: EuiTourState
 ): ConsoleTourStepProps[] => {
   return stateTourStepProps.map((step: EuiTourStepProps) => {
     const nextTourStep = () => {
       if (tourState.currentTourStep < 5) {
-        // If the user is not on the shell tab and the current step is welcome to
-        // console, skip the editor query step.
-        if (selectedTab !== SHELL_TAB_ID && tourState.currentTourStep === 1) {
-          return actions.goToStep(3);
-        }
-
         actions.incrementStep();
       }
     };
