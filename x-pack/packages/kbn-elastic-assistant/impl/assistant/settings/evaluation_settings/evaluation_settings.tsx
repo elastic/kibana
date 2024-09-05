@@ -55,9 +55,9 @@ export const EvaluationSettings: React.FC = React.memo(() => {
 
   // Run Details
   // Run Name
-  const [runName, setRunName] = useState();
+  const [runName, setRunName] = useState<string | undefined>();
   const onRunNameChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setRunName(e.target.value);
     },
     [setRunName]
@@ -65,19 +65,19 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   /** Trace Options **/
   const [showTraceOptions, setShowTraceOptions] = useState(false);
   const onApmUrlChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setTraceOptions({ ...traceOptions, apmUrl: e.target.value });
     },
     [setTraceOptions, traceOptions]
   );
   const onLangSmithProjectChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setTraceOptions({ ...traceOptions, langSmithProject: e.target.value });
     },
     [setTraceOptions, traceOptions]
   );
   const onLangSmithApiKeyChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setTraceOptions({ ...traceOptions, langSmithApiKey: e.target.value });
     },
     [setTraceOptions, traceOptions]

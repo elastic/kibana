@@ -1,0 +1,16 @@
+## FLOOR
+
+The `FLOOR` function rounds a number down to the nearest integer. This operation is a no-op for long (including unsigned) and integer types. For double types, it picks the closest double value to the integer, similar to `Math.floor`.
+
+### Examples
+
+```esql
+ROW a=1.8
+| EVAL a = FLOOR(a)
+```
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| EVAL height_floor = FLOOR(height)
+```
