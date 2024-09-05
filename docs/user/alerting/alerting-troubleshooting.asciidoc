@@ -197,7 +197,7 @@ If cluster performance becomes degraded from excessive or expensive rules and {k
 
 [source,txt]
 --------------------------------------------------
-xpack.task_manager.max_workers: 1
+xpack.task_manager.capacity: 5
 xpack.task_manager.poll_interval: 1h
 --------------------------------------------------
 
