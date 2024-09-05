@@ -26,7 +26,10 @@ import {
 import { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
 
-export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule) => ({
+export const getMonitorAlertDocument = (
+  monitorSummary: MonitorSummaryStatusRule,
+  useLatestChecks: boolean
+) => ({
   [MONITOR_ID]: monitorSummary.monitorId,
   [MONITOR_TYPE]: monitorSummary.monitorType,
   [MONITOR_NAME]: monitorSummary.monitorName,
@@ -40,7 +43,8 @@ export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule
   'location.name': monitorSummary.locationName,
   configId: monitorSummary.configId,
   'kibana.alert.evaluation.threshold': monitorSummary.downThreshold,
-  'kibana.alert.evaluation.value': monitorSummary.checks?.down ?? 1,
+  'kibana.alert.evaluation.value':
+    (useLatestChecks ? monitorSummary.checks?.downWithinXChecks : monitorSummary.checks?.down) ?? 1,
   'monitor.tags': monitorSummary.monitorTags ?? [],
 });
 
@@ -72,9 +76,9 @@ export const getMonitorSummary = ({
   locationsThreshold,
   numberOfChecks,
 }: MonitorSummaryData): MonitorSummaryStatusRule => {
-  const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
-  const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
-  const checkedAt = moment(monitorInfo['@timestamp'])
+  const monitorName = monitorInfo?.monitor?.name ?? monitorInfo?.monitor?.id;
+  const observerLocation = monitorInfo?.observer?.geo?.name ?? UNNAMED_LOCATION;
+  const checkedAt = moment(monitorInfo?.['@timestamp'])
     .tz(tz || 'UTC')
     .format(dateFormat);
   const typeToLabelMap: Record<string, string> = {
@@ -229,7 +233,7 @@ export const getReasonMessage = ({
   const checkedAt = moment(timestamp).format('LLL');
 
   return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.new', {
-    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Monitor is down {downChecks} {downChecks, plural, one {time} other {times}} within the last {numberOfChecks} checks. Alert when {downThreshold} out of last {numberOfChecks} checks are down from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
+    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Monitor is down {downChecks} {downChecks, plural, one {time} other {times}} within the last {numberOfChecks} checks. Alert when {downThreshold} out of the last {numberOfChecks} checks are down from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
     values: {
       name,
       status,

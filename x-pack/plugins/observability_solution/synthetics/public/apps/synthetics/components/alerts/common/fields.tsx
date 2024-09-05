@@ -34,6 +34,7 @@ export function MonitorField({ value, onChange, ...rest }: FieldProps) {
       fieldName="monitorIds"
       selectedField={rest.selectedField}
       setSelectedField={rest.setSelectedField}
+      suggestions={rest.suggestions}
     >
       <FieldSelector
         value={value}
@@ -59,6 +60,7 @@ export function TagsField({ value, onChange, ...rest }: FieldProps) {
       fieldName="tags"
       selectedField={rest.selectedField}
       setSelectedField={rest.setSelectedField}
+      suggestions={rest.suggestions}
     >
       <FieldSelector
         value={value}
@@ -85,6 +87,7 @@ export function MonitorTypeField({ value, onChange, ...rest }: FieldProps) {
       fieldName="monitorTypes"
       selectedField={rest.selectedField}
       setSelectedField={rest.setSelectedField}
+      suggestions={rest.suggestions}
     >
       <FieldSelector
         value={value}
@@ -111,6 +114,7 @@ export function LocationsField({ value, onChange, ...rest }: FieldProps) {
       fieldName="locations"
       selectedField={rest.selectedField}
       setSelectedField={rest.setSelectedField}
+      suggestions={rest.suggestions}
     >
       <FieldSelector
         value={value}
@@ -137,6 +141,7 @@ export function ProjectsField({ value, onChange, ...rest }: FieldProps) {
       fieldName="projects"
       selectedField={rest.selectedField}
       setSelectedField={rest.setSelectedField}
+      suggestions={rest.suggestions}
     >
       <FieldSelector
         value={value}

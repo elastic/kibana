@@ -185,17 +185,36 @@ export const setRecoveredAlertsContext = ({
     );
     let isUp = false;
     let linkMessage = '';
-    let monitorSummary: MonitorSummaryStatusRule | null = null;
+    let monitorSummary;
     let lastErrorMessage;
 
-    if (recoveredAlertId && locationId && staleDownConfigs[recoveredAlertId]) {
-      const downConfig = staleDownConfigs[recoveredAlertId];
-      const { ping } = downConfig;
+    if (recoveredAlertId && locationId) {
       monitorSummary = getMonitorSummary({
-        monitorInfo: ping,
+        monitorInfo: {
+          monitor: {
+            id: recoveredAlertId,
+            name: alertHit['monitor.name'],
+            type: alertHit['monitor.type'],
+          },
+          error: {
+            message: alertHit['error.message'],
+          },
+          url: {
+            full: alertHit['url.full'],
+          },
+          observer: {
+            geo: {
+              name: alertHit['observer.geo.name'],
+            },
+          },
+          '@timestamp': state.lastCheckedAt,
+          state: {
+            id: state.stateId,
+          },
+        },
         statusMessage: RECOVERED_LABEL,
         locationId,
-        configId: downConfig.configId,
+        configId: state.configId,
         dateFormat,
         tz,
         checks,
@@ -203,50 +222,38 @@ export const setRecoveredAlertsContext = ({
         numberOfChecks,
         locationsThreshold,
       });
-      lastErrorMessage = monitorSummary.lastErrorMessage;
+    }
 
-      if (downConfig.isDeleted) {
-        recoveryStatus = i18n.translate(
-          'xpack.synthetics.alerts.monitorStatus.deleteMonitor.status',
-          {
-            defaultMessage: `has been deleted`,
-          }
-        );
-        recoveryReason = i18n.translate(
-          'xpack.synthetics.alerts.monitorStatus.deleteMonitor.reason',
-          {
-            defaultMessage: `the monitor has been deleted`,
-          }
-        );
-      } else if (downConfig.isLocationRemoved) {
-        recoveryStatus = i18n.translate(
-          'xpack.synthetics.alerts.monitorStatus.removedLocation.status',
-          {
-            defaultMessage: `has recovered`,
-          }
-        );
-        recoveryReason = i18n.translate(
-          'xpack.synthetics.alerts.monitorStatus.removedLocation.reason',
-          {
-            defaultMessage: `this location has been removed from the monitor`,
-          }
-        );
+    if (recoveredAlertId && locationId && staleDownConfigs[recoveredAlertId]) {
+      const summary = getDeletedMonitorOrLocationSummary({
+        staleDownConfigs,
+        recoveredAlertId,
+        locationId,
+        dateFormat,
+        tz,
+        checks,
+        numberOfChecks,
+        locationsThreshold,
+        downThreshold,
+      });
+      if (summary) {
+        monitorSummary = summary.monitorSummary;
+        recoveryStatus = summary.recoveryStatus;
+        recoveryReason = summary.recoveryReason;
+        lastErrorMessage = summary.lastErrorMessage;
       }
     }
 
     if (configId && recoveredAlertId && locationId && upConfigs[recoveredAlertId]) {
-      // pull the last error from state, since it is not available on the up ping
-      lastErrorMessage = alertHit?.['error.message'];
-
-      const upConfig = upConfigs[recoveredAlertId];
-      isUp = Boolean(upConfig) || false;
-      const ping = upConfig.ping;
-
-      monitorSummary = getMonitorSummary({
-        monitorInfo: ping,
-        statusMessage: RECOVERED_LABEL,
+      const summary = getUpMonitorRecoverySummary({
+        upConfigs,
+        recoveredAlertId,
+        state,
+        alertHit,
         locationId,
         configId,
+        basePath,
+        spaceId,
         dateFormat,
         tz,
         checks,
@@ -254,31 +261,13 @@ export const setRecoveredAlertsContext = ({
         numberOfChecks,
         locationsThreshold,
       });
-
-      // When alert is flapping, the stateId is not available on ping.state.ends.id, use state instead
-      const stateId = ping.state?.ends?.id || state.stateId;
-      const upTimestamp = ping['@timestamp'];
-      const checkedAt = moment(upTimestamp).tz(tz).format(dateFormat);
-      recoveryStatus = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.status', {
-        defaultMessage: `is now up`,
-      });
-      recoveryReason = i18n.translate(
-        'xpack.synthetics.alerts.monitorStatus.upCheck.reasonWithoutDuration',
-        {
-          defaultMessage: `the monitor is now up again. It ran successfully at {checkedAt}`,
-          values: {
-            checkedAt,
-          },
-        }
-      );
-
-      if (basePath && spaceId && stateId) {
-        const relativeViewInAppUrl = getRelativeViewInAppUrl({
-          configId,
-          locationId,
-          stateId,
-        });
-        linkMessage = getFullViewInAppMessage(basePath, spaceId, relativeViewInAppUrl);
+      if (summary) {
+        monitorSummary = summary.monitorSummary;
+        recoveryStatus = summary.recoveryStatus;
+        recoveryReason = summary.recoveryReason;
+        isUp = summary.isUp;
+        linkMessage = summary.linkMessage;
+        lastErrorMessage = summary.lastErrorMessage;
       }
     }
 
@@ -299,6 +288,162 @@ export const setRecoveredAlertsContext = ({
     };
     alertsClient.setAlertData({ id: recoveredAlertId, context });
   }
+};
+
+export const getDeletedMonitorOrLocationSummary = ({
+  staleDownConfigs,
+  recoveredAlertId,
+  locationId,
+  dateFormat,
+  tz,
+  checks,
+  numberOfChecks,
+  locationsThreshold,
+  downThreshold,
+}: {
+  staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
+  recoveredAlertId: string;
+  locationId: string;
+  dateFormat: string;
+  tz: string;
+  checks: MonitorSummaryStatusRule['checks'];
+  numberOfChecks: number;
+  locationsThreshold: number;
+  downThreshold: number;
+}) => {
+  const downConfig = staleDownConfigs[recoveredAlertId];
+  const { ping } = downConfig;
+  const monitorSummary = getMonitorSummary({
+    monitorInfo: ping,
+    statusMessage: RECOVERED_LABEL,
+    locationId,
+    configId: downConfig.configId,
+    dateFormat,
+    tz,
+    checks,
+    downThreshold,
+    numberOfChecks,
+    locationsThreshold,
+  });
+  const lastErrorMessage = monitorSummary.lastErrorMessage;
+
+  if (downConfig.isDeleted) {
+    return {
+      lastErrorMessage,
+      monitorSummary,
+      recoveryStatus: i18n.translate('xpack.synthetics.alerts.monitorStatus.deleteMonitor.status', {
+        defaultMessage: `has been deleted`,
+      }),
+      recoveryReason: i18n.translate('xpack.synthetics.alerts.monitorStatus.deleteMonitor.status', {
+        defaultMessage: `has been deleted`,
+      }),
+    };
+  } else if (downConfig.isLocationRemoved) {
+    return {
+      monitorSummary,
+      lastErrorMessage,
+      recoveryStatus: i18n.translate(
+        'xpack.synthetics.alerts.monitorStatus.removedLocation.status',
+        {
+          defaultMessage: `has recovered`,
+        }
+      ),
+      recoveryReason: i18n.translate(
+        'xpack.synthetics.alerts.monitorStatus.removedLocation.reason',
+        {
+          defaultMessage: `this location has been removed from the monitor`,
+        }
+      ),
+    };
+  }
+};
+
+export const getUpMonitorRecoverySummary = ({
+  upConfigs,
+  recoveredAlertId,
+  state,
+  alertHit,
+  locationId,
+  configId,
+  basePath,
+  spaceId,
+  dateFormat,
+  tz,
+  checks,
+  downThreshold,
+  numberOfChecks,
+  locationsThreshold,
+}: {
+  upConfigs: AlertOverviewStatus['upConfigs'];
+  recoveredAlertId: string;
+  state: SyntheticsCommonState;
+  alertHit: any;
+  locationId: string;
+  configId: string;
+  basePath?: IBasePath;
+  spaceId?: string;
+  dateFormat: string;
+  tz: string;
+  checks: MonitorSummaryStatusRule['checks'];
+  downThreshold: number;
+  numberOfChecks: number;
+  locationsThreshold: number;
+}) => {
+  // pull the last error from state, since it is not available on the up ping
+  const lastErrorMessage = alertHit?.['error.message'];
+  let linkMessage = '';
+
+  const upConfig = upConfigs[recoveredAlertId];
+  const isUp = Boolean(upConfig) || false;
+  const ping = upConfig.ping;
+
+  const monitorSummary = getMonitorSummary({
+    monitorInfo: ping,
+    statusMessage: RECOVERED_LABEL,
+    locationId,
+    configId,
+    dateFormat,
+    tz,
+    checks,
+    downThreshold,
+    numberOfChecks,
+    locationsThreshold,
+  });
+
+  // When alert is flapping, the stateId is not available on ping.state.ends.id, use state instead
+  const stateId = ping.state?.ends?.id || state.stateId;
+  const upTimestamp = ping['@timestamp'];
+  const checkedAt = moment(upTimestamp).tz(tz).format(dateFormat);
+  const recoveryStatus = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.status', {
+    defaultMessage: `is now up`,
+  });
+  const recoveryReason = i18n.translate(
+    'xpack.synthetics.alerts.monitorStatus.upCheck.reasonWithoutDuration',
+    {
+      defaultMessage: `the monitor is now up again. It ran successfully at {checkedAt}`,
+      values: {
+        checkedAt,
+      },
+    }
+  );
+
+  if (basePath && spaceId && stateId) {
+    const relativeViewInAppUrl = getRelativeViewInAppUrl({
+      configId,
+      locationId,
+      stateId,
+    });
+    linkMessage = getFullViewInAppMessage(basePath, spaceId, relativeViewInAppUrl);
+  }
+
+  return {
+    monitorSummary,
+    lastErrorMessage,
+    recoveryStatus,
+    recoveryReason,
+    isUp,
+    linkMessage,
+  };
 };
 
 export const RECOVERED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.recoveredLabel', {

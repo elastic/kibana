@@ -186,10 +186,6 @@ export class StatusRuleExecutor {
       : 'now-2m';
 
     const condition = this.params.condition;
-    if (condition && 'locationsThreshold' in condition.window) {
-      from = moment().subtract(maxPeriod, 'milliseconds').subtract(5, 'minutes').toISOString();
-      return { from, to: 'now' };
-    }
     if (condition && 'numberOfChecks' in condition?.window) {
       const numberOfChecks = condition.window.numberOfChecks;
       from = moment()
@@ -238,7 +234,7 @@ export class StatusRuleExecutor {
 
   handleDownMonitorThresholdAlert = ({ downConfigs }: { downConfigs: StatusConfigs }) => {
     const isCustomRule = !isEmpty(this.params);
-    const { isTimeWindow, downThreshold, locationsThreshold } = getConditionType(
+    const { isTimeWindow, isChecksBased, downThreshold, locationsThreshold } = getConditionType(
       this.params?.condition
     );
     const groupBy = this.params?.condition?.groupBy ?? 'locationId';
@@ -263,6 +259,7 @@ export class StatusRuleExecutor {
             monitorSummary,
             statusConfig,
             downThreshold,
+            useLatestChecks: isChecksBased,
           });
         }
       });
@@ -289,6 +286,7 @@ export class StatusRuleExecutor {
             monitorSummary,
             statusConfig: configs[0],
             downThreshold,
+            useLatestChecks: isChecksBased,
           });
         }
       }
@@ -371,6 +369,7 @@ export class StatusRuleExecutor {
     monitorSummary,
     statusConfig,
     downThreshold,
+    useLatestChecks = false,
   }: {
     idWithLocation: string;
     alertId: string;
@@ -381,6 +380,7 @@ export class StatusRuleExecutor {
       checks?: AlertStatusMetaDataCodec['checks'];
     };
     downThreshold: number;
+    useLatestChecks?: boolean;
   }) {
     const { configId, locationId, checks } = statusConfig;
     const { spaceId, startedAt } = this.options;
@@ -416,7 +416,7 @@ export class StatusRuleExecutor {
       [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid),
     };
 
-    const payload = getMonitorAlertDocument(monitorSummary);
+    const payload = getMonitorAlertDocument(monitorSummary, useLatestChecks);
 
     alertsClient.setAlertData({
       id: alertId,

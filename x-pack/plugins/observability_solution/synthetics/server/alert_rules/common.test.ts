@@ -293,7 +293,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorUrl: '(unavailable)',
         monitorUrlLabel: 'URL',
         reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Monitor is down 1 time within the last 1 checks. Alert when 1 out of last 1 checks are down from at least 1 location.',
+          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.',
         stateId: '123456',
         status: 'recovered',
         locationId: location,
@@ -382,7 +382,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorUrlLabel: 'URL',
         timestamp: '2023-02-26T00:00:00.000Z',
         reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Monitor is down 1 time within the last 1 checks. Alert when 1 out of last 1 checks are down from at least 1 location.',
+          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.',
         locationId: location,
         downThreshold: 1,
       },
@@ -469,7 +469,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorUrl: '(unavailable)',
         monitorUrlLabel: 'URL',
         reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Monitor is down 1 time within the last 1 checks. Alert when 1 out of last 1 checks are down from at least 1 location.',
+          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.',
         stateId: null,
         timestamp: '2023-02-26T00:00:00.000Z',
         downThreshold: 1,
