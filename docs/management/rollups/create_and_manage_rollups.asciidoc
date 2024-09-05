@@ -165,7 +165,7 @@ as your source to see both the raw and rolled up data.
 [role="screenshot"]
 image::images/management-create-rollup-bar-chart.png[Create visualization of rolled up data]
 
-. Select *Bar vertical stacked* in the chart type dropdown.
+. Select *Bar* in the chart type dropdown.
 
 . Add the `@timestamp` field to the *Horizontal axis*.
 
