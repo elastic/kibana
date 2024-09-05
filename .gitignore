@@ -152,3 +152,11 @@ oas_docs/output/kibana.tmp1.yaml
 oas_docs/output/kibana.tmp2.yaml
 oas_docs/output/kibana.new.yaml
 oas_docs/output/kibana.serverless.new.yaml
+
+# Security Solution Playwright
+x-pack/test/security_solution_playwright/test-results/
+x-pack/test/security_solution_playwright/playwright-report/
+x-pack/test/security_solution_playwright/blob-report/
+x-pack/test/security_solution_playwright/playwright/.cache/
+x-pack/test/security_solution_playwright/.auth/
+x-pack/test/security_solution_playwright/.env
