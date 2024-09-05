@@ -91,3 +91,10 @@ export const DATA_INGESTION_HUB_VIDEO_MODAL_BUTTON = i18n.translate(
     defaultMessage: 'Head to steps',
   }
 );
+
+export const DATA_INGESTION_HUB_VIDEO_MODAL_BUTTON_CLOSE = i18n.translate(
+  'xpack.securitySolution.onboarding.dataIngestionHubHeader.videoModal.buttonClose',
+  {
+    defaultMessage: 'Close',
+  }
+);

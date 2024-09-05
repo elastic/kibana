@@ -9,24 +9,38 @@ import { render, fireEvent } from '@testing-library/react';
 import { DataIngestionHubHeader } from '.';
 import darkRocket from '../images/dark_rocket.png';
 import { useCurrentUser } from '../../../../lib/kibana';
-import { HeaderCardAsTypeEnum, useDataIngestionHubHeaderCards } from './cards';
+import { useHeaderCards } from './cards/header_cards';
 
-jest.mock('../../../../lib/kibana', () => ({
-  useCurrentUser: jest.fn(),
-  useEuiTheme: jest.fn(() => ({ colorMode: 'DARK' })),
-}));
+const mockSpace = {
+  id: 'space',
+  name: 'space',
+  disabledFeatures: [],
+};
 
-jest.mock('./cards', () => ({
-  useDataIngestionHubHeaderCards: jest.fn(),
-  HeaderCardAsTypeEnum: {
-    action: 'action',
-  },
+jest.mock('../../../../lib/kibana', () => {
+  const original = jest.requireActual('../../../../lib/kibana');
+
+  return {
+    useCurrentUser: jest.fn(),
+    useEuiTheme: jest.fn(() => ({ colorMode: 'DARK' })),
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        spaces: {
+          getActiveSpace: jest.fn().mockResolvedValue(mockSpace),
+        },
+      },
+    }),
+  };
+});
+
+jest.mock('./cards/header_cards', () => ({
+  useHeaderCards: jest.fn(),
 }));
 
 const mockUseCurrentUser = useCurrentUser as jest.Mock;
-const mockUseDataIngestionHubHeaderCards = useDataIngestionHubHeaderCards as jest.Mock;
-
-const spaceId = 'mockSpaceId';
+const mockUseDataIngestionHubHeaderCards = useHeaderCards as jest.Mock;
 
 describe('WelcomeHeaderComponent', () => {
   beforeEach(() => {
@@ -37,7 +51,7 @@ describe('WelcomeHeaderComponent', () => {
   it('should render fullName when fullName is provided', () => {
     const fullName = 'John Doe';
     mockUseCurrentUser.mockReturnValue({ fullName });
-    const { getByText } = render(<DataIngestionHubHeader spaceId={spaceId} />);
+    const { getByText } = render(<DataIngestionHubHeader />);
     const titleElement = getByText(`Hi ${fullName}!`);
     expect(titleElement).toBeInTheDocument();
   });
@@ -47,7 +61,7 @@ describe('WelcomeHeaderComponent', () => {
     const username = 'jd';
     mockUseCurrentUser.mockReturnValue({ fullName, username });
 
-    const { getByText } = render(<DataIngestionHubHeader spaceId={spaceId} />);
+    const { getByText } = render(<DataIngestionHubHeader />);
     const titleElement = getByText(`Hi ${username}!`);
     expect(titleElement).toBeInTheDocument();
   });
@@ -56,7 +70,7 @@ describe('WelcomeHeaderComponent', () => {
     const username = 'jd';
     mockUseCurrentUser.mockReturnValue({ username });
 
-    const { getByText } = render(<DataIngestionHubHeader spaceId={spaceId} />);
+    const { getByText } = render(<DataIngestionHubHeader />);
     const titleElement = getByText(`Hi ${username}!`);
     expect(titleElement).toBeInTheDocument();
   });
@@ -64,46 +78,36 @@ describe('WelcomeHeaderComponent', () => {
   it('should not render the greeting message if both fullName and username are not available', () => {
     mockUseCurrentUser.mockReturnValue({});
 
-    const { queryByTestId } = render(<DataIngestionHubHeader spaceId={spaceId} />);
+    const { queryByTestId } = render(<DataIngestionHubHeader />);
     const greetings = queryByTestId('data-ingestion-hub-header-greetings');
     expect(greetings).not.toBeInTheDocument();
   });
 
   it('should render subtitle', () => {
-    const { getByText } = render(<DataIngestionHubHeader spaceId={spaceId} />);
+    const { getByText } = render(<DataIngestionHubHeader />);
     const subtitleElement = getByText('Welcome to Elastic Security');
     expect(subtitleElement).toBeInTheDocument();
   });
 
   it('should render description', () => {
-    const { getByText } = render(<DataIngestionHubHeader spaceId={spaceId} />);
+    const { getByText } = render(<DataIngestionHubHeader />);
     const descriptionElement = getByText('Follow these steps to set up your workspace.');
     expect(descriptionElement).toBeInTheDocument();
   });
 
   it('should render the rocket dark image when the theme is DARK', () => {
-    const { queryByTestId } = render(<DataIngestionHubHeader spaceId={spaceId} />);
+    const { queryByTestId } = render(<DataIngestionHubHeader />);
     const image = queryByTestId('data-ingestion-hub-header-image');
     expect(image).toHaveStyle({ backgroundImage: `url(${darkRocket})` });
   });
 
   it('should display the modal when the "video" card is clicked', () => {
-    const mockVideoAction = jest.fn();
-    mockUseDataIngestionHubHeaderCards.mockReturnValue([
-      {
-        key: 'video',
-        title: 'Video',
-        description: 'Watch our video',
-        icon: darkRocket,
-        asType: HeaderCardAsTypeEnum.action,
-        action: { title: 'Watch', trigger: mockVideoAction },
-      },
-    ]);
+    const { getByText, queryByTestId } = render(<DataIngestionHubHeader />);
 
-    const { getByText } = render(<DataIngestionHubHeader spaceId={spaceId} />);
-
-    const cardElement = getByText('Watch');
+    const cardElement = getByText('Watch video');
     fireEvent.click(cardElement);
-    expect(mockVideoAction).toHaveBeenCalled();
+
+    const modalElement = queryByTestId('data-ingestion-hub-video-modal');
+    expect(modalElement).toBeInTheDocument();
   });
 });

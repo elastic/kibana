@@ -6,14 +6,14 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { COLOR_MODES_STANDARD, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
-export const useDataIngestionHubHeaderCardStyles = () => {
+export const useCardStyles = () => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === 'DARK';
+  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
 
-  const cardStyle = useMemo(() => {
+  const cardBodyStyle = useMemo(() => {
     const cardBaseStyle = { minWidth: '315px' };
     return isDarkMode
       ? css({
@@ -25,9 +25,9 @@ export const useDataIngestionHubHeaderCardStyles = () => {
       : css(cardBaseStyle);
   }, [isDarkMode, euiTheme]);
 
-  const dataIngestionHubHeaderCardStyles = useMemo(() => {
+  const cardStyles = useMemo(() => {
     return {
-      cardStyle,
+      cardBodyStyle,
       cardTitleStyle: css({
         fontSize: `${euiTheme.base * 0.875}px`,
         fontWeight: euiTheme.font.weight.semiBold,
@@ -39,11 +39,6 @@ export const useDataIngestionHubHeaderCardStyles = () => {
         fontWeight: euiTheme.font.weight.regular,
         lineHeight: `${euiTheme.base * 1.25}px`,
         color: euiTheme.colors.darkestShade,
-      }),
-      cardLinkStyle: css({
-        fontSize: euiTheme.size.m,
-        fontWeight: euiTheme.font.weight.medium,
-        lineHeight: euiTheme.size.base,
       }),
       cardButtonStyle: css({
         padding: '0px',
@@ -57,7 +52,7 @@ export const useDataIngestionHubHeaderCardStyles = () => {
       }),
     };
   }, [
-    cardStyle,
+    cardBodyStyle,
     euiTheme.base,
     euiTheme.colors.darkestShade,
     euiTheme.colors.title,
@@ -69,5 +64,5 @@ export const useDataIngestionHubHeaderCardStyles = () => {
     euiTheme.size.m,
   ]);
 
-  return dataIngestionHubHeaderCardStyles;
+  return cardStyles;
 };

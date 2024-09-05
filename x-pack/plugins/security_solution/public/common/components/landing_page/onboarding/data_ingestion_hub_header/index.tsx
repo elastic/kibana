@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import classnames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { useLocalStorage } from 'react-use';
 import {
   GET_STARTED_PAGE_TITLE,
   GET_STARTED_DATA_INGESTION_HUB_DESCRIPTION,
@@ -16,46 +15,11 @@ import {
 } from '../translations';
 import { useCurrentUser } from '../../../../lib/kibana';
 import { useDataIngestionHubHeaderStyles } from './index.styles';
-import { useDataIngestionHubHeaderCards } from './cards';
-import { DataIngestionHubHeaderCard } from './data_ingestion_hub_header_card';
-import { DataIngestionHubVideoModal } from './data_ingestion_hub_video_modal';
+import { useHeaderCards } from './cards/header_cards';
 
-export const getStorageKeyBySpace = (storageKey: string, spaceId: string | null | undefined) => {
-  if (spaceId == null) {
-    return storageKey;
-  }
-  return `${storageKey}.${spaceId}`;
-};
-
-const IS_ONBOARDING_HUB_VISITED_LOCAL_STORAGE_KEY = 'secutirySolution.isOnboardingHubVisited';
-
-const DataIngestionHubHeaderComponent: React.FC<{ spaceId: string }> = (props) => {
-  const { spaceId } = props;
+export const DataIngestionHubHeader: React.FC = React.memo(() => {
   const userName = useCurrentUser();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const isOnboardingHubVisitedStorageKey = getStorageKeyBySpace(
-    IS_ONBOARDING_HUB_VISITED_LOCAL_STORAGE_KEY,
-    spaceId
-  );
-
-  const [isOnboardingHubVisited, setIsOnboardingHubVisited] = useLocalStorage<boolean | null>(
-    isOnboardingHubVisitedStorageKey,
-    null
-  );
-
-  const closeModal = () => {
-    if (isOnboardingHubVisited === null) {
-      setIsOnboardingHubVisited(true);
-    }
-    setIsModalVisible(false);
-  };
-
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
-  const cards = useDataIngestionHubHeaderCards({ videoAction: showModal });
+  const headerCards = useHeaderCards();
 
   const {
     headerContentStyles,
@@ -108,20 +72,12 @@ const DataIngestionHubHeaderComponent: React.FC<{ spaceId: string }> = (props) =
         alignItems="center"
         wrap
       >
-        {cards.map((card) => (
-          <EuiFlexItem key={card.key}>
-            <DataIngestionHubHeaderCard card={card} />
-          </EuiFlexItem>
+        {headerCards.map((card, i) => (
+          <EuiFlexItem key={i}>{card}</EuiFlexItem>
         ))}
       </EuiFlexGroup>
-      {isModalVisible && (
-        <DataIngestionHubVideoModal
-          onCloseModal={closeModal}
-          isOnboardingHubVisited={isOnboardingHubVisited}
-        />
-      )}
     </>
   );
-};
+});
 
-export const DataIngestionHubHeader = React.memo(DataIngestionHubHeaderComponent);
+DataIngestionHubHeader.displayName = 'DataIngestionHubHeader';

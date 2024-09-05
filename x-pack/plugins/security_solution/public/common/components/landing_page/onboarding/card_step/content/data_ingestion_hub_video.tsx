@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
-import { VIDEO_SOURCE } from '../../../../empty_prompt/constants';
+import { INGESTION_HUB_VIDEO_SOURCE } from '../../../../../constants';
 import { WATCH_VIDEO_BUTTON_TITLE } from '../../translations';
 
 const VIDEO_CONTENT_HEIGHT = 309;
@@ -65,7 +65,7 @@ const DataIngestionHubVideoComponent: React.FC = () => {
             sandbox="allow-scripts allow-same-origin"
             scrolling="no"
             allow={isVideoPlaying ? 'autoplay;' : undefined}
-            src={`${VIDEO_SOURCE}${isVideoPlaying ? '?autoplay=1' : ''}`}
+            src={`${INGESTION_HUB_VIDEO_SOURCE}${isVideoPlaying ? '?autoplay=1' : ''}`}
             title={WATCH_VIDEO_BUTTON_TITLE}
           />
         )}
