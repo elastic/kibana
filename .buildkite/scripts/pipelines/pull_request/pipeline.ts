@@ -364,7 +364,7 @@ const modifyPerfPipeline = (options: ModifyPipeline) => {
         .join(',');
       pipeline.push(
         modifyPerfPipeline({
-          filename: '.buildkite/pipelines/pull_request/single_user_performance.yml',
+          filename: '.buildkite/pipelines/pull_request/single_user_performance_check.yml',
           update: {
             label: `Run single user performance journeys, groups: ${journeyGroupsStr}`,
             envs: { JOURNEY_GROUPS: journeyGroupsStr },
