@@ -23,7 +23,6 @@ import { backupServiceStrings } from '../../dashboard_container/_dashboard_conta
 import { UnsavedPanelState } from '../../dashboard_container/types';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
-export const PANELS_CONTROL_GROUP_KEY = 'controlGroup';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardPanels';
 const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
 
@@ -113,7 +112,6 @@ class DashboardBackupService implements DashboardBackupServiceType {
       const panels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId]?.[
         id
       ] as UnsavedPanelState | undefined;
-
       return { dashboardState, panels };
     } catch (e) {
       this.notifications.toasts.addDanger({

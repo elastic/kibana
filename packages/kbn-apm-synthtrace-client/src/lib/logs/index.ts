@@ -66,6 +66,7 @@ export type LogDocument = Fields &
     'event.duration': number;
     'event.start': Date;
     'event.end': Date;
+    test_field: string | string[];
     date: Date;
     severity: string;
     msg: string;
