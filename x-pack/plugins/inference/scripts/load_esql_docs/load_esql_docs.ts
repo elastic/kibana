@@ -24,6 +24,8 @@ import { KibanaClient } from '../util/kibana_client';
 import { selectConnector } from '../util/select_connector';
 import { syncBuiltDocs } from './built-docs';
 import { extractDocEntries } from './extract_doc_entries';
+import { generateDoc } from './generate_doc';
+import { convertToMarkdown } from './convert_to_markdown';
 
 yargs(process.argv.slice(2))
   .command(
@@ -79,40 +81,43 @@ yargs(process.argv.slice(2))
           const builtDocsDir = Path.join(REPO_ROOT, '../built-docs');
           log.info(`Looking in ${builtDocsDir} for built-docs repository`);
 
-          await syncBuiltDocs({ builtDocsDir, log });
+          // TODO: uncomment
+          // await syncBuiltDocs({ builtDocsDir, log });
 
-          const files = FastGlob.sync(
-            `${builtDocsDir}/html/en/elasticsearch/reference/master/esql*.html`
-          );
-          if (!files.length) {
-            throw new Error('No files found');
-          }
+          // TODO: uncomment
+          // const extraction = await extractDocEntries({
+          //   builtDocsDir,
+          //   inferenceClient: chatClient,
+          //   log,
+          // });
 
-          const fsLimiter = pLimit(10);
+          const tempFileName = Path.join(REPO_ROOT, './extraction.json');
 
-          log.info(`Processing ${files.length} files`);
+          //await Fs.writeFile(tempFileName, JSON.stringify(extraction, undefined, 2));
+          const extraction = JSON.parse((await Fs.readFile(tempFileName)).toString('utf-8'));
 
-          const documents = await Promise.all(
-            files.map((file) => fsLimiter(() => extractDocEntries({ file, log })))
-          );
-
-          const flattened = documents.flat().filter((doc) => {
-            // ES|QL aggregate functions, ES|QL mathematical functions, ES|QL string functions etc
-            const isOverviewArticle =
-              doc.title.startsWith('ES|QL') ||
-              doc.title === 'Functions overview' ||
-              doc.title === 'Operators overview';
-
-            if (isOverviewArticle) {
-              log.debug('Dropping overview article', doc.title);
-            }
-            return !isOverviewArticle;
+          const docFiles = await generateDoc({
+            extraction,
+            inferenceClient: chatClient,
+            log,
           });
+
+          // console.log('*** extraction');
+          // console.log(JSON.stringify(extraction, undefined, 2));
 
           const outDir = Path.join(__dirname, '../../server/tasks/nl_to_esql/esql_docs');
 
+          await Promise.all(
+            docFiles.map(async (file) => {
+              const fileName = Path.join(outDir, file.name);
+              await Fs.writeFile(fileName, file.content);
+            })
+          );
+
+          return;
+
           if (!argv.dryRun) {
-            log.info(`Writing ${flattened.length} documents to disk to ${outDir}`);
+            log.info(`Writing ${docFiles.length} documents to disk to ${outDir}`);
           }
 
           if (!argv.only && !argv.dryRun) {
@@ -131,11 +136,6 @@ yargs(process.argv.slice(2))
               error.code === 'EEXIST' ? Promise.resolve() : error
             );
           }
-          const chatLimiter = pLimit(10);
-
-          const allContent = flattened
-            .map((doc) => `## ${doc.title}\n\n${doc.content}\n\(end of ${doc.title})`)
-            .join('\n\n');
 
           const allErrors: Array<{
             title: string;
@@ -195,76 +195,6 @@ yargs(process.argv.slice(2))
               await Fs.writeFile(fileName, doc.content);
             }
           }
-
-          await Promise.all(
-            flattened.map(async (doc) => {
-              if (doc.skip || (argv.only && !argv.only.includes(doc.title))) {
-                return undefined;
-              }
-
-              if (!doc.instructions) {
-                return fsLimiter(() => writeFile(doc));
-              }
-
-              return chatLimiter(async () => {
-                try {
-                  const response = await lastValueFrom(
-                    chatClient.output('generate_markdown', {
-                      connectorId: chatClient.getConnectorId(),
-                      system: `## System instructions
-
-                    Your job is to generate technical documentation in Markdown format based on content that is scraped from the Elasticsearch website.
-
-                    The documentation is about ES|QL, or the Elasticsearch Query Language, which is a new piped language that can be
-                    used for loading, extracting and transforming data stored in Elasticsearch. The audience for the documentation
-                    you generate, is intended for an LLM, to be able to answer questions about ES|QL or generate and execute ES|QL
-                    queries.
-
-                    If you need to generate example queries, make sure they are different, in that they use different commands, and arguments,
-                    to show case how a command, function or operator can be used in different ways.
-
-                    When you generate a complete ES|QL query, always wrap it in code blocks with the language being \`esql\`.. Here's an example:
-
-                    \`\`\`esql
-                    FROM logs-*
-                    | WHERE @timestamp <= NOW()
-                    \`\`\`
-
-                    **If you are describing the syntax of a command, only wrap it in SINGLE backticks.
-                    Leave out the esql part**. Eg:
-                    ### Syntax:
-
-                    \`DISSECT input "pattern" [APPEND_SEPARATOR="<separator>"]\`
-
-                    #### Context
-
-                    These is the entire documentation, use it as context for answering questions
-
-                    ${allContent}
-                    `,
-                      input: `Generate Markdown for the following document:
-
-                    ## ${doc.title}
-
-                    ### Instructions
-
-                    ${doc.instructions}
-
-                    ### Content of file
-
-                    ${doc.content}`,
-                    })
-                  );
-
-                  return fsLimiter(() =>
-                    writeFile({ title: doc.title, content: response.content! })
-                  );
-                } catch (error) {
-                  log.error(`Error processing ${doc.title}: ${error.stack}`);
-                }
-              });
-            })
-          );
 
           log.warning(
             `Please verify the following queries that had syntax errors\n${JSON.stringify(
