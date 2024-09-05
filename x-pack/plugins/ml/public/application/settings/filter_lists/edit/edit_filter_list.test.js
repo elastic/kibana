@@ -34,7 +34,7 @@ const mockKibanaContext = {
     docLinks: { links: { ml: { customRules: 'test' } } },
     notifications: { toasts: { addDanger: jest.fn(), addError: jest.fn() } },
     mlServices: {
-      mlApiServices: {
+      mlApi: {
         filters: {
           filters: mockFilters,
         },
