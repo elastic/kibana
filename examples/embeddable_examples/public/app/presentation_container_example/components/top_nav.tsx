@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { TimeRange } from '@kbn/es-query';
 import { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
-import { unsavedChanges } from '../unsaved_changes';
 
 interface Props {
   dataLoading: boolean;
@@ -35,10 +34,8 @@ export function TopNav(props: Props) {
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   useEffect(() => {
-    const subscription = props.unsavedChanges$.subscribe((nextUnsavedChanges) => {
-      console.log('nextUnsavedChanges', nextUnsavedChanges);
-      setHasUnsavedChanges(nextUnsavedChanges !== undefined);
-      unsavedChanges.save(nextUnsavedChanges ?? {});
+    const subscription = props.unsavedChanges$.subscribe((unsavedChanges) => {
+      setHasUnsavedChanges(unsavedChanges !== undefined);
     });
 
     return () => {

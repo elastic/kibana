@@ -28,28 +28,25 @@ import { LastSavedState, ParentApi, UnsavedChanges } from './types';
 
 export function getParentApi() {
   const initialUnsavedChanges = unsavedChanges.load();
+  const initialSavedState = lastSavedState.load();
   let newPanels: Record<string, object> = {};
-  const lastSavedState$ = new BehaviorSubject<LastSavedState>(lastSavedState.load());
+  const lastSavedState$ = new BehaviorSubject<
+    LastSavedState & { panels: Array<{ id: string; type: string }> }
+  >({
+    ...initialSavedState,
+    panels: initialSavedState.panelsState.map(({ id, type }) => {
+      return { id, type };
+    }),
+  });
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
   const panels$ = new BehaviorSubject<Array<{ id: string; type: string }>>(
-    initialUnsavedChanges.panels ??
-      lastSavedState$.value.panelsState.map(({ id, type }) => {
-        return { id, type };
-      })
+    initialUnsavedChanges.panels ?? lastSavedState$.value.panels
   );
   const timeRange$ = new BehaviorSubject<TimeRange | undefined>(
-    initialUnsavedChanges.timeRange ?? lastSavedState$.value.timeRange
+    initialUnsavedChanges.timeRange ?? initialSavedState.timeRange
   );
-  // One could use `initializeUnsavedChanges` to set up unsaved changes observable.
-  // Instead, decided to manually setup unsaved changes observable
-  // since only timeRange state needs to be monitored.
-  const timeRangeUnsavedChanges$ = timeRange$.pipe(
-    map((currentTimeRange) => {
-      const hasChanges = !isEqual(currentTimeRange, lastSavedState$.value.timeRange);
-      return hasChanges ? { timeRange: currentTimeRange } : undefined;
-    })
-  );
+
   const reload$ = new Subject<void>();
 
   const saveNotification$ = new Subject<void>();
@@ -93,9 +90,49 @@ export function getParentApi() {
     dataLoading$.next(isAtLeastOneChildLoading);
   });
 
+  // One could use `initializeUnsavedChanges` to set up unsaved changes observable.
+  // Instead, decided to manually setup unsaved changes observable
+  // since only timeRange and panels array need to be monitored.
+  const timeRangeUnsavedChanges$ = timeRange$.pipe(
+    map((currentTimeRange) => {
+      const hasChanges = !isEqual(currentTimeRange, lastSavedState$.value.timeRange);
+      return hasChanges ? { timeRange: currentTimeRange } : undefined;
+    })
+  );
+  const panelsUnsavedChanges$ = panels$.pipe(
+    map((currentPanels) => {
+      const hasChanges = !isEqual(currentPanels, lastSavedState$.value.panels);
+      return hasChanges ? { panels: currentPanels } : undefined;
+    })
+  );
+  const unsavedChanges$ = combineLatest([
+    timeRangeUnsavedChanges$,
+    panelsUnsavedChanges$,
+    childrenUnsavedChanges$(children$),
+  ]).pipe(
+    map(([timeRangeUnsavedChanges, panelsChanges, childrenUnsavedChanges]) => {
+      const nextUnsavedChanges: UnsavedChanges = {};
+      if (timeRangeUnsavedChanges) {
+        nextUnsavedChanges.timeRange = timeRangeUnsavedChanges.timeRange;
+      }
+      if (panelsChanges) {
+        nextUnsavedChanges.panels = panelsChanges.panels;
+      }
+      if (childrenUnsavedChanges) {
+        nextUnsavedChanges.panelUnsavedChanges = childrenUnsavedChanges;
+      }
+      return Object.keys(nextUnsavedChanges).length ? nextUnsavedChanges : undefined;
+    })
+  );
+
+  const unsavedChangesSubscription = unsavedChanges$.subscribe((nextUnsavedChanges) => {
+    unsavedChanges.save(nextUnsavedChanges ?? {});
+  });
+
   return {
     cleanUp: () => {
       childrenDataLoadingSubscripiton.unsubscribe();
+      unsavedChangesSubscription.unsubscribe();
     },
     /**
      * api's needed by component that should not be shared with children
@@ -125,7 +162,12 @@ export function getParentApi() {
           timeRange: timeRange$.value ?? DEFAULT_STATE.timeRange,
           panelsState,
         };
-        lastSavedState$.next(savedState);
+        lastSavedState$.next({
+          ...savedState,
+          panels: panelsState.map(({ id, type }) => {
+            return { id, type };
+          }),
+        });
         lastSavedState.save(savedState);
         saveNotification$.next();
       },
@@ -168,7 +210,7 @@ export function getParentApi() {
        * return last saved embeddable state
        */
       getSerializedStateForChild: (childId: string) => {
-        const panel = lastSavedState$.value.panelsState.find(({ id }) => {
+        const panel = initialSavedState.panelsState.find(({ id }) => {
           return id === childId;
         });
         return panel ? panel.panelState : undefined;
@@ -181,24 +223,11 @@ export function getParentApi() {
       },
       resetUnsavedChanges: () => {
         timeRange$.next(lastSavedState$.value.timeRange);
+        panels$.next(lastSavedState$.value.panels);
         newPanels = {};
       },
       timeRange$,
-      unsavedChanges: combineLatest([
-        timeRangeUnsavedChanges$,
-        childrenUnsavedChanges$(children$),
-      ]).pipe(
-        map(([timeRangeUnsavedChanges, childrenUnsavedChanges]) => {
-          const nextUnsavedChanges: UnsavedChanges = {};
-          if (timeRangeUnsavedChanges) {
-            nextUnsavedChanges.timeRange = timeRangeUnsavedChanges.timeRange;
-          }
-          if (childrenUnsavedChanges) {
-            nextUnsavedChanges.panelUnsavedChanges = childrenUnsavedChanges;
-          }
-          return Object.keys(nextUnsavedChanges).length ? nextUnsavedChanges : undefined;
-        })
-      ),
+      unsavedChanges: unsavedChanges$,
     } as unknown as ParentApi,
   };
 }
