@@ -1098,9 +1098,14 @@ const updateExistingDataStream = async ({
   );
   const updatedDynamicDimensionMappings = filterDimensionMappings(mappings.dynamic_templates);
 
+  const sortMappings = (
+    a: Record<string, MappingDynamicTemplate>,
+    b: Record<string, MappingDynamicTemplate>
+  ) => Object.keys(a)[0].localeCompare(Object.keys(b)[0]);
+
   const dynamicDimensionMappingsChanged = !deepEqual(
-    currentDynamicDimensionMappings.sort(),
-    updatedDynamicDimensionMappings.sort()
+    currentDynamicDimensionMappings.sort(sortMappings),
+    updatedDynamicDimensionMappings.sort(sortMappings)
   );
 
   // Trigger a rollover if the index mode or source type has changed
