@@ -326,10 +326,11 @@ describe('Data Streams tab', () => {
       expect(exists('includeStatsSwitch')).toBeTruthy();
     });
 
-    test('shows storage size and documents count if enableSizeAndDocCount===true', async () => {
+    test('shows storage size and documents count if enableSizeAndDocCount===true, enableDataStreamStats==false', async () => {
       testBed = await setup(httpSetup, {
         config: {
           enableSizeAndDocCount: true,
+          enableDataStreamStats: false,
         },
       });
 
@@ -350,10 +351,11 @@ describe('Data Streams tab', () => {
       ]);
     });
 
-    test('shows last updated and storage size if enableDataStreamStats===true', async () => {
+    test('shows last updated and storage size if enableDataStreamStats===true, enableSizeAndDocCount===false', async () => {
       testBed = await setup(httpSetup, {
         config: {
           enableDataStreamStats: true,
+          enableSizeAndDocCount: false,
         },
       });
 
