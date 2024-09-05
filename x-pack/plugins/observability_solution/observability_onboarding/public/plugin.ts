@@ -36,6 +36,7 @@ import { ConfigSchema } from '.';
 import {
   OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT,
 } from '../common/telemetry_events';
 
 export type ObservabilityOnboardingPluginSetup = void;
@@ -126,6 +127,7 @@ export class ObservabilityOnboardingPlugin
 
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT);
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT);
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT);
 
     return {
       locators: this.locators,
