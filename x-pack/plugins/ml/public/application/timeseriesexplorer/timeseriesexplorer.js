@@ -161,7 +161,7 @@ export class TimeSeriesExplorer extends React.Component {
     this.mlForecastService = forecastServiceFactory(this.mlApi);
     this.mlIndexUtils = indexServiceFactory(this.dataViewsService);
     this.mlJobService = mlJobServiceFactory(this.mlApi);
-    this.mlResultsService = mlResultsServiceProvider(this.mlApiServices);
+    this.mlResultsService = mlResultsServiceProvider(this.mlApi);
     this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
       constructorContext.services.uiSettings,
       this.mlApi,

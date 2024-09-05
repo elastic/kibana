@@ -21,7 +21,7 @@ export function isClosable(jobs: CombinedJobWithStats[]): boolean;
 export function isResettable(jobs: CombinedJobWithStats[]): boolean;
 export function forceStartDatafeeds(
   toastNotifications: ToastsStart,
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   jobs: CombinedJobWithStats[],
   start: number | undefined,
   end: number | undefined,
@@ -29,7 +29,7 @@ export function forceStartDatafeeds(
 ): Promise<void>;
 export function stopDatafeeds(
   toastNotifications: ToastsStart,
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   jobs: CombinedJobWithStats[] | MlSummaryJob[],
   finish?: () => void
 ): Promise<void>;
@@ -46,13 +46,13 @@ export function cloneJob(
 ): Promise<void>;
 export function closeJobs(
   toastNotifications: ToastsStart,
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   jobs: CombinedJobWithStats[] | MlSummaryJob[],
   finish?: () => void
 ): Promise<void>;
 export function deleteJobs(
   toastNotifications: ToastsStart,
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   jobs: Array<{ id: string }>,
   deleteUserAnnotations?: boolean,
   deleteAlertingRules?: boolean,
@@ -60,7 +60,7 @@ export function deleteJobs(
 ): Promise<void>;
 export function resetJobs(
   toastNotifications: ToastsStart,
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   jobIds: string[],
   deleteUserAnnotations?: boolean,
   finish?: () => void

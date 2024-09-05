@@ -44,7 +44,7 @@ export class JobsListUI extends Component {
       itemIdToExpandedRowMap: {},
     };
 
-    this.mlApiServices = props.kibana.services.mlServices.mlApi;
+    this.mlApi = props.kibana.services.mlServices.mlApi;
   }
 
   static getDerivedStateFromProps(props) {

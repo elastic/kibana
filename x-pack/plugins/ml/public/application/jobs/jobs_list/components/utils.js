@@ -82,14 +82,14 @@ export function isResettable(jobs) {
 
 export function forceStartDatafeeds(
   toastNotifications,
-  mlApiServices,
+  mlApi,
   jobs,
   start,
   end,
   finish = () => {}
 ) {
   const datafeedIds = jobs.filter((j) => j.hasDatafeed).map((j) => j.datafeedId);
-  mlApiServices.jobs
+  mlApi.jobs
     .forceStartDatafeeds(datafeedIds, start, end)
     .then((resp) => {
       showResults(toastNotifications, resp, DATAFEED_STATE.STARTED);
@@ -106,9 +106,9 @@ export function forceStartDatafeeds(
     });
 }
 
-export function stopDatafeeds(toastNotifications, mlApiServices, jobs, finish = () => {}) {
+export function stopDatafeeds(toastNotifications, mlApi, jobs, finish = () => {}) {
   const datafeedIds = jobs.filter((j) => j.hasDatafeed).map((j) => j.datafeedId);
-  mlApiServices.jobs
+  mlApi.jobs
     .stopDatafeeds(datafeedIds)
     .then((resp) => {
       showResults(toastNotifications, resp, DATAFEED_STATE.STOPPED);
@@ -294,9 +294,9 @@ export async function cloneJob(toastNotifications, application, mlApi, jobId) {
   }
 }
 
-export function closeJobs(toastNotifications, mlApiServices, jobs, finish = () => {}) {
+export function closeJobs(toastNotifications, mlApi, jobs, finish = () => {}) {
   const jobIds = jobs.map((j) => j.id);
-  mlApiServices.jobs
+  mlApi.jobs
     .closeJobs(jobIds)
     .then((resp) => {
       showResults(toastNotifications, resp, JOB_STATE.CLOSED);
@@ -315,12 +315,12 @@ export function closeJobs(toastNotifications, mlApiServices, jobs, finish = () =
 
 export function resetJobs(
   toastNotifications,
-  mlApiServices,
+  mlApi,
   jobIds,
   deleteUserAnnotations,
   finish = () => {}
 ) {
-  mlApiServices.jobs
+  mlApi.jobs
     .resetJobs(jobIds, deleteUserAnnotations)
     .then((resp) => {
       showResults(toastNotifications, resp, JOB_ACTION.RESET);
@@ -339,14 +339,14 @@ export function resetJobs(
 
 export function deleteJobs(
   toastNotifications,
-  mlApiServices,
+  mlApi,
   jobs,
   deleteUserAnnotations,
   deleteAlertingRules,
   finish = () => {}
 ) {
   const jobIds = jobs.map((j) => j.id);
-  mlApiServices.jobs
+  mlApi.jobs
     .deleteJobs(jobIds, deleteUserAnnotations, deleteAlertingRules)
     .then((resp) => {
       showResults(toastNotifications, resp, JOB_STATE.DELETED);
