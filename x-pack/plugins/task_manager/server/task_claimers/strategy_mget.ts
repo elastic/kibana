@@ -359,7 +359,6 @@ async function searchAvailableTasks({
       filterDownBy(InactiveTasks),
       tasksWithPartitions(partitions)
     );
-
     searches.push({
       query: queryUnlimitedTasks,
       sort, // note: we could optimize this to not sort on priority, for this case
