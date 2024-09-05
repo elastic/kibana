@@ -1,0 +1,15 @@
+## MV_COUNT
+
+The `MV_COUNT` function converts a multivalued expression into a single-valued column containing a count of the number of values.
+
+### Examples
+
+```esql
+ROW a=["foo", "zoo", "bar"]
+| EVAL count_a = MV_COUNT(a)
+```
+
+```esql
+ROW b=["apple", "banana", "cherry", "date"]
+| EVAL count_b = MV_COUNT(b)
+```

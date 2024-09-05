@@ -11,7 +11,7 @@ import { evalFunctionDefinitions } from '../definitions/functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import {
-  ADD_DATE_HISTOGRAM_SNIPPET,
+  getAddDateHistogramSnippet,
   getDateLiterals,
   getSafeInsertText,
   TIME_SYSTEM_PARAMS,
@@ -657,7 +657,7 @@ describe('autocomplete', () => {
     // STATS argument BY expression
     testSuggestions('FROM index1 | STATS field BY f/', [
       'var0 = ',
-      ADD_DATE_HISTOGRAM_SNIPPET,
+      getAddDateHistogramSnippet(),
       ...getFunctionSignaturesByReturnType('stats', 'any', { grouping: true, scalar: true }),
       ...getFieldNamesByType('any').map((field) => `${field} `),
     ]);
@@ -870,7 +870,7 @@ describe('autocomplete', () => {
       'by'
     );
     testSuggestions('FROM a | STATS AVG(numberField) BY /', [
-      ADD_DATE_HISTOGRAM_SNIPPET,
+      getAddDateHistogramSnippet(),
       attachTriggerCommand('var0 = '),
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
@@ -880,7 +880,7 @@ describe('autocomplete', () => {
 
     // STATS argument BY assignment (checking field suggestions)
     testSuggestions('FROM a | STATS AVG(numberField) BY var0 = /', [
-      ADD_DATE_HISTOGRAM_SNIPPET,
+      getAddDateHistogramSnippet(),
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
         .map(attachTriggerCommand),
