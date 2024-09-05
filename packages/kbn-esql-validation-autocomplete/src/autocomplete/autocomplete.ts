@@ -715,6 +715,9 @@ async function getExpressionSuggestionsByType(
           // check if lastWord is an existing field
           const column = getColumnByName(lastWord, references);
           if (column) {
+            if (['grok', 'dissect'].includes(command.name)) {
+              return [];
+            }
             // now we know that the user has already entered a column,
             // so suggest comma and pipe
             // const NON_ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
@@ -734,6 +737,7 @@ async function getExpressionSuggestionsByType(
             suggestions.push(
               ...fieldSuggestions.map((suggestion) => ({
                 ...suggestion,
+                text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
                 command: TRIGGER_SUGGESTION_COMMAND,
                 rangeToReplace,
               }))
@@ -744,6 +748,7 @@ async function getExpressionSuggestionsByType(
           suggestions.push(
             ...fieldSuggestions.map((suggestion) => ({
               ...suggestion,
+              text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
               command: TRIGGER_SUGGESTION_COMMAND,
             }))
           );
