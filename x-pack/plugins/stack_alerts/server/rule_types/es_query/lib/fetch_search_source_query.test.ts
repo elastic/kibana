@@ -489,7 +489,7 @@ describe('fetchSearchSourceQuery', () => {
         params: defaultParams,
         services: {
           logger,
-          searchSourceClient: searchSourceCommonMock,
+          getSearchSourceClient: async () => searchSourceCommonMock,
           ruleResultService: mockRuleResultService,
           share: {
             url: {
@@ -501,10 +501,12 @@ describe('fetchSearchSourceQuery', () => {
               },
             },
           },
-          dataViews: {
-            ...dataViewPluginMocks.createStartContract(),
-            create: async (spec: DataViewSpec) =>
-              new DataView({ spec, fieldFormats: fieldFormatsMock }),
+          getDataViews: async () => {
+            return {
+              ...dataViewPluginMocks.createStartContract(),
+              create: async (spec: DataViewSpec) =>
+                new DataView({ spec, fieldFormats: fieldFormatsMock }),
+            };
           },
         },
         spacePrefix: '',
@@ -599,7 +601,7 @@ describe('fetchSearchSourceQuery', () => {
         params: defaultParams,
         services: {
           logger,
-          searchSourceClient: searchSourceCommonMock,
+          getSearchSourceClient: async () => searchSourceCommonMock,
           ruleResultService: mockRuleResultService,
           share: {
             url: {
@@ -611,10 +613,12 @@ describe('fetchSearchSourceQuery', () => {
               },
             },
           },
-          dataViews: {
-            ...dataViewPluginMocks.createStartContract(),
-            create: async (spec: DataViewSpec) =>
-              new DataView({ spec, fieldFormats: fieldFormatsMock }),
+          getDataViews: async () => {
+            return {
+              ...dataViewPluginMocks.createStartContract(),
+              create: async (spec: DataViewSpec) =>
+                new DataView({ spec, fieldFormats: fieldFormatsMock }),
+            };
           },
         },
         spacePrefix: '',
