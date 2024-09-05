@@ -253,7 +253,6 @@ export async function handleInstallPackageFailure({
   esClient,
   spaceId,
   authorizationHeader,
-  retryFromLastState,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   error: FleetError | Boom.Boom | Error;
@@ -263,7 +262,6 @@ export async function handleInstallPackageFailure({
   esClient: ElasticsearchClient;
   spaceId: string;
   authorizationHeader?: HTTPAuthorizationHeader | null;
-  retryFromLastState?: boolean;
 }) {
   if (error instanceof ConcurrentInstallOperationError) {
     return;
@@ -280,11 +278,12 @@ export async function handleInstallPackageFailure({
     createdAt: new Date().toISOString(),
     latestAttempts: installedPkg?.attributes.latest_install_failed_attempts,
   });
-
-  // if there is an unknown server error, reinstall the previous version if update or retry install where it left off
+  // if there is an unknown server error, check the installType and do the following actions
   try {
     const installType = getInstallType({ pkgVersion, installedPkg });
-    const latestAttempts = installedPkg?.attributes.latest_install_failed_attempts;
+    const attemptNumber = installedPkg?.attributes?.latest_install_failed_attempts?.length
+      ? installedPkg?.attributes?.latest_install_failed_attempts?.length
+      : 0;
 
     await updateInstallStatusToFailed({
       logger,
@@ -293,7 +292,7 @@ export async function handleInstallPackageFailure({
       status: 'install_failed',
       latestInstallFailedAttempts,
     });
-
+    // in case of install, uninstall any package assets
     if (installType === 'install') {
       logger.error(
         `Uninstalling ${pkgkey} after error installing: [${error.toString()}] with install type: ${installType}`
@@ -303,17 +302,11 @@ export async function handleInstallPackageFailure({
     }
 
     // in case of reinstall, restart install where it left off
-    // retry MAX_REINSTALL_RETRIES before exiting, in case the error persists
-    if (
-      installType === 'reinstall' &&
-      latestAttempts &&
-      latestAttempts.length < MAX_REINSTALL_RETRIES
-    ) {
+    // retry MAX_REINSTALL_RETRIES times before exiting, in case the error persists
+    if (installType === 'reinstall' && attemptNumber < MAX_REINSTALL_RETRIES) {
       logger.error(`Error installing ${pkgkey}: [${error.toString()}]`);
       logger.debug(
-        `Retrying install of ${pkgkey}  with install type: ${installType} - Attempt ${
-          latestAttempts.length + 1
-        } `
+        `Retrying install of ${pkgkey} with install type: ${installType} - Attempt ${attemptNumber} `
       );
       await installPackage({
         installSource: 'registry',
@@ -324,8 +317,9 @@ export async function handleInstallPackageFailure({
         authorizationHeader,
         retryFromLastState: true,
       });
+      return;
     }
-
+    // In case of update, reinstall the previous version
     if (installType === 'update') {
       if (!installedPkg) {
         logger.error(
