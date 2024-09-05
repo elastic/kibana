@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
 import {
@@ -72,7 +72,7 @@ export default function (providerContext: FtrProviderContext) {
 
       await deleteIndex(es, [
         LATEST_FINDINGS_INDEX_DEFAULT_NS,
-        LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+        CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
         CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS,
       ]);
     });
@@ -80,13 +80,13 @@ export default function (providerContext: FtrProviderContext) {
     afterEach(async () => {
       await deleteIndex(es, [
         LATEST_FINDINGS_INDEX_DEFAULT_NS,
-        LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+        CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
       ]);
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await deleteIndex(es, [
         LATEST_FINDINGS_INDEX_DEFAULT_NS,
-        LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+        CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
         CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS,
       ]);
     });
@@ -202,7 +202,7 @@ export default function (providerContext: FtrProviderContext) {
         numberOfFindings: 2,
       });
 
-      await addIndex(es, billableFindings, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS);
+      await addIndex(es, billableFindings, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN);
 
       let interceptedRequestBody: UsageRecord[] = [];
 
@@ -328,7 +328,7 @@ export default function (providerContext: FtrProviderContext) {
           ],
           LATEST_FINDINGS_INDEX_DEFAULT_NS
         ),
-        addIndex(es, [...billableFindingsCNVM], LATEST_VULNERABILITIES_INDEX_DEFAULT_NS),
+        addIndex(es, [...billableFindingsCNVM], CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN),
         addIndex(
           es,
           [...blockActionEnabledHeartbeats, ...blockActionDisabledHeartbeats],
