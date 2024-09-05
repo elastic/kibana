@@ -36,9 +36,9 @@ export interface FetchSearchSourceQueryOpts {
   spacePrefix: string;
   services: {
     logger: Logger;
-    searchSourceClient: ISearchStartSearchSource;
+    getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
     share: SharePluginStart;
-    dataViews: DataViewsContract;
+    getDataViews: () => Promise<DataViewsContract>;
   };
   dateStart: string;
   dateEnd: string;
@@ -54,7 +54,8 @@ export async function fetchSearchSourceQuery({
   dateStart,
   dateEnd,
 }: FetchSearchSourceQueryOpts) {
-  const { logger, searchSourceClient } = services;
+  const { logger, getSearchSourceClient } = services;
+  const searchSourceClient = await getSearchSourceClient();
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
 
@@ -90,7 +91,7 @@ export async function fetchSearchSourceQuery({
   const link = await generateLink(
     initialSearchSource,
     services.share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!,
-    services.dataViews,
+    services.getDataViews,
     index,
     dateStart,
     dateEnd,
@@ -196,13 +197,14 @@ export async function updateSearchSource(
 export async function generateLink(
   searchSource: ISearchSource,
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
-  dataViews: DataViewsContract,
+  getDataViews: () => Promise<DataViewsContract>,
   dataViewToUpdate: DataView,
   dateStart: string,
   dateEnd: string,
   spacePrefix: string,
   filterToExcludeHitsFromPreviousRun: Filter | null
 ) {
+  const dataViews = await getDataViews();
   const prevFilters = [...((searchSource.getField('filter') as Filter[]) || [])];
 
   if (filterToExcludeHitsFromPreviousRun) {
