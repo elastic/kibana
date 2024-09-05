@@ -159,21 +159,21 @@ export function Main({ isEmbeddable = false }: MainProps) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
-                     <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
-                      <EuiButtonEmpty
-                        iconType="exportAction"
-                        onClick={() =>
-                          downloadFileAs(EXPORT_FILE_NAME, {
-                            content: inputEditorValue,
-                            type: 'text/plain',
-                          })
-                        }
-                        size="xs"
-                        data-test-subj="consoleExportButton"
-                      >
-                        {MAIN_PANEL_LABELS.exportButton}
-                      </EuiButtonEmpty>
-                    </EuiToolTip>
+                <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
+                  <EuiButtonEmpty
+                    iconType="exportAction"
+                    onClick={() =>
+                      downloadFileAs(EXPORT_FILE_NAME, {
+                        content: inputEditorValue,
+                        type: 'text/plain',
+                      })
+                    }
+                    size="xs"
+                    data-test-subj="consoleExportButton"
+                  >
+                    {MAIN_PANEL_LABELS.exportButton}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
               </ConsoleTourStep>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -189,10 +189,10 @@ export function Main({ isEmbeddable = false }: MainProps) {
                 isOpen={isHelpOpen}
                 closePopover={() => setIsHelpOpen(false)}
                 resetTour={() => {
-                      setIsHelpOpen(false);
-                      dispatch({ type: 'setCurrentView', payload: SHELL_TAB_ID });
-                      actions.resetTour();
-                    }}
+                  setIsHelpOpen(false);
+                  dispatch({ type: 'setCurrentView', payload: SHELL_TAB_ID });
+                  actions.resetTour();
+                }}
               />
             </EuiFlexItem>
             {isEmbeddable && (
@@ -223,8 +223,8 @@ export function Main({ isEmbeddable = false }: MainProps) {
               loading={!done}
               setEditorInstance={() => {}}
               containerWidth={containerDimensions.width}
-                inputEditorValue={inputEditorValue}
-                  setInputEditorValue={setInputEditorValue}
+              inputEditorValue={inputEditorValue}
+              setInputEditorValue={setInputEditorValue}
             />
           )}
           {currentView === HISTORY_TAB_ID && <History containerWidth={containerDimensions.width} />}

@@ -59,41 +59,41 @@ export const Editor = memo(
       services: { storage },
       config: { isMonacoEnabled } = {},
     } = useServicesContext();
-    
-  const { currentTextObject } = useEditorReadContext();
-  const {
-    requestInFlight,
-    lastResult: { data: requestData, error: requestError },
-  } = useRequestReadContext();
 
-  const dispatch = useRequestActionContext();
-      const editorDispatch = useEditorActionContext();
+    const { currentTextObject } = useEditorReadContext();
+    const {
+      requestInFlight,
+      lastResult: { data: requestData, error: requestError },
+    } = useRequestReadContext();
 
-  const [fetchingMappings, setFetchingMappings] = useState(false);
+    const dispatch = useRequestActionContext();
+    const editorDispatch = useEditorActionContext();
 
-  const [inputEditorValue, setInputEditorValue] = useState<string>(currentTextObject?.text ?? '');
+    const [fetchingMappings, setFetchingMappings] = useState(false);
 
-  useEffect(() => {
-    const subscription = getAutocompleteInfo().mapping.isLoading$.subscribe(setFetchingMappings);
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+    const [inputEditorValue, setInputEditorValue] = useState<string>(currentTextObject?.text ?? '');
 
-  const [firstPanelSize, secondPanelSize] = storage.get(StorageKeys.SIZE, [
-    INITIAL_PANEL_SIZE,
-    INITIAL_PANEL_SIZE,
-  ]);
+    useEffect(() => {
+      const subscription = getAutocompleteInfo().mapping.isLoading$.subscribe(setFetchingMappings);
+      return () => {
+        subscription.unsubscribe();
+      };
+    }, []);
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const onPanelSizeChange = useCallback(
-    debounce((sizes) => {
-      storage.set(StorageKeys.SIZE, Object.values(sizes));
-    }, 300),
-    []
-  );
-      
-          /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    const [firstPanelSize, secondPanelSize] = storage.get(StorageKeys.SIZE, [
+      INITIAL_PANEL_SIZE,
+      INITIAL_PANEL_SIZE,
+    ]);
+
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    const onPanelSizeChange = useCallback(
+      debounce((sizes) => {
+        storage.set(StorageKeys.SIZE, Object.values(sizes));
+      }, 300),
+      []
+    );
+
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     const debouncedUpdateLocalStorageValue = useCallback(
       debounce((textObject: TextObject) => {
         editorDispatch({ type: 'setCurrentTextObject', payload: textObject });
@@ -118,163 +118,167 @@ export const Editor = memo(
       /* eslint-disable-next-line react-hooks/exhaustive-deps */
     }, [inputEditorValue, debouncedUpdateLocalStorageValue]);
 
-  const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
-  const isLoading = loading || requestInFlight;
+    const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
+    const isLoading = loading || requestInFlight;
 
-  if (!currentTextObject) return null;
+    if (!currentTextObject) return null;
 
-  return (
-    <>
-      {fetchingMappings ? (
-        <div className="conApp__requestProgressBarContainer">
-          <EuiProgress size="xs" color="accent" position="absolute" />
-        </div>
-      ) : null}
-      <EuiResizableContainer
-        style={{ height: '100%' }}
-        direction={containerWidth < euiTheme.breakpoint.l ? 'vertical' : 'horizontal'}
-        onPanelWidthChange={(sizes) => onPanelSizeChange(sizes)}
-      >
-        {(EuiResizablePanel, EuiResizableButton) => (
-          <>
-            <EuiResizablePanel
-              initialSize={firstPanelSize}
-              minSize={PANEL_MIN_SIZE}
-              tabIndex={0}
-              paddingSize="none"
-            >
-              <EuiSplitPanel.Outer
-                grow={true}
-                borderRadius="none"
-                hasShadow={false}
-                style={{ height: '100%' }}
+    return (
+      <>
+        {fetchingMappings ? (
+          <div className="conApp__requestProgressBarContainer">
+            <EuiProgress size="xs" color="accent" position="absolute" />
+          </div>
+        ) : null}
+        <EuiResizableContainer
+          style={{ height: '100%' }}
+          direction={containerWidth < euiTheme.breakpoint.l ? 'vertical' : 'horizontal'}
+          onPanelWidthChange={(sizes) => onPanelSizeChange(sizes)}
+        >
+          {(EuiResizablePanel, EuiResizableButton) => (
+            <>
+              <EuiResizablePanel
+                initialSize={firstPanelSize}
+                minSize={PANEL_MIN_SIZE}
+                tabIndex={0}
+                paddingSize="none"
               >
-                <EuiSplitPanel.Inner
-                  paddingSize="none"
+                <EuiSplitPanel.Outer
                   grow={true}
-                  className="consoleEditorPanel"
-                  style={{ top: 0 }}
+                  borderRadius="none"
+                  hasShadow={false}
+                  style={{ height: '100%' }}
                 >
-                  {loading ? (
-                    <EditorContentSpinner />
-                  ) : isMonacoEnabled ? (
-                    <MonacoEditor
-                      localStorageValue={currentTextObject.text}
-                      value={inputEditorValue}
-                      setValue={setInputEditorValue}
-                    />
-                  ) : (
-                    <EditorUI
-                      initialTextValue={currentTextObject.text}
-                      setEditorInstance={setEditorInstance}
-                    />
-                  )}
-                </EuiSplitPanel.Inner>
-
-                {!loading && (
                   <EuiSplitPanel.Inner
-                    grow={false}
-                    paddingSize="s"
-                    css={{
-                      backgroundColor: euiThemeVars.euiFormBackgroundColor,
-                    }}
+                    paddingSize="none"
+                    grow={true}
                     className="consoleEditorPanel"
+                    style={{ top: 0 }}
                   >
-                    <EuiButtonEmpty
-                      size="xs"
-                      color="primary"
-                      data-test-subj="clearConsoleInput"
-                      onClick={() => setInputEditorValue('')}
-                    >
-                      {i18n.translate('console.editor.clearConsoleInputButton', {
-                        defaultMessage: 'Clear this input',
-                      })}
-                    </EuiButtonEmpty>
-                  </EuiSplitPanel.Inner>
-                )}
-              </EuiSplitPanel.Outer>
-            </EuiResizablePanel>
-
-            <EuiResizableButton
-              className="conApp__resizerButton"
-              aria-label={i18n.translate('console.editor.adjustPanelSizeAriaLabel', {
-                defaultMessage: "Press left/right to adjust panels' sizes",
-              })}
-            />
-
-            <EuiResizablePanel
-              initialSize={secondPanelSize}
-              minSize={PANEL_MIN_SIZE}
-              tabIndex={0}
-              paddingSize="none"
-            >
-              <EuiSplitPanel.Outer borderRadius="none" hasShadow={false} style={{ height: '100%' }}>
-                <EuiSplitPanel.Inner
-                  paddingSize="none"
-                  css={{ alignContent: 'center', top: 0 }}
-                  className="consoleEditorPanel"
-                >
-                  {data ? (
-                    isMonacoEnabled ? (
-                      <MonacoEditorOutput />
+                    {loading ? (
+                      <EditorContentSpinner />
+                    ) : isMonacoEnabled ? (
+                      <MonacoEditor
+                        localStorageValue={currentTextObject.text}
+                        value={inputEditorValue}
+                        setValue={setInputEditorValue}
+                      />
                     ) : (
-                      <EditorOutput />
-                    )
-                  ) : isLoading ? (
-                    <EditorContentSpinner />
-                  ) : (
-                    <OutputPanelEmptyState />
-                  )}
-                </EuiSplitPanel.Inner>
+                      <EditorUI
+                        initialTextValue={currentTextObject.text}
+                        setEditorInstance={setEditorInstance}
+                      />
+                    )}
+                  </EuiSplitPanel.Inner>
 
-                {(data || isLoading) && (
+                  {!loading && (
+                    <EuiSplitPanel.Inner
+                      grow={false}
+                      paddingSize="s"
+                      css={{
+                        backgroundColor: euiThemeVars.euiFormBackgroundColor,
+                      }}
+                      className="consoleEditorPanel"
+                    >
+                      <EuiButtonEmpty
+                        size="xs"
+                        color="primary"
+                        data-test-subj="clearConsoleInput"
+                        onClick={() => setInputEditorValue('')}
+                      >
+                        {i18n.translate('console.editor.clearConsoleInputButton', {
+                          defaultMessage: 'Clear this input',
+                        })}
+                      </EuiButtonEmpty>
+                    </EuiSplitPanel.Inner>
+                  )}
+                </EuiSplitPanel.Outer>
+              </EuiResizablePanel>
+
+              <EuiResizableButton
+                className="conApp__resizerButton"
+                aria-label={i18n.translate('console.editor.adjustPanelSizeAriaLabel', {
+                  defaultMessage: "Press left/right to adjust panels' sizes",
+                })}
+              />
+
+              <EuiResizablePanel
+                initialSize={secondPanelSize}
+                minSize={PANEL_MIN_SIZE}
+                tabIndex={0}
+                paddingSize="none"
+              >
+                <EuiSplitPanel.Outer
+                  borderRadius="none"
+                  hasShadow={false}
+                  style={{ height: '100%' }}
+                >
                   <EuiSplitPanel.Inner
-                    grow={false}
-                    paddingSize="s"
-                    css={{
-                      backgroundColor: euiThemeVars.euiFormBackgroundColor,
-                    }}
+                    paddingSize="none"
+                    css={{ alignContent: 'center', top: 0 }}
                     className="consoleEditorPanel"
                   >
-                    <EuiFlexGroup gutterSize="none" responsive={false}>
-
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          size="xs"
-                          color="primary"
-                          data-test-subj="clearConsoleOutput"
-                          onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
-                        >
-                          {i18n.translate('console.editor.clearConsoleOutputButton', {
-                            defaultMessage: 'Clear this output',
-                          })}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem>
-                        <NetworkRequestStatusBar
-                          requestInProgress={requestInFlight}
-                          requestResult={
-                            data
-                              ? {
-                                  method: data.request.method.toUpperCase(),
-                                  endpoint: data.request.path,
-                                  statusCode: data.response.statusCode,
-                                  statusText: data.response.statusText,
-                                  timeElapsedMs: data.response.timeMs,
-                                }
-                              : undefined
-                          }
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    {data ? (
+                      isMonacoEnabled ? (
+                        <MonacoEditorOutput />
+                      ) : (
+                        <EditorOutput />
+                      )
+                    ) : isLoading ? (
+                      <EditorContentSpinner />
+                    ) : (
+                      <OutputPanelEmptyState />
+                    )}
                   </EuiSplitPanel.Inner>
-                )}
-              </EuiSplitPanel.Outer>
-            </EuiResizablePanel>
-          </>
-        )}
-      </EuiResizableContainer>
-    </>
-  );
-});
+
+                  {(data || isLoading) && (
+                    <EuiSplitPanel.Inner
+                      grow={false}
+                      paddingSize="s"
+                      css={{
+                        backgroundColor: euiThemeVars.euiFormBackgroundColor,
+                      }}
+                      className="consoleEditorPanel"
+                    >
+                      <EuiFlexGroup gutterSize="none" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            color="primary"
+                            data-test-subj="clearConsoleOutput"
+                            onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
+                          >
+                            {i18n.translate('console.editor.clearConsoleOutputButton', {
+                              defaultMessage: 'Clear this output',
+                            })}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+
+                        <EuiFlexItem>
+                          <NetworkRequestStatusBar
+                            requestInProgress={requestInFlight}
+                            requestResult={
+                              data
+                                ? {
+                                    method: data.request.method.toUpperCase(),
+                                    endpoint: data.request.path,
+                                    statusCode: data.response.statusCode,
+                                    statusText: data.response.statusText,
+                                    timeElapsedMs: data.response.timeMs,
+                                  }
+                                : undefined
+                            }
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiSplitPanel.Inner>
+                  )}
+                </EuiSplitPanel.Outer>
+              </EuiResizablePanel>
+            </>
+          )}
+        </EuiResizableContainer>
+      </>
+    );
+  }
+);
