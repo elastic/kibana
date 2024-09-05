@@ -25,12 +25,11 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { asyncForEach } from '@kbn/std';
 import {
   usePermissionCheck,
   createPermissionFailureMessage,
 } from '../../capabilities/check_capabilities';
-import type { Module } from '../../../../common/types/modules';
+import type { Module, RecognizeModuleResult } from '../../../../common/types/modules';
 import { useMlKibana } from '../../contexts/kibana';
 import type { TabIdType, KibanaAssetType } from './flyout';
 import { TAB_IDS } from './flyout';
@@ -65,11 +64,6 @@ export const LABELS = {
 };
 
 export type LabelId = keyof typeof LABELS;
-
-export interface DataViewInfo {
-  id: string;
-  title: string;
-}
 
 const ListDescriptionItem = ({
   label,
@@ -111,14 +105,13 @@ export const OverviewTabContent: FC<Props> = ({
 }) => {
   const [runningDataRecognizer, setRunningDataRecognizer] = useState<boolean>(false);
   const [recognizerWasRun, setRecognizerWasRun] = useState<boolean>(false);
-  const [matchingDataViews, setMatchingDataViews] = useState<DataViewInfo[]>([]);
+  const [matchingDataViews, setMatchingDataViews] = useState<RecognizeModuleResult>([]);
   const {
     services: {
       docLinks,
       mlServices: {
         mlApi: { recognizeModule },
       },
-      data: { dataViews: dataViewsService },
     },
   } = useMlKibana();
   const logsConfigsUrl = docLinks.links.ml.logsAnomalyDetectionConfigs;
@@ -128,28 +121,8 @@ export const OverviewTabContent: FC<Props> = ({
   const runDataRecongizer = async () => {
     setRunningDataRecognizer(true);
     const result = await recognizeModule({ moduleId: module.id });
-    const matching: DataViewInfo[] = [];
 
-    if (result?.length) {
-      const dataViews = await dataViewsService.getIdsWithTitle();
-
-      await asyncForEach(dataViews, async ({ id, title }) => {
-        const indices = await dataViewsService.getIndices({
-          pattern: title,
-          isRollupIndex: () => false,
-        });
-
-        const matches = indices.some(({ name }) => {
-          return result.includes(name);
-        });
-
-        if (matches) {
-          matching.push({ id, title });
-        }
-      });
-    }
-
-    setMatchingDataViews(matching);
+    setMatchingDataViews(result);
     setRunningDataRecognizer(false);
     setRecognizerWasRun(true);
   };

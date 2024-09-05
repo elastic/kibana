@@ -27,6 +27,7 @@ import type { CompatibleModule } from '../../../common/constants/app';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlClient } from '../../lib/ml_client';
+import type { RecognizeModuleResultDataView } from '../../../common/types/modules';
 import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import type {
   KibanaObjects,
@@ -252,58 +253,61 @@ export class DataRecognizer {
   }
 
   // called externally by an endpoint
-  public async findIndexMatches(moduleId: string, size: number = 15): Promise<string[]> {
+  public async findIndexMatches(
+    moduleId: string,
+    size: number = 15
+  ): Promise<RecognizeModuleResultDataView[]> {
     const config = await this._findConfig(moduleId);
-    const matchingIndices: string[] = [];
+    const matchingDataViews: RecognizeModuleResultDataView[] = [];
 
     if (config?.module.query === undefined) {
-      return matchingIndices;
+      return matchingDataViews;
     }
 
     try {
-      const listOfIndices = await this._client.asCurrentUser.cat.indices({ format: 'json' });
       const promises: Array<
         Promise<SearchResponse<unknown, Record<string, AggregationsAggregate>>>
       > = [];
-      // Keep track of which index name is associated with which promise
-      const indicesMap: Record<string, Promise<any>> = {};
+      // Keep track of which data view title is associated with which promise
+      const dataViewTitleMap: Record<string, Promise<any>> = {};
+      const dataViewsMap: Record<string, { id: string; name: string | undefined }> = {};
+      const idsWithTitle = await this._dataViewsService.getIdsWithTitle();
 
-      listOfIndices.forEach((indexObj) => {
-        // Don't check internal or hidden indices
-        if (indexObj.index && indexObj.index?.startsWith('.') === false) {
-          const promise = this._client.asCurrentUser.search(
-            {
-              index: indexObj.index,
-              size: 0,
-              body: {
-                query: config?.module.query,
-              },
+      idsWithTitle.forEach(({ id, title, name }) => {
+        dataViewsMap[title] = { id, name };
+        const promise = this._client.asCurrentUser.search(
+          {
+            index: title, // title is index pattern we can search by e.g. "filebeat-*"
+            size: 0,
+            body: {
+              query: config?.module.query,
             },
-            { maxRetries: 0 }
-          );
-          indicesMap[indexObj.index] = promise;
-          promises.push(promise);
-        }
+          },
+          { maxRetries: 0 }
+        );
+        dataViewTitleMap[title] = promise;
+        promises.push(promise);
       });
 
       const response = await Promise.all(promises);
-      const responseMap: Record<string, number> = Object.keys(indicesMap).reduce(
-        (acc, indexName, i) => {
+
+      const responseMap: Record<string, number> = Object.keys(dataViewTitleMap).reduce(
+        (acc, title, i) => {
           const totalHits =
             typeof response[i].hits.total === 'number'
               ? response[i].hits.total
               : (response[i].hits?.total as SearchTotalHits)?.value ?? 0;
-          return Object.assign(acc, { [indexName]: totalHits });
+          return Object.assign(acc, { [title]: totalHits });
         },
         {}
       );
 
-      for (const indexName in responseMap) {
-        if (Object.prototype.hasOwnProperty.call(responseMap, indexName)) {
-          const indexResponseHitsTotal = responseMap[indexName];
-          if (indexResponseHitsTotal > 0 && matchingIndices.length < size) {
-            matchingIndices.push(indexName);
-          } else if (matchingIndices.length >= size) {
+      for (const title in responseMap) {
+        if (Object.prototype.hasOwnProperty.call(responseMap, title)) {
+          const indexResponseHitsTotal = responseMap[title];
+          if (indexResponseHitsTotal > 0 && matchingDataViews.length < size) {
+            matchingDataViews.push({ title, ...(dataViewsMap[title] ?? {}) });
+          } else if (matchingDataViews.length >= size) {
             break;
           }
         }
@@ -314,7 +318,7 @@ export class DataRecognizer {
       );
     }
 
-    return matchingIndices;
+    return matchingDataViews;
   }
 
   // called externally by an endpoint

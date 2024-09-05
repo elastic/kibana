@@ -13,11 +13,14 @@ import type { EuiTableFieldDataColumnType, EuiTableActionsColumnType } from '@el
 import { EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
 
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
-import type { DataViewInfo } from './overview_tab_content';
 import { ML_PAGES } from '../../../../common/constants/locator';
+import type {
+  RecognizeModuleResult,
+  RecognizeModuleResultDataView,
+} from '../../../../common/types/modules';
 
 interface Props {
-  matchingDataViews: DataViewInfo[];
+  matchingDataViews: RecognizeModuleResult;
   moduleId: string;
   jobsLength: number;
 }
@@ -44,14 +47,26 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId, jobsLen
   );
 
   const columns: Array<
-    EuiTableFieldDataColumnType<DataViewInfo> | EuiTableActionsColumnType<DataViewInfo>
+    | EuiTableFieldDataColumnType<RecognizeModuleResultDataView>
+    | EuiTableActionsColumnType<RecognizeModuleResultDataView>
   > = [
     {
       field: 'title',
       name: i18n.translate(
         'xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.dataViewMatches.dataViewTitleColumnName',
         {
-          defaultMessage: 'Data View',
+          defaultMessage: 'Title',
+        }
+      ),
+      sortable: true,
+      truncateText: true,
+    },
+    {
+      field: 'name',
+      name: i18n.translate(
+        'xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.dataViewMatches.dataViewNameColumnName',
+        {
+          defaultMessage: 'Name',
         }
       ),
       sortable: true,
@@ -66,7 +81,7 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId, jobsLen
       ),
       actions: [
         {
-          render: (dataViewInfo: DataViewInfo) => {
+          render: (dataViewInfo: RecognizeModuleResultDataView) => {
             return (
               <EuiButtonEmpty
                 isDisabled={false}
@@ -100,7 +115,6 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId, jobsLen
 
   return (
     <EuiInMemoryTable
-      tableCaption="Demo of EuiInMemoryTable"
       items={matchingDataViews}
       columns={columns}
       pagination={true}

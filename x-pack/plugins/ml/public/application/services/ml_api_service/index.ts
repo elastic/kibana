@@ -18,6 +18,7 @@ import type {
   MlNodeCount,
 } from '../../../../common/types/ml_server_info';
 import type { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
+import type { RecognizeModuleResult } from '../../../../common/types/modules';
 import type { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
 import type { BucketSpanEstimatorData } from '../../../../common/types/job_service';
 import type {
@@ -433,7 +434,7 @@ export function mlApiProvider(httpService: HttpService) {
     },
 
     recognizeModule({ moduleId, size }: { moduleId: string; size?: number }) {
-      return httpService.http<string[]>({
+      return httpService.http<RecognizeModuleResult>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/recognize_by_module/${moduleId}`,
         method: 'GET',
         version: '1',
