@@ -24,8 +24,8 @@ export function useDegradedFields() {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
 
-  const degradedFields = useSelector(service, (state) => state.context.degradedFields) ?? {};
-  const { data, table } = degradedFields;
+  const { degradedFields, expandedDegradedField } = useSelector(service, (state) => state.context);
+  const { data, table } = degradedFields ?? {};
   const { page, rowsPerPage, sort } = table;
 
   const totalItemCount = data?.length ?? 0;
@@ -62,17 +62,48 @@ export function useDegradedFields() {
     return sortedItems.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
   }, [data, sort.field, sort.direction, page, rowsPerPage]);
 
-  const isLoading = useSelector(service, (state) =>
+  const isDegradedFieldsLoading = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDegradedFields.fetching')
   );
 
+  const closeDegradedFieldFlyout = useCallback(
+    () => service.send({ type: 'CLOSE_DEGRADED_FIELD_FLYOUT' }),
+    [service]
+  );
+
+  const openDegradedFieldFlyout = useCallback(
+    (fieldName: string) => {
+      if (expandedDegradedField === fieldName) {
+        service.send({ type: 'CLOSE_DEGRADED_FIELD_FLYOUT' });
+      } else {
+        service.send({ type: 'OPEN_DEGRADED_FIELD_FLYOUT', fieldName });
+      }
+    },
+    [expandedDegradedField, service]
+  );
+
+  const degradedFieldValues = useSelector(service, (state) =>
+    state.matches('initializing.initializeFixItFlow.ignoredValues.done')
+      ? state.context.degradedFieldValues
+      : undefined
+  );
+
+  const isDegradedFieldsValueLoading = useSelector(service, (state) => {
+    return !state.matches('initializing.initializeFixItFlow.ignoredValues.done');
+  });
+
   return {
-    isLoading,
+    isDegradedFieldsLoading,
     pagination,
     onTableChange,
     renderedItems,
     sort: { sort },
     fieldFormats,
     totalItemCount,
+    expandedDegradedField,
+    openDegradedFieldFlyout,
+    closeDegradedFieldFlyout,
+    degradedFieldValues,
+    isDegradedFieldsValueLoading,
   };
 }
