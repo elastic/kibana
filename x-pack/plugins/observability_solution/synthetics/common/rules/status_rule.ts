@@ -69,6 +69,7 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
       isChecksBased: true,
       numberOfChecks,
       downThreshold: 1,
+      locationsThreshold: 1,
       numberOfLocations: 1,
     };
   }
