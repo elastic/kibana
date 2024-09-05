@@ -9,7 +9,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { MlApiServices } from '../../../services/ml_api_service';
+import type { MlApi } from '../../../services/ml_api_service';
 import type { MlJobService } from '../../../services/job_service';
 import { QuickGeoJobCreator } from './quick_create_job';
 
@@ -20,7 +20,7 @@ interface Dependencies {
   kibanaConfig: IUiSettingsClient;
   timeFilter: TimefilterContract;
   dashboardService: DashboardStart;
-  mlApiServices: MlApiServices;
+  mlApi: MlApi;
   mlJobService: MlJobService;
 }
 export async function resolver(
@@ -34,8 +34,7 @@ export async function resolver(
   toRisonString: string,
   layerRisonString?: string
 ) {
-  const { dataViews, kibanaConfig, timeFilter, dashboardService, mlApiServices, mlJobService } =
-    deps;
+  const { dataViews, kibanaConfig, timeFilter, dashboardService, mlApi, mlJobService } = deps;
   const defaultLayer = { query: getDefaultQuery(), filters: [] };
 
   const dashboard = getRisonValue<typeof defaultLayer>(dashboardRisonString, defaultLayer);
@@ -58,7 +57,7 @@ export async function resolver(
     kibanaConfig,
     timeFilter,
     dashboardService,
-    mlApiServices,
+    mlApi,
     mlJobService
   );
 
