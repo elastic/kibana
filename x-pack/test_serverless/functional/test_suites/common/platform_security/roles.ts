@@ -56,7 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should create and only display custom roles', async () => {
-      const customRole = 'serverless-custom-role';
+      const customRole = 'serverlesscustomrole';
       await pageObjects.security.addRole(customRole, {
         elasticsearch: {
           indices: [

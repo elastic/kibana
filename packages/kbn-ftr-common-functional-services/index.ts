@@ -38,3 +38,4 @@ export { SavedObjectInfoService } from './services/saved_object_info';
 export { DeploymentService } from './services/deployment';
 export { IndexPatternsService } from './services/index_patterns';
 export { RandomnessService } from './services/randomness';
+export { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './services/supertest';
