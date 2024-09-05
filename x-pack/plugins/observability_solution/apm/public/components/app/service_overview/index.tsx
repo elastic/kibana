@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { SignalTypes } from '../../../../common/entities/types';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
@@ -87,11 +87,14 @@ export function ServiceOverview() {
           {hasLogsSignal ? (
             <EuiFlexItem>
               {hasLogsOnlySignal && !dismissedLogsOnlyEmptyState && (
-                <ServiceTabEmptyState
-                  title={logsOnlyEmptyStateContent.title}
-                  content={logsOnlyEmptyStateContent.content}
-                  onDissmiss={() => setDismissedLogsOnlyEmptyState(true)}
-                />
+                <>
+                  <ServiceTabEmptyState
+                    title={logsOnlyEmptyStateContent.title}
+                    content={logsOnlyEmptyStateContent.content}
+                    onDissmiss={() => setDismissedLogsOnlyEmptyState(true)}
+                  />
+                  <EuiSpacer size="m" />
+                </>
               )}
               <LogsOverview />
             </EuiFlexItem>
