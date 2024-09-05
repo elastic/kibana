@@ -69,7 +69,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
         });
       }
 
-      if (reporting?.csv?.enablePanelActionDownload !== false) {
+      if (reporting?.csv?.enablePanelActionDownload === true) {
         addDeprecation({
           configPath: `${fromPath}.csv.enablePanelActionDownload`,
           title: i18n.translate('xpack.reporting.deprecations.csvPanelActionDownload.title', {
