@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { SignalTypes } from '../../../../common/entities/types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -15,9 +16,13 @@ import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
+import { isLogsOnlySignal } from '../../../utils/get_signal_type';
+import { ServiceTabEmptyState } from '../service_tab_empty_state';
+import { logsOnlyEmptyStateContent } from './constants';
 
 export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
+  const { serviceEntitySummary } = useApmServiceContext();
 
   const {
     query: { environment, kuery, comparisonEnabled },
@@ -29,6 +34,20 @@ export function ErrorGroupOverview() {
     environment,
     kuery,
   });
+
+  const hasLogsOnlySignal =
+    serviceEntitySummary?.signalTypes &&
+    isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+
+  if (hasLogsOnlySignal) {
+    return (
+      <ServiceTabEmptyState
+        title={logsOnlyEmptyStateContent.title}
+        content={logsOnlyEmptyStateContent.content}
+        imgSrc={logsOnlyEmptyStateContent.imgSrc}
+      />
+    );
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
