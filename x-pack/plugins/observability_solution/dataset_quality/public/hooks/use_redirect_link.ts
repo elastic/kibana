@@ -186,7 +186,7 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
     },
     query,
     breakdownField,
-    columns: ['@timestamp', 'message'],
+    columns: [],
     filters: [
       buildPhraseFilter(
         {
