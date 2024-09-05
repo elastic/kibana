@@ -44,6 +44,7 @@ import { useUserData } from '../../../../detections/components/user_info';
 import { StepPanel } from '../../../rule_creation/components/step_panel';
 import { StepAboutRule } from '../../components/step_about_rule';
 import { StepDefineRule } from '../../components/step_define_rule';
+import { useExperimentalFeatureFieldsTransform } from '../../components/step_define_rule/use_experimental_feature_fields_transform';
 import { StepScheduleRule } from '../../components/step_schedule_rule';
 import { StepRuleActions } from '../../../rule_creation/components/step_rule_actions';
 import { formatRule } from '../rule_creation/helpers';
@@ -54,7 +55,10 @@ import {
   MaxWidthEuiFlexItem,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
-import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
+import {
+  DefineStepRule,
+  RuleStep,
+} from '../../../../detections/pages/detection_engine/rules/types';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import { ruleStepsOrder } from '../../../../detections/pages/detection_engine/rules/utils';
@@ -392,11 +396,17 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const { startTransaction } = useStartTransaction();
 
+  const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
+
   const saveChanges = useCallback(async () => {
     startTransaction({ name: SINGLE_RULE_ACTIONS.SAVE });
+    const localDefineStepData: DefineStepRule = defineFieldsTransform({
+      ...defineStepForm.getFormData(),
+      eqlOptions: eqlOptionsSelected,
+    });
     await updateRule({
       ...formatRule<RuleUpdateProps>(
-        defineStepData,
+        localDefineStepData,
         aboutStepData,
         scheduleStepData,
         actionsStepData,
@@ -414,8 +424,10 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   }, [
     aboutStepData,
     actionsStepData,
-    defineStepData,
+    defineStepForm,
+    defineFieldsTransform,
     dispatchToaster,
+    eqlOptionsSelected,
     navigateToApp,
     rule?.exceptions_list,
     rule?.name,

@@ -124,7 +124,7 @@ export const createEqlAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
         });
-      const isNonSeqAlertSuppressionActive = await getIsAlertSuppressionActive({
+      const isAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: completeRule.ruleParams.alertSuppression,
         licensing,
       });
@@ -147,7 +147,7 @@ export const createEqlAlertType = (
         wrapSuppressedSequences,
         alertTimestampOverride,
         alertWithSuppression,
-        isAlertSuppressionActive: isNonSeqAlertSuppressionActive,
+        isAlertSuppressionActive,
         experimentalFeatures,
       });
       return { ...result, state };

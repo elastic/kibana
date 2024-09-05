@@ -78,6 +78,7 @@ import {
   isThresholdRule as getIsThresholdRule,
   isQueryRule,
   isEsqlRule,
+  isEqlSequenceQuery,
   isSuppressionRuleInGA,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
@@ -198,7 +199,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 }) => {
   const queryClient = useQueryClient();
 
-  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
@@ -486,6 +486,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * The exception is threshold rules, which use an existing threshold field for the same
    * purpose and so are treated as if the field is always selected.  */
   const areSuppressionFieldsSelected = isThresholdRule || groupByFields.length > 0;
+
+  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(
+    ruleType,
+    isEqlSequenceQuery(queryBar?.query?.query as string)
+  );
+
+  useEffect(
+    () => console.error('IS SUPPRESSION ENABLED', isAlertSuppressionEnabled),
+    [isAlertSuppressionEnabled]
+  );
 
   /** If we don't have ML field information, users can't meaningfully interact with suppression fields */
   const areSuppressionFieldsDisabledByMlFields =
@@ -1187,13 +1197,15 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
 }) => {
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(data);
   const transformFields = useExperimentalFeatureFieldsTransform();
+  const fieldsToDisplay = transformFields(dataForDescription);
+  console.error('WHAT FIELDS TO DISPLAY', fieldsToDisplay.queryBar?.query.query);
 
   return (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
         schema={filterRuleFieldsForType(schema, data.ruleType)}
-        data={filterRuleFieldsForType(transformFields(dataForDescription), data.ruleType)}
+        data={filterRuleFieldsForType(fieldsToDisplay, data.ruleType)}
         indexPatterns={indexPattern}
       />
     </StepContentWrapper>
