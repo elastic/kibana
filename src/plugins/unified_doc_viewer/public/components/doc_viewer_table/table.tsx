@@ -24,6 +24,7 @@ import {
   useResizeObserver,
   EuiSwitch,
   useEuiTheme,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -367,7 +368,7 @@ export const DocViewerTable = ({
   );
 
   const onHideNullValuesChange = useCallback(
-    (e) => {
+    (e: EuiSwitchEvent) => {
       setAreNullValuesHidden(e.target.checked);
     },
     [setAreNullValuesHidden]
