@@ -13,13 +13,24 @@ import type {
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import { calculateIsCustomized } from './calculate_is_customized';
 
+/**
+ * Calculates rule_source for a rule based on two pieces of information:
+ * 1. The prebuilt rule asset that matches the specified rule_id and version
+ * 2. Whether a prebuilt rule with the specified rule_id is currently installed
+ *
+ * @param rule The rule for which rule_source is being calculated
+ * @param assetWithMatchingVersion The prebuilt rule asset that matches the specified rule_id and version
+ * @param ruleIdExists Whether a prebuilt rule with the specified rule_id is currently installed
+ *
+ * @returns The calculated rule_source
+ */
 export const calculateRuleSourceFromAsset = ({
   rule,
-  prebuiltRuleAsset,
+  assetWithMatchingVersion,
   ruleIdExists,
 }: {
   rule: RuleResponse | RuleToImport;
-  prebuiltRuleAsset: PrebuiltRuleAsset | undefined;
+  assetWithMatchingVersion: PrebuiltRuleAsset | undefined;
   ruleIdExists: boolean;
 }): RuleSource => {
   if (!ruleIdExists) {
@@ -28,14 +39,14 @@ export const calculateRuleSourceFromAsset = ({
     };
   }
 
-  if (prebuiltRuleAsset == null) {
+  if (assetWithMatchingVersion == null) {
     return {
       type: 'external',
-      is_customized: false,
+      is_customized: true,
     };
   }
 
-  const isCustomized = calculateIsCustomized(prebuiltRuleAsset, rule);
+  const isCustomized = calculateIsCustomized(assetWithMatchingVersion, rule);
 
   return {
     type: 'external',

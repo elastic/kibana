@@ -5,31 +5,15 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
-import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import { calculateRuleSourceFromAsset } from './calculate_rule_source_from_asset';
-
-const buildTestRule = (overrides?: Partial<RuleResponse>) => {
-  return {
-    rule_id: 'rule_id',
-    version: 1,
-    ...overrides,
-  } as RuleResponse;
-};
-
-const buildTestRuleAsset = (overrides?: Partial<PrebuiltRuleAsset>) => {
-  return {
-    rule_id: 'rule_id',
-    version: 1,
-    ...overrides,
-  } as PrebuiltRuleAsset;
-};
+import { getRulesSchemaMock } from '../../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { getPrebuiltRuleMock } from '../../../../../prebuilt_rules/mocks';
 
 describe('calculateRuleSourceFromAsset', () => {
   it('calculates as internal if no asset is found', () => {
     const result = calculateRuleSourceFromAsset({
-      rule: buildTestRule(),
-      prebuiltRuleAsset: undefined,
+      rule: getRulesSchemaMock(),
+      assetWithMatchingVersion: undefined,
       ruleIdExists: false,
     });
 
@@ -38,44 +22,55 @@ describe('calculateRuleSourceFromAsset', () => {
     });
   });
 
-  it('calculates as unmodified external type if an asset is found without a matching version', () => {
+  it('calculates as customized external type if an asset is found matching rule_id but not version', () => {
+    const ruleToImport = getRulesSchemaMock();
     const result = calculateRuleSourceFromAsset({
-      rule: buildTestRule(),
-      prebuiltRuleAsset: buildTestRuleAsset({ version: 2 }),
-      ruleIdExists: true,
-    });
-
-    expect(result).toEqual({
-      type: 'external',
-      is_customized: false,
-    });
-  });
-
-  it('calculates as unmodified external type if an asset is not found but the rule ID exists', () => {
-    const result = calculateRuleSourceFromAsset({
-      rule: buildTestRule(),
-      prebuiltRuleAsset: undefined,
-      ruleIdExists: true,
-    });
-
-    expect(result).toEqual({
-      type: 'external',
-      is_customized: false,
-    });
-  });
-
-  it('calculates as external with customizations if a matching asset/version is found', () => {
-    const rule = buildTestRule();
-
-    const result = calculateRuleSourceFromAsset({
-      rule,
-      prebuiltRuleAsset: buildTestRuleAsset(),
+      rule: ruleToImport,
+      assetWithMatchingVersion: undefined,
       ruleIdExists: true,
     });
 
     expect(result).toEqual({
       type: 'external',
       is_customized: true,
+    });
+  });
+
+  describe('matching rule_id and version is found', () => {
+    it('calculates as customized external type if the imported rule has all fields unchanged from the asset', () => {
+      const ruleToImport = getRulesSchemaMock();
+      const result = calculateRuleSourceFromAsset({
+        rule: getRulesSchemaMock(), // version 1
+        assetWithMatchingVersion: getPrebuiltRuleMock({
+          ...ruleToImport,
+          version: 1, // version 1 (same version as imported rule)
+          // no other overwrites -> no differences
+        }),
+        ruleIdExists: true,
+      });
+
+      expect(result).toEqual({
+        type: 'external',
+        is_customized: false,
+      });
+    });
+
+    it('calculates as non-customized external type the imported rule has fields which differ from the asset', () => {
+      const ruleToImport = getRulesSchemaMock();
+      const result = calculateRuleSourceFromAsset({
+        rule: getRulesSchemaMock(), // version 1
+        assetWithMatchingVersion: getPrebuiltRuleMock({
+          ...ruleToImport,
+          version: 1, // version 1 (same version as imported rule)
+          name: 'Customized name', // mock a customization
+        }),
+        ruleIdExists: true,
+      });
+
+      expect(result).toEqual({
+        type: 'external',
+        is_customized: true,
+      });
     });
   });
 });

@@ -5,30 +5,14 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../common/api/detection_engine';
-import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
+import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
+import { getPrebuiltRuleMock } from '../../../prebuilt_rules/mocks';
 import { calculateRuleSourceForImport } from './calculate_rule_source_for_import';
-
-const buildTestRule = (overrides?: Partial<RuleResponse>) => {
-  return {
-    rule_id: 'rule_id',
-    version: 1,
-    ...overrides,
-  } as RuleResponse;
-};
-
-const buildTestRuleAsset = (overrides?: Partial<PrebuiltRuleAsset>) => {
-  return {
-    rule_id: 'rule_id',
-    version: 1,
-    ...overrides,
-  } as PrebuiltRuleAsset;
-};
 
 describe('calculateRuleSourceForImport', () => {
   it('calculates as internal if no asset is found', () => {
     const result = calculateRuleSourceForImport({
-      rule: buildTestRule(),
+      rule: getRulesSchemaMock(),
       prebuiltRuleAssets: [],
       installedRuleIds: [],
     });
@@ -38,22 +22,26 @@ describe('calculateRuleSourceForImport', () => {
     });
   });
 
-  it('calculates as unmodified external type if an asset is found without a matching version', () => {
+  it('calculates as modified external type if an asset is found without a matching version', () => {
+    const rule = getRulesSchemaMock();
+    rule.rule_id = 'rule_id';
+
     const result = calculateRuleSourceForImport({
-      rule: buildTestRule(),
+      rule,
       prebuiltRuleAssets: [],
       installedRuleIds: ['rule_id'],
     });
 
     expect(result).toEqual({
       type: 'external',
-      isCustomized: false,
+      is_customized: true,
     });
   });
 
   it('calculates as external with customizations if a matching asset/version is found', () => {
-    const rule = buildTestRule();
-    const prebuiltRuleAssets = [buildTestRuleAsset()];
+    const rule = getRulesSchemaMock();
+    rule.rule_id = 'rule_id';
+    const prebuiltRuleAssets = [getPrebuiltRuleMock({ rule_id: 'rule_id' })];
 
     const result = calculateRuleSourceForImport({
       rule,
@@ -63,7 +51,7 @@ describe('calculateRuleSourceForImport', () => {
 
     expect(result).toEqual({
       type: 'external',
-      isCustomized: true,
+      is_customized: true,
     });
   });
 });
