@@ -71,8 +71,6 @@ export const Editor = memo(
 
     const [fetchingMappings, setFetchingMappings] = useState(false);
 
-    const [inputEditorValue, setInputEditorValue] = useState<string>(currentTextObject?.text ?? '');
-
     useEffect(() => {
       const subscription = getAutocompleteInfo().mapping.isLoading$.subscribe(setFetchingMappings);
       return () => {
