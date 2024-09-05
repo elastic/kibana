@@ -30,10 +30,14 @@ import {
   ALERT_END,
   ALERT_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ALERT_GROUP,
 } from '@kbn/rule-data-utils';
 
 import { v4 as uuidv4 } from 'uuid';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import { CreateInvestigationResponse } from '@kbn/investigation-shared';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { Group } from '@kbn/observability-alerting-rule-utils';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
@@ -41,6 +45,9 @@ import { paths } from '../../../../common/locators/paths';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import { useCreateInvestigation } from '../hooks/use_create_investigation';
 import { useFetchInvestigationsByAlert } from '../hooks/use_fetch_investigations_by_alert';
+import { useAddInvestigationItem } from '../hooks/use_add_investigation_item';
+import { AlertParams } from '../../../components/custom_threshold/types';
+import { generateInvestigationItem } from '../../../utils/investigation_item_helper';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
@@ -125,9 +132,35 @@ export function HeaderActions({
   };
 
   const { mutateAsync: createInvestigation } = useCreateInvestigation();
+  const { mutateAsync: addInvestigationItem } = useAddInvestigationItem();
 
   const alertStart = alert?.fields[ALERT_START];
   const alertEnd = alert?.fields[ALERT_END];
+
+  const addChartsToInvestigation = async (investigationDetails: CreateInvestigationResponse) => {
+    if (
+      rule &&
+      alert &&
+      alert.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID
+    ) {
+      const ruleParams = rule.params as RuleTypeParams & AlertParams;
+
+      for (let index = 0; index < ruleParams.criteria.length; index++) {
+        const criterion = ruleParams.criteria[index];
+        const item = generateInvestigationItem(
+          criterion,
+          ruleParams.searchConfiguration,
+          alert.fields[ALERT_RULE_TYPE_ID],
+          ruleParams.groupBy,
+          alert.fields[ALERT_GROUP] as Group[]
+        );
+
+        if (item) {
+          await addInvestigationItem({ investigationId: investigationDetails.id, item });
+        }
+      }
+    }
+  };
 
   const createOrOpenInvestigation = async () => {
     if (!alert) return;
@@ -151,6 +184,8 @@ export function HeaderActions({
           },
         },
       });
+
+      await addChartsToInvestigation(investigationResponse);
 
       navigateToApp('investigate', { path: `/${investigationResponse.id}`, replace: false });
     } else {
