@@ -2337,8 +2337,8 @@ components:
     IsRuleImmutable:
       deprecated: true
       description: >-
-        [DEPRECATION WARNING TODO] - This field determines whether the rule is a
-        prebuilt Elastic rule. It will be replaced with the `rule_source` field.
+        This field determines whether the rule is a prebuilt Elastic rule. It
+        will be replaced with the `rule_source` field.
       type: boolean
     ItemsPerSearch:
       minimum: 1

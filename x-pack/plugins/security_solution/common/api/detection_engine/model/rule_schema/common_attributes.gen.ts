@@ -51,7 +51,7 @@ export type KqlQueryLanguageEnum = typeof KqlQueryLanguage.enum;
 export const KqlQueryLanguageEnum = KqlQueryLanguage.enum;
 
 /**
- * [DEPRECATION WARNING TODO] - This field determines whether the rule is a prebuilt Elastic rule. It will be replaced with the `rule_source` field.
+ * This field determines whether the rule is a prebuilt Elastic rule. It will be replaced with the `rule_source` field.
  * @deprecated
  */
 export type IsRuleImmutable = z.infer<typeof IsRuleImmutable>;
