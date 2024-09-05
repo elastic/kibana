@@ -136,6 +136,7 @@ export const OverviewTabContent: FC<Props> = ({
         color={'primary'}
         onClick={runDataRecongizer}
         size="s"
+        data-test-subj="mlSuppliedConfigurationsFlyoutRunDataRecognizerButton"
       >
         <FormattedMessage
           id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.runDataRecognizerButtonLabel"

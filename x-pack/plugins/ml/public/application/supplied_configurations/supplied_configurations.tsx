@@ -138,8 +138,9 @@ export const SuppliedConfigurations = () => {
       <EuiFlexGrid gutterSize="l" columns={4}>
         {filteredModules.map(({ description, id, logo, title }) => {
           return (
-            <EuiFlexItem key={id}>
+            <EuiFlexItem key={id} data-test-subj="mlSuppliedConfigurationsCard">
               <EuiCard
+                data-test-subj={`mlSuppliedConfigurationsCard ${id}`}
                 layout="horizontal"
                 icon={<EuiIcon size="xxl" type={isLogoObject(logo) ? logo.icon : logo} />}
                 title={title}

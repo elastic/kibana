@@ -114,6 +114,7 @@ export const SuppliedConfigurationsFlyout: FC<Props> = ({ module, onClose }) => 
       ownFocus
       onClose={onClose}
       aria-labelledby={'supplied-configurations-flyout'}
+      data-test-subj={`mlSuppliedConfigurationsFlyout ${module.id}`}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="m">

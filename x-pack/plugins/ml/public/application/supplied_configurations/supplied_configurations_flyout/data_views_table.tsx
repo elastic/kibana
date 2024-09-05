@@ -115,8 +115,12 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId, jobsLen
 
   return (
     <EuiInMemoryTable
+      data-test-subj="mlSuppliedConfigurationsFlyoutDataViewsTable"
       items={matchingDataViews}
       columns={columns}
+      rowProps={(item) => ({
+        'data-test-subj': `mlSuppliedConfigurationsDataViewsTableRow row-${item.id}`,
+      })}
       pagination={true}
       sorting={sorting}
     />
