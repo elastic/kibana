@@ -47,6 +47,8 @@ export interface RecalledEntry {
 function isModelMissingOrUnavailableError(error: Error) {
   return (
     error instanceof errors.ResponseError &&
+    error.body &&
+    error.body.error &&
     (error.body.error.type === 'resource_not_found_exception' ||
       error.body.error.type === 'status_exception')
   );
