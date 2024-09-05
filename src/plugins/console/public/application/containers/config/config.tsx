@@ -11,13 +11,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { Settings } from './settings';
 import { Variables } from './variables';
-import type { SenseEditor } from '../../models';
 
-export interface Props {
-  editorInstance: SenseEditor | null;
-}
-
-export function Config({ editorInstance }: Props) {
+export function Config() {
   return (
     <EuiPanel
       color="subdued"
@@ -28,7 +23,7 @@ export function Config({ editorInstance }: Props) {
     >
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
-          <Settings editorInstance={editorInstance} />
+          <Settings />
         </EuiFlexItem>
         <EuiFlexItem>
           <Variables />

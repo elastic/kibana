@@ -7,7 +7,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { RequestResult } from '../../../../hooks/use_send_current_request/send_request';
+import { RequestResult } from '../../../hooks/use_send_current_request/send_request';
 import {
   DEFAULT_STATUS_BADGE_CLASSNAME,
   SUCCESS_STATUS_BADGE_CLASSNAME,

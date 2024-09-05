@@ -208,7 +208,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
                 <Editor loading={!done} setEditorInstance={() => {}} />
               )}
               {currentView === HISTORY_TAB_ID && <History />}
-              {currentView === CONFIG_TAB_ID && <Config editorInstance={null} />}
+              {currentView === CONFIG_TAB_ID && <Config />}
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="xs" grow={false}>

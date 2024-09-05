@@ -12,7 +12,7 @@ import {
   WARNING_STATUS_BADGE_CLASSNAME,
   DANGER_STATUS_BADGE_CLASSNAME,
 } from './constants';
-import { RequestResult } from '../../../../hooks/use_send_current_request/send_request';
+import { RequestResult } from '../../../hooks/use_send_current_request/send_request';
 
 describe('getStatusCodeDecorations', () => {
   it('correctly returns all decorations on full data', () => {

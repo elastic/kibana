@@ -7,7 +7,7 @@
  */
 
 import { monaco, ParsedRequest } from '@kbn/monaco';
-import type { MetricsTracker } from '../../../../../types';
+import type { MetricsTracker } from '../../../../types';
 import {
   getAutoIndentedRequests,
   getCurlRequest,
