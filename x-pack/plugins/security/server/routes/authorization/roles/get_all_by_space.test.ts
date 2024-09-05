@@ -354,6 +354,15 @@ describe('GET all roles by space id', () => {
             enabled: true,
           },
         },
+        third_role: {
+          cluster: [],
+          indices: [],
+          applications: [],
+          run_as: [],
+          transient_metadata: {
+            enabled: true,
+          },
+        },
       }),
       spaceId: 'marketing',
       asserts: {
