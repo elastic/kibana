@@ -190,6 +190,7 @@ export const configSchema = schema.object({
     { defaultValue: [] }
   ),
   dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
+  publicBaseUrl: schema.maybe(hostURISchema),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
