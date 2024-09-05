@@ -158,7 +158,6 @@ export const AddPanelFlyout = ({
       if (savedObjectToPanel[type]) {
         // this panel type has a custom method for converting saved objects to panels
         const panel = savedObjectToPanel[type](savedObject);
-
         const { id: _embeddableId } = await container.addNewEmbeddable(
           legacyFactoryForSavedObjectType.type,
           panel,

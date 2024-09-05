@@ -5,13 +5,23 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiTitle,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { TextBasedLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
 import { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import { Item } from '@kbn/investigation-shared';
 import React from 'react';
+// import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import { AddFromLibraryButton } from '../add_from_library_button';
 import { EsqlWidgetPreview } from './esql_widget_preview';
 
 type Props = {
@@ -69,7 +79,7 @@ export function AddInvestigationItem({ onItemAdd: onItemAdd, timeRange }: Props)
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiPanel color="subdued" hasShadow={false}>
-            <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
                 <TextBasedLangEditor
                   query={query}
@@ -91,36 +101,39 @@ export function AddInvestigationItem({ onItemAdd: onItemAdd, timeRange }: Props)
                 />
               </EuiFlexItem>
 
-              {!isPreviewOpen ? (
-                <EuiFlexGroup
-                  direction="column"
-                  alignItems="center"
-                  gutterSize="l"
-                  className={emptyPreview}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="image" size="xxl" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <p>
-                      {i18n.translate(
-                        'xpack.investigateApp.addObservationUI.p.selectADataSourceLabel',
-                        { defaultMessage: 'Select a data source to generate a preview chart' }
-                      )}
-                    </p>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : (
-                <EsqlWidgetPreview
-                  esqlQuery={submittedQuery.esql}
-                  timeRange={timeRange}
-                  onItemAdd={(item) => {
-                    resetState();
-                    return onItemAdd(item);
-                  }}
-                />
-              )}
+              <EuiFlexItem grow={false}>
+                <AddFromLibraryButton onWidgetAdd={(item) => onItemAdd(item)} />
+              </EuiFlexItem>
             </EuiFlexGroup>
+            {!isPreviewOpen ? (
+              <EuiFlexGroup
+                direction="column"
+                alignItems="center"
+                gutterSize="l"
+                className={emptyPreview}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="image" size="xxl" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <p>
+                    {i18n.translate(
+                      'xpack.investigateApp.addObservationUI.p.selectADataSourceLabel',
+                      { defaultMessage: 'Select a data source to generate a preview chart' }
+                    )}
+                  </p>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EsqlWidgetPreview
+                esqlQuery={submittedQuery.esql}
+                timeRange={timeRange}
+                onItemAdd={(item) => {
+                  resetState();
+                  return onItemAdd(item);
+                }}
+              />
+            )}
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexGroup>
