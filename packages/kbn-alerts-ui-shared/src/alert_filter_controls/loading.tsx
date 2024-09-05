@@ -7,18 +7,13 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiLoadingChart } from '@elastic/eui';
-import styled from '@emotion/styled';
+import { EuiButton, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { TEST_IDS } from './constants';
-
-const FilterGroupLoadingButton = styled(EuiButton)`
-  height: 38px;
-`;
 
 export const FilterGroupLoading = () => {
   return (
-    <FilterGroupLoadingButton color="text">
-      <EuiLoadingChart className="filter-group__loading" data-test-subj={TEST_IDS.FILTER_LOADING} />
-    </FilterGroupLoadingButton>
+    <EuiButton color="text" size='s'>
+      <EuiLoadingChart  className="filter-group__loading" data-test-subj={TEST_IDS.FILTER_LOADING} />
+    </EuiButton>
   );
 };
