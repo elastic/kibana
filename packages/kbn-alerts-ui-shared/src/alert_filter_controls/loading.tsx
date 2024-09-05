@@ -7,13 +7,13 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
+import { EuiButton, EuiLoadingChart } from '@elastic/eui';
 import { TEST_IDS } from './constants';
 
 export const FilterGroupLoading = () => {
   return (
-    <EuiButton color="text" size='s'>
-      <EuiLoadingChart  className="filter-group__loading" data-test-subj={TEST_IDS.FILTER_LOADING} />
+    <EuiButton color="text" size="s">
+      <EuiLoadingChart className="filter-group__loading" data-test-subj={TEST_IDS.FILTER_LOADING} />
     </EuiButton>
   );
 };
