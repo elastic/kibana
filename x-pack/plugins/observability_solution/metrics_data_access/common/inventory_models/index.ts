@@ -78,7 +78,8 @@ export const isBasicMetricAgg = (
 
   return Object.values(agg).some(
     (value) =>
-      value === undefined || 'field' in (value as estypes.AggregationsMetricAggregationBase)
+      value === undefined ||
+      (value && 'field' in (value as estypes.AggregationsMetricAggregationBase))
   );
 };
 
