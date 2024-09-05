@@ -18,7 +18,10 @@ describe('calculateRuleSourceForImport', () => {
     });
 
     expect(result).toEqual({
-      type: 'internal',
+      ruleSource: {
+        type: 'internal',
+      },
+      immutable: false,
     });
   });
 
@@ -33,8 +36,11 @@ describe('calculateRuleSourceForImport', () => {
     });
 
     expect(result).toEqual({
-      type: 'external',
-      is_customized: true,
+      ruleSource: {
+        type: 'external',
+        is_customized: true,
+      },
+      immutable: true,
     });
   });
 
@@ -50,8 +56,11 @@ describe('calculateRuleSourceForImport', () => {
     });
 
     expect(result).toEqual({
-      type: 'external',
-      is_customized: true,
+      ruleSource: {
+        type: 'external',
+        is_customized: true,
+      },
+      immutable: true,
     });
   });
 });

@@ -17,7 +17,7 @@ import { calculateRuleSourceFromAsset } from '../detection_rules_client/mergers/
  * the installed version of the specified prebuilt rule.
  * @param installedRuleIds A list of prebuilt rule IDs that are currently installed
  *
- * @returns The calculated rule_source
+ * @returns The calculated rule_source and immutable fields for the rule
  */
 export const calculateRuleSourceForImport = ({
   rule,
@@ -27,15 +27,20 @@ export const calculateRuleSourceForImport = ({
   rule: RuleToImport;
   prebuiltRuleAssets: PrebuiltRuleAsset[];
   installedRuleIds: string[];
-}): RuleSource => {
+}): { ruleSource: RuleSource; immutable: boolean } => {
   const assetWithMatchingVersion = prebuiltRuleAssets.find(
     (asset) => asset.rule_id === rule.rule_id
   );
   const ruleIdExists = installedRuleIds.includes(rule.rule_id);
 
-  return calculateRuleSourceFromAsset({
+  const ruleSource = calculateRuleSourceFromAsset({
     rule,
     assetWithMatchingVersion,
     ruleIdExists,
   });
+
+  return {
+    ruleSource,
+    immutable: ruleSource.type === 'external',
+  };
 };

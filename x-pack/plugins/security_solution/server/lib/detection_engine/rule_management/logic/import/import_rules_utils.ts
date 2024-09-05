@@ -120,13 +120,14 @@ export const importRules = async ({
             }
 
             if (allowPrebuiltRules) {
-              const ruleSource = calculateRuleSourceForImport({
+              const { immutable, ruleSource } = calculateRuleSourceForImport({
                 rule: parsedRule,
                 prebuiltRuleAssets,
                 installedRuleIds,
               });
 
               parsedRule.rule_source = ruleSource;
+              parsedRule.immutable = immutable;
             }
 
             try {
