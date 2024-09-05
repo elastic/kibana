@@ -59,6 +59,7 @@ import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import type { NarrowDateRange } from '../../../../common/components/ml/types';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
@@ -100,7 +101,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<NarrowDateRange>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
