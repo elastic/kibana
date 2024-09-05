@@ -202,18 +202,7 @@ const kibanaFeatureSchema = schema.object({
   }),
   name: schema.string(),
   category: appCategorySchema,
-  scope: schema.maybe(
-    schema.arrayOf(
-      schema.string({
-        validate(value: string) {
-          if (!Object.values(KibanaFeatureScope).includes(value as KibanaFeatureScope)) {
-            return `Invalid KibanaFeatureScope: [${value}]`;
-          }
-        },
-      }),
-      { minSize: 1 }
-    )
-  ),
+  scope: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
   description: schema.maybe(schema.string()),
   order: schema.maybe(schema.number()),
   excludeFromBasePrivileges: schema.maybe(schema.boolean()),
@@ -223,6 +212,8 @@ const kibanaFeatureSchema = schema.object({
   catalogue: schema.maybe(catalogueSchema),
   alerting: schema.maybe(alertingSchema),
   cases: schema.maybe(casesSchema),
+  // Features registered only for the spaces scope should not have a `privileges` property.
+  // Such features are applicable only to the Spaces Visibility Toggles
   privileges: schema.conditional(
     schema.siblingRef('scope'),
     schema.arrayOf(schema.literal('spaces'), {
@@ -294,6 +285,16 @@ const elasticsearchFeatureSchema = schema.object({
 
 export function validateKibanaFeature(feature: KibanaFeatureConfig) {
   kibanaFeatureSchema.validate(feature);
+
+  const unknownScopesEntries = difference(feature.scope ?? [], Object.values(KibanaFeatureScope));
+
+  if (unknownScopesEntries.length) {
+    throw new Error(
+      `Feature privilege ${feature.id} has unknown scope entries: ${unknownScopesEntries.join(
+        ', '
+      )}`
+    );
+  }
 
   // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
   const { app = [], management = {}, catalogue = [], alerting = [], cases = [] } = feature;

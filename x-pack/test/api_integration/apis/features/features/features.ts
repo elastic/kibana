@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return a full feature set with correct scope', async () => {
-        const { body } = await supertest.get('/api/features').set('kbn-xsrf', 'xxx').expect(200);
+        const { body } = await supertest.get('/api/features').expect(200);
         expect(body).to.be.an(Array);
 
         const scopeAgnosticFeatures = [

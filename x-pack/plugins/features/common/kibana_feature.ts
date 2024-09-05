@@ -12,6 +12,11 @@ import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 import { SubFeatureConfig, SubFeature as KibanaSubFeature } from './sub_feature';
 import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
 
+/**
+ * Enum for allowed feature scope values.
+ * security - The feature is available in Security Feature Privileges.
+ * spaces - The feature is available in the Spaces Visibility Toggles.
+ */
 export enum KibanaFeatureScope {
   Security = 'security',
   Spaces = 'spaces',
@@ -158,7 +163,7 @@ export interface KibanaFeatureConfig {
   /**
    * Indicates whether the feature is available in Security Feature Privileges and the Spaces Visibility Toggles.
    */
-  scope?: readonly string[];
+  scope?: readonly KibanaFeatureScope[];
 }
 
 export class KibanaFeature {
