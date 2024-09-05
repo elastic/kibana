@@ -30,6 +30,7 @@ import {
 import { WaterfallItem } from './waterfall_item';
 import { WaterfallContextProvider } from './context/waterfall_context';
 import { useWaterfallContext } from './context/use_waterfall';
+import { EVENT_OUTCOME } from '../../../../../../../common/es_fields/apm';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
@@ -208,7 +209,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
       style={{ position: 'relative' }}
       buttonClassName={`button_${node.item.id}`}
       id={node.item.id}
-      hasError={node.item.doc.event?.outcome === 'failure'}
+      hasError={node.item.doc[EVENT_OUTCOME]?.[0] === 'failure'}
       marginLeftLevel={marginLeftLevel}
       buttonContentClassName="accordion__buttonContent"
       buttonContent={

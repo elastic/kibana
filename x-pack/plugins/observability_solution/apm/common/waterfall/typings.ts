@@ -6,7 +6,6 @@
  */
 
 import { Exception } from '../../typings/es_schemas/raw/error_raw';
-import { EventOutcome } from '../../typings/es_schemas/raw/fields/event_outcome';
 import { AgentName } from '../../typings/es_schemas/ui/fields/agent';
 
 export interface WaterfallTransaction {
@@ -14,8 +13,8 @@ export interface WaterfallTransaction {
   'trace.id': string[];
   'service.name': string[];
   'service.environment'?: string[];
-  'agent.name': AgentName[];
-  'event.outcome'?: EventOutcome[];
+  'agent.name': string[];
+  'event.outcome'?: string[];
   'parent.id'?: string[];
   'processor.event': ['transaction'];
   'transaction.duration.us': number[];
@@ -34,7 +33,7 @@ export interface WaterfallSpan {
   'service.name': string[];
   'service.environment'?: string[];
   'agent.name': AgentName[];
-  'event.outcome'?: EventOutcome[];
+  'event.outcome'?: string[];
   'parent.id'?: string[];
   'processor.event': ['span'];
   'span.id': string[];
@@ -60,6 +59,7 @@ export interface WaterfallError {
   'parent.id'?: string[];
   'error.id': string[];
   'error.log.message'?: string[];
+  'error.exception.message'?: string[];
   'error.exception'?: Exception[];
   'error.grouping_key': string[];
   'service.name': string[];

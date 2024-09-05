@@ -15,6 +15,14 @@ import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/wa
 import { Environment } from '../../../../../common/environment_rt';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRACE_ID,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/es_fields/apm';
 
 function FullTraceButton({ isLoading, isDisabled }: { isLoading?: boolean; isDisabled?: boolean }) {
   return (
@@ -93,17 +101,17 @@ export function MaybeViewTraceLink({
     // the user is viewing a zoomed in version of the trace. Link to the full trace
   } else {
     const nextEnvironment = getNextEnvironmentUrlParam({
-      requestedEnvironment: rootTransaction.service.environment,
+      requestedEnvironment: rootTransaction[SERVICE_ENVIRONMENT]?.[0],
       currentEnvironmentUrlParam: environment,
     });
 
     return (
       <TransactionDetailLink
-        serviceName={rootTransaction.service.name}
-        transactionId={rootTransaction.transaction.id}
-        traceId={rootTransaction.trace.id}
-        transactionName={rootTransaction.transaction.name}
-        transactionType={rootTransaction.transaction.type}
+        serviceName={rootTransaction[SERVICE_NAME]?.[0]}
+        transactionId={rootTransaction[TRANSACTION_ID]?.[0]}
+        traceId={rootTransaction[TRACE_ID]?.[0]}
+        transactionName={rootTransaction[TRANSACTION_NAME]?.[0]}
+        transactionType={rootTransaction[TRANSACTION_TYPE]?.[0]}
         environment={nextEnvironment}
         latencyAggregationType={latencyAggregationType}
         comparisonEnabled={comparisonEnabled}

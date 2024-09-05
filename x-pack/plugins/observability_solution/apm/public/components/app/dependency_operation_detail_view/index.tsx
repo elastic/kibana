@@ -24,6 +24,7 @@ import { TransactionTab } from '../transaction_details/waterfall_with_summary/tr
 import { DependencyOperationDistributionChart } from './dependency_operation_distribution_chart';
 import { DetailViewHeader } from './detail_view_header';
 import { maybeRedirectToAvailableSpanSample } from './maybe_redirect_to_available_span_sample';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 
 export function DependencyOperationDetailView() {
   const router = useApmRouter();
@@ -187,7 +188,9 @@ export function DependencyOperationDetailView() {
               traceSamplesFetchStatus={spanFetch.status}
               onSampleClick={onSampleClick}
               onTabClick={onTabClick}
-              serviceName={waterfallFetch.waterfall.entryWaterfallTransaction?.doc.service.name}
+              serviceName={
+                waterfallFetch.waterfall.entryWaterfallTransaction?.doc[SERVICE_NAME]?.[0]
+              }
               waterfallItemId={waterfallItemId}
               detailTab={detailTab}
               selectedSample={selectedSample || null}

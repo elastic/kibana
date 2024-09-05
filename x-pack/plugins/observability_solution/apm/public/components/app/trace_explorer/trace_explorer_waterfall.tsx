@@ -7,6 +7,7 @@
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { SERVICE_NAME } from '@kbn/apm-types/es_fields';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTraceExplorerSamples } from '../../../hooks/use_trace_explorer_samples';
@@ -106,7 +107,9 @@ export function TraceExplorerWaterfall() {
         onTabClick={onTabClick}
         detailTab={detailTab}
         waterfallItemId={waterfallItemId}
-        serviceName={waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service.name}
+        serviceName={
+          waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc[SERVICE_NAME]?.[0]
+        }
         showCriticalPath={showCriticalPath}
         onShowCriticalPathChange={onShowCriticalPathChange}
       />

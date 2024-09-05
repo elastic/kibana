@@ -30,10 +30,10 @@ describe('Marker', () => {
       type: 'errorMark',
       verticalLine: true,
       error: {
-        trace: { id: '123' },
-        transaction: { id: '456' },
-        error: { grouping_key: '123' },
-        service: { name: 'bar' },
+        'trace.id': ['123'],
+        'transaction.id': ['456'],
+        'error.grouping_key': ['123'],
+        'service.name': ['bar'],
       },
       serviceColor: '#fff',
     } as ErrorMark;

@@ -390,7 +390,12 @@ function getItemBarStyle(
 ): React.CSSProperties {
   let itemBarStyle = { left: `${left}%`, width: `${width}%` };
 
-  if (item.docType === 'span' && item.doc[SPAN_COMPOSITE_COUNT]?.[0]) {
+  if (
+    item.docType === 'span' &&
+    item.doc[SPAN_COMPOSITE_COUNT]?.[0] &&
+    item.doc[SPAN_COMPOSITE_SUM]?.[0] &&
+    item.doc[SPAN_DURATION]?.[0]
+  ) {
     const percNumItems = 100.0 / item.doc[SPAN_COMPOSITE_COUNT][0];
     const spanSumRatio = item.doc[SPAN_COMPOSITE_SUM]?.[0] / item.doc[SPAN_DURATION]?.[0];
     const percDuration = percNumItems * spanSumRatio;
