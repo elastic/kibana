@@ -9,6 +9,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { GetViewInAppRelativeUrlFnOpts, AlertsClientError } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
+import apm from 'elastic-apm-node';
 import { StatusRuleExecutorOptions } from './types';
 import { StatusConfigs } from './queries/query_monitor_status_alert';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
@@ -54,6 +55,7 @@ export const registerSyntheticsStatusCheckRule = (
     minimumLicenseRequired: 'basic',
     doesSetRecoveryContext: true,
     executor: async (options: StatusRuleExecutorOptions) => {
+      apm.setTransactionName('Synthetics Status Rule Executor');
       const { state: ruleState, params, services, spaceId } = options;
       const { alertsClient, uiSettingsClient } = services;
       if (!alertsClient) {
@@ -90,6 +92,7 @@ export const registerSyntheticsStatusCheckRule = (
         numberOfChecks,
         locationsThreshold,
       });
+
       return {
         state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
       };

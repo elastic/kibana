@@ -318,6 +318,7 @@ describe('StatusRuleExecutor', () => {
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
         },
+        useLatestChecks: true,
       });
     });
 
@@ -470,6 +471,7 @@ describe('StatusRuleExecutor', () => {
           status: 'down',
           timestamp: '2021-06-01T00:00:00.000Z',
         },
+        useLatestChecks: true,
       });
     });
   });
