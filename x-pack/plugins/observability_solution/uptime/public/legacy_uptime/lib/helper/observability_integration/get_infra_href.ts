@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { castArray } from 'lodash';
 import { AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
 import { MonitorSummary, Ping } from '../../../../../common/runtime_types';
 import { addBasePath } from './add_base_path';
@@ -19,8 +18,10 @@ export const getInfraContainerHref = (
     return undefined;
   }
 
+  const pings = Array.isArray(state.summaryPings) ? state.summaryPings : [state.summaryPings];
+
   // Pick the first container id if one is available
-  const containerId = castArray(state.summaryPings)[0]?.container?.id;
+  const containerId = pings[0]?.container?.id;
 
   return containerId
     ? locator.getRedirectUrl({
@@ -38,8 +39,10 @@ export const getInfraKubernetesHref = (
     return undefined;
   }
 
+  const pings = Array.isArray(state.summaryPings) ? state.summaryPings : [state.summaryPings];
+
   // Pick the first pod id if one is available
-  const podId = castArray(state.summaryPings)[0]?.kubernetes?.pod?.uid;
+  const podId = pings[0]?.kubernetes?.pod?.uid;
 
   return podId
     ? locator.getRedirectUrl({
