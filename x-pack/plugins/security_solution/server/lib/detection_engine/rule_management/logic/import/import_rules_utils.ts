@@ -108,7 +108,8 @@ export const importRules = async ({
                     'xpack.securitySolution.detectionEngine.rules.importPrebuiltRulesUnsupported',
                     {
                       defaultMessage:
-                        'Importing prebuilt rules is not supported. To import this rule as a custom rule, remove its "immutable" property try again.',
+                        'Importing prebuilt rules is not supported. To import this rule as a custom rule, first duplicate the rule and then export it. [rule_id: {ruleId}]',
+                      values: { ruleId: parsedRule.rule_id },
                     }
                   ),
                   ruleId: parsedRule.rule_id,

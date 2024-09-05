@@ -27,6 +27,8 @@ describe('importRules', () => {
 
     savedObjectsClient = savedObjectsClientMock.create();
     mockPrebuiltRulesImporter = prebuiltRulesImporterMock.create();
+    mockPrebuiltRulesImporter.fetchPrebuiltRuleAssets.mockResolvedValue([]);
+    mockPrebuiltRulesImporter.fetchInstalledRuleIds.mockResolvedValue([]);
   });
 
   it('returns an empty rules response if no rules to import', async () => {
@@ -138,34 +140,7 @@ describe('importRules', () => {
       expect(result).toEqual([
         {
           error: {
-            message:
-              'Importing prebuilt rules is not supported. To import this rule as a custom rule, remove its "immutable" property try again.',
-            status_code: 400,
-          },
-          rule_id: prebuiltRuleToImport.rule_id,
-        },
-      ]);
-    });
-
-    it('rejects a prebuilt rule when version is missing', async () => {
-      // @ts-expect-error version is required on the type
-      delete prebuiltRuleToImport.version;
-      const ruleChunk = [prebuiltRuleToImport];
-      const result = await importRules({
-        ruleChunks: [ruleChunk],
-        rulesResponseAcc: [],
-        overwriteRules: false,
-        detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-        prebuiltRulesImporter: mockPrebuiltRulesImporter,
-        allowPrebuiltRules: false,
-        savedObjectsClient,
-      });
-
-      expect(result).toEqual([
-        {
-          error: {
-            message:
-              'Importing prebuilt rules is not supported. To import this rule as a custom rule, remove its "immutable" property try again.',
+            message: `Importing prebuilt rules is not supported. To import this rule as a custom rule, first duplicate the rule and then export it. [rule_id: ${prebuiltRuleToImport.rule_id}]`,
             status_code: 400,
           },
           rule_id: prebuiltRuleToImport.rule_id,

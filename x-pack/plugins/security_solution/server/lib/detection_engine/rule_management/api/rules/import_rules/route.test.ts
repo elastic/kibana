@@ -272,6 +272,42 @@ describe('Import rules route', () => {
         });
       });
     });
+
+    it('returns an error if rule is missing a version', async () => {
+      const ruleWithoutVersion = getImportRulesWithIdSchemaMock('rule-1');
+      // @ts-expect-error
+      delete ruleWithoutVersion.version;
+      const payload = buildHapiStream(rulesToNdJsonString([ruleWithoutVersion]));
+      const versionlessRequest = getImportRulesRequest(payload);
+
+      const response = await server.inject(
+        versionlessRequest,
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        errors: [
+          {
+            error: {
+              message: `version: Required`,
+              status_code: 400,
+            },
+            rule_id: '(unknown id)',
+          },
+        ],
+        success: false,
+        success_count: 0,
+        rules_count: 1,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
+      });
+    });
   });
 
   describe('multi rule import', () => {
