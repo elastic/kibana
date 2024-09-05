@@ -26,7 +26,7 @@ interface Params {
   size: number;
 }
 
-export async function getServiceEntitiesHistoryMetrics({
+export async function getEntityHistoryServicesMetrics({
   end,
   entityIds,
   start,
@@ -66,11 +66,11 @@ export async function getServiceEntitiesHistoryMetrics({
       return {
         ...acc,
         [currBucket.key]: {
-          latency: currBucket.latency.value ?? null,
-          logErrorRate: currBucket.logErrorRate.value ?? null,
-          logRate: currBucket.logRate.value ?? null,
-          throughput: currBucket.throughput.value ?? null,
-          failedTransactionRate: currBucket.failedTransactionRate.value ?? null,
+          latency: currBucket.latency.value,
+          logErrorRate: currBucket.logErrorRate.value,
+          logRate: currBucket.logRate.value,
+          throughput: currBucket.throughput.value,
+          failedTransactionRate: currBucket.failedTransactionRate.value,
         },
       };
     },
