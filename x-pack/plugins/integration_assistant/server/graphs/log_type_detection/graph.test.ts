@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { FakeLLM } from '@langchain/core/utils/testing';
-import { getLogFormatDetectionGraph } from './graph';
 import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
+import { FakeLLM } from '@langchain/core/utils/testing';
+import { getLogFormatDetectionGraph } from './graph';
 
-const mockLLM = new FakeLLM({
+const model = new FakeLLM({
   response: '{"log_type": "structured"}',
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
@@ -22,7 +22,7 @@ describe('LogFormatDetectionGraph', () => {
       // When getLogFormatDetectionGraph runs, langgraph compiles the graph it will error if the graph has any issues.
       // Common issues for example detecting a node has no next step, or there is a infinite loop between them.
       try {
-        await getLogFormatDetectionGraph(mockLLM);
+        await getLogFormatDetectionGraph({ model });
       } catch (error) {
         fail(`getLogFormatDetectionGraph threw an error: ${error}`);
       }

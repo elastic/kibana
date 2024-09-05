@@ -12,7 +12,7 @@ import '@testing-library/jest-dom/extend-expect';
 import { FilterLists } from './filter_lists';
 
 // Mocking the child components to just assert that they get the data
-// received via the async call using mlApiServices in the main component.
+// received via the async call using mlApi in the main component.
 jest.mock('../../../components/help_menu', () => ({
   HelpMenu: ({ docLink }) => <div data-test-subj="mockHelpMenu" data-link={docLink} />,
 }));
@@ -46,7 +46,7 @@ const mockKibanaProp = {
   services: {
     docLinks: { links: { ml: { customRules: 'https://customRules' } } },
     mlServices: {
-      mlApiServices: {
+      mlApi: {
         filters: {
           filtersStats: () => {
             return Promise.resolve([mockTestFilter]);

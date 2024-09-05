@@ -1,0 +1,32 @@
+## COUNT
+
+The `COUNT` function returns the total number (count) of input values. If the `field` parameter is omitted, it is equivalent to `COUNT(*)`, which counts the number of rows.
+
+### Examples
+
+```esql
+FROM employees
+| STATS COUNT(height)
+```
+
+```esql
+FROM employees
+| STATS count = COUNT(*) BY languages
+| SORT languages DESC
+```
+
+```esql
+ROW words="foo;bar;baz;qux;quux;foo"
+| STATS word_count = COUNT(SPLIT(words, ";"))
+```
+
+```esql
+ROW n=1
+| WHERE n < 0
+| STATS COUNT(n)
+```
+
+```esql
+ROW n=1
+| STATS COUNT(n > 0 OR NULL), COUNT(n < 0 OR NULL)
+```
