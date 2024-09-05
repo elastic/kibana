@@ -14,7 +14,7 @@ import { StatusConfigs } from './queries/query_monitor_status_alert';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { StatusRuleExecutor } from './status_rule_executor';
-import { getConditionType, StatusRulePramsSchema } from '../../../common/rules/status_rule';
+import { StatusRulePramsSchema } from '../../../common/rules/status_rule';
 import {
   MONITOR_STATUS,
   SYNTHETICS_ALERT_RULE_TYPES,
@@ -67,13 +67,14 @@ export const registerSyntheticsStatusCheckRule = (
       ]);
       const tz = timezone === 'Browser' ? 'UTC' : timezone;
 
+      const groupBy = params?.condition?.groupBy ?? 'locationId';
+      const groupByLocation = groupBy === 'locationId';
+
       const statusRule = new StatusRuleExecutor(server, syntheticsMonitorClient, options);
 
       const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
         ruleState.meta?.downConfigs as StatusConfigs
       );
-
-      const { locationsThreshold, numberOfChecks } = getConditionType(params.condition);
 
       statusRule.handleDownMonitorThresholdAlert({
         downConfigs,
@@ -84,11 +85,12 @@ export const registerSyntheticsStatusCheckRule = (
         basePath,
         spaceId,
         staleDownConfigs,
+        previousDownConfigs: ruleState.meta?.downConfigs,
         upConfigs,
         dateFormat,
         tz,
-        numberOfChecks,
-        locationsThreshold,
+        condition: params.condition,
+        groupByLocation,
       });
       return {
         state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),

@@ -141,7 +141,7 @@ export const getUngroupedReasonMessage = ({
   status?: string;
   params: StatusRuleParams;
 }) => {
-  const { isChecksBased, numberOfChecks, timeWindow, downThreshold, locationsThreshold } =
+  const { useLatestChecks, numberOfChecks, timeWindow, downThreshold, locationsThreshold } =
     getConditionType(params.condition);
 
   if (statusConfigs.length === 1) {
@@ -169,7 +169,7 @@ export const getUngroupedReasonMessage = ({
           status,
           threshold: downThreshold,
           locationsThreshold,
-          condition: isChecksBased
+          condition: useLatestChecks
             ? i18n.translate(
                 'xpack.synthetics.alertRules.monitorStatus.reasonMessage.condition.latestChecks',
                 {
@@ -196,7 +196,7 @@ export const getUngroupedReasonMessage = ({
                     ' {downCount} {downCount, plural, one {time} other {times}} from {locName}',
                   values: {
                     locName: c.ping.observer.geo?.name,
-                    downCount: isChecksBased ? c.checks?.downWithinXChecks : c.checks?.down,
+                    downCount: useLatestChecks ? c.checks?.downWithinXChecks : c.checks?.down,
                   },
                 }
               );

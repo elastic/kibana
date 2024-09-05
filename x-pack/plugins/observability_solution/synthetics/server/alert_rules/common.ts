@@ -37,8 +37,9 @@ import {
 } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
-import { AlertOverviewStatus } from './status_rule/status_rule_executor';
+import { AlertOverviewStatus, getConfigsByIds } from './status_rule/status_rule_executor';
 import type { MonitorSummaryStatusRule } from './status_rule/types';
+import { StatusRuleCondition, getConditionType } from '../../common/rules/status_rule';
 
 export const updateState = (
   state: SyntheticsCommonState,
@@ -143,11 +144,12 @@ export const setRecoveredAlertsContext = ({
   basePath,
   spaceId,
   staleDownConfigs,
+  previousDownConfigs,
   upConfigs,
   dateFormat,
   tz,
-  numberOfChecks,
-  locationsThreshold,
+  condition,
+  groupByLocation,
 }: {
   alertsClient: PublicAlertsClient<
     ObservabilityUptimeAlert,
@@ -158,13 +160,16 @@ export const setRecoveredAlertsContext = ({
   basePath?: IBasePath;
   spaceId?: string;
   staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
+  previousDownConfigs: AlertOverviewStatus['downConfigs'];
   upConfigs: AlertOverviewStatus['upConfigs'];
   dateFormat: string;
   tz: string;
-  numberOfChecks: number;
-  locationsThreshold: number;
+  condition?: StatusRuleCondition;
+  groupByLocation: boolean;
 }) => {
+  const { locationsThreshold, numberOfChecks } = getConditionType(condition);
   const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
+  const downConfigsById = getConfigsByIds(previousDownConfigs);
   for (const recoveredAlert of recoveredAlerts) {
     const recoveredAlertId = recoveredAlert.alert.getId();
     const alertUuid = recoveredAlert.alert.getUuid();
@@ -173,6 +178,7 @@ export const setRecoveredAlertsContext = ({
     const alertHit = recoveredAlert.hit;
     const locationId = alertHit?.['location.id'];
     const configId = alertHit?.configId;
+    const downConfigs = downConfigsById.get(configId);
 
     const { checks, downThreshold } = state;
 
@@ -185,7 +191,7 @@ export const setRecoveredAlertsContext = ({
     );
     let isUp = false;
     let linkMessage = '';
-    let monitorSummary;
+    let monitorSummary: MonitorSummaryStatusRule = {};
     let lastErrorMessage;
 
     if (recoveredAlertId && locationId) {
@@ -222,6 +228,10 @@ export const setRecoveredAlertsContext = ({
         numberOfChecks,
         locationsThreshold,
       });
+    }
+
+    if (!groupByLocation) {
+      monitorSummary.locationNames = downConfigs.map((c) => c.ping.observer.geo?.name!).join(' | ');
     }
 
     if (recoveredAlertId && locationId && staleDownConfigs[recoveredAlertId]) {

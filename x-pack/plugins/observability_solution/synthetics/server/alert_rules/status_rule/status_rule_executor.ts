@@ -234,7 +234,7 @@ export class StatusRuleExecutor {
 
   handleDownMonitorThresholdAlert = ({ downConfigs }: { downConfigs: StatusConfigs }) => {
     const isCustomRule = !isEmpty(this.params);
-    const { isTimeWindow, isChecksBased, downThreshold, locationsThreshold } = getConditionType(
+    const { isTimeWindow, useLatestChecks, downThreshold, locationsThreshold } = getConditionType(
       this.params?.condition
     );
     const groupBy = this.params?.condition?.groupBy ?? 'locationId';
@@ -259,7 +259,7 @@ export class StatusRuleExecutor {
             monitorSummary,
             statusConfig,
             downThreshold,
-            useLatestChecks: isChecksBased,
+            useLatestChecks,
           });
         }
       });
@@ -286,7 +286,7 @@ export class StatusRuleExecutor {
             monitorSummary,
             statusConfig: configs[0],
             downThreshold,
-            useLatestChecks: isChecksBased,
+            useLatestChecks,
           });
         }
       }
@@ -459,7 +459,9 @@ export const getDoesMonitorMeetLocationThreshold = ({
   }
 };
 
-const getConfigsByIds = (downConfigs: StatusConfigs): Map<string, AlertStatusMetaDataCodec[]> => {
+export const getConfigsByIds = (
+  downConfigs: StatusConfigs
+): Map<string, AlertStatusMetaDataCodec[]> => {
   const downConfigsById = new Map<string, AlertStatusMetaDataCodec[]>();
   Object.entries(downConfigs).forEach(([_, config]) => {
     const { configId } = config;

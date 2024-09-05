@@ -9,22 +9,22 @@ import { getConditionType } from './status_rule';
 
 describe('Status Rule', () => {
   it('should return the correct condition type for empty', () => {
-    const { isChecksBased } = getConditionType({} as any);
-    expect(isChecksBased).toBe(true);
+    const { useLatestChecks } = getConditionType({} as any);
+    expect(useLatestChecks).toBe(true);
   });
 
   it('should return the correct condition type check based', () => {
-    const { isChecksBased, isTimeWindow } = getConditionType({
+    const { useLatestChecks, isTimeWindow } = getConditionType({
       window: {
         numberOfChecks: 5,
       },
     });
-    expect(isChecksBased).toBe(true);
+    expect(useLatestChecks).toBe(true);
     expect(isTimeWindow).toBe(false);
   });
 
   it('should return the correct condition type time based', () => {
-    const { isTimeWindow, isChecksBased } = getConditionType({
+    const { isTimeWindow, useLatestChecks } = getConditionType({
       window: {
         time: {
           unit: 'm',
@@ -33,6 +33,6 @@ describe('Status Rule', () => {
       },
     });
     expect(isTimeWindow).toBe(true);
-    expect(isChecksBased).toBe(false);
+    expect(useLatestChecks).toBe(false);
   });
 });

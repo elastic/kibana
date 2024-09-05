@@ -74,7 +74,7 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
       isLocationBased: false,
       isTimeWindow: false,
       timeWindow,
-      isChecksBased: true,
+      useLatestChecks: true,
       numberOfChecks,
       downThreshold: 1,
       locationsThreshold: 1,
@@ -82,9 +82,9 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
   }
   const conWindow = condition.window;
   const isTimeWindow = conWindow && 'time' in condition.window;
-  const isChecksBased = conWindow && 'numberOfChecks' in condition.window;
+  const useLatestChecks = conWindow && 'numberOfChecks' in condition.window;
 
-  if (isChecksBased) {
+  if (useLatestChecks) {
     numberOfChecks = condition && 'numberOfChecks' in conWindow ? conWindow.numberOfChecks : 1;
   }
 
@@ -96,7 +96,7 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
   return {
     isTimeWindow,
     timeWindow,
-    isChecksBased,
+    useLatestChecks,
     numberOfChecks,
     locationsThreshold: condition?.locationsThreshold ?? 1,
     downThreshold: condition?.downThreshold ?? 1,
