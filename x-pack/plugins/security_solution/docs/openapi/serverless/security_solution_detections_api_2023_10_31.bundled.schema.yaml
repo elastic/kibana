@@ -2242,8 +2242,6 @@ components:
       properties:
         is_customized:
           $ref: '#/components/schemas/IsExternalRuleCustomized'
-        source_updated_at:
-          $ref: '#/components/schemas/ExternalSourceUpdatedAt'
         type:
           enum:
             - external
@@ -2251,13 +2249,6 @@ components:
       required:
         - type
         - is_customized
-    ExternalSourceUpdatedAt:
-      description: >-
-        The date and time that the external/prebuilt rule was last updated in
-        its source repository.
-      example: '2021-08-31T00:00:00Z'
-      format: date-time
-      type: string
     FindRulesSortField:
       enum:
         - created_at

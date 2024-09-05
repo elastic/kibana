@@ -72,7 +72,6 @@ function zodMaskFor<T>() {
  * Big differences between this schema and RuleCreateProps:
  *  - rule_id is a required field
  *  - version is a required field
- *  - source_updated_at is a new, optional field in support of prebuilt rule customization
  *  - some fields are omitted because they are not present in https://github.com/elastic/detection-rules
  */
 export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
@@ -82,6 +81,5 @@ export const PrebuiltRuleAsset = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PR
     z.object({
       rule_id: RuleSignatureId,
       version: RuleVersion,
-      source_updated_at: z.string().datetime().optional(),
     })
   );

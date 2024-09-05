@@ -21,7 +21,6 @@ const buildTestRuleAsset = (overrides?: Partial<PrebuiltRuleAsset>) => {
   return {
     rule_id: 'rule_id',
     version: 1,
-    source_updated_at: '2024-05-01',
     ...overrides,
   } as PrebuiltRuleAsset;
 };
@@ -76,7 +75,6 @@ describe('calculateRuleSourceFromAsset', () => {
 
     expect(result).toEqual({
       type: 'external',
-      source_updated_at: '2024-05-01',
       is_customized: true,
     });
   });

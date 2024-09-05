@@ -40,6 +40,5 @@ export const calculateRuleSourceFromAsset = ({
   return {
     type: 'external',
     is_customized: isCustomized,
-    source_updated_at: prebuiltRuleAsset.source_updated_at,
   };
 };

@@ -58,12 +58,6 @@ export type IsRuleImmutable = z.infer<typeof IsRuleImmutable>;
 export const IsRuleImmutable = z.boolean();
 
 /**
- * The date and time that the external/prebuilt rule was last updated in its source repository.
- */
-export type ExternalSourceUpdatedAt = z.infer<typeof ExternalSourceUpdatedAt>;
-export const ExternalSourceUpdatedAt = z.string().datetime();
-
-/**
  * Determines whether an external/prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverged from the base value).
  */
 export type IsExternalRuleCustomized = z.infer<typeof IsExternalRuleCustomized>;
@@ -84,7 +78,6 @@ export type ExternalRuleSource = z.infer<typeof ExternalRuleSource>;
 export const ExternalRuleSource = z.object({
   type: z.literal('external'),
   is_customized: IsExternalRuleCustomized,
-  source_updated_at: ExternalSourceUpdatedAt.optional(),
 });
 
 /**
