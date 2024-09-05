@@ -165,6 +165,20 @@ export const ENABLED_LOGGED_REQUESTS_CHECKBOX = i18n.translate(
   }
 );
 
+export const LOGGED_REQUESTS_ACCORDION_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.loggedRequestsAccordionButtonLabel',
+  {
+    defaultMessage: 'Preview logged requests',
+  }
+);
+
+export const LOGGED_REQUEST_ITEM_ACCORDION_UNKNOWN_TIME_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.loggedRequestItemAccordionUnknownTimeButtonLabel',
+  {
+    defaultMessage: 'Preview logged requests',
+  }
+);
+
 export const VIEW_DETAILS_FOR_ROW = ({
   ariaRowindex,
   columnValues,

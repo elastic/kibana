@@ -1,0 +1,69 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import { EuiSpacer, EuiCodeBlock, useEuiPaddingSize } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
+import * as i18n from './translations';
+import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
+import { OptimizedAccordion } from './optimized_accordion';
+
+const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs>> = ({
+  startedAt,
+  duration,
+  requests,
+}) => {
+  const paddingLeft = useEuiPaddingSize('l');
+  return (
+    <OptimizedAccordion
+      buttonContent={
+        <>
+          {startedAt ? (
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.queryPreview.loggedRequestItemAccordionButtonLabel"
+              defaultMessage="Rule execution started at {time}."
+              values={{ time: <PreferenceFormattedDate value={new Date(startedAt)} /> }}
+            />
+          ) : (
+            i18n.LOGGED_REQUEST_ITEM_ACCORDION_UNKNOWN_TIME_BUTTON
+          )}
+          {`[${duration}ms]`}
+        </>
+      }
+      id={`ruleExecution-${startedAt}`}
+      css={`
+        padding-left: ${paddingLeft};
+      `}
+    >
+      {(requests ?? []).map((request, key) => (
+        <div
+          css={`
+            padding-left: ${paddingLeft};
+          `}
+        >
+          <EuiSpacer size="l" />
+          {request?.description ?? null} {request?.duration ? `[${request.duration}ms]` : null}
+          <EuiSpacer size="s" />
+          <EuiCodeBlock key={key} language="json" isCopyable overflowHeight={300} isVirtualized>
+            {request.request}
+          </EuiCodeBlock>
+        </div>
+      ))}
+    </OptimizedAccordion>
+  );
+};
+
+export const LoggedRequestsItem = React.memo(LoggedRequestsItemComponent);
+LoggedRequestsItem.displayName = 'LoggedRequestsItem';
