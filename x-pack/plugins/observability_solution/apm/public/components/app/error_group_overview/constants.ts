@@ -8,17 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc: string } = {
-  title: i18n.translate(
-    'xpack.apm.serviceTabContent.serviceTabEmptyState.errorGroupOverviewTitle',
-    {
-      defaultMessage: 'TBD',
-    }
-  ),
-  content: i18n.translate(
-    'xpack.apm.serviceTabContent.serviceTabEmptyState.errorGroupOverviewContent',
-    {
-      defaultMessage: 'TBD',
-    }
-  ),
+  title: i18n.translate('xpack.apm.serviceTabEmptyState.errorGroupOverviewTitle', {
+    defaultMessage: 'TBD',
+  }),
+  content: i18n.translate('xpack.apm.serviceTabEmptyState.errorGroupOverviewContent', {
+    defaultMessage: 'TBD',
+  }),
   imgSrc: 'TBD',
 };

@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const logsOnlyEmptyStateContent: { title: string; content: string } = {
-  title: i18n.translate('xpack.apm.serviceTabContent.serviceTabEmptyState.overviewTitle', {
+  title: i18n.translate('xpack.apm.serviceTabEmptyState.overviewTitle', {
     defaultMessage: 'Detect and resolve issues faster with deep visibility into your application',
   }),
-  content: i18n.translate('xpack.apm.serviceTabContent.serviceTabEmptyState.overviewContent', {
+  content: i18n.translate('xpack.apm.serviceTabEmptyState.overviewContent', {
     defaultMessage:
       'Understanding your application performance, relationships and dependencies by instrumenting with APM.',
   }),

@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc: string } = {
-  title: i18n.translate('xpack.apm.serviceTabContent.serviceTabEmptyState.metricsTitle', {
+  title: i18n.translate('xpack.apm.serviceTabEmptyState.metricsTitle', {
     defaultMessage: 'TBD',
   }),
-  content: i18n.translate('xpack.apm.serviceTabContent.serviceTabEmptyState.metricsContent', {
+  content: i18n.translate('xpack.apm.serviceTabEmptyState.metricsContent', {
     defaultMessage: 'TBD',
   }),
   imgSrc: 'TBD',

@@ -14,45 +14,39 @@ import serviceMapTabImgSrc from '../../../assets/service_tab_empty_state/service
 
 export const emptyStateContent: Record<Tab, { title: string; content: string; imgSrc?: string }> = {
   overview: {
-    title: i18n.translate('xpack.apm.serviceTabContent.serviceTabEmptyState.overviewTitle', {
+    title: i18n.translate('xpack.apm.serviceTabEmptyState.overviewTitle', {
       defaultMessage: 'Detect and resolve issues faster with deep visibility into your application',
     }),
-    content: i18n.translate('xpack.apm.serviceTabContent.serviceTabEmptyState.overviewContent', {
+    content: i18n.translate('xpack.apm.serviceTabEmptyState.overviewContent', {
       defaultMessage:
         'Understanding your application performance, relationships and dependencies by instrumenting with APM.',
     }),
   },
   dependencies: {
-    title: i18n.translate('xpack.apm.serviceTabContent.serviceTabEmptyState.dependenciesTitle', {
+    title: i18n.translate('xpack.apm.serviceTabEmptyState.dependenciesTitle', {
       defaultMessage: 'Understand the dependencies for your service',
     }),
-    content: i18n.translate(
-      'xpack.apm.serviceTabContent.serviceTabEmptyState.dependenciesContent',
-      {
-        defaultMessage:
-          'See your services dependencies on both internal and third-party services by instrumenting with APM.',
-      }
-    ),
+    content: i18n.translate('xpack.apm.serviceTabEmptyState.dependenciesContent', {
+      defaultMessage:
+        'See your services dependencies on both internal and third-party services by instrumenting with APM.',
+    }),
     imgSrc: dependenciesTabImgSrc,
   },
   infrastructure: {
-    title: i18n.translate('xpack.apm.serviceTabContent.serviceTabEmptyState.infrastructureTitle', {
+    title: i18n.translate('xpack.apm.serviceTabEmptyState.infrastructureTitle', {
       defaultMessage: 'Understand what your service is running on',
     }),
-    content: i18n.translate(
-      'xpack.apm.serviceTabContent.serviceTabEmptyState.infrastructureContent',
-      {
-        defaultMessage:
-          'Troubleshoot service problems by seeing the infrastructure your service is running on.',
-      }
-    ),
+    content: i18n.translate('xpack.apm.serviceTabEmptyState.infrastructureContent', {
+      defaultMessage:
+        'Troubleshoot service problems by seeing the infrastructure your service is running on.',
+    }),
     imgSrc: infrastructureTabImgSrc,
   },
   'service-map': {
-    title: i18n.translate('xpack.apm.serviceTabContent.serviceTabEmptyState.serviceMapTitle', {
+    title: i18n.translate('xpack.apm.serviceTabEmptyState.serviceMapTitle', {
       defaultMessage: 'Visualise the dependencies between your services',
     }),
-    content: i18n.translate('xpack.apm.serviceTabContent.serviceTabEmptyState.serviceMapContent', {
+    content: i18n.translate('xpack.apm.serviceTabEmptyState.serviceMapContent', {
       defaultMessage:
         'See your services dependencies at a glance to help identify dependencies that may be affecting your service.',
     }),
