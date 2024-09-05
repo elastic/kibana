@@ -9,11 +9,11 @@ import { EuiCodeBlock, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export interface LogsOverviewErrorContentProps {
+export interface LogCategoriesErrorContentProps {
   error?: Error;
 }
 
-export const LogsOverviewErrorContent: React.FC<LogsOverviewErrorContentProps> = ({ error }) => {
+export const LogCategoriesErrorContent: React.FC<LogCategoriesErrorContentProps> = ({ error }) => {
   return (
     <EuiEmptyPrompt
       color="danger"
@@ -29,12 +29,15 @@ export const LogsOverviewErrorContent: React.FC<LogsOverviewErrorContentProps> =
   );
 };
 
-const logsOverviewErrorTitle = i18n.translate('xpack.observabilityLogsOverview.errorTitle', {
-  defaultMessage: 'Error',
-});
+const logsOverviewErrorTitle = i18n.translate(
+  'xpack.observabilityLogsOverview.logCategories.errorTitle',
+  {
+    defaultMessage: 'Failed to categorize logs',
+  }
+);
 
 const unknownErrorDescription = i18n.translate(
-  'xpack.observabilityLogsOverview.unknownErrorDescription',
+  'xpack.observabilityLogsOverview.logCategories.unknownErrorDescription',
   {
     defaultMessage: 'An unspecified error occurred.',
   }

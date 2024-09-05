@@ -24,7 +24,7 @@ export const categorizeDocuments = ({ search }: { search: ISearchGeneric }) =>
     },
     LogCategorizationParams & {
       samplingProbability: number;
-      ignoredQueries?: string[];
+      ignoredCategoryTerms?: string[];
       minDocsPerCategory?: number;
     }
   >(
@@ -36,7 +36,8 @@ export const categorizeDocuments = ({ search }: { search: ISearchGeneric }) =>
         timeField,
         messageField,
         samplingProbability,
-        ignoredQueries,
+        ignoredCategoryTerms = [],
+        documentFilters = [],
         minDocsPerCategory,
       },
       signal,
@@ -53,7 +54,8 @@ export const categorizeDocuments = ({ search }: { search: ISearchGeneric }) =>
         startTimestamp,
         endTimestamp,
         randomSampler,
-        ignoredQueries,
+        additionalFilters: documentFilters,
+        ignoredCategoryTerms,
         minDocsPerCategory,
       });
 

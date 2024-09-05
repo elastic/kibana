@@ -12,13 +12,21 @@ import moment from 'moment';
 
 const isoTimestampFormat = "YYYY-MM-DD'T'HH:mm:ss.SSS'Z'";
 
-export const createCategorizationQuery = (
-  messageField: string,
-  timeField: string,
-  startTimestamp: string,
-  endTimestamp: string,
-  ignoredQueries: string[] = []
-): QueryDslQueryContainer => {
+export const createCategorizationQuery = ({
+  messageField,
+  timeField,
+  startTimestamp,
+  endTimestamp,
+  additionalFilters = [],
+  ignoredCategoryTerms = [],
+}: {
+  messageField: string;
+  timeField: string;
+  startTimestamp: string;
+  endTimestamp: string;
+  additionalFilters?: QueryDslQueryContainer[];
+  ignoredCategoryTerms?: string[];
+}): QueryDslQueryContainer => {
   return {
     bool: {
       filter: [
@@ -36,17 +44,9 @@ export const createCategorizationQuery = (
             },
           },
         },
+        ...additionalFilters,
       ],
-      must_not: ignoredQueries.map((ignoredQuery) => ({
-        match: {
-          [messageField]: {
-            query: ignoredQuery,
-            operator: 'AND' as const,
-            fuzziness: 0,
-            auto_generate_synonyms_phrase_query: false,
-          },
-        },
-      })),
+      must_not: ignoredCategoryTerms.map(createCategoryQuery(messageField)),
     },
   };
 };
@@ -59,7 +59,8 @@ export const createCategorizationRequestParams = ({
   endTimestamp,
   randomSampler,
   minDocsPerCategory = 0,
-  ignoredQueries = [],
+  additionalFilters = [],
+  ignoredCategoryTerms = [],
 }: {
   startTimestamp: string;
   endTimestamp: string;
@@ -68,7 +69,8 @@ export const createCategorizationRequestParams = ({
   messageField: string;
   randomSampler: RandomSamplerWrapper;
   minDocsPerCategory?: number;
-  ignoredQueries?: string[];
+  additionalFilters?: QueryDslQueryContainer[];
+  ignoredCategoryTerms?: string[];
 }) => {
   const startMoment = moment(startTimestamp, isoTimestampFormat);
   const endMoment = moment(endTimestamp, isoTimestampFormat);
@@ -82,13 +84,14 @@ export const createCategorizationRequestParams = ({
     index,
     size: 0,
     track_total_hits: false,
-    query: createCategorizationQuery(
+    query: createCategorizationQuery({
       messageField,
       timeField,
       startTimestamp,
       endTimestamp,
-      ignoredQueries
-    ),
+      additionalFilters,
+      ignoredCategoryTerms,
+    }),
     aggs: randomSampler.wrap({
       histogram: {
         date_histogram: {
@@ -103,7 +106,7 @@ export const createCategorizationRequestParams = ({
       categories: {
         categorize_text: {
           field: messageField,
-          size: 10000,
+          size: 1000,
           categorization_analyzer: {
             tokenizer: 'standard',
           },
@@ -131,3 +134,16 @@ export const createCategorizationRequestParams = ({
     }),
   };
 };
+
+export const createCategoryQuery =
+  (messageField: string) =>
+  (categoryTerms: string): QueryDslQueryContainer => ({
+    match: {
+      [messageField]: {
+        query: categoryTerms,
+        operator: 'AND' as const,
+        fuzziness: 0,
+        auto_generate_synonyms_phrase_query: false,
+      },
+    },
+  });

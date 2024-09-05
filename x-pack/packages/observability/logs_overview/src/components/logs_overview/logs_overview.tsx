@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { type LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { LogsSourceConfiguration, normalizeLogsSource } from '../../utils/logs_source';
 import { LogCategories, LogCategoriesDependencies } from '../log_categories';
+import { LogsOverviewErrorContent } from './logs_overview_error_content';
 import { LogsOverviewLoadingContent } from './logs_overview_loading_content';
 
 export interface LogsOverviewProps {
   dependencies: LogsOverviewDependencies;
+  documentFilters?: QueryDslQueryContainer[];
   logsSource?: LogsSourceConfiguration;
   timeRange: {
     start: string;
@@ -26,7 +29,12 @@ export type LogsOverviewDependencies = LogCategoriesDependencies & {
 };
 
 export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
-  ({ dependencies, logsSource = defaultLogsSource, timeRange }) => {
+  ({
+    dependencies,
+    documentFilters = defaultDocumentFilters,
+    logsSource = defaultLogsSource,
+    timeRange,
+  }) => {
     const normalizedLogsSource = useAsync(
       () => normalizeLogsSource({ logsDataAccess: dependencies.logsDataAccess })(logsSource),
       [dependencies.logsDataAccess, logsSource]
@@ -37,18 +45,20 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
     }
 
     if (normalizedLogsSource.error != null || normalizedLogsSource.value == null) {
-      // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
-      return <>Error</>;
+      return <LogsOverviewErrorContent error={normalizedLogsSource.error} />;
     }
 
     return (
       <LogCategories
         dependencies={dependencies}
+        documentFilters={documentFilters}
         logsSource={normalizedLogsSource.value}
         timeRange={timeRange}
       />
     );
   }
 );
+
+const defaultDocumentFilters: QueryDslQueryContainer[] = [];
 
 const defaultLogsSource: LogsSourceConfiguration = { type: 'shared_setting' };

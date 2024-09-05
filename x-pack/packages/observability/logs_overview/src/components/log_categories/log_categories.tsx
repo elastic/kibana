@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchGeneric } from '@kbn/search-types';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import { useMachine } from '@xstate5/react';
@@ -15,6 +15,7 @@ import {
   createCategorizeLogsServiceImplementations,
 } from '../../services/categorize_logs_service';
 import { IndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import { LogCategoriesErrorContent } from './log_categories_error_content';
 import { LogCategoriesLoadingContent } from './log_categories_loading_content';
 import {
   LogCategoriesResultContent,
@@ -23,6 +24,7 @@ import {
 
 export interface LogCategoriesProps {
   dependencies: LogCategoriesDependencies;
+  documentFilters?: QueryDslQueryContainer[];
   logsSource: IndexNameLogsSourceConfiguration;
   // The time range could be made optional if we want to support an internal
   // time range picker
@@ -38,6 +40,7 @@ export type LogCategoriesDependencies = LogCategoriesResultContentDependencies &
 
 export const LogCategories: React.FC<LogCategoriesProps> = ({
   dependencies,
+  documentFilters = [],
   logsSource,
   timeRange,
 }) => {
@@ -53,6 +56,7 @@ export const LogCategories: React.FC<LogCategoriesProps> = ({
         endTimestamp: timeRange.end,
         timeField: logsSource.timestampField,
         messageField: logsSource.messageField,
+        documentFilters,
       },
     }
   );
@@ -71,13 +75,7 @@ export const LogCategories: React.FC<LogCategoriesProps> = ({
       />
     );
   } else if (categorizeLogsServiceState.matches('failed')) {
-    return (
-      <div>
-        {i18n.translate('xpack.observabilityLogsOverview.logCategories.div.errorLabel', {
-          defaultMessage: 'Error',
-        })}
-      </div>
-    );
+    return <LogCategoriesErrorContent error={categorizeLogsServiceState.context.error} />;
   } else if (categorizeLogsServiceState.matches('countingDocuments')) {
     return <LogCategoriesLoadingContent onCancel={cancelOperation} stage="counting" />;
   } else if (

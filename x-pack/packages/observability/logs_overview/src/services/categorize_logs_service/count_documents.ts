@@ -19,31 +19,42 @@ export const countDocuments = ({ search }: { search: ISearchGeneric }) =>
       samplingProbability: number;
     },
     LogCategorizationParams
-  >(async ({ input: { index, endTimestamp, startTimestamp, timeField, messageField }, signal }) => {
-    const { rawResponse: totalHitsResponse } = await lastValueFrom(
-      search(
-        {
-          params: {
-            index,
-            size: 0,
-            track_total_hits: true,
-            query: createCategorizationQuery(messageField, timeField, startTimestamp, endTimestamp),
+  >(
+    async ({
+      input: { index, endTimestamp, startTimestamp, timeField, messageField, documentFilters },
+      signal,
+    }) => {
+      const { rawResponse: totalHitsResponse } = await lastValueFrom(
+        search(
+          {
+            params: {
+              index,
+              size: 0,
+              track_total_hits: true,
+              query: createCategorizationQuery({
+                messageField,
+                timeField,
+                startTimestamp,
+                endTimestamp,
+                additionalFilters: documentFilters,
+              }),
+            },
           },
-        },
-        { abortSignal: signal }
-      )
-    );
+          { abortSignal: signal }
+        )
+      );
 
-    const documentCount =
-      totalHitsResponse.hits.total == null
-        ? 0
-        : typeof totalHitsResponse.hits.total === 'number'
-        ? totalHitsResponse.hits.total
-        : totalHitsResponse.hits.total.value;
-    const samplingProbability = getSampleProbability(documentCount);
+      const documentCount =
+        totalHitsResponse.hits.total == null
+          ? 0
+          : typeof totalHitsResponse.hits.total === 'number'
+          ? totalHitsResponse.hits.total
+          : totalHitsResponse.hits.total.value;
+      const samplingProbability = getSampleProbability(documentCount);
 
-    return {
-      documentCount,
-      samplingProbability,
-    };
-  });
+      return {
+        documentCount,
+        samplingProbability,
+      };
+    }
+  );
