@@ -7,9 +7,9 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { useDocumentDetailsContext } from '../../shared/context';
+import { useDocumentDetailsContext } from '../context';
 import { getSourcererScopeId } from '../../../../helpers';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
+import { useBasicDataFromDetailsData } from '../hooks/use_basic_data_from_details_data';
 import { SecurityCellActionType } from '../../../../app/actions/constants';
 import {
   CellActionsMode,
@@ -57,7 +57,7 @@ export const CellActions: FC<CellActionsProps> = ({ field, value, isObjectArray,
   return (
     <SecurityCellActions
       data={data}
-      mode={CellActionsMode.HOVER_RIGHT}
+      mode={CellActionsMode.HOVER_DOWN}
       triggerId={triggerId}
       visibleCellActions={6}
       sourcererScopeId={getSourcererScopeId(scopeId)}
