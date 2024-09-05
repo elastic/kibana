@@ -11,11 +11,9 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiFormRow,
   EuiIcon,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -62,96 +60,69 @@ export const CreateIndexForm = ({ userPrivileges }: CreateIndexFormProps) => {
   };
 
   return (
-    <EuiForm component="form" fullWidth>
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('xpack.searchIndices.startPage.createIndex.title', {
-                  defaultMessage: 'Create your first index',
-                })}
-              </h4>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <></>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiText color="subdued">
-          <p>
-            {i18n.translate('xpack.searchIndices.startPage.createIndex.description', {
-              defaultMessage:
-                'An index stores your data and defines the schema, or field mappings, for your searches',
-            })}
-          </p>
-        </EuiText>
-        <EuiFormRow
-          label={i18n.translate('xpack.searchIndices.startPage.createIndex.name.label', {
-            defaultMessage: 'Name your index',
-          })}
-          helpText={i18n.translate('xpack.searchIndices.startPage.createIndex.name.helpText', {
-            defaultMessage:
-              'Index names must be lowercase and can only contain hyphens and numbers',
-          })}
+    <>
+      <EuiFormRow
+        label={i18n.translate('xpack.searchIndices.startPage.createIndex.name.label', {
+          defaultMessage: 'Name your index',
+        })}
+        helpText={i18n.translate('xpack.searchIndices.startPage.createIndex.name.helpText', {
+          defaultMessage: 'Index names must be lowercase and can only contain hyphens and numbers',
+        })}
+        fullWidth
+        isInvalid={indexNameHasError}
+      >
+        <EuiFieldText
           fullWidth
+          data-test-subj="indexNameField"
+          name="indexName"
+          value={formState.indexName}
           isInvalid={indexNameHasError}
-        >
-          <EuiFieldText
-            fullWidth
-            data-test-subj="indexNameField"
-            name="indexName"
-            value={formState.indexName}
-            isInvalid={indexNameHasError}
-            onChange={onIndexNameChange}
-            placeholder={i18n.translate(
-              'xpack.searchIndices.startPage.createIndex.name.placeholder',
-              {
-                defaultMessage: 'Enter a name for your index',
-              }
-            )}
-          />
-        </EuiFormRow>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              iconSide="left"
-              iconType="sparkles"
-              data-test-subj="createIndexBtn"
-              fill
-              disabled={
-                indexNameHasError ||
-                isLoading ||
-                userPrivileges?.privileges?.canCreateIndex === false
-              }
-              isLoading={isLoading}
-              onClick={onCreateIndex}
-            >
-              {i18n.translate('xpack.searchIndices.startPage.createIndex.action.text', {
-                defaultMessage: 'Create my index',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {userPrivileges?.privileges?.canCreateApiKeys && (
-              <EuiFlexGroup gutterSize="s">
-                <EuiIcon size="l" type="key" color="subdued" />
-                <EuiText size="s" data-test-subj="apiKeyLabel">
-                  <p>
-                    {i18n.translate(
-                      'xpack.searchIndices.startPage.createIndex.apiKeyCreation.description',
-                      {
-                        defaultMessage: "We'll create an API key for this index",
-                      }
-                    )}
-                  </p>
-                </EuiText>
-              </EuiFlexGroup>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          onChange={onIndexNameChange}
+          placeholder={i18n.translate(
+            'xpack.searchIndices.startPage.createIndex.name.placeholder',
+            {
+              defaultMessage: 'Enter a name for your index',
+            }
+          )}
+        />
+      </EuiFormRow>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="primary"
+            iconSide="left"
+            iconType="sparkles"
+            data-test-subj="createIndexBtn"
+            fill
+            disabled={
+              indexNameHasError || isLoading || userPrivileges?.privileges?.canCreateIndex === false
+            }
+            isLoading={isLoading}
+            onClick={onCreateIndex}
+          >
+            {i18n.translate('xpack.searchIndices.startPage.createIndex.action.text', {
+              defaultMessage: 'Create my index',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {userPrivileges?.privileges?.canCreateApiKeys && (
+            <EuiFlexGroup gutterSize="s">
+              <EuiIcon size="l" type="key" color="subdued" />
+              <EuiText size="s" data-test-subj="apiKeyLabel">
+                <p>
+                  {i18n.translate(
+                    'xpack.searchIndices.startPage.createIndex.apiKeyCreation.description',
+                    {
+                      defaultMessage: "We'll create an API key for this index",
+                    }
+                  )}
+                </p>
+              </EuiText>
+            </EuiFlexGroup>
+          )}
+        </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiForm>
+    </>
   );
 };

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 
-export enum AnalyticsEvents {
-  startPageOpened = 'start_page_opened',
-  startPageShowCodeClick = 'start_page_show_code',
-  startPageShowCreateIndexUIClick = 'start_page_show_create_index_ui',
-  startCreateIndexClick = 'start_create_index',
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CreateIndexCodeViewProps {}
+
+export const CreateIndexCodeView = ({}: CreateIndexCodeViewProps) => {
+  return <></>;
+};
