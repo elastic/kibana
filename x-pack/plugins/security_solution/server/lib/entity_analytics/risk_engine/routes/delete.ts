@@ -9,7 +9,7 @@ import { buildSiemResponse } from "@kbn/lists-plugin/server/routes/utils";
 import type { IKibanaResponse } from "@kbn/core-http-server";
 import { withRiskEnginePrivilegeCheck } from "../risk_engine_privileges";
 import {
-  RISK_ENGINE_INSTALLATION_AND_DATA_CLEANUP_URL,
+  RISK_ENGINE_CLEANUP_URL,
   APP_ID,
   API_VERSIONS,
 } from "../../../../../common/constants";
@@ -17,6 +17,7 @@ import type { EntityAnalyticsRoutesDeps } from "../../types";
 import { RiskEngineAuditActions } from "../audit";
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from "../../audit";
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from "./translations";
+import type { CleanUpRiskEngineResponse } from "../../../../../common/api/entity_analytics";
 
 export const riskEngineCleanupRoute = (
   router: EntityAnalyticsRoutesDeps["router"],
@@ -25,7 +26,7 @@ export const riskEngineCleanupRoute = (
   router.versioned
     .delete({
       access: "public",
-      path: RISK_ENGINE_INSTALLATION_AND_DATA_CLEANUP_URL,
+      path: RISK_ENGINE_CLEANUP_URL,
       options: {
         tags: ["access:securitySolution", `access:${APP_ID}-entity-analytics`],
       },
@@ -38,7 +39,7 @@ export const riskEngineCleanupRoute = (
           context,
           request,
           response
-        ): Promise<IKibanaResponse<{ success: boolean }>> => {
+        ): Promise<IKibanaResponse<CleanUpRiskEngineResponse>> => {
           const siemResponse = buildSiemResponse(response);
           const securitySolution = await context.securitySolution;
           const [_, { taskManager }] = await getStartServices();
@@ -72,25 +73,30 @@ export const riskEngineCleanupRoute = (
               taskManager,
               riskScoreDataClient,
             });
-            if (errors) {
+            if (errors && errors.length > 0) {
               return siemResponse.error({
                 statusCode: 500,
                 body: {
-                  message:
-                    "Errors were encountered while tearing down Risk Engine",
-                  errors: errors.join("\n"),
+                  risk_engine_cleanup: false,
+                  errors: errors.map((error, seq) => ({
+                    seq: seq + 1,
+                    error: error.toString(),
+                  })),
                 },
                 bypassErrorFormat: true,
               });
             } else {
-              return response.ok({ body: { success: true } });
+              return response.ok({ body: { risk_engine_cleanup: true } });
             }
           } catch (error) {
             return siemResponse.error({
               statusCode: 500,
               body: {
-                message: "Error tearing down Risk Engine",
-                full_error: JSON.stringify(error),
+                risk_engine_cleanup: false,
+                errors: {
+                  seq: 1,
+                  error: JSON.stringify(error),
+                },
               },
               bypassErrorFormat: true,
             });

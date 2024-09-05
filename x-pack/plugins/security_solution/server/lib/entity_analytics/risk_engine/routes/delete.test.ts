@@ -70,7 +70,7 @@ describe("risk engine cleanup route", () => {
       const request = buildRequest();
       const response = await server.inject(request, context);
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ success: true });
+      expect(response.body).toEqual({ risk_engine_cleanup: true });
     });
 
     it("returns a 500 when cleanup is unsuccessful", async () => {
@@ -81,8 +81,11 @@ describe("risk engine cleanup route", () => {
       const response = await server.inject(request, context);
       expect(response.status).toBe(500);
       expect(response.body).toEqual({
-        full_error: "{}",
-        message: "Error tearing down Risk Engine",
+        errors: {
+          error: "{}",
+          seq: 1,
+        },
+        risk_engine_cleanup: false,
         status_code: 500,
       });
     });
@@ -99,9 +102,21 @@ describe("risk engine cleanup route", () => {
       const response = await server.inject(request, context);
       expect(response.status).toBe(500);
       expect(response.body).toEqual({
-        errors:
-          "Error: Error while removing risk scoring task\nError: Error while deleting saved objects\nError: Error while removing risk score index",
-        message: "Errors were encountered while tearing down Risk Engine",
+        errors: [
+          {
+            seq: 1,
+            error: "Error: Error while removing risk scoring task",
+          },
+          {
+            seq: 2,
+            error: "Error: Error while deleting saved objects",
+          },
+          {
+            seq: 3,
+            error: "Error: Error while removing risk score index",
+          },
+        ],
+        risk_engine_cleanup: false,
         status_code: 500,
       });
     });
