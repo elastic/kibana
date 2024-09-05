@@ -15,8 +15,15 @@ import {
   take,
   combineLatest,
   map,
+  switchMap,
 } from 'rxjs';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  HttpStart,
+} from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
 import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
@@ -70,7 +77,9 @@ export class NavigationPublicPlugin
     const { unifiedSearch, cloud, cloudExperiments, spaces } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
-    const activeSpace$ = spaces?.getActiveSpace$() ?? of(undefined);
+    const activeSpace$ = this.getIsUnauthenticated(core.http)
+      ? of(undefined)
+      : spaces?.getActiveSpace$() ?? of(undefined);
 
     /*
      *
@@ -128,12 +137,14 @@ export class NavigationPublicPlugin
           this.addSolutionNavigation(solutionNavigation);
         });
       },
-      isSolutionNavEnabled$: combineLatest([
-        this.isSolutionNavExperiementEnabled$,
-        activeSpace$,
-      ]).pipe(
-        map(([isFeatureEnabled, activeSpace]) => {
-          return getIsProjectNav(isFeatureEnabled, activeSpace?.solution) && !isServerless;
+      isSolutionNavEnabled$: of(this.getIsUnauthenticated(core.http)).pipe(
+        switchMap((isUnauthenticated) => {
+          if (isUnauthenticated) return of(false);
+          return combineLatest([this.isSolutionNavExperiementEnabled$, activeSpace$]).pipe(
+            map(([isFeatureEnabled, activeSpace]) => {
+              return getIsProjectNav(isFeatureEnabled, activeSpace?.solution) && !isServerless;
+            })
+          );
         })
       ),
     };
@@ -195,6 +206,11 @@ export class NavigationPublicPlugin
     if (isProjectNav) {
       chrome.project.changeActiveSolutionNavigation(solutionView!);
     }
+  }
+
+  private getIsUnauthenticated(http: HttpStart) {
+    const { anonymousPaths } = http;
+    return anonymousPaths.isAnonymous(window.location.pathname);
   }
 }
 

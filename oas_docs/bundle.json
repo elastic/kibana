@@ -499,7 +499,8 @@
                   "description": "Kibana's operational status. A minimal response is sent for unauthorized users."
                 }
               }
-            }
+            },
+            "description": "Overall status is OK and Kibana should be functioning normally."
           },
           "503": {
             "content": {
@@ -516,7 +517,8 @@
                   "description": "Kibana's operational status. A minimal response is sent for unauthorized users."
                 }
               }
-            }
+            },
+            "description": "Kibana or some of it's essential services are unavailable. Kibana may be degraded or unavailable."
           }
         },
         "summary": "Get Kibana's current status",

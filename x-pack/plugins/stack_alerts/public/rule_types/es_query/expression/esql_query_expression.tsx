@@ -209,6 +209,7 @@ export const EsqlQueryExpression: React.FC<
       <EuiFormRow
         id="timeField"
         fullWidth
+        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.timeField.length > 0 && timeField !== undefined}
         error={errors.timeField}
         label={
@@ -220,6 +221,7 @@ export const EsqlQueryExpression: React.FC<
       >
         <EuiSelect
           options={timeFieldOptions}
+          // @ts-expect-error upgrade typescript v5.1.6
           isInvalid={errors.timeField.length > 0 && timeField !== undefined}
           fullWidth
           name="timeField"
@@ -235,6 +237,7 @@ export const EsqlQueryExpression: React.FC<
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id="timeWindowSize"
+            // @ts-expect-error upgrade typescript v5.1.6
             isInvalid={errors.timeWindowSize.length > 0}
             error={errors.timeWindowSize}
             label={
@@ -247,6 +250,7 @@ export const EsqlQueryExpression: React.FC<
             <EuiFieldNumber
               name="timeWindowSize"
               data-test-subj="timeWindowSizeNumber"
+              // @ts-expect-error upgrade typescript v5.1.6
               isInvalid={errors.timeWindowSize.length > 0}
               min={0}
               value={timeWindowSize || ''}
