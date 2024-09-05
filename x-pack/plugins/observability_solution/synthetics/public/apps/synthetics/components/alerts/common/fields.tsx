@@ -15,6 +15,7 @@ interface FieldProps {
   onChange: (value?: string[]) => void;
   setSearch: (val: string) => void;
   suggestions?: Suggestion[];
+  allSuggestions?: Record<string, Suggestion[]>;
   isLoading?: boolean;
   setSelectedField: (value?: string) => void;
   selectedField?: string;
@@ -27,14 +28,14 @@ export const allOptionText = i18n.translate('xpack.synthetics.filter.alert.allLa
 export function MonitorField({ value, onChange, ...rest }: FieldProps) {
   return (
     <FieldPopoverExpression
-      value={value?.join(', ') || allOptionText}
+      value={value}
       title={i18n.translate('xpack.synthetics.alerting.fields.monitor', {
         defaultMessage: 'Monitor',
       })}
       fieldName="monitorIds"
       selectedField={rest.selectedField}
       setSelectedField={rest.setSelectedField}
-      suggestions={rest.suggestions}
+      allSuggestions={rest.allSuggestions}
     >
       <FieldSelector
         value={value}
@@ -53,14 +54,14 @@ export function MonitorField({ value, onChange, ...rest }: FieldProps) {
 export function TagsField({ value, onChange, ...rest }: FieldProps) {
   return (
     <FieldPopoverExpression
-      value={value?.join(', ') || allOptionText}
+      value={value}
       title={i18n.translate('xpack.synthetics.alerting.fields.tags', {
         defaultMessage: 'Tags',
       })}
       fieldName="tags"
       selectedField={rest.selectedField}
       setSelectedField={rest.setSelectedField}
-      suggestions={rest.suggestions}
+      allSuggestions={rest.allSuggestions}
     >
       <FieldSelector
         value={value}
@@ -82,12 +83,12 @@ export function MonitorTypeField({ value, onChange, ...rest }: FieldProps) {
   });
   return (
     <FieldPopoverExpression
-      value={value?.join(', ') ?? allOptionText}
+      value={value}
       title={label}
       fieldName="monitorTypes"
       selectedField={rest.selectedField}
       setSelectedField={rest.setSelectedField}
-      suggestions={rest.suggestions}
+      allSuggestions={rest.allSuggestions}
     >
       <FieldSelector
         value={value}
@@ -109,12 +110,12 @@ export function LocationsField({ value, onChange, ...rest }: FieldProps) {
   });
   return (
     <FieldPopoverExpression
-      value={value?.join(', ') ?? allOptionText}
+      value={value}
       title={label}
       fieldName="locations"
       selectedField={rest.selectedField}
       setSelectedField={rest.setSelectedField}
-      suggestions={rest.suggestions}
+      allSuggestions={rest.allSuggestions}
     >
       <FieldSelector
         value={value}
@@ -136,12 +137,12 @@ export function ProjectsField({ value, onChange, ...rest }: FieldProps) {
   });
   return (
     <FieldPopoverExpression
-      value={value?.join(', ') ?? allOptionText}
+      value={value}
       title={label}
       fieldName="projects"
       selectedField={rest.selectedField}
       setSelectedField={rest.setSelectedField}
-      suggestions={rest.suggestions}
+      allSuggestions={rest.allSuggestions}
     >
       <FieldSelector
         value={value}

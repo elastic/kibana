@@ -7,18 +7,19 @@
 
 import React, { ReactNode } from 'react';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
+import { allOptionText } from './fields';
 import { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
 
 type ExpressionColor = 'subdued' | 'primary' | 'success' | 'accent' | 'warning' | 'danger';
 interface Props {
   title?: ReactNode;
-  value: ReactNode;
+  value?: string[];
   children?: ReactNode;
   color?: ExpressionColor;
   selectedField?: string;
   fieldName: string;
   setSelectedField: (value?: string) => void;
-  suggestions?: Suggestion[];
+  allSuggestions?: Record<string, Suggestion[]>;
 }
 
 export function FieldPopoverExpression({
@@ -29,11 +30,18 @@ export function FieldPopoverExpression({
   selectedField,
   fieldName,
   setSelectedField,
-  suggestions,
+  allSuggestions,
 }: Props) {
   const isPopoverOpen = selectedField === fieldName;
 
-  const label = suggestions?.find((suggestion) => suggestion.value === selectedField)?.label;
+  const suggestions = allSuggestions?.[fieldName];
+
+  const label = value
+    ? suggestions
+        ?.filter((suggestion) => value.includes(suggestion.value))
+        ?.map((suggestion) => suggestion.label)
+        .join(', ')
+    : allOptionText;
 
   const closePopover = () => setSelectedField(selectedField === fieldName ? undefined : fieldName);
   return (
