@@ -14,7 +14,7 @@ import {
 } from '../../../common/es_fields/apm';
 import { ENTITY, ENTITY_TYPE } from '../../../common/es_fields/entities';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
+import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { entitiesRangeQuery } from './get_entities';
 import { EntityLatestServiceRaw, EntityType } from './types';
 
