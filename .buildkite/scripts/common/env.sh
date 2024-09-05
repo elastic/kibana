@@ -149,3 +149,6 @@ if [[ "${KBN_ENABLE_FIPS:-}" == "true" ]] || is_pr_with_label "ci:enable-fips-ag
 fi
 
 export FTR_ENABLE_FIPS_AGENT
+
+ES_JAVA_HOME="$HOME/.java/openjdk23"
+export ES_JAVA_HOME
