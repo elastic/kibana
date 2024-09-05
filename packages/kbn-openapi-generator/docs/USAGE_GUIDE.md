@@ -336,9 +336,15 @@ It works with exceptions
 
 If you strongly believe any of the unsupported features should be supported by OpenAPI Generator feel free to create an enhancement ticket in GitHub and assign it to Rule Management team.
 
-### Is there a way to specify `default` value for a referenced schema?
+### How to specify `default` value?
 
-Sometimes you might have an array schema defined in a spec with shared schemas like
+The best approach is to specify default value on consumer's side.
+
+(_Technically it's a violation of OpenAPI 3.0 Specification but it's allowed in OpenAPI 3.1 Specification and supported by the tooling_).
+
+Having a default value specified in a wrong place could lead to subtle bugs. For example we have a primitive schema reused in `POST` and `PATCH` operations. `POST` operation requires all fields in request body while `PATCH` allows to specify only some of them. Having a reused schema with a default value for the same field in `POST` and `PATCH` will lead to a bug. When this field is omitted for `PATCH `operation it will be defaulted to the default value and lead to opaque changes.
+
+For example you have the following primitive schemas shared between multiple specs
 
 **common.schema.yaml**
 
@@ -351,6 +357,12 @@ paths: {}
 
 components:
   schemas:
+    EnumType:
+      type: string
+      enum:
+        - value1
+        - value2
+
     ParametersArray:
       type: array
       items:
@@ -365,7 +377,7 @@ components:
           type: string
 ```
 
-and you want to reference `ParametersArray` in for example a request body
+And it's used in a route's spec where described primitive schemas are consumed. The default value should be specified in the route's spec.
 
 **spec.schema.yaml**
 
@@ -389,47 +401,11 @@ paths:
             schema:
               type: object
               properties:
-                someField:
-                  type: string
+                someEnumField:
+                  $ref: './common.schema.yaml#/components/schemas/EnumType'
+                  default: value1
                 parameters:
                   $ref: './common.schema.yaml#/components/schemas/ParametersArray'
-              required: [someField]
-      responses: ...
-```
-
-But you also want to have default value for example an empty array. In this case you can't provide any additional properties (including `default`) to the reference since OpenAPI 3.0 doesn't allow any properties next to `$ref`.
-
-The solution is to decompose the `ParametersArray` like below
-
-**spec.schema.yaml**
-
-```yaml
-openapi: 3.0.0
-info:
-  title: Update parameters
-  version: '2023-10-31'
-paths:
-  /api/my/data:
-    post:
-      x-labels: [serverless, ess]
-      x-codegen-enabled: true
-      operationId: UpdateParameters
-      summary: Updates parameters
-      description: This a more detailed description why you should update the parameters
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                someField:
-                  type: string
-                parameters:
-                  type: array
-                  items:
-                    $ref: './common.schema.yaml#/components/schemas/Parameter'
                   default: []
-              required: [someField]
       responses: ...
 ```

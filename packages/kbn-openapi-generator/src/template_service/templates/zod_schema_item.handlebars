@@ -107,15 +107,7 @@ z.unknown()
 
 {{~#*inline "type_string"~}}
   {{~#if enum~}}
-    {{~#if (isSingle enum)~}}
-      z.literal("{{first enum}}")
-    {{~else~}}
-      z.enum([
-        {{~#each enum~}}
-          "{{.}}",
-        {{~/each~}}
-      ])
-    {{~/if~}}
+    {{~> zod_enum~}}
   {{~else~}}
   z.string()
   {{~#if minLength}}.min({{minLength}}){{/if~}}
