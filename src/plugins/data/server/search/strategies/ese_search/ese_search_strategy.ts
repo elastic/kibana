@@ -13,6 +13,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import type {
+  DiagnosticListenerFull,
+  DiagnosticListenerLight,
+} from '@elastic/transport/lib/Diagnostic';
+import { v4 } from 'uuid';
 import { IAsyncSearchRequestParams } from '../..';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
@@ -97,21 +102,54 @@ export const enhancedEsSearchStrategyProvider = (
     options: IAsyncSearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
-    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+    const client = useInternalUser
+      ? esClient.asInternalUser.child({})
+      : esClient.asCurrentUser.child({});
     const params = {
       ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
       ...request.params,
     };
+
+    // NOTE: this diagnostic is applied here to report back ES query time to Lens app
+    let requestStart = NaN;
+    let requestEnd = NaN;
+    const id = request.id ?? v4();
+    const requestEvent: DiagnosticListenerFull = (_, result) => {
+      if (result?.meta?.request?.id === id) {
+        requestStart = Date.now();
+        // console.log(`[${id}] start at ${Date.now()}}`);
+      }
+    };
+    const deserializationEvent: DiagnosticListenerLight = (_, result) => {
+      if (result?.requestId === id) {
+        requestEnd = Date.now();
+        // console.log(`[${id}] return at ${Date.now()}`);
+      }
+    };
+    client.diagnostic.on('request', requestEvent);
+    client.diagnostic.on('deserialization', deserializationEvent);
+    const totalTimeStart = Date.now();
     const { body, headers, meta } = await client.asyncSearch.submit(params, {
       ...options.transport,
       signal: options.abortSignal,
       meta: true,
+      id,
     });
+    const totalTimeEnd = Date.now();
+    client.diagnostic.off('request', requestEvent);
+    client.diagnostic.off('deserialization', deserializationEvent);
+
+    // console.log(`[${id}] search time ${requestEnd - requestStart}`);
+    // console.log(`[${id}] total time ${totalTimeEnd - totalTimeStart}`);
     const response = shimHitsTotal(body.response, options);
     return toAsyncKibanaSearchResponse(
       { ...body, response },
       headers?.warning,
-      meta?.request?.params
+      meta?.request?.params,
+      {
+        clientTime: totalTimeEnd - totalTimeStart,
+        esTime: requestEnd - requestStart,
+      }
     );
   }
 

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { ConnectionRequestParams } from '@elastic/transport';
 
 /**
@@ -54,8 +54,7 @@ export interface RequestStatistic {
 }
 
 export interface Response {
-  // TODO replace object with IKibanaSearchResponse once IKibanaSearchResponse is seperated from data plugin.
-  json?: object;
+  json?: IKibanaSearchResponse;
   requestParams?: ConnectionRequestParams;
   time?: number;
 }

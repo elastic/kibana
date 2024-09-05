@@ -35,7 +35,12 @@ export function toAsyncKibanaSearchStatusResponse(
 export function toAsyncKibanaSearchResponse(
   response: AsyncSearchResponse,
   warning?: string,
-  requestParams?: ConnectionRequestParams
+  requestParams?: ConnectionRequestParams,
+  stats?: {
+    esTime: number;
+    clientTime: number;
+    took: number;
+  }
 ): IKibanaSearchResponse {
   return {
     id: response.id,
@@ -45,5 +50,6 @@ export function toAsyncKibanaSearchResponse(
     ...(warning ? { warning } : {}),
     ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
     ...getTotalLoaded(response.response),
+    stats,
   };
 }

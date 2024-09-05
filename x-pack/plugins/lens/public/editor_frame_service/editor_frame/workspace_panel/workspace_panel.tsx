@@ -192,6 +192,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   // NOTE: initialRenderTime is only set once when the component mounts
   const visualizationRenderStartTime = useRef<number>(NaN);
   const dataReceivedTime = useRef<number>(NaN);
+  const esStats = useRef<{ esTime: number; clientTime: number; took: number }>({
+    esTime: -1,
+    clientTime: -1,
+    took: -1,
+  });
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
@@ -206,6 +211,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           value1: dataReceivedTime.current - visualizationRenderStartTime.current,
           key2: 'time_to_render',
           value2: currentTime - dataReceivedTime.current,
+          key3: 'esTime',
+          value3: esStats.current.esTime,
+          key4: 'clientTime',
+          value4: esStats.current.clientTime,
+          key5: 'took',
+          value5: esStats.current.took,
         });
       }
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
@@ -263,6 +274,29 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               searchService: plugins.data.search,
             }
           );
+
+          const requests = adapters.requests.getRequests();
+          esStats.current = {
+            ...requests.reduce(
+              (acc, request) => {
+                if (request.response?.json?.stats) {
+                  return {
+                    esTime: Math.max(acc.esTime, request.response.json.stats.esTime),
+                    clientTime: Math.max(acc.clientTime, request.response.json.stats.clientTime),
+                    took: request.response.json.rawResponse?.took
+                      ? Math.max(acc.took, request.response.json.rawResponse?.took)
+                      : acc.took,
+                  };
+                }
+                return acc;
+              },
+              {
+                esTime: 0,
+                clientTime: 0,
+                took: 0,
+              }
+            ),
+          };
         }
 
         if (requestWarnings.length) {
