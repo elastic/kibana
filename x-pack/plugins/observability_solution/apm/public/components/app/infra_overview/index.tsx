@@ -6,15 +6,33 @@
  */
 import { EuiPanel } from '@elastic/eui';
 import React from 'react';
+import { SignalTypes } from '../../../../common/entities/types';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { InfraTabs } from './infra_tabs';
-import { ServiceTabContent } from '../service_tab_content';
+import { ServiceTabEmptyState } from '../service_tab_empty_state';
+import { logsOnlyEmptyStateContent } from './constants';
 
 export function InfraOverview() {
+  const { serviceEntitySummary } = useApmServiceContext();
+
+  const hasLogsOnlySignal =
+    serviceEntitySummary?.signalTypes &&
+    isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+
+  if (hasLogsOnlySignal) {
+    return (
+      <ServiceTabEmptyState
+        title={logsOnlyEmptyStateContent.title}
+        content={logsOnlyEmptyStateContent.content}
+        imgSrc={logsOnlyEmptyStateContent.imgSrc}
+      />
+    );
+  }
+
   return (
-    <ServiceTabContent tabName="infrastructure">
-      <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
-        <InfraTabs />
-      </EuiPanel>
-    </ServiceTabContent>
+    <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
+      <InfraTabs />
+    </EuiPanel>
   );
 }
