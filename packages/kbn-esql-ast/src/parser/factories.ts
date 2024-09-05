@@ -10,7 +10,7 @@
  * In case of changes in the grammar, this script should be updated: esql_update_ast_script.js
  */
 
-import { type Token, type ParserRuleContext, type TerminalNode } from 'antlr4';
+import type { Token, ParserRuleContext, TerminalNode, RecognitionException } from 'antlr4';
 import {
   QualifiedNameContext,
   type ArithmeticUnaryContext,
@@ -19,12 +19,10 @@ import {
   type IntegerValueContext,
   type QualifiedIntegerLiteralContext,
   QualifiedNamePatternContext,
-} from './antlr/esql_parser';
-import { getPosition } from './ast_position_utils';
+} from '../antlr/esql_parser';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {
   ESQLAstBaseItem,
-  ESQLCommand,
   ESQLLiteral,
   ESQLList,
   ESQLTimeInterval,
@@ -40,8 +38,9 @@ import type {
   ESQLNumericLiteralType,
   FunctionSubtype,
   ESQLNumericLiteral,
-} from './types';
-import { parseIdentifier } from './parser/helpers';
+} from '../types';
+import { parseIdentifier, getPosition } from './helpers';
+import { Builder, type AstNodeParserFields } from '../builder';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -59,54 +58,32 @@ export function createAstBaseItem<Name = string>(
   };
 }
 
-export function createCommand(name: string, ctx: ParserRuleContext): ESQLCommand {
-  return {
-    type: 'command',
-    name,
-    text: ctx.getText(),
-    args: [],
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception),
-  };
-}
+const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields => ({
+  text: ctx.getText(),
+  location: getPosition(ctx.start, ctx.stop),
+  incomplete: Boolean(ctx.exception),
+});
 
-export function createInlineCast(ctx: InlineCastContext): Omit<ESQLInlineCast, 'value'> {
-  return {
-    type: 'inlineCast',
-    name: 'inlineCast',
-    text: ctx.getText(),
-    castType: ctx.dataType().getText(),
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception),
-  };
-}
+export const createCommand = (name: string, ctx: ParserRuleContext) =>
+  Builder.command({ name, args: [] }, createParserFields(ctx));
 
-export function createList(ctx: ParserRuleContext, values: ESQLLiteral[]): ESQLList {
-  return {
-    type: 'list',
-    name: ctx.getText(),
-    values,
-    text: ctx.getText(),
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception),
-  };
-}
+export const createInlineCast = (ctx: InlineCastContext, value: ESQLInlineCast['value']) =>
+  Builder.expression.inlineCast(
+    { castType: ctx.dataType().getText(), value },
+    createParserFields(ctx)
+  );
 
-export function createNumericLiteral(
+export const createList = (ctx: ParserRuleContext, values: ESQLLiteral[]): ESQLList =>
+  Builder.expression.literal.list({ values }, createParserFields(ctx));
+
+export const createNumericLiteral = (
   ctx: DecimalValueContext | IntegerValueContext,
   literalType: ESQLNumericLiteralType
-): ESQLLiteral {
-  const text = ctx.getText();
-  return {
-    type: 'literal',
-    literalType,
-    text,
-    name: text,
-    value: Number(text),
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception),
-  };
-}
+): ESQLLiteral =>
+  Builder.expression.literal.numeric(
+    { value: Number(ctx.getText()), literalType },
+    createParserFields(ctx)
+  );
 
 export function createFakeMultiplyLiteral(
   ctx: ArithmeticUnaryContext,
@@ -424,5 +401,15 @@ export function createUnknownItem(ctx: ParserRuleContext): ESQLUnknownItem {
     text: ctx.getText(),
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception),
+  };
+}
+
+export function createError(exception: RecognitionException) {
+  const token = exception.offendingToken;
+
+  return {
+    type: 'error' as const,
+    text: `SyntaxError: ${exception.message}`,
+    location: getPosition(token),
   };
 }

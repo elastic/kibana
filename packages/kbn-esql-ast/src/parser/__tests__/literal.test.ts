@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getAstAndSyntaxErrors as parse } from '../ast_parser';
-import { ESQLLiteral } from '../types';
+import { getAstAndSyntaxErrors as parse } from '..';
+import { ESQLLiteral } from '../../types';
 
 describe('literal expression', () => {
   it('numeric expression captures "value", and "name" fields', () => {

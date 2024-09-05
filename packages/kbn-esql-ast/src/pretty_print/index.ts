@@ -6,5 +6,15 @@
  * Side Public License, v 1.
  */
 
-export type * from './types';
-export { Builder } from './builder';
+export { LeafPrinter } from './leaf_printer';
+
+export {
+  BasicPrettyPrinter,
+  type BasicPrettyPrinterOptions,
+  type BasicPrettyPrinterMultilineOptions,
+} from './basic_pretty_printer';
+
+export {
+  WrappingPrettyPrinter,
+  type WrappingPrettyPrinterOptions,
+} from './wrapping_pretty_printer';

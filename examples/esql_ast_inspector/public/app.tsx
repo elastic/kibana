@@ -22,9 +22,10 @@ import { EuiProvider } from '@elastic/eui';
 
 import type { CoreStart } from '@kbn/core/public';
 
-import { EditorError, ESQLAst, getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { EditorError, ESQLAstQueryExpression, parse } from '@kbn/esql-ast';
 import { CodeEditor } from '@kbn/code-editor';
 import type { StartDependencies } from './plugin';
+import { PrettyPrint } from './pretty_print';
 
 export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
   const [currentErrors, setErrors] = useState<EditorError[]>([]);
@@ -34,12 +35,14 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
 
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const [ast, setAST] = useState<ESQLAst>(getAstAndSyntaxErrors(currentQuery).ast);
+  const [root, setAST] = useState<ESQLAstQueryExpression>(
+    parse(currentQuery, { withFormatting: true }).root
+  );
 
   const parseQuery = (query: string) => {
-    const { ast: _ast, errors } = getAstAndSyntaxErrors(query);
+    const { root: _root, errors } = parse(query, { withFormatting: true });
     setErrors(errors);
-    setAST(_ast);
+    setAST(_root);
   };
 
   return (
@@ -79,10 +82,12 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
               </EuiFormRow>
             </EuiForm>
             <EuiSpacer />
+            <PrettyPrint src={currentQuery} />
+            <EuiSpacer />
             <CodeEditor
               allowFullScreen={true}
               languageId={'json'}
-              value={JSON.stringify(ast, null, 2)}
+              value={JSON.stringify(root, null, 2)}
             />
           </EuiPageSection>
         </EuiPageBody>

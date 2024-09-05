@@ -6,5 +6,15 @@
  * Side Public License, v 1.
  */
 
-export type * from './types';
-export { Builder } from './builder';
+export {
+  getLexer,
+  getParser,
+  parse,
+  type ParseOptions,
+  type ParseResult,
+
+  /** @deprecated Use `parse` instead. */
+  parse as getAstAndSyntaxErrors,
+} from './parser';
+
+export { ESQLErrorListener } from './esql_error_listener';

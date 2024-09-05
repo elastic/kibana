@@ -31,8 +31,8 @@ import {
   type MetricsCommandContext,
   IndexPatternContext,
   InlinestatsCommandContext,
-} from './antlr/esql_parser';
-import { default as ESQLParserListener } from './antlr/esql_parser_listener';
+} from '../antlr/esql_parser';
+import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import {
   createCommand,
   createFunction,
@@ -41,8 +41,8 @@ import {
   textExistsAndIsValid,
   createSource,
   createAstBaseItem,
-} from './ast_helpers';
-import { getPosition } from './ast_position_utils';
+} from './factories';
+import { getPosition } from './helpers';
 import {
   collectAllSourceIdentifiers,
   collectAllFields,
@@ -56,10 +56,10 @@ import {
   getPolicyName,
   getMatchField,
   getEnrichClauses,
-} from './ast_walker';
-import type { ESQLAst, ESQLAstMetricsCommand } from './types';
+} from './walkers';
+import type { ESQLAst, ESQLAstMetricsCommand } from '../types';
 
-export class AstListener implements ESQLParserListener {
+export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
 
   public getAst() {

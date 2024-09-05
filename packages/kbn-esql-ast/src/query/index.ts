@@ -6,15 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { Builder } from '.';
-
-test('can mint a numeric literal', () => {
-  const node = Builder.numericLiteral({ value: 42 });
-
-  expect(node).toMatchObject({
-    type: 'literal',
-    literalType: 'integer',
-    name: '42',
-    value: 42,
-  });
-});
+export { EsqlQuery } from './query';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getAstAndSyntaxErrors as parse } from '../ast_parser';
-import { Walker } from '../walker';
+import { getAstAndSyntaxErrors as parse } from '..';
+import { Walker } from '../../walker';
 
 describe('function AST nodes', () => {
   describe('"variadic-call"', () => {

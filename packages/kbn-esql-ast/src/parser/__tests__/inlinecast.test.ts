@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getAstAndSyntaxErrors as parse } from '../ast_parser';
-import { ESQLFunction, ESQLInlineCast, ESQLSingleAstItem } from '../types';
+import { getAstAndSyntaxErrors as parse } from '..';
+import { ESQLFunction, ESQLInlineCast, ESQLSingleAstItem } from '../../types';
 
 describe('Inline cast (::)', () => {
   describe('correctly formatted', () => {
@@ -19,7 +19,7 @@ describe('Inline cast (::)', () => {
       expect(ast[1].args[0]).toEqual(
         expect.objectContaining({
           castType: 'string',
-          name: 'inlineCast',
+          name: '',
           type: 'inlineCast',
           value: expect.objectContaining({
             name: 'field',
@@ -37,7 +37,7 @@ describe('Inline cast (::)', () => {
       expect((ast[1].args[0] as ESQLFunction).args[0]).toEqual(
         expect.objectContaining({
           castType: 'long',
-          name: 'inlineCast',
+          name: '',
           type: 'inlineCast',
           value: expect.objectContaining({
             name: 'field',
