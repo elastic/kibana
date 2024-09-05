@@ -87,7 +87,7 @@ interface PluginsSetup {
   licensing: LicensingPluginStart;
   home?: HomePublicPluginSetup;
   searchHomepage?: SearchHomepagePluginSetup;
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
   share?: SharePluginSetup;
 }
 

@@ -17,7 +17,7 @@ import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
 interface CheckAccess {
   request: KibanaRequest;
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
   spaces?: SpacesPluginStart;
   config: ConfigType;
   log: Logger;
@@ -44,9 +44,9 @@ export const checkAccess = async ({
   request,
   log,
 }: CheckAccess): Promise<ProductAccess> => {
-  const isRbacEnabled = security?.authz.mode.useRbacForRequest(request);
+  const isRbacEnabled = security.authz.mode.useRbacForRequest(request);
 
-  // If security has been disabled, always hide the plugin
+  // If security has been disabled, always hide app search and workplace search
   if (!isRbacEnabled) {
     return DENY_ALL_PLUGINS;
   }
