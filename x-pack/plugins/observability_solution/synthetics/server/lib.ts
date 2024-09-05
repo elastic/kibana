@@ -122,8 +122,8 @@ export class SyntheticsEsClient {
   }
 
   async msearch<
-    TDocument = unknown,
-    TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest
+    TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest,
+    TDocument = unknown
   >(
     requests: MsearchMultisearchBody[]
   ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {

@@ -369,7 +369,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Execute a given command on an endpoint
+     * Run a shell command on an endpoint.
      */
     endpointExecuteAction(props: EndpointExecuteActionProps) {
       return supertest
@@ -380,32 +380,29 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Download a file from an endpoint
+     * Download a file from an endpoint.
      */
     endpointFileDownload(props: EndpointFileDownloadProps) {
       return supertest
         .get(
-          replaceParams(
-            '/api/endpoint/action/{action_id}/file/{file_id}/download&#x60;',
-            props.params
-          )
+          replaceParams('/api/endpoint/action/{action_id}/file/{file_id}/download', props.params)
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get file info
+     * Get information for the specified file using the file ID.
      */
     endpointFileInfo(props: EndpointFileInfoProps) {
       return supertest
-        .get(replaceParams('/api/endpoint/action/{action_id}/file/{file_id}&#x60;', props.params))
+        .get(replaceParams('/api/endpoint/action/{action_id}/file/{file_id}', props.params))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get action details
+     * Get the details of a response action using the action ID.
      */
     endpointGetActionsDetails(props: EndpointGetActionsDetailsProps) {
       return supertest
@@ -415,7 +412,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get a list of action requests and their responses
+     * Get a list of all response actions.
      */
     endpointGetActionsList(props: EndpointGetActionsListProps) {
       return supertest
@@ -425,6 +422,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get a response actions state, which reports whether encryption is enabled.
+     */
     endpointGetActionsState() {
       return supertest
         .get('/api/endpoint/action/state')
@@ -433,7 +433,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get action status
+     * Get the status of response actions for the specified agent IDs.
      */
     endpointGetActionsStatus(props: EndpointGetActionsStatusProps) {
       return supertest
@@ -444,7 +444,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .query(props.query);
     },
     /**
-     * Get a file from an endpoint
+     * Get a file from an endpoint.
      */
     endpointGetFileAction(props: EndpointGetFileActionProps) {
       return supertest
@@ -455,7 +455,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Get list of running processes on an endpoint
+     * Get a list of all processes running on an endpoint.
      */
     endpointGetProcessesAction(props: EndpointGetProcessesActionProps) {
       return supertest
@@ -466,7 +466,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Isolate an endpoint
+     * Isolate an endpoint from the network. The endpoint remains isolated until it's released.
      */
     endpointIsolateAction(props: EndpointIsolateActionProps) {
       return supertest
@@ -476,6 +476,12 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+      * Isolate an endpoint from the network.
+> info
+> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/isolate`.
+
+      */
     endpointIsolateRedirect(props: EndpointIsolateRedirectProps) {
       return supertest
         .post('/api/endpoint/isolate')
@@ -485,7 +491,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Kill a running process on an endpoint
+     * Terminate a running process on an endpoint.
      */
     endpointKillProcessAction(props: EndpointKillProcessActionProps) {
       return supertest
@@ -496,7 +502,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Scan a file or directory
+     * Scan a specific file or directory on an endpoint for malware.
      */
     endpointScanAction(props: EndpointScanActionProps) {
       return supertest
@@ -507,7 +513,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Suspend a running process on an endpoint
+     * Suspend a running process on an endpoint.
      */
     endpointSuspendProcessAction(props: EndpointSuspendProcessActionProps) {
       return supertest
@@ -518,7 +524,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Release an endpoint
+     * Release an isolated endpoint, allowing it to rejoin a network.
      */
     endpointUnisolateAction(props: EndpointUnisolateActionProps) {
       return supertest
@@ -528,6 +534,12 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+      * Release an isolated endpoint, allowing it to rejoin a network.
+> info
+> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/unisolate`.
+
+      */
     endpointUnisolateRedirect(props: EndpointUnisolateRedirectProps) {
       return supertest
         .post('/api/endpoint/unisolate')
@@ -537,7 +549,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Upload a file to an endpoint
+     * Upload a file to an endpoint.
      */
     endpointUploadAction(props: EndpointUploadActionProps) {
       return supertest

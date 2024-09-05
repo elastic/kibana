@@ -1,0 +1,19 @@
+## RIGHT
+
+The `RIGHT` function returns a substring that extracts a specified number of characters from a string, starting from the right.
+
+### Examples
+
+```esql
+FROM employees
+| KEEP last_name
+| EVAL right = RIGHT(last_name, 3)
+| SORT last_name ASC
+| LIMIT 5
+```
+
+```esql
+ROW full_name = "John Doe"
+| EVAL last_part = RIGHT(full_name, 4)
+| KEEP last_part
+```
