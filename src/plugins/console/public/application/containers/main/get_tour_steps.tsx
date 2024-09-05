@@ -81,7 +81,6 @@ export function getTourSteps(docLinks: DocLinksStart['links']) {
       ),
       anchorPosition: 'rightUp',
       'data-test-subj': 'historyTourStep',
-      offset: 15,
       ...commonProps,
     },
     {
@@ -99,7 +98,6 @@ export function getTourSteps(docLinks: DocLinksStart['links']) {
       ),
       anchorPosition: 'rightUp',
       'data-test-subj': 'configTourStep',
-      offset: 15,
       ...commonProps,
     },
     {

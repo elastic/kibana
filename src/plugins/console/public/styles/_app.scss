@@ -235,3 +235,10 @@
   // the value needs to be above the z-index of the resizer bar
   z-index: $euiZLevel1 + 2;
 }
+
+// We need to hide the file input element to prevent the default browser styles
+#importConsoleFile {
+  opacity: 0;
+  position: absolute;
+  z-index: -1;
+}
