@@ -46,6 +46,11 @@ export async function queryMonitorHeatmap({
                 'monitor.id': monitorId,
               },
             },
+            {
+              term: {
+                'observer.geo.name': location,
+              },
+            },
           ],
         },
       },
@@ -56,11 +61,6 @@ export async function queryMonitorHeatmap({
           },
         },
       ],
-      post_filter: {
-        terms: {
-          'observer.geo.name': [location],
-        },
-      },
       _source: false,
       fields: ['@timestamp', 'config_id', 'summary.*', 'error.*', 'observer.geo.name'],
       aggs: {
