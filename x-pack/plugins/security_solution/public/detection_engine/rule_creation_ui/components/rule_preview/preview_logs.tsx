@@ -11,7 +11,7 @@ import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion, EuiCodeBlock } from '@ela
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { OptimizedAccordion } from './optimizied_accordion';
+import { OptimizedAccordion } from './optimized_accordion';
 interface PreviewLogsProps {
   logs: RulePreviewLogs[];
   hasNoiseWarning: boolean;

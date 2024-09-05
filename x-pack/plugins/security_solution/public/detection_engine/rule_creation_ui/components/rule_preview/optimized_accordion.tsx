@@ -30,7 +30,7 @@ const OptimizedAccordionComponent: FC<EuiAccordionProps> = ({ children, ...props
 
   return (
     <EuiAccordion {...props} forceState={trigger} onToggle={onToggle}>
-      {isRendered ? children : null}
+      {isRendered || props.forceState === 'open' ? children : null}
     </EuiAccordion>
   );
 };
