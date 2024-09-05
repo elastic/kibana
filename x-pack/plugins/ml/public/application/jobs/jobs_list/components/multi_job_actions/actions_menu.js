@@ -47,11 +47,11 @@ class MultiJobActionsMenuUI extends Component {
     this.canCreateMlAlerts = checkPermission('canCreateMlAlerts');
 
     this.toastNoticiations = constructorContext.services.notifications.toasts;
-    const mlApiServices = constructorContext.services.mlServices.mlApiServices;
+    const mlApi = constructorContext.services.mlServices.mlApi;
     const toastNotificationService = toastNotificationServiceProvider(
       constructorContext.services.notifications.toasts
     );
-    this.mlJobService = mlJobServiceFactory(toastNotificationService, mlApiServices);
+    this.mlJobService = mlJobServiceFactory(toastNotificationService, mlApi);
   }
 
   onButtonClick = () => {

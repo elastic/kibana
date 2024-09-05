@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { SignalTypes } from '../../common/entities/types';
+import { EntityDataStreamType } from '../../common/entities/types';
 
-export function isApmSignal(signalTypes: SignalTypes[]) {
-  return signalTypes.includes(SignalTypes.METRICS) || signalTypes.includes(SignalTypes.TRACES);
+export function isApmSignal(dataStreamTypes: EntityDataStreamType[]) {
+  return (
+    dataStreamTypes.includes(EntityDataStreamType.METRICS) ||
+    dataStreamTypes.includes(EntityDataStreamType.TRACES)
+  );
 }
-export function isLogsSignal(signalTypes: SignalTypes[]) {
-  return signalTypes.includes(SignalTypes.LOGS);
+export function isLogsSignal(dataStreamTypes: EntityDataStreamType[]) {
+  return dataStreamTypes.includes(EntityDataStreamType.LOGS);
 }

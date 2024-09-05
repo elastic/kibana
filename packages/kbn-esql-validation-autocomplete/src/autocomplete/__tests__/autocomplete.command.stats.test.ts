@@ -7,7 +7,7 @@
  */
 
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
-import { ADD_DATE_HISTOGRAM_SNIPPET } from '../factories';
+import { getAddDateHistogramSnippet } from '../factories';
 import { roundParameterTypes } from './constants';
 import { setup, getFunctionSignaturesByReturnType, getFieldNamesByType } from './helpers';
 
@@ -214,7 +214,7 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
         const expected = [
           'var0 = ',
-          ADD_DATE_HISTOGRAM_SNIPPET,
+          getAddDateHistogramSnippet(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
@@ -237,7 +237,7 @@ describe('autocomplete.suggest', () => {
         const fields = getFieldNamesByType('any').map((field) => `${field} `);
         await assertSuggestions('from a | stats a=c by d, /', [
           'var0 = ',
-          ADD_DATE_HISTOGRAM_SNIPPET,
+          getAddDateHistogramSnippet(),
           ...fields,
           ...allEvaFunctions,
           ...allGroupingFunctions,
@@ -249,7 +249,7 @@ describe('autocomplete.suggest', () => {
         ]);
         await assertSuggestions('from a | stats avg(b) by c, /', [
           'var0 = ',
-          ADD_DATE_HISTOGRAM_SNIPPET,
+          getAddDateHistogramSnippet(),
           ...fields,
           ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
           ...allGroupingFunctions,
@@ -271,13 +271,13 @@ describe('autocomplete.suggest', () => {
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by var0 = /', [
-          ADD_DATE_HISTOGRAM_SNIPPET,
+          getAddDateHistogramSnippet(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, var0 = /', [
-          ADD_DATE_HISTOGRAM_SNIPPET,
+          getAddDateHistogramSnippet(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
