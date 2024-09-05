@@ -31,7 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const degradedDatasetName = datasetNames[2];
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
 
-  describe('Degraded fields flyout', () => {
+  describe('Degraded fields flyout', function () {
+    // see details: https://github.com/elastic/kibana/issues/192172
+    this.tags(['failsOnMKI']);
     before(async () => {
       await synthtrace.index([
         // Ingest basic logs
