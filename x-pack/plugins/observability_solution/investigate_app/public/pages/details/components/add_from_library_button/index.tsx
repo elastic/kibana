@@ -58,7 +58,7 @@ export function AddFromLibraryButton({ onWidgetAdd }) {
       savedObjectId: string;
     }) {
       const widget = {
-        id: v4(),
+        // id: v4(),
         title,
         type: 'embeddable',
         params: {
@@ -116,7 +116,7 @@ export function AddFromLibraryButton({ onWidgetAdd }) {
           savedObjectId: explicitInput.savedObjectId,
           attributes,
         });
-        return undefined as any;
+        return v4();
       },
       children$,
     };
