@@ -7,6 +7,7 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import { type AlertStatus } from '@kbn/rule-data-utils';
 
 export type AssetDetailsLocator = LocatorPublic<AssetDetailsLocatorParams>;
 
@@ -30,6 +31,11 @@ export interface AssetDetailsLocatorParams extends SerializableRecord {
       to: string;
     };
     alertMetric?: string;
+    processSearch?: string;
+    metadataSearch?: string;
+    logsSearch?: string;
+    profilingSearch?: string;
+    alertStatus?: AlertStatus | 'all';
   };
 }
 

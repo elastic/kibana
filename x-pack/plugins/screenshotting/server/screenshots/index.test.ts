@@ -8,6 +8,7 @@
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger, PackageInfo } from '@kbn/core/server';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ConfigType } from '@kbn/screenshotting-server';
 import { lastValueFrom, of, throwError } from 'rxjs';
 import { ScreenshotOptions, Screenshots } from '.';
 import {
@@ -18,7 +19,6 @@ import {
 import * as errors from '../../common/errors';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
-import type { ConfigType } from '../config';
 import type { PngScreenshotOptions } from '../formats';
 import * as Layouts from '../layouts/create_layout';
 import { createMockLayout } from '../layouts/mock';

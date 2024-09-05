@@ -2216,6 +2216,38 @@
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLSource.cluster",
+            "type": "string",
+            "tags": [],
+            "label": "cluster",
+            "description": [
+              "\nRepresents the cluster part of the source identifier. Empty string if not\npresent.\n\n```\nFROM [<cluster>:]<index>\n```"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLSource.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [
+              "\nRepresents the index part of the source identifier. Unescaped and unquoted.\n\n```\nFROM [<cluster>:]<index>\n```"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

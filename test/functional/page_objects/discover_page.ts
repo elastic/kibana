@@ -413,7 +413,7 @@ export class DiscoverPageObject extends FtrService {
     // add the focus to the button to make it appear
     const skipButton = await this.testSubjects.find('discoverSkipTableButton');
     // force focus on it, to make it interactable
-    skipButton.focus();
+    await skipButton.focus();
     // now click it!
     return skipButton.click();
   }
@@ -521,8 +521,8 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
-  public showsErrorCallout() {
-    this.retry.try(async () => {
+  public async showsErrorCallout() {
+    await this.retry.try(async () => {
       await this.testSubjects.existOrFail('discoverErrorCalloutTitle');
     });
   }

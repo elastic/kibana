@@ -21,7 +21,7 @@ import { SearchSessionsMgmtAPI } from './api';
 import { getColumns } from './get_columns';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { SearchSessionsConfigSchema } from '../../../../../config';
+import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import { createSearchUsageCollectorMock } from '../../../collectors/mocks';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
