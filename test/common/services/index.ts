@@ -7,14 +7,6 @@
  */
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { DeploymentService } from './deployment';
-import { RandomnessService } from './randomness';
-import { SecurityServiceProvider } from './security';
-import { EsDeleteAllIndicesProvider } from './es_delete_all_indices';
-import { SavedObjectInfoService } from './saved_object_info';
-import { IndexPatternsService } from './index_patterns';
-import { BsearchService } from './bsearch';
-import { ConsoleProvider } from './console';
 
 // pick only services that work for any FTR config, e.g. 'samlAuth' requires SAML setup in config file
 const { es, esArchiver, kibanaServer, retry, supertestWithoutAuth, supertest, esSupertest } =
