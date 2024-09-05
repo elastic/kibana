@@ -58,6 +58,13 @@ export const getSecurityBaseKibanaFeature = ({
     insightsAndAlerting: ['triggersActions'],
   },
   alerting: SECURITY_RULE_TYPES,
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.securityGroupDescription',
+    {
+      defaultMessage:
+        'Privileges in this group can’t be granted globally if running with an Elastic Stack Subscription. Customize each sub-feature privilege individually.',
+    }
+  ),
   privileges: {
     all: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
