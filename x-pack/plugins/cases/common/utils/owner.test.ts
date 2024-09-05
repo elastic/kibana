@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { OWNER_INFO } from '../constants';
-import { getCaseOwnerByAppId, isValidOwner } from './owner';
+import { getCaseOwnerByAppId, getOwnerFromRuleConsumerProducer, isValidOwner } from './owner';
 
 describe('owner utils', () => {
   describe('isValidOwner', () => {
@@ -30,6 +31,44 @@ describe('owner utils', () => {
 
     it('return undefined for invalid application ID', () => {
       expect(getCaseOwnerByAppId('not-valid')).toBe(undefined);
+    });
+  });
+
+  describe('getOwnerFromRuleConsumerProducer', () => {
+    const owners = Object.values(OWNER_INFO).map((item) => ({
+      id: item.id,
+      validRuleConsumers: item.validRuleConsumers,
+    }));
+
+    it.each(owners)('returns owner %s correctly for consumer', (owner) => {
+      for (const consumer of owner.validRuleConsumers ?? []) {
+        const result = getOwnerFromRuleConsumerProducer(consumer);
+
+        expect(result).toBe(owner.id);
+      }
+    });
+
+    it.each(owners)('returns owner %s correctly for producer', (owner) => {
+      for (const producer of owner.validRuleConsumers ?? []) {
+        const result = getOwnerFromRuleConsumerProducer(undefined, producer);
+
+        expect(result).toBe(owner.id);
+      }
+    });
+
+    it('returns cases as a default owner', () => {
+      const owner = getOwnerFromRuleConsumerProducer();
+
+      expect(owner).toBe(OWNER_INFO.cases.id);
+    });
+
+    it('returns owner as per consumer when both values are passed ', () => {
+      const owner = getOwnerFromRuleConsumerProducer(
+        AlertConsumers.SIEM,
+        AlertConsumers.OBSERVABILITY
+      );
+
+      expect(owner).toBe(OWNER_INFO.securitySolution.id);
     });
   });
 });
