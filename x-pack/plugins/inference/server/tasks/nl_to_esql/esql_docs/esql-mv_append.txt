@@ -1,0 +1,17 @@
+## MV_APPEND
+
+The `MV_APPEND` function concatenates values of two multi-value fields.
+
+### Examples
+
+```esql
+ROW a = ["foo", "bar"], b = ["baz", "qux"]
+| EVAL c = MV_APPEND(a, b)
+| KEEP a, b, c
+```
+
+```esql
+ROW x = [1, 2, 3], y = [4, 5, 6]
+| EVAL z = MV_APPEND(x, y)
+| KEEP x, y, z
+```
