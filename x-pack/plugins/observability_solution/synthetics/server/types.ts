@@ -38,7 +38,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { TelemetryEventsSender } from './telemetry/sender';
-import { UptimeConfig } from '../common/config';
+import { UptimeConfig } from './config';
 import { SyntheticsEsClient } from './lib';
 
 export interface SyntheticsServerSetup {

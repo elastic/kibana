@@ -1,0 +1,15 @@
+## MV_MAX
+
+The `MV_MAX` function converts a multivalued expression into a single valued column containing the maximum value.
+
+### Examples
+
+```esql
+ROW a=[3, 5, 1]
+| EVAL max_a = MV_MAX(a)
+```
+
+```esql
+ROW a=["foo", "zoo", "bar"]
+| EVAL max_a = MV_MAX(a)
+```

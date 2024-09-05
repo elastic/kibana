@@ -14,6 +14,7 @@ import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
 import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
 import monitoringRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_monitoring.json';
 import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
+import ossPackagesTelemetrySchema from '@kbn/telemetry-plugin/schema/kbn_packages.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
 import type { UnencryptedTelemetryPayload } from '@kbn/telemetry-plugin/common/types';
 import type {
@@ -25,7 +26,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import type { SecurityService } from '@kbn/test-suites-src/common/services/security/security';
+import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
 import basicClusterFixture from './fixtures/basiccluster.json';
 import multiClusterFixture from './fixtures/multicluster.json';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -160,7 +161,10 @@ export default function ({ getService }: FtrProviderContext) {
           // It's nested because of the way it's collected and declared
           monitoringRootTelemetrySchema.properties.monitoringTelemetry.properties.stats.items
         );
-        const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
+        const plugins = deepmerge(
+          deepmerge(ossPluginsTelemetrySchema, ossPackagesTelemetrySchema),
+          xpackPluginsTelemetrySchema
+        );
 
         try {
           assertTelemetryPayload({ root, plugins }, localXPack);

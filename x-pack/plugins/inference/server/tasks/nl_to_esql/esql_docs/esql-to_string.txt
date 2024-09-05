@@ -1,0 +1,15 @@
+## TO_STRING
+
+Converts an input value into a string.
+
+### Examples
+
+```esql
+ROW a=10
+| EVAL j = TO_STRING(a)
+```
+
+```esql
+ROW a=[10, 9, 8]
+| EVAL j = TO_STRING(a)
+```
