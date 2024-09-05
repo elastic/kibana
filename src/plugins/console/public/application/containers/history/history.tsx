@@ -218,7 +218,7 @@ export function History() {
                   grow={false}
                   color="subdued"
                   paddingSize="s"
-                  css={{ marginTop: euiTheme.size.l }}
+                  css={{ paddingTop: euiTheme.size.l }}
                 >
                   <EuiText>
                     <EuiButtonEmpty

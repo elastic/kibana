@@ -7,7 +7,7 @@
  */
 import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { unlinkSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { resolve } from 'path';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -230,6 +230,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Clean up input file
         unlinkSync(filePath);
+      });
+
+      it('can export input as file', async () => {
+        await PageObjects.console.monaco.enterText('GET _search');
+        await PageObjects.console.clickExportButton();
+
+        // Wait for download to trigger
+        await PageObjects.common.sleep(1000);
+
+        const downloadPath = resolve(REPO_ROOT, `target/functional-tests/downloads/console_export`);
+        await retry.try(async () => {
+          const fileExists = existsSync(downloadPath);
+          expect(fileExists).to.be(true);
+        });
+
+        // Verify the downloaded file content
+        const fileContent = readFileSync(downloadPath, 'utf8');
+        expect(fileContent).to.be('GET _search');
+
+        // Clean up downloaded file
+        unlinkSync(downloadPath);
       });
     });
   });
