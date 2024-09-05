@@ -22,7 +22,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 1 more"`
+      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 2 more"`
     );
   });
 
@@ -47,7 +47,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
+      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 1 more"`
     );
   });
 
@@ -61,7 +61,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
+      `"name: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', version: Required"`
     );
   });
 
@@ -76,7 +76,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
+      `"name: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', version: Required"`
     );
   });
 
@@ -90,12 +90,24 @@ describe('RuleToImport', () => {
       severity: 'low',
       interval: '5m',
       type: 'query',
+      version: 1,
     };
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"risk_score: Required"`);
+  });
+
+  test('missing version is not valid', () => {
+    const payload: RuleToImportInput = getImportRulesSchemaMock();
+    // @ts-expect-error version is normally required
+    delete payload.version;
+
+    const result = RuleToImport.safeParse(payload);
+    expectParseError(result);
+
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"version: Required"`);
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval, index] does not validate', () => {
@@ -109,6 +121,7 @@ describe('RuleToImport', () => {
       type: 'query',
       interval: '5m',
       index: ['index-1'],
+      version: 1,
     };
 
     const result = RuleToImport.safeParse(payload);
@@ -117,7 +130,7 @@ describe('RuleToImport', () => {
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"risk_score: Required"`);
   });
 
-  test('[rule_id, description, from, to, name, severity, type, query, index, interval] does validate', () => {
+  test('[rule_id, description, from, to, name, severity, type, query, index, interval, version] does validate', () => {
     const payload: RuleToImportInput = {
       rule_id: 'rule-1',
       risk_score: 50,
@@ -130,6 +143,7 @@ describe('RuleToImport', () => {
       query: 'some query',
       index: ['index-1'],
       interval: '5m',
+      version: 1,
     };
 
     const result = RuleToImport.safeParse(payload);
@@ -137,7 +151,7 @@ describe('RuleToImport', () => {
     expectParseSuccess(result);
   });
 
-  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
+  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, version] does not validate', () => {
     const payload: Partial<RuleToImportInput> = {
       rule_id: 'rule-1',
       description: 'some description',
@@ -150,6 +164,7 @@ describe('RuleToImport', () => {
       type: 'query',
       query: 'some query',
       language: 'kuery',
+      version: 1,
     };
 
     const result = RuleToImport.safeParse(payload);
@@ -158,7 +173,7 @@ describe('RuleToImport', () => {
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"risk_score: Required"`);
   });
 
-  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does validate', () => {
+  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, version] does validate', () => {
     const payload: RuleToImportInput = {
       rule_id: 'rule-1',
       risk_score: 50,
@@ -172,6 +187,7 @@ describe('RuleToImport', () => {
       type: 'query',
       query: 'some query',
       language: 'kuery',
+      version: 1,
     };
 
     const result = RuleToImport.safeParse(payload);
@@ -179,7 +195,7 @@ describe('RuleToImport', () => {
     expectParseSuccess(result);
   });
 
-  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does validate', () => {
+  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index, version] does validate', () => {
     const payload: RuleToImportInput = {
       rule_id: 'rule-1',
       output_index: '.siem-signals',
@@ -194,6 +210,7 @@ describe('RuleToImport', () => {
       type: 'query',
       query: 'some query',
       language: 'kuery',
+      version: 1,
     };
 
     const result = RuleToImport.safeParse(payload);
@@ -213,6 +230,7 @@ describe('RuleToImport', () => {
       interval: '5m',
       type: 'query',
       risk_score: 50,
+      version: 1,
     };
 
     const result = RuleToImport.safeParse(payload);
@@ -233,6 +251,7 @@ describe('RuleToImport', () => {
       severity: 'low',
       interval: '5m',
       type: 'query',
+      version: 1,
     };
 
     const result = RuleToImport.safeParse(payload);
@@ -261,6 +280,7 @@ describe('RuleToImport', () => {
       severity: 'low',
       interval: '5m',
       type: 'query',
+      version: 1,
       threat: [
         {
           framework: 'someFramework',
@@ -880,7 +900,7 @@ describe('RuleToImport', () => {
       );
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note] does validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and version] does validate', () => {
       const payload: RuleToImportInput = {
         rule_id: 'rule-1',
         description: 'some description',
@@ -893,6 +913,7 @@ describe('RuleToImport', () => {
         type: 'query',
         risk_score: 50,
         note: '# some markdown',
+        version: 1,
       };
 
       const result = RuleToImport.safeParse(payload);
@@ -901,7 +922,7 @@ describe('RuleToImport', () => {
   });
 
   describe('exception_list', () => {
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and exceptions_list] does validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and exceptions_list] does validate', () => {
       const payload: RuleToImportInput = {
         rule_id: 'rule-1',
         description: 'some description',
@@ -916,13 +937,14 @@ describe('RuleToImport', () => {
         risk_score: 50,
         note: '# some markdown',
         exceptions_list: getListArrayMock(),
+        version: 1,
       };
 
       const result = RuleToImport.safeParse(payload);
       expectParseSuccess(result);
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, version, and empty exceptions_list] does validate', () => {
       const payload: RuleToImportInput = {
         rule_id: 'rule-1',
         description: 'some description',
@@ -937,6 +959,7 @@ describe('RuleToImport', () => {
         risk_score: 50,
         note: '# some markdown',
         exceptions_list: [],
+        version: 1,
       };
 
       const result = RuleToImport.safeParse(payload);
@@ -957,6 +980,7 @@ describe('RuleToImport', () => {
         filters: [],
         risk_score: 50,
         note: '# some markdown',
+        version: 1,
         exceptions_list: [{ id: 'uuid_here', namespace_type: 'not a namespace type' }],
       };
 
@@ -968,7 +992,7 @@ describe('RuleToImport', () => {
       );
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
       const payload: RuleToImportInput = {
         rule_id: 'rule-1',
         description: 'some description',
@@ -982,6 +1006,7 @@ describe('RuleToImport', () => {
         filters: [],
         risk_score: 50,
         note: '# some markdown',
+        version: 1,
       };
 
       const result = RuleToImport.safeParse(payload);
@@ -1012,6 +1037,7 @@ describe('RuleToImport', () => {
         data_view_id: 'logs-*',
         index: [],
         interval: '5m',
+        version: 1,
       };
 
       const result = RuleToImport.safeParse(payload);
@@ -1033,6 +1059,7 @@ describe('RuleToImport', () => {
         data_view_id: 'logs-*',
         index: ['auditbeat-*'],
         interval: '5m',
+        version: 1,
       };
 
       const result = RuleToImport.safeParse(payload);

@@ -18,6 +18,7 @@ import {
 /**
  * Differences from this and the createRulesSchema are
  *   - rule_id is required
+ *   - version is required
  *   - id is optional (but ignored in the import code - rule_id is exclusively used for imports)
  *   - immutable is optional (but ignored in the import code)
  *   - created_at is optional (but ignored in the import code)
@@ -30,6 +31,7 @@ export type RuleToImportInput = z.input<typeof RuleToImport>;
 export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
   ResponseFields.partial().extend({
     rule_id: RuleSignatureId,
+    version: RuleVersion,
     /*
       Overriding `required_fields` from ResponseFields because
       in ResponseFields `required_fields` has the output type,
@@ -40,12 +42,3 @@ export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
     required_fields: z.array(RequiredFieldInput).optional(),
   })
 );
-
-/**
- * PrebuiltRuleToImport represents a RuleToImport that has been validated as
- * representing a prebuilt rule. Part of this definition is the inclusion of a
- * "version" specifier, which is represented here.
- */
-export type PrebuiltRuleToImport = z.infer<typeof PrebuiltRuleToImport>;
-export type PrebuiltRuleToImportInput = z.input<typeof PrebuiltRuleToImport>;
-export const PrebuiltRuleToImport = RuleToImport.and(z.object({ version: RuleVersion }));

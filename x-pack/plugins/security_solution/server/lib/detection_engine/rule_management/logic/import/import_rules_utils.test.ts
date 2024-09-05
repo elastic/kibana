@@ -148,6 +148,7 @@ describe('importRules', () => {
     });
 
     it('rejects a prebuilt rule when version is missing', async () => {
+      // @ts-expect-error version is required on the type
       delete prebuiltRuleToImport.version;
       const ruleChunk = [prebuiltRuleToImport];
       const result = await importRules({

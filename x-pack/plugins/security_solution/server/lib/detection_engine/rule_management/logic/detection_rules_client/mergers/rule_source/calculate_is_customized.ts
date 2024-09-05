@@ -6,7 +6,7 @@
  */
 
 import type {
-  PrebuiltRuleToImport,
+  RuleToImport,
   RuleResponse,
 } from '../../../../../../../../common/api/detection_engine';
 import { MissingVersion } from '../../../../../../../../common/api/detection_engine';
@@ -17,7 +17,7 @@ import { convertPrebuiltRuleAssetToRuleResponse } from '../../converters/convert
 
 export function calculateIsCustomized(
   baseRule: PrebuiltRuleAsset | undefined,
-  nextRule: RuleResponse | PrebuiltRuleToImport
+  nextRule: RuleResponse | RuleToImport
 ) {
   if (baseRule == null) {
     // If the base version is missing, we consider the rule to be customized

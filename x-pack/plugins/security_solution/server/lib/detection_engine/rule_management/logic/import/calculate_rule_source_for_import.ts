@@ -6,7 +6,7 @@
  */
 
 import type {
-  PrebuiltRuleToImport,
+  RuleToImport,
   RuleSource,
 } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
@@ -25,7 +25,7 @@ export const calculateRuleSourceForImport = ({
   prebuiltRuleAssets,
   installedRuleIds,
 }: {
-  rule: PrebuiltRuleToImport;
+  rule: RuleToImport;
   prebuiltRuleAssets: PrebuiltRuleAsset[];
   installedRuleIds: string[];
 }): RuleSource => {

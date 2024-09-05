@@ -18,6 +18,7 @@ export const getImportRulesSchemaMock = (rewrites?: Partial<RuleToImport>): Rule
     language: 'kuery',
     rule_id: 'rule-1',
     immutable: false,
+    version: 1,
     ...rewrites,
   } as RuleToImport);
 
@@ -31,6 +32,7 @@ export const getImportRulesWithIdSchemaMock = (ruleId = 'rule-1'): RuleToImport 
   risk_score: 55,
   language: 'kuery',
   rule_id: ruleId,
+  version: 1,
   immutable: false,
 });
 
@@ -87,6 +89,7 @@ export const getImportThreatMatchRulesSchemaMock = (
       },
     ],
     immutable: false,
+    version: 1,
     ...rewrites,
   } as RuleToImport);
 

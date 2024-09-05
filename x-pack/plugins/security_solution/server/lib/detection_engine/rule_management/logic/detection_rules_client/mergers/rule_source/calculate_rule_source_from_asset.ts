@@ -8,7 +8,7 @@
 import type {
   RuleSource,
   RuleResponse,
-  PrebuiltRuleToImport,
+  RuleToImport,
 } from '../../../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import { calculateIsCustomized } from './calculate_is_customized';
@@ -18,7 +18,7 @@ export const calculateRuleSourceFromAsset = ({
   prebuiltRuleAsset,
   ruleIdExists,
 }: {
-  rule: RuleResponse | PrebuiltRuleToImport;
+  rule: RuleResponse | RuleToImport;
   prebuiltRuleAsset: PrebuiltRuleAsset | undefined;
   ruleIdExists: boolean;
 }): RuleSource => {
