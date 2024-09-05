@@ -32,7 +32,6 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security', function () {
     describe('Roles', () => {
       before(async () => {
-        // roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin'); // search projects can use developer role, how to implement?
         supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
           withInternalHeaders: true,
           withCustomHeaders: { 'kbn-xsrf': 'true' },
