@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { DataViewSpec } from '@kbn/data-plugin/common';
+
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
-import { DataViewSpec } from '@kbn/data-plugin/common';
-import { FtrService } from '../ftr_provider_context';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { FtrService } from './ftr_provider_context';
 
 export class IndexPatternsService extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
