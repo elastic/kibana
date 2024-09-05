@@ -12,14 +12,14 @@ import { monaco } from '@kbn/monaco';
 
 const mockPopulateContext = jest.fn();
 
-jest.mock('../../../../../lib/autocomplete/engine', () => {
+jest.mock('../../../../lib/autocomplete/engine', () => {
   return {
     populateContext: (...args: any) => {
       mockPopulateContext(args);
     },
   };
 });
-import { AutoCompleteContext } from '../../../../../lib/autocomplete/types';
+import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
 import {
   getDocumentationLinkFromAutocomplete,
   getUrlPathCompletionItems,
