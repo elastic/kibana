@@ -19,6 +19,7 @@ import { sortAndTruncateAnalyzedFields } from '../../../common/utils/sort_and_tr
 import { mergeSampleDocumentsWithFieldCaps } from '../../util/merge_sample_documents_with_field_caps';
 import { getSampleDocuments } from '../get_sample_documents';
 import { StepProcess, runSteps } from '../run_steps';
+import { confirmConstantsInDataset } from './confirm_constants_in_dataset';
 
 async function getKeywordAndNumericalFields({
   indexPatterns,
@@ -167,14 +168,66 @@ export function extractMetricDefinitions({
       });
 
       const possibleConstantFields = documentAnalysis.fields.filter(
-        (field) => field.cardinality === 1
+        (field) => field.cardinality === 1 || field.cardinality === null
       );
 
-      const [] = await Promise.all([]);
+      const constants = await step('extracting_constant_keywords', () =>
+        confirmConstantsInDataset({
+          indexPatterns,
+          constants: possibleConstantFields.map((field) => ({ field: field.name })),
+          esClient: obsEsClient,
+        })
+      );
+
+      const truncatedDocumentAnalysis = sortAndTruncateAnalyzedFields(documentAnalysis);
+
+      const labels = await step('describe_dataset', async () => {
+        const actualConstantFields = constants.filter((constant) => constant.constant);
+
+        const outputCompleteEvent = await lastValueFrom(
+          inferenceClient
+            .output('describe_dataset', {
+              connectorId,
+              system: `You are a helpful assistant for Elastic Observability.
+              Your goal is to help users understand their data. You are a
+              Distinguished SRE, who is comfortable explaining Observability
+              concepts to more novice SREs. You excel at understanding
+              Observability signals, extracting metrics, labels and filters
+              from logs data, and building dashboards on top of log data
+              using the Elastic platform.`,
+              input: `Your current task is to describe a dataset using sample
+            documents and constant keywords found in the dataset. The
+            description you generate should help users understand the data
+            in this dataset: what it means, and what value can be extracted
+            from it that is helpful in observing the user's systems.
+
+            ## Dataset name
+
+            The dataset's name is ${indexPatterns.join(', ')}
+
+            ${
+              actualConstantFields.length
+                ? `## Constant keywords
+
+            The following constant values are found in the dataset. They
+            are the same on every document:
+
+            ${actualConstantFields.map((field) => `- ${field.field}: ${field.value}`).join('\n')}`
+                : ``
+            }
+                
+            ## Document analysis
+            
+            ${JSON.stringify(truncatedDocumentAnalysis)}
+            `,
+            })
+            .pipe(withoutOutputUpdateEvents())
+        );
+
+        return outputCompleteEvent.data.output;
+      });
 
       return step('extracting_metric_definitions', async (): Promise<MetricDefinition[]> => {
-        const truncatedDocumentAnalysis = sortAndTruncateAnalyzedFields(documentAnalysis);
-
         logger.debug(() => JSON.stringify(truncatedDocumentAnalysis));
 
         const output = await lastValueFrom(
