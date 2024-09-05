@@ -7,7 +7,6 @@
 
 import { Exception } from '../../typings/es_schemas/raw/error_raw';
 import { EventOutcome } from '../../typings/es_schemas/raw/fields/event_outcome';
-import { SpanLink } from '../../typings/es_schemas/raw/fields/span_links';
 import { AgentName } from '../../typings/es_schemas/ui/fields/agent';
 
 export interface WaterfallTransaction {
@@ -25,7 +24,8 @@ export interface WaterfallTransaction {
   'transaction.type': string[];
   'transaction.result'?: string[];
   'faas.coldstart'?: boolean[];
-  'span.links'?: SpanLink[];
+  'span.links.span.id'?: string[];
+  'span.links.trace.id'?: string[];
 }
 
 export interface WaterfallSpan {
@@ -47,7 +47,8 @@ export interface WaterfallSpan {
   'span.composite.compression_strategy'?: string[];
   'span.sync'?: boolean[];
   'span.duration.us': number[];
-  'span.links'?: SpanLink[];
+  'span.links.span.id'?: string[];
+  'span.links.trace.id'?: string[];
   'transaction.id'?: string[];
   'child.id'?: string[];
 }

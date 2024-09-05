@@ -199,7 +199,7 @@ export const tasks: TelemetryTask[] = [
             },
           },
         })
-      ).hits.hits[0] as { fields: { '@timestamp': string[] } };
+      ).hits.hits[0] as unknown as { fields: { '@timestamp': string[] } };
 
       if (!lastTransaction) {
         return {};

@@ -8,6 +8,8 @@
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { Dictionary, first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { dedot } from '@kbn/apm-synthtrace-client';
+import { SpanLink } from '@kbn/apm-types';
 import { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
 import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
@@ -23,7 +25,8 @@ import {
   TRANSACTION_ID,
   TRANSACTION_DURATION,
   SERVICE_NAME,
-  SPAN_LINKS,
+  SPAN_LINKS_SPAN_ID,
+  SPAN_LINKS_TRACE_ID,
   SPAN_ID,
   SPAN_TYPE,
   CHILD_ID,
@@ -140,6 +143,18 @@ function getTransactionItem(
   transaction: WaterfallTransaction,
   linkedChildrenCount: number = 0
 ): IWaterfallTransaction {
+  const spanLinks: SpanLink[] = [];
+  for (let i = 0; i < (transaction[SPAN_LINKS_TRACE_ID]?.length ?? 0); i++) {
+    spanLinks.push(
+      dedot(
+        {
+          'trace.id': transaction[SPAN_LINKS_TRACE_ID]?.[i],
+          'span.id': transaction[SPAN_LINKS_SPAN_ID]?.[i],
+        },
+        {}
+      ) as SpanLink
+    );
+  }
   return {
     docType: 'transaction',
     doc: transaction,
@@ -151,13 +166,23 @@ function getTransactionItem(
     legendValues: getLegendValues(transaction),
     color: '',
     spanLinksCount: {
-      linkedParents: transaction[SPAN_LINKS]?.length ?? 0,
+      linkedParents: spanLinks?.length ?? 0,
       linkedChildren: linkedChildrenCount,
     },
   };
 }
 
 function getSpanItem(span: WaterfallSpan, linkedChildrenCount: number = 0): IWaterfallSpan {
+  const spanLinks: SpanLink[] = [];
+  for (let i = 0; i < (span[SPAN_LINKS_TRACE_ID]?.length ?? 0); i++) {
+    spanLinks.push(
+      dedot(
+        { 'trace.id': span[SPAN_LINKS_TRACE_ID]?.[i], 'span.id': span[SPAN_LINKS_SPAN_ID]?.[i] },
+        {}
+      ) as SpanLink
+    );
+  }
+
   return {
     docType: 'span',
     doc: span,
@@ -169,7 +194,7 @@ function getSpanItem(span: WaterfallSpan, linkedChildrenCount: number = 0): IWat
     legendValues: getLegendValues(span),
     color: '',
     spanLinksCount: {
-      linkedParents: span[SPAN_LINKS]?.length ?? 0,
+      linkedParents: spanLinks?.length ?? 0,
       linkedChildren: linkedChildrenCount,
     },
   };
@@ -474,7 +499,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   const legends = getLegends(items);
 
   const orphanTraceItemsCount = getOrphanTraceItemsCount(traceItems.traceDocs);
-q
+
   return {
     entryWaterfallTransaction,
     rootWaterfallTransaction,
