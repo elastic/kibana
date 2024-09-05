@@ -217,6 +217,16 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
       params: [{}, { literalOptions: ['asc', 'desc'] }],
     }),
   },
+  percentile: {
+    signatures: new Array(9).fill({
+      params: [{}, { constantOnly: true }],
+    }),
+  },
+  top: {
+    signatures: new Array(6).fill({
+      params: [{}, { constantOnly: true }, { constantOnly: true, literalOptions: ['asc', 'desc'] }],
+    }),
+  },
 };
 
 const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
