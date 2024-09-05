@@ -33,7 +33,6 @@ export const services = {
   indexPatterns: IndexPatternsService,
   savedObjectInfo: SavedObjectInfoService,
   randomness: RandomnessService,
-  supertestWithoutAuth: SupertestWithoutAuthProvider,
   samlAuth: SamlAuthProvider,
   supertest: KibanaSupertestProvider,
   esSupertest: ElasticsearchSupertestProvider,
