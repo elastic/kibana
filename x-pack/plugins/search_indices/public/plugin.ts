@@ -11,7 +11,6 @@ import type {
   SearchIndicesAppPluginStartDependencies,
   SearchIndicesPluginSetup,
   SearchIndicesPluginStart,
-  SearchIndicesServicesContext,
   SearchIndicesServicesContextDeps,
 } from './types';
 

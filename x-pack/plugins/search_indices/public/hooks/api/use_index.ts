@@ -15,11 +15,12 @@ export const useIndex = (indexName: string) => {
   const queryKey = ['fetchIndex', indexName];
   const result = useQuery({
     queryKey,
-    refetchInterval:POLLING_INTERVAL,
-    refetchIntervalInBackground:true,
-    refetchOnWindowFocus:"always",
+    refetchInterval: POLLING_INTERVAL,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: 'always',
     retry: true,
-    queryFn: () => http.fetch<Index>(`/internal/index_management/indices/${encodeURIComponent(indexName)}`),
+    queryFn: () =>
+      http.fetch<Index>(`/internal/index_management/indices/${encodeURIComponent(indexName)}`),
   });
   return { queryKey, ...result };
 };
