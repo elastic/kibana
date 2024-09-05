@@ -200,7 +200,6 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
             isReadOnly={isReadOnly}
             currentSpace={space}
             assignedRoles={state.roles}
-            onClickBulkEdit={showRolesPrivilegeEditor}
             onClickRowEditAction={(rowRecord) => showRolesPrivilegeEditor([rowRecord])}
             onClickBulkRemove={async (selectedRoles) => {
               await removeRole(selectedRoles);

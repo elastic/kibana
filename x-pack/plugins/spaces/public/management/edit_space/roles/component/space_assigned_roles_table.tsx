@@ -40,7 +40,6 @@ interface ISpaceAssignedRolesTableProps {
   currentSpace: Space;
   assignedRoles: Map<Role['name'], Role>;
   onClickAssignNewRole: () => Promise<void>;
-  onClickBulkEdit: (selectedRoles: Role[]) => void;
   onClickBulkRemove: (selectedRoles: Role[]) => void;
   onClickRowEditAction: (role: Role) => void;
   onClickRowRemoveAction: (role: Role) => void;
@@ -240,7 +239,6 @@ export const SpaceAssignedRolesTable = ({
   assignedRoles,
   currentSpace,
   onClickAssignNewRole,
-  onClickBulkEdit,
   onClickBulkRemove,
   onClickRowEditAction,
   onClickRowRemoveAction,
@@ -431,7 +429,6 @@ export const SpaceAssignedRolesTable = ({
     );
   }, [
     isBulkActionContextOpen,
-    onClickBulkEdit,
     onClickBulkRemove,
     pagination.index,
     pagination.size,
