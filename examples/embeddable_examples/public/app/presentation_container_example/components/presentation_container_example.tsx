@@ -7,7 +7,14 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiButtonEmpty, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -65,15 +72,32 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
 
       <EuiSpacer size="m" />
 
-      <TopNav
-        dataLoading={dataLoading ?? false}
-        onReload={componentApi.onReload}
-        onSave={componentApi.onSave}
-        resetUnsavedChanges={parentApi.resetUnsavedChanges}
-        setTimeRange={componentApi.setTimeRange}
-        timeRange={timeRange}
-        unsavedChanges$={parentApi.unsavedChanges}
-      />
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiSuperDatePicker
+            isLoading={dataLoading}
+            start={timeRange?.from}
+            end={timeRange?.to}
+            onTimeChange={({ start, end }) => {
+              componentApi.setTimeRange({
+                from: start,
+                to: end,
+              });
+            }}
+            onRefresh={() => {
+              componentApi.onReload();
+            }}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <TopNav
+            onSave={componentApi.onSave}
+            resetUnsavedChanges={parentApi.resetUnsavedChanges}
+            unsavedChanges$={parentApi.unsavedChanges}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
