@@ -371,19 +371,6 @@ export const SpaceAssignedRolesTable = ({
                       width: 180,
                       items: [
                         {
-                          icon: <EuiIcon type="pencil" />,
-                          name: i18n.translate(
-                            'xpack.spaces.management.spaceDetails.rolesTable.bulkActions.editPrivilege',
-                            {
-                              defaultMessage: 'Edit privileges',
-                            }
-                          ),
-                          onClick: async () => {
-                            onClickBulkEdit(selectedRoles);
-                            setBulkActionContextOpen(false);
-                          },
-                        },
-                        {
                           icon: <EuiIcon type="trash" color="danger" />,
                           name: (
                             <EuiTextColor color="danger">
