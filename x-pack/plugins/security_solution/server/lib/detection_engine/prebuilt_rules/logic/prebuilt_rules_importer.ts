@@ -60,11 +60,12 @@ export class PrebuiltRulesImporter implements IPrebuiltRulesImporter {
   }
 
   /**
-   * Retrieves the prebuilt rule assets for the specified rules being imported. If
-   * @param rules - The rules to be imported
+   * Retrieves prebuilt rule assets for rules that are being imported.
+   * @param rules - The rules being imported
    *
    * @returns The prebuilt rule assets corresponding to the specified prebuilt
    * rules, which are used to determine how to import those rules (create vs. update, etc.).
+   * Assets match the `rule_id` and `version` of the specified rules.
    */
   public async fetchPrebuiltRuleAssets({
     rules,
@@ -95,7 +96,7 @@ export class PrebuiltRulesImporter implements IPrebuiltRulesImporter {
   }
 
   /**
-   * Retrieves the rule IDs (`rule_id`) of installed prebuilt rules matching those
+   * Retrieves the rule IDs (`rule_id`s) of installed prebuilt rules matching those
    * of the specified rules. Can be used to determine whether the rule being
    * imported is a custom rule or a prebuilt rule.
    *
