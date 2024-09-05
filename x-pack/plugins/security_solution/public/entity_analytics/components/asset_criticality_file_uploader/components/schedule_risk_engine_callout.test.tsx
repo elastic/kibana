@@ -9,7 +9,6 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { ScheduleRiskEngineCallout } from './schedule_risk_engine_callout';
 
-const THIRTY_MINUTES = 30 * 60 * 1000;
 const oneHourFromNow = () => {
   const date = new Date();
   date.setHours(date.getHours() + 1);
