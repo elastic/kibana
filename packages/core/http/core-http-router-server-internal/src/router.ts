@@ -39,6 +39,7 @@ import { wrapErrors } from './error_wrapper';
 import { Method } from './versioned_router/types';
 import { prepareRouteConfigValidation } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
+import { validRouteSecurity } from './security_route_config_validator';
 
 export type ContextEnhancer<
   P,
@@ -212,8 +213,10 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           method,
           path: getRouteFullPath(this.routerPath, route.path),
           options: validOptions(method, route),
-          // // TODO: [Authz] Implement validation in https://github.com/elastic/kibana/issues/191713
-          security: route.security,
+          // For the versioned route security is validated in the versioned router
+          security: internalOptions.isVersioned
+            ? route.security
+            : validRouteSecurity(route.security),
           /** Below is added for introspection */
           validationSchemas: route.validate,
           isVersioned: internalOptions.isVersioned,

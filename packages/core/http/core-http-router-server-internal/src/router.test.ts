@@ -232,6 +232,49 @@ describe('Router', () => {
       );
     });
 
+    it('throws if enabled security config is not valid', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      expect(() =>
+        router.get(
+          // we use 'any' because validate requires valid Type or function usage
+          {
+            path: '/',
+            validate: false,
+            security: {
+              authz: {
+                requiredPrivileges: [],
+              },
+            },
+          },
+          (context, req, res) => res.ok({})
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]"`
+      );
+    });
+
+    it('throws if disabled security config does not provide opt-out reason', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      expect(() =>
+        router.get(
+          // we use 'any' because validate requires valid Type or function usage
+          {
+            path: '/',
+            validate: false,
+            security: {
+              // @ts-expect-error
+              authz: {
+                enabled: false,
+              },
+            },
+          },
+          (context, req, res) => res.ok({})
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authz.reason]: expected value of type [string] but got [undefined]"`
+      );
+    });
+
     it('should default `output: "stream" and parse: false` when no body validation is required but not a GET', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.post({ path: '/', validate: {} }, (context, req, res) => res.ok({}));
