@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import _, { omit } from 'lodash';
+import _ from 'lodash';
 import { first } from 'rxjs';
 
 import {
@@ -17,14 +17,18 @@ import {
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
 } from './task';
-import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import {
+  ElasticsearchClientMock,
+  elasticsearchServiceMock,
+  savedObjectsServiceMock,
+} from '@kbn/core/server/mocks';
 import { TaskStore, SearchOpts, AggregationOpts, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
-import { asErr } from './lib/result_type';
+import { asErr, asOk } from './lib/result_type';
 import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const mockGetValidatedTaskInstanceFromReading = jest.fn();
@@ -347,7 +351,7 @@ describe('TaskStore', () => {
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
 
-    test('excludes state and params from source when excludeState is true', async () => {
+    test('excludes state and params from source when limitResponse is true', async () => {
       const { args } = await testFetch({}, [], true);
       expect(args).toMatchObject({
         index: 'tasky',
@@ -889,61 +893,6 @@ describe('TaskStore', () => {
       );
     });
 
-    test(`logs warning and doesn't validate whenever excludeLargeFields option is passed-in`, async () => {
-      const task = {
-        runAt: mockedDate,
-        scheduledAt: mockedDate,
-        startedAt: null,
-        retryAt: null,
-        id: 'task:324242',
-        params: { hello: 'world' },
-        state: { foo: 'bar' },
-        taskType: 'report',
-        attempts: 3,
-        status: 'idle' as TaskStatus,
-        version: '123',
-        ownerId: null,
-        traceparent: '',
-      };
-
-      savedObjectsClient.bulkUpdate.mockResolvedValue({
-        saved_objects: [
-          {
-            id: '324242',
-            type: 'task',
-            attributes: {
-              ...task,
-              state: '{"foo":"bar"}',
-              params: '{"hello":"world"}',
-            },
-            references: [],
-            version: '123',
-          },
-        ],
-      });
-
-      await store.bulkUpdate([task], { validate: true, excludeLargeFields: true });
-
-      expect(logger.warn).toHaveBeenCalledWith(
-        `Skipping validation for bulk update because excludeLargeFields=true.`
-      );
-      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
-        validate: false,
-      });
-
-      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
-        [
-          {
-            id: task.id,
-            type: 'task',
-            version: task.version,
-            attributes: omit(taskInstanceToAttributes(task, task.id), ['state', 'params']),
-          },
-        ],
-        { refresh: false }
-      );
-    });
-
     test('pushes error from saved objects client to errors$', async () => {
       const task = {
         runAt: mockedDate,
@@ -966,6 +915,373 @@ describe('TaskStore', () => {
       await expect(
         store.bulkUpdate([task], { validate: true })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+  });
+
+  describe('bulkPartialUpdate', () => {
+    let store: TaskStore;
+    let esClient: ElasticsearchClientMock;
+    const logger = mockLogger();
+
+    beforeAll(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      store = new TaskStore({
+        logger,
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+      });
+    });
+
+    test(`should return immediately if no docs to update`, async () => {
+      await store.bulkPartialUpdate([]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    test(`should perform partial update using esClient`, async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        ownerId: 'testtest',
+        traceparent: '',
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:324242',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([task]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'task:324242', if_primary_term: 1, if_seq_no: 4 } },
+          {
+            doc: {
+              task: {
+                attempts: 3,
+                ownerId: 'testtest',
+                params: '{"hello":"world"}',
+                retryAt: null,
+                runAt: '2019-02-12T21:01:22.479Z',
+                scheduledAt: '2019-02-12T21:01:22.479Z',
+                startedAt: null,
+                state: '{"foo":"bar"}',
+                status: 'idle',
+                taskType: 'report',
+                traceparent: '',
+              },
+            },
+          },
+        ],
+        index: 'tasky',
+        refresh: false,
+      });
+
+      expect(result).toEqual([asOk(task)]);
+    });
+
+    test(`should perform partial update with minimal fields`, async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:324242',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([task]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'task:324242', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { attempts: 3 } } },
+        ],
+        index: 'tasky',
+        refresh: false,
+      });
+
+      expect(result).toEqual([asOk(task)]);
+    });
+
+    test(`should perform partial update with no version`, async () => {
+      const task = {
+        id: '324242',
+        attempts: 3,
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:324242',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([task]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [{ update: { _id: 'task:324242' } }, { doc: { task: { attempts: 3 } } }],
+        index: 'tasky',
+        refresh: false,
+      });
+
+      expect(result).toEqual([asOk(task)]);
+    });
+
+    test(`should gracefully handle errors within the response`, async () => {
+      const task1 = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+
+      const task2 = {
+        id: '45343254',
+        version: 'WzQsMV0=',
+        status: 'running' as TaskStatus,
+      };
+
+      const task3 = {
+        id: '7845',
+        version: 'WzQsMV0=',
+        runAt: mockedDate,
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:324242',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:45343254',
+              _version: 2,
+              error: {
+                type: 'document_missing_exception',
+                reason: '[5]: document missing',
+                index_uuid: 'aAsFqTI0Tc2W0LCWgPNrOA',
+                shard: '0',
+                index: '.kibana_task_manager_8.16.0_001',
+              },
+              status: 404,
+            },
+          },
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:7845',
+              _version: 2,
+              status: 409,
+              error: { type: 'anything', reason: 'some-reason', index: 'some-index' },
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([task1, task2, task3]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'task:324242', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { attempts: 3 } } },
+          { update: { _id: 'task:45343254', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { status: 'running' } } },
+          { update: { _id: 'task:7845', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { runAt: mockedDate.toISOString() } } },
+        ],
+        index: 'tasky',
+        refresh: false,
+      });
+
+      expect(result).toEqual([
+        asOk(task1),
+        asErr({
+          type: 'task',
+          id: '45343254',
+          status: 404,
+          error: {
+            type: 'document_missing_exception',
+            reason: '[5]: document missing',
+            index_uuid: 'aAsFqTI0Tc2W0LCWgPNrOA',
+            shard: '0',
+            index: '.kibana_task_manager_8.16.0_001',
+          },
+        }),
+        asErr({
+          type: 'task',
+          id: '7845',
+          status: 409,
+          error: { type: 'anything', reason: 'some-reason', index: 'some-index' },
+        }),
+      ]);
+    });
+
+    test(`should gracefully handle malformed errors within the response`, async () => {
+      const task1 = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+
+      const task2 = {
+        id: '45343254',
+        version: 'WzQsMV0=',
+        status: 'running' as TaskStatus,
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:324242',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _version: 2,
+              error: {
+                type: 'document_missing_exception',
+                reason: '[5]: document missing',
+                index_uuid: 'aAsFqTI0Tc2W0LCWgPNrOA',
+                shard: '0',
+                index: '.kibana_task_manager_8.16.0_001',
+              },
+              status: 404,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([task1, task2]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'task:324242', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { attempts: 3 } } },
+          { update: { _id: 'task:45343254', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { status: 'running' } } },
+        ],
+        index: 'tasky',
+        refresh: false,
+      });
+
+      expect(result).toEqual([
+        asOk(task1),
+        asErr({
+          type: 'task',
+          id: 'unknown',
+          error: { type: 'malformed response' },
+        }),
+      ]);
+    });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      esClient.bulk.mockRejectedValue(new Error('Failure'));
+      await expect(store.bulkPartialUpdate([task])).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure"`
+      );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });
