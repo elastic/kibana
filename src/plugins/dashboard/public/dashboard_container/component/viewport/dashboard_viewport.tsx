@@ -72,6 +72,10 @@ export const DashboardViewportComponent = () => {
     };
   }, [controlGroupApi]);
 
+  // Bug in main where panels are loaded before control filters are ready
+  // Want to migrate to react embeddable controls with same behavior
+  // TODO - do not load panels until control filters are ready
+  /*
   const [dashboardInitialized, setDashboardInitialized] = useState(false);
   useEffect(() => {
     let ignore = false;
@@ -84,6 +88,7 @@ export const DashboardViewportComponent = () => {
       ignore = true;
     };
   }, [dashboard]);
+  */
 
   return (
     <div
@@ -124,8 +129,10 @@ export const DashboardViewportComponent = () => {
         data-shared-items-count={panelCount}
       >
         {/* Wait for `viewportWidth` to actually be set before rendering the dashboard grid - 
-            otherwise, there is a race condition where the panels can end up being squashed */}
-        {viewportWidth !== 0 && dashboardInitialized && (
+            otherwise, there is a race condition where the panels can end up being squashed 
+            TODO only render when dashboardInitialized
+        */}
+        {viewportWidth !== 0 && (
           <DashboardGrid viewportWidth={viewportWidth} />
         )}
       </div>

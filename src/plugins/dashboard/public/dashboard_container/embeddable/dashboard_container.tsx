@@ -184,7 +184,7 @@ export class DashboardContainer
   private scrollPosition?: number;
 
   // setup
-  public untilContainerInitialized: () => Promise<void>;
+  // public untilContainerInitialized: () => Promise<void>;
 
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
@@ -223,6 +223,7 @@ export class DashboardContainer
     initialComponentState?: DashboardPublicState
   ) {
     const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
+    /*
     async function untilContainerInitialized(): Promise<void> {
       return new Promise((resolve) => {
         controlGroupApi$
@@ -238,6 +239,7 @@ export class DashboardContainer
           });
       });
     }
+    */
 
     const {
       usageCollection,
@@ -251,13 +253,18 @@ export class DashboardContainer
       { embeddableLoaded: {} },
       getEmbeddableFactory,
       parent,
+      // Bug in main where panels are loaded before control filters are ready
+      // Want to migrate to react embeddable controls with same behavior
+      // TODO - do not load panels until control filters are ready
+      /*
       {
-        untilContainerInitialized,
+        untilContainerInitialized: undefined,
       }
+      */
     );
 
     this.controlGroupApi$ = controlGroupApi$;
-    this.untilContainerInitialized = untilContainerInitialized;
+    //this.untilContainerInitialized = untilContainerInitialized;
 
     this.trackPanelAddMetric = usageCollection.reportUiCounter?.bind(
       usageCollection,
