@@ -83,7 +83,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         });
 
         // xpack.spaces.allowFeatureVisibility: false for all solutions
-        it(`does not display feaure visibilty `, async () => {
+        it(`does not display feature visibility`, async () => {
           await svlCommon.navigateToApp('management');
           await testSubjects.click('app-card-spaces');
 

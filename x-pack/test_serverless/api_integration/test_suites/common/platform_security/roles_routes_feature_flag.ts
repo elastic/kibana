@@ -7,8 +7,9 @@
 
 import expect from '@kbn/expect';
 import type { Role } from '@kbn/security-plugin-types-common';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { clearAllRoles } from '../../../../shared/lib';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../shared/services';
 
 // Notes:
 // Test coverage comes from stateful test suite: x-pack/test/api_integration/apis/security/roles.ts
@@ -24,38 +25,31 @@ import { RoleCredentials } from '../../../../shared/services';
 // esServerArgs: ['xpack.security.authc.native_roles.enabled=true'],
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestWithAdminScope: SupertestWithRoleScopeType;
   const es = getService('es');
-  let roleAuthc: RoleCredentials;
 
   describe('security', function () {
     describe('Roles', () => {
       before(async () => {
-        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin'); // search projects can use developer role, how to implement?
+        // roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin'); // search projects can use developer role, how to implement?
+        supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+          withInternalHeaders: true,
+          withCustomHeaders: { 'kbn-xsrf': 'true' },
+        });
       });
       after(async () => {
-        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await clearAllRoles(es);
       });
 
       describe('Create Role', () => {
         it('should allow us to create an empty role', async () => {
-          await supertestWithoutAuth
-            .put('/api/security/role/empty_role')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
-            .send({})
-            .expect(204);
+          await supertestWithAdminScope.put('/api/security/role/empty_role').send({}).expect(204);
         });
 
         it('should create a role with kibana and elasticsearch privileges', async () => {
-          await supertestWithoutAuth
+          await supertestWithAdminScope
             .put('/api/security/role/role_with_privileges')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .send({
               metadata: {
                 foo: 'test-metadata',
@@ -120,11 +114,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it(`should create a role with kibana and FLS/DLS elasticsearch privileges`, async () => {
-          await supertestWithoutAuth
+          await supertestWithAdminScope
             .put('/api/security/role/role_with_privileges_dls_fls')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .send({
               metadata: {
                 foo: 'test-metadata',
@@ -149,11 +140,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         // serverless only (stateful will allow)
         it(`should not create a role with 'run as' privileges`, async () => {
-          await supertestWithoutAuth
+          await supertestWithAdminScope
             .put('/api/security/role/role_with_privileges')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .send({
               metadata: {
                 foo: 'test-metadata',
@@ -186,12 +174,9 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         // serverless only (stateful will allow)
-        it(`should not create a role with remote cluseter privileges`, async () => {
-          await supertestWithoutAuth
+        it(`should not create a role with remote cluster privileges`, async () => {
+          await supertestWithAdminScope
             .put('/api/security/role/role_with_privileges')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .send({
               metadata: {
                 foo: 'test-metadata',
@@ -230,11 +215,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         // serverless only (stateful will allow)
         it(`should not create a role with remote index privileges`, async () => {
-          await supertestWithoutAuth
+          await supertestWithAdminScope
             .put('/api/security/role/role_with_privileges')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .send({
               metadata: {
                 foo: 'test-metadata',
@@ -287,21 +269,15 @@ export default function ({ getService }: FtrProviderContext) {
               },
             });
 
-            await supertestWithoutAuth
+            await supertestWithAdminScope
               .put('/api/security/role/test_role?createOnly=true')
-              .set('kbn-xsrf', 'xxx')
-              .set(svlCommonApi.getInternalRequestHeader())
-              .set(roleAuthc.apiKeyHeader)
               .send({})
               .expect(409);
           });
 
           it('should succeed when role does not exist', async () => {
-            await supertestWithoutAuth
+            await supertestWithAdminScope
               .put('/api/security/role/new_role?createOnly=true')
-              .set('kbn-xsrf', 'xxx')
-              .set(svlCommonApi.getInternalRequestHeader())
-              .set(roleAuthc.apiKeyHeader)
               .send({})
               .expect(204);
           });
@@ -346,48 +322,43 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithoutAuth
-            .get('/api/security/role/role_to_get')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
-            .expect(200, {
-              name: 'role_to_get',
-              metadata: {
-                foo: 'test-metadata',
-              },
-              transient_metadata: { enabled: true },
-              elasticsearch: {
-                cluster: ['manage'],
-                indices: [
-                  {
-                    names: ['logstash-*'],
-                    privileges: ['read', 'view_index_metadata'],
-                    allow_restricted_indices: false,
-                  },
-                ],
-                run_as: [],
-              },
-              kibana: [
+          await supertestWithAdminScope.get('/api/security/role/role_to_get').expect(200, {
+            name: 'role_to_get',
+            metadata: {
+              foo: 'test-metadata',
+            },
+            transient_metadata: { enabled: true },
+            elasticsearch: {
+              cluster: ['manage'],
+              indices: [
                 {
-                  base: ['read'],
-                  feature: {},
-                  spaces: ['*'],
-                },
-                {
-                  base: [],
-                  feature: {
-                    dashboard: ['read'],
-                    discover: ['all'],
-                    ml: ['all'],
-                  },
-                  spaces: ['marketing', 'sales'],
+                  names: ['logstash-*'],
+                  privileges: ['read', 'view_index_metadata'],
+                  allow_restricted_indices: false,
                 },
               ],
+              run_as: [],
+            },
+            kibana: [
+              {
+                base: ['read'],
+                feature: {},
+                spaces: ['*'],
+              },
+              {
+                base: [],
+                feature: {
+                  dashboard: ['read'],
+                  discover: ['all'],
+                  ml: ['all'],
+                },
+                spaces: ['marketing', 'sales'],
+              },
+            ],
 
-              _transform_error: [],
-              _unrecognized_applications: ['apm'],
-            });
+            _transform_error: [],
+            _unrecognized_applications: ['apm'],
+          });
         });
 
         it('should get roles by space id', async () => {
@@ -443,11 +414,8 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithoutAuth
+          await supertestWithAdminScope
             .get('/internal/security/roles/engineering')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .expect(200)
             .expect((res: { body: Role[] }) => {
               const roles = res.body;
@@ -502,11 +470,8 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithoutAuth
+          await supertestWithAdminScope
             .put('/api/security/role/role_to_update')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .send({
               metadata: {
                 foo: 'test-metadata',
@@ -575,7 +540,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
 
-        it(`should update a role adding DLS and TLS priviledges`, async () => {
+        it(`should update a role adding DLS and FLS privileges`, async () => {
           await es.security.putRole({
             name: 'role_to_update_with_dls_fls',
             body: {
@@ -589,11 +554,8 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithoutAuth
+          await supertestWithAdminScope
             .put('/api/security/role/role_to_update_with_dls_fls')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .send({
               elasticsearch: {
                 cluster: ['manage'],
@@ -651,11 +613,8 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithoutAuth
+          await supertestWithAdminScope
             .put('/api/security/role/role_to_update')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .send({
               metadata: {
                 foo: 'test-metadata',
@@ -750,11 +709,8 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithoutAuth
+          await supertestWithAdminScope
             .put('/api/security/role/role_to_update')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .send({
               metadata: {
                 foo: 'test-metadata',
@@ -854,11 +810,8 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithoutAuth
+          await supertestWithAdminScope
             .put('/api/security/role/role_to_update')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .send({
               metadata: {
                 foo: 'test-metadata',
@@ -931,76 +884,41 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('Delete Role', () => {
-        it('should delete the roles we created', async () => {
-          await supertestWithoutAuth
-            .delete('/api/security/role/empty_role')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
-            .expect(204);
-          await supertestWithoutAuth
-            .delete('/api/security/role/role_with_privileges')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
-            .expect(204);
-          await supertestWithoutAuth
-            .delete('/api/security/role/role_with_privileges_dls_fls')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
-            .expect(204);
-          await supertestWithoutAuth
-            .delete('/api/security/role/test_role')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
-            .expect(204);
-          await supertestWithoutAuth
-            .delete('/api/security/role/new_role')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
-            .expect(204);
-          await supertestWithoutAuth
-            .delete('/api/security/role/role_to_update')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
-            .expect(204);
-          await supertestWithoutAuth
-            .delete('/api/security/role/role_to_update_with_dls_fls')
-            .set('kbn-xsrf', 'xxx')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
-            .expect(204);
+        it('should delete an existing role', async () => {
+          await es.security.putRole({
+            name: 'role_to_delete',
+            body: {
+              cluster: ['monitor'],
+              indices: [
+                {
+                  names: ['beats-*'],
+                  privileges: ['write'],
+                },
+              ],
+              applications: [
+                {
+                  application: 'kibana-.kibana',
+                  privileges: ['read'],
+                  resources: ['*'],
+                },
+                {
+                  application: 'apm',
+                  privileges: ['apm-privilege'],
+                  resources: ['*'],
+                },
+              ],
+              metadata: {
+                bar: 'old-metadata',
+              },
+            },
+          });
+          await supertestWithAdminScope.delete('/api/security/role/role_to_delete').expect(204);
 
-          const emptyRole = await es.security.getRole({ name: 'empty_role' }, { ignore: [404] });
-          expect(emptyRole).to.eql({});
-          const roleWithPrivileges = await es.security.getRole(
-            { name: 'role_with_privileges' },
+          const deletedRole = await es.security.getRole(
+            { name: 'role_to_delete' },
             { ignore: [404] }
           );
-          expect(roleWithPrivileges).to.eql({});
-          const roleWithPrivilegesDlsFls = await es.security.getRole(
-            { name: 'role_with_privileges_dls_fls' },
-            { ignore: [404] }
-          );
-          expect(roleWithPrivilegesDlsFls).to.eql({});
-          const testRole = await es.security.getRole({ name: 'test_role' }, { ignore: [404] });
-          expect(testRole).to.eql({});
-          const newRole = await es.security.getRole({ name: 'new_role' }, { ignore: [404] });
-          expect(newRole).to.eql({});
-          const roleToUpdate = await es.security.getRole(
-            { name: 'role_to_update' },
-            { ignore: [404] }
-          );
-          expect(roleToUpdate).to.eql({});
-          const roleToUpdateWithDlsFls = await es.security.getRole(
-            { name: 'role_to_update_with_dls_fls' },
-            { ignore: [404] }
-          );
-          expect(roleToUpdateWithDlsFls).to.eql({});
+          expect(deletedRole).to.eql({});
         });
       });
     });

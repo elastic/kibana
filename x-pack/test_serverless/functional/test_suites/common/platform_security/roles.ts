@@ -5,33 +5,13 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import { clearAllRoles } from '../../../../shared/lib';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Note: this suite is currently only called from the feature flags test config:
 // x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
 // This can be moved into the common config groups once custom roles are enabled
 // permanently in serverless.
-
-async function clearAllRoles(esClient: Client, logger: ToolingLog) {
-  const existingRoles = await esClient.security.getRole();
-  const esRolesNames = Object.entries(existingRoles)
-    .filter(([roleName, esRole]) => {
-      return !esRole.metadata?._reserved;
-    })
-    .map(([roleName]) => roleName);
-
-  if (esRolesNames.length > 0) {
-    await Promise.all(
-      esRolesNames.map(async (roleName) => {
-        await esClient.security.deleteRole({ name: roleName });
-      })
-    );
-  } else {
-    logger.debug('No Roles to delete.');
-  }
-}
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -85,9 +65,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         });
 
-        const table = await testSubjects.find('rolesTable');
-        const tableContent = await table.getVisibleText();
-        expect(tableContent).to.contain(customRole);
+        const rows = await testSubjects.findAll('roleRow');
+        expect(rows.length).equal(1);
+        const cells = await rows[0].findAllByClassName('euiTableRowCell');
+        expect(cells.length).greaterThan(1);
+        const cellContent = await cells[0].getVisibleText();
+        expect(cellContent).to.contain(customRole);
       });
     });
   });

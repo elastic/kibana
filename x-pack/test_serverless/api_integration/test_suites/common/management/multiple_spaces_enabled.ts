@@ -7,8 +7,8 @@
 
 import expect from 'expect';
 import { asyncForEach } from '@kbn/std';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../shared/services';
 
 // Notes:
 // This suite is currently only called from the feature flags test configs, e.g.
@@ -16,7 +16,7 @@ import { RoleCredentials } from '../../../../shared/services';
 // Configuration toggle:
 // kbnServerArgs: ['--xpack.spaces.maxSpaces=100'],
 //
-// Initial test coverage limited to CRUD operations and feature visibility toggles.
+// Initial test coverage limited to CRUD operations and ensuring disabling features/toggling feature visibility is not possible.
 // Full coverage of x-pack/test/api_integration/apis/spaces & x-pack/test/spaces_api_integration
 // should be converted into a deployment agnostic suite when spaces are
 // permanently enabled in serverless.
@@ -25,16 +25,12 @@ import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let internalRequestHeader: Record<string, string>;
-  let roleAuthc: RoleCredentials;
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestWithAdminScope: SupertestWithRoleScopeType;
 
   async function createSpace(id: string) {
-    await supertestWithoutAuth
+    await supertestWithAdminScope
       .post('/api/spaces/space')
-      .set(internalRequestHeader)
-      .set(roleAuthc.apiKeyHeader)
       .send({
         id,
         name: id,
@@ -44,42 +40,31 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function deleteSpace(id: string) {
-    await supertestWithoutAuth
-      .delete(`/api/spaces/space/${id}`)
-      .set(internalRequestHeader)
-      .set(roleAuthc.apiKeyHeader)
-      .expect(204);
+    await supertestWithAdminScope.delete(`/api/spaces/space/${id}`).expect(204);
   }
 
   describe('spaces', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin'); // search projects can use developer role, how to implement?
-      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+        withCustomHeaders: { 'kbn-xsrf': 'true' },
+      });
     });
     after(async () => {
       // delete any lingering spaces
-      const { body } = await supertestWithoutAuth
-        .get('/api/spaces/space')
-        .set(internalRequestHeader)
-        .set(roleAuthc.apiKeyHeader)
-        .send()
-        .expect(200);
+      const { body } = await supertestWithAdminScope.get('/api/spaces/space').send().expect(200);
 
       const toDelete = (body as Array<{ id: string }>).filter((f) => f.id !== 'default');
 
       await asyncForEach(toDelete, async (space) => {
         await deleteSpace(space.id);
       });
-
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Create (POST /api/spaces/space)', () => {
       it('should allow us to create a space', async () => {
-        await supertestWithoutAuth
+        await supertestWithAdminScope
           .post('/api/spaces/space')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
           .send({
             id: 'custom_space_1',
             name: 'custom_space_1',
@@ -89,10 +74,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should not allow us to create a space with disabled features', async () => {
-        await supertestWithoutAuth
+        await supertestWithAdminScope
           .post('/api/spaces/space')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
           .send({
             id: 'custom_space_2',
             name: 'custom_space_2',
@@ -116,25 +99,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should allow us to get a space', async () => {
-        await supertestWithoutAuth
-          .get('/api/spaces/space/space_to_get_1')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
-          .send()
-          .expect(200, {
-            id: 'space_to_get_1',
-            name: 'space_to_get_1',
-            disabledFeatures: [],
-          });
+        await supertestWithAdminScope.get('/api/spaces/space/space_to_get_1').send().expect(200, {
+          id: 'space_to_get_1',
+          name: 'space_to_get_1',
+          disabledFeatures: [],
+        });
       });
 
       it('should allow us to get all spaces', async () => {
-        const { body } = await supertestWithoutAuth
-          .get('/api/spaces/space')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
-          .send()
-          .expect(200);
+        const { body } = await supertestWithAdminScope.get('/api/spaces/space').send().expect(200);
 
         expect(body).toEqual(
           expect.arrayContaining([
@@ -164,10 +137,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should allow us to update a space', async () => {
-        await supertestWithoutAuth
+        await supertestWithAdminScope
           .put('/api/spaces/space/space_to_update')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
           .send({
             id: 'space_to_update',
             name: 'some new name',
@@ -176,24 +147,17 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        await supertestWithoutAuth
-          .get('/api/spaces/space/space_to_update')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
-          .send()
-          .expect(200, {
-            id: 'space_to_update',
-            name: 'some new name',
-            initials: 'SN',
-            disabledFeatures: [],
-          });
+        await supertestWithAdminScope.get('/api/spaces/space/space_to_update').send().expect(200, {
+          id: 'space_to_update',
+          name: 'some new name',
+          initials: 'SN',
+          disabledFeatures: [],
+        });
       });
 
       it('should not allow us to update a space with disabled features', async () => {
-        await supertestWithoutAuth
+        await supertestWithAdminScope
           .put('/api/spaces/space/space_to_update')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
           .send({
             id: 'space_to_update',
             name: 'some new name',
@@ -208,11 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should allow us to delete a space', async () => {
         await createSpace('space_to_delete');
 
-        await supertestWithoutAuth
-          .delete(`/api/spaces/space/space_to_delete`)
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
-          .expect(204);
+        await supertestWithAdminScope.delete(`/api/spaces/space/space_to_delete`).expect(204);
       });
     });
 
@@ -226,10 +186,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns the default space', async () => {
-        const response = await supertestWithoutAuth
+        const response = await supertestWithAdminScope
           .get('/internal/spaces/_active_space')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
         const { id, name, _reserved } = response.body;
@@ -241,10 +199,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns the default space when explicitly referenced', async () => {
-        const response = await supertestWithoutAuth
+        const response = await supertestWithAdminScope
           .get('/s/default/internal/spaces/_active_space')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
         const { id, name, _reserved } = response.body;
@@ -256,10 +212,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns the foo space', async () => {
-        await supertestWithoutAuth
+        await supertestWithAdminScope
           .get('/s/foo-space/internal/spaces/_active_space')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
           .expect(200, {
             id: 'foo-space',
             name: 'foo-space',
@@ -268,10 +222,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns 404 when the space is not found', async () => {
-        await supertestWithoutAuth
+        await supertestWithAdminScope
           .get('/s/not-found-space/internal/spaces/_active_space')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
           .expect(404, {
             statusCode: 404,
             error: 'Not Found',
@@ -285,41 +237,35 @@ export default function ({ getService }: FtrProviderContext) {
     // are enabled in production.
     describe(`Access`, () => {
       it('#copyToSpace', async () => {
-        const { body, status } = await supertestWithoutAuth
-          .post('/api/spaces/_copy_saved_objects')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader);
+        const { body, status } = await supertestWithAdminScope.post(
+          '/api/spaces/_copy_saved_objects'
+        );
         svlCommonApi.assertResponseStatusCode(400, status, body);
       });
       it('#resolveCopyToSpaceErrors', async () => {
-        const { body, status } = await supertestWithoutAuth
-          .post('/api/spaces/_resolve_copy_saved_objects_errors')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader);
+        const { body, status } = await supertestWithAdminScope.post(
+          '/api/spaces/_resolve_copy_saved_objects_errors'
+        );
         svlCommonApi.assertResponseStatusCode(400, status, body);
       });
       it('#updateObjectsSpaces', async () => {
-        const { body, status } = await supertestWithoutAuth
-          .post('/api/spaces/_update_objects_spaces')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader);
+        const { body, status } = await supertestWithAdminScope.post(
+          '/api/spaces/_update_objects_spaces'
+        );
         svlCommonApi.assertResponseStatusCode(400, status, body);
       });
       it('#getShareableReferences', async () => {
-        const { body, status } = await supertestWithoutAuth
+        const { body, status } = await supertestWithAdminScope
           .post('/api/spaces/_get_shareable_references')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
           .send({
             objects: [{ type: 'a', id: 'a' }],
           });
         svlCommonApi.assertResponseStatusCode(200, status, body);
       });
       it('#disableLegacyUrlAliases', async () => {
-        const { body, status } = await supertestWithoutAuth
-          .post('/api/spaces/_disable_legacy_url_aliases')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader);
+        const { body, status } = await supertestWithAdminScope.post(
+          '/api/spaces/_disable_legacy_url_aliases'
+        );
         // without a request body we would normally a 400 bad request if the endpoint was registered
         svlCommonApi.assertApiNotFound(body, status);
       });

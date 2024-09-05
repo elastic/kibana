@@ -6,6 +6,7 @@
  */
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { services as deploymentAgnosticServices } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { SupertestProvider } from './supertest';
 import { SvlCommonApiServiceProvider } from './svl_common_api';
 import { SvlReportingServiceProvider } from './svl_reporting';
@@ -25,5 +26,7 @@ export const services = {
   svlCommonApi: SvlCommonApiServiceProvider,
   svlReportingApi: SvlReportingServiceProvider,
   svlUserManager: commonFunctionalServices.samlAuth,
+  samlAuth: commonFunctionalServices.samlAuth, // <--temp workaround until we can unify naming
+  roleScopedSupertest: deploymentAgnosticServices.roleScopedSupertest,
   dataViewApi: DataViewApiProvider,
 };
