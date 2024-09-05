@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -15,6 +15,9 @@ import {
   EuiFieldSearch,
   EuiLink,
   EuiFlyoutHeader,
+  EuiFlyoutBody,
+  useEuiTheme,
+  EuiComboBox,
 } from '@elastic/eui';
 import { elementToString } from '../utils/element_to_string';
 import { LanguageDocumentationSections } from './types';
@@ -32,52 +35,58 @@ function DocumentationFlyoutContent({
   searchInDescription,
   linkToDocumentation,
 }: DocumentationFlyoutProps) {
+  const { euiTheme } = useEuiTheme();
   const [selectedSection, setSelectedSection] = useState<string | undefined>();
-  const scrollTargets = useRef<Record<string, HTMLElement>>({});
-
-  useEffect(() => {
-    if (selectedSection && scrollTargets.current[selectedSection]) {
-      scrollTargets.current[selectedSection].scrollIntoView();
-    }
-  }, [selectedSection]);
-
   const [searchText, setSearchText] = useState('');
 
-  const normalizedSearchText = searchText.trim().toLocaleLowerCase();
+  const scrollTargets = useRef<Record<string, HTMLElement>>({});
 
-  const filteredGroups = sections?.groups
-    .map((group) => {
-      const items = group.items.filter((helpItem) => {
-        return (
-          !normalizedSearchText ||
-          helpItem.label.toLocaleLowerCase().includes(normalizedSearchText) ||
-          // Converting the JSX element to a string first
-          (searchInDescription &&
-            elementToString(helpItem.description)
-              ?.toLocaleLowerCase()
-              .includes(normalizedSearchText))
-        );
+  const normalizedSearchText = useMemo(() => searchText.trim().toLocaleLowerCase(), [searchText]);
+
+  const filteredGroups = useMemo(() => {
+    return sections?.groups
+      .slice(1)
+      .map((group) => {
+        const items = group.items.filter((helpItem) => {
+          return (
+            !normalizedSearchText ||
+            helpItem.label.toLocaleLowerCase().includes(normalizedSearchText) ||
+            // Converting the JSX element to a string first
+            (searchInDescription &&
+              elementToString(helpItem.description)
+                ?.toLocaleLowerCase()
+                .includes(normalizedSearchText))
+          );
+        });
+        return { ...group, options: items };
+      })
+      .filter((group) => {
+        if (group.options.length > 0 || !normalizedSearchText) {
+          return true;
+        }
+        return group.label.toLocaleLowerCase().includes(normalizedSearchText);
       });
-      return { ...group, items };
-    })
-    .filter((group) => {
-      if (group.items.length > 0 || !normalizedSearchText) {
-        return true;
-      }
-      return group.label.toLocaleLowerCase().includes(normalizedSearchText);
-    });
+  }, [sections, normalizedSearchText, searchInDescription]);
+
+  const onNavigationChange = useCallback((selectedOptions) => {
+    setSelectedSection(selectedOptions.length ? selectedOptions[0].label : undefined);
+    if (selectedOptions.length) {
+      const scrollToElement = scrollTargets.current[selectedOptions[0].label];
+      scrollToElement.scrollIntoView();
+    }
+  }, []);
 
   return (
     <>
-      <EuiFlyoutHeader
-        hasBorder
-        css={css`
-          padding-inline: 0 !important;
-          padding-block-start: 0 !important;
-        `}
-      >
+      <EuiFlyoutHeader hasBorder>
         {linkToDocumentation && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              align-items: flex-end;
+              padding-top: ${euiTheme.size.xs}
+            `}
+          >
             <EuiLink external href={linkToDocumentation} target="_blank">
               {i18n.translate('languageDocumentationPopover.esqlDocsLabel', {
                 defaultMessage: 'View full ES|QL documentation',
@@ -85,95 +94,59 @@ function DocumentationFlyoutContent({
             </EuiLink>
           </EuiFlexItem>
         )}
-      </EuiFlyoutHeader>
-      <EuiFlexGroup gutterSize="none" responsive={false}>
-        {/* <EuiFlexItem className="documentation__docsSidebar" grow={1}>
-          <EuiFlexGroup
-            className="documentation__docsSidebarInner"
-            direction="column"
-            gutterSize="none"
-            responsive={false}
+        <EuiFlexGroup gutterSize="none" responsive={false} direction="column">
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              padding: ${euiTheme.size.s} 0;
+            `}
           >
-            <EuiFlexItem className="documentation__docsSearch" grow={false}>
-              <EuiFieldSearch
-                value={searchText}
-                onChange={(e) => {
-                  setSearchText(e.target.value);
-                }}
-                data-test-subj="language-documentation-navigation-search"
-                placeholder={i18n.translate('languageDocumentationPopover.searchPlaceholder', {
-                  defaultMessage: 'Search',
-                })}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem className="documentation__docsNav">
-              {filteredGroups?.map((helpGroup, index) => {
-                return (
-                  <nav className="documentation__docsNavGroup" key={helpGroup.label}>
-                    <EuiTitle size="xxs" data-test-subj="language-documentation-navigation-title">
-                      <h6>
-                        <EuiLink
-                          className="documentation__docsNavGroupLink"
-                          color="text"
-                          onClick={() => {
-                            setSelectedSection(helpGroup.label);
-                          }}
-                        >
-                          <EuiHighlight search={searchText}>{helpGroup.label}</EuiHighlight>
-                        </EuiLink>
-                      </h6>
-                    </EuiTitle>
-
-                    {helpGroup.items.length ? (
-                      <>
-                        <EuiSpacer size="s" />
-
-                        <EuiListGroup gutterSize="none">
-                          {helpGroup.items.map((helpItem) => {
-                            return (
-                              <EuiListGroupItem
-                                key={helpItem.label}
-                                label={
-                                  <EuiHighlight search={searchText}>{helpItem.label}</EuiHighlight>
-                                }
-                                size="s"
-                                onClick={() => {
-                                  setSelectedSection(helpItem.label);
-                                }}
-                              />
-                            );
-                          })}
-                        </EuiListGroup>
-                      </>
-                    ) : null}
-                  </nav>
-                );
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem> */}
-        <EuiFlexItem>
-          <EuiFieldSearch
-            value={searchText}
-            onChange={(e) => {
-              setSearchText(e.target.value);
-            }}
-            data-test-subj="language-documentation-navigation-search"
-            placeholder={i18n.translate('languageDocumentationPopover.searchPlaceholder', {
-              defaultMessage: 'Search',
-            })}
-          />
-          <EuiText size="s">
-            <section
-              ref={(el) => {
-                if (el && sections?.groups?.length) {
-                  scrollTargets.current[sections.groups[0].label] = el;
-                }
+            <EuiFieldSearch
+              value={searchText}
+              onChange={(e) => {
+                setSearchText(e.target.value);
               }}
-            >
-              {sections?.initialSection}
-            </section>
-            {sections?.groups.slice(1).map((helpGroup, index) => {
+              data-test-subj="language-documentation-navigation-search"
+              placeholder={i18n.translate('languageDocumentationPopover.searchPlaceholder', {
+                defaultMessage: 'Search',
+              })}
+              fullWidth
+              compressed
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiComboBox
+              aria-label={i18n.translate('languageDocumentationPopover.navigationAriaLabel', {
+                defaultMessage: 'Navigate through the documentation',
+              })}
+              placeholder={i18n.translate('languageDocumentationPopover.navigationPlaceholder', {
+                defaultMessage: 'Commands and functions',
+              })}
+              options={filteredGroups}
+              selectedOptions={selectedSection ? [{ label: selectedSection }] : []}
+              singleSelection={{ asPlainText: true }}
+              onChange={onNavigationChange}
+              compressed
+              fullWidth
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiFlexGroup gutterSize="none" responsive={false} direction="column">
+          <EuiText size="s">
+            {!searchText && (
+              <section
+                ref={(el) => {
+                  if (el && sections?.groups?.length) {
+                    scrollTargets.current[sections.groups[0].label] = el;
+                  }
+                }}
+              >
+                {sections?.initialSection}
+              </section>
+            )}
+            {filteredGroups?.map((helpGroup, index) => {
               return (
                 <section
                   key={helpGroup.label}
@@ -187,7 +160,7 @@ function DocumentationFlyoutContent({
 
                   <p>{helpGroup.description}</p>
 
-                  {sections?.groups[index + 1].items.map((helpItem) => {
+                  {filteredGroups?.[index].options.map((helpItem) => {
                     return (
                       <article
                         key={helpItem.label}
@@ -205,8 +178,8 @@ function DocumentationFlyoutContent({
               );
             })}
           </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </EuiFlexGroup>
+      </EuiFlyoutBody>
     </>
   );
 }

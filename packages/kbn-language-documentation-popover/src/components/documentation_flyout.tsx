@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect } from 'react';
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiButtonIcon,
-  EuiButtonIconProps,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlyout, EuiButtonIcon, EuiButtonIconProps, useEuiTheme } from '@elastic/eui';
 import { LanguageDocumentationSections } from './types';
 import { LanguageDocumentationFlyoutContent } from './documentation_flyout_content';
 
@@ -60,13 +54,11 @@ function DocumentationFlyout({
           type="push"
           size={DEFAULT_WIDTH}
         >
-          <EuiFlyoutBody>
-            <LanguageDocumentationFlyoutContent
-              sections={sections}
-              searchInDescription={searchInDescription}
-              linkToDocumentation={linkToDocumentation}
-            />
-          </EuiFlyoutBody>
+          <LanguageDocumentationFlyoutContent
+            sections={sections}
+            searchInDescription={searchInDescription}
+            linkToDocumentation={linkToDocumentation}
+          />
         </EuiFlyout>
       )}
     </>

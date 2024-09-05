@@ -18,8 +18,7 @@ export const initialSection = (
     markdownContent={i18n.translate(
       'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.markdown',
       {
-        defaultMessage: `## ES|QL
-
+        defaultMessage: `
 An ES|QL (Elasticsearch query language) query consists of a series of commands, separated by pipe characters: \`|\`. Each query starts with a **source command**, which produces a table, typically with data from Elasticsearch. 
 
 A source command can be followed by one or more **processing commands**. Processing commands can change the output table of the previous command by adding, removing, and changing rows and columns.
@@ -87,7 +86,7 @@ ES|QL can access the following metadata fields:
 Use the \`METADATA\` directive to enable metadata fields:
 
 \`\`\`
-FROM index [METADATA _index, _id]
+FROM index METADATA _index, _id
 \`\`\`
 
 Metadata fields are only available if the source of the data is an index. Consequently, \`FROM\` is the only source commands that supports the \`METADATA\` directive.
@@ -95,7 +94,7 @@ Metadata fields are only available if the source of the data is an index. Conseq
 Once enabled, the fields are then available to subsequent processing commands, just like the other index fields:
 
 \`\`\`
-FROM ul_logs, apps [METADATA _index, _version]
+FROM ul_logs, apps METADATA _index, _version
 | WHERE id IN (13, 14) AND _version == 1
 | EVAL key = CONCAT(_index, "_", TO_STR(id))
 | SORT id, _index
@@ -105,7 +104,7 @@ FROM ul_logs, apps [METADATA _index, _version]
 Also, similar to the index fields, once an aggregation is performed, a metadata field will no longer be accessible to subsequent commands, unless used as grouping field:
 
 \`\`\`
-FROM employees [METADATA _index, _id]
+FROM employees METADATA _index, _id
 | STATS max = MAX(emp_no) BY _index
 \`\`\`
             `,
