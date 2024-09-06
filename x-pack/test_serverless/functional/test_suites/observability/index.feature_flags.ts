@@ -13,6 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./infra'));
     loadTestFile(require.resolve('../common/platform_security/navigation/management_nav_cards.ts'));
     loadTestFile(require.resolve('../common/platform_security/roles.ts'));
-    loadTestFile(require.resolve('../common/spaces/spaces_selection_enabled.ts'));
+    loadTestFile(require.resolve('../common/spaces/multiple_spaces_enabled.ts'));
   });
 }
