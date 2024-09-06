@@ -8,13 +8,13 @@
 import { PluginInitializerContext } from '@kbn/core-plugins-server';
 import { EntityManagerConfig } from '../common/config';
 import { EntityManagerServerPluginSetup, EntityManagerServerPluginStart, config } from './plugin';
-import { EntityMangerRouteRepository } from './routes';
+import { EntityManagerRouteRepository } from './routes';
 
 export type {
   EntityManagerConfig,
   EntityManagerServerPluginSetup,
   EntityManagerServerPluginStart,
-  EntityMangerRouteRepository,
+  EntityManagerRouteRepository,
 };
 export { config };
 

@@ -13,4 +13,4 @@ export const entityManagerRouteRepository = {
   ...entitiesRoutes,
 };
 
-export type EntityMangerRouteRepository = typeof entityManagerRouteRepository;
+export type EntityManagerRouteRepository = typeof entityManagerRouteRepository;

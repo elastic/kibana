@@ -17,26 +17,29 @@ import {
   EnableManagedEntityResponse,
   ManagedEntityEnabledResponse,
 } from '../../common/types_api';
-import type { EntityMangerRouteRepository } from '../../server';
+import type { EntityManagerRouteRepository } from '../../server';
 import { EntityManagerUnauthorizedError } from './errors';
 
-type EntityManagerRepositoryClient = RouteRepositoryClient<EntityMangerRouteRepository>;
+type EntityManagerRepositoryClient = RouteRepositoryClient<EntityManagerRouteRepository>;
 
 type QueryParamOf<T extends { params?: any }> = Exclude<T['params'], undefined>['query'];
 
 type DeleteEntityDefinitionQuery = QueryParamOf<
-  ClientRequestParamsOf<EntityMangerRouteRepository, 'DELETE /internal/entities/managed/enablement'>
+  ClientRequestParamsOf<
+    EntityManagerRouteRepository,
+    'DELETE /internal/entities/managed/enablement'
+  >
 >;
 
 type CreateEntityDefinitionQuery = QueryParamOf<
-  ClientRequestParamsOf<EntityMangerRouteRepository, 'PUT /internal/entities/managed/enablement'>
+  ClientRequestParamsOf<EntityManagerRouteRepository, 'PUT /internal/entities/managed/enablement'>
 >;
 
 export class EntityClient {
   public readonly repositoryClient: EntityManagerRepositoryClient;
 
   constructor(core: CoreStart | CoreSetup) {
-    this.repositoryClient = createRepositoryClient<EntityMangerRouteRepository>(core).fetch;
+    this.repositoryClient = createRepositoryClient<EntityManagerRouteRepository>(core).fetch;
   }
 
   async isManagedEntityDiscoveryEnabled(): Promise<ManagedEntityEnabledResponse> {
