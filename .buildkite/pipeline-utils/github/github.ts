@@ -93,6 +93,9 @@ export const doAnyChangesMatch = async (
 };
 
 export const hasSelectiveChecks = async () => {
+  // TODO: Add the code to parse the commit msg to see if the pragma is present, smth like
+  // #SC# [".buildkite/scripts/steps/lint.sh", ".buildkite/scripts/steps/check_types.sh"]
+  // #SC# === "selective checks"
   return [`.buildkite/scripts/steps/lint.sh`];
 };
 
