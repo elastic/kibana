@@ -10,13 +10,14 @@ import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiPageTemplate,
   EuiSplitPanel,
   EuiToolTip,
   useEuiTour,
   EuiButtonEmpty,
   EuiHorizontalRule,
+  EuiScreenReaderOnly,
+  useResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { downloadFileAs } from '@kbn/share-plugin/public';
@@ -65,6 +66,9 @@ export function Main({ isEmbeddable = false }: MainProps) {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
+
+  const [resizeRef, setResizeRef] = useState<HTMLDivElement | null>(null);
+  const containerDimensions = useResizeObserver(resizeRef);
 
   const {
     docLinks,
@@ -172,142 +176,141 @@ export function Main({ isEmbeddable = false }: MainProps) {
   );
 
   return (
-    <div id="consoleRoot">
-      <EuiFlexGroup
-        className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}
-        gutterSize="m"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiTitle className="euiScreenReaderOnly">
-            <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
-            <EuiSplitPanel.Inner grow={false} className="consoleTabs">
-              <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-                <EuiFlexItem>
-                  <TopNavMenu
-                    disabled={!done}
-                    items={getTopNavConfig({
-                      selectedTab: currentView,
-                      setSelectedTab: (tab) => dispatch({ type: 'setCurrentView', payload: tab }),
-                    })}
-                    tourStepProps={consoleTourStepProps}
-                  />
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
-                    <>
-                      <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
-                        <EuiButtonEmpty
-                          iconType="exportAction"
-                          onClick={() =>
-                            downloadFileAs(EXPORT_FILE_NAME, {
-                              content: inputEditorValue,
-                              type: 'text/plain',
-                            })
-                          }
-                          size="xs"
-                          data-test-subj="consoleExportButton"
-                        >
-                          {MAIN_PANEL_LABELS.exportButton}
-                        </EuiButtonEmpty>
-                      </EuiToolTip>
-                      <>
-                        <EuiToolTip content={MAIN_PANEL_LABELS.importButtonTooltip}>
-                          <EuiButtonEmpty
-                            iconType="importAction"
-                            onClick={() => document.getElementById('importConsoleFile')?.click()}
-                            size="xs"
-                            data-test-subj="consoleImportButton"
-                          >
-                            {MAIN_PANEL_LABELS.importButton}
-                          </EuiButtonEmpty>
-                        </EuiToolTip>
-                        {/* This input is hidden by CSS in the UI, but the NavIcon button activates it */}
-                        <input
-                          type="file"
-                          accept="text/*"
-                          multiple={false}
-                          name="consoleSnippets"
-                          id="importConsoleFile"
-                          onChange={onFileChange}
-                        />
-                      </>
-                    </>
-                  </ConsoleTourStep>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <ShortcutsPopover
-                    button={shortcutsButton}
-                    isOpen={isShortcutsOpen}
-                    closePopover={() => setIsShortcutsOpen(false)}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <HelpPopover
-                    button={helpButton}
-                    isOpen={isHelpOpen}
-                    closePopover={() => setIsHelpOpen(false)}
-                    resetTour={() => {
-                      setIsHelpOpen(false);
-                      dispatch({ type: 'setCurrentView', payload: SHELL_TAB_ID });
-                      actions.resetTour();
-                    }}
-                  />
-                </EuiFlexItem>
-                {isEmbeddable && (
-                  <EuiFlexItem grow={false}>
-                    <NavIconButton
-                      iconType={isFullscreenOpen ? 'fullScreenExit' : 'fullScreen'}
-                      onClick={toggleFullscreen}
-                      ariaLabel={
-                        isFullscreenOpen
-                          ? MAIN_PANEL_LABELS.closeFullscrenButton
-                          : MAIN_PANEL_LABELS.openFullscrenButton
+    <div
+      id="consoleRoot"
+      className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}
+      ref={setResizeRef}
+    >
+      <EuiScreenReaderOnly>
+        <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
+      </EuiScreenReaderOnly>
+      <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
+        <EuiSplitPanel.Inner grow={false} className="consoleTabs">
+          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <TopNavMenu
+                disabled={!done}
+                items={getTopNavConfig({
+                  selectedTab: currentView,
+                  setSelectedTab: (tab) => dispatch({ type: 'setCurrentView', payload: tab }),
+                })}
+                tourStepProps={consoleTourStepProps}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
+                <>
+                  <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
+                    <EuiButtonEmpty
+                      iconType="exportAction"
+                      onClick={() =>
+                        downloadFileAs(EXPORT_FILE_NAME, {
+                          content: inputEditorValue,
+                          type: 'text/plain',
+                        })
                       }
-                      dataTestSubj="consoleToggleFullscreenButton"
-                      toolTipContent={
-                        isFullscreenOpen
-                          ? MAIN_PANEL_LABELS.closeFullscrenButton
-                          : MAIN_PANEL_LABELS.openFullscrenButton
-                      }
+                      size="xs"
+                      data-test-subj="consoleExportButton"
+                    >
+                      {MAIN_PANEL_LABELS.exportButton}
+                    </EuiButtonEmpty>
+                  </EuiToolTip>
+                  <>
+                    <EuiToolTip content={MAIN_PANEL_LABELS.importButtonTooltip}>
+                      <EuiButtonEmpty
+                        iconType="importAction"
+                        onClick={() => document.getElementById('importConsoleFile')?.click()}
+                        size="xs"
+                        data-test-subj="consoleImportButton"
+                      >
+                        {MAIN_PANEL_LABELS.importButton}
+                      </EuiButtonEmpty>
+                    </EuiToolTip>
+                    {/* This input is hidden by CSS in the UI, but the NavIcon button activates it */}
+                    <input
+                      type="file"
+                      accept="text/*"
+                      multiple={false}
+                      name="consoleSnippets"
+                      id="importConsoleFile"
+                      onChange={onFileChange}
                     />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiSplitPanel.Inner>
-            <EuiHorizontalRule margin="none" />
-            <EuiSplitPanel.Inner paddingSize="none">
-              {currentView === SHELL_TAB_ID && (
-                <Editor
-                  loading={!done}
-                  setEditorInstance={() => {}}
-                  inputEditorValue={inputEditorValue}
-                  setInputEditorValue={setInputEditorValue}
+                  </>
+                </>
+              </ConsoleTourStep>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ShortcutsPopover
+                button={shortcutsButton}
+                isOpen={isShortcutsOpen}
+                closePopover={() => setIsShortcutsOpen(false)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <HelpPopover
+                button={helpButton}
+                isOpen={isHelpOpen}
+                closePopover={() => setIsHelpOpen(false)}
+                resetTour={() => {
+                  setIsHelpOpen(false);
+                  dispatch({ type: 'setCurrentView', payload: SHELL_TAB_ID });
+                  actions.resetTour();
+                }}
+              />
+            </EuiFlexItem>
+            {isEmbeddable && (
+              <EuiFlexItem grow={false}>
+                <NavIconButton
+                  iconType={isFullscreenOpen ? 'fullScreenExit' : 'fullScreen'}
+                  onClick={toggleFullscreen}
+                  ariaLabel={
+                    isFullscreenOpen
+                      ? MAIN_PANEL_LABELS.closeFullscrenButton
+                      : MAIN_PANEL_LABELS.openFullscrenButton
+                  }
+                  dataTestSubj="consoleToggleFullscreenButton"
+                  toolTipContent={
+                    isFullscreenOpen
+                      ? MAIN_PANEL_LABELS.closeFullscrenButton
+                      : MAIN_PANEL_LABELS.openFullscrenButton
+                  }
                 />
-              )}
-              {currentView === HISTORY_TAB_ID && <History />}
-              {currentView === CONFIG_TAB_ID && <Config />}
-            </EuiSplitPanel.Inner>
-            <EuiHorizontalRule margin="none" />
-            <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
-              <EuiButtonEmpty
-                onClick={() => dispatch({ type: 'setCurrentView', payload: CONFIG_TAB_ID })}
-                iconType="editorCodeBlock"
-                size="xs"
-                color="text"
-              >
-                {MAIN_PANEL_LABELS.variablesButton}
-              </EuiButtonEmpty>
-            </EuiSplitPanel.Inner>
-          </EuiSplitPanel.Outer>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiSplitPanel.Inner>
+        <EuiHorizontalRule margin="none" />
+        <EuiSplitPanel.Inner paddingSize="none">
+          {currentView === SHELL_TAB_ID && (
+            <Editor
+              loading={!done}
+              containerWidth={containerDimensions.width}
+              inputEditorValue={inputEditorValue}
+              setInputEditorValue={setInputEditorValue}
+            />
+          )}
+          {currentView === HISTORY_TAB_ID && <History containerWidth={containerDimensions.width} />}
+          {currentView === CONFIG_TAB_ID && (
+            <Config editorInstance={null} containerWidth={containerDimensions.width} />
+          )}
+        </EuiSplitPanel.Inner>
+        <EuiHorizontalRule margin="none" className="consoleVariablesBottomBar" />
+        <EuiSplitPanel.Inner
+          paddingSize="xs"
+          grow={false}
+          className="consoleVariablesBottomBar"
+          color="plain"
+        >
+          <EuiButtonEmpty
+            onClick={() => dispatch({ type: 'setCurrentView', payload: CONFIG_TAB_ID })}
+            iconType="editorCodeBlock"
+            size="xs"
+            color="text"
+          >
+            {MAIN_PANEL_LABELS.variablesButton}
+          </EuiButtonEmpty>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
 
       {/* Empty container for Editor Tour Step */}
       <ConsoleTourStep tourStepProps={consoleTourStepProps[EDITOR_TOUR_STEP - 1]}>

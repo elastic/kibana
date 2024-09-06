@@ -14,19 +14,20 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiResizableContainer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
-import { TextObject } from '../../../../common/text_object';
+import { TextObject } from '../../../common/text_object';
 
 import {
   EditorContentSpinner,
   OutputPanelEmptyState,
   NetworkRequestStatusBar,
 } from '../../components';
-import { Panel, PanelsContainer } from '..';
-import { getAutocompleteInfo, StorageKeys } from '../../../services';
+import { getAutocompleteInfo, StorageKeys } from '../../services';
 import {
   useEditorReadContext,
   useServicesContext,
@@ -34,24 +35,32 @@ import {
   useRequestActionContext,
   useEditorActionContext,
 } from '../../contexts';
-import type { SenseEditor } from '../../models';
+import type { SenseEditor } from '../models';
 import { MonacoEditor } from './monaco_editor';
 import { MonacoEditorOutput } from './monaco_editor_output';
-import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
+import { getResponseWithMostSevereStatusCode } from '../../lib/utils';
 
+const INITIAL_PANEL_SIZE = 50;
+const PANEL_MIN_SIZE = '20%';
 const DEBOUNCE_DELAY = 500;
-const INITIAL_PANEL_WIDTH = 50;
-const PANEL_MIN_WIDTH = '100px';
 
 interface Props {
   loading: boolean;
   setEditorInstance: (instance: SenseEditor) => void;
+  containerWidth: number;
   inputEditorValue: string;
   setInputEditorValue: (value: string) => void;
 }
 
 export const Editor = memo(
-  ({ loading, setEditorInstance, inputEditorValue, setInputEditorValue }: Props) => {
+  ({
+    loading,
+    setEditorInstance,
+    containerWidth,
+    inputEditorValue,
+    setInputEditorValue,
+  }: Props) => {
+    const { euiTheme } = useEuiTheme();
     const {
       services: { storage },
     } = useServicesContext();
@@ -74,15 +83,15 @@ export const Editor = memo(
       };
     }, []);
 
-    const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
-      INITIAL_PANEL_WIDTH,
-      INITIAL_PANEL_WIDTH,
+    const [firstPanelSize, secondPanelSize] = storage.get(StorageKeys.SIZE, [
+      INITIAL_PANEL_SIZE,
+      INITIAL_PANEL_SIZE,
     ]);
 
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    const onPanelWidthChange = useCallback(
-      debounce((widths: number[]) => {
-        storage.set(StorageKeys.WIDTH, widths);
+    const onPanelSizeChange = useCallback(
+      debounce((sizes) => {
+        storage.set(StorageKeys.SIZE, Object.values(sizes));
       }, 300),
       []
     );
@@ -124,109 +133,145 @@ export const Editor = memo(
             <EuiProgress size="xs" color="accent" position="absolute" />
           </div>
         ) : null}
-        <PanelsContainer onPanelWidthChange={onPanelWidthChange} resizerClassName="conApp__resizer">
-          <Panel
-            style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-            initialWidth={firstPanelWidth}
-          >
-            <EuiSplitPanel.Outer grow={true} borderRadius="none" hasShadow={false}>
-              <EuiSplitPanel.Inner paddingSize="none">
-                {loading ? (
-                  <EditorContentSpinner />
-                ) : (
-                  <MonacoEditor
-                    localStorageValue={currentTextObject.text}
-                    value={inputEditorValue}
-                    setValue={setInputEditorValue}
-                  />
-                )}
-              </EuiSplitPanel.Inner>
-
-              {!loading && (
-                <EuiSplitPanel.Inner
-                  grow={false}
-                  paddingSize="s"
-                  css={{
-                    backgroundColor: euiThemeVars.euiFormBackgroundColor,
-                  }}
+        <EuiResizableContainer
+          style={{ height: '100%' }}
+          direction={containerWidth < euiTheme.breakpoint.l ? 'vertical' : 'horizontal'}
+          onPanelWidthChange={(sizes) => onPanelSizeChange(sizes)}
+        >
+          {(EuiResizablePanel, EuiResizableButton) => (
+            <>
+              <EuiResizablePanel
+                initialSize={firstPanelSize}
+                minSize={PANEL_MIN_SIZE}
+                tabIndex={0}
+                paddingSize="none"
+              >
+                <EuiSplitPanel.Outer
+                  grow={true}
+                  borderRadius="none"
+                  hasShadow={false}
+                  style={{ height: '100%' }}
                 >
-                  <EuiButtonEmpty
-                    size="xs"
-                    color="primary"
-                    data-test-subj="clearConsoleInput"
-                    onClick={() => setInputEditorValue('')}
+                  <EuiSplitPanel.Inner
+                    paddingSize="none"
+                    grow={true}
+                    className="consoleEditorPanel"
+                    style={{ top: 0 }}
                   >
-                    {i18n.translate('console.editor.clearConsoleInputButton', {
-                      defaultMessage: 'Clear this input',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiSplitPanel.Inner>
-              )}
-            </EuiSplitPanel.Outer>
-          </Panel>
-          <Panel
-            style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-            initialWidth={secondPanelWidth}
-          >
-            <EuiSplitPanel.Outer grow borderRadius="none" hasShadow={false}>
-              <EuiSplitPanel.Inner paddingSize="none" css={{ alignContent: 'center' }}>
-                {data ? (
-                  <MonacoEditorOutput />
-                ) : isLoading ? (
-                  <EditorContentSpinner />
-                ) : (
-                  <OutputPanelEmptyState />
-                )}
-              </EuiSplitPanel.Inner>
-
-              {(data || isLoading) && (
-                <EuiSplitPanel.Inner
-                  grow={false}
-                  paddingSize="s"
-                  css={{
-                    backgroundColor: euiThemeVars.euiFormBackgroundColor,
-                  }}
-                >
-                  <EuiFlexGroup gutterSize="none">
-                    {data ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          size="xs"
-                          color="primary"
-                          data-test-subj="clearConsoleOutput"
-                          onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
-                        >
-                          {i18n.translate('console.editor.clearConsoleOutputButton', {
-                            defaultMessage: 'Clear this output',
-                          })}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
+                    {loading ? (
+                      <EditorContentSpinner />
                     ) : (
-                      <EuiFlexItem grow={false} />
-                    )}
-
-                    <EuiFlexItem>
-                      <NetworkRequestStatusBar
-                        requestInProgress={requestInFlight}
-                        requestResult={
-                          data
-                            ? {
-                                method: data.request.method.toUpperCase(),
-                                endpoint: data.request.path,
-                                statusCode: data.response.statusCode,
-                                statusText: data.response.statusText,
-                                timeElapsedMs: data.response.timeMs,
-                              }
-                            : undefined
-                        }
+                      <MonacoEditor
+                        localStorageValue={currentTextObject.text}
+                        value={inputEditorValue}
+                        setValue={setInputEditorValue}
                       />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiSplitPanel.Inner>
-              )}
-            </EuiSplitPanel.Outer>
-          </Panel>
-        </PanelsContainer>
+                    )}
+                  </EuiSplitPanel.Inner>
+
+                  {!loading && (
+                    <EuiSplitPanel.Inner
+                      grow={false}
+                      paddingSize="s"
+                      css={{
+                        backgroundColor: euiThemeVars.euiFormBackgroundColor,
+                      }}
+                      className="consoleEditorPanel"
+                    >
+                      <EuiButtonEmpty
+                        size="xs"
+                        color="primary"
+                        data-test-subj="clearConsoleInput"
+                        onClick={() => setInputEditorValue('')}
+                      >
+                        {i18n.translate('console.editor.clearConsoleInputButton', {
+                          defaultMessage: 'Clear this input',
+                        })}
+                      </EuiButtonEmpty>
+                    </EuiSplitPanel.Inner>
+                  )}
+                </EuiSplitPanel.Outer>
+              </EuiResizablePanel>
+
+              <EuiResizableButton
+                className="conApp__resizerButton"
+                aria-label={i18n.translate('console.editor.adjustPanelSizeAriaLabel', {
+                  defaultMessage: "Press left/right to adjust panels' sizes",
+                })}
+              />
+
+              <EuiResizablePanel
+                initialSize={secondPanelSize}
+                minSize={PANEL_MIN_SIZE}
+                tabIndex={0}
+                paddingSize="none"
+              >
+                <EuiSplitPanel.Outer
+                  borderRadius="none"
+                  hasShadow={false}
+                  style={{ height: '100%' }}
+                >
+                  <EuiSplitPanel.Inner
+                    paddingSize="none"
+                    css={{ alignContent: 'center', top: 0 }}
+                    className="consoleEditorPanel"
+                  >
+                    {data ? (
+                      <MonacoEditorOutput />
+                    ) : isLoading ? (
+                      <EditorContentSpinner />
+                    ) : (
+                      <OutputPanelEmptyState />
+                    )}
+                  </EuiSplitPanel.Inner>
+
+                  {(data || isLoading) && (
+                    <EuiSplitPanel.Inner
+                      grow={false}
+                      paddingSize="s"
+                      css={{
+                        backgroundColor: euiThemeVars.euiFormBackgroundColor,
+                      }}
+                      className="consoleEditorPanel"
+                    >
+                      <EuiFlexGroup gutterSize="none" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            color="primary"
+                            data-test-subj="clearConsoleOutput"
+                            onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
+                          >
+                            {i18n.translate('console.editor.clearConsoleOutputButton', {
+                              defaultMessage: 'Clear this output',
+                            })}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+
+                        <EuiFlexItem>
+                          <NetworkRequestStatusBar
+                            requestInProgress={requestInFlight}
+                            requestResult={
+                              data
+                                ? {
+                                    method: data.request.method.toUpperCase(),
+                                    endpoint: data.request.path,
+                                    statusCode: data.response.statusCode,
+                                    statusText: data.response.statusText,
+                                    timeElapsedMs: data.response.timeMs,
+                                  }
+                                : undefined
+                            }
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiSplitPanel.Inner>
+                  )}
+                </EuiSplitPanel.Outer>
+              </EuiResizablePanel>
+            </>
+          )}
+        </EuiResizableContainer>
       </>
     );
   }
