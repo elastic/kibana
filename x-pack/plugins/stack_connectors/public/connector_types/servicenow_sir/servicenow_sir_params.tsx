@@ -163,7 +163,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
-        error={errors['subActionParams.incident.short_description']}
+        error={errors['subActionParams.incident.short_description'] as string[]}
         isInvalid={
           errors['subActionParams.incident.short_description'] !== undefined &&
           Number(errors['subActionParams.incident.short_description'].length) > 0 &&

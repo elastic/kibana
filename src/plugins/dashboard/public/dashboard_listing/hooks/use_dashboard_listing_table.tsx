@@ -272,7 +272,7 @@ export const useDashboardListingTable = ({
     }
   }, [hasInitialFetchReturned]);
 
-  const getDetailViewLink: GetDetailViewLink = useCallback(
+  const getDetailViewLink = useCallback<NonNullable<GetDetailViewLink>>(
     ({ id, attributes: { timeRestore } }) => getDashboardUrl(id, timeRestore),
     [getDashboardUrl]
   );

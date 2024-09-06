@@ -25,7 +25,7 @@ export const getLogLevelBadgeCell =
     return (
       <LogLevelBadge
         logLevel={value}
-        fallback={<span data-test-subj={`${dataTestSubj}-unknown`}>{value}</span>}
+        fallback={<span data-test-subj={`${dataTestSubj}-unknown`}>{value as string}</span>}
         data-test-subj={dataTestSubj}
         css={badgeCss}
       />

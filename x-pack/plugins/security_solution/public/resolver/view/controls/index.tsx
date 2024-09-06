@@ -69,7 +69,7 @@ export const GraphControls = React.memo(
 
     const closePopover = useCallback(() => setPopover(null), []);
 
-    const handleZoomAmountChange: EuiRangeProps['onChange'] = useCallback(
+    const handleZoomAmountChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
       (event) => {
         const valueAsNumber = parseFloat(
           (event as React.ChangeEvent<HTMLInputElement>).target.value

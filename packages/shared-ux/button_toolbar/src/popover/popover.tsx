@@ -25,7 +25,7 @@ type AllowedPopoverProps = Omit<
  * Props for `ToolbarPopover`.
  */
 export type Props = AllowedButtonProps &
-  AllowedPopoverProps & {
+  Omit<AllowedPopoverProps, 'children'> & {
     children: (arg: { closePopover: () => void }) => React.ReactNode;
     label: NonNullable<ToolbarButtonProps<'standard'>['label']>;
   };

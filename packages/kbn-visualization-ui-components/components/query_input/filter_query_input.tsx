@@ -120,7 +120,7 @@ export function FilterQueryInput({
                         }
                       )}
                     >
-                      {inputFilter?.query ||
+                      {(inputFilter?.query as string) ||
                         i18n.translate(
                           'visualizationUiComponents.filterQueryInput.emptyFilterQuery',
                           {

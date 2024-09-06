@@ -40,7 +40,9 @@ export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessag
         }
         data-test-subj={getTestId('badArgument')}
       >
-        <div data-test-subj={getTestId('badArgument-message')}>{store.errorMessage}</div>
+        <div data-test-subj={getTestId('badArgument-message')}>
+          {store.errorMessage as ReactNode}
+        </div>
 
         {!command.commandDefinition.helpHidden && (
           <div data-test-subj={getTestId('badArgument-commandUsage')}>

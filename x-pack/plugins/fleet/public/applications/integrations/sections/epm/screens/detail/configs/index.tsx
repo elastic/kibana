@@ -134,7 +134,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                 overflowHeight={1000}
                 data-test-subj="configsTab.codeblock"
               >
-                {configs}
+                {configs as React.ReactNode}
               </EuiCodeBlock>
             </>
           )}

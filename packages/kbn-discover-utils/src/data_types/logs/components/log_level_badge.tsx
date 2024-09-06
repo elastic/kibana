@@ -40,7 +40,7 @@ export const LogLevelBadge = ({
         data-test-subj={`${dataTestSubj}-unknown`}
         css={badgeCss}
       >
-        {logLevel}
+        {logLevel as React.ReactNode}
       </EuiBadge>
     );
   }
@@ -52,7 +52,7 @@ export const LogLevelBadge = ({
       data-test-subj={`${dataTestSubj}-${coalescedValue}`}
       css={badgeCss}
     >
-      {logLevel}
+      {logLevel as React.ReactNode}
     </EuiBadge>
   );
 };

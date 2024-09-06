@@ -13,6 +13,8 @@ export function createExpressionRendererMock(): jest.Mock<
   [ReactExpressionRendererProps]
 > {
   return jest.fn(({ expression }) => (
-    <span data-test-subj="lnsExpressionRenderer">{expression || 'Expression renderer mock'}</span>
+    <span data-test-subj="lnsExpressionRenderer">
+      {(expression as string) || 'Expression renderer mock'}
+    </span>
   ));
 }

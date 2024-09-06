@@ -208,7 +208,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
-        error={errors['subActionParams.incident.name']}
+        error={errors['subActionParams.incident.name'] as string[]}
         isInvalid={
           errors['subActionParams.incident.name'] !== undefined &&
           Number(errors['subActionParams.incident.name'].length) > 0 &&

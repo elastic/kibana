@@ -53,7 +53,6 @@ export function ApmMainTemplate({
   showServiceGroupSaveButton = false,
   showServiceGroupsNav = false,
   showEnablementCallout = false,
-  environmentFilterInTemplate = true,
   selectedNavButton,
   ...pageTemplateProps
 }: {

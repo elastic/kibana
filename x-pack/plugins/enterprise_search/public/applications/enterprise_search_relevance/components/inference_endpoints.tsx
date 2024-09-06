@@ -33,7 +33,6 @@ export const InferenceEndpoints: React.FC = () => {
         restrictWidth={false}
         customPageSections
         bottomBorder="extended"
-        docLink="inference_endpoints"
       >
         <searchInferenceEndpoints.InferenceEndpoints />
       </EnterpriseSearchRelevancePageTemplate>
