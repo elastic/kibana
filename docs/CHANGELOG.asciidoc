@@ -665,7 +665,7 @@ UI improvements for managed tags. For more information, refer to ({kibana-pull}1
 *Details* +
 The mechanism of exporting CSV data from a saved search panel in a dashboard has been changed to generate a CSV report, rather than allowing the CSV data to be downloaded
 without creating a report. To preserve the original behavior, it is necessary to update `kibana.yml` with the setting of `xpack.reporting.csv.enablePanelActionDownload:
-true`. The scope of this breaking change is limited to downloading CSV files from saved search panels only: downloading CSV files from other types of dashboard panels is
+true`. The scope of this breaking change is limited to downloading CSV files from saved search panels only; downloading CSV files from other types of dashboard panels is
 unchanged. For more information, refer to ({kibana-pull}178159[#178159]).
 ====
 
