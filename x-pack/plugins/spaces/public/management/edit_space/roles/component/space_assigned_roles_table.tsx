@@ -152,18 +152,30 @@ const getTableColumns = ({
           icon: 'lock',
           href: '#',
           target: '_self',
-          name: i18n.translate(
-            'xpack.spaces.management.spaceDetails.rolesTable.column.actions.reservedIndictor.title',
-            {
-              defaultMessage: 'Reserved',
-            }
-          ),
-          description: i18n.translate(
-            'xpack.spaces.management.spaceDetails.rolesTable.column.actions.reservedIndictor.description',
-            {
-              defaultMessage: 'No action to perform, this role is reserved',
-            }
-          ),
+          name: (role) =>
+            isRoleReserved(role)
+              ? i18n.translate(
+                  'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableTitle.isReserved',
+                  { defaultMessage: 'Reserved' }
+                )
+              : i18n.translate(
+                  'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableTitle.isAssignedToAll',
+                  { defaultMessage: 'Assigned to all spaces' }
+                ),
+          description: (role) =>
+            isRoleReserved(role)
+              ? i18n.translate(
+                  'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableDescription.isReserved',
+                  {
+                    defaultMessage: `Can't perform actions on a reserved role`,
+                  }
+                )
+              : i18n.translate(
+                  'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableDescription.isAssignedToAll',
+                  {
+                    defaultMessage: `Can't perform actions on a role that is assigned to all spaces`,
+                  }
+                ),
           isPrimary: true,
           enabled: () => false,
           available: (rowRecord) => !isEditableRole(rowRecord),
