@@ -16,7 +16,7 @@ export function getFieldValuePairCounts(cpgs: SignificantItemGroup[]): FieldValu
   return cpgs.reduce<FieldValuePairCounts>((p, { group }) => {
     group.forEach(({ fieldName, fieldValue }) => {
       if (p[fieldName] === undefined) {
-        p[fieldName] = {};
+        p[fieldName] = Object.create(null);
       }
       p[fieldName][fieldValue] = p[fieldName][fieldValue] ? p[fieldName][fieldValue] + 1 : 1;
     });

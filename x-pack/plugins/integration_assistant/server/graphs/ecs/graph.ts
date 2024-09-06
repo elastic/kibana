@@ -34,6 +34,9 @@ const handleCreateMappingChunks = async ({ state }: EcsBaseNodeParams) => {
 };
 
 function chainRouter({ state }: EcsBaseNodeParams): string {
+  if (Object.keys(state.finalMapping).length === 0 && state.hasTriedOnce) {
+    return 'modelOutput';
+  }
   if (Object.keys(state.duplicateFields).length > 0) {
     return 'duplicateFields';
   }
