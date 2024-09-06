@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const queryBar = getService('queryBar');
   const pageObjects = getPageObjects([
     'common',
     'cspSecurity',
@@ -21,81 +20,116 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'cisAddIntegration',
   ]);
 
-  const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
+  describe('Agentless Cloud - Sanity Tests', function () {
+    describe('agentless agent health', function () {
+      it(`should be healthy`, async () => {
+        const AGENTLESS_POLICY_NAME_PREFIX = 'Agentless policy for';
+        const AGENT_NAME_PREFIX = 'agentless-';
+        const HEALTHY_STATUS = 'Healthy';
+        const fleet = pageObjects.fleet;
 
-  const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
+        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
+          CLOUD_CREDENTIALS_PACKAGE_VERSION
+        );
 
-  describe('Agentless cloud', function () {
-    let cisIntegration: typeof pageObjects.cisAddIntegration;
-    let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
+        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
-    before(async () => {
-      cisIntegration = pageObjects.cisAddIntegration;
-      cisIntegrationAws = pageObjects.cisAddIntegration.cisAws; // Start the usage api mock server on port 8081
+        await cisIntegration.inputIntegrationName(integrationPolicyName);
+
+        // Click the first agentless policy
+        for (const option of options) {
+          if ((await option.getVisibleText()).includes(AGENTLESS_POLICY_NAME_PREFIX)) {
+            await option.click();
+            break;
+          }
+        }
+
+        // The agent is healthy
+        const agentHealthSpan = await find.byCssSelector(`span[title='${HEALTHY_STATUS}']`);
+        expect(agentHealthSpan).not.to.empty();
+
+        const agentTableLinks = await find.allByCssSelector('tbody a');
+
+        // The agent has enrolled with Fleet
+        const host = await agentTableLinks[0].getVisibleText();
+        expect(host).to.be.contain(AGENT_NAME_PREFIX);
+
+        // The integration policy is applied
+        const policy = await agentTableLinks[1].getVisibleText();
+        expect(policy).to.contain(AGENTLESS_POLICY_NAME_PREFIX);
+      });
     });
 
-    after(async () => {
-      await pageObjects.cspSecurity.logout();
+    describe('agentless agent findings', function () {
+      it(`should have been collected`, async () => {
+        const findings = pageObjects.findings;
+
+        await findings.navigateToLatestFindingsPage();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await queryBar.setQuery('agent.name : *agentless*');
+        await queryBar.submitQuery();
+
+        const agentlessFindingsRowsCount = await findings
+          .createDataTableObject('latest_findings_table')
+          .getRowsCount();
+
+        expect(agentlessFindingsRowsCount).to.be.greaterThan(0);
+      });
     });
 
-    it(`should create agentless-agent`, async () => {
-      const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
-      await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        CLOUD_CREDENTIALS_PACKAGE_VERSION
-      );
+    // Tech Debt: The following test is disabled until the delete agentless agent task is done
+    // https://github.com/elastic/kibana/issues/174598
 
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+    // describe('create and delete Agentless agent', function () {
+    // let cisIntegration: typeof pageObjects.cisAddIntegration;
+    // let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
 
-      await cisIntegration.inputIntegrationName(integrationPolicyName);
+    // before(async () => {
+    //   cisIntegration = pageObjects.cisAddIntegration;
+    //   cisIntegrationAws = pageObjects.cisAddIntegration.cisAws; // Start the usage api mock server on port 8081
+    // });
+    //   it(`should create agentless-agent for AWS single account`, async () => {
+    //     const agentlessIntegrationAwsName = `cloud_security_posture-agentless-aws-sanity-${new Date().toISOString()}`;
+    //     const agentlessAgentAwsPolicyName = `Agentless policy for ${agentlessIntegrationAwsName}`;
 
-      await cisIntegration.selectSetupTechnology('agentless');
-      await cisIntegration.selectAwsCredentials('direct');
+    //     await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
+    //       CLOUD_CREDENTIALS_PACKAGE_VERSION
+    //     );
 
-      await pageObjects.header.waitUntilLoadingHasFinished();
+    //     await cisIntegration.clickOptionButton(
+    //       cisIntegration.testSubjectIds.CIS_AWS_OPTION_TEST_ID
+    //     );
+    //     await cisIntegration.clickOptionButton(
+    //       cisIntegration.testSubjectIds.AWS_SINGLE_ACCOUNT_TEST_ID
+    //     );
 
-      await cisIntegration.clickSaveButton();
-      await pageObjects.header.waitUntilLoadingHasFinished();
+    //     await cisIntegration.inputIntegrationName(agentlessIntegrationAwsName);
 
-      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
+    //     await cisIntegration.selectSetupTechnology('agentless');
+    //     await cisIntegration.selectAwsCredentials('direct');
 
-      await cisIntegration.navigateToIntegrationCspList();
-      await pageObjects.header.waitUntilLoadingHasFinished();
+    //     await pageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await cisIntegration.getFirstCspmIntegrationPageIntegration()).to.be(
-        integrationPolicyName
-      );
-      expect(await cisIntegration.getFirstCspmIntegrationPageAgent()).to.be(
-        `Agentless policy for ${integrationPolicyName}`
-      );
-    });
+    //     await cisIntegration.clickSaveButton();
+    //     await pageObjects.header.waitUntilLoadingHasFinished();
 
-    it(`should create default agent-based agent`, async () => {
-      const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
+    //     expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
 
-      await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        CLOUD_CREDENTIALS_PACKAGE_VERSION
-      );
+    //     await cisIntegration.navigateToIntegrationCspList();
+    //     await pageObjects.header.waitUntilLoadingHasFinished();
 
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+    //     expect(await cisIntegration.getFirstCspmIntegrationPageIntegration()).to.be(
+    //       agentlessIntegrationAwsName
+    //     );
+    //     expect(await cisIntegration.getFirstCspmIntegrationPageAgent()).to.be(
+    //       agentlessAgentAwsPolicyName
+    //     );
 
-      await cisIntegration.inputIntegrationName(integrationPolicyName);
-
-      await cisIntegration.clickSaveButton();
-      await pageObjects.header.waitUntilLoadingHasFinished();
-
-      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(true);
-
-      const agentPolicyName = await cisIntegration.getAgentBasedPolicyValue();
-
-      await cisIntegration.navigateToIntegrationCspList();
-      await pageObjects.header.waitUntilLoadingHasFinished();
-
-      expect(await cisIntegration.getFirstCspmIntegrationPageIntegration()).to.be(
-        integrationPolicyName
-      );
-      expect(await cisIntegration.getFirstCspmIntegrationPageAgent()).to.be(agentPolicyName);
-    });
+    //     // Delete the agentless agent when the following task is done
+    //     // https://github.com/elastic/kibana/issues/174598
+    //   });
+    // });
   });
 }
