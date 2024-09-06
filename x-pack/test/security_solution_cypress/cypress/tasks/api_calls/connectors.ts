@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { rootRequest } from './common';
+
 export const createConnector = (connector: Record<string, unknown>) =>
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: '/api/actions/action',
     body: connector,
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 
 const slackConnectorAPIPayload = {
