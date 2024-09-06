@@ -40,6 +40,11 @@ import {
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
+  VECTOR_SEARCH_PLUGIN,
+  SEMANTIC_SEARCH_PLUGIN,
+  AI_SEARCH_PLUGIN,
+  APPLICATIONS_PLUGIN,
+  INFERENCE_ENDPOINTS_PLUGIN,
 } from '../common/constants';
 
 import {
@@ -165,6 +170,12 @@ export class EnterpriseSearchPlugin implements Plugin {
       ANALYTICS_PLUGIN.ID,
       ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
       SEARCH_EXPERIENCES_PLUGIN.ID,
+      VECTOR_SEARCH_PLUGIN.ID,
+      SEMANTIC_SEARCH_PLUGIN.ID,
+      APPLICATIONS_PLUGIN.ID,
+      AI_SEARCH_PLUGIN.ID,
+      // SEARCH_PLAYGROUND_PLUGIN.ID,
+      INFERENCE_ENDPOINTS_PLUGIN.ID,
     ];
     const isCloud = !!cloud?.cloudId;
 
@@ -220,30 +231,12 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return {
           navLinks: {
-            enterpriseSearch: true,
-            enterpriseSearchContent: true,
-            enterpriseSearchAnalytics: true,
-            enterpriseSearchApplications: true,
-            enterpriseSearchAISearch: true,
-            enterpriseSearchVectorSearch: true,
-            enterpriseSearchSemanticSearch: true,
-            enterpriseSearchElasticsearch: true,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-            searchExperiences: true,
           },
           catalogue: {
-            enterpriseSearch: true,
-            enterpriseSearchContent: true,
-            enterpriseSearchAnalytics: true,
-            enterpriseSearchApplications: true,
-            enterpriseSearchAISearch: true,
-            enterpriseSearchVectorSearch: true,
-            enterpriseSearchSemanticSearch: true,
-            enterpriseSearchElasticsearch: true,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-            searchExperiences: true,
           },
         };
       },
