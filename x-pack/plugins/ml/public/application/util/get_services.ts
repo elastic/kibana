@@ -14,7 +14,7 @@ import { MlLicense } from '../../../common/license';
 import { MlCapabilitiesService } from '../capabilities/check_capabilities';
 import { fieldFormatServiceFactory } from '../services/field_format_service_factory';
 import { HttpService } from '../services/http_service';
-import { mlApiServicesProvider } from '../services/ml_api_service';
+import { mlApiProvider } from '../services/ml_api_service';
 import { mlUsageCollectionProvider } from '../services/usage_collection';
 import { mlJobServiceFactory } from '../services/job_service';
 import { toastNotificationServiceProvider } from '../services/toast_notification_service';
@@ -29,9 +29,9 @@ export function getMlGlobalServices(
   usageCollection?: UsageCollectionSetup
 ) {
   const httpService = new HttpService(coreStart.http);
-  const mlApiServices = mlApiServicesProvider(httpService);
+  const mlApi = mlApiProvider(httpService);
   const toastNotificationService = toastNotificationServiceProvider(coreStart.notifications.toasts);
-  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApiServices);
+  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApi);
   // Note on the following services:
   // - `mlIndexUtils` is just instantiated here to be passed on to `mlFieldFormatService`,
   //   but it's not being made available as part of global services. Since it's just
@@ -42,14 +42,14 @@ export function getMlGlobalServices(
   //   its own context or possibly without having a singleton like state at all, since the
   //   way this manages its own state right now doesn't consider React component lifecycles.
   const mlIndexUtils = indexServiceFactory(dataViews);
-  const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils, mlJobService);
+  const mlFieldFormatService = fieldFormatServiceFactory(mlApi, mlIndexUtils, mlJobService);
 
   return {
     httpService,
-    mlApiServices,
+    mlApi,
     mlFieldFormatService,
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
-    mlCapabilities: new MlCapabilitiesService(mlApiServices),
+    mlCapabilities: new MlCapabilitiesService(mlApi),
     mlLicense: new MlLicense(),
   };
 }
