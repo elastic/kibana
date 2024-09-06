@@ -8,7 +8,7 @@
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { renderHook } from '@testing-library/react-hooks';
-import { getUseCellActionsHook } from './use_cell_actions';
+import { useCellActionsOptions } from './use_cell_actions';
 import { columns as mockColumns, data as mockData } from './mock/data';
 import type {
   EuiDataGridColumn,
@@ -22,8 +22,6 @@ import type { ComponentProps, JSXElementConstructor, PropsWithChildren } from 'r
 import React from 'react';
 import { makeAction } from '../../../common/components/cell_actions/mocks';
 import { VIEW_SELECTION } from '../../../../common/constants';
-
-const useCellActions = getUseCellActionsHook(TableId.test);
 
 const mockDataGridRef: {
   current: EuiDataGridRefProps;
@@ -88,11 +86,10 @@ describe('getUseCellActionsHook', () => {
   it('should render cell actions correctly for gridView view', async () => {
     const { result, waitForNextUpdate } = renderHook(
       () =>
-        useCellActions({
+        useCellActionsOptions(TableId.test, {
           columns: mockColumns as unknown as EuiDataGridColumn[],
-          data: mockData,
+          oldAlertsData: mockData,
           dataGridRef: mockDataGridRef,
-          ecsData: [],
           pageSize: 10,
           pageIndex: 0,
         }),
@@ -103,7 +100,7 @@ describe('getUseCellActionsHook', () => {
 
     await waitForNextUpdate();
 
-    const cellAction = result.current.getCellActions('host.name', 0)[0];
+    const cellAction = result.current.getCellActionsForColumn('host.name', 0)[0];
 
     renderCellAction(cellAction);
 
@@ -113,11 +110,10 @@ describe('getUseCellActionsHook', () => {
   it('should not render cell actions correctly for eventRendered view', async () => {
     const { result, waitForNextUpdate } = renderHook(
       () =>
-        useCellActions({
+        useCellActionsOptions(TableId.test, {
           columns: mockColumns as unknown as EuiDataGridColumn[],
-          data: mockData,
+          oldAlertsData: mockData,
           dataGridRef: mockDataGridRef,
-          ecsData: [],
           pageSize: 10,
           pageIndex: 0,
         }),
@@ -126,7 +122,7 @@ describe('getUseCellActionsHook', () => {
       }
     );
 
-    const cellAction = result.current.getCellActions('host.name', 0);
+    const cellAction = result.current.getCellActionsForColumn('host.name', 0);
 
     await waitForNextUpdate();
 

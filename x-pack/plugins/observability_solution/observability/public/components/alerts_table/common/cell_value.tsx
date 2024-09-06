@@ -23,32 +23,19 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import type { ObservabilityRuleTypeRegistry } from '../../..';
+import { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../../alert_severity_badge';
 import { AlertStatusIndicator } from '../../alert_status_indicator';
 import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
 import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
+import { ObservabilityAlertsTableProp } from '../types';
 
-export const getMappedNonEcsValue = ({
-  data,
-  fieldName,
-}: {
-  data: TimelineNonEcsData[];
-  fieldName: string;
-}): string[] | undefined => {
-  const item = data.find((d) => d.field === fieldName);
-  if (item != null && item.value != null) {
-    return item.value;
-  }
-  return undefined;
-};
-
-const getRenderValue = (mappedNonEcsValue: any) => {
+const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
-  const value = Array.isArray(mappedNonEcsValue) ? mappedNonEcsValue.join() : mappedNonEcsValue;
+  const rawValue = alert[fieldName];
+  const value = Array.isArray(rawValue) ? rawValue.join() : rawValue;
 
   if (!isEmpty(value)) {
     if (typeof value === 'object') {
@@ -69,24 +56,14 @@ const getRenderValue = (mappedNonEcsValue: any) => {
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-
-export const getRenderCellValue = ({
+// eslint-disable-next-line react/function-component-definition
+export const AlertsTableCellValue: ObservabilityAlertsTableProp<'renderCellValue'> = ({
   columnId,
-  data,
-  setFlyoutAlert,
+  alert,
+  openAlertInFlyout,
   observabilityRuleTypeRegistry,
-}: {
-  columnId: string;
-  data?: Array<{ field: string; value: any }>;
-  setFlyoutAlert?: (alertId: string) => void;
-  observabilityRuleTypeRegistry?: ObservabilityRuleTypeRegistry;
 }) => {
-  if (!data) return null;
-  const mappedNonEcsValue = getMappedNonEcsValue({
-    data,
-    fieldName: columnId,
-  });
-  const value = getRenderValue(mappedNonEcsValue);
+  const value = getAlertFieldValue(alert, columnId);
 
   switch (columnId) {
     case ALERT_STATUS:
@@ -101,36 +78,27 @@ export const getRenderCellValue = ({
     case ALERT_RULE_EXECUTION_TIMESTAMP:
       return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
     case ALERT_DURATION:
-      return asDuration(Number(value));
+      return <>{asDuration(Number(value))}</>;
     case ALERT_SEVERITY:
       return <AlertSeverityBadge severityLevel={value ?? undefined} />;
     case ALERT_EVALUATION_VALUE:
-      const valuesField = getMappedNonEcsValue({
-        data,
-        fieldName: ALERT_EVALUATION_VALUES,
-      });
-      const values = getRenderValue(valuesField);
-      return valuesField ? values : value;
+      const multipleValues = getAlertFieldValue(alert, ALERT_EVALUATION_VALUES);
+      return <>{multipleValues ?? value}</>;
     case ALERT_REASON:
-      const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
       if (!observabilityRuleTypeRegistry) return <>{value}</>;
-      const alert = parseAlert(observabilityRuleTypeRegistry)(dataFieldEs);
+      const parsedAlert = parseAlert(observabilityRuleTypeRegistry)(alert);
       return (
         <EuiLink
           data-test-subj="o11yGetRenderCellValueLink"
           css={{ ':hover': { textDecoration: 'none' } }}
-          onClick={() => setFlyoutAlert && setFlyoutAlert(alert.fields[ALERT_UUID])}
+          onClick={() => openAlertInFlyout?.(parsedAlert.fields[ALERT_UUID])}
         >
-          {alert.reason}
+          {parsedAlert.reason}
         </EuiLink>
       );
     case ALERT_RULE_NAME:
-      const ruleCategory = getMappedNonEcsValue({
-        data,
-        fieldName: ALERT_RULE_CATEGORY,
-      });
-      const tooltipContent = getRenderValue(ruleCategory);
-      return <CellTooltip value={value} tooltipContent={tooltipContent} />;
+      const ruleCategory = getAlertFieldValue(alert, ALERT_RULE_CATEGORY);
+      return <CellTooltip value={value} tooltipContent={ruleCategory} />;
     default:
       return <>{value}</>;
   }

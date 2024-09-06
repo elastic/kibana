@@ -36,11 +36,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
-import {
-  ActionTypeRegistryContract,
-  AlertsTableConfigurationRegistryContract,
-  RuleTypeRegistryContract,
-} from '../types';
+import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import {
   Section,
   legacyRouteToRuleDetails,
@@ -73,7 +69,6 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   ruleTypeRegistry: RuleTypeRegistryContract;
-  alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;
   history: ScopedHistory;
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;

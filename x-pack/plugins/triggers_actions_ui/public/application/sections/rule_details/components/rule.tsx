@@ -70,8 +70,7 @@ export function RuleComponent({
   durationEpoch = Date.now(),
   isLoadingChart,
 }: RuleComponentProps) {
-  const { ruleTypeRegistry, actionTypeRegistry, alertsTableConfigurationRegistry } =
-    useKibana().services;
+  const { ruleTypeRegistry, actionTypeRegistry } = useKibana().services;
 
   const alerts = Object.entries(ruleSummary.alerts)
     .map(([alertId, alert]) => alertToListItem(durationEpoch, alertId, alert))

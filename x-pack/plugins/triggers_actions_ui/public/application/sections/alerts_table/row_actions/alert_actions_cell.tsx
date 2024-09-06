@@ -26,9 +26,6 @@ const actionsToolTip = i18n.translate('xpack.triggersActionsUI.alertsTable.moreA
  * The cell containing contextual actions for a single alert row in the table
  */
 export const AlertActionsCell: AlertsTableProps['renderActionsCell'] = (props) => {
-  const { rowIndex, pageIndex, pageSize, alerts } = props;
-  const idx = rowIndex - pageSize * pageIndex;
-  const alert = alerts[idx];
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const closeActionsPopover = () => {
@@ -42,14 +39,13 @@ export const AlertActionsCell: AlertsTableProps['renderActionsCell'] = (props) =
   const DefaultRowActions = useMemo(
     () => (
       <DefaultAlertActions
-        key={'defaultRowActions'}
+        key="defaultRowActions"
         onActionExecuted={closeActionsPopover}
         isAlertDetailsEnabled={false}
-        alert={alert}
         {...props}
       />
     ),
-    [alert, props]
+    [props]
   );
 
   // TODO re-enable view in app when it works

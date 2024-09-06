@@ -118,22 +118,21 @@ describe('AlertsDataGrid', () => {
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
       const { container } = render(<TestComponent {...mockDataGridProps} />);
-      userEvent.click(container.querySelector('.euiDataGridHeaderCell__button')!, undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(container.querySelector('.euiDataGridHeaderCell__button')!, {
+        pointerEventsCheck: 0,
       });
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(
+      await userEvent.click(
         screen.getByTestId(`dataGridHeaderCellActionGroup-${mockColumns[0].id}`),
-        undefined,
         {
-          skipPointerEventsCheck: true,
+          pointerEventsCheck: 0,
         }
       );
 
-      userEvent.click(screen.getByTitle('Sort A-Z'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(screen.getByTitle('Sort A-Z'), {
+        pointerEventsCheck: 0,
       });
 
       expect(mockDataGridProps.onSortChange).toHaveBeenCalledWith([
@@ -143,8 +142,8 @@ describe('AlertsDataGrid', () => {
 
     it('should support pagination', async () => {
       render(<TestComponent {...mockDataGridProps} />);
-      userEvent.click(screen.getByTestId('pagination-button-1'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(screen.getByTestId('pagination-button-1'), {
+        pointerEventsCheck: 0,
       });
 
       expect(mockDataGridProps.onChangePageIndex).toHaveBeenCalledWith(1);
@@ -311,26 +310,28 @@ describe('AlertsDataGrid', () => {
     });
 
     describe('cell Actions', () => {
-      const mockGetCellActions = jest.fn((columnId: string): EuiDataGridColumnCellAction[] => [
-        ({ rowIndex, Component }) => {
-          const label = 'Fake Cell First Action';
-          return (
-            <Component
-              onClick={() => cellActionOnClickMockedFn(columnId, rowIndex)}
-              data-test-subj={'fake-cell-first-action'}
-              iconType="refresh"
-              aria-label={label}
-            />
-          );
-        },
-      ]);
+      const mockGetCellActionsForColumn = jest.fn(
+        (columnId: string): EuiDataGridColumnCellAction[] => [
+          ({ rowIndex, Component }) => {
+            const label = 'Fake Cell First Action';
+            return (
+              <Component
+                onClick={() => cellActionOnClickMockedFn(columnId, rowIndex)}
+                data-test-subj={'fake-cell-first-action'}
+                iconType="refresh"
+                aria-label={label}
+              />
+            );
+          },
+        ]
+      );
       const props: TestAlertsDataGridProps = {
         ...mockDataGridProps,
-        getCellActionsOptions: () => ({
-          getCellActions: mockGetCellActions,
+        cellActionsOptions: {
+          getCellActionsForColumn: mockGetCellActionsForColumn,
           visibleCellActions: 2,
           disabledCellActions: [],
-        }),
+        },
       };
 
       it('should render cell actions on hover', async () => {

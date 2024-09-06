@@ -30,7 +30,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID } from './constants';
 
-export type BaseAlertsDataGridProps = AlertsDataGridProps<AdditionalContext>;
+export type BaseAlertsDataGridProps = AlertsDataGridProps;
 export type TestAlertsDataGridProps = Partial<Omit<BaseAlertsDataGridProps, 'renderContext'>> & {
   renderContext?: Partial<RenderContext<AdditionalContext>>;
 };
@@ -177,7 +177,7 @@ export const mockBulkActionsState = {
   updatedAt: Date.now(),
 };
 
-export const mockRenderContext: RenderContext<AdditionalContext> = {
+export const mockRenderContext = {
   tableId: 'test-table',
   showAlertStatusWithFlapping: true,
   columns: mockColumns,
@@ -185,7 +185,7 @@ export const mockRenderContext: RenderContext<AdditionalContext> = {
   isLoading: false,
   isLoadingAlerts: false,
   alerts: mockAlerts,
-  ecsData: mockEcsData,
+  ecsAlertsData: mockEcsData,
   oldAlertsData: mockOldAlertsData,
   alertsCount: mockAlerts.length,
   browserFields: mockBrowserFields,
@@ -221,7 +221,7 @@ export const mockRenderContext: RenderContext<AdditionalContext> = {
       />
     </EuiFlexItem>
   ),
-};
+} as RenderContext<AdditionalContext>;
 
 export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
   pageSizeOptions: [1, 10, 20, 50, 100],

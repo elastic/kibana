@@ -4,17 +4,81 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import React, { useEffect, useMemo, useRef } from 'react';
+import {
+  ALERT_DURATION,
+  ALERT_REASON,
+  ALERT_RULE_NAME,
+  ALERT_STATUS,
+  AlertConsumers,
+} from '@kbn/rule-data-utils';
 import type { TimeRange } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { AlertsTableProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table';
-import { SloEmbeddableDeps } from '../types';
+import type {
+  AlertsTableProps,
+  AlertsTableImperativeApi,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
+import { EuiDataGridColumn } from '@elastic/eui';
+import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
+import { i18n } from '@kbn/i18n';
 import type { SloItem } from '../types';
-import { SLO_ALERTS_TABLE_CONFIG_ID } from '../../constants';
+import { SloEmbeddableDeps } from '../types';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.sloAlertsEmbeddable.alert.table';
+/**
+ * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,
+ * plus additional TGrid column properties
+ */
+const columns: Array<
+  Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
+> = [
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate(
+      'xpack.slo.slo.sloAlertsEmbeddable.alertsTGrid.statusColumnDescription',
+      {
+        defaultMessage: 'Status',
+      }
+    ),
+    id: ALERT_STATUS,
+    initialWidth: 110,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate(
+      'xpack.slo.slo.sloAlertsEmbeddable.alertsTGrid.durationColumnDescription',
+      {
+        defaultMessage: 'Duration',
+      }
+    ),
+    id: ALERT_DURATION,
+    initialWidth: 116,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate(
+      'xpack.slo.slo.sloAlertsEmbeddable.alertsTGrid.sloColumnDescription',
+      {
+        defaultMessage: 'Rule name',
+      }
+    ),
+    id: ALERT_RULE_NAME,
+    initialWidth: 110,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate(
+      'xpack.slo.slo.sloAlertsEmbeddable.alertsTGrid.reasonColumnDescription',
+      {
+        defaultMessage: 'Reason',
+      }
+    ),
+    id: ALERT_REASON,
+    linkField: '*',
+  },
+];
 
 interface Props {
   deps: SloEmbeddableDeps;
@@ -90,33 +154,31 @@ export const useSloAlertsQuery = (
 
 export function SloAlertsTable({
   slos,
-  deps,
   timeRange,
   onLoaded,
   lastReloadRequestTime,
   showAllGroupByInstances,
 }: Props) {
-  const {
-    triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
-    observability: { observabilityRuleTypeRegistry },
-  } = deps;
+  const ref = useRef<AlertsTableImperativeApi>(null);
+
+  useEffect(() => {
+    ref.current?.refresh();
+  }, [lastReloadRequestTime]);
+
   return (
-    <AlertsStateTable
-      query={useSloAlertsQuery(slos, timeRange, showAllGroupByInstances)}
-      alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-      configurationId={SLO_ALERTS_TABLE_CONFIG_ID}
-      featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
-      hideLazyLoader
+    <ObservabilityAlertsTable
+      ref={ref}
       id={ALERTS_TABLE_ID}
+      featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
+      query={useSloAlertsQuery(slos, timeRange, showAllGroupByInstances)}
+      columns={columns}
+      hideLazyLoader
       initialPageSize={ALERTS_PER_PAGE}
-      showAlertStatusWithFlapping
       onLoaded={() => {
         if (onLoaded) {
           onLoaded();
         }
       }}
-      lastReloadRequestTime={lastReloadRequestTime}
-      cellContext={{ observabilityRuleTypeRegistry }}
     />
   );
 }

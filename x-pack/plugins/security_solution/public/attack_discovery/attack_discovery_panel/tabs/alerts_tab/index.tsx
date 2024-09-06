@@ -9,8 +9,8 @@ import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-commo
 import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import React, { useMemo } from 'react';
 
-import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../../common/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 
 interface Props {
   attackDiscovery: AttackDiscovery;
@@ -18,8 +18,6 @@ interface Props {
 }
 
 const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) => {
-  const { triggersActionsUi } = useKibana().services;
-
   const originalAlertIds = useMemo(
     () =>
       attackDiscovery.alertIds.map((alertId) =>
@@ -37,27 +35,16 @@ const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) 
     [originalAlertIds]
   );
 
-  const configId = ALERTS_TABLE_REGISTRY_CONFIG_IDS.CASE; // show the same row-actions as in the case view
-
-  const alertStateProps = useMemo(
-    () => ({
-      alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
-      configurationId: configId,
-      id: `attack-discovery-alerts-${attackDiscovery.id}`,
-      featureIds: [AlertConsumers.SIEM],
-      query: alertIdsQuery,
-      showAlertStatusWithFlapping: false,
-    }),
-    [
-      alertIdsQuery,
-      attackDiscovery.id,
-      configId,
-      triggersActionsUi.alertsTableConfigurationRegistry,
-    ]
-  );
-
   return (
-    <div data-test-subj="alertsTab">{triggersActionsUi.getAlertsStateTable(alertStateProps)}</div>
+    <div data-test-subj="alertsTab">
+      <AlertsTableComponent
+        id={`attack-discovery-alerts-${attackDiscovery.id}`}
+        tableType={TableId.alertsOnCasePage}
+        featureIds={[AlertConsumers.SIEM]}
+        query={alertIdsQuery}
+        showAlertStatusWithFlapping={false}
+      />
+    </div>
   );
 };
 

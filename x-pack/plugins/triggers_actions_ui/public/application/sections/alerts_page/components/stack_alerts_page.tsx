@@ -197,7 +197,6 @@ const PageContent = () => {
               key={featureIds.join()}
               id="stack-alerts-page-table"
               featureIds={featureIds}
-              additionalContext={{ test: 'ciao' }}
               query={esQuery}
               initialSort={defaultAlertsTableSort}
               showAlertStatusWithFlapping

@@ -23,7 +23,9 @@ interface CaseViewAlertsProps {
   onAlertsTableLoaded?: (eventIds: Array<Partial<{ _id: string }>>) => void;
 }
 export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlertsProps) => {
-  const { triggersActionsUi } = useKibana().services;
+  const {
+    triggersActionsUi: { getAlertsStateTable: AlertsTable },
+  } = useKibana().services;
 
   const alertIds = getManualAlertIds(caseData.comments);
   const alertIdsQuery = useMemo(
@@ -38,37 +40,6 @@ export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlerts
   const { isLoading: isLoadingAlertFeatureIds, data: alertData } = useGetFeatureIds(
     alertIds,
     caseData.owner !== SECURITY_SOLUTION_OWNER
-  );
-
-  const configId =
-    caseData.owner === SECURITY_SOLUTION_OWNER
-      ? `${caseData.owner}-case`
-      : !isLoadingAlertFeatureIds
-      ? triggersActionsUi.alertsTableConfigurationRegistry.getAlertConfigIdPerRuleTypes(
-          alertData?.ruleTypeIds ?? []
-        )
-      : '';
-
-  const alertStateProps = useMemo(
-    () => ({
-      alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
-      configurationId: configId,
-      id: `case-details-alerts-${caseData.owner}`,
-      featureIds: (caseData.owner === SECURITY_SOLUTION_OWNER
-        ? [AlertConsumers.SIEM]
-        : alertData?.featureIds ?? []) as ValidFeatureId[],
-      query: alertIdsQuery,
-      showAlertStatusWithFlapping: caseData.owner !== SECURITY_SOLUTION_OWNER,
-      onLoaded: onAlertsTableLoaded,
-    }),
-    [
-      triggersActionsUi.alertsTableConfigurationRegistry,
-      configId,
-      caseData.owner,
-      alertData?.featureIds,
-      alertIdsQuery,
-      onAlertsTableLoaded,
-    ]
   );
 
   if (alertIdsQuery.ids.values.length === 0) {
@@ -91,7 +62,17 @@ export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlerts
   ) : (
     <EuiFlexItem data-test-subj="case-view-alerts">
       <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
-      {triggersActionsUi.getAlertsStateTable(alertStateProps)}
+      <AlertsTable
+        id={`case-details-alerts-${caseData.owner}`}
+        featureIds={
+          (caseData.owner === SECURITY_SOLUTION_OWNER
+            ? [AlertConsumers.SIEM]
+            : alertData?.featureIds ?? []) as ValidFeatureId[]
+        }
+        query={alertIdsQuery}
+        showAlertStatusWithFlapping={caseData.owner !== SECURITY_SOLUTION_OWNER}
+        onLoaded={onAlertsTableLoaded}
+      />
     </EuiFlexItem>
   );
 };
