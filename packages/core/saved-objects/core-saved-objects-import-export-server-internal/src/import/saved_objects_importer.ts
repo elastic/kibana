@@ -9,6 +9,7 @@
 
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsImporter,
@@ -27,15 +28,18 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
   readonly #typeRegistry: ISavedObjectTypeRegistry;
   readonly #importSizeLimit: number;
   readonly #importHooks: Record<string, SavedObjectsImportHook[]>;
+  readonly #log: Logger;
 
   constructor({
     savedObjectsClient,
     typeRegistry,
     importSizeLimit,
+    logger,
   }: {
     savedObjectsClient: SavedObjectsClientContract;
     typeRegistry: ISavedObjectTypeRegistry;
     importSizeLimit: number;
+    logger: Logger;
   }) {
     this.#savedObjectsClient = savedObjectsClient;
     this.#typeRegistry = typeRegistry;
@@ -46,9 +50,10 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       }
       return hooks;
     }, {} as Record<string, SavedObjectsImportHook[]>);
+    this.#log = logger;
   }
 
-  public import({
+  public async import({
     readStream,
     createNewCopies,
     namespace,
@@ -57,22 +62,30 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     compatibilityMode,
     managed,
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
-    return importSavedObjectsFromStream({
-      readStream,
-      createNewCopies,
-      namespace,
-      overwrite,
-      refresh,
-      compatibilityMode,
-      objectLimit: this.#importSizeLimit,
-      savedObjectsClient: this.#savedObjectsClient,
-      typeRegistry: this.#typeRegistry,
-      importHooks: this.#importHooks,
-      managed,
-    });
+    this.#log.debug('Starting the import process');
+    try {
+      const result = await importSavedObjectsFromStream({
+        readStream,
+        createNewCopies,
+        namespace,
+        overwrite,
+        refresh,
+        compatibilityMode,
+        objectLimit: this.#importSizeLimit,
+        savedObjectsClient: this.#savedObjectsClient,
+        typeRegistry: this.#typeRegistry,
+        importHooks: this.#importHooks,
+        managed,
+      });
+      this.#log.info(`Successfully imported ${result.successCount} objects`);
+      return result;
+    } catch (error) {
+      this.#log.error('Import failed', error);
+      throw error;
+    }
   }
 
-  public resolveImportErrors({
+  public async resolveImportErrors({
     readStream,
     createNewCopies,
     compatibilityMode,
@@ -80,17 +93,25 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     retries,
     managed,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
-    return resolveSavedObjectsImportErrors({
-      readStream,
-      createNewCopies,
-      compatibilityMode,
-      namespace,
-      retries,
-      objectLimit: this.#importSizeLimit,
-      savedObjectsClient: this.#savedObjectsClient,
-      typeRegistry: this.#typeRegistry,
-      importHooks: this.#importHooks,
-      managed,
-    });
+    this.#log.debug('Resolving import errors');
+    try {
+      const result = await resolveSavedObjectsImportErrors({
+        readStream,
+        createNewCopies,
+        compatibilityMode,
+        namespace,
+        retries,
+        objectLimit: this.#importSizeLimit,
+        savedObjectsClient: this.#savedObjectsClient,
+        typeRegistry: this.#typeRegistry,
+        importHooks: this.#importHooks,
+        managed,
+      });
+      this.#log.info(`Resolved errors for ${result.successCount} objects`);
+      return result;
+    } catch (error) {
+      this.#log.error('Error resolving import errors', error);
+      throw error;
+    }
   }
 }
