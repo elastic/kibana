@@ -255,39 +255,12 @@ export const PingStateType = t.type({
 export type Ping = t.TypeOf<typeof PingType>;
 export type PingState = t.TypeOf<typeof PingStateType>;
 
-export const PingStatusType = t.intersection([
-  t.type({
-    timestamp: t.string,
-    docId: t.string,
-    config_id: t.string,
-    locationId: t.string,
-    summary: t.partial({
-      down: t.number,
-      up: t.number,
-    }),
-  }),
-  t.partial({
-    error: PingErrorType,
-  }),
-]);
-
-export type PingStatus = t.TypeOf<typeof PingStatusType>;
-
 export const PingsResponseType = t.type({
   total: t.number,
   pings: t.array(PingType),
 });
 
 export type PingsResponse = t.TypeOf<typeof PingsResponseType>;
-
-export const PingStatusesResponseType = t.type({
-  total: t.number,
-  pings: t.array(PingStatusType),
-  from: t.string,
-  to: t.string,
-});
-
-export type PingStatusesResponse = t.TypeOf<typeof PingStatusesResponseType>;
 
 export const GetPingsParamsType = t.intersection([
   t.type({

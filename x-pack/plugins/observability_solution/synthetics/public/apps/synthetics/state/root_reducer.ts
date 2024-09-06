@@ -30,13 +30,11 @@ import { monitorListReducer, MonitorListState } from './monitor_list';
 import { serviceLocationsReducer, ServiceLocationsState } from './service_locations';
 import { monitorOverviewReducer, MonitorOverviewState } from './overview';
 import { BrowserJourneyState } from './browser_journey/models';
-import { pingStatusReducer, PingStatusState } from './ping_status';
 import { monitorStatusHeatmapReducer, MonitorStatusHeatmap } from './status_heatmap';
 
 export interface SyntheticsAppState {
   ui: UiState;
   settings: SettingsState;
-  pingStatus: PingStatusState;
   elasticsearch: QueriesState;
   monitorList: MonitorListState;
   overview: MonitorOverviewState;
@@ -59,7 +57,6 @@ export interface SyntheticsAppState {
 export const rootReducer = combineReducers<SyntheticsAppState>({
   ui: uiReducer,
   settings: settingsReducer,
-  pingStatus: pingStatusReducer,
   monitorList: monitorListReducer,
   overview: monitorOverviewReducer,
   globalParams: globalParamsReducer,
