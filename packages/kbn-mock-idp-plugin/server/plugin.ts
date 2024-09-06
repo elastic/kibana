@@ -10,7 +10,11 @@ import type { PluginInitializer, Plugin } from '@kbn/core-plugins-server';
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import { MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH, createSAMLResponse } from '@kbn/mock-idp-utils';
-import { SERVERLESS_ROLES_ROOT_PATH, readRolesFromResource } from '@kbn/es';
+import {
+  SERVERLESS_ROLES_ROOT_PATH,
+  STATEFUL_ROLES_ROOT_PATH,
+  readRolesFromResource,
+} from '@kbn/es';
 import { resolve } from 'path';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 
@@ -39,6 +43,11 @@ const readServerlessRoles = (projectType: string) => {
   } else {
     throw new Error(`Unsupported projectType: ${projectType}`);
   }
+};
+
+const readStatefulRoles = (projectType: string) => {
+  const rolesResourcePath = resolve(STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
+  return readRolesFromResource(rolesResourcePath);
 };
 
 export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
@@ -72,22 +81,23 @@ export const plugin: PluginInitializer<
         options: { authRequired: false },
       },
       (context, request, response) => {
-        const projectType = plugins.cloud.serverless?.projectType;
-        if (!projectType) {
-          return response.customError({ statusCode: 500, body: 'projectType is not defined' });
-        } else {
-          try {
-            if (roles.length === 0) {
+        try {
+          if (roles.length === 0) {
+            const projectType = plugins.cloud?.serverless?.projectType;
+            if (projectType) {
               roles.push(...readServerlessRoles(projectType));
+            } else {
+              // then it is a stateful deployment
+              roles.push(...readStatefulRoles());
             }
-            return response.ok({
-              body: {
-                roles,
-              },
-            });
-          } catch (err) {
-            return response.customError({ statusCode: 500, body: err.message });
           }
+          return response.ok({
+            body: {
+              roles,
+            },
+          });
+        } catch (err) {
+          return response.customError({ statusCode: 500, body: err.message });
         }
       }
     );
