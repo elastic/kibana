@@ -21,9 +21,19 @@ export async function extractAndArchiveLogs({
 }: {
   outputFolder: string;
   log: ToolingLog;
-  nodeNames: string[];
+  nodeNames?: string[];
 }) {
   const logFiles: string[] = [];
+  if (!nodeNames) {
+    const { stdout: nodeNamesString } = await execa('docker', [
+      'ps',
+      '--quiet',
+      '--format',
+      '{{.Names}}',
+    ]);
+    nodeNames = nodeNamesString.split('\n').filter(Boolean);
+  }
+
   for (const name of nodeNames) {
     const { stdout: nodeId } = await execa('docker', [
       'ps',
