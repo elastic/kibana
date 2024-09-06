@@ -68,7 +68,7 @@ export interface ReqOptions {
   description?: string;
   path: string;
   query?: Record<string, any>;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   body?: any;
   retries?: number;
   headers?: Record<string, string>;
