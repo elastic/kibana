@@ -184,8 +184,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           const mapped = traces.map((traceDocs) => {
             return sortBy(traceDocs, '@timestamp')
-              .filter((doc) => doc.processor.event === 'transaction')
-              .map((doc) => doc.service.name);
+              .filter((doc) => doc['processor.event']?.[0] === 'transaction')
+              .map((doc) => doc['service.name']?.[0]);
           });
 
           expect(mapped).to.eql([

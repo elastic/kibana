@@ -116,7 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns some errors', () => {
         expect(traces.traceItems.errorDocs.length).to.be.greaterThan(0);
-        expect(traces.traceItems.errorDocs[0].error.exception?.[0].message).to.eql(
+        expect(traces.traceItems.errorDocs[0]['error.exception.message']?.[0]).to.eql(
           '[ResponseError] index_not_found_exception'
         );
       });
@@ -125,11 +125,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(traces.traceItems.traceDocs.length).to.be.greaterThan(0);
         expect(
           traces.traceItems.traceDocs.map((item) => {
-            if (item.span && 'name' in item.span) {
-              return item.span.name;
+            if (item['span.name']) {
+              return item['span.name']?.[0];
             }
-            if (item.transaction && 'name' in item.transaction) {
-              return item.transaction.name;
+            if (item['transaction.name']?.[0]) {
+              return item['transaction.name']?.[0];
             }
           })
         ).to.eql(['GET /apple 🍏', 'get_green_apple_🍏']);
