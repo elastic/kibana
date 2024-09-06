@@ -361,27 +361,6 @@ export class ConsolePageObject extends FtrService {
     });
   }
 
-  public async getAllVisibleText() {
-    let textString = '';
-    const textLineElements = await this.getAllTextLines();
-    for (let i = 0; i < textLineElements.length; i++) {
-      textString = textString.concat(await textLineElements[i].getVisibleText());
-    }
-    return textString;
-  }
-
-  public async getVisibleTextAt(lineIndex: number) {
-    const lines = await this.getAllTextLines();
-    if (lines.length < lineIndex) {
-      throw new Error(`No line with index: ${lineIndex}`);
-    }
-
-    const line = lines[lineIndex];
-    const text = await line.getVisibleText();
-
-    return text.trim();
-  }
-
   public async hasSuccessBadge() {
     return await this.find.existsByCssSelector('.ace_badge--success');
   }
@@ -472,38 +451,6 @@ export class ConsolePageObject extends FtrService {
   public async clickAutoIndentButton() {
     const button = await this.testSubjects.find('consoleMenuAutoIndent');
     await button.click();
-  }
-
-  public async getRequestQueryParams() {
-    await this.sleepForDebouncePeriod();
-    const requestEditor = await this.getRequestEditor();
-    const requestQueryParams = await requestEditor.findAllByCssSelector('.ace_url.ace_param');
-
-    if (requestQueryParams.length === 0) {
-      // No query params
-      return;
-    }
-
-    const params = [];
-    for (const param of requestQueryParams) {
-      params.push(await param.getVisibleText());
-    }
-    return params.join('').trim();
-  }
-
-  public async getRequestBody() {
-    let request = await this.getRequest();
-    // Remove new lines at the beginning of the request
-    request = request.replace(/^\n/, '');
-    const method = await this.getRequestMethod();
-    const path = await this.getRequestPath();
-    const query = await this.getRequestQueryParams();
-
-    if (query) {
-      return request.replace(`${method} ${path}?${query}`, '').trim();
-    }
-
-    return request.replace(`${method} ${path}`, '').trim();
   }
 
   public async getRequestBodyCount() {

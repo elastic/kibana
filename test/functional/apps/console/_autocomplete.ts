@@ -196,7 +196,7 @@ GET _search
         for (const keyPress of keyPresses) {
           await PageObjects.console.sleepForDebouncePeriod();
           log.debug('Key', keyPress);
-          await PageObjects.console.monaco[keyPress]();
+          await PageObjects.console[keyPress]();
           expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
         }
       });
@@ -281,8 +281,8 @@ GET _search
     describe.skip('with a missing comma in query', () => {
       const LINE_NUMBER = 4;
       beforeEach(async () => {
-        await PageObjects.console.clearTextArea();
-        await PageObjects.console.enterRequest();
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText('\nGET _search');
         await PageObjects.console.pressEnter();
       });
 
@@ -302,11 +302,11 @@ GET _search
           const secondInnerHtml = await conApp.getAttribute('innerHTML');
           return firstInnerHtml === secondInnerHtml;
         });
-        const textAreaString = await PageObjects.console.getAllVisibleText();
+        const textAreaString = await PageObjects.console.getEditorText();
         log.debug('Text Area String Value==================\n');
         log.debug(textAreaString);
         expect(textAreaString).to.contain(',');
-        const text = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
+        const text = await PageObjects.console.getEditorTextAtLine(LINE_NUMBER);
         const lastChar = text.charAt(text.length - 1);
         expect(lastChar).to.be.eql(',');
       });
@@ -319,11 +319,11 @@ GET _search
         await PageObjects.console.pressEnter();
 
         await retry.waitForWithTimeout('text area to contain comma', 25000, async () => {
-          const textAreaString = await PageObjects.console.getAllVisibleText();
+          const textAreaString = await PageObjects.console.getEditorText();
           return textAreaString.includes(',');
         });
 
-        const text = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
+        const text = await PageObjects.console.getEditorTextAtLine(LINE_NUMBER);
         const lastChar = text.charAt(text.length - 1);
         expect(lastChar).to.be.eql(',');
       });
