@@ -9,6 +9,7 @@ import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useRef, useEffect, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { EventOutcome } from '@kbn/apm-types';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import {
@@ -379,7 +380,7 @@ function RelatedErrors({
     );
   }
 
-  return <FailureBadge outcome={item.doc[EVENT_OUTCOME]?.[0]} />;
+  return <FailureBadge outcome={item.doc[EVENT_OUTCOME]?.[0] as EventOutcome} />;
 }
 
 function getItemBarStyle(
