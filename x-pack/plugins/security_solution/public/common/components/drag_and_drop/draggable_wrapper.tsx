@@ -12,6 +12,7 @@ import type {
   DraggableProvided,
   DraggableStateSnapshot,
   DraggingStyle,
+  DroppableProvided,
   NotDraggingStyle,
 } from '@hello-pangea/dnd';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
@@ -44,7 +45,7 @@ DragEffects.displayName = 'DragEffects';
  * writing, there's no hook equivalent for `componentDidCatch`, per
  * https://reactjs.org/docs/hooks-faq.html#do-hooks-cover-all-use-cases-for-classes
  */
-class DragDropErrorBoundary extends React.PureComponent<React.PropsWithChildren> {
+class DragDropErrorBoundary extends React.PureComponent {
   componentDidCatch() {
     this.forceUpdate(); // required for recovery
   }
@@ -89,7 +90,7 @@ export const ProviderContentWrapper = styled.span`
   }
 `;
 
-type RenderFunctionProp = (
+export type RenderFunctionProp = (
   props: DataProvider,
   provided: DraggableProvided | null,
   state: DraggableStateSnapshot
@@ -156,8 +157,7 @@ const DraggableOnWrapper: React.FC<DraggableWrapperProps> = React.memo(
     );
 
     const RenderClone = useCallback(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (provided: any, snapshot: any) => (
+      (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
         <ConditionalPortal registerProvider={registerProvider}>
           <div
             {...provided.draggableProps}
@@ -179,8 +179,7 @@ const DraggableOnWrapper: React.FC<DraggableWrapperProps> = React.memo(
     );
 
     const DraggableContent = useCallback(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (provided: any, snapshot: any) => (
+      (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
         <ProviderContainer
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -217,8 +216,7 @@ const DraggableOnWrapper: React.FC<DraggableWrapperProps> = React.memo(
     );
 
     const DroppableContent = useCallback(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (droppableProvided: any) => (
+      (droppableProvided: DroppableProvided) => (
         <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
           <div
             className={DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME}

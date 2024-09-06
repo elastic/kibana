@@ -28,8 +28,7 @@ export function VersionsPicker({
   );
 
   const handleChange = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (changeEvent: any) => {
+    (changeEvent: React.ChangeEvent<HTMLSelectElement>) => {
       onChange(changeEvent.target.value as SelectedVersions);
     },
     [onChange]

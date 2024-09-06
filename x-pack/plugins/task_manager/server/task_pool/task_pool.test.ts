@@ -167,7 +167,7 @@ describe('TaskPool', () => {
       expect(shouldNotRun).not.toHaveBeenCalled();
     });
 
-    test('should log when marking a Task as running fails', async () => {
+    test('should log and throw an error when marking a Task as running fails', async () => {
       const pool = new TaskPool({
         capacity$: of(3),
         definitions,
@@ -180,15 +180,15 @@ describe('TaskPool', () => {
         throw new Error(`Mark Task as running has failed miserably`);
       });
 
-      const result = await pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()]);
+      await expect(
+        pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()])
+      ).rejects.toThrowError('Mark Task as running has failed miserably');
 
       expect((logger as jest.Mocked<Logger>).error.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "Failed to mark Task TaskType \\"shooooo\\" as running: Mark Task as running has failed miserably",
         ]
       `);
-
-      expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
     });
 
     test('should log when running a Task fails', async () => {
@@ -549,7 +549,7 @@ describe('TaskPool', () => {
       expect(shouldNotRun).not.toHaveBeenCalled();
     });
 
-    test('should log when marking a Task as running fails', async () => {
+    test('should log and throw an error when marking a Task as running fails', async () => {
       const pool = new TaskPool({
         capacity$: of(6),
         definitions,
@@ -562,15 +562,15 @@ describe('TaskPool', () => {
         throw new Error(`Mark Task as running has failed miserably`);
       });
 
-      const result = await pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()]);
+      await expect(
+        pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()])
+      ).rejects.toThrowError('Mark Task as running has failed miserably');
 
       expect((logger as jest.Mocked<Logger>).error.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          "Failed to mark Task TaskType \\"shooooo\\" as running: Mark Task as running has failed miserably",
-        ]
-      `);
-
-      expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
+      Array [
+        "Failed to mark Task TaskType \\"shooooo\\" as running: Mark Task as running has failed miserably",
+      ]
+    `);
     });
 
     test('should log when running a Task fails', async () => {

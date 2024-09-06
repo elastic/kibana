@@ -24,7 +24,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { useMlApiContext } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
 import { SyncList } from './sync_list';
 import { useToastNotificationService } from '../../services/toast_notification_service';
@@ -40,7 +40,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
   const [syncResp, setSyncResp] = useState<SyncSavedObjectResponse | null>(null);
   const {
     savedObjects: { syncSavedObjects },
-  } = useMlApiContext();
+  } = useMlApi();
 
   async function loadSyncList(simulate: boolean = true) {
     setLoading(true);

@@ -34,8 +34,7 @@ export default function ESQLToDataViewTransitionModal({
   onClose,
 }: ESQLToDataViewTransitionModalProps) {
   const [dismissModalChecked, setDismissModalChecked] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onTransitionModalDismiss = useCallback((e: any) => {
+  const onTransitionModalDismiss = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setDismissModalChecked(e.target.checked);
   }, []);
 

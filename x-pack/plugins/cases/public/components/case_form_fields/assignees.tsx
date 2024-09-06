@@ -114,7 +114,7 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
     }, [currentUserProfile, selectedAssignees, setValue]);
 
     const renderOption = useCallback(
-      (option: unknown, searchValue: string, contentClassName: string) => {
+      (option: EuiComboBoxOptionOption<string>, searchValue: string, contentClassName: string) => {
         const { user, data } = option as UserProfileComboBoxOption;
 
         const displayName = getUserDisplayName(user);

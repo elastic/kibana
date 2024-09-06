@@ -51,8 +51,7 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
 
     const href = useMemo(() => getUrlForApp('integrations', { path: '/create' }), [getUrlForApp]);
     const navigate = useCallback(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (ev: any) => {
+      (ev: React.MouseEvent<HTMLAnchorElement>) => {
         ev.preventDefault();
         navigateToUrl(href);
       },

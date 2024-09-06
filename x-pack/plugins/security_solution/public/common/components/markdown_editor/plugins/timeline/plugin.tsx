@@ -45,8 +45,7 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
   );
 
   const handleTimelineChange = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (timelineTitle: any, timelineId: any, graphEventId: any) => {
+    (timelineTitle: string, timelineId: string | null, graphEventId?: string) => {
       const url = formatUrl(getTimelineUrl(timelineId ?? '', graphEventId), {
         absolute: true,
         skipSearch: true,

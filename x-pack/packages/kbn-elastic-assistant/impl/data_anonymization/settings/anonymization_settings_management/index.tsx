@@ -12,7 +12,10 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import * as i18n from '../anonymization_settings/translations';
-import { useAnonymizationListUpdate } from '../anonymization_settings/use_anonymization_list_update';
+import {
+  useAnonymizationListUpdate,
+  UseAnonymizationListUpdateProps,
+} from '../anonymization_settings/use_anonymization_list_update';
 import {
   DEFAULT_ANONYMIZATION_FIELDS,
   DEFAULT_CONVERSATIONS,
@@ -70,18 +73,20 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
     handleSave();
   }, [handleSave]);
 
-  const handleAnonymizationFieldsBulkActions = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (value: any) => {
+  const handleAnonymizationFieldsBulkActions = useCallback<
+    UseAnonymizationListUpdateProps['setAnonymizationFieldsBulkActions']
+  >(
+    (value) => {
       setHasPendingChanges(true);
       setAnonymizationFieldsBulkActions(value);
     },
     [setAnonymizationFieldsBulkActions]
   );
 
-  const handleUpdatedAnonymizationData = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (value: any) => {
+  const handleUpdatedAnonymizationData = useCallback<
+    UseAnonymizationListUpdateProps['setUpdatedAnonymizationData']
+  >(
+    (value) => {
       setHasPendingChanges(true);
       setUpdatedAnonymizationData(value);
     },

@@ -28,14 +28,13 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
     );
 
     const onKeyDown = useCallback(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (event: any) => {
+      (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         // keyCode 13 is needed in case of IME input
         if (event.keyCode === 13 && !event.shiftKey) {
           event.preventDefault();
 
           if (value.trim().length) {
-            onPromptSubmit(event.target.value?.trim());
+            onPromptSubmit(event.currentTarget.value?.trim());
             setUserPrompt('');
           } else {
             event.stopPropagation();

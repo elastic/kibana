@@ -56,8 +56,7 @@ export const useTimelineTypes = ({
   }, [formatUrl, urlSearch]);
 
   const goToTimeline = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (ev: any) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToUrl(timelineUrl);
     },
@@ -65,8 +64,7 @@ export const useTimelineTypes = ({
   );
 
   const goToTemplateTimeline = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (ev: any) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToUrl(templateUrl);
     },
@@ -74,8 +72,7 @@ export const useTimelineTypes = ({
   );
 
   const goToNotes = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (ev: any) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToUrl(notesUrl);
     },

@@ -95,7 +95,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
     // Callback for when user types to create a new quick prompt
     const onCreateOption = useCallback(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (searchValue: any, flattenedOptions: any = []) => {
+      (searchValue: any, flattenedOptions: any[] = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }

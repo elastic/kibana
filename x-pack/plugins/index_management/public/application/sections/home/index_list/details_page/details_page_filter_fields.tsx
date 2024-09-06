@@ -39,7 +39,7 @@ export const MappingsFilter: React.FC<Props> = ({
   const [isFilterByPopoverVisible, setIsFilterPopoverVisible] = useState<boolean>(false);
   const dispatch = useDispatch();
   const setSelectedOptions = useCallback(
-    (options: any) => {
+    (options: EuiSelectableOption[]) => {
       dispatch({
         type: 'filter:update',
         value: {

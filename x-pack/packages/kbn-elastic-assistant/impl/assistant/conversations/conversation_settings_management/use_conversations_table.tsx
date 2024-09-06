@@ -42,6 +42,9 @@ export const useConversationsTable = () => {
       onDeleteActionClicked,
       // @ts-ignore
       onEditActionClicked,
+    }: {
+      onDeleteActionClicked: (conversation: ConversationTableItem) => void;
+      onEditActionClicked: (conversation: ConversationTableItem) => void;
     }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
       return [
         {

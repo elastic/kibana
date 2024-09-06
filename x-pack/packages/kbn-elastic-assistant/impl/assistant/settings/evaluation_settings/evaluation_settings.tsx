@@ -55,10 +55,9 @@ export const EvaluationSettings: React.FC = React.memo(() => {
 
   // Run Details
   // Run Name
-  const [runName, setRunName] = useState();
+  const [runName, setRunName] = useState<string | undefined>();
   const onRunNameChange = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (e: any) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setRunName(e.target.value);
     },
     [setRunName]
@@ -66,22 +65,19 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   /** Trace Options **/
   const [showTraceOptions, setShowTraceOptions] = useState(false);
   const onApmUrlChange = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (e: any) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setTraceOptions({ ...traceOptions, apmUrl: e.target.value });
     },
     [setTraceOptions, traceOptions]
   );
   const onLangSmithProjectChange = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (e: any) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setTraceOptions({ ...traceOptions, langSmithProject: e.target.value });
     },
     [setTraceOptions, traceOptions]
   );
   const onLangSmithApiKeyChange = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (e: any) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setTraceOptions({ ...traceOptions, langSmithApiKey: e.target.value });
     },
     [setTraceOptions, traceOptions]

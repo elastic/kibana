@@ -98,7 +98,7 @@ export const FieldDescriptionContent: React.FC<
   );
 
   const truncateFieldDescription = useCallback(
-    (nextValue: any) => {
+    (nextValue: boolean) => {
       setIsTruncated(nextValue);
       setShouldTruncateByDefault(nextValue);
     },

@@ -321,7 +321,7 @@ export function LensEditConfigurationFlyout({
   });
 
   const runQuery = useCallback(
-    async (q: any, abortController: any) => {
+    async (q: AggregateQuery, abortController?: AbortController) => {
       const attrs = await getSuggestions(
         q,
         startDependencies,

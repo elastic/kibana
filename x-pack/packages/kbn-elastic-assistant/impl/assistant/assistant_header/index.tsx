@@ -110,8 +110,7 @@ export const AssistantHeader: React.FC<Props> = ({
   const showDestroyModal = useCallback(() => setIsResetConversationModalVisible(true), []);
 
   const onConversationChange = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (updatedConversation: any) => {
+    (updatedConversation: Conversation) => {
       onConversationSelected({
         cId: updatedConversation.id,
         cTitle: updatedConversation.title,
