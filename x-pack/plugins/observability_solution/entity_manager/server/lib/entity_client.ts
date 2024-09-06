@@ -10,18 +10,12 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { installEntityDefinition } from './entities/install_entity_definition';
-import { startTransform } from './entities/start_transform';
+import { startTransforms } from './entities/start_transforms';
 import { findEntityDefinitions } from './entities/find_entity_definition';
 import { uninstallEntityDefinition } from './entities/uninstall_entity_definition';
 import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
 
-import {
-  stopHistoryTransform,
-  stopLatestTransform,
-  stopHistoryBackfillTransform,
-} from './entities/stop_transforms';
-
-import { isBackfillEnabled } from './entities/helpers/is_backfill_enabled';
+import { stopTransforms } from './entities/stop_transforms';
 
 export class EntityClient {
   constructor(
@@ -47,7 +41,7 @@ export class EntityClient {
     });
 
     if (!installOnly) {
-      await startTransform(this.options.esClient, definition, this.options.logger);
+      await startTransforms(this.options.esClient, definition, this.options.logger);
     }
 
     return installedDefinition;
@@ -87,17 +81,11 @@ export class EntityClient {
     return { definitions };
   }
 
-  async startTransforms(definition: EntityDefinition) {
-    return startTransform(this.options.esClient, definition, this.options.logger);
+  async startEntityDefinition(definition: EntityDefinition) {
+    return startTransforms(this.options.esClient, definition, this.options.logger);
   }
 
-  async stopTransforms(definition: EntityDefinition) {
-    return Promise.all([
-      stopHistoryTransform(this.options.esClient, definition, this.options.logger),
-      stopLatestTransform(this.options.esClient, definition, this.options.logger),
-      isBackfillEnabled(definition)
-        ? stopHistoryBackfillTransform(this.options.esClient, definition, this.options.logger)
-        : Promise.resolve(),
-    ]);
+  async stopEntityDefinition(definition: EntityDefinition) {
+    return stopTransforms(this.options.esClient, definition, this.options.logger);
   }
 }

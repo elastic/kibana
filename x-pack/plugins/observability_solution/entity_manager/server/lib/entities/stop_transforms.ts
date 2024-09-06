@@ -15,13 +15,17 @@ import {
 } from './helpers/generate_component_id';
 import { retryTransientEsErrors } from './helpers/retry';
 
-export async function stopHistoryTransform(
+import { isBackfillEnabled } from './helpers/is_backfill_enabled';
+
+export async function stopTransforms(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
 ) {
   try {
     const historyTransformId = generateHistoryTransformId(definition);
+    const latestTransformId = generateLatestTransformId(definition);
+
     await retryTransientEsErrors(
       () =>
         esClient.transform.stopTransform(
@@ -30,40 +34,22 @@ export async function stopHistoryTransform(
         ),
       { logger }
     );
-  } catch (e) {
-    logger.error(`Cannot stop history transform [${definition.id}]: ${e}`);
-    throw e;
-  }
-}
 
-export async function stopHistoryBackfillTransform(
-  esClient: ElasticsearchClient,
-  definition: EntityDefinition,
-  logger: Logger
-) {
-  try {
-    const historyBackfillTransformId = generateHistoryBackfillTransformId(definition);
-    await retryTransientEsErrors(
-      () =>
-        esClient.transform.stopTransform(
-          { transform_id: historyBackfillTransformId, wait_for_completion: true, force: true },
-          { ignore: [409, 404] }
-        ),
-      { logger }
-    );
-  } catch (e) {
-    logger.error(`Cannot stop history backfill transform [${definition.id}]: ${e}`);
-    throw e;
-  }
-}
-
-export async function stopLatestTransform(
-  esClient: ElasticsearchClient,
-  definition: EntityDefinition,
-  logger: Logger
-) {
-  try {
-    const latestTransformId = generateLatestTransformId(definition);
+    if (isBackfillEnabled(definition)) {
+      const historyBackfillTransformId = generateHistoryBackfillTransformId(definition);
+      await retryTransientEsErrors(
+        () =>
+          esClient.transform.stopTransform(
+            {
+              transform_id: historyBackfillTransformId,
+              wait_for_completion: true,
+              force: true,
+            },
+            { ignore: [409, 404] }
+          ),
+        { logger }
+      );
+    }
     await retryTransientEsErrors(
       () =>
         esClient.transform.stopTransform(
@@ -73,7 +59,7 @@ export async function stopLatestTransform(
       { logger }
     );
   } catch (e) {
-    logger.error(`Cannot stop latest transform [${definition.id}]`);
+    logger.error(`Cannot stop entity transforms [${definition.id}]: ${e}`);
     throw e;
   }
 }

@@ -15,7 +15,7 @@ import {
 import { retryTransientEsErrors } from './helpers/retry';
 import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 
-export async function startTransform(
+export async function startTransforms(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger

@@ -41,16 +41,8 @@ import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { EntityDefinitionWithState } from './types';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
-import {
-  stopHistoryBackfillTransform,
-  stopHistoryTransform,
-  stopLatestTransform,
-} from './stop_transforms';
-import {
-  deleteHistoryBackfillTransform,
-  deleteHistoryTransform,
-  deleteLatestTransform,
-} from './delete_transforms';
+import { stopTransforms } from './stop_transforms';
+import { deleteTransforms } from './delete_transforms';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -307,19 +299,6 @@ const stopAndDeleteTransforms = async (
   definition: EntityDefinition,
   logger: Logger
 ) => {
-  await Promise.all([
-    stopHistoryTransform(esClient, definition, logger),
-    isBackfillEnabled(definition)
-      ? stopHistoryBackfillTransform(esClient, definition, logger)
-      : Promise.resolve(),
-    stopLatestTransform(esClient, definition, logger),
-  ]);
-
-  await Promise.all([
-    deleteHistoryTransform(esClient, definition, logger),
-    isBackfillEnabled(definition)
-      ? deleteHistoryBackfillTransform(esClient, definition, logger)
-      : Promise.resolve(),
-    deleteLatestTransform(esClient, definition, logger),
-  ]);
+  await stopTransforms(esClient, definition, logger);
+  await deleteTransforms(esClient, definition, logger);
 };
