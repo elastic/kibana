@@ -7,20 +7,19 @@
 
 import { BulletSubtype } from '@elastic/charts';
 import expect from '@kbn/expect';
-import { GaugeShapes } from '@kbn/visualizations-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'timePicker']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
 
   describe('lens gauge', () => {
     before(async () => {
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -37,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should switch to gauge and render a gauge with default values', async () => {
-      await PageObjects.lens.switchToVisualization(GaugeShapes.HORIZONTAL_BULLET, 'horizontal');
+      await PageObjects.lens.switchToVisualization('lnsGauge', 'gauge');
       await PageObjects.lens.waitForVisualization('gaugeChart');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
@@ -48,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reflect edits for gauge', async () => {
-      await PageObjects.lens.switchToVisualization(GaugeShapes.HORIZONTAL_BULLET, 'horizontal');
+      await PageObjects.lens.switchToVisualization('lnsGauge', 'gauge');
       await PageObjects.lens.waitForVisualization('gaugeChart');
       await PageObjects.lens.configureDimension({
         dimension: 'lnsGauge_metricDimensionPanel > lns-dimensionTrigger',
@@ -61,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setEuiSwitch('lnsDynamicColoringGaugeSwitch', 'check');
       await PageObjects.lens.closeDimensionEditor();
 
-      await PageObjects.lens.openVisualOptions();
+      await PageObjects.lens.openTextOptions();
       await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMajor', 'custom title');
       await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor-select', 'custom', {});
       await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
@@ -97,7 +96,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
     it('should seamlessly switch to vertical bullet chart without losing configuration', async () => {
-      await PageObjects.lens.switchToVisualization(GaugeShapes.VERTICAL_BULLET, 'vertical');
+      await PageObjects.lens.openVisualOptions();
+      await testSubjects.click('lns_gaugeOrientation_verticalBullet');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be(BulletSubtype.vertical);
@@ -107,8 +107,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
-    it('should seamlessly switch to semi-circular gauge chart without losing configuration', async () => {
-      await PageObjects.lens.switchToVisualization(GaugeShapes.SEMI_CIRCLE, 'semi');
+    it('should seamlessly switch to minor arc gauge chart without losing configuration', async () => {
+      await PageObjects.lens.openVisualOptions();
+      await PageObjects.lens.setGaugeShape('Minor arc');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be(BulletSubtype.halfCircle);
@@ -119,7 +120,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
     it('should seamlessly switch to arc gauge chart without losing configuration', async () => {
-      await PageObjects.lens.switchToVisualization(GaugeShapes.ARC, 'arc');
+      await PageObjects.lens.openVisualOptions();
+      await PageObjects.lens.setGaugeShape('Major arc');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be(BulletSubtype.twoThirdsCircle);
@@ -130,7 +132,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
     it('should seamlessly switch to circular gauge chart without losing configuration', async () => {
-      await PageObjects.lens.switchToVisualization(GaugeShapes.CIRCLE, 'circular');
+      await PageObjects.lens.openVisualOptions();
+      await PageObjects.lens.setGaugeShape('Circle');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be(BulletSubtype.circle);

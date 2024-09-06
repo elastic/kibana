@@ -197,6 +197,7 @@ export const SystemActionTypeForm = ({
                     executionMode={ActionConnectorMode.ActionForm}
                     ruleTypeId={ruleTypeId}
                     producerId={producerId}
+                    featureId={featureId}
                   />
                   {warning ? (
                     <>

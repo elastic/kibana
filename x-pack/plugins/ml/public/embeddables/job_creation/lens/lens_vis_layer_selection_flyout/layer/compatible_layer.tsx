@@ -37,11 +37,11 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
       lens,
       dashboardService,
       notifications: { toasts },
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlFromLensKibanaContext();
   const toastNotificationService = toastNotificationServiceProvider(toasts);
-  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApiServices);
+  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApi);
 
   const quickJobCreator = useMemo(
     () =>
@@ -51,7 +51,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
         uiSettings,
         data.query.timefilter.timefilter,
         dashboardService,
-        mlApiServices,
+        mlApi,
         mlJobService
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps

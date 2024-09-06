@@ -27,6 +27,33 @@ components:
         - 'NOT_INSTALLED'
         - 'DISABLED'
         - 'ENABLED'
+
+    RiskEngineTaskStatusValues:
+      type: string
+      enum:
+        - 'idle'
+        - 'claiming'
+        - 'running'
+        - 'failed'
+        - 'should_delete'
+        - 'unrecognized'
+        - 'dead_letter'
+
+    RiskEngineTaskStatus:
+      type: object
+      required:
+        - status
+        - runAt
+      properties:
+        status:
+          $ref: '#/components/schemas/RiskEngineTaskStatusValues'
+        runAt:
+          type: string
+          format: date-time
+        startedAt:
+          type: string
+          format: date-time
+
     RiskEngineStatusResponse:
       type: object
       required:
@@ -41,3 +68,5 @@ components:
         is_max_amount_of_risk_engines_reached:
           description: Indicates whether the maximum amount of risk engines has been reached
           type: boolean
+        risk_engine_task_status:
+          $ref: '#/components/schemas/RiskEngineTaskStatus'
