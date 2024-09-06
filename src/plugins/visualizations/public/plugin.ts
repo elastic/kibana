@@ -125,7 +125,7 @@ import {
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
 import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
-import { VisualizeSerializedState } from './embeddable/types';
+import type { VisualizeSerializedState } from './embeddable/types';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -307,7 +307,7 @@ export class VisualizationsPlugin
          * this should be replaced to use only scoped history after moving legacy apps to browser routing
          */
         const history = createHashHistory();
-        const { createVisEmbeddableFromObject } = await import('./legacy/embeddable');
+        const [{ createVisEmbeddableFromObject }, { renderApp }] = await Promise.all([import('./legacy/embeddable'), import('./visualize_app')];
         const services: VisualizeServices = {
           ...coreStart,
           history,
