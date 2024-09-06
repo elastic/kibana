@@ -6,11 +6,11 @@
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { Pipeline } from '../../../common';
-import type { SimplifiedProcessors, SimplifiedProcessor, CategorizationState } from '../../types';
-import type { CategorizationNodeParams } from './types';
+import type { CategorizationState, SimplifiedProcessor, SimplifiedProcessors } from '../../types';
 import { combineProcessors } from '../../util/processors';
-import { CATEGORIZATION_MAIN_PROMPT } from './prompts';
 import { CATEGORIZATION_EXAMPLE_PROCESSORS } from './constants';
+import { CATEGORIZATION_MAIN_PROMPT } from './prompts';
+import type { CategorizationNodeParams } from './types';
 
 export async function handleCategorization({
   state,
@@ -36,6 +36,7 @@ export async function handleCategorization({
   return {
     currentPipeline,
     currentProcessors,
+    hasTriedOnce: true,
     lastExecutedChain: 'categorization',
   };
 }

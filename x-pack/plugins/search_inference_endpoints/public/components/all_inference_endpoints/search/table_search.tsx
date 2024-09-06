@@ -15,7 +15,7 @@ interface TableSearchComponentProps {
 
 export const TableSearch: React.FC<TableSearchComponentProps> = ({ searchKey, setSearchKey }) => {
   const onSearch = useCallback(
-    (newSearch) => {
+    (newSearch: string) => {
       const trimSearch = newSearch.trim();
       setSearchKey(trimSearch);
     },

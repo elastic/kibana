@@ -148,7 +148,6 @@ export const applicationUsageSchema = {
   graph: commonSchema,
   logs: commonSchema,
   metrics: commonSchema,
-  infra: commonSchema, // It's a forward app so we'll likely never report it
   fleet: commonSchema,
   integrations: commonSchema,
   ingestManager: commonSchema,
