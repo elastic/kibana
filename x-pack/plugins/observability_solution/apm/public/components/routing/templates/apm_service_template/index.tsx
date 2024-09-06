@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { isLogsOnlySignal } from '../../../../utils/get_signal_type';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -23,6 +24,7 @@ import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { Tab, useTabs } from './use_tabs';
+import { SignalTypes } from '../../../../../common/entities/types';
 
 interface Props {
   title: string;
@@ -54,7 +56,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
 
   const tabs = useTabs({ selectedTab });
 
-  const { agentName, serviceAgentStatus } = useApmServiceContext();
+  const { agentName, serviceAgentStatus, serviceEntitySummary } = useApmServiceContext();
 
   const isPendingServiceAgent = !agentName && isPending(serviceAgentStatus);
 
@@ -74,6 +76,10 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
       pathname: location.pathname.replace('/services/', '/mobile-services/'),
     });
   }
+
+  const hasLogsOnlySignal =
+    serviceEntitySummary?.signalTypes &&
+    isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
 
   return (
     <ApmMainTemplate
@@ -115,7 +121,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
         </EuiFlexGroup>
       ) : (
         <>
-          <SearchBar {...searchBarOptions} />
+          {!hasLogsOnlySignal && <SearchBar {...searchBarOptions} />}
           <ServiceAnomalyTimeseriesContextProvider>
             {children}
           </ServiceAnomalyTimeseriesContextProvider>
