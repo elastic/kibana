@@ -543,7 +543,7 @@
     "@kbn/hardening-plugin": "link:test/plugin_functional/plugins/hardening",
     "@kbn/health-gateway-server": "link:packages/kbn-health-gateway-server",
     "@kbn/hello-world-plugin": "link:examples/hello_world",
-    "@kbn/home-plugin": "link:src/plugins/home",
+    "@kbn/home-plugin": "link:src/platform/plugins/shared/home",
     "@kbn/home-sample-data-card": "link:packages/home/sample_data_card",
     "@kbn/home-sample-data-tab": "link:packages/home/sample_data_tab",
     "@kbn/home-sample-data-types": "link:packages/home/sample_data_types",
