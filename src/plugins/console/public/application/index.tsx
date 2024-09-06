@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';
+import { HttpSetup, NotificationsSetup, DocLinksStart, ScopedHistory } from '@kbn/core/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -33,6 +33,7 @@ export interface BootDependencies extends ConsoleStartServices {
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;
+  history: ScopedHistory;
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
   isMonacoEnabled: boolean;
@@ -44,6 +45,7 @@ export async function renderApp({
   docLinkVersion,
   usageCollection,
   element,
+  history,
   http,
   docLinks,
   autocompleteInfo,
@@ -60,7 +62,7 @@ export async function renderApp({
     prefix: 'sense:',
   });
   setStorage(storage);
-  const history = createHistory({ storage });
+  const storageHistory = createHistory({ storage });
   const settings = createSettings({ storage });
   const objectStorageClient = localStorageObjectClient.create(storage);
   const api = createApi({ http });
@@ -78,7 +80,8 @@ export async function renderApp({
           services: {
             esHostService,
             storage,
-            history,
+            history: storageHistory,
+            routeHistory: history,
             settings,
             notifications,
             trackUiMetric,

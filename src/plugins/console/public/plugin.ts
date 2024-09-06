@@ -81,7 +81,7 @@ export class ConsoleUIPlugin
           defaultMessage: 'Console',
         }),
         enableRouting: false,
-        mount: async ({ element }) => {
+        mount: async ({ element, history }) => {
           const [core] = await getStartServices();
 
           const {
@@ -99,6 +99,7 @@ export class ConsoleUIPlugin
             notifications,
             usageCollection,
             element,
+            history,
             autocompleteInfo: this.autocompleteInfo,
             isMonacoEnabled,
             isDevMode: this.ctx.env.mode.dev,

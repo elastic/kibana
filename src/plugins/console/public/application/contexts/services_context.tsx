@@ -9,12 +9,14 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import type { NotificationsSetup, DocLinksStart, HttpSetup } from '@kbn/core/public';
 
+import { ScopedHistory } from '@kbn/core/public';
 import type { AutocompleteInfo, History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';
 import { ConsoleStartServices, MetricsTracker } from '../../types';
 import { EsHostService } from '../lib';
 
 interface ContextServices {
+  routeHistory: ScopedHistory;
   history: History;
   storage: Storage;
   settings: Settings;

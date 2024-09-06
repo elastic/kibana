@@ -72,8 +72,29 @@ export function Main({ isEmbeddable = false }: MainProps) {
 
   const {
     docLinks,
-    services: { notifications },
+    services: { notifications, routeHistory },
   } = useServicesContext();
+
+  useEffect(() => {
+    if (!isEmbeddable) {
+      const unlisten = routeHistory.listen(() => {
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+
+        const routeView = routeHistory.location.hash?.substring(2); // Remove #/ chars from hash path
+        if (
+          routeView &&
+          routeView !== currentView &&
+          [SHELL_TAB_ID, CONFIG_TAB_ID, HISTORY_TAB_ID].includes(routeView)
+        ) {
+          dispatch({ type: 'setCurrentView', payload: routeView });
+        }
+      });
+
+      routeHistory.push(`#/${currentView}`);
+
+      return () => unlisten();
+    }
+  }, [isEmbeddable, currentView, dispatch, routeHistory]);
 
   const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
   const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
