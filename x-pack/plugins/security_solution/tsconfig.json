@@ -221,5 +221,9 @@
     "@kbn/cloud-security-posture",
     "@kbn/security-solution-distribution-bar",
     "@kbn/cloud-security-posture-common",
+    // "@kbn/entityManager-plugin",
+    {
+      "path": "../observability_solution/entity_manager/tsconfig.json"
+    },
   ]
 }
