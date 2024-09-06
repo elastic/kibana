@@ -5,22 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { TextBasedLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
 import { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import { Item } from '@kbn/investigation-shared';
 import React from 'react';
-// import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { AddFromLibraryButton } from '../add_from_library_button';
 import { EsqlWidgetPreview } from './esql_widget_preview';
 
@@ -103,9 +94,9 @@ export function AddInvestigationItem({ onItemAdd: onItemAdd, timeRange }: Props)
 
               <EuiFlexItem grow={false}>
                 <AddFromLibraryButton
-                  onWidgetAdd={(item) => {
+                  onItemAdd={async (item) => {
                     resetState();
-                    return onItemAdd(item);
+                    await onItemAdd(item);
                   }}
                 />
               </EuiFlexItem>
@@ -133,9 +124,9 @@ export function AddInvestigationItem({ onItemAdd: onItemAdd, timeRange }: Props)
               <EsqlWidgetPreview
                 esqlQuery={submittedQuery.esql}
                 timeRange={timeRange}
-                onItemAdd={(item) => {
+                onItemAdd={async (item) => {
                   resetState();
-                  return onItemAdd(item);
+                  await onItemAdd(item);
                 }}
               />
             )}

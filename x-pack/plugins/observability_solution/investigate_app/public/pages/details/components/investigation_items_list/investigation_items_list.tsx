@@ -31,8 +31,6 @@ export function InvestigationItemsList({
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       {items.map((item) => {
-        console.log(item, '!!item');
-
         return (
           <EuiFlexItem grow={false} key={`item-${item.id}`}>
             <GridItem

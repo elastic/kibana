@@ -8,16 +8,11 @@
 
 import * as t from 'io-ts';
 
-const itemSchema = t.intersection([
-  t.type({
-    title: t.string,
-    type: t.string,
-    params: t.record(t.string, t.any),
-  }),
-  t.partial({
-    id: t.string,
-  }),
-]);
+const itemSchema = t.type({
+  title: t.string,
+  type: t.string,
+  params: t.record(t.string, t.any),
+});
 
 const investigationItemSchema = t.intersection([
   t.type({

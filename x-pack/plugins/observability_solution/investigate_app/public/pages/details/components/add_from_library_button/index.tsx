@@ -9,29 +9,24 @@ import type { OverlayRef } from '@kbn/core/public';
 import { v4 } from 'uuid';
 import { openAddPanelFlyout } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import React, { useMemo, useRef } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { Item } from '@kbn/investigation-shared';
+
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { InvestigateTextButton } from '../investigate_text_button';
 
-// interface AddFromLibraryButtonProps {
-//   onWidgetAdd: (widget: InvestigateWidgetCreate) => Promise<void>;
-// }
+interface AddFromLibraryButtonProps {
+  onItemAdd: (item: Item) => Promise<void>;
+}
 
-export function AddFromLibraryButton({ onWidgetAdd }) {
-  const children$ = useMemo(() => new BehaviorSubject({}), []);
-
+export function AddFromLibraryButton({ onItemAdd }: AddFromLibraryButtonProps) {
   const {
     dependencies: {
       start: { contentManagement },
     },
   } = useKibana();
-
-  const onWidgetAddRef = useRef(onWidgetAdd);
-
-  onWidgetAddRef.current = onWidgetAdd;
 
   const panelRef = useRef<OverlayRef>();
 
@@ -41,24 +36,21 @@ export function AddFromLibraryButton({ onWidgetAdd }) {
         type: string,
         explicitInput: { savedObjectId: string },
         attributes: FinderAttributes
-      ) => Promise<{ id: undefined }>;
+      ) => Promise<{ id: string }>;
     }
   >(() => {
     function addEmbeddable({
       type,
       title,
-      description,
       attributes,
       savedObjectId,
     }: {
       type: string;
       title: string;
-      description?: string;
       attributes: Record<string, any>;
       savedObjectId: string;
     }) {
-      const widget = {
-        // id: v4(),
+      const embeddableItem = {
         title,
         type: 'embeddable',
         params: {
@@ -67,8 +59,7 @@ export function AddFromLibraryButton({ onWidgetAdd }) {
           type,
         },
       };
-
-      onWidgetAddRef.current(widget).then(() => {
+      onItemAdd(embeddableItem).then(() => {
         if (panelRef.current) {
           panelRef.current.close();
         }
@@ -79,48 +70,30 @@ export function AddFromLibraryButton({ onWidgetAdd }) {
         const state = panel.initialState! as {
           savedObjectId: string;
         };
-
         const savedObject = (await contentManagement.client.get({
           contentTypeId: panel.panelType,
           id: state.savedObjectId,
         })) as { item: { attributes: { title: string } } };
         addEmbeddable({
           type: panel.panelType,
-
           savedObjectId: state.savedObjectId,
           attributes: {},
-          description: '',
-
           title: savedObject.item.attributes.title,
         });
 
         return undefined as any;
       },
-      removePanel: async (...args) => {
-        throw new Error('removePanel not supported in this context');
-      },
-      replacePanel: async (...args) => {
-        throw new Error('replacePanel not supported in this context');
-      },
-      getPanelCount() {
-        return 0;
-      },
       addNewEmbeddable: async (type, explicitInput, attributes) => {
         addEmbeddable({
           type,
           title: attributes.title ?? '',
-          description:
-            'description' in attributes && typeof attributes.description === 'string'
-              ? attributes.description
-              : '',
           savedObjectId: explicitInput.savedObjectId,
           attributes,
         });
-        return v4();
+        return { id: v4() };
       },
-      children$,
     };
-  }, [children$, contentManagement]);
+  }, [contentManagement.client, onItemAdd]);
 
   return (
     <InvestigateTextButton

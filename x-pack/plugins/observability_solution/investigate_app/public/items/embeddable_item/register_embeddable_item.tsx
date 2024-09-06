@@ -52,12 +52,6 @@ function ReactEmbeddable({ type, config, timeRange: { from, to }, savedObjectId 
       type={type}
       getParentApi={() => api}
       maybeId={savedObjectId}
-      onAnyStateChange={(state) => {
-        // console.log('onAnyStateChange', state);
-      }}
-      onApiAvailable={(childApi) => {
-        // console.log('onApiAvailable', childApi);
-      }}
       hidePanelChrome
     />
   );
