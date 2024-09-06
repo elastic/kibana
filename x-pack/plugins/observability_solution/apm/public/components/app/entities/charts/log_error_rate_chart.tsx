@@ -135,7 +135,7 @@ export function LogErrorRateChart({ height }: { height: number }) {
               start={start}
               end={end}
               kuery={mergeKueries([
-                errorLogKueryFormat,
+                `(${errorLogKueryFormat})`,
                 toKueryFilterFormat(SERVICE_NAME, [serviceName]),
               ])}
             />
