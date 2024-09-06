@@ -453,11 +453,6 @@ export class ConsolePageObject extends FtrService {
     await button.click();
   }
 
-  public async getRequestBodyCount() {
-    const body = await this.getRequestBody();
-    return body.split('\n').length;
-  }
-
   public async clickHistory() {
     const historyButton = await this.testSubjects.find('consoleHistoryButton');
     await historyButton.click();

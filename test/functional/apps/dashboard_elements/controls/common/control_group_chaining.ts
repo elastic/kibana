@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let controlIds: string[];
 
     const addDocument = async (index: string, document: string) => {
-      await console.enterText('\nPOST ' + index + '/_doc/ \n{\n ' + document);
+      await console.enterText('\nPOST ' + index + '/_doc/\n{\n ' + document + '\n}');
       await console.clickPlay();
       await header.waitUntilLoadingHasFinished();
       const response = JSON.parse(await console.getOutputText());
@@ -43,6 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       /* start by adding some incomplete data so that we can test `exists` query */
       await common.navigateToApp('console');
+      await console.skipTourIfExists();
       await console.clearEditorText();
       await addDocument(
         'animals-cats-2018-01-01',
