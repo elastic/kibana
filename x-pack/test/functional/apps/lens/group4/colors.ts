@@ -68,7 +68,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     });
 
     it('should carry over palette to the pie chart', async () => {
-      await lens.switchToVisualization('donut');
+      await lens.switchToVisualization('pie');
       await lens.openDimensionEditor('lnsPie_sliceByDimensionPanel > lns-dimensionTrigger');
       await lens.assertPalette(ElasticBrandPalette.id, false);
       await lens.closeDimensionEditor();

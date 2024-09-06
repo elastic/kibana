@@ -276,7 +276,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await getCurrentVisTitle()).to.be('Bar vertical stacked');
+      expect(await getCurrentVisTitle()).to.be('Bar');
 
       await checkESQLHistogramVis(defaultTimespanESQL, '100');
 
@@ -306,12 +306,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await checkESQLHistogramVis(defaultTimespanESQL, '5');
-      await discover.chooseLensSuggestion('donut');
+      await discover.chooseLensSuggestion('pie');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
       expect(await monacoEditor.getCodeEditorValue()).to.contain('averageA');
 
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
@@ -355,12 +355,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await checkESQLHistogramVis(defaultTimespanESQL, '5');
-      await discover.chooseLensSuggestion('donut');
+      await discover.chooseLensSuggestion('pie');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
       expect(await monacoEditor.getCodeEditorValue()).to.contain('averageA');
 
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
@@ -370,7 +370,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
@@ -379,7 +379,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await testSubjects.missingOrFail('unsavedChangesBadge');
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
     });
 
@@ -408,12 +408,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await checkESQLHistogramVis(defaultTimespanESQL, '5');
-      await discover.chooseLensSuggestion('donut');
+      await discover.chooseLensSuggestion('pie');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
       expect(await monacoEditor.getCodeEditorValue()).to.contain('averageA');
 
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
 
       // now we customize the vis again
@@ -452,29 +452,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await checkESQLHistogramVis(defaultTimespanESQL, '5');
-      await discover.chooseLensSuggestion('donut');
+      await discover.chooseLensSuggestion('pie');
 
       await discover.saveSearch('testCustomESQLVis');
-      await discover.saveSearch('testCustomESQLVisDonut', true);
+      await discover.saveSearch('testCustomESQLVisPartition', true);
 
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
 
       await browser.refresh();
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
     });
 
     it('should be able to load a saved search with custom vis, edit query and revert changes', async () => {
-      await discover.loadSavedSearch('testCustomESQLVisDonut');
+      await discover.loadSavedSearch('testCustomESQLVisPartition');
 
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
@@ -487,7 +487,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await getCurrentVisTitle()).to.be('Bar vertical stacked');
+      expect(await getCurrentVisTitle()).to.be('Bar');
       expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
 
       await checkESQLHistogramVis(defaultTimespanESQL, '100');
@@ -501,49 +501,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       expect(await monacoEditor.getCodeEditorValue()).to.contain('averageB');
 
-      // should be still Donut after reverting and saving again
-      await discover.saveSearch('testCustomESQLVisDonut');
+      // should be still Pie after reverting and saving again
+      await discover.saveSearch('testCustomESQLVisPartition');
 
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
     });
 
     it('should be able to change to an unfamiliar vis type via lens flyout', async () => {
-      await discover.loadSavedSearch('testCustomESQLVisDonut');
+      await discover.loadSavedSearch('testCustomESQLVisPartition');
 
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
-      await changeVisShape('Pie');
+      await changeVisShape('Treemap');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
 
-      expect(await getCurrentVisTitle()).to.be('Pie');
+      expect(await getCurrentVisTitle()).to.be('Treemap');
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
-      await discover.saveSearch('testCustomESQLVisPie', true);
+      await discover.saveSearch('testCustomESQLVisTreemap', true);
 
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await getCurrentVisTitle()).to.be('Pie');
+      expect(await getCurrentVisTitle()).to.be('Treemap');
       await testSubjects.existOrFail('partitionVisChart');
 
       await browser.refresh();
@@ -551,7 +551,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await getCurrentVisTitle()).to.be('Pie');
+      expect(await getCurrentVisTitle()).to.be('Treemap');
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
@@ -562,7 +562,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await getCurrentVisTitle()).to.be('Bar vertical stacked');
+      expect(await getCurrentVisTitle()).to.be('Bar');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
@@ -573,7 +573,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
-      expect(await getCurrentVisTitle()).to.be('Pie');
+      expect(await getCurrentVisTitle()).to.be('Treemap');
       await testSubjects.existOrFail('partitionVisChart');
     });
 
@@ -583,7 +583,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
@@ -600,7 +600,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
 
       await discover.chooseLensSuggestion('barVerticalStacked');
@@ -627,7 +627,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await getCurrentVisTitle()).to.be('Bar vertical stacked');
+      expect(await getCurrentVisTitle()).to.be('Bar');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
@@ -642,8 +642,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
-      await discover.chooseLensSuggestion('donut');
-      expect(await getCurrentVisTitle()).to.be('Donut');
+      await discover.chooseLensSuggestion('pie');
+      expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 

@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const filterBar = getService('filterBar');
 
-  describe.only('Dashboard to TSVB to Lens', function describeIndexTests() {
+  describe('Dashboard to TSVB to Lens', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
     });

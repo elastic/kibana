@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.waitForMissingDataViewWarning();
         await lens.switchToVisualization('lnsDatatable');
         await lens.waitForMissingDataViewWarning();
-        await lens.switchToVisualization('donut');
+        await lens.switchToVisualization('pie');
         await lens.waitForMissingDataViewWarning();
         await lens.switchToVisualization('line');
         await lens.waitForMissingDataViewWarning();
