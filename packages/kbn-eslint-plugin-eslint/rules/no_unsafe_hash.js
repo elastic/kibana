@@ -35,26 +35,26 @@ module.exports = {
 
     function getIdentifierValue(node) {
       const scope = sourceCode.getScope(node);
-      if (scope) {
-        const variable = scope.variables.find((variable) => variable.name === node.name);
-        if (variable && variable.defs.length > 0) {
-          const def = variable.defs[0];
-          if (
-            def.node.init &&
-            def.node.init.type === 'Literal' &&
-            !isAllowedAlgorithm(def.node.init.value)
-          ) {
-            disallowedAlgorithmNodes.add(node.name);
-            return def.node.init.value;
-          }
+      if (!scope) {
+        return;
+      }
+      const variable = scope.variables.find((variable) => variable.name === node.name);
+      if (variable && variable.defs.length > 0) {
+        const def = variable.defs[0];
+        if (
+          def.node.init &&
+          def.node.init.type === 'Literal' &&
+          !isAllowedAlgorithm(def.node.init.value)
+        ) {
+          disallowedAlgorithmNodes.add(node.name);
+          return def.node.init.value;
         }
       }
-      return undefined;
     }
 
     return {
       ImportDeclaration(node) {
-        if (node.source.value === 'crypto') {
+        if (node.source.value === 'crypto' || node.source.value === 'node:crypto') {
           node.specifiers.forEach((specifier) => {
             if (specifier.type === 'ImportSpecifier' && specifier.imported.name === 'createHash') {
               isCreateHashImported = true;
