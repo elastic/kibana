@@ -965,6 +965,13 @@ detection engine rules.
         .send(props.body as object)
         .query(props.query);
     },
+    scheduleRiskEngineNow() {
+      return supertest
+        .post('/api/risk_score/engine/schedule_now')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     /**
      * Find and/or aggregate detection alerts that match the given query.
      */
