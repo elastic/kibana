@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import { RequestHandlerContext } from '@kbn/core/server';
-import {
-  EntityDefinition,
-  entityDefinitionSchema,
-  createEntityDefinitionQuerySchema,
-  CreateEntityDefinitionQuery,
-} from '@kbn/entities-schema';
-import { SetupRouteOptions } from '../types';
+import { createEntityDefinitionQuerySchema, entityDefinitionSchema } from '@kbn/entities-schema';
+import { z } from '@kbn/zod';
+import { EntityDefinitionIdInvalid } from '../../lib/entities/errors/entity_definition_id_invalid';
 import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_error';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
-import { EntityDefinitionIdInvalid } from '../../lib/entities/errors/entity_definition_id_invalid';
+import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 /**
  * @openapi
@@ -50,47 +45,39 @@ import { EntityDefinitionIdInvalid } from '../../lib/entities/errors/entity_defi
  *       409:
  *         description: An entity definition with this ID already exists
  *       400:
- *         description: The entity definition cannot be installed; see the error for more details
+ *         description: The entity definition cannot be installed; see the error for more details but commonly due to validation failures of the definition ID or metrics format
  */
-export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
-  router,
-  getScopedClient,
-  logger,
-}: SetupRouteOptions<T>) {
-  router.post<unknown, CreateEntityDefinitionQuery, EntityDefinition>(
-    {
-      path: '/internal/entities/definition',
-      validate: {
-        body: entityDefinitionSchema.strict(),
-        query: createEntityDefinitionQuerySchema,
-      },
-    },
-    async (context, request, res) => {
-      try {
-        const client = await getScopedClient({ request });
-        const definition = await client.createEntityDefinition({
-          definition: request.body,
-          installOnly: request.query.installOnly,
-        });
+export const createEntityDefinitionRoute = createEntityManagerServerRoute({
+  endpoint: 'POST /internal/entities/definition',
+  params: z.object({
+    query: createEntityDefinitionQuerySchema,
+    body: entityDefinitionSchema,
+  }),
+  handler: async ({ request, response, params, logger, getScopedClient }) => {
+    try {
+      const client = await getScopedClient({ request });
+      const definition = await client.createEntityDefinition({
+        definition: params.body,
+        installOnly: params.query.installOnly,
+      });
 
-        return res.ok({ body: definition });
-      } catch (e) {
-        logger.error(e);
+      return response.ok({ body: definition });
+    } catch (e) {
+      logger.error(e);
 
-        if (e instanceof EntityDefinitionIdInvalid) {
-          return res.badRequest({ body: e });
-        }
-
-        if (e instanceof EntityIdConflict) {
-          return res.conflict({ body: e });
-        }
-
-        if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
-          return res.customError({ body: e, statusCode: 400 });
-        }
-
-        return res.customError({ body: e, statusCode: 500 });
+      if (e instanceof EntityDefinitionIdInvalid) {
+        return response.badRequest({ body: e });
       }
+
+      if (e instanceof EntityIdConflict) {
+        return response.conflict({ body: e });
+      }
+
+      if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
+        return response.customError({ body: e, statusCode: 400 });
+      }
+
+      return response.customError({ body: e, statusCode: 500 });
     }
-  );
-}
+  },
+});
