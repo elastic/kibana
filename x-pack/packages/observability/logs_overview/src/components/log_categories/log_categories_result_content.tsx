@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { LogCategory } from '../../types';
 import { LogCategoriesGrid, LogCategoriesGridDependencies } from './log_categories_grid';
@@ -20,9 +22,40 @@ export const LogCategoriesResultContent: React.FC<LogCategoriesResultContentProp
   dependencies,
   logCategories,
 }) => {
+  if (logCategories.length === 0) {
+    return <LogCategoriesEmptyResultContent />;
+  } else {
+    return (
+      <div>
+        <LogCategoriesGrid dependencies={dependencies} logCategories={logCategories} />
+      </div>
+    );
+  }
+};
+
+export const LogCategoriesEmptyResultContent: React.FC = () => {
   return (
-    <div>
-      <LogCategoriesGrid dependencies={dependencies} logCategories={logCategories} />
-    </div>
+    <EuiEmptyPrompt
+      body={<p>{emptyResultContentDescription}</p>}
+      color="subdued"
+      layout="horizontal"
+      title={<h2>{emptyResultContentTitle}</h2>}
+      titleSize="m"
+    />
   );
 };
+
+const emptyResultContentTitle = i18n.translate(
+  'xpack.observabilityLogsOverview.logCategories.emptyResultContentTitle',
+  {
+    defaultMessage: 'No log categories found',
+  }
+);
+
+const emptyResultContentDescription = i18n.translate(
+  'xpack.observabilityLogsOverview.logCategories.emptyResultContentDescription',
+  {
+    defaultMessage:
+      'No suitable documents within the time range. Try searching for a longer time period.',
+  }
+);
