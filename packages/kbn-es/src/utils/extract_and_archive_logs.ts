@@ -27,11 +27,18 @@ export async function extractAndArchiveLogs({
   if (!nodeNames) {
     const { stdout: nodeNamesString } = await execa('docker', [
       'ps',
-      '--quiet',
+      '-a',
       '--format',
       '{{.Names}}',
     ]);
     nodeNames = nodeNamesString.split('\n').filter(Boolean);
+  }
+
+  if (!nodeNames.length) {
+    log.info('No Docker nodes found to extract logs from');
+    return;
+  } else {
+    log.info(`Attempting to extract logs from Docker nodes to ${outputFolder}`);
   }
 
   for (const name of nodeNames) {

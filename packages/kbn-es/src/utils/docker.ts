@@ -109,7 +109,7 @@ interface ServerlessEsNodeArgs {
 export const DEFAULT_PORT = 9200;
 const DOCKER_REGISTRY = 'docker.elastic.co';
 
-const ARCHIVE_LOGS = true;
+// const ARCHIVE_LOGS = true;
 
 const DOCKER_BASE_CMD = [
   'run',
