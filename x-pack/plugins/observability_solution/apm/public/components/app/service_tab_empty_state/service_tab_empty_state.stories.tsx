@@ -11,7 +11,6 @@ import {
   ApmPluginContext,
   ApmPluginContextValue,
 } from '../../../context/apm_plugin/apm_plugin_context';
-import exampleImgSrc from '../../../assets/service_tab_empty_state/service_tab_empty_state_dependencies.png';
 
 const contextMock = {
   core: { http: { basePath: { prepend: () => {} } } },
@@ -29,13 +28,13 @@ export default {
   ],
 };
 
-export function Default({ title, content, imgSrc }: ComponentProps<typeof ServiceTabEmptyState>) {
-  return <ServiceTabEmptyState title={title} content={content} imgSrc={imgSrc} />;
+export function Default({ title, content, imgName }: ComponentProps<typeof ServiceTabEmptyState>) {
+  return <ServiceTabEmptyState title={title} content={content} imgName={imgName} />;
 }
 
 Default.args = {
   title: 'Understand the dependencies for your service',
   content:
     'See your services dependencies on both internal and third-party services by instrumenting with APM.',
-  imgSrc: exampleImgSrc,
+  imgName: 'service_tab_empty_state_transactions.png',
 } as ComponentProps<typeof ServiceTabEmptyState>;
