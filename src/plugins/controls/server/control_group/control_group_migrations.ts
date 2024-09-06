@@ -45,11 +45,7 @@ export const makeControlOrdersZeroBased = (state: SerializableControlGroupState)
  * list controls.
  */
 export const removeHideExcludeAndHideExists = (state: SerializableControlGroupState) => {
-  if (
-    state.initialChildControlState &&
-    typeof state.initialChildControlState === 'object' &&
-    Object.keys(state.initialChildControlState).length > 0
-  ) {
+  if (state.panels && typeof state.panels === 'object' && Object.keys(state.panels).length > 0) {
     const newPanels = Object.keys(state.panels).reduce((panelAccumulator, panelId) => {
       const panel = (
         state.panels as ControlPanelsState<SerializedControlState<OptionsListControlState>>
@@ -64,7 +60,7 @@ export const removeHideExcludeAndHideExists = (state: SerializableControlGroupSt
         [panelId]: panel,
       };
     }, {});
-    state.initialChildControlState = newPanels;
+    state.panels = newPanels;
   }
   return state;
 };

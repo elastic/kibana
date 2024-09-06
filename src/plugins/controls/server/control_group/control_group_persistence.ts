@@ -16,6 +16,19 @@ import {
   SerializedControlState,
 } from '../../common';
 
+export const getDefaultControlGroupState = (): SerializableControlGroupState => ({
+  panels: {},
+  labelPosition: DEFAULT_CONTROL_STYLE,
+  chainingSystem: 'HIERARCHICAL',
+  autoApplySelections: true,
+  ignoreParentSettings: {
+    ignoreFilters: false,
+    ignoreQuery: false,
+    ignoreTimerange: false,
+    ignoreValidations: false,
+  },
+});
+
 // using SerializableRecord to force type to be read as serializable
 export type SerializableControlGroupState = SerializableRecord &
   Omit<
@@ -34,19 +47,6 @@ const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
     return;
   }
 };
-
-export const getDefaultControlGroupState = (): ControlGroupRuntimeState => ({
-  initialChildControlState: {},
-  labelPosition: DEFAULT_CONTROL_STYLE,
-  chainingSystem: 'HIERARCHICAL',
-  autoApplySelections: true,
-  ignoreParentSettings: {
-    ignoreFilters: false,
-    ignoreQuery: false,
-    ignoreTimerange: false,
-    ignoreValidations: false,
-  },
-});
 
 export const controlGroupSerializedStateToSerializableRuntimeState = (
   serializedState: ControlGroupSerializedState

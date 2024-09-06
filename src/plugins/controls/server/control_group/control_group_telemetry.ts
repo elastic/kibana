@@ -9,13 +9,14 @@
 
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
+import { SerializableRecord } from '@kbn/utility-types';
 import {
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
 } from '../../common/control_group/types';
 import {
-  getDefaultControlGroupState,
   controlGroupSerializedStateToSerializableRuntimeState,
+  getDefaultControlGroupState,
 } from './control_group_persistence';
 
 export interface ControlGroupTelemetry {
@@ -108,10 +109,9 @@ const reportControlTypes = (
   return controlTypeStats;
 };
 
-export const controlGroupTelemetry: PersistableStateService['telemetry'] = (
-  state,
-  stats
-): ControlGroupTelemetry => {
+export const controlGroupTelemetry: PersistableStateService<
+  SerializableRecord & ControlGroupSerializedState
+>['telemetry'] = (state, stats): ControlGroupTelemetry => {
   const controlGroupStats = initializeControlGroupTelemetry(stats);
   const controlGroupState = {
     ...getDefaultControlGroupState(),
@@ -121,7 +121,7 @@ export const controlGroupTelemetry: PersistableStateService['telemetry'] = (
   };
   if (!controlGroupState) return controlGroupStats;
 
-  controlGroupStats.total += Object.keys(controlGroupState?.initialChildControlState ?? {}).length;
+  controlGroupStats.total += Object.keys(controlGroupState?.panels ?? {}).length;
 
   controlGroupStats.chaining_system = reportChainingSystemInUse(
     controlGroupStats.chaining_system,

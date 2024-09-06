@@ -7,39 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as uuidv4 } from 'uuid';
-
 import {
-  getDefaultControlGroupState,
-  mockDataControlState,
-  mockOptionsListControlState,
-} from '../..//common/mocks';
-import {
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
   type ControlPanelState,
   type ControlWidth,
   type DefaultDataControlState,
   type SerializedControlState,
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  ControlGroupSerializedState,
-  ControlGroupRuntimeState,
-  DefaultControlState,
-  ControlPanelsState,
 } from '../../common';
+import { OptionsListControlState } from '../../common/options_list';
+import { mockDataControlState, mockOptionsListControlState } from '../mocks';
 import { removeHideExcludeAndHideExists } from './control_group_migrations';
+import {
+  SerializableControlGroupState,
+  getDefaultControlGroupState,
+} from './control_group_persistence';
 
 describe('migrate control group', () => {
-  const getOptionsListControl = (order: number, input?: Partial<DefaultDataControlState>) => {
+  const getOptionsListControl = (
+    order: number,
+    input?: Partial<OptionsListControlState & { id: string }>
+  ) => {
     return {
       type: OPTIONS_LIST_CONTROL,
       order,
       width: 'small' as ControlWidth,
       grow: true,
       explicitInput: { ...mockOptionsListControlState, ...input },
-    } as ControlPanelState<SerializedControlState<DefaultDataControlState>>;
+    } as ControlPanelState<SerializedControlState<OptionsListControlState>>;
   };
 
-  const getRangeSliderControl = (order: number, input?: Partial<object>) => {
+  const getRangeSliderControl = (
+    order: number,
+    input?: Partial<DefaultDataControlState & { id: string }>
+  ) => {
     return {
       type: RANGE_SLIDER_CONTROL,
       order,
@@ -49,43 +50,52 @@ describe('migrate control group', () => {
     } as ControlPanelState<SerializedControlState<DefaultDataControlState>>;
   };
 
-  const getControlGroupState = (panels: ControlPanelsState): ControlGroupRuntimeState => {
+  const getControlGroupState = (
+    panels: Array<ControlPanelState<SerializedControlState>>
+  ): SerializableControlGroupState => {
+    const panelsObjects = panels.reduce((acc, panel) => {
+      return { ...acc, [panel.explicitInput.id]: panel };
+    }, {});
+
     return {
       ...getDefaultControlGroupState(),
-      initialChildControlState: panels,
+      panels: panelsObjects,
     };
   };
 
   describe('remove hideExclude and hideExists', () => {
     test('should migrate single options list control', () => {
-      const migratedControlGroupInput: ControlGroupRuntimeState = removeHideExcludeAndHideExists(
-        getControlGroupState([getOptionsListControl(0, { id: 'testPanelId', hideExclude: true })])
-      );
-      expect(migratedControlGroupInput.panels).toEqual({
+      const migratedControlGroupState: SerializableControlGroupState =
+        removeHideExcludeAndHideExists(
+          getControlGroupState([getOptionsListControl(0, { id: 'testPanelId', hideExclude: true })])
+        );
+      expect(migratedControlGroupState.panels).toEqual({
         testPanelId: getOptionsListControl(0, { id: 'testPanelId' }),
       });
     });
+
     test('should migrate multiple options list controls', () => {
-      const migratedControlGroupInput: ControlGroupInput = removeHideExcludeAndHideExists(
-        getControlGroupState([
-          getOptionsListControl(0, { id: 'testPanelId1' }),
-          getOptionsListControl(1, { id: 'testPanelId2', hideExclude: false }),
-          getOptionsListControl(2, { id: 'testPanelId3', hideExists: true }),
-          getOptionsListControl(3, {
-            id: 'testPanelId4',
-            hideExclude: true,
-            hideExists: false,
-          }),
-          getOptionsListControl(4, {
-            id: 'testPanelId5',
-            hideExists: true,
-            hideExclude: false,
-            singleSelect: true,
-            runPastTimeout: true,
-            selectedOptions: ['test'],
-          }),
-        ])
-      );
+      const migratedControlGroupInput: SerializableControlGroupState =
+        removeHideExcludeAndHideExists(
+          getControlGroupState([
+            getOptionsListControl(0, { id: 'testPanelId1' }),
+            getOptionsListControl(1, { id: 'testPanelId2', hideExclude: false }),
+            getOptionsListControl(2, { id: 'testPanelId3', hideExists: true }),
+            getOptionsListControl(3, {
+              id: 'testPanelId4',
+              hideExclude: true,
+              hideExists: false,
+            }),
+            getOptionsListControl(4, {
+              id: 'testPanelId5',
+              hideExists: true,
+              hideExclude: false,
+              singleSelect: true,
+              runPastTimeout: true,
+              selectedOptions: ['test'],
+            }),
+          ])
+        );
       expect(migratedControlGroupInput.panels).toEqual({
         testPanelId1: getOptionsListControl(0, { id: 'testPanelId1' }),
         testPanelId2: getOptionsListControl(1, { id: 'testPanelId2' }),
@@ -103,17 +113,18 @@ describe('migrate control group', () => {
     });
 
     test('should migrate multiple different types of controls', () => {
-      const migratedControlGroupInput: ControlGroupInput = removeHideExcludeAndHideExists(
-        getControlGroupState([
-          getOptionsListControl(0, {
-            id: 'testPanelId1',
-            hideExists: true,
-            hideExclude: true,
-            runPastTimeout: true,
-          }),
-          getRangeSliderControl(1, { id: 'testPanelId2' }),
-        ])
-      );
+      const migratedControlGroupInput: SerializableControlGroupState =
+        removeHideExcludeAndHideExists(
+          getControlGroupState([
+            getOptionsListControl(0, {
+              id: 'testPanelId1',
+              hideExists: true,
+              hideExclude: true,
+              runPastTimeout: true,
+            }),
+            getRangeSliderControl(1, { id: 'testPanelId2' }),
+          ])
+        );
       expect(migratedControlGroupInput.panels).toEqual({
         testPanelId1: getOptionsListControl(0, { id: 'testPanelId1', runPastTimeout: true }),
         testPanelId2: getRangeSliderControl(1, { id: 'testPanelId2' }),
