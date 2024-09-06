@@ -171,6 +171,7 @@ export const createLensEmbeddableFactory = (
         );
         // used for functional tests
         const renderCount = useStateFromPublishingSubject(observables.variables.renderCount$);
+        // used for reporting/functional tests
         const hasRendered = useStateFromPublishingSubject(
           observables.variables.hasRenderCompleted$
         );

@@ -368,7 +368,7 @@ export const runSaveLensVisualization = async (
 
     if (shouldNavigateBackToOrigin && savedObjectId) {
       redirectToOrigin({
-        state: { savedObjectId },
+        state: newDoc.attributes,
         isCopied: saveProps.newCopyOnSave,
       });
       return;

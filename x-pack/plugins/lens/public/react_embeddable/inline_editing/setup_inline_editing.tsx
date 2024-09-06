@@ -70,18 +70,21 @@ export function prepareInlineEditPanel(
     const { updatePanelState, updateSuggestion } = getStateManagementForInlineEditing(
       activeDatasourceId,
       () => getState().attributes as TypedLensSerializedState['attributes'],
-      (attrs: TypedLensSerializedState['attributes'], resetId: boolean = false) =>
+      (attrs: TypedLensSerializedState['attributes'], resetId: boolean = false) => {
+        const prevState = getState();
         updateState({
-          ...getState(),
+          ...prevState,
           attributes: attrs,
           /**
            * SavedObjectId is undefined for by value panels and defined for the by reference ones.
            * Here we are converting the by reference panels to by value when user is inline editing
            */
           ...(resetId ? { savedObjectId: undefined } : {}),
-        }),
+        });
+      },
       visualizationMap,
-      datasourceMap
+      datasourceMap,
+      startDependencies.data.query.filterManager.extract
     );
 
     const updateByRefInput = (savedObjectId: LensRuntimeState['savedObjectId']) => {

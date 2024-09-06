@@ -142,11 +142,8 @@ import {
 } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { ChartType } from './lens_suggestions_api';
-// import { savedObjectToEmbeddableAttributes } from './lens_attribute_service';
-// import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
-import { LensRenderer } from './react_embeddable/lens_renderer';
-// import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/edit_action';
+import { LensRenderer } from './react_embeddable/lens_renderer_component';
 
 export type { SaveProps } from './app_plugin';
 

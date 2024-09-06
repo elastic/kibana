@@ -12,6 +12,11 @@ import { useMemo, useRef } from 'react';
 import type { LensApi, LensRendererProps, LensRuntimeState, LensSerializedState } from './types';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 
+/**
+ * The aim of this component is to provide a wrapper for other plugins who want to
+ * use a Lens component into their own page. This hides the embeddable parts of it
+ * by wrapping it into a ReactEmbeddableRenderer component and exposing a custom API
+ */
 export function LensRenderer({
   title,
   query,

@@ -20,6 +20,8 @@ export const LENS_EDIT_BY_VALUE = 'edit_by_value';
 export const LENS_ICON = 'lensApp';
 export const STAGE_ID = 'production';
 
+export const INDEX_PATTERN_TYPE = 'index-pattern';
+
 export const PieChartTypes = {
   PIE: 'pie',
   DONUT: 'donut',

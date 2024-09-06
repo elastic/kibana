@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { FilterManager } from '@kbn/data-plugin/public';
+import { mergeToNewDoc } from '../../state_management/shared_logic';
+import { DatasourceStates, VisualizationState } from '../../state_management/types';
 import type { VisualizationMap, DatasourceMap } from '../../types';
-import { getActiveVisualizationIdFromDoc, extractReferencesFromState } from '../../utils';
 import type { TypedLensSerializedState } from '../types';
 
 export function getStateManagementForInlineEditing(
@@ -17,50 +19,27 @@ export function getStateManagementForInlineEditing(
     resetId?: boolean
   ) => void,
   visualizationMap: VisualizationMap,
-  datasourceMap: DatasourceMap
+  datasourceMap: DatasourceMap,
+  extractFilterReferences: FilterManager['extract']
 ) {
-  // TODO: unify this with the main editor logic
-  const updatePanelState = (
-    datasourceState: unknown,
-    visualizationState: unknown,
-    visualizationType?: string
-  ) => {
+  const updatePanelState = (datasourceState: unknown, visualizationState: unknown) => {
     const viz = getAttributes();
+    const newDoc = {
+      ...viz,
+      ...mergeToNewDoc(
+        viz,
+        visualizationState as VisualizationState,
+        datasourceState as DatasourceStates,
+        viz.state.query,
+        viz.state.filters,
+        activeDatasourceId,
+        viz.state.adHocDataViews || {},
+        { visualizationMap, datasourceMap, extractFilterReferences }
+      ),
+    };
 
-    const activeVisualizationId = getActiveVisualizationIdFromDoc(viz);
-    if (viz?.state) {
-      const datasourceStates = {
-        ...viz.state.datasourceStates,
-        [activeDatasourceId]: datasourceState,
-      };
-      const references = extractReferencesFromState({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, datasourceId) => ({
-            ...acc,
-            [datasourceId]: datasourceMap[datasourceId],
-          }),
-          {}
-        ),
-        datasourceStates: Object.fromEntries(
-          Object.entries(datasourceStates).map(([id, state]) => [id, { isLoading: false, state }])
-        ),
-        visualizationState,
-        activeVisualization: activeVisualizationId
-          ? visualizationMap[visualizationType ?? activeVisualizationId]
-          : undefined,
-      });
-      const attrs = {
-        ...viz,
-        state: {
-          ...viz.state,
-          visualization: visualizationState,
-          datasourceStates,
-        },
-        references,
-        visualizationType: visualizationType ?? viz.visualizationType,
-      };
-
-      updateAttributes(attrs, true);
+    if (newDoc.state) {
+      updateAttributes(newDoc, true);
     }
   };
 

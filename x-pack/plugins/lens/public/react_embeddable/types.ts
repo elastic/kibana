@@ -300,13 +300,15 @@ export type GetStateType = () => LensRuntimeState;
 type TypedLensAttributes<TVisType, TVisState> = Simplify<
   Omit<LensDocument, 'savedObjectId' | 'type' | 'state' | 'visualizationType'> & {
     visualizationType: TVisType;
-    state: Omit<LensDocument['state'], 'datasourceStates' | 'visualization'> & {
-      datasourceStates: {
-        formBased?: FormBasedPersistedState;
-        textBased?: TextBasedPersistedState;
-      };
-      visualization: TVisState;
-    };
+    state: Simplify<
+      Omit<LensDocument['state'], 'datasourceStates' | 'visualization'> & {
+        datasourceStates: {
+          formBased?: FormBasedPersistedState;
+          textBased?: TextBasedPersistedState;
+        };
+        visualization: TVisState;
+      }
+    >;
   }
 >;
 
