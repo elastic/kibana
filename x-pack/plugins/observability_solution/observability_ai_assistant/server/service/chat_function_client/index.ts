@@ -132,7 +132,7 @@ export class ChatFunctionClient {
     return matchingDefinitions.map((definition) => functionsByName[definition.name]);
   }
 
-  getActions() {
+  getActions(): Required<ObservabilityAIAssistantScreenContextRequest>['actions'] {
     return this.actions;
   }
 
@@ -146,12 +146,14 @@ export class ChatFunctionClient {
     args,
     messages,
     signal,
+    connectorId,
   }: {
     chat: FunctionCallChatFunction;
     name: string;
     args: string | undefined;
     messages: Message[];
     signal: AbortSignal;
+    connectorId: string;
   }): Promise<FunctionResponse> {
     const fn = this.functionRegistry.get(name);
 
@@ -169,6 +171,7 @@ export class ChatFunctionClient {
         messages,
         screenContexts: this.screenContexts,
         chat,
+        connectorId,
       },
       signal
     );
