@@ -52,7 +52,7 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
           providing the last persisted state to the embeddable. Implement{' '}
           <strong>HasSerializedChildState</strong> interface to provide an embeddable with last
           persisted state. Implement <strong>HasRuntimeChildState</strong> interface to provide an
-          embeddable with previous sessions&apos;s unsaved changes.
+          embeddable with a previous session&apos;s unsaved changes.
         </p>
         <p>
           This example uses session storage to persist saved state and unsaved changes while a
