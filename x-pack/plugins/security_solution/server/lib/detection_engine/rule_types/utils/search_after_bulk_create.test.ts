@@ -114,7 +114,8 @@ describe('searchAfterAndBulkCreate', () => {
     wrapHits = wrapHitsFactory({
       completeRule: queryCompleteRule,
       mergeStrategy: 'missingFields',
-      ignoreFields: [],
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
       spaceId: 'default',
       indicesToQuery: inputIndexPattern,
       alertTimestampOverride: undefined,

@@ -25,7 +25,7 @@ import type {
 import type { ConfigType } from '../../../../config';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
 import type { ThresholdBucket } from './types';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
@@ -86,20 +86,21 @@ export const wrapSuppressedThresholdALerts = ({
 
     const instanceId = objectHash([suppressedValues, completeRule.alertId, spaceId]);
 
-    const baseAlert: BaseFieldsLatest = buildBulkBody(
+    const baseAlert: BaseFieldsLatest = transformHitToAlert({
       spaceId,
       completeRule,
-      hit,
+      doc: hit,
       mergeStrategy,
-      [],
-      true,
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
       buildReasonMessage,
       indicesToQuery,
       alertTimestampOverride,
       ruleExecutionLogger,
-      id,
-      publicBaseUrl
-    );
+      alertUuid: id,
+      publicBaseUrl,
+    });
 
     return {
       _id: id,

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+import { merge } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { requiredOptional } from '@kbn/zod-helpers';
 
-import type { BaseHit, SearchTypes } from '../../../../../../common/detection_engine/types';
+import type { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
 import { getMergeStrategy } from '../../utils/source_fields_merging/strategies';
-import type { BaseSignalHit, SignalSource, SignalSourceHit } from '../../types';
-import { additionalAlertFields, buildAlert } from './build_alert';
-import { filterSource } from './filter_source';
+import type { SignalSource, SignalSourceHit } from '../../types';
+import { buildAlertFields, isThresholdResult } from './build_alert';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import { buildRuleNameFromMapping } from '../../utils/mappings/build_rule_name_from_mapping';
 import { buildSeverityFromMapping } from '../../utils/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../utils/mappings/build_risk_score_from_mapping';
 import type { BaseFieldsLatest } from '../../../../../../common/api/detection_engine/model/alerts';
-import { stripNonEcsFields } from './strip_non_ecs_fields';
+import { traverseDoc } from './strip_non_ecs_fields';
+import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
 
 const isSourceDoc = (
   hit: SignalSourceHit
@@ -30,12 +30,21 @@ const isSourceDoc = (
   return hit._source != null;
 };
 
-const buildEventTypeAlert = (doc: BaseSignalHit): Record<string, SearchTypes> => {
-  if (doc._source?.event != null && doc._source?.event instanceof Object) {
-    return flattenWithPrefix('event', doc._source?.event ?? {});
-  }
-  return {};
-};
+export interface TransformHitToAlertProps {
+  spaceId: string | null | undefined;
+  completeRule: CompleteRule<RuleParams>;
+  doc: estypes.SearchHit<SignalSource>;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  ignoreFields: Record<string, boolean>;
+  ignoreFieldsRegexes: string[];
+  applyOverrides: boolean;
+  buildReasonMessage: BuildReasonMessage;
+  indicesToQuery: string[];
+  alertTimestampOverride: Date | undefined;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  alertUuid: string;
+  publicBaseUrl?: string;
+}
 
 /**
  * Formats the search_after result for insertion into the signals index. We first create a
@@ -46,35 +55,34 @@ const buildEventTypeAlert = (doc: BaseSignalHit): Record<string, SearchTypes> =>
  * @param doc The SignalSourceHit with "_source", "fields", and additional data such as "threshold_result"
  * @returns The body that can be added to a bulk call for inserting the signal.
  */
-export const buildBulkBody = (
-  spaceId: string | null | undefined,
-  completeRule: CompleteRule<RuleParams>,
-  doc: estypes.SearchHit<SignalSource>,
-  mergeStrategy: ConfigType['alertMergeStrategy'],
-  ignoreFields: ConfigType['alertIgnoreFields'],
-  applyOverrides: boolean,
-  buildReasonMessage: BuildReasonMessage,
-  indicesToQuery: string[],
-  alertTimestampOverride: Date | undefined,
-  ruleExecutionLogger: IRuleExecutionLogForExecutors,
-  alertUuid: string,
-  publicBaseUrl?: string
-): BaseFieldsLatest => {
-  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
+export const transformHitToAlert = ({
+  spaceId,
+  completeRule,
+  doc,
+  mergeStrategy,
+  ignoreFields,
+  ignoreFieldsRegexes,
+  applyOverrides,
+  buildReasonMessage,
+  indicesToQuery,
+  alertTimestampOverride,
+  ruleExecutionLogger,
+  alertUuid,
+  publicBaseUrl,
+}: TransformHitToAlertProps): BaseFieldsLatest => {
+  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields, ignoreFieldsRegexes });
+  const thresholdResult = mergedDoc._source?.threshold_result;
 
-  const eventFields = buildEventTypeAlert(mergedDoc);
-  const { result: validatedEventFields, removed: removedEventFields } =
-    stripNonEcsFields(eventFields);
+  const {
+    result: validatedSource,
+    removed: removedSourceFields,
+    fieldsToAdd,
+  } = traverseDoc(mergedDoc._source ?? {});
 
-  const filteredSource = filterSource(mergedDoc);
-  const { result: validatedSource, removed: removedSourceFields } =
-    stripNonEcsFields(filteredSource);
-
-  if (removedEventFields.length || removedSourceFields.length) {
+  if (removedSourceFields.length) {
     ruleExecutionLogger?.debug(
       'Following fields were removed from alert source as ECS non-compliant:',
-      JSON.stringify(removedSourceFields),
-      JSON.stringify(removedEventFields)
+      JSON.stringify(removedSourceFields)
     );
   }
 
@@ -104,31 +112,26 @@ export const buildBulkBody = (
     mergedDoc,
   });
 
-  const thresholdResult = mergedDoc._source?.threshold_result;
   if (isSourceDoc(mergedDoc)) {
-    return {
-      ...validatedSource,
-      ...validatedEventFields,
-      ...buildAlert(
-        [mergedDoc],
-        completeRule,
-        spaceId,
-        reason,
-        indicesToQuery,
-        alertUuid,
-        publicBaseUrl,
-        alertTimestampOverride,
-        overrides
-      ),
-      ...additionalAlertFields({
-        ...mergedDoc,
-        _source: {
-          ...validatedSource,
-          ...validatedEventFields,
-          threshold_result: thresholdResult,
-        },
-      }),
-    };
+    const alertFields = buildAlertFields({
+      docs: [mergedDoc],
+      completeRule,
+      spaceId,
+      reason,
+      indicesToQuery,
+      alertUuid,
+      publicBaseUrl,
+      alertTimestampOverride,
+      overrides,
+    });
+    merge(validatedSource, alertFields);
+    if (thresholdResult != null && isThresholdResult(thresholdResult)) {
+      validatedSource[ALERT_THRESHOLD_RESULT] = thresholdResult;
+    }
+    fieldsToAdd.forEach(({ key, value }) => {
+      validatedSource[key] = value;
+    });
+    return validatedSource as BaseFieldsLatest;
   }
 
   throw Error('Error building alert from source document.');

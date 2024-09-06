@@ -6,8 +6,9 @@
  */
 
 import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
+import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
-import { isPlainObject, cloneDeep, isArray } from 'lodash';
+import { isPlainObject, isArray, set, unset } from 'lodash';
 
 import type { SearchTypes } from '../../../../../../common/detection_engine/types';
 import { isValidIpType } from './ecs_types_validators/is_valid_ip_type';
@@ -15,6 +16,10 @@ import { isValidDateType } from './ecs_types_validators/is_valid_date_type';
 import { isValidNumericType } from './ecs_types_validators/is_valid_numeric_type';
 import { isValidBooleanType } from './ecs_types_validators/is_valid_boolean_type';
 import { isValidLongType } from './ecs_types_validators/is_valid_long_type';
+import {
+  ALERT_ORIGINAL_EVENT,
+  ALERT_THRESHOLD_RESULT,
+} from '../../../../../../common/field_maps/field_names';
 
 type SourceFieldRecord = Record<string, SearchTypes>;
 type SourceField = SearchTypes | SourceFieldRecord;
@@ -153,67 +158,120 @@ const computeIsEcsCompliant = (value: SourceField, path: string) => {
   return isEcsFieldObject ? isPlainObject(value) : !isPlainObject(value);
 };
 
-interface StripNonEcsFieldsReturn {
-  result: SourceFieldRecord;
-  removed: Array<{ key: string; value: SearchTypes }>;
-}
+const bannedFields = ['kibana', 'signal', 'threshold_result', ALERT_THRESHOLD_RESULT];
 
 /**
- * strips alert source object from ECS non compliant fields
+ * Traverse an entire source document and mutate it to prepare for indexing into the alerts index. Traversing the document
+ * is computationally expensive so we only want to traverse it once, therefore a few distinct cases are handled in this function:
+ * 1. Fields that we must explicitly remove, like `kibana` and `signal`, fields, are removed from the document.
+ * 2. Fields that are incompatible with ECS are removed.
+ * 3. All `event.*` fields are collected so we can copy them to `kibana.alert.original_event` after traversing the document.
+ * @param document The document to traverse
+ * @returns The mutated document, a list of removed fields, and a list of new fields to add
  */
-export const stripNonEcsFields = (doc: SourceFieldRecord): StripNonEcsFieldsReturn => {
-  const result = cloneDeep(doc);
-  const removed: Array<{ key: string; value: SearchTypes }> = [];
+export const traverseDoc = <T extends SourceFieldRecord>(document: T) => {
+  return internalTraverseDoc({ document, path: [], topLevel: true, removed: [], fieldsToAdd: [] });
+};
 
-  /**
-   * traverses through object and deletes ECS non compliant fields
-   * @param document - document to traverse
-   * @param documentKey - document key in parent document, if exists
-   * @param parent - parent of traversing document
-   * @param parentPath - path of parent in initial source document
-   */
-  const traverseAndDeleteInObj = (
-    document: SourceField,
-    documentKey: string,
-    parent?: SourceFieldRecord,
-    parentPath?: string
-  ) => {
-    const fullPath = [parentPath, documentKey].filter(Boolean).join('.');
-    // if document array, traverse through each item w/o changing documentKey, parent, parentPath
-    if (isArray(document) && document.length > 0) {
-      document.slice().forEach((value) => {
-        traverseAndDeleteInObj(value, documentKey, parent, parentPath);
+const internalTraverseDoc = <T extends SourceFieldRecord>({
+  document,
+  path,
+  topLevel,
+  removed,
+  fieldsToAdd,
+}: {
+  document: T;
+  path: string[];
+  topLevel: boolean;
+  removed: Array<{ key: string; value: SearchTypes }>;
+  fieldsToAdd: Array<{ key: string; value: SearchTypes }>;
+}) => {
+  Object.entries(document).forEach(([key, value]) => {
+    const fullPathArray = [...path, key];
+    const fullPath = fullPathArray.join('.');
+    // Insert checks that don't care about the value - only depend on the key - up here
+    let deleted = false;
+    if (topLevel) {
+      bannedFields.forEach((bannedField) => {
+        if (key.split('.')[0] === bannedField) {
+          delete document[key];
+          deleted = true;
+          removed.push({ key: fullPath, value });
+        }
       });
-      return;
     }
 
-    if (parent && !computeIsEcsCompliant(document, fullPath)) {
-      const documentReference = parent[documentKey];
-      // if document reference in parent is array, remove only this item from array
-      // e.g. a boolean mapped field with values ['not-boolean', 'true'] should strip 'not-boolean' and leave 'true'
-      if (isArray(documentReference)) {
-        const indexToDelete = documentReference.findIndex((item) => item === document);
-        documentReference.splice(indexToDelete, 1);
-        if (documentReference.length === 0) {
-          delete parent[documentKey];
+    // If we passed the key check, additional checks based on key and value are done below. Items in arrays are treated independently from each other.
+    if (!deleted) {
+      if (isArray(value)) {
+        const newValue = traverseArray({ array: value, path: fullPathArray, removed, fieldsToAdd });
+        if (newValue.length > 0) {
+          set(document, key, newValue);
+        } else {
+          unset(document, key);
+        }
+      } else if (!computeIsEcsCompliant(value, fullPath)) {
+        delete document[key];
+        removed.push({ key: fullPath, value });
+      } else if (isSearchTypesRecord(value)) {
+        internalTraverseDoc({
+          document: value,
+          path: fullPathArray,
+          topLevel: false,
+          removed,
+          fieldsToAdd,
+        });
+      }
+    }
+
+    // We're keeping the field, but maybe we want to copy it to a different field as well
+    if (fullPath.split('.')[0] === 'event' && topLevel) {
+      const newKey = `${ALERT_ORIGINAL_EVENT}${fullPath.replace('event', '')}`;
+      if (isPlainObject(value)) {
+        const flattenedObject = flattenWithPrefix(newKey, value);
+        for (const [k, v] of Object.entries(flattenedObject)) {
+          fieldsToAdd.push({ key: k, value: v });
         }
       } else {
-        delete parent[documentKey];
+        fieldsToAdd.push({
+          key: `${ALERT_ORIGINAL_EVENT}${fullPath.replace('event', '')}`,
+          value,
+        });
       }
-      removed.push({ key: fullPath, value: document });
-      return;
     }
+  });
+  return { result: document, removed, fieldsToAdd };
+};
 
-    if (isSearchTypesRecord(document)) {
-      Object.entries(document).forEach(([key, value]) => {
-        traverseAndDeleteInObj(value, key, document, fullPath);
-      });
+const traverseArray = ({
+  array,
+  path,
+  removed,
+  fieldsToAdd,
+}: {
+  array: SearchTypes[];
+  path: string[];
+  removed: Array<{ key: string; value: SearchTypes }>;
+  fieldsToAdd: Array<{ key: string; value: SearchTypes }>;
+}): SearchTypes[] => {
+  const pathString = path.join('.');
+  for (let i = 0; i < array.length; i++) {
+    const value = array[i];
+    if (isArray(value)) {
+      array[i] = traverseArray({ array: value, path, removed, fieldsToAdd });
     }
-  };
-
-  traverseAndDeleteInObj(result, '');
-  return {
-    result,
-    removed,
-  };
+  }
+  return array.filter((value) => {
+    if (isArray(value)) {
+      return value.length > 0;
+    } else if (!computeIsEcsCompliant(value, pathString)) {
+      removed.push({ key: pathString, value });
+      return false;
+    } else if (isSearchTypesRecord(value)) {
+      internalTraverseDoc({ document: value, path, topLevel: false, removed, fieldsToAdd });
+      return true;
+    } else {
+      return true;
+    }
+  });
 };

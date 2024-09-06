@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { get, isPlainObject } from 'lodash/fp';
-import type { SignalSource } from '../../../types';
+import { isObjectTypeGuard } from './is_objectlike_or_array_of_objectlikes';
 
 /**
  * Returns true if path in SignalSource object is valid
  * Path is valid if each field in hierarchy is object or undefined
  * Path is not valid if ANY of field in hierarchy is not object or undefined
- * @param path in source to check within source
- * @param source The source document
+ * The function is robust in that it can handle any mix of dot and nested notation in the document
+ * @param key Path (dot-notation) to check for validity
+ * @param document Document to search
  * @returns boolean
  */
-export const isPathValid = (path: string[] | string, source: SignalSource): boolean => {
-  if (path == null) {
-    return false;
+export const robustIsPathValid = (key: string, document: Record<string, unknown>): boolean => {
+  const splitKey = key.split('.');
+  let tempKey = splitKey[0];
+  for (let i = 0; i < splitKey.length; i++) {
+    if (i > 0) {
+      tempKey += `.${splitKey[i]}`;
+    }
+    const value = document[tempKey];
+    if (value != null) {
+      if (!isObjectTypeGuard(value)) {
+        return false;
+      } else {
+        return robustIsPathValid(splitKey.slice(i + 1).join('.'), value);
+      }
+    }
   }
-  const pathAsArray = typeof path === 'string' ? path.split('.') : path;
-
-  if (pathAsArray.length === 0) {
-    return false;
-  }
-
-  return pathAsArray.every((_, index, array) => {
-    const newPath = [...array].splice(0, index + 1);
-    // _.get won't retrieve value of flattened key 'a.b' when receives path ['a', 'b'].
-    // so we would try to call _.get with dot-notation path if array path results in undefined
-    const valueToCheck = get(newPath, source) ?? get(newPath.join('.'), source);
-    return valueToCheck === undefined || isPlainObject(valueToCheck);
-  });
+  return true;
 };

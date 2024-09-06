@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
-import { set } from '@kbn/safer-lodash-set';
-
 import type { SignalSource } from '../../../types';
-import { filterFieldEntries } from '../utils/filter_field_entries';
+import { filterFieldEntry } from '../utils/filter_field_entry';
 import type { FieldsType, MergeStrategyFunction } from '../types';
 import { recursiveUnboxingFields } from '../utils/recursive_unboxing_fields';
 import { isTypeObject } from '../utils/is_type_object';
 import { isNestedObject } from '../utils/is_nested_object';
-import { isPathValid } from '../utils/is_path_valid';
-import { buildFieldsKeyAsArrayMap } from '../utils/build_fields_key_as_array_map';
+import { robustGet, robustSet } from '../utils/robust_field_access';
+import { robustIsPathValid } from '../utils/is_path_valid';
+import type { SearchTypes } from '../../../../../../../common/detection_engine/types';
 
 /**
  * Merges only missing sections of "doc._source" with its "doc.fields" on a "best effort" basis. See ../README.md for more information
@@ -26,36 +24,35 @@ import { buildFieldsKeyAsArrayMap } from '../utils/build_fields_key_as_array_map
  * it will not be added from fields.
  * @returns The two merged together in one object where we can
  */
-export const mergeMissingFieldsWithSource: MergeStrategyFunction = ({ doc, ignoreFields }) => {
+export const mergeMissingFieldsWithSource: MergeStrategyFunction = ({
+  doc,
+  ignoreFields,
+  ignoreFieldsRegexes,
+}) => {
   const source = doc._source ?? {};
   const fields = doc.fields ?? {};
   const fieldEntries = Object.entries(fields);
-  const filteredEntries = filterFieldEntries(fieldEntries, ignoreFields);
-  const fieldsKeyMap = buildFieldsKeyAsArrayMap(source);
 
-  const transformedSource = filteredEntries.reduce(
-    (merged, [fieldsKeyAsString, fieldsValue]: [string, FieldsType]) => {
-      const fieldsKey = fieldsKeyMap[fieldsKeyAsString] ?? fieldsKeyAsString;
-      if (
-        hasEarlyReturnConditions({
-          fieldsValue,
-          fieldsKey,
-          merged,
-        })
-      ) {
-        return merged;
-      }
-
-      const valueInMergedDocument = get(fieldsKey, merged);
+  fieldEntries.forEach((fieldEntry: [string, FieldsType]) => {
+    const [fieldsKeyAsString, fieldsValue] = fieldEntry;
+    const valueInMergedDocument = robustGet({ key: fieldsKeyAsString, document: source });
+    if (
+      !hasEarlyReturnConditions({
+        fieldsValue,
+        key: fieldsKeyAsString,
+        valueInMergedDocument,
+        merged: source,
+      }) &&
+      filterFieldEntry(fieldEntry, fieldEntries, ignoreFields, ignoreFieldsRegexes)
+    ) {
       const valueToMerge = recursiveUnboxingFields(fieldsValue, valueInMergedDocument);
-      return set(merged, fieldsKey, valueToMerge);
-    },
-    { ...source }
-  );
+      return robustSet({ document: source, key: fieldsKeyAsString, valueToSet: valueToMerge });
+    }
+  });
 
   return {
     ...doc,
-    _source: transformedSource,
+    _source: source,
   };
 };
 
@@ -72,18 +69,19 @@ export const mergeMissingFieldsWithSource: MergeStrategyFunction = ({ doc, ignor
  */
 const hasEarlyReturnConditions = ({
   fieldsValue,
-  fieldsKey,
+  key,
   merged,
+  valueInMergedDocument,
 }: {
   fieldsValue: FieldsType;
-  fieldsKey: string[] | string;
+  key: string;
   merged: SignalSource;
+  valueInMergedDocument: SearchTypes;
 }) => {
-  const valueInMergedDocument = get(fieldsKey, merged);
   return (
     fieldsValue.length === 0 ||
     valueInMergedDocument !== undefined ||
-    !isPathValid(fieldsKey, merged) ||
+    !robustIsPathValid(key, merged) ||
     isNestedObject(fieldsValue) ||
     isTypeObject(fieldsValue)
   );

@@ -16,13 +16,13 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
-jest.mock('../factories/utils/build_bulk_body', () => ({ buildBulkBody: jest.fn() }));
+jest.mock('../factories/utils/transform_hit_to_alert', () => ({ transformHitToAlert: jest.fn() }));
 
-const buildBulkBodyMock = buildBulkBody as jest.Mock;
+const buildBulkBodyMock = transformHitToAlert as jest.Mock;
 
 const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
