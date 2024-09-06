@@ -109,7 +109,7 @@ export const GroupByExpression = ({
   }, [selectedTermsFieldsOptions, groupBy, onChangeSelectedTermField]);
 
   useEffect(() => {
-    if (fields) {
+    if (fields && fields.length > 0) {
       // if current field set doesn't contain selected field, clear selection
       const hasUnknownField = selectedTermsFieldsOptions.some(
         (fieldOption) => !fields.some((field) => field.name === fieldOption.label)
