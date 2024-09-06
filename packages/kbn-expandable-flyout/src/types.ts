@@ -16,6 +16,7 @@ export interface ExpandableFlyoutApi {
     left?: FlyoutPanelProps;
     right?: FlyoutPanelProps;
     preview?: FlyoutPanelProps;
+    shouldSync?: boolean;
   }) => void;
   /**
    * Replaces the current right panel with a new one
