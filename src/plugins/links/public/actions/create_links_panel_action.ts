@@ -21,12 +21,12 @@ export const registerCreateLinksPanelAction = () => {
     getIconType: () => APP_ICON,
     order: 10,
     isCompatible: async ({ embeddable }) => {
-      const { compatibilityCheck } = await import('./compatibility_check');
-      return compatibilityCheck(embeddable);
+      const { isParentApiCompatible } = await import('./compatibility_check');
+      return isParentApiCompatible(embeddable);
     },
     execute: async ({ embeddable }) => {
-      const { compatibilityCheck } = await import('./compatibility_check');
-      if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
+      const { isParentApiCompatible } = await import('./compatibility_check');
+      if (!isParentApiCompatible(embeddable)) throw new IncompatibleActionError();
       const { openEditorFlyout } = await import('../editor/open_editor_flyout');
       const runtimeState = await openEditorFlyout({
         parentDashboard: embeddable,

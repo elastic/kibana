@@ -8,7 +8,7 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { RIGHT_SECTION_TEST_ID } from './test_ids';
 
 interface RightSectionProps {
@@ -25,20 +25,19 @@ interface RightSectionProps {
 /**
  * Right section of the expanded flyout rendering a panel
  */
-export const RightSection: React.FC<RightSectionProps> = ({
-  component,
-  width,
-}: RightSectionProps) => {
-  const style = useMemo<React.CSSProperties>(
-    () => ({ height: '100%', width: `${width}px` }),
-    [width]
-  );
+export const RightSection: React.FC<RightSectionProps> = memo(
+  ({ component, width }: RightSectionProps) => {
+    const style = useMemo<React.CSSProperties>(
+      () => ({ height: '100%', width: `${width}px` }),
+      [width]
+    );
 
-  return (
-    <EuiFlexItem grow={false} style={style} data-test-subj={RIGHT_SECTION_TEST_ID}>
-      {component}
-    </EuiFlexItem>
-  );
-};
+    return (
+      <EuiFlexItem grow={false} style={style} data-test-subj={RIGHT_SECTION_TEST_ID}>
+        {component}
+      </EuiFlexItem>
+    );
+  }
+);
 
 RightSection.displayName = 'RightSection';

@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import type { IStorage } from '@kbn/kibana-utils-plugin/public';
 
 export const useExpandableFlyoutApi = jest.fn(() => ({
   openFlyout: jest.fn(),
@@ -38,3 +39,22 @@ export const withExpandableFlyoutProvider = <T extends object>(
 };
 
 export const ExpandableFlyout = jest.fn();
+
+export const localStorageMock = (): IStorage => {
+  let store: Record<string, unknown> = {};
+
+  return {
+    getItem: (key: string) => {
+      return store[key] || null;
+    },
+    setItem: (key: string, value: unknown) => {
+      store[key] = value;
+    },
+    clear() {
+      store = {};
+    },
+    removeItem(key: string) {
+      delete store[key];
+    },
+  };
+};

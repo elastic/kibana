@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import {
+  apiPublishesPanelDescription,
+  apiPublishesPanelTitle,
+  apiPublishesSavedObjectId,
+} from '@kbn/presentation-publishing';
+import { LinksParentApi } from '../types';
 
-export const compatibilityCheck = (
-  api: EmbeddableApiContext['embeddable']
-): api is PresentationContainer => {
-  return apiIsPresentationContainer(api);
-};
+export const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
+  apiIsPresentationContainer(parentApi) &&
+  apiPublishesSavedObjectId(parentApi) &&
+  apiPublishesPanelTitle(parentApi) &&
+  apiPublishesPanelDescription(parentApi);
