@@ -97,6 +97,10 @@ class AgentlessAgentService {
 
     const requestConfigDebug = JSON.stringify({
       ...requestConfig,
+      data: {
+        ...requestConfig.data,
+        fleet_token: 'REDACTED',
+      },
       httpsAgent: {
         ...requestConfig.httpsAgent,
         options: {
