@@ -15,6 +15,7 @@ import {
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
+import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 import { omitMonitorKeys } from './add_monitor';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
@@ -27,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
     const supertest = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');
+    const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     let _monitors: MonitorFields[];
     let monitors: MonitorFields[];
@@ -190,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
           monitors.map((mon) => ({ ...mon, name: mon.name + '4' })).map(saveMonitor)
         );
 
-        const apiResponse = await getMonitorAPIHelper(supertest, id1);
+        const apiResponse = await monitorTestService.getMonitor(id1);
 
         expect(apiResponse.body).eql(
           omitMonitorKeys({
@@ -209,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
           monitors.map((mon) => ({ ...mon, name: mon.name + '5' })).map(saveMonitor)
         );
 
-        const apiResponse = await getMonitorAPIHelper(supertest, id1, 200, { ui: true });
+        const apiResponse = await monitorTestService.getMonitor(id1, { ui: true });
 
         expect(apiResponse.body).eql({
           ...omitMonitorKeys({

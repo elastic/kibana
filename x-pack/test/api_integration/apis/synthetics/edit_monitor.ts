@@ -15,7 +15,6 @@ import {
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/saved_object_to_monitor';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { omitResponseTimestamps, omitEmptyValues } from './helper/monitor';
@@ -69,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { url, ...rest } = res.body;
 
       const result = { ...rest, urls: url } as EncryptedSyntheticsSavedMonitor;
-      return omitBy(omit(result, ['created_at', 'updated_at']), removeMonitorEmptyValues);
+      return omitBy(omit(result, ['created_at', 'updated_at']));
     };
 
     before(async () => {
@@ -399,7 +398,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(toUpdate)
         .expect(200);
 
-      const updatedResponse = await monitorTestService.getMonitor(monitorId, true, SPACE_ID);
+      const updatedResponse = await monitorTestService.getMonitor(monitorId, { space: SPACE_ID });
 
       // ensure monitor was updated
       expect(updatedResponse.body.urls).eql(toUpdate.urls);
@@ -416,7 +415,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(toUpdate2)
         .expect(200);
 
-      const updatedResponse2 = await monitorTestService.getMonitor(monitorId, true, SPACE_ID);
+      const updatedResponse2 = await monitorTestService.getMonitor(monitorId, { space: SPACE_ID });
 
       // ensure monitor was updated
       expect(updatedResponse2.body.urls).eql(toUpdate2.urls);

@@ -1123,8 +1123,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const decryptedCreatedMonitor = await monitorTestService.getMonitor(
           getResponse.body.monitors[0].config_id,
-          true,
-          SPACE_ID
+          { ui: true, space: SPACE_ID }
         );
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
@@ -1161,8 +1160,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const decryptedUpdatedMonitor = await monitorTestService.getMonitor(
           monitorsUpdated[0].config_id,
-          true,
-          SPACE_ID
+          { ui: true, space: SPACE_ID }
         );
         expect(decryptedUpdatedMonitor.body[ConfigKey.SOURCE_PROJECT_CONTENT]).eql(updatedSource);
       } finally {

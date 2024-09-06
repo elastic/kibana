@@ -23,7 +23,7 @@ import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { transformPublicKeys } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/saved_object_to_monitor';
+import { transformPublicKeys } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/formatters/saved_object_to_monitor';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
