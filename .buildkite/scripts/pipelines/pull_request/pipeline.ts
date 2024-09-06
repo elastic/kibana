@@ -28,13 +28,13 @@ const getPipeline = (filename: string, removeSteps = true) => {
   return removeSteps ? str.replace(/^steps:/, '') : str;
 };
 
-interface ModifyPipeline {
-  filename: string;
-  update?: {
-    label?: string;
-    envs?: { [key: string]: string };
-  };
-}
+// interface ModifyPipeline {
+//   filename: string;
+//   update?: {
+//     label?: string;
+//     envs?: { [key: string]: string };
+//   };
+// }
 
 // const modifyPerfPipeline = (options: ModifyPipeline) => {
 //   const str = fs.readFileSync(options.filename).toString();
