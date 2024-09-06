@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
-import type { MlApiServices } from '../../services/ml_api_service';
+import type { MlApi } from '../../services/ml_api_service';
 import type { FormMessage } from '../../data_frame_analytics/pages/analytics_management/hooks/use_create_analytics_form/state';
 
 interface CreateKibanaDataViewResponse {
@@ -25,11 +25,11 @@ function delay(ms = 1000) {
   });
 }
 
-export async function checkIndexExists(destIndex: string, ml: MlApiServices) {
+export async function checkIndexExists(destIndex: string, mlApi: MlApi) {
   let resp;
   let errorMessage;
   try {
-    resp = await ml.checkIndicesExists({ indices: [destIndex] });
+    resp = await mlApi.checkIndicesExists({ indices: [destIndex] });
   } catch (e) {
     errorMessage = extractErrorMessage(e);
   }
@@ -38,7 +38,7 @@ export async function checkIndexExists(destIndex: string, ml: MlApiServices) {
 
 export async function retryIndexExistsCheck(
   destIndex: string,
-  ml: MlApiServices
+  ml: MlApi
 ): Promise<{
   success: boolean;
   indexExists: boolean;
@@ -70,7 +70,7 @@ export async function retryIndexExistsCheck(
 export const createKibanaDataView = async (
   destinationIndex: string,
   dataViewsService: DataViewsContract,
-  ml: MlApiServices,
+  ml: MlApi,
   timeFieldName?: string,
   callback?: (response: FormMessage) => void
 ) => {

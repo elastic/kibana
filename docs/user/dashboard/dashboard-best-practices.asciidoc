@@ -1,0 +1,21 @@
+[[dashboard-best-practices]]
+== Dashboard best practices
+
+[[dashboard-troubleshooting]]
+=== Optimize dashboard loading time
+
+To improve the dashboard loading time, enable *Defer loading panels below the fold* *Lab*, which loads dashboard panels as they become visible on the dashboard.
+
+. In the toolbar, click *Labs*.
++
+To enable *Labs*, contact your administrator, or configure the <<presentation-labs,Advanced Settings>>. 
+
+. To specify how you want to enable the lab, use the following actions:
+
+* *{kib}* &mdash; Enables the lab in {kib}.
+
+* *Browser* &mdash; Enables the lab for your browser, and persists after you close the browser.
+
+* *Session* &mdash; Enables the lab for this browser session, then resets after you close the browser.
+
+. Click *Close*.
