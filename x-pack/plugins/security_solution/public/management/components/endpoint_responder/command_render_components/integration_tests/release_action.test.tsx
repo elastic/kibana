@@ -127,9 +127,7 @@ describe('When using the release action from response actions console', () => {
   it('should accept an optional `--comment`', async () => {
     const { apiMocks, render, user } = prepareTest();
     const { renderResult } = await render();
-    await enterConsoleCommand(renderResult, user, 'release --comment "This is a comment"', {
-      submitClick: true,
-    });
+    await enterConsoleCommand(renderResult, user, 'release --comment "This is a comment"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledWith(
@@ -143,9 +141,7 @@ describe('When using the release action from response actions console', () => {
   it('should only accept one `--comment`', async () => {
     const { render, user } = prepareTest();
     const { renderResult } = await render();
-    await enterConsoleCommand(renderResult, user, 'release --comment "one" --comment "two"', {
-      submitClick: true,
-    });
+    await enterConsoleCommand(renderResult, user, 'release --comment "one" --comment "two"');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'

@@ -104,9 +104,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should show an error if the `get_file` capability is not present in the endpoint', async () => {
     await render([]);
-    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"', {
-      submitClick: true,
-    });
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'get-file')
@@ -116,9 +114,7 @@ describe('When using get-file action from response actions console', () => {
   it('should show an error if the `get-file` is not authorized', async () => {
     endpointPrivileges.canWriteFileOperations = false;
     await render();
-    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"', {
-      submitClick: true,
-    });
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       INSUFFICIENT_PRIVILEGES_FOR_COMMAND
@@ -127,9 +123,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should show an error if `get-file` is entered without `--path` argument', async () => {
     await render([]);
-    await enterConsoleCommand(renderResult, user, 'get-file', {
-      submitClick: true,
-    });
+    await enterConsoleCommand(renderResult, user, 'get-file');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Missing required arguments: --path'
@@ -138,9 +132,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should show error if `--path` is empty string', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'get-file --path=""', {
-      submitClick: true,
-    });
+    await enterConsoleCommand(renderResult, user, 'get-file --path=""');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --path. Argument cannot be empty'
@@ -149,9 +141,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should call the `get_file` api with the expected payload', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"', {
-      submitClick: true,
-    });
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
@@ -167,10 +157,7 @@ describe('When using get-file action from response actions console', () => {
     await enterConsoleCommand(
       renderResult,
       user,
-      'get-file --path="one/two" --comment "one" --comment "two"',
-      {
-        submitClick: true,
-      }
+      'get-file --path="one/two" --comment "one" --comment "two"'
     );
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
@@ -193,9 +180,7 @@ describe('When using get-file action from response actions console', () => {
     apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
 
     await render();
-    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"', {
-      submitClick: true,
-    });
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -245,9 +230,7 @@ describe('When using get-file action from response actions console', () => {
     };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
-    await enterConsoleCommand(renderResult, user, 'get-file --path one', {
-      submitClick: true,
-    });
+    await enterConsoleCommand(renderResult, user, 'get-file --path one');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('getFile-actionFailure').textContent).toMatch(
@@ -270,9 +253,7 @@ describe('When using get-file action from response actions console', () => {
         responseActionsSentinelOneGetFileEnabled: false,
       });
       await render();
-      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"', {
-        submitClick: true,
-      });
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
       expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
         UPGRADE_AGENT_FOR_RESPONDER('sentinel_one', 'get-file')
@@ -281,9 +262,7 @@ describe('When using get-file action from response actions console', () => {
 
     it('should call API with `agent_type` set to `sentinel_one`', async () => {
       await render();
-      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"', {
-        submitClick: true,
-      });
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
       await waitFor(() => {
         expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
@@ -296,9 +275,7 @@ describe('When using get-file action from response actions console', () => {
 
     it('should not look at `capabilities` to determine compatibility', async () => {
       await render([]);
-      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"', {
-        submitClick: true,
-      });
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
       await waitFor(() => {
         expect(apiMocks.responseProvider.getFile).toHaveBeenCalled();
@@ -308,9 +285,7 @@ describe('When using get-file action from response actions console', () => {
 
     it('should display pending message', async () => {
       await render();
-      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"', {
-        submitClick: true,
-      });
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
       await waitFor(() => {
         expect(renderResult.getByTestId('getFile-pending'));

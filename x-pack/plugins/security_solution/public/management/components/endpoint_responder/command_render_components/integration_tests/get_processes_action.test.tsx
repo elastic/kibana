@@ -126,9 +126,7 @@ describe('When using processes action from response actions console', () => {
 
   it('should accept an optional `--comment`', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'processes --comment "This is a comment"', {
-      submitClick: true,
-    });
+    await enterConsoleCommand(renderResult, user, 'processes --comment "This is a comment"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.processes).toHaveBeenCalledWith(
@@ -141,9 +139,7 @@ describe('When using processes action from response actions console', () => {
 
   it('should only accept one `--comment`', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'processes --comment "one" --comment "two"', {
-      submitClick: true,
-    });
+    await enterConsoleCommand(renderResult, user, 'processes --comment "one" --comment "two"');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'

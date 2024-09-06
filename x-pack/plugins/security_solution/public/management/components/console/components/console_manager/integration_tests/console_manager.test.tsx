@@ -283,11 +283,9 @@ describe('When using ConsoleManager', () => {
       await render();
       await enterConsoleCommand(renderResult, user, 'help', {
         dataTestSubj: 'testRunningConsole',
-        submitClick: true,
       });
       await enterConsoleCommand(renderResult, user, 'cmd1', {
         dataTestSubj: 'testRunningConsole',
-        submitClick: true,
       });
 
       await waitFor(() => {
@@ -309,7 +307,6 @@ describe('When using ConsoleManager', () => {
       await render();
       await enterConsoleCommand(renderResult, user, 'cmd1', {
         dataTestSubj: 'testRunningConsole',
-        submitClick: true,
       });
 
       // Command should have `pending` status and no store values

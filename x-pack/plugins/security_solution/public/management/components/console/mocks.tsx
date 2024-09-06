@@ -36,8 +36,6 @@ interface ConsoleSelectorsAndActionsMock {
     options?: Partial<{
       /** If true, the ENTER key will not be pressed */
       inputOnly: boolean;
-      /** If true, the submit button will be clicked instead of using ENTER */
-      submitClick: boolean;
       /**
        * if true, then the keyboard keys will be used to send the command.
        * Use this if wanting ot press keyboard keys other than letter/punctuation

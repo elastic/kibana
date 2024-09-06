@@ -169,8 +169,7 @@ describe('When using scan action from response actions console', () => {
     await enterConsoleCommand(
       renderResult,
       user,
-      'scan --path="one/two" --comment "one" --comment "two"',
-      { submitClick: true }
+      'scan --path="one/two" --comment "one" --comment "two"'
     );
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
@@ -180,9 +179,7 @@ describe('When using scan action from response actions console', () => {
 
   it('should work with a single `--comment` argument', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'scan --path="one/two" --comment "Scan folder"', {
-      submitClick: true,
-    });
+    await enterConsoleCommand(renderResult, user, 'scan --path="one/two" --comment "Scan folder"');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('scan-pending').textContent).toEqual(
@@ -286,9 +283,7 @@ describe('When using scan action from response actions console', () => {
 
       apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
       await render();
-      await enterConsoleCommand(renderResult, user, 'scan --path="/error/path"', {
-        submitClick: true,
-      });
+      await enterConsoleCommand(renderResult, user, 'scan --path="/error/path"');
 
       await waitFor(() => {
         expect(renderResult.getByTestId('scan-actionFailure').textContent).toMatch(
