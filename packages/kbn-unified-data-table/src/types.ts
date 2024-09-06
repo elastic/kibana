@@ -17,8 +17,8 @@ import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { EuiDataGridControlColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
+export type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
 export type { DataGridDensity } from './constants';
 
 /**
@@ -43,17 +43,6 @@ export type ValueToStringConverter = (
   columnId: string,
   options?: { compatibleWithCSV?: boolean }
 ) => { formattedString: string; withFormula: boolean };
-
-/**
- * Custom column types per column name
- */
-export type DataTableColumnsMeta = Record<
-  string,
-  {
-    type: DatatableColumnMeta['type'];
-    esType?: DatatableColumnMeta['esType'];
-  }
->;
 
 export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
   row: DataTableRecord;

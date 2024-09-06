@@ -10,12 +10,12 @@ import React from 'react';
 import { FieldName } from '@kbn/unified-doc-viewer';
 import { FieldDescription, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { TableFieldValue } from './table_cell_value';
-import type { TableRow } from './table_cell_actions';
+import type { FieldRow } from './field_row';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 interface TableCellProps {
   searchTerm: string;
-  rows: TableRow[];
+  rows: FieldRow[];
   rowIndex: number;
   columnId: string;
   isDetails: boolean;
@@ -31,31 +31,25 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
       return null;
     }
 
-    const {
-      action: { flattenedField },
-      field: { field, fieldMapping, fieldType, scripted },
-      value: { formattedValue, ignored },
-    } = row;
+    const { flattenedValue, name, dataViewField, ignoredReason, fieldType } = row;
+    const displayName = dataViewField?.displayName ?? name;
 
     if (columnId === 'name') {
       return (
         <div>
           <FieldName
-            fieldName={field}
+            fieldName={displayName}
             fieldType={fieldType}
-            fieldMapping={fieldMapping}
-            scripted={scripted}
-            highlight={getFieldSearchMatchingHighlight(
-              fieldMapping?.displayName ?? field,
-              searchTerm
-            )}
+            fieldMapping={dataViewField}
+            scripted={dataViewField?.scripted}
+            highlight={getFieldSearchMatchingHighlight(displayName, searchTerm)}
           />
 
-          {isDetails && !!fieldMapping ? (
+          {isDetails && !!dataViewField ? (
             <div>
               <FieldDescription
                 fieldsMetadataService={fieldsMetadata}
-                field={fieldMapping}
+                field={dataViewField}
                 truncate={false}
               />
             </div>
@@ -67,10 +61,10 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
     if (columnId === 'value') {
       return (
         <TableFieldValue
-          field={field}
-          formattedValue={formattedValue}
-          rawValue={flattenedField}
-          ignoreReason={ignored}
+          field={name}
+          formattedValue={row.formattedAsHtml ?? ''}
+          rawValue={flattenedValue}
+          ignoreReason={ignoredReason}
           isDetails={isDetails}
         />
       );

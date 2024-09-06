@@ -21,7 +21,7 @@ import classnames from 'classnames';
 import React, { Fragment, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IgnoredReason, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
-import { FieldRecord } from './table';
+import { FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 const DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110;
@@ -95,8 +95,8 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
   );
 });
 
-type TableFieldValueProps = Pick<FieldRecord['field'], 'field'> & {
-  formattedValue: FieldRecord['value']['formattedValue'];
+type TableFieldValueProps = Pick<FieldRecordLegacy['field'], 'field'> & {
+  formattedValue: FieldRecordLegacy['value']['formattedValue'];
   rawValue: unknown;
   ignoreReason?: IgnoredReason;
   isDetails?: boolean; // true when inside EuiDataGrid cell popover

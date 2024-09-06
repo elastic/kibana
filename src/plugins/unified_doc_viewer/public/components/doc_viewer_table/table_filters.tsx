@@ -18,6 +18,7 @@ import {
   type FieldTypeFilterProps,
 } from '@kbn/unified-field-list/src/components/field_list_filters/field_type_filter';
 import { getUnifiedDocViewerServices } from '../../plugin';
+import { FieldRow } from './field_row';
 
 export const LOCAL_STORAGE_KEY_SEARCH_TERM = 'discover:searchText';
 export const LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES = 'unifiedDocViewer:selectedFieldTypes';
@@ -108,11 +109,7 @@ const getStoredFieldTypes = (storage: Storage) => {
 };
 
 interface UseTableFiltersReturn extends TableFiltersCommonProps {
-  onFilterField: (
-    fieldName: string,
-    fieldDisplayName: string | undefined,
-    fieldType: string | undefined
-  ) => boolean;
+  onFilterField: (row: FieldRow) => boolean;
 }
 
 export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
@@ -138,11 +135,15 @@ export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
   );
 
   const onFilterField: UseTableFiltersReturn['onFilterField'] = useCallback(
-    (fieldName, fieldDisplayName, fieldType) => {
+    (row) => {
+      const { fieldType, name, dataViewField } = row;
       const term = searchTerm?.trim();
+
       if (
         term &&
-        !fieldNameWildcardMatcher({ name: fieldName, displayName: fieldDisplayName }, term)
+        !fieldNameWildcardMatcher({ name, displayName: dataViewField?.customLabel }, term) &&
+        !fieldNameWildcardMatcher({ name: row.formattedAsText || '' }, term) &&
+        !fieldNameWildcardMatcher({ name: JSON.stringify(row.flattenedValue) || '' }, term)
       ) {
         return false;
       }

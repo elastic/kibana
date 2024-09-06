@@ -7,6 +7,7 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
 
@@ -45,6 +46,18 @@ type FormattedHitPair = readonly [
   formattedValue: string,
   fieldName: string | null // `null` is when number of fields is limited and there is an extra pair about it
 ];
+
+/**
+ * If empty, types will be derived by default from the dataView field types.
+ * For displaying ES|QL search results, define column types (which are available separately in the fetch request) in the following format.
+ */
+export type DataTableColumnsMeta = Record<
+  string,
+  {
+    type: DatatableColumnMeta['type'];
+    esType?: DatatableColumnMeta['esType'];
+  }
+>;
 
 /**
  * Pairs array for each field in the hit

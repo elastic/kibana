@@ -13,8 +13,53 @@ import {
   LOCAL_STORAGE_KEY_SEARCH_TERM,
   LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES,
 } from './table_filters';
+import { FieldRow } from './field_row';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 const storage = new Storage(window.localStorage);
+
+const hit = buildDataTableRecord(
+  {
+    _ignored: [],
+    _index: 'test',
+    _id: '1',
+    _source: {
+      'extension.keyword': 'zip',
+      bytes: 500,
+      '@timestamp': '2021-01-01T00:00:00',
+    },
+  },
+  dataView
+);
+const rowExtensionKeyword = new FieldRow({
+  name: 'extension.keyword',
+  flattenedValue: 'zip',
+  hit,
+  dataView,
+  fieldFormats: {} as FieldFormatsStart,
+  isPinned: false,
+  columnsMeta: undefined,
+});
+const rowBytes = new FieldRow({
+  name: 'bytes',
+  flattenedValue: 500,
+  hit,
+  dataView,
+  fieldFormats: {} as FieldFormatsStart,
+  isPinned: false,
+  columnsMeta: undefined,
+});
+const rowTimestamp = new FieldRow({
+  name: '@timestamp',
+  flattenedValue: '2021-01-01T00:00:00',
+  hit,
+  dataView,
+  fieldFormats: {} as FieldFormatsStart,
+  isPinned: false,
+  columnsMeta: undefined,
+});
 
 describe('useTableFilters', () => {
   beforeAll(() => {
@@ -33,8 +78,8 @@ describe('useTableFilters', () => {
 
     expect(result.current.searchTerm).toBe('');
     expect(result.current.selectedFieldTypes).toEqual([]);
-    expect(result.current.onFilterField('extension', undefined, 'keyword')).toBe(true);
-    expect(result.current.onFilterField('bytes', undefined, 'number')).toBe(true);
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(true);
+    expect(result.current.onFilterField(rowBytes)).toBe(true);
 
     expect(storage.get(LOCAL_STORAGE_KEY_SEARCH_TERM)).toBeNull();
   });
@@ -46,8 +91,8 @@ describe('useTableFilters', () => {
       result.current.onChangeSearchTerm('ext');
     });
 
-    expect(result.current.onFilterField('extension', undefined, 'keyword')).toBe(true);
-    expect(result.current.onFilterField('bytes', undefined, 'number')).toBe(false);
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(true);
+    expect(result.current.onFilterField(rowBytes)).toBe(false);
 
     expect(storage.get(LOCAL_STORAGE_KEY_SEARCH_TERM)).toBe('ext');
   });
@@ -59,22 +104,22 @@ describe('useTableFilters', () => {
       result.current.onChangeFieldTypes(['number']);
     });
 
-    expect(result.current.onFilterField('extension', undefined, 'keyword')).toBe(false);
-    expect(result.current.onFilterField('bytes', undefined, 'number')).toBe(true);
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(false);
+    expect(result.current.onFilterField(rowBytes)).toBe(true);
 
     act(() => {
       result.current.onChangeFieldTypes(['keyword']);
     });
 
-    expect(result.current.onFilterField('extension', undefined, 'keyword')).toBe(true);
-    expect(result.current.onFilterField('bytes', undefined, 'number')).toBe(false);
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(true);
+    expect(result.current.onFilterField(rowBytes)).toBe(false);
 
     act(() => {
       result.current.onChangeFieldTypes(['number', 'keyword']);
     });
 
-    expect(result.current.onFilterField('extension', undefined, 'keyword')).toBe(true);
-    expect(result.current.onFilterField('bytes', undefined, 'number')).toBe(true);
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(true);
+    expect(result.current.onFilterField(rowBytes)).toBe(true);
 
     jest.advanceTimersByTime(600);
     expect(storage.get(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES)).toBe('["number","keyword"]');
@@ -88,24 +133,24 @@ describe('useTableFilters', () => {
       result.current.onChangeFieldTypes(['keyword']);
     });
 
-    expect(result.current.onFilterField('extension', undefined, 'keyword')).toBe(true);
-    expect(result.current.onFilterField('bytes', undefined, 'number')).toBe(false);
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(true);
+    expect(result.current.onFilterField(rowBytes)).toBe(false);
 
     act(() => {
       result.current.onChangeSearchTerm('ext');
       result.current.onChangeFieldTypes(['number']);
     });
 
-    expect(result.current.onFilterField('extension', undefined, 'keyword')).toBe(false);
-    expect(result.current.onFilterField('bytes', undefined, 'number')).toBe(false);
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(false);
+    expect(result.current.onFilterField(rowBytes)).toBe(false);
 
     act(() => {
       result.current.onChangeSearchTerm('bytes');
       result.current.onChangeFieldTypes(['number']);
     });
 
-    expect(result.current.onFilterField('extension', undefined, 'keyword')).toBe(false);
-    expect(result.current.onFilterField('bytes', undefined, 'number')).toBe(true);
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(false);
+    expect(result.current.onFilterField(rowBytes)).toBe(true);
 
     jest.advanceTimersByTime(600);
     expect(storage.get(LOCAL_STORAGE_KEY_SEARCH_TERM)).toBe('bytes');
@@ -121,8 +166,8 @@ describe('useTableFilters', () => {
     expect(result.current.searchTerm).toBe('bytes');
     expect(result.current.selectedFieldTypes).toEqual(['number']);
 
-    expect(result.current.onFilterField('extension', undefined, 'keyword')).toBe(false);
-    expect(result.current.onFilterField('bytes', undefined, 'number')).toBe(true);
-    expect(result.current.onFilterField('bytes_counter', undefined, 'counter')).toBe(false);
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(false);
+    expect(result.current.onFilterField(rowBytes)).toBe(true);
+    expect(result.current.onFilterField(rowTimestamp)).toBe(false);
   });
 });
