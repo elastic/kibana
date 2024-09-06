@@ -8,7 +8,6 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import {
-  DISCOVER_CELL_ACTIONS_TRIGGER,
   DISCOVER_CELL_ACTION_TYPE,
   createCellAction,
   toCellActionContext,
@@ -24,7 +23,11 @@ import type {
   ActionDefinition,
   ActionExecutionContext,
 } from '@kbn/ui-actions-plugin/public/actions';
-import type { AdditionalCellAction, DiscoverCellActionExecutionContext } from '../types';
+import {
+  DISCOVER_CELL_ACTIONS_TRIGGER,
+  type AdditionalCellAction,
+  type DiscoverCellActionExecutionContext,
+} from '../types';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 

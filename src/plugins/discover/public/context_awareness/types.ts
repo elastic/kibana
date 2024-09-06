@@ -14,6 +14,7 @@ import type { CellAction, CellActionExecutionContext, CellActionsData } from '@k
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 
 export interface DocViewerExtension {
@@ -46,6 +47,8 @@ export interface DefaultAppStateExtension {
 export interface RowControlsExtensionParams {
   dataView: DataView;
 }
+
+export const DISCOVER_CELL_ACTIONS_TRIGGER: Trigger = { id: 'DISCOVER_CELL_ACTIONS_TRIGGER_ID' };
 
 export interface DiscoverCellActionMetadata extends Record<string, unknown> {
   instanceId?: string;

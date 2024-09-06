@@ -8,19 +8,17 @@
 
 import { createCellActionFactory } from '@kbn/cell-actions/actions';
 import { useEffect, useMemo, useState } from 'react';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  AdditionalCellAction,
-  AdditionalCellActionContext,
-  DiscoverCellAction,
-  DiscoverCellActionExecutionContext,
-  DiscoverCellActionMetadata,
+import {
+  DISCOVER_CELL_ACTIONS_TRIGGER,
+  type AdditionalCellAction,
+  type AdditionalCellActionContext,
+  type DiscoverCellAction,
+  type DiscoverCellActionExecutionContext,
+  type DiscoverCellActionMetadata,
 } from '../types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useProfileAccessor } from './use_profile_accessor';
-
-export const DISCOVER_CELL_ACTIONS_TRIGGER: Trigger = { id: 'DISCOVER_CELL_ACTIONS_TRIGGER_ID' };
 
 export const DISCOVER_CELL_ACTION_TYPE = 'discover-cellAction-type';
 
