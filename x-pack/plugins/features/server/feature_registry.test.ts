@@ -215,7 +215,7 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerKibanaFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature privilege test-feature has unknown scope entries: foo, bar"`
+        `"Feature test-feature has unknown scope entries: foo, bar"`
       );
     });
 
