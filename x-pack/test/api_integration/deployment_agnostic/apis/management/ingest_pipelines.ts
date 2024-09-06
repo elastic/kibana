@@ -34,6 +34,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { body } = await supertestWithAdminScope
           .post(ingestPipelines.fixtures.apiBasePath)
           .send(pipelineRequestBody);
+          .expect(200);
 
         expect(body).to.eql({
           acknowledged: true,
