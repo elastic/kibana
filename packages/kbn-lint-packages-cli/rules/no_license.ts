@@ -10,7 +10,7 @@
 import { PackageRule } from '@kbn/repo-linter';
 import { setProp, getProp } from '@kbn/json-ast';
 
-const DEFAULT_LICENSE = 'Elastic License 2.0 OR AGPL-3.0 OR SSPL-1.0';
+const DEFAULT_LICENSE = 'Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0';
 const XPACK_LICENSE = 'Elastic License 2.0';
 const LICENSE_EXCEPTIONS = Object.entries({
   MIT: ['@kbn/safer-lodash-set', '@kbn/handlebars', '@kbn/expect'],
