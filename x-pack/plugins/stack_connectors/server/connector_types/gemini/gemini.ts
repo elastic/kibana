@@ -412,7 +412,7 @@ const formatGeminiPayload = ({
       {
         category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
         // without setting threshold, the model will block responses about suspicious alerts
-        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        threshold: HarmBlockThreshold.BLOCK_NONE,
       },
     ],
   };
