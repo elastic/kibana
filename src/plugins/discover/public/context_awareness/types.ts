@@ -66,6 +66,7 @@ export type AdditionalCellActionContext = CellActionsData &
   Omit<OmitIndexSignature<DiscoverCellActionMetadata>, 'instanceId'>;
 
 export interface AdditionalCellAction {
+  id: string;
   getDisplayName: (context: AdditionalCellActionContext) => string;
   getIconType: (context: AdditionalCellActionContext) => EuiIconType;
   isCompatible?: (

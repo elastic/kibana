@@ -31,6 +31,7 @@ export const createKubernetesContainerLogsDataSourceProfileProvider = (
         [
           ...prev(),
           {
+            id: 'k8s-action',
             getDisplayName: () => 'K8s action',
             getIconType: () => 'bolt',
             execute: () => {

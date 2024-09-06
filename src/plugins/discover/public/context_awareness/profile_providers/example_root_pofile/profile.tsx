@@ -31,6 +31,7 @@ export const exampleRootProfileProvider: RootProfileProvider = {
       [
         ...prev(),
         {
+          id: 'example-root-action',
           getDisplayName: () => 'Example root action',
           getIconType: () => 'plus',
           execute: () => {

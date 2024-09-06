@@ -96,7 +96,7 @@ export const createCellAction = (
 
   const factory = createFactory();
 
-  return factory({ id: uuidv4(), order });
+  return factory({ id: `${action.id}-${uuidv4()}`, order });
 };
 
 export const toCellActionContext = ({

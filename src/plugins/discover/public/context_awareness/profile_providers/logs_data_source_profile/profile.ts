@@ -24,6 +24,7 @@ export const createLogsDataSourceProfileProvider = (
       [
         ...prev(),
         {
+          id: 'heart',
           getDisplayName: (context) => `Heart ${context.field.name}`,
           getIconType: () => 'heart',
           execute: (context) => {

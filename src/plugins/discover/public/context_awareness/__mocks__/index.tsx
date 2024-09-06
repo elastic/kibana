@@ -36,6 +36,7 @@ export const createContextAwarenessMocks = ({
       getAdditionalCellActions: jest.fn((prev) => () => [
         ...prev(),
         {
+          id: 'root-action',
           getDisplayName: () => 'Root action',
           getIconType: () => 'minus',
           isCompatible: () => false,
@@ -84,6 +85,7 @@ export const createContextAwarenessMocks = ({
       getAdditionalCellActions: jest.fn((prev) => () => [
         ...prev(),
         {
+          id: 'data-source-action',
           getDisplayName: () => 'Data source action',
           getIconType: () => 'plus',
           execute: () => {

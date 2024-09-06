@@ -102,12 +102,15 @@ describe('useAdditionalCellActions', () => {
     const { rerender, result, unmount } = render();
     expect(result.current.instanceId).toEqual('1');
     expect(mockActions).toHaveLength(1);
-    expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual(['2']);
+    expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual(['root-action-2']);
     await act(() => discoverServiceMock.profilesManager.resolveDataSourceProfile({}));
     rerender();
     expect(result.current.instanceId).toEqual('3');
     expect(mockActions).toHaveLength(2);
-    expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual(['4', '5']);
+    expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual([
+      'root-action-4',
+      'data-source-action-5',
+    ]);
     unmount();
     expect(mockActions).toHaveLength(0);
     expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual([]);
@@ -129,6 +132,7 @@ describe('createCellAction', () => {
 
   const getCellAction = (isCompatible?: AdditionalCellAction['isCompatible']) => {
     const additional: AdditionalCellAction = {
+      id: 'test',
       getIconType: jest.fn(() => 'plus'),
       getDisplayName: jest.fn(() => 'displayName'),
       execute: jest.fn(),
@@ -140,7 +144,7 @@ describe('createCellAction', () => {
   it('should create cell action', () => {
     const { action } = getCellAction();
     expect(action).toEqual({
-      id: '1',
+      id: 'test-1',
       order: 0,
       type: DISCOVER_CELL_ACTION_TYPE,
       getIconType: expect.any(Function),
