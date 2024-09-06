@@ -194,6 +194,13 @@ export function getParentApi() {
       canRemovePanels: () => true,
       children$,
       dataLoading: dataLoading$,
+      executionContext: {
+        type: 'presentationContainerEmbeddableExample',
+      },
+      getAllDataViews: () => {
+        // TODO remove once dashboard converted to API and use `PublishesDataViews` interface
+        return [];
+      },
       getPanelCount: () => {
         return panels$.value.length;
       },

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import {
   CanAddNewPanel,
@@ -16,6 +17,7 @@ import {
   HasSaveNotification,
 } from '@kbn/presentation-containers';
 import {
+  HasExecutionContext,
   PublishesDataLoading,
   PublishesTimeRange,
   PublishesUnsavedChanges,
@@ -25,6 +27,7 @@ import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/p
 
 export type ParentApi = PresentationContainer &
   CanAddNewPanel &
+  HasExecutionContext &
   HasSaveNotification &
   HasSerializedChildState &
   HasRuntimeChildState &
@@ -32,7 +35,9 @@ export type ParentApi = PresentationContainer &
   PublishesViewMode &
   PublishesReload &
   PublishesTimeRange &
-  PublishesUnsavedChanges;
+  PublishesUnsavedChanges & {
+    getAllDataViews: () => DataView[];
+  };
 
 export interface LastSavedState {
   timeRange: TimeRange;
