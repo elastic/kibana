@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   Plugin,
@@ -18,6 +20,7 @@ import {
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
@@ -45,6 +48,7 @@ import {
   AI_SEARCH_PLUGIN,
   APPLICATIONS_PLUGIN,
   INFERENCE_ENDPOINTS_PLUGIN,
+  SEARCH_PRODUCT_NAME,
 } from '../common/constants';
 
 import {
@@ -174,7 +178,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       SEMANTIC_SEARCH_PLUGIN.ID,
       APPLICATIONS_PLUGIN.ID,
       AI_SEARCH_PLUGIN.ID,
-      // SEARCH_PLAYGROUND_PLUGIN.ID,
       INFERENCE_ENDPOINTS_PLUGIN.ID,
     ];
     const isCloud = !!cloud?.cloudId;
@@ -197,13 +200,32 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register space/feature control
      */
     features.registerKibanaFeature({
-      id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-      name: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
+      id: ENTERPRISE_SEARCH_APP_ID,
+      name: SEARCH_PRODUCT_NAME,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       app: ['kibana', ...PLUGIN_IDS],
       catalogue: PLUGIN_IDS,
-      privileges: null,
+      privileges: {
+        all: {
+          app: ['kibana', ...PLUGIN_IDS],
+          api: [SEARCH_PRODUCT_NAME, 'api'],
+          catalogue: PLUGIN_IDS,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['show', 'save'],
+        },
+        read: {
+          disabled: true,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['show'],
+        },
+      },
     });
 
     /**
@@ -228,13 +250,17 @@ export class EnterpriseSearchPlugin implements Plugin {
         };
 
         const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
+        const license = await firstValueFrom(licensing.license$);
+        const showRelevance = license.isActive && license.hasAtLeast('enterprise');
 
         return {
           navLinks: {
+            enterpriseSearchRelevance: showRelevance,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
           },
           catalogue: {
+            enterpriseSearchRelevance: showRelevance,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
           },
