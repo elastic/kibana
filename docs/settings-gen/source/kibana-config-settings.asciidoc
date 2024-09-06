@@ -1,6 +1,6 @@
 
 // This is a generated file. Please don't update it directly.
-// Collection: Configure Kibana
+// Collection: Alerting and action settings in Kibana
 // Product: Kibana
 
 
@@ -23,7 +23,10 @@ If not set, {kib} will generate a random key on startup, but all alerting and ac
 Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>.
 +
 ====
-Options: `yes`, `no`, `maybe` +
+Options: +
+{nbsp} `yes` - a description +
+{nbsp} `no` - a different description +
+{nbsp} `maybe`- yet another description +
 Default: `true` +
 Type: static +
 ====
@@ -82,7 +85,10 @@ Overrides the general `xpack.actions.rejectUnauthorized` configuration for reque
 Controls the verification of the server certificate that {kib} receives when making an outbound SSL/TLS connection to the host server. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
 +
 ====
-Options: `full`, `certificate`, `none` +
+Options: +
+{nbsp} `full` +
+{nbsp} `certificate` +
+{nbsp} `none` +
 Default: `full` +
 ====
 
@@ -113,7 +119,10 @@ Even more.
 Some description.
 +
 ====
-Options: `yes`, `no`, `maybe` +
+Options: +
+{nbsp} `yes` +
+{nbsp} `no` +
+{nbsp} `maybe` +
 Default: `true` +
 Type: static +
 ====
@@ -133,7 +142,10 @@ Even more.
 Some description.
 +
 ====
-Options: `yes`, `no`, `maybe` +
+Options: +
+{nbsp} `yes - some decription` +
+{nbsp} `no` - another description +
+{nbsp} `maybe` - yet another description +
 Default: `true` +
 Type: static +
 ====
@@ -153,7 +165,10 @@ Even more.
 Some description.
 +
 ====
-Options: `yes`, `no`, `maybe` +
+Options: +
+{nbsp} `yes` - option description +
+{nbsp} `no` - another option description +
+{nbsp} `maybe` - yet another option description +
 Default: `true` +
 Type: static +
 ====

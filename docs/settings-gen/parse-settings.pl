@@ -77,12 +77,7 @@ sub parsefile {
     if ($group_description_string) {
       $asciidocoutput .= $group_description_string;
     }
-  
-  
-  
-  
-  
-  
+
   
     my $settings = $group->{settings};
     for my $setting (@$settings) {
@@ -122,10 +117,10 @@ sub parsefile {
       # build the list of supported options
       my $setting_options_string = "";
       for my $option (@$setting_options) {
-        $setting_options_string .= '`'.$option.'`, ';
+        $setting_options_string .= '{nbsp} '.$option.' +'."\n";
       }
-      # remove the comma after the last option in the list
-      if ($setting_options_string) {$setting_options_string =~ s/, $//;}
+      # remove the ' +' after the last option in the list
+      # if ($setting_options_string) {$setting_options_string =~ s/ +$//;}
   
       # build the list of supported platforms
       my $setting_platforms_string = "";
@@ -172,7 +167,7 @@ sub parsefile {
         $asciidocoutput .= "+\n====\n";
   
         if ($setting_options_string) {
-          $asciidocoutput .= "Options: ".$setting_options_string.' +'."\n";
+          $asciidocoutput .= "Options: +\n".$setting_options_string;
         }
         if ($setting_default) {
           $asciidocoutput .= "Default: ".'`'.$setting_default.'`'.' +'."\n";
