@@ -15,18 +15,16 @@ import {
   EuiStepStatus,
 } from '@elastic/eui';
 import useEvent from 'react-use/lib/useEvent';
-import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
-import { CommandSnippet } from './command_snippet';
-import { DataIngestStatus } from './data_ingest_status';
-import { FeedbackButtons } from '../shared/feedback_buttons';
+import { CreateStackCommandSnippet } from './create_stack_command_snippet';
+import { VisualizeData } from './visualize_data';
 
-export const KubernetesPanel: React.FC = () => {
+export function FirehosePanel() {
   const [windowLostFocus, setWindowLostFocus] = useState(false);
   const { data, status, error, refetch } = useFetcher(
     (callApi) => {
-      return callApi('POST /internal/observability_onboarding/kubernetes/flow');
+      return callApi('POST /internal/observability_onboarding/firehose/flow');
     },
     [],
     { showToastOnError: false }
@@ -38,17 +36,12 @@ export const KubernetesPanel: React.FC = () => {
     return <EmptyPrompt error={error} onRetryClick={refetch} />;
   }
 
-  const isMonitoringStepActive =
+  const isVisualizeStepActive =
     status === FETCH_STATUS.SUCCESS && data !== undefined && windowLostFocus;
 
   const steps = [
     {
-      title: i18n.translate(
-        'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetes.installStepTitle',
-        {
-          defaultMessage: 'Install standalone Elastic Agent on your Kubernetes cluster',
-        }
-      ),
+      title: 'Create a Firehose delivery stream and ingest CloudWatch logs',
       children: (
         <>
           {status !== FETCH_STATUS.SUCCESS && (
@@ -59,33 +52,27 @@ export const KubernetesPanel: React.FC = () => {
             </>
           )}
           {status === FETCH_STATUS.SUCCESS && data !== undefined && (
-            <CommandSnippet
+            <CreateStackCommandSnippet
+              templateUrl={data.templateUrl}
               encodedApiKey={data.apiKeyEncoded}
               onboardingId={data.onboardingId}
               elasticsearchUrl={data.elasticsearchUrl}
-              elasticAgentVersion={data.elasticAgentVersion}
-              isCopyPrimaryAction={!isMonitoringStepActive}
+              isCopyPrimaryAction={!isVisualizeStepActive}
             />
           )}
         </>
       ),
     },
     {
-      title: i18n.translate(
-        'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetes.monitorStepTitle',
-        {
-          defaultMessage: 'Monitor your Kubernetes cluster',
-        }
-      ),
-      status: (isMonitoringStepActive ? 'current' : 'incomplete') as EuiStepStatus,
-      children: isMonitoringStepActive && <DataIngestStatus onboardingId={data.onboardingId} />,
+      title: 'Visualize your data',
+      status: (isVisualizeStepActive ? 'current' : 'incomplete') as EuiStepStatus,
+      children: isVisualizeStepActive && <VisualizeData />,
     },
   ];
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
       <EuiSteps steps={steps} />
-      <FeedbackButtons flow="kubernetes" />
     </EuiPanel>
   );
-};
+}
