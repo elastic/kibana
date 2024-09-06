@@ -24,10 +24,15 @@ export function AddButton({
   useEffect(() => {
     let cancelled = false;
 
-    const actionContext = { embeddable: parentApi };
+    const actionContext = {
+      embeddable: parentApi,
+      trigger: {
+        id: ADD_PANEL_TRIGGER,
+      },
+    };
     const actionsPromises = uiActions.getTriggerActions(ADD_PANEL_TRIGGER).map(async (action) => {
       return {
-        isCompatable: await action.isCompatible(actionContext),
+        isCompatible: await action.isCompatible(actionContext),
         action,
       };
     });
