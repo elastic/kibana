@@ -15,5 +15,5 @@ export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc
     defaultMessage:
       'Analyse errors down to the specific transaction to pin-point specific errors within your service.',
   }),
-  imgSrc: 'TBD',
+  imgSrc: 'service_tab_empty_state_errors.png',
 };

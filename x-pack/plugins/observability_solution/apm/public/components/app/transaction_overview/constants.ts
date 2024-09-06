@@ -15,5 +15,5 @@ export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc
     defaultMessage:
       "Troubleshoot your service's performance by analysing latency, throughput and errors down to the specific transaction.",
   }),
-  imgSrc: 'TBD',
+  imgSrc: 'service_tab_empty_state_transactions.png',
 };

@@ -15,5 +15,5 @@ export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc
     defaultMessage:
       'View metric trends for the instances of your service to identify performance bottlenecks that could be affecting your users.',
   }),
-  imgSrc: 'TBD',
+  imgSrc: 'service_tab_empty_state_metrics.png',
 };

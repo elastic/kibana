@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import dependenciesTabImgSrc from '../../../assets/service_tab_empty_state/service_tab_empty_state_dependencies.png';
 
 export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc: string } = {
   title: i18n.translate('xpack.apm.serviceTabEmptyState.dependenciesTitle', {
@@ -16,5 +15,5 @@ export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc
     defaultMessage:
       'See your services dependencies on both internal and third-party services by instrumenting with APM.',
   }),
-  imgSrc: dependenciesTabImgSrc,
+  imgSrc: 'service_tab_empty_state_dependencies.png',
 };
