@@ -21,11 +21,15 @@ export const fetchMonitorStatusHeatmap = async ({
   from: string | number;
   to: string | number;
   interval: number;
-}): Promise<MonitorStatusHeatmapBucket[]> =>
-  apiService.get(SYNTHETICS_API_URLS.MONITOR_STATUS_HEATMAP, {
+}): Promise<MonitorStatusHeatmapBucket[]> => {
+  const response = await apiService.get<{
+    result: MonitorStatusHeatmapBucket[];
+  }>(SYNTHETICS_API_URLS.MONITOR_STATUS_HEATMAP, {
     monitorId,
     location,
     from,
     to,
     interval,
   });
+  return response.result;
+};
