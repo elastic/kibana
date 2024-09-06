@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { HighlightField, HighlightFieldProps } from './highlight_field';
 import { useLogsOverviewContext } from '../../../hooks/use_logs_overview_provider';
 import { getUnifiedDocViewerServices } from '../../../plugin';
@@ -25,10 +26,15 @@ export function ServiceNameHighlightField(props: HighlightFieldProps) {
   });
   const { isEntityManagerEnabled } = useLogsOverviewContext();
 
+  const routeLinkProps = getRouterLinkProps({
+    href,
+    onClick: () => apmLinkToServiceEntityLocator?.navigate({ serviceName: props.value as string }),
+  });
+
   return (
     <HighlightField {...props}>
       {isEntityManagerEnabled
-        ? ({ content }) => <EuiLink href={href}>{content}</EuiLink>
+        ? ({ content }) => <EuiLink {...routeLinkProps}>{content}</EuiLink>
         : undefined}
     </HighlightField>
   );
