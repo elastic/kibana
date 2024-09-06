@@ -6,7 +6,8 @@
  */
 
 import React, { ComponentType } from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { PhaseIndicator } from './phase_indicator';
 import { ActionComponentProps } from './components/types';
 import { i18nTexts } from '../../edit_policy/i18n_texts';
 
@@ -20,9 +21,16 @@ export const PhaseDescription = ({
   const title = i18nTexts.editPolicy.titles[phase];
   return (
     <>
-      <EuiTitle size="s">
-        <h2>{title}</h2>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <PhaseIndicator phase={phase} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h2>{title}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="l" />
       {components.map((Component) => (
         <Component phase={phase} phases={phases} />

@@ -8,6 +8,7 @@
 import React from 'react';
 import { SerializedHotPhase, SerializedWarmPhase } from '../../../../../../common/types';
 import { i18nTexts } from '../../../edit_policy/i18n_texts';
+import { i18nTexts as i18nTextsFlyout } from './i18n_texts';
 import type { ActionComponentProps } from './types';
 import { ActionDescription } from './action_description';
 
@@ -31,6 +32,13 @@ export const Shrink = ({ phase, phases }: ActionComponentProps) => {
       </>
     );
   }
+
+  descriptionItems.push(
+    <>
+      {`${i18nTexts.editPolicy.allowWriteAfterShrinkLabel}: `}
+      <strong>{shrink?.allow_write_after_shrink ? i18nTextsFlyout.yes : i18nTextsFlyout.no}</strong>
+    </>
+  );
 
   return shrink ? (
     <ActionDescription

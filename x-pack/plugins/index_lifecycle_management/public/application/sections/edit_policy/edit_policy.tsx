@@ -34,6 +34,7 @@ import {
   useFormIsModified,
 } from '../../../shared_imports';
 import { toasts } from '../../services/notification';
+import { getPoliciesListPath, getPolicyViewPath } from '../../services/navigation';
 import { UseField } from './form';
 import { savePolicy } from './save_policy';
 import {
@@ -127,8 +128,9 @@ export const EditPolicy: React.FunctionComponent = () => {
     [originalPolicyName, existingPolicies, isClonedPolicy]
   );
 
-  const backToPolicyList = () => {
-    history.push('/policies');
+  const backToPolicyList = (name?: string) => {
+    const url = name ? getPolicyViewPath(name) : getPoliciesListPath();
+    history.push(url);
   };
 
   const submit = async () => {
@@ -141,17 +143,18 @@ export const EditPolicy: React.FunctionComponent = () => {
         })
       );
     } else {
+      const name = getPolicyName();
       setHasSubmittedForm(true);
       const success = await savePolicy(
         {
           ...policy,
-          name: getPolicyName(),
+          name,
         },
         isNewPolicy || isClonedPolicy
       );
 
       if (success) {
-        backToPolicyList();
+        backToPolicyList(name);
       }
     }
   };
@@ -305,7 +308,10 @@ export const EditPolicy: React.FunctionComponent = () => {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty data-test-subj="cancelTestPolicy" onClick={backToPolicyList}>
+                <EuiButtonEmpty
+                  data-test-subj="cancelTestPolicy"
+                  onClick={() => backToPolicyList()}
+                >
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
                     defaultMessage="Cancel"

@@ -163,7 +163,7 @@ export const i18nTexts = {
     }),
     minAgeLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.minimumAge.minimumAgeFieldLabel',
-      { defaultMessage: 'Move data into phase when:' }
+      { defaultMessage: 'Move data into phase when' }
     ),
     rolloverLabel: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.rolloverFieldTitle', {
       defaultMessage: 'Rollover',

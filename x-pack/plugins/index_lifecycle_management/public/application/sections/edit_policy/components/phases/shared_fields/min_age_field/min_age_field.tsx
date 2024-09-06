@@ -80,7 +80,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
             >
               <EuiFlexItem grow={false}>
                 <EuiText className={'eui-textNoWrap'} size={'xs'}>
-                  {i18nTexts.editPolicy.minAgeLabel}
+                  {`${i18nTexts.editPolicy.minAgeLabel}:`}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
