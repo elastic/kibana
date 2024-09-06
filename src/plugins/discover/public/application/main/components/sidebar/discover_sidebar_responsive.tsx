@@ -141,8 +141,6 @@ export interface DiscoverSidebarResponsiveProps {
  * Mobile: Data view selector is visible and a button to trigger a flyout with all elements
  */
 
-let i = 0;
-
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
     useState<UnifiedFieldListSidebarContainerApi | null>(null);
@@ -190,7 +188,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           });
           break;
         case FetchStatus.COMPLETE:
-          console.log('complete', ++i);
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
