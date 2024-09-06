@@ -104,7 +104,7 @@ export function ServiceTabEmptyState({
           {!imgName && (
             <EuiFlexItem
               style={{
-                maxHeight: `${euiTheme.base * 14}px`,
+                maxHeight: `${euiTheme.base * 16}px`,
                 overflow: 'hidden',
                 borderRadius: `${euiTheme.border.radius.medium}`,
                 border: `${euiTheme.border.thin}`,
