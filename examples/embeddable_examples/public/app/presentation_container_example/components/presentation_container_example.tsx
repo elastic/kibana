@@ -56,7 +56,7 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
         </p>
         <p>
           This example uses session storage to persist saved state and unsaved changes while a
-          production implemenation may choose to persist state elsewhere.
+          production implementation may choose to persist state elsewhere.
           <EuiButtonEmpty
             color={'warning'}
             onClick={() => {
