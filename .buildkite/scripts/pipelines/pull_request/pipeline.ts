@@ -330,7 +330,6 @@ const getPerfPipeline = (filename: string, groups: string) => {
         .filter((label) => label.startsWith('ci:perf-check:'))
         .map((label) => label.replace('ci:perf-check:', ''))
         .join(',');
-      console.log(`perf pipeline with groups: ${journeyGroups}`);
       pipeline.push(
         getPerfPipeline(
           '.buildkite/pipelines/pull_request/single_user_performance_check.yml',
