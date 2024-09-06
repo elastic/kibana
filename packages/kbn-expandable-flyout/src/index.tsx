@@ -10,6 +10,8 @@ import React, { useMemo } from 'react';
 import type { Interpolation, Theme } from '@emotion/react';
 import { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
+import { useFlyoutType } from './hooks/use_flyout_type';
+import { SettingsMenu } from './components/settings_menu';
 import { useSectionSizes } from './hooks/use_sections_sizes';
 import { useWindowSize } from './hooks/use_window_size';
 import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
@@ -35,6 +37,22 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
    * Callback function to let application's code the flyout is closed
    */
   onClose?: EuiFlyoutProps['onClose'];
+  /**
+   * Set of properties that drive a settings menu
+   */
+  flyoutCustomProps?: {
+    /**
+     * Hide the gear icon and settings menu if true
+     */
+    hideSettings?: boolean;
+    /**
+     * Control if the option to render in overlay or push mode is enabled or not
+     */
+    pushVsOverlay?: {
+      disabled: boolean;
+      tooltip: string;
+    };
+  };
 }
 
 /**
@@ -47,10 +65,11 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
 export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
   customStyles,
   registeredPanels,
+  flyoutCustomProps,
   ...flyoutProps
 }) => {
   const windowWidth = useWindowSize();
-
+  const { flyoutType, flyoutTypeChange } = useFlyoutType();
   const { left, right, preview } = useExpandableFlyoutState();
   const { closeFlyout } = useExpandableFlyoutApi();
 
@@ -96,6 +115,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
     <EuiFlyout
       {...flyoutProps}
       data-panel-id={right?.id ?? ''}
+      type={flyoutType}
       size={flyoutWidth}
       ownFocus={false}
       onClose={(e) => {
@@ -134,6 +154,17 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
           banner={previewBanner}
         />
       ) : null}
+
+      {!flyoutCustomProps?.hideSettings && (
+        <SettingsMenu
+          flyoutTypeProps={{
+            type: flyoutType,
+            onChange: flyoutTypeChange,
+            disabled: flyoutCustomProps?.pushVsOverlay?.disabled || false,
+            tooltip: flyoutCustomProps?.pushVsOverlay?.tooltip || '',
+          }}
+        />
+      )}
     </EuiFlyout>
   );
 };
