@@ -7,18 +7,11 @@
  */
 
 import React from 'react';
+import { EuiIconProps } from '@elastic/eui';
+import { IconSimpleWrapper } from './icon_simple_wrapper';
 
-export const EuiIconLegend = ({ title, titleId, ...props }: { title: string; titleId: string }) => (
-  <svg
-    width={16}
-    height={16}
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-labelledby={titleId}
-    {...props}
-  >
-    {title ? <title id={titleId}>{title}</title> : null}
+export const EuiIconLegend = (props: Omit<EuiIconProps, 'type'>) => (
+  <IconSimpleWrapper {...props}>
     <path
       clipRule="evenodd"
       fillRule="evenodd"
@@ -37,5 +30,5 @@ export const EuiIconLegend = ({ title, titleId, ...props }: { title: string; tit
       d="M3 16a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm0-1a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"
     />
     <path d="M8.5 13a.5.5 0 000 1h7a.5.5 0 000-1h-7z" />
-  </svg>
+  </IconSimpleWrapper>
 );
