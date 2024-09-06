@@ -11,10 +11,34 @@ import React, { FC, PropsWithChildren, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
 
-import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
+import {
+  EuiProvider,
+  EuiProviderProps,
+  euiStylisPrefixer,
+  EuiThemeNewButtonOption1,
+  EuiThemeNewButtonOption2_1,
+  EuiThemeNewButtonOption2_2,
+  EuiThemeNewButtonOption3,
+  EuiThemeShape,
+} from '@elastic/eui';
+
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { getColorMode, defaultTheme } from '@kbn/react-kibana-context-common';
 import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+
+const BUTTON_KEY_TO_THEME_MAP: Record<
+  string,
+  {
+    model: EuiThemeShape;
+    root: EuiThemeShape;
+    key: string;
+  }
+> = {
+  '1': EuiThemeNewButtonOption1,
+  '2.1': EuiThemeNewButtonOption2_1,
+  '2.2': EuiThemeNewButtonOption2_2,
+  '3': EuiThemeNewButtonOption3,
+};
 
 /**
  * Props for the KibanaEuiProvider.
@@ -67,6 +91,11 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   const theme = useObservable(theme$, defaultTheme);
   const themeColorMode = useMemo(() => getColorMode(theme), [theme]);
 
+  const selectedButtonOption = localStorage.getItem('kbn-theme-button-option');
+  const selectedCustomTheme = selectedButtonOption
+    ? BUTTON_KEY_TO_THEME_MAP[selectedButtonOption]
+    : undefined;
+
   // In some cases-- like in Storybook or testing-- we want to explicitly override the
   // colorMode provided by the `theme`.
   const colorMode = colorModeProp || themeColorMode;
@@ -75,8 +104,19 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   // elsewhere.  Should be a passive addition to anyone using the older theme provider(s).
   const globalStyles = globalStylesProp === false ? false : undefined;
 
+  const customThemeProps = selectedCustomTheme && { theme: selectedCustomTheme };
+
   return (
-    <EuiProvider {...{ cache, modify, colorMode, globalStyles, utilityClasses: globalStyles }}>
+    <EuiProvider
+      {...{
+        cache,
+        modify,
+        colorMode,
+        globalStyles,
+        utilityClasses: globalStyles,
+        ...customThemeProps,
+      }}
+    >
       {children}
     </EuiProvider>
   );
