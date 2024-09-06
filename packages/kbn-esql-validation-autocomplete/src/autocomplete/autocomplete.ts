@@ -51,6 +51,7 @@ import {
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import {
+  allStarConstant,
   colonCompleteItem,
   commaCompleteItem,
   commandAutocompleteDefinitions,
@@ -1459,6 +1460,7 @@ async function getFunctionArgsSuggestions(
         })
       );
   }
+
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
     if (command.name !== 'stats') {
@@ -1479,6 +1481,11 @@ async function getFunctionArgsSuggestions(
     }
   }
 
+  // For special case of COUNT, suggest * if cursor is in empty spot
+  // e.g. count( / ) -> suggest `*`
+  if (fnDefinition.name === 'count' && !arg) {
+    suggestions.push(allStarConstant);
+  }
   return suggestions;
 }
 

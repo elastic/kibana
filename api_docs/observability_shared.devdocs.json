@@ -6221,6 +6221,21 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.COMMON_OBSERVABILITY_GROUPING",
+        "type": "Array",
+        "tags": [],
+        "label": "COMMON_OBSERVABILITY_GROUPING",
+        "description": [],
+        "signature": [
+          "{ id: string; getDisplayName: () => string; getIconType: () => string; order: number; }[]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/embeddable_grouping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.CONTAINER_ID",
         "type": "string",
         "tags": [],

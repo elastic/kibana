@@ -14,14 +14,11 @@ import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
 import { PanelIncompatibleError, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
-  apiPublishesPanelDescription,
-  apiPublishesPanelTitle,
-  apiPublishesSavedObjectId,
   initializeTitles,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
-import { apiIsPresentationContainer, SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 
 import {
   CONTENT_ID,
@@ -52,14 +49,9 @@ import {
   linksSerializeStateIsByReference,
 } from '../lib/deserialize_from_library';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
+import { isParentApiCompatible } from '../actions/compatibility_check';
 
 export const LinksContext = createContext<LinksApi | null>(null);
-
-const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
-  apiIsPresentationContainer(parentApi) &&
-  apiPublishesSavedObjectId(parentApi) &&
-  apiPublishesPanelTitle(parentApi) &&
-  apiPublishesPanelDescription(parentApi);
 
 export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: ReactEmbeddableFactory<
