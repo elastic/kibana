@@ -30,7 +30,7 @@ const fields = [
   'state',
 ];
 
-export interface AlertStatusMetaDataCodec {
+export interface AlertStatusMetaData {
   monitorQueryId: string;
   configId: string;
   status?: string;
@@ -43,7 +43,7 @@ export interface AlertStatusMetaDataCodec {
   };
 }
 
-export type StatusConfigs = Record<string, AlertStatusMetaDataCodec>;
+export type StatusConfigs = Record<string, AlertStatusMetaData>;
 
 export interface AlertStatusResponse {
   upConfigs: StatusConfigs;
@@ -163,7 +163,7 @@ export async function queryMonitorStatusAlert(
             const configId = latestPing.config_id;
             const monitorQueryId = latestPing.monitor.id;
 
-            const meta: AlertStatusMetaDataCodec = {
+            const meta: AlertStatusMetaData = {
               ping: latestPing,
               configId,
               monitorQueryId,

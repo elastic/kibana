@@ -9,7 +9,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { getConditionType, StatusRuleParams, TimeWindow } from '../../../common/rules/status_rule';
-import { AlertStatusMetaDataCodec } from './queries/query_monitor_status_alert';
+import { AlertStatusMetaData } from './queries/query_monitor_status_alert';
 import { getTimeUnitLabel } from '../common';
 import { ALERT_REASON_MSG } from '../action_variables';
 import { MonitorSummaryStatusRule } from './types';
@@ -136,7 +136,7 @@ export const getUngroupedReasonMessage = ({
   params,
   status = DOWN_LABEL,
 }: {
-  statusConfigs: AlertStatusMetaDataCodec[];
+  statusConfigs: AlertStatusMetaData[];
   monitorName: string;
   status?: string;
   params: StatusRuleParams;

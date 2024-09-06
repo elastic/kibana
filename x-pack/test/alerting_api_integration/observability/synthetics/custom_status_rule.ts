@@ -11,7 +11,7 @@ import {
   getReasonMessage,
   getUngroupedReasonMessage,
 } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/message_utils';
-import { AlertStatusMetaDataCodec } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/queries/query_monitor_status_alert';
+import { AlertStatusMetaData } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/queries/query_monitor_status_alert';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SyntheticsRuleHelper } from './synthetics_rule_helper';
 
@@ -220,7 +220,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         },
-      ] as AlertStatusMetaDataCodec[];
+      ] as AlertStatusMetaData[];
 
       it('should trigger down alert based on location threshold with two locations down', async () => {
         await ruleHelper.makeSummaries({

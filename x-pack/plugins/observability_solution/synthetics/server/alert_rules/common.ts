@@ -18,8 +18,10 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { legacyExperimentalFieldMap, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
-import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import {
+  PublicAlertsClient,
+  RecoveredAlertData,
+} from '@kbn/alerting-plugin/server/alerts_client/types';
 import { TimeWindow } from '../../common/rules/status_rule';
 import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
@@ -143,8 +145,8 @@ export const setRecoveredAlertsContext = ({
   alertsClient,
   basePath,
   spaceId,
-  staleDownConfigs,
-  previousDownConfigs,
+  staleDownConfigs = {},
+  previousDownConfigs = {},
   upConfigs,
   dateFormat,
   tz,
@@ -169,7 +171,7 @@ export const setRecoveredAlertsContext = ({
 }) => {
   const { locationsThreshold, numberOfChecks } = getConditionType(condition);
   const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
-  const downConfigsById = getConfigsByIds(previousDownConfigs);
+  const downConfigsById = getConfigsByIds(previousDownConfigs || {});
   for (const recoveredAlert of recoveredAlerts) {
     const recoveredAlertId = recoveredAlert.alert.getId();
     const alertUuid = recoveredAlert.alert.getUuid();
@@ -178,7 +180,6 @@ export const setRecoveredAlertsContext = ({
     const alertHit = recoveredAlert.hit;
     const locationId = alertHit?.['location.id'];
     const configId = alertHit?.configId;
-    const downConfigs = downConfigsById.get(configId);
 
     const { checks, downThreshold } = state;
 
@@ -196,29 +197,41 @@ export const setRecoveredAlertsContext = ({
     );
     let isUp = false;
     let linkMessage = '';
-    let monitorSummary: MonitorSummaryStatusRule = {};
+    let monitorSummary: MonitorSummaryStatusRule = getDefaultRecoveredSummary({
+      recoveredAlert,
+      tz,
+      dateFormat,
+      numberOfChecks,
+      locationsThreshold,
+    });
     let lastErrorMessage = alertHit?.['error.message'];
 
     if (recoveredAlertId && locationId && previousDownConfigs[recoveredAlertId]) {
-      monitorSummary = getMonitorSummary({
-        monitorInfo: previousDownConfigs[recoveredAlertId]?.ping,
-        statusMessage: RECOVERED_LABEL,
-        locationId,
-        configId: state.configId,
-        dateFormat,
-        tz,
-        checks,
-        downThreshold,
-        numberOfChecks,
-        locationsThreshold,
-      });
+      monitorSummary = {
+        ...monitorSummary,
+        ...getMonitorSummary({
+          monitorInfo: previousDownConfigs[recoveredAlertId]?.ping,
+          statusMessage: RECOVERED_LABEL,
+          locationId,
+          configId: state.configId,
+          dateFormat,
+          tz,
+          checks,
+          downThreshold,
+          numberOfChecks,
+          locationsThreshold,
+        }),
+      };
       if (monitorSummary.lastErrorMessage) {
         lastErrorMessage = monitorSummary.lastErrorMessage;
       }
     }
 
     if (!groupByLocation) {
-      monitorSummary.locationNames = downConfigs.map((c) => c.ping.observer.geo?.name!).join(' | ');
+      const downConfigs = downConfigsById.get(configId) || [];
+      const locationNames = downConfigs.map((c) => c.ping.observer.geo?.name!).join(' | ');
+      monitorSummary.locationNames = locationNames;
+      monitorSummary.locationName = locationNames;
     }
 
     if (recoveredAlertId && locationId && staleDownConfigs[recoveredAlertId]) {
@@ -234,7 +247,10 @@ export const setRecoveredAlertsContext = ({
         downThreshold,
       });
       if (summary) {
-        monitorSummary = summary.monitorSummary;
+        monitorSummary = {
+          ...monitorSummary,
+          ...summary.monitorSummary,
+        };
         recoveryStatus = summary.recoveryStatus;
         recoveryReason = summary.recoveryReason;
         lastErrorMessage = summary.lastErrorMessage;
@@ -259,7 +275,10 @@ export const setRecoveredAlertsContext = ({
         locationsThreshold,
       });
       if (summary) {
-        monitorSummary = summary.monitorSummary;
+        monitorSummary = {
+          ...monitorSummary,
+          ...summary.monitorSummary,
+        };
         recoveryStatus = summary.recoveryStatus;
         recoveryReason = summary.recoveryReason;
         isUp = summary.isUp;
@@ -277,14 +296,74 @@ export const setRecoveredAlertsContext = ({
       recoveryStatus,
       linkMessage,
       ...(isUp ? { status: 'up' } : {}),
-      ...(recoveryReason ? { [RECOVERY_REASON]: recoveryReason } : {}),
-      ...(recoveryReason ? { [ALERT_REASON]: recoveryReason } : {}),
+      ...(recoveryReason
+        ? {
+            [RECOVERY_REASON]: recoveryReason,
+          }
+        : {}),
       ...(basePath && spaceId && alertUuid
         ? { [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid) }
         : {}),
     };
     alertsClient.setAlertData({ id: recoveredAlertId, context });
   }
+};
+
+export const getDefaultRecoveredSummary = ({
+  recoveredAlert,
+  tz,
+  dateFormat,
+  numberOfChecks,
+  locationsThreshold,
+}: {
+  recoveredAlert: RecoveredAlertData<
+    ObservabilityUptimeAlert,
+    AlertState,
+    AlertContext,
+    ActionGroupIdsOf<MonitorStatusActionGroup>
+  >;
+  tz: string;
+  dateFormat: string;
+  numberOfChecks: number;
+  locationsThreshold: number;
+}) => {
+  if (!recoveredAlert.hit) return; // TODO: handle this case
+  const hit = recoveredAlert.hit;
+  const state = recoveredAlert.alert.getState();
+  const { checks, downThreshold } = state;
+  const locationId = hit['observer.name'] || hit['location.id'];
+  const configId = hit.configId;
+  return getMonitorSummary({
+    monitorInfo: {
+      monitor: {
+        id: hit['monitor.id'],
+        name: hit['monitor.name'],
+        type: hit['monitor.type'],
+      },
+      url: {
+        full: hit['url.full'],
+      },
+      error: {
+        message: hit['error.message'],
+      },
+      observer: {
+        geo: {
+          name: hit['observer.geo.name'] || hit['location.name'],
+        },
+        name: hit['observer.name'] || hit['location.id'],
+      },
+      '@timestamp': hit['@timestamp'],
+    },
+    statusMessage: RECOVERED_LABEL,
+    locationId,
+    configId,
+    dateFormat,
+    tz,
+    checks,
+    downThreshold,
+    numberOfChecks,
+    locationsThreshold,
+  });
 };
 
 export const getDeletedMonitorOrLocationSummary = ({

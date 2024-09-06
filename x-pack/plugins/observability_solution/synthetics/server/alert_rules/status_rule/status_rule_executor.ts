@@ -27,7 +27,7 @@ import {
   getUngroupedReasonMessage,
 } from './message_utils';
 import {
-  AlertStatusMetaDataCodec,
+  AlertStatusMetaData,
   AlertStatusResponse,
   queryMonitorStatusAlert,
   StatusConfigs,
@@ -48,7 +48,7 @@ import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { ALERT_DETAILS_URL, VIEW_IN_APP_URL } from '../action_variables';
 import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
 
-export interface StaleDownConfig extends AlertStatusMetaDataCodec {
+export interface StaleDownConfig extends AlertStatusMetaData {
   isDeleted?: boolean;
   isLocationRemoved?: boolean;
 }
@@ -242,7 +242,6 @@ export class StatusRuleExecutor {
   }
 
   handleDownMonitorThresholdAlert = ({ downConfigs }: { downConfigs: StatusConfigs }) => {
-    const isCustomRule = !isEmpty(this.params);
     const { isTimeWindow, useLatestChecks, downThreshold, locationsThreshold } = getConditionType(
       this.params?.condition
     );
@@ -302,7 +301,7 @@ export class StatusRuleExecutor {
     }
   };
 
-  getMonitorDownSummary({ statusConfig }: { statusConfig: AlertStatusMetaDataCodec }) {
+  getMonitorDownSummary({ statusConfig }: { statusConfig: AlertStatusMetaData }) {
     const { ping, configId, locationId, checks } = statusConfig;
     const { numberOfChecks, downThreshold, locationsThreshold } = getConditionType(
       this.params.condition
@@ -342,7 +341,7 @@ export class StatusRuleExecutor {
     statusConfigs,
     locationsThreshold,
   }: {
-    statusConfigs: AlertStatusMetaDataCodec[];
+    statusConfigs: AlertStatusMetaData[];
     locationsThreshold: number;
   }) {
     const { numberOfChecks, downThreshold } = getConditionType(this.params.condition);
@@ -386,7 +385,7 @@ export class StatusRuleExecutor {
     statusConfig: {
       configId: string;
       locationId: string;
-      checks?: AlertStatusMetaDataCodec['checks'];
+      checks?: AlertStatusMetaData['checks'];
     };
     downThreshold: number;
     useLatestChecks?: boolean;
@@ -441,19 +440,17 @@ export const getDoesMonitorMeetLocationThreshold = ({
   downThreshold,
   useTimeWindow,
 }: {
-  matchesByLocation: AlertStatusMetaDataCodec[];
+  matchesByLocation: AlertStatusMetaData[];
   locationsThreshold: number;
   downThreshold: number;
   useTimeWindow: boolean;
 }) => {
   // for location based we need to make sure, monitor is down for the threshold for all locations
-  const getMatchingLocationsWithDownThresholdWithXChecks = (
-    matches: AlertStatusMetaDataCodec[]
-  ) => {
+  const getMatchingLocationsWithDownThresholdWithXChecks = (matches: AlertStatusMetaData[]) => {
     return matches.filter((config) => (config.checks?.downWithinXChecks ?? 1) >= downThreshold);
   };
   const getMatchingLocationsWithDownThresholdWithinTimeWindow = (
-    matches: AlertStatusMetaDataCodec[]
+    matches: AlertStatusMetaData[]
   ) => {
     return matches.filter((config) => (config.checks?.down ?? 1) >= downThreshold);
   };
@@ -468,10 +465,8 @@ export const getDoesMonitorMeetLocationThreshold = ({
   }
 };
 
-export const getConfigsByIds = (
-  downConfigs: StatusConfigs
-): Map<string, AlertStatusMetaDataCodec[]> => {
-  const downConfigsById = new Map<string, AlertStatusMetaDataCodec[]>();
+export const getConfigsByIds = (downConfigs: StatusConfigs): Map<string, AlertStatusMetaData[]> => {
+  const downConfigsById = new Map<string, AlertStatusMetaData[]>();
   Object.entries(downConfigs).forEach(([_, config]) => {
     const { configId } = config;
     if (!downConfigsById.has(configId)) {

@@ -16,7 +16,7 @@ import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_mo
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
 import { SyntheticsServerSetup } from '../../types';
-import { AlertStatusMetaDataCodec } from './queries/query_monitor_status_alert';
+import { AlertStatusMetaData } from './queries/query_monitor_status_alert';
 
 describe('StatusRuleExecutor', () => {
   // @ts-ignore
@@ -480,7 +480,7 @@ describe('StatusRuleExecutor', () => {
 describe('getDoesMonitorMeetLocationThreshold', () => {
   describe('when useTimeWindow is false', () => {
     it('should return false if monitor does not meets location threshold', () => {
-      const matchesByLocation: AlertStatusMetaDataCodec[] = [
+      const matchesByLocation: AlertStatusMetaData[] = [
         {
           checks: { down: 0, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
@@ -501,7 +501,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
     });
 
     it('should return true if monitor meets location threshold', () => {
-      const matchesByLocation: AlertStatusMetaDataCodec[] = [
+      const matchesByLocation: AlertStatusMetaData[] = [
         {
           checks: { down: 1, downWithinXChecks: 1 },
           locationId: 'us_central_qa',
@@ -522,7 +522,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
     });
 
     it('should return false if monitor does not meets 2 location threshold', () => {
-      const matchesByLocation: AlertStatusMetaDataCodec[] = [
+      const matchesByLocation: AlertStatusMetaData[] = [
         {
           checks: { down: 1, downWithinXChecks: 1 },
           locationId: 'us_central_qa',
@@ -543,7 +543,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
     });
 
     it('should return true if monitor meets 2 location threshold', () => {
-      const matchesByLocation: AlertStatusMetaDataCodec[] = [
+      const matchesByLocation: AlertStatusMetaData[] = [
         {
           checks: { down: 1, downWithinXChecks: 1 },
           locationId: 'us_central_qa',
@@ -575,7 +575,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
 
   describe('when useTimeWindow is true', () => {
     it('should return false if monitor does not meets location threshold', () => {
-      const matchesByLocation: AlertStatusMetaDataCodec[] = [
+      const matchesByLocation: AlertStatusMetaData[] = [
         {
           checks: { down: 0, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
@@ -596,7 +596,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
     });
 
     it('should return true if monitor meets location threshold', () => {
-      const matchesByLocation: AlertStatusMetaDataCodec[] = [
+      const matchesByLocation: AlertStatusMetaData[] = [
         {
           checks: { down: 1, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
@@ -617,7 +617,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
     });
 
     it('should return false if monitor does not meets 2 location threshold', () => {
-      const matchesByLocation: AlertStatusMetaDataCodec[] = [
+      const matchesByLocation: AlertStatusMetaData[] = [
         {
           checks: { down: 1, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
@@ -638,7 +638,7 @@ describe('getDoesMonitorMeetLocationThreshold', () => {
     });
 
     it('should return true if monitor meets 2 location threshold', () => {
-      const matchesByLocation: AlertStatusMetaDataCodec[] = [
+      const matchesByLocation: AlertStatusMetaData[] = [
         {
           checks: { down: 1, downWithinXChecks: 0 },
           locationId: 'us_central_qa',
