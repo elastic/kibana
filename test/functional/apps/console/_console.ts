@@ -110,9 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe.skip('with query params', () => {
       it('should issue a successful request', async () => {
         await PageObjects.console.clearEditorText();
-        await PageObjects.console.enterText(
-          'GET _cat/aliases?format=json&v=true&pretty=true'
-        );
+        await PageObjects.console.enterText('GET _cat/aliases?format=json&v=true&pretty=true');
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
 

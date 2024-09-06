@@ -290,9 +290,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
             />
           )}
           {currentView === HISTORY_TAB_ID && <History containerWidth={containerDimensions.width} />}
-          {currentView === CONFIG_TAB_ID && (
-            <Config containerWidth={containerDimensions.width} />
-          )}
+          {currentView === CONFIG_TAB_ID && <Config containerWidth={containerDimensions.width} />}
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" className="consoleVariablesBottomBar" />
         <EuiSplitPanel.Inner

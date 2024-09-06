@@ -113,9 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
 
           for (const [i, endpoint] of endpoints.entries()) {
-            expect(await PageObjects.console.getAutocompleteSuggestion(i)).to.be.eql(
-              endpoint
-            );
+            expect(await PageObjects.console.getAutocompleteSuggestion(i)).to.be.eql(endpoint);
           }
 
           await PageObjects.console.pressEscape();
