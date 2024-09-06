@@ -18,7 +18,8 @@
     "@kbn/ui-theme",
     "@kbn/code-editor",
     "@kbn/core-lifecycle-browser",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/search-types"
   ],
   "exclude": [
     "target/**/*",
