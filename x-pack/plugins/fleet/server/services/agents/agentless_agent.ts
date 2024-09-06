@@ -35,22 +35,22 @@ class AgentlessAgentService {
     agentlessAgentPolicy: AgentPolicy
   ) {
     const logger = appContextService.getLogger();
-    logger.debug(`Creating agentless agent ${agentlessAgentPolicy.id}`);
+    logger.debug(`[Agentless API] Creating agentless agent ${agentlessAgentPolicy.id}`);
 
     if (!isAgentlessApiEnabled) {
       logger.error(
-        'Creating agentless agent not supported in non-cloud or non-serverless environments'
+        '[Agentless API] Creating agentless agent not supported in non-cloud or non-serverless environments'
       );
       throw new AgentlessAgentCreateError('Agentless agent not supported');
     }
     if (!agentlessAgentPolicy.supports_agentless) {
-      logger.error('Agentless agent policy does not have agentless enabled');
+      logger.error('[Agentless API] Agentless agent policy does not have agentless enabled');
       throw new AgentlessAgentCreateError('Agentless agent policy does not have agentless enabled');
     }
 
     const agentlessConfig = appContextService.getConfig()?.agentless;
     if (!agentlessConfig) {
-      logger.error('Missing agentless configuration');
+      logger.error('[Agentless API] Missing agentless configuration');
       throw new AgentlessAgentCreateError('missing agentless configuration');
     }
 
@@ -61,9 +61,11 @@ class AgentlessAgentService {
       soClient
     );
 
-    logger.debug(`Creating agentless agent with fleetUrl ${fleetUrl} and fleetToken ${fleetToken}`);
+    logger.debug(
+      `[Agentless API] Creating agentless agent with fleetUrl ${fleetUrl} and fleetToken ${fleetToken}`
+    );
 
-    logger.debug(`Creating agentless agent with TLS config with certificate: ${agentlessConfig.api.tls.certificate},
+    logger.debug(`[Agentless API] Creating agentless agent with TLS config with certificate: ${agentlessConfig.api.tls.certificate},
        and key: ${agentlessConfig.api.tls.key}`);
 
     const tlsConfig = new SslConfig(
@@ -112,13 +114,15 @@ class AgentlessAgentService {
       },
     });
 
-    logger.debug(`Creating agentless agent with request config ${requestConfigDebug}`);
+    logger.debug(
+      `[Agentless API] Creating agentless agent with request config ${requestConfigDebug}`
+    );
 
     const response = await axios<AgentlessApiResponse>(requestConfig).catch(
       (error: Error | AxiosError) => {
         if (!axios.isAxiosError(error)) {
           logger.error(
-            `Creating agentless failed with an error ${error}  ${JSON.stringify(
+            `[Agentless API] Creating agentless failed with an error ${error} ${JSON.stringify(
               requestConfigDebug
             )}`
           );
@@ -130,7 +134,7 @@ class AgentlessAgentService {
         if (error.response) {
           // The request was made and the server responded with a status code and error data
           logger.error(
-            `Creating agentless failed because the Agentless API responding with a status code that falls out of the range of 2xx: ${JSON.stringify(
+            `[Agentless API] Creating agentless failed because the Agentless API responding with a status code that falls out of the range of 2xx: ${JSON.stringify(
               error.response.status
             )}} ${JSON.stringify(error.response.data)}} ${JSON.stringify(requestConfigDebug)}`
           );
@@ -140,7 +144,7 @@ class AgentlessAgentService {
         } else if (error.request) {
           // The request was made but no response was received
           logger.error(
-            `Creating agentless agent failed while sending the request to the Agentless API: ${errorLogCodeCause} ${JSON.stringify(
+            `[Agentless API] Creating agentless agent failed while sending the request to the Agentless API: ${errorLogCodeCause} ${JSON.stringify(
               requestConfigDebug
             )}`
           );
@@ -148,7 +152,7 @@ class AgentlessAgentService {
         } else {
           // Something happened in setting up the request that triggered an Error
           logger.error(
-            `Creating agentless agent failed to be created ${errorLogCodeCause} ${JSON.stringify(
+            `[Agentless API] Creating agentless agent failed to be created ${errorLogCodeCause} ${JSON.stringify(
               requestConfigDebug
             )}`
           );
@@ -159,29 +163,13 @@ class AgentlessAgentService {
       }
     );
 
-    logger.debug(`Created an agentless agent ${response}`);
+    logger.debug(`[Agentless API] Created an agentless agent ${response}`);
     return response;
   }
 
   public async deleteAgentlessAgent(agentlessPolicyId: string) {
     const logger = appContextService.getLogger();
-    logger.debug(
-      `[Agentless API] Start deleting agentless agent for agent policy - ${agentlessPolicyId}`
-    );
-
-    if (!isAgentlessApiEnabled) {
-      logger.error(
-        '[Agentless API] Agentless API is not supported. Deleting agentless agent is not supported in non-cloud or non-serverless environments'
-      );
-    }
-
     const agentlessConfig = appContextService.getConfig()?.agentless;
-    if (!agentlessConfig) {
-      logger.error('[Agentless API] kibana.yml is currently missing Agentless API configuration');
-    }
-
-    logger.debug(`[Agentless API] Deleting agentless agent with TLS config with certificate`);
-
     const tlsConfig = new SslConfig(
       sslSchema.validate({
         enabled: true,
@@ -205,8 +193,38 @@ class AgentlessAgentService {
       }),
     };
 
+    const requestConfigDebug = JSON.stringify({
+      url: getDeletionEndpointPath(agentlessConfig, `/deployments/${agentlessPolicyId}`),
+      method: 'DELETE',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: tlsConfig.rejectUnauthorized,
+        cert: tlsConfig.certificate,
+        key: tlsConfig.key,
+        ca: tlsConfig.certificateAuthorities,
+      }),
+    });
+
     logger.debug(
-      `[Agentless API] Deleting agentless agent with request config ${JSON.stringify({
+      `[Agentless API] Start deleting agentless agent for agent policy ${requestConfigDebug}`
+    );
+
+    if (!isAgentlessApiEnabled) {
+      logger.error(
+        '[Agentless API] Agentless API is not supported. Deleting agentless agent is not supported in non-cloud or non-serverless environments'
+      );
+    }
+
+    if (!agentlessConfig) {
+      logger.error('[Agentless API] kibana.yml is currently missing Agentless API configuration');
+    }
+
+    logger.debug(`[Agentless API] Deleting agentless agent with TLS config with certificate`);
+
+    logger.debug(
+      `[Agentless API] Deleting agentless deployment with request config ${JSON.stringify({
         ...requestConfig,
         httpsAgent: {
           ...requestConfig.httpsAgent,
@@ -221,23 +239,27 @@ class AgentlessAgentService {
     );
 
     const response = await axios(requestConfig).catch((error: AxiosError) => {
+      const errorLogCodeCause = `${error.code}  ${this.convertCauseErrorsToString(error)}`;
+
       if (!axios.isAxiosError(error)) {
-        logger.error(`[Agentless API] Deleting agentless failed with an error ${error}`);
+        logger.error(`[Agentless API] Deleting agentless deployment failed with an error ${error}`);
       }
       if (error.response) {
         logger.error(
-          `[Agentless API] DELETE Agentless Agent Response Error: ${error.response.status} - ${error.response.statusText} Deleting agentless agent failed for agent policy id ${agentlessPolicyId}.`
+          `[Agentless API] Deleting Agentless deployment Failed Response Error: ${JSON.stringify(
+            error.response.status
+          )}} ${JSON.stringify(error.response.data)}} ${requestConfigDebug} `
         );
       } else if (error.request) {
         logger.error(
-          `[Agentless API] Deleting agentless failed to receive a response from the Agentless API ${JSON.stringify(
-            error.cause
+          `[Agentless API] Deleting agentless deployment failed to receive a response from the Agentless API ${errorLogCodeCause} ${JSON.stringify(
+            requestConfigDebug
           )}`
         );
       } else {
         logger.error(
-          `[Agentless API] Deleting agentless failed to delete the request ${JSON.stringify(
-            error.cause
+          `[Agentless API] Deleting agentless deployment failed to delete the request ${errorLogCodeCause} ${JSON.stringify(
+            requestConfigDebug
           )}`
         );
       }
