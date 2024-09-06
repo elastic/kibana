@@ -30,7 +30,9 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
   }, []);
 
   useEffect(() => {
-    cleanUp();
+    return () => {
+      cleanUp();
+    };
   }, [cleanUp]);
 
   const [dataLoading, panels, timeRange] = useBatchedPublishingSubjects(
