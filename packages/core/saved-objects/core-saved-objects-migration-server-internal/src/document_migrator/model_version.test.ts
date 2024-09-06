@@ -43,7 +43,7 @@ describe('getModelVersionTransforms', () => {
     log = loggerMock.create();
   });
 
-  it('generate transforms for all model versions', () => {
+  it('generate transforms for all model versions ignoring versions with mapping-only changes', () => {
     const typeDefinition = createType({
       name: 'foo',
       modelVersions: {
@@ -51,10 +51,19 @@ describe('getModelVersionTransforms', () => {
           changes: [{ type: 'data_backfill', backfillFn: jest.fn() }],
         },
         '2': {
-          changes: [{ type: 'mappings_deprecation', deprecatedMappings: [] }],
+          changes: [{ type: 'data_removal', removedAttributePaths: ['myattr'] }],
         },
         '3': {
+          changes: [{ type: 'mappings_deprecation', deprecatedMappings: [] }],
+        },
+        '4': {
           changes: [{ type: 'mappings_addition', addedMappings: {} }],
+        },
+        '5': {
+          changes: [
+            { type: 'mappings_addition', addedMappings: {} },
+            { type: 'data_backfill', backfillFn: jest.fn() },
+          ],
         },
       },
     });
@@ -64,7 +73,8 @@ describe('getModelVersionTransforms', () => {
     expect(transforms).toEqual([
       expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(1)),
       expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(2)),
-      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(3)),
+      // virtual version 3 and 4 are not generated because they are mapping-only changes
+      expectTransform(TransformType.Migrate, modelVersionToVirtualVersion(5)),
     ]);
   });
 

@@ -43,6 +43,9 @@ export const getModelVersionSchemas = ({
   }, {} as Record<string, TypeVersionSchema>);
 };
 
+/**
+ * Note: transforms are only returned for model versions that have at least one change type that transforms documents.
+ */
 export const getModelVersionTransforms = ({
   typeDefinition,
   log,
@@ -55,21 +58,31 @@ export const getModelVersionTransforms = ({
       ? typeDefinition.modelVersions()
       : typeDefinition.modelVersions ?? {};
 
-  return Object.entries(modelVersionMap).map<Transform>(([rawModelVersion, definition]) => {
-    const modelVersion = assertValidModelVersion(rawModelVersion);
-    const virtualVersion = modelVersionToVirtualVersion(modelVersion);
-    return {
-      version: virtualVersion,
-      transform: convertModelVersionTransformFn({
-        typeDefinition,
-        log,
-        modelVersion,
-        virtualVersion,
-        modelVersionDefinition: definition,
-      }),
-      transformType: TransformType.Migrate,
-    };
-  });
+  return (
+    Object.entries(modelVersionMap)
+      // Filter out model versions that do not have any change types that transforms documents
+      .filter(([rawModelVersion, definition]) => {
+        return !definition.changes.every(
+          (change) => change.type === 'mappings_addition' || change.type === 'mappings_deprecation'
+        );
+      })
+      .map<Transform>(([rawModelVersion, definition]) => {
+        const modelVersion = assertValidModelVersion(rawModelVersion);
+        const virtualVersion = modelVersionToVirtualVersion(modelVersion);
+
+        return {
+          version: virtualVersion,
+          transform: convertModelVersionTransformFn({
+            typeDefinition,
+            log,
+            modelVersion,
+            virtualVersion,
+            modelVersionDefinition: definition,
+          }),
+          transformType: TransformType.Migrate,
+        };
+      })
+  );
 };
 
 export const convertModelVersionTransformFn = ({
