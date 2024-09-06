@@ -155,8 +155,7 @@ export const serviceDetailRoute = {
             defaultMessage: 'Overview',
           }),
           searchBarOptions: {
-            showTransactionTypeSelector: true,
-            showTimeComparison: true,
+            hidden: true,
           },
         }),
         params: t.partial({

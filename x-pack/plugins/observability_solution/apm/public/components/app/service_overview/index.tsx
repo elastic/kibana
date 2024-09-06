@@ -21,6 +21,7 @@ import { LogsOverview } from './logs_overview';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
 import { logsOnlyEmptyStateContent } from './constants';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -74,33 +75,36 @@ export function ServiceOverview() {
   const showApmOverview = isEntityCentricExperienceViewEnabled === false || hasApmSignal;
 
   return (
-    <AnnotationsContextProvider
-      serviceName={serviceName}
-      environment={environment}
-      start={start}
-      end={end}
-    >
-      <ChartPointerEventContextProvider>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {showApmOverview ? <ApmOverview /> : null}
-          {/* Only shows Logs overview when entity has Logs signal */}
-          {hasLogsSignal ? (
-            <EuiFlexItem>
-              {hasLogsOnlySignal && !dismissedLogsOnlyEmptyState && (
-                <>
-                  <ServiceTabEmptyState
-                    title={logsOnlyEmptyStateContent.title}
-                    content={logsOnlyEmptyStateContent.content}
-                    onDissmiss={() => setDismissedLogsOnlyEmptyState(true)}
-                  />
-                  <EuiSpacer size="m" />
-                </>
-              )}
-              <LogsOverview />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </ChartPointerEventContextProvider>
-    </AnnotationsContextProvider>
+    <>
+      <SearchBar showTimeComparison showTransactionTypeSelector />
+      <AnnotationsContextProvider
+        serviceName={serviceName}
+        environment={environment}
+        start={start}
+        end={end}
+      >
+        <ChartPointerEventContextProvider>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {showApmOverview ? <ApmOverview /> : null}
+            {/* Only shows Logs overview when entity has Logs signal */}
+            {hasLogsSignal ? (
+              <EuiFlexItem>
+                {hasLogsOnlySignal && !dismissedLogsOnlyEmptyState && (
+                  <>
+                    <ServiceTabEmptyState
+                      title={logsOnlyEmptyStateContent.title}
+                      content={logsOnlyEmptyStateContent.content}
+                      onDissmiss={() => setDismissedLogsOnlyEmptyState(true)}
+                    />
+                    <EuiSpacer size="m" />
+                  </>
+                )}
+                <LogsOverview />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </ChartPointerEventContextProvider>
+      </AnnotationsContextProvider>
+    </>
   );
 }
