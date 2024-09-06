@@ -17,9 +17,7 @@ describe('parseSearchParams', () => {
     const searchParams = parseSearchParams('tag:((()^invalid');
     expect(searchParams).toEqual({
       term: 'tag:((()^invalid',
-      filters: {
-        unknowns: {},
-      },
+      filters: {},
     });
   });
 
@@ -33,7 +31,6 @@ describe('parseSearchParams', () => {
     expect(searchParams.filters).toEqual({
       tags: undefined,
       types: undefined,
-      unknowns: {},
     });
   });
 
@@ -44,20 +41,16 @@ describe('parseSearchParams', () => {
       filters: {
         tags: ['foo', 'dolly'],
         types: ['bar'],
-        unknowns: {},
       },
     });
   });
 
-  it('handles unknowns field clauses', () => {
+  it('considers unknown field clauses to be part of the raw search term', () => {
     const searchParams = parseSearchParams('tag:foo unknown:bar hello');
     expect(searchParams).toEqual({
-      term: 'hello',
+      term: 'unknown:bar hello',
       filters: {
         tags: ['foo'],
-        unknowns: {
-          unknown: ['bar'],
-        },
       },
     });
   });
@@ -69,7 +62,6 @@ describe('parseSearchParams', () => {
       filters: {
         tags: ['foo', 'bar'],
         types: ['dash', 'board'],
-        unknowns: {},
       },
     });
   });
@@ -81,7 +73,6 @@ describe('parseSearchParams', () => {
       filters: {
         tags: ['42', 'true'],
         types: ['69', 'false'],
-        unknowns: {},
       },
     });
   });
