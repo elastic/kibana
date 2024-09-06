@@ -29,7 +29,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
 const getPerfPipeline = (filename: string, groups: string) => {
   const str = fs.readFileSync(filename).toString();
-  return str.replace(/journey_groups/g, groups);
+  return str.replace(/^steps:/, '').replace(/journey_groups/g, groups);
 };
 
 (async () => {
