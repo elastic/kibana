@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import { SignalTypes } from '../../../../common/entities/types';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -60,12 +59,10 @@ export function ServiceOverview() {
   );
 
   const hasLogsSignal =
-    serviceEntitySummary?.signalTypes &&
-    isLogsSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+    serviceEntitySummary?.dataStreamTypes && isLogsSignal(serviceEntitySummary.dataStreamTypes);
 
   const hasApmSignal =
-    serviceEntitySummary?.signalTypes &&
-    isApmSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+    serviceEntitySummary?.dataStreamTypes && isApmSignal(serviceEntitySummary.dataStreamTypes);
 
   const hasLogsOnlySignal =
     serviceEntitySummary?.signalTypes &&

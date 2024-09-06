@@ -152,6 +152,10 @@ export async function installYarnDeps(log, opts = undefined) {
   });
 
   log.success('yarn deps installed');
+
+  await run('yarn', ['playwright', 'install']);
+
+  log.success('Playwright browsers installed');
 }
 
 /**
