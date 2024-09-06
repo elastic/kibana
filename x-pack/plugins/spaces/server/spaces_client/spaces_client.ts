@@ -234,7 +234,9 @@ export class SpacesClient implements ISpacesClient {
       space.disabledFeatures.some((feature) => {
         const disabledKibanaFeature = kibanaFeatures.find((f) => f.id === feature);
 
-        return !disabledKibanaFeature?.scope?.includes(KibanaFeatureScope.Spaces);
+        return (
+          disabledKibanaFeature && !disabledKibanaFeature.scope?.includes(KibanaFeatureScope.Spaces)
+        );
       })
     ) {
       throw Boom.badRequest(
