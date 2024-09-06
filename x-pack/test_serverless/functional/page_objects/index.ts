@@ -21,6 +21,7 @@ import { SvlSearchConnectorsPageProvider } from './svl_search_connectors_page';
 import { SvlManagementPageProvider } from './svl_management_page';
 import { SvlIngestPipelines } from './svl_ingest_pipelines';
 import { SvlSearchHomePageProvider } from './svl_search_homepage';
+import { SvlSearchIndexDetailPageProvider } from './svl_search_index_detail_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -39,4 +40,5 @@ export const pageObjects = {
   svlManagementPage: SvlManagementPageProvider,
   svlIngestPipelines: SvlIngestPipelines,
   svlSearchHomePage: SvlSearchHomePageProvider,
+  svlSearchIndexDetailPage: SvlSearchIndexDetailPageProvider,
 };

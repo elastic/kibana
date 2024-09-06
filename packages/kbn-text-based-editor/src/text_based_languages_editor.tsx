@@ -83,9 +83,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const { euiTheme } = useEuiTheme();
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application, core, fieldsMetadata } =
-    kibana.services;
+  const {
+    dataViews,
+    expressions,
+    indexManagementApiService,
+    application,
+    core,
+    fieldsMetadata,
+    uiSettings,
+  } = kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
+  const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
@@ -364,6 +372,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return policies.map(({ type, query: policyQuery, ...rest }) => rest);
       },
+      getPreferences: async () => {
+        return {
+          histogramBarTarget,
+        };
+      },
     };
     return callbacks;
   }, [
@@ -378,6 +391,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     abortController,
     indexManagementApiService,
     fieldsMetadata,
+    histogramBarTarget,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
