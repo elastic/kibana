@@ -62,7 +62,7 @@ export const getSecurityBaseKibanaFeature = ({
     'securitySolutionPackages.features.featureRegistry.securityGroupDescription',
     {
       defaultMessage:
-        'Privileges in this group can’t be granted globally if running with an Elastic Stack Subscription. Customize each sub-feature privilege individually.',
+        'Granting privileges globally in this group is supported only with Basic Elastic Stack Subscription. All others require each sub-feature be customized individually.',
     }
   ),
   privileges: {
