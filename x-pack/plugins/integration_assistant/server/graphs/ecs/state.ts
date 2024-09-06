@@ -7,7 +7,7 @@
 
 import type { StateGraphArgs } from '@langchain/langgraph';
 import type { EcsMappingState } from '../../types';
-import { merge } from '../../util/samples';
+import { mergeDictionaries } from '../../util/samples';
 
 export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
   ecs: {
@@ -16,7 +16,7 @@ export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
   },
   chunkSize: {
     value: (x: number, y?: number) => y ?? x,
-    default: () => 25,
+    default: () => 30,
   },
   lastExecutedChain: {
     value: (x: string, y?: string) => y ?? x,
@@ -59,7 +59,7 @@ export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
     default: () => ({}),
   },
   chunkMapping: {
-    reducer: merge,
+    reducer: mergeDictionaries,
     default: () => ({}),
   },
   finalMapping: {

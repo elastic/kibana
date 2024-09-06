@@ -6,7 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { merge } from '../../util/samples';
+import { mergeDictionaries } from '../../util/samples';
 
 interface NestedObject {
   [key: string]: any;
@@ -21,7 +21,7 @@ export function mergeAndChunkSamples(objects: string[], chunkSize: number): stri
 
   for (const obj of objects) {
     const sample: NestedObject = JSON.parse(obj);
-    result = merge(result, sample);
+    result = mergeDictionaries(result, sample);
   }
 
   const chunks = generateChunks(result, chunkSize);

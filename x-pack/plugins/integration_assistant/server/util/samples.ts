@@ -172,29 +172,83 @@ function isEmptyValue(value: unknown): boolean {
   );
 }
 
-export function merge(
+/**
+ * Merges two arrays for purposes of sampling.
+ *
+ * This function:
+ *   - Combines values in two input arrays.
+ *   - Removes duplicates from them.
+ *   - Sorts in ascending order.
+ *   - Truncates to at most maxArrayLength elements.
+ *
+ * Properties:
+ *   - The function is deterministic, commutative and associative.
+ *   - [] is the identity element and the result of merging an array with itself is itself.
+ *   - For an arbitrary chain of calls `mergeArrays(mergeArrays(A, B), ..., Z)` the result
+ *     is the first `maxArrayLength` unique elements from the sorted union of A...Z.
+ *
+ * @param target - The target array.
+ * @param source - The source array.
+ * @returns The resulting array with duplicates removed, sorted, and truncated.
+ */
+export function mergeArrays(target: any[], source: any[]): any[] {
+  const MaxArrayLength = 3;
+
+  // Use Set to remove duplicates and convert back to array
+  const uniques = new Set(target);
+  source.forEach((item) => uniques.add(item));
+
+  const result = Array.from(uniques);
+  result.sort();
+
+  // Take at most maxArrayLength elements
+  if (result.length > MaxArrayLength) {
+    result.length = MaxArrayLength;
+  }
+  return result;
+}
+
+/**
+ * Counts the number of JSON dictionaries among the parameters.
+ *
+ * @param objs - Inputs of any type.
+ * @returns The number of dictionaries among them.
+ */
+function countDictionaries(...objs: any[]): number {
+  return objs.filter((obj) => typeof obj === 'object' && obj !== null && !Array.isArray(obj))
+    .length;
+}
+
+export function mergeDictionaries(
   target: Record<string, any>,
   source: Record<string, any>
 ): Record<string, unknown> {
-  for (const [key, sourceValue] of Object.entries(source)) {
-    const targetValue = target[key];
-    if (Array.isArray(sourceValue)) {
-      // Directly assign arrays
-      target[key] = sourceValue;
-    } else if (
-      typeof sourceValue === 'object' &&
-      sourceValue !== null &&
-      !Array.isArray(targetValue)
-    ) {
-      if (typeof targetValue !== 'object' || isEmptyValue(targetValue)) {
-        target[key] = merge({}, sourceValue);
+  for (const [key, sourceValue] of Object.entries(source))
+    if (!isEmptyValue(sourceValue)) {
+      const targetValue = target[key];
+
+      if (isEmptyValue(targetValue)) {
+        target[key] = sourceValue;
       } else {
-        target[key] = merge(targetValue, sourceValue);
+        const dictionaries = countDictionaries(sourceValue, targetValue);
+
+        if (dictionaries === 0) {
+          // Box the elementary types then merge as arrays.
+          const arrayTargetValue = Array.isArray(targetValue) ? targetValue : [targetValue];
+          const arraySourceValue = Array.isArray(sourceValue) ? sourceValue : [sourceValue];
+          target[key] = mergeArrays(arrayTargetValue, arraySourceValue);
+        }
+
+        if (dictionaries === 1) {
+          // Do nothing, as we cannot merge a dictionary with non-dictionary.
+        }
+
+        if (dictionaries === 2) {
+          target[key] = mergeDictionaries(targetValue, sourceValue);
+        }
       }
-    } else if (!(key in target) || (isEmptyValue(targetValue) && !isEmptyValue(sourceValue))) {
-      target[key] = sourceValue;
     }
-  }
+
   return target;
 }
 
@@ -206,7 +260,7 @@ export function mergeSamples(objects: any[]): string {
     if (typeof obj === 'string') {
       sample = JSON.parse(obj);
     }
-    result = merge(result, sample);
+    result = mergeDictionaries(result, sample);
   }
 
   return JSON.stringify(result, null, 2);
