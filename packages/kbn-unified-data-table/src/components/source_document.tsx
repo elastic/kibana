@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useMemo } from 'react';
 import type {
   DataTableRecord,
   EsHitRecord,
@@ -26,7 +26,7 @@ import classnames from 'classnames';
 import { getInnerColumns } from '../utils/columns';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
-
+let i = 0;
 export function SourceDocument({
   useTopLevelObjectColumns,
   row,
@@ -52,12 +52,27 @@ export function SourceDocument({
   className?: string;
   isCompressed?: boolean;
 }) {
-  const pairs: FormattedHit = useTopLevelObjectColumns
-    ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
-        0,
-        maxEntries
-      )
-    : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
+  // useEffect(() => {
+  //   console.log('rendered', ++i);
+  // }, []);
+  const pairs: FormattedHit = useMemo(
+    () =>
+      useTopLevelObjectColumns
+        ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
+            0,
+            maxEntries
+          )
+        : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats),
+    [
+      columnId,
+      dataView,
+      fieldFormats,
+      maxEntries,
+      row,
+      shouldShowFieldHandler,
+      useTopLevelObjectColumns,
+    ]
+  );
 
   return (
     <EuiDescriptionList

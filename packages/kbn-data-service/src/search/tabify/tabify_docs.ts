@@ -166,9 +166,26 @@ function makeProxy(flat: Record<string, any>, indexPattern?: DataView) {
     return String(a).localeCompare(String(b));
   }
 
+  let cachedKeys: Array<string | symbol> | undefined;
+
   return new Proxy(flat, {
+    defineProperty: (...args) => {
+      cachedKeys = undefined;
+      console.log('defineProperty');
+      return Reflect.defineProperty(...args);
+    },
+    deleteProperty: (...args) => {
+      cachedKeys = undefined;
+      console.log('deleteProperty');
+      return Reflect.deleteProperty(...args);
+    },
     ownKeys: (target) => {
-      return Reflect.ownKeys(target).sort(comparator);
+      if (!cachedKeys) {
+        cachedKeys = Reflect.ownKeys(target).sort(comparator);
+      } else {
+        console.log('cached');
+      }
+      return cachedKeys;
     },
   });
 }
