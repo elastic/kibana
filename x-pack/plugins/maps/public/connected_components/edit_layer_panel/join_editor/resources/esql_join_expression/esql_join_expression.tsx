@@ -28,20 +28,18 @@ interface Props {
 export function ESQLJoinExpression(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  console.log({ isPopoverOpen });
-
-  // const { geoField } = props.sourceDescriptor;
-  // const expressionValue =
-  //   geoField !== undefined
-  //     ? i18n.translate('xpack.maps.spatialJoinExpression.value', {
-  //         defaultMessage: 'features from {geoField}',
-  //         values: { geoField },
-  //       })
-  //     : i18n.translate('xpack.maps.spatialJoinExpression.emptyValue', {
-  //         defaultMessage: '-- configure spatial join --',
-  //       });
-
-  const expressionValue = `FROM foobar`;
+  const expressionValue =
+    props.sourceDescriptor.term !== undefined && props.sourceDescriptor.esql !== undefined
+      ? i18n.translate('xpack.maps.termJoinExpression.value', {
+          defaultMessage: '{term}-field from {esql}',
+          values: {
+            term: props.sourceDescriptor.term || '',
+            esql: props.sourceDescriptor.esql,
+          },
+        })
+      : i18n.translate('xpack.maps.termJoinExpression.placeholder', {
+          defaultMessage: '-- configure ES|QL join --',
+        });
 
   return (
     <EuiPopover
@@ -68,11 +66,12 @@ export function ESQLJoinExpression(props: Props) {
       repositionOnScroll={true}
     >
       <ESQLJoinPopoverContent
-        sourceDescriptor={props.sourceDescriptor}
-        onSourceDescriptorChange={props.onSourceDescriptorChange}
         leftSourceName={props.leftSourceName}
         leftValue={props.leftValue}
         leftFields={props.leftFields}
+        onLeftFieldChange={props.onLeftFieldChange}
+        sourceDescriptor={props.sourceDescriptor}
+        onSourceDescriptorChange={props.onSourceDescriptorChange}
       />
     </EuiPopover>
   );

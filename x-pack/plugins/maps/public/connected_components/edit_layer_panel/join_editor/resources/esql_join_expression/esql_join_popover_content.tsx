@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 // import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LeftFieldSelector } from '../common/left_field_selector/left_field_selector';
 import { JoinField } from '../..';
 import type {
   ESESQLTermSourceDescriptor,
@@ -39,7 +40,6 @@ interface Props {
   // Left source props (static - can not change)
   leftSourceName?: string;
 
-
   // Left field props
   leftValue?: string;
   leftFields: JoinField[];
@@ -47,7 +47,6 @@ interface Props {
 }
 
 export function ESQLJoinPopoverContent(props: Props) {
-  console.log('render pro', { props });
   // const [rightDataView, setRightDataView] = useState<DataView | undefined>(undefined);
   // const [rightGeoFields, setRightGeoFields] = useState<DataViewField[]>([]);
   // const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -127,20 +126,13 @@ export function ESQLJoinPopoverContent(props: Props) {
           defaultMessage="Configure the shared key that combines layer features, the left source, with the results of an ES|QL expression, the right source."
         />
       </EuiFormHelpText>
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.termJoinExpression.leftSourceLabel', {
-          defaultMessage: 'Left source',
-        })}
-      >
-        <EuiComboBox
-          selectedOptions={
-            props.leftSourceName
-              ? [{ value: props.leftSourceName, label: props.leftSourceName }]
-              : []
-          }
-          isDisabled
-        />
-      </EuiFormRow>
+
+      <LeftFieldSelector
+        leftSourceName={props.leftSourceName}
+        leftFields={props.leftFields}
+        onLeftFieldChange={props.onLeftFieldChange}
+        leftValue={props.leftValue}
+      />
 
       {/* <EuiSkeletonText lines={3} isLoading={isLoading}>*/}
       <EuiSkeletonText lines={3} isLoading={false}>
