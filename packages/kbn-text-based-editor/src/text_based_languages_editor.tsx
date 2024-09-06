@@ -41,7 +41,7 @@ import {
   useDebounceWithOptions,
   type MonacoMessage,
 } from './helpers';
-import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
+import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
 import {
   EDITOR_INITIAL_HEIGHT,
@@ -127,12 +127,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     errors: [],
     warnings: [],
   });
-  const [refetchHistoryItems, setRefetchHistoryItems] = useState(false);
-
-  // as the duration on the history component is being calculated from
-  // the isLoading property, if this property is not defined we want
-  // to hide the history component
-  const hideHistoryComponent = hideQueryHistory || isLoading == null;
+  const hideHistoryComponent = hideQueryHistory;
 
   const onQueryUpdate = useCallback(
     (value: string) => {
@@ -449,19 +444,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       }
     };
     if (isQueryLoading || isLoading) {
+      validateQuery();
+    } else {
       addQueriesToCache({
         queryString: code,
         timeZone,
-      });
-      validateQuery();
-      setRefetchHistoryItems(false);
-    } else {
-      updateCachedQueries({
-        queryString: code,
         status: clientParserStatus,
       });
-
-      setRefetchHistoryItems(true);
     }
   }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, code, timeZone]);
 
@@ -743,7 +732,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         setIsHistoryOpen={toggleHistory}
         measuredContainerWidth={measuredEditorWidth}
         hideQueryHistory={hideHistoryComponent}
-        refetchHistoryItems={refetchHistoryItems}
         isHelpMenuOpen={isLanguagePopoverOpen}
         setIsHelpMenuOpen={setIsLanguagePopoverOpen}
       />

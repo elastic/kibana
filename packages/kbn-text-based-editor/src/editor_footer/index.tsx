@@ -50,7 +50,6 @@ interface EditorFooterProps {
   isSpaceReduced?: boolean;
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
-  refetchHistoryItems?: boolean;
   isInCompactMode?: boolean;
 }
 
@@ -70,7 +69,6 @@ export const EditorFooter = memo(function EditorFooter({
   isHistoryOpen,
   setIsHistoryOpen,
   hideQueryHistory,
-  refetchHistoryItems,
   isInCompactMode,
   measuredContainerWidth,
   code,
@@ -359,7 +357,6 @@ export const EditorFooter = memo(function EditorFooter({
             containerCSS={styles.historyContainer}
             onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={measuredContainerWidth}
-            refetchHistoryItems={refetchHistoryItems}
             isInCompactMode={isInCompactMode}
           />
         </EuiFlexItem>
