@@ -182,7 +182,12 @@ export const setRecoveredAlertsContext = ({
 
     const { checks, downThreshold } = state;
 
-    let recoveryReason = '';
+    let recoveryReason = i18n.translate(
+      'xpack.synthetics.alerts.monitorStatus.defaultRecovery.reason',
+      {
+        defaultMessage: `the alert condition is no longer met`,
+      }
+    );
     let recoveryStatus = i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.defaultRecovery.status',
       {
@@ -194,7 +199,7 @@ export const setRecoveredAlertsContext = ({
     let monitorSummary: MonitorSummaryStatusRule = {};
     let lastErrorMessage = alertHit?.['error.message'];
 
-    if (recoveredAlertId && locationId) {
+    if (recoveredAlertId && locationId && previousDownConfigs[recoveredAlertId]) {
       monitorSummary = getMonitorSummary({
         monitorInfo: previousDownConfigs[recoveredAlertId]?.ping,
         statusMessage: RECOVERED_LABEL,
