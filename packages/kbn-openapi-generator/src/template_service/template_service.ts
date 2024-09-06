@@ -8,7 +8,7 @@
 
 import Handlebars from 'handlebars';
 import { resolve } from 'path';
-import { GenerationContext } from '../parser/get_generation_context';
+import { BundleGenerationContext, GenerationContext } from '../parser/get_generation_context';
 import { registerHelpers } from './register_helpers';
 import { registerTemplates } from './register_templates';
 
@@ -18,6 +18,7 @@ export type TemplateName = (typeof AVAILABLE_TEMPLATES)[number];
 
 export interface ITemplateService {
   compileTemplate: (templateName: TemplateName, context: GenerationContext) => string;
+  compileBundleTemplate: (templateName: TemplateName, context: BundleGenerationContext) => string;
 }
 
 /**
@@ -32,6 +33,9 @@ export const initTemplateService = async (): Promise<ITemplateService> => {
 
   return {
     compileTemplate: (templateName: TemplateName, context: GenerationContext) => {
+      return handlebars.compile(templates[templateName])(context);
+    },
+    compileBundleTemplate: (templateName: TemplateName, context: BundleGenerationContext) => {
       return handlebars.compile(templates[templateName])(context);
     },
   };
