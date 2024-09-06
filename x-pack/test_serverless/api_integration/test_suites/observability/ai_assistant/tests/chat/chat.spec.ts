@@ -69,6 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         roleAuthc,
         internalReqHeader,
       });
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it("returns a 4xx if the connector doesn't exist", async () => {

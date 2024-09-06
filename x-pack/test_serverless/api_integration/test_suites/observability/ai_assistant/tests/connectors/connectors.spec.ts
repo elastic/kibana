@@ -40,6 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         roleAuthc,
         internalReqHeader,
       });
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('Returns a 2xx for enterprise license', async () => {
