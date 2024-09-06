@@ -19,7 +19,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import defaultImgSrc from '../../../assets/service_tab_empty_state/service_tab_empty_state_default.png';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 import { AddApmData } from '../../shared/add_data_buttons/buttons';
 
 export interface ServiceTabEmptyStateProps {
@@ -51,6 +52,12 @@ export function ServiceTabEmptyState({
   onDissmiss,
 }: ServiceTabEmptyStateProps) {
   const { euiTheme } = useEuiTheme();
+  const imgFolder = `/plugins/apm/assets/service_tab_empty_state/${
+    useUiSetting('theme:darkMode') === 'enabled' ? 'dark' : 'light'
+  }`;
+  const imgSrc = useKibanaUrl(
+    `${imgFolder}/${imgName ? imgName : 'service_tab_empty_state_overview.png'}`
+  );
 
   return (
     <>
@@ -103,7 +110,7 @@ export function ServiceTabEmptyState({
                 border: `${euiTheme.border.thin}`,
               }}
             >
-              <EuiImage src={defaultImgSrc} alt={content} />
+              <EuiImage src={imgSrc} alt={content} />
             </EuiFlexItem>
           )}
 
