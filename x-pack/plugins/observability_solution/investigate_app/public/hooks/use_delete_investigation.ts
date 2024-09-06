@@ -50,7 +50,11 @@ export function useDeleteInvestigation({
                 defaultMessage: 'Unable to delete investigation: an error occurred',
               })
           ),
-          { title: 'Error' }
+          {
+            title: i18n.translate('xpack.investigateApp.deleteInvestigationErrorTitle', {
+              defaultMessage: 'Error',
+            }),
+          }
         );
         onDeleteFailure();
       },
