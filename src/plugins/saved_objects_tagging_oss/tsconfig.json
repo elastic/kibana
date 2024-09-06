@@ -9,7 +9,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/saved-objects-plugin",
   ],
   "exclude": [
     "target/**/*",
