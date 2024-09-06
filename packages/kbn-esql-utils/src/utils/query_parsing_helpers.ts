@@ -120,7 +120,7 @@ export const isQueryWrappedByPipes = (query: string): boolean => {
   return numberOfCommands === pipesWithNewLine?.length;
 };
 
-export const wrapByPipes = (query: string, isWrapped: boolean): string => {
+export const prettifyQuery = (query: string, isWrapped: boolean): string => {
   const { ast } = getAstAndSyntaxErrors(query);
   return BasicPrettyPrinter.print(ast, { multiline: !isWrapped });
 };

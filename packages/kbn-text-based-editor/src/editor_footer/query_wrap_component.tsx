@@ -9,7 +9,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import { wrapByPipes, isQueryWrappedByPipes } from '@kbn/esql-utils';
+import { prettifyQuery, isQueryWrappedByPipes } from '@kbn/esql-utils';
 
 export function QueryWrapComponent({
   code,
@@ -60,7 +60,7 @@ export function QueryWrapComponent({
                 )
           }
           onClick={() => {
-            const updatedCode = wrapByPipes(code, isWrappedByPipes);
+            const updatedCode = prettifyQuery(code, isWrappedByPipes);
             if (code !== updatedCode) {
               updateQuery(updatedCode);
             }

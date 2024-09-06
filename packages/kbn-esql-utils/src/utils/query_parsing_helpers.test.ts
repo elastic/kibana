@@ -12,7 +12,7 @@ import {
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
-  wrapByPipes,
+  prettifyQuery,
   isQueryWrappedByPipes,
   retieveMetadataColumns,
 } from './query_parsing_helpers';
@@ -179,19 +179,19 @@ describe('esql query helpers', () => {
     });
   });
 
-  describe('wrapByPipes', function () {
+  describe('prettifyQuery', function () {
     it('should return the code wrapped', function () {
-      const code = wrapByPipes('FROM index1 | KEEP field1, field2 | SORT field1', false);
+      const code = prettifyQuery('FROM index1 | KEEP field1, field2 | SORT field1', false);
       expect(code).toEqual('FROM index1\n  | KEEP field1, field2\n  | SORT field1');
     });
 
     it('should return the code unwrapped', function () {
-      const code = wrapByPipes('FROM index1 \n| KEEP field1, field2 \n| SORT field1', true);
+      const code = prettifyQuery('FROM index1 \n| KEEP field1, field2 \n| SORT field1', true);
       expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
     });
 
     it('should return the code unwrapped and trimmed', function () {
-      const code = wrapByPipes(
+      const code = prettifyQuery(
         'FROM index1       \n| KEEP field1, field2     \n| SORT field1',
         true
       );

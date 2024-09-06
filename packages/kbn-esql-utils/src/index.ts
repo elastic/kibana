@@ -16,7 +16,7 @@ export {
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
-  wrapByPipes,
+  prettifyQuery,
   isQueryWrappedByPipes,
   retieveMetadataColumns,
 } from './utils/query_parsing_helpers';
