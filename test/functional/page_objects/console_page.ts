@@ -384,6 +384,14 @@ export class ConsolePageObject extends FtrService {
     return text.trim();
   }
 
+  public async hasSuccessBadge() {
+    return await this.find.existsByCssSelector('.ace_badge--success');
+  }
+
+  public async hasWarningBadge() {
+    return await this.find.existsByCssSelector('.ace_badge--warning');
+  }
+
   public async getResponseStatus() {
     const statusBadge = await this.testSubjects.find('consoleResponseStatusBadge');
     const text = await statusBadge.getVisibleText();
