@@ -111,3 +111,8 @@ export const SESSION_ROUTE = '/internal/security/session';
  * Allowed image file types for uploading an image as avatar
  */
 export const IMAGE_FILE_TYPES = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
+
+/**
+ * Prefix for API actions.
+ */
+export const API_OPERATION_PREFIX = 'api:';

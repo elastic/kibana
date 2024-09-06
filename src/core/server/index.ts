@@ -237,7 +237,7 @@ export type {
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
-export { validBodyOutput } from '@kbn/core-http-server';
+export { validBodyOutput, OnPostAuthResultType } from '@kbn/core-http-server';
 
 export type {
   HttpResourcesRenderOptions,
@@ -606,4 +606,6 @@ export type {
   RouteAuthz,
   RouteSecurity,
   RouteSecurityGetter,
+  Privilege,
+  PrivilegeSet,
 } from '@kbn/core-http-server';

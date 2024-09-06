@@ -111,7 +111,7 @@ export interface RouteConfigOptionsBody {
  */
 export type RouteAccess = 'public' | 'internal';
 
-type Privilege = string;
+export type Privilege = string;
 
 /**
  * A set of privileges that can be used to define complex authorization requirements.
@@ -119,7 +119,7 @@ type Privilege = string;
  * - `anyRequired`: An array of privileges where at least one must be satisfied to meet the authorization requirement.
  * - `allRequired`: An array of privileges where all listed privileges must be satisfied to meet the authorization requirement.
  */
-interface PrivilegeSet {
+export interface PrivilegeSet {
   anyRequired?: Privilege[];
   allRequired?: Privilege[];
 }

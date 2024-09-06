@@ -36,6 +36,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   requestUuid: string;
   rewrittenUrl?: URL;
   traceId?: string;
+  authzResult?: Record<string, boolean>;
   measureElu?: () => void;
 }
 
@@ -144,6 +145,12 @@ export interface KibanaRequest<
    * Even if the API facade is the same, fake requests have some stubbed functionalities.
    */
   readonly isFakeRequest: boolean;
+
+  /**
+   * Authorization check result, passed through to the route handler.
+   * Indicates whether the specific privilege was granted or denied.
+   */
+  readonly authzResult?: Record<string, boolean>;
 
   /**
    * An internal request has access to internal routes.

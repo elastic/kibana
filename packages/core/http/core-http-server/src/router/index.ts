@@ -62,6 +62,8 @@ export type {
   AuthcDisabled,
   AuthcEnabled,
   RouteSecurity,
+  Privilege,
+  PrivilegeSet,
 } from './route';
 
 export { validBodyOutput } from './route';

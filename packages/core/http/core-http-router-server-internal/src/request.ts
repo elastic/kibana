@@ -174,6 +174,8 @@ export class CoreKibanaRequest<
   public readonly httpVersion: string;
   /** {@inheritDoc KibanaRequest.protocol} */
   public readonly protocol: HttpProtocol;
+  /** {@inheritDoc KibanaRequest.authzResult} */
+  public readonly authzResult?: Record<string, boolean>;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
@@ -196,6 +198,7 @@ export class CoreKibanaRequest<
     this.id = appState?.requestId ?? uuidv4();
     this.uuid = appState?.requestUuid ?? uuidv4();
     this.rewrittenUrl = appState?.rewrittenUrl;
+    this.authzResult = appState?.authzResult;
 
     this.url = request.url ?? new URL('https://fake-request/url');
     this.headers = isRealReq ? deepFreeze({ ...request.headers }) : request.headers;
@@ -241,6 +244,7 @@ export class CoreKibanaRequest<
         isAuthenticated: this.auth.isAuthenticated,
       },
       route: this.route,
+      authzResult: this.authzResult,
     };
   }
 
