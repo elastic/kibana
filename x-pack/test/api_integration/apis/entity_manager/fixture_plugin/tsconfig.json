@@ -11,7 +11,6 @@
     "@kbn/core",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/core-plugins-server",
-    "@kbn/zod-helpers",
     "@kbn/entityManager-plugin",
     "@kbn/security-plugin-types-server",
     "@kbn/entities-schema",
