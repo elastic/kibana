@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export interface PingStatusActionArgs {
-  monitorId: string;
-  locationId: string;
+export interface MonitorStatusHeatmapActionArgs {
   from: string | number;
   to: string | number;
-  size: number;
+  interval: number;
+  monitorId: string;
+  location: string;
 }
