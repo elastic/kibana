@@ -161,7 +161,7 @@ export const categorizeLogsService = setup({
         id: 'categorizeRemainingCategories',
         input: ({ context }) => ({
           ...context.parameters,
-          samplingProbability: context.samplingProbability,
+          samplingProbability: 1,
           ignoredCategoryTerms: context.categories.map((category) => category.terms),
           minDocsPerCategory: 0,
         }),
