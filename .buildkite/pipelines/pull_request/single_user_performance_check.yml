@@ -5,6 +5,9 @@ steps:
       JOURNEY_GROUPS: 'journey_groups'
       PERFORMANCE_ENABLE_TELEMETRY: true
     agents:
+      provider: ''
+      image: ''
+      imageProject: ''
       queue: kb-static-ubuntu
     depends_on:
       - build
