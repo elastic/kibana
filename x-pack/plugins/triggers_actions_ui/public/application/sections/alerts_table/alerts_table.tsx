@@ -16,6 +16,8 @@ import React, {
   forwardRef,
   Ref,
   ReactElement,
+  memo,
+  FC,
 } from 'react';
 import { isEmpty } from 'lodash';
 import {
@@ -27,6 +29,7 @@ import {
   EuiCode,
   EuiCopy,
   EuiDataGridControlColumn,
+  EuiDataGridRefProps,
 } from '@elastic/eui';
 import {
   ALERT_CASE_IDS,
@@ -52,6 +55,7 @@ import {
   Alert,
   Alerts,
   AlertsDataGridProps,
+  AlertsTableImperativeApi,
   AlertsTableProps,
   RenderContext,
   RowSelectionState,
@@ -70,7 +74,6 @@ import { useBulkGetMaintenanceWindowsQuery } from './hooks/use_bulk_get_maintena
 import { CasesService } from './types';
 import { AlertsTableContextProvider } from './contexts/alerts_table_context';
 import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
-import { typedMemo } from './utils';
 import { usePagination } from './hooks/use_pagination';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
 
@@ -153,32 +156,29 @@ const ErrorBoundaryFallback: FallbackComponent = ({ error }) => {
   );
 };
 
-export const AlertsTable = typedMemo(
-  <AC extends AdditionalContext>(props: AlertsTableProps<AC>) => {
-    return (
-      <QueryClientProvider client={alertsTableQueryClient} context={AlertsQueryContext}>
-        <ErrorBoundary fallback={ErrorBoundaryFallback}>
-          <AlertsTableContent<AC> {...props} />
-        </ErrorBoundary>
-      </QueryClientProvider>
-    );
-  }
-);
-
 function typedForwardRef<T, P = {}>(
   render: (props: P, ref: React.Ref<T>) => ReactElement | null
 ): (props: P & React.RefAttributes<T>) => ReactElement | null {
   return forwardRef(render) as any;
 }
 
+export const AlertsTable = memo(
+  forwardRef((props, ref) => {
+    return (
+      <QueryClientProvider client={alertsTableQueryClient} context={AlertsQueryContext}>
+        <ErrorBoundary fallback={ErrorBoundaryFallback}>
+          <AlertsTableContent {...props} ref={ref} />
+        </ErrorBoundary>
+      </QueryClientProvider>
+    );
+  })
+) as typeof AlertsTableContent;
+
+(AlertsTable as FC).displayName = 'AlertsTable';
+
 const DEFAULT_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [];
 const DEFAULT_SORT: SortCombinations[] = [];
 const DEFAULT_COLUMNS: EuiDataGridColumn[] = [];
-
-interface AlertsTableImperativeApi {
-  refresh: () => void;
-  toggleColumn: (columnId: string) => void;
-}
 
 const AlertsTableContent = typedForwardRef(
   <AC extends AdditionalContext>(
@@ -225,6 +225,7 @@ const AlertsTableContent = typedForwardRef(
     };
     const queryClient = useQueryClient({ context: AlertsQueryContext });
     const storage = useRef(new Storage(window.localStorage));
+    const dataGridRef = useRef<EuiDataGridRefProps>(null);
     const localStorageAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
 
     const columnsLocal = useMemo(
@@ -332,9 +333,9 @@ const AlertsTableContent = typedForwardRef(
 
     useEffect(() => {
       if (onLoaded && !isLoadingAlerts && isSuccess) {
-        onLoaded(alerts);
+        onLoaded(alerts, columns);
       }
-    }, [alerts, isLoadingAlerts, isSuccess, onLoaded]);
+    }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded]);
 
     const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
     const mutedAlertsQuery = useGetMutedAlertsQuery({
@@ -384,12 +385,6 @@ const AlertsTableContent = typedForwardRef(
       refresh,
       toggleColumn: onToggleColumn,
     }));
-
-    useEffect(() => {
-      if (onUpdate) {
-        onUpdate({ isLoading: isLoadingAlerts, totalCount: alertsCount, refresh });
-      }
-    }, [isLoadingAlerts, alertsCount, onUpdate, refresh]);
 
     const bulkActionsStore = useReducer(bulkActionsReducer, initialBulkActionsState);
 
@@ -448,6 +443,7 @@ const AlertsTableContent = typedForwardRef(
           ...additionalContext,
           columns,
           tableId: id,
+          dataGridRef,
 
           refresh,
 
@@ -455,8 +451,11 @@ const AlertsTableContent = typedForwardRef(
 
           isLoadingAlerts,
           alerts,
-          ecsData: ecsAlertsData, // TODO(@umbopepato) deprecate these
+          alertsCount,
+          // TODO deprecate
+          ecsAlertsData,
           oldAlertsData,
+
           browserFields,
 
           isLoadingCases: casesQuery.isFetching,
@@ -492,6 +491,7 @@ const AlertsTableContent = typedForwardRef(
         isLoadingAlerts,
         queries.isFetching,
         alerts,
+        alertsCount,
         ecsAlertsData,
         oldAlertsData,
         browserFields,
@@ -516,6 +516,12 @@ const AlertsTableContent = typedForwardRef(
       ]
     );
 
+    useEffect(() => {
+      if (onUpdate) {
+        onUpdate(renderContext);
+      }
+    }, [onUpdate, renderContext]);
+
     const additionalToolbarControls = useMemo(
       () =>
         AdditionalToolbarControlsComponent ? (
@@ -533,7 +539,6 @@ const AlertsTableContent = typedForwardRef(
         trailingControlColumns,
         visibleColumns,
         'data-test-subj': 'internalAlertsState',
-        browserFields,
         onToggleColumn,
         onResetColumns,
         onChangeVisibleColumns,
@@ -546,16 +551,12 @@ const AlertsTableContent = typedForwardRef(
         dynamicRowHeight,
         featureIds,
         alertsQuerySnapshot,
-        pageIndex: pagination.pageIndex,
         onChangePageIndex,
-        pageSize: pagination.pageSize,
         onChangePageSize,
         onPaginateFlyout,
         flyoutAlertIndex,
         setFlyoutAlertIndex,
         sort,
-        refresh,
-        alertsCount,
         onSortChange,
       }),
       [
@@ -565,7 +566,6 @@ const AlertsTableContent = typedForwardRef(
         leadingControlColumns,
         trailingControlColumns,
         visibleColumns,
-        browserFields,
         onToggleColumn,
         onResetColumns,
         onChangeVisibleColumns,
@@ -578,16 +578,12 @@ const AlertsTableContent = typedForwardRef(
         dynamicRowHeight,
         featureIds,
         alertsQuerySnapshot,
-        pagination.pageIndex,
-        pagination.pageSize,
         onChangePageIndex,
         onChangePageSize,
         onPaginateFlyout,
         flyoutAlertIndex,
         setFlyoutAlertIndex,
         sort,
-        refresh,
-        alertsCount,
         onSortChange,
       ]
     );

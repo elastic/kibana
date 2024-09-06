@@ -41,6 +41,9 @@ import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
+import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_table';
+import { getColumns } from '../../components/alerts_table/common/get_columns';
+import { AlertActions } from './components/alert_actions';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { buildEsQuery } from '../../utils/build_es_query';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
@@ -53,6 +56,8 @@ const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 const DEFAULT_FILTERS: Filter[] = [];
+
+const tableColumns = getColumns({ showRuleName: true });
 
 function InternalAlertsPage() {
   const kibanaServices = useKibana().services;
@@ -67,9 +72,7 @@ function InternalAlertsPage() {
       url: { locators },
     },
     triggersActionsUi: {
-      alertsTableConfigurationRegistry,
       getAlertsSearchBar: AlertsSearchBar,
-      getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
     },
     uiSettings,
@@ -80,7 +83,7 @@ function InternalAlertsPage() {
       timefilter: { timefilter: timeFilterService },
     },
   } = data;
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
@@ -284,15 +287,14 @@ function InternalAlertsPage() {
                     filters: groupingFilters,
                   });
                   return (
-                    <AlertsStateTable
+                    <ObservabilityAlertsTable
                       id={ALERTS_TABLE_ID}
                       featureIds={observabilityAlertFeatureIds}
-                      configurationId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                       query={mergeBoolQueries(esQuery, groupQuery)}
-                      showAlertStatusWithFlapping
                       initialPageSize={ALERTS_PER_PAGE}
-                      cellContext={{ observabilityRuleTypeRegistry }}
-                      alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+                      columns={tableColumns}
+                      renderActionsCell={AlertActions}
+                      showInspectButton
                     />
                   );
                 }}

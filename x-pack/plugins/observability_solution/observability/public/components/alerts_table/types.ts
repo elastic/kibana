@@ -5,6 +5,22 @@
  * 2.0.
  */
 
+import {
+  AlertsTablePropsWithRef,
+  LazyLoadProps,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ConfigSchema, ObservabilityRuleTypeRegistry } from '../..';
+
+export interface ObservabilityAlertsTableContext {
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  config: ConfigSchema;
+}
+
+export type ObservabilityAlertsTableProps =
+  AlertsTablePropsWithRef<ObservabilityAlertsTableContext> & LazyLoadProps;
+export type ObservabilityAlertsTableProp<PropKey extends keyof ObservabilityAlertsTableProps> =
+  NonNullable<ObservabilityAlertsTableProps[PropKey]>;
+
 export interface BucketItem {
   key: string;
   doc_count: number;

@@ -14,7 +14,6 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import {
@@ -22,7 +21,6 @@ import {
   EuiDataGrid,
   EuiDataGridControlColumn,
   EuiDataGridProps,
-  EuiDataGridRefProps,
   EuiDataGridStyle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -45,6 +43,7 @@ import {
   AlertsDataGridProps,
   AlertsTableProps,
   BulkActionsVerbs,
+  CellActionsOptions,
   FetchAlertData,
 } from '../../../types';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
@@ -66,9 +65,8 @@ const DefaultGridStyle: EuiDataGridStyle = {
   fontSize: 's',
 };
 
-const DEFAULT_CELL_ACTIONS = {
-  getCellActions: () => null,
-  visibleCellActions: undefined,
+const defaultCellActionsOptions: CellActionsOptions = {
+  getCellActionsForColumn: () => [],
   disabledCellActions: [],
 };
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
@@ -209,6 +207,8 @@ const CellValueHost: AlertsTableProps['renderCellValue'] = (props) => {
     renderCellValue: CellValue,
     isLoading,
     alerts,
+    oldAlertsData,
+    ecsAlertsData,
     cases,
     maintenanceWindows,
     showAlertStatusWithFlapping,
@@ -219,6 +219,8 @@ const CellValueHost: AlertsTableProps['renderCellValue'] = (props) => {
   } = props;
   const idx = rowIndex - pageSize * pageIndex;
   const alert = alerts[idx];
+  const legacyAlert = oldAlertsData[idx];
+  const ecsAlert = ecsAlertsData[idx];
   if (isSystemCell(columnId)) {
     return (
       <SystemCellFactory
@@ -236,7 +238,7 @@ const CellValueHost: AlertsTableProps['renderCellValue'] = (props) => {
     if (CellValue) {
       return (
         <ErrorBoundary fallback={ViewError}>
-          <CellValue {...props} alert={alert} />
+          <CellValue {...props} alert={alert} legacyAlert={legacyAlert} ecsAlert={ecsAlert} />
         </ErrorBoundary>
       );
     } else {
@@ -298,7 +300,7 @@ export const AlertsDataGrid = typedMemo(
       actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH,
       getBulkActions,
       fieldsBrowserOptions,
-      getCellActionsOptions,
+      cellActionsOptions,
       pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
       height,
       ...euiDataGridProps
@@ -309,16 +311,15 @@ export const AlertsDataGrid = typedMemo(
       alertsCount,
       isLoadingAlerts,
       oldAlertsData,
-      ecsData: ecsAlertsData,
       browserFields,
       renderActionsCell: ActionsCell,
       pageIndex,
       pageSize,
       refresh: refreshQueries,
       columns,
+      dataGridRef,
     } = renderContext;
 
-    const dataGridRef = useRef<EuiDataGridRefProps>(null);
     const [activeRowClasses, setActiveRowClasses] = useState<
       NonNullable<EuiDataGridStyle['rowClasses']>
     >({});
@@ -405,6 +406,7 @@ export const AlertsDataGrid = typedMemo(
     const customActionsColumn: EuiDataGridControlColumn | undefined = useMemo(() => {
       if (ActionsCell) {
         const RowCellRender: EuiDataGridControlColumn['rowCellRender'] = (_props) => {
+          const alert = _props.alerts[_props.rowIndex - _props.pageSize * _props.pageIndex];
           const setIsActionLoading = useCallback(
             (_isLoading: boolean = true) => {
               updateBulkActionsState({
@@ -422,6 +424,7 @@ export const AlertsDataGrid = typedMemo(
                   // `_props` already contains the correct render context
                   typeof ActionsCell
                 >)}
+                alert={alert}
                 setIsActionLoading={setIsActionLoading}
               />
             </CustomCellWrapper>
@@ -477,30 +480,23 @@ export const AlertsDataGrid = typedMemo(
       [onChangePageIndex, onChangePageSize, pageIndex, pageSize, pageSizeOptions]
     );
 
-    const { getCellActions, visibleCellActions, disabledCellActions } =
-      getCellActionsOptions?.({
-        columns,
-        data: oldAlertsData,
-        ecsData: ecsAlertsData,
-        dataGridRef,
-        pageSize,
-        pageIndex,
-      }) ?? DEFAULT_CELL_ACTIONS;
+    const { getCellActionsForColumn, visibleCellActions, disabledCellActions } =
+      cellActionsOptions ?? defaultCellActionsOptions;
 
     const columnsWithCellActions = useMemo(() => {
-      if (getCellActions) {
+      if (getCellActionsForColumn) {
         return columns.map((col, idx) => ({
           ...col,
           ...(!(disabledCellActions ?? []).includes(col.id)
             ? {
-                cellActions: getCellActions(col.id, idx) ?? [],
+                cellActions: getCellActionsForColumn(col.id, idx) ?? [],
                 visibleCellActions,
               }
             : {}),
         }));
       }
       return columns;
-    }, [getCellActions, disabledCellActions, columns, visibleCellActions]);
+    }, [getCellActionsForColumn, columns, disabledCellActions, visibleCellActions]);
 
     // Update highlighted rows when alerts or pagination changes
     const highlightedRowClasses = useMemo(() => {
@@ -646,6 +642,8 @@ export const AlertsDataGrid = typedMemo(
     );
   }
 );
+
+(AlertsDataGrid as FC).displayName = 'AlertsDataGrid';
 
 // eslint-disable-next-line import/no-default-export
 export { AlertsDataGrid as default };

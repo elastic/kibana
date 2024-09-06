@@ -12,6 +12,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { AlertsCount } from '../../../hooks/use_alerts_count';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { createAlertsEsQuery } from '../../../utils/filters/create_alerts_es_query';
@@ -43,11 +44,7 @@ export const AlertsOverview = ({
   );
   const {
     charts,
-    triggersActionsUi: {
-      getAlertsStateTable: AlertsStateTable,
-      alertsTableConfigurationRegistry,
-      getAlertSummaryWidget: AlertSummaryWidget,
-    },
+    triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
   } = services;
 
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -123,12 +120,9 @@ export const AlertsOverview = ({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <AlertsStateTable
-          alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+        <ObservabilityAlertsTable
           id={'assetDetailsAlertsTable'}
-          configurationId={AlertConsumers.OBSERVABILITY}
           featureIds={alertFeatureIds}
-          showAlertStatusWithFlapping
           query={alertsEsQueryByStatus}
           initialPageSize={5}
         />

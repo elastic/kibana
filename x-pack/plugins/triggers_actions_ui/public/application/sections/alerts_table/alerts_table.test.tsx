@@ -347,7 +347,7 @@ describe('AlertsTable', () => {
     ),
   };
 
-  let onChangePageIndex: AlertsDataGridProps<AdditionalContext>['onChangePageIndex'];
+  let onChangePageIndex: AlertsDataGridProps['onChangePageIndex'];
   let refresh: RenderContext<AdditionalContext>['refresh'];
 
   mockAlertsDataGrid.mockImplementation((props) => {

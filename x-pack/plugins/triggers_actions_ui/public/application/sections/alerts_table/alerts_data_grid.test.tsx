@@ -310,26 +310,28 @@ describe('AlertsDataGrid', () => {
     });
 
     describe('cell Actions', () => {
-      const mockGetCellActions = jest.fn((columnId: string): EuiDataGridColumnCellAction[] => [
-        ({ rowIndex, Component }) => {
-          const label = 'Fake Cell First Action';
-          return (
-            <Component
-              onClick={() => cellActionOnClickMockedFn(columnId, rowIndex)}
-              data-test-subj={'fake-cell-first-action'}
-              iconType="refresh"
-              aria-label={label}
-            />
-          );
-        },
-      ]);
+      const mockGetCellActionsForColumn = jest.fn(
+        (columnId: string): EuiDataGridColumnCellAction[] => [
+          ({ rowIndex, Component }) => {
+            const label = 'Fake Cell First Action';
+            return (
+              <Component
+                onClick={() => cellActionOnClickMockedFn(columnId, rowIndex)}
+                data-test-subj={'fake-cell-first-action'}
+                iconType="refresh"
+                aria-label={label}
+              />
+            );
+          },
+        ]
+      );
       const props: TestAlertsDataGridProps = {
         ...mockDataGridProps,
-        getCellActionsOptions: () => ({
-          getCellActions: mockGetCellActions,
+        cellActionsOptions: {
+          getCellActionsForColumn: mockGetCellActionsForColumn,
           visibleCellActions: 2,
           disabledCellActions: [],
-        }),
+        },
       };
 
       it('should render cell actions on hover', async () => {
@@ -379,22 +381,22 @@ describe('AlertsDataGrid', () => {
         expect(await screen.findByTestId(FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID)).toBeVisible();
       });
 
-      it('The column state is synced correctly between the column selector and the field selector', async () => {
-        const columnToHide = tableProps.columns[0];
+      it('syncs the columns state correctly between the column selector and the field selector', async () => {
+        const columnToHide = mockColumns[0];
         render(
-          <AlertsTableWithProviders
-            {...tableProps}
+          <TestComponent
+            {...mockDataGridProps}
             toolbarVisibility={{
               showColumnSelector: true,
             }}
             initialBulkActionsState={{
-              ...defaultBulkActionsState,
+              ...mockBulkActionsState,
               rowSelection: new Map(),
             }}
           />
         );
 
-        const fieldBrowserBtn = await screen.findByTestId(TEST_ID.FIELD_BROWSER_BTN);
+        const fieldBrowserBtn = await screen.findByTestId(FIELD_BROWSER_BTN_TEST_ID);
         const columnSelectorBtn = await screen.findByTestId('dataGridColumnSelectorButton');
 
         // Open the column visibility selector and hide the column
@@ -406,7 +408,7 @@ describe('AlertsDataGrid', () => {
 
         // Open the field browser
         fireEvent.click(fieldBrowserBtn);
-        expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER)).toBeVisible();
+        expect(await screen.findByTestId(FIELD_BROWSER_TEST_ID)).toBeVisible();
 
         // The column should be checked in the field browser, independent of its visibility status
         const columnCheckbox: HTMLInputElement = await screen.findByTestId(

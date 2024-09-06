@@ -29,13 +29,6 @@ export function registerMlAlerts(
   if (alerting) {
     registerNavigation(alerting);
   }
-
-  // Async import to prevent a bundle size increase
-  Promise.all([getStartServices(), import('./anomaly_detection_alerts_table')]).then(
-    ([[_, mlStartDependencies], { registerAlertsTableConfiguration }]) => {
-      registerAlertsTableConfiguration(triggersActionsUi, mlStartDependencies.fieldFormats);
-    }
-  );
 }
 
 export function registerNavigation(alerting: AlertingSetup) {

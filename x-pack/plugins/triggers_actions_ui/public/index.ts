@@ -33,7 +33,6 @@ export type {
   AlertsDataGridProps,
   RuleSummary,
   AlertStatus,
-  AlertsTableConfigurationRegistryContract,
   AlertsTableFlyoutBaseProps,
   RuleEventLogListProps,
   AlertTableFlyoutComponent,
