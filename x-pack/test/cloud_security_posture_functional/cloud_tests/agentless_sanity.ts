@@ -18,6 +18,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'security',
     'header',
     'cisAddIntegration',
+    'findings',
+    'fleet',
   ]);
 
   describe('Agentless Cloud - Sanity Tests', function () {
@@ -28,14 +30,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const HEALTHY_STATUS = 'Healthy';
         const fleet = pageObjects.fleet;
 
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-          CLOUD_CREDENTIALS_PACKAGE_VERSION
-        );
+        await fleet.navigateToFleetAgentsPage();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
-        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await (await testSubjects.find('agentList.policyFilter')).click();
 
-        await cisIntegration.inputIntegrationName(integrationPolicyName);
+        const options = await testSubjects.findAll('agentList.agentPolicyFilterOption');
 
         // Click the first agentless policy
         for (const option of options) {
