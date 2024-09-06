@@ -48,14 +48,16 @@ export function ServiceOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const hasLogsSignal =
-    serviceEntitySummary?.dataStreamTypes && isLogsSignal(serviceEntitySummary.dataStreamTypes);
+  const hasSignal =
+    serviceEntitySummary?.dataStreamTypes && serviceEntitySummary?.dataStreamTypes?.length > 0;
 
-  const hasApmSignal =
-    serviceEntitySummary?.dataStreamTypes && isApmSignal(serviceEntitySummary.dataStreamTypes);
+  const hasLogsSignal = hasSignal && isLogsSignal(serviceEntitySummary.dataStreamTypes);
 
-  // Shows APM overview when entity has APM signal or when Entity centric is not enabled
-  const showApmOverview = isEntityCentricExperienceViewEnabled === false || hasApmSignal;
+  const hasApmSignal = hasSignal && isApmSignal(serviceEntitySummary.dataStreamTypes);
+
+  // Shows APM overview when entity has APM signal or when Entity centric is not enabled or when entity has no signal
+  const showApmOverview =
+    isEntityCentricExperienceViewEnabled === false || hasApmSignal || !hasSignal;
 
   return (
     <AnnotationsContextProvider
