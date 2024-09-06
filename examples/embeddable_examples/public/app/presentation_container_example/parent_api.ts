@@ -233,6 +233,19 @@ export function getParentApi() {
             childApi.resetUnsavedChanges();
           }
         });
+        const nextPanelIds = lastSavedState$.value.panels.map(({ id }) => id);
+        const children = { ...children$.value };
+        let modifiedChildren = false;
+        Object.keys(children).forEach((controlId) => {
+          if (!nextPanelIds.includes(controlId)) {
+            // remove children that no longer exist after reset
+            delete children[controlId];
+            modifiedChildren = true;
+          }
+        });
+        if (modifiedChildren) {
+          children$.next(children);
+        }
         newPanels = {};
       },
       timeRange$,
