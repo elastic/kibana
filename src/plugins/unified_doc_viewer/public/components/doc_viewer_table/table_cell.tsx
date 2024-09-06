@@ -38,7 +38,7 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
       return (
         <div>
           <FieldName
-            fieldName={displayName}
+            fieldName={name}
             fieldType={fieldType}
             fieldMapping={dataViewField}
             scripted={dataViewField?.scripted}
