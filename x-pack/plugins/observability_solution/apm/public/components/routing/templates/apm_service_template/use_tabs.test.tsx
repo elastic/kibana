@@ -182,7 +182,7 @@ describe('APM service template', () => {
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
           serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
           serviceEntitySummary: {
-            signalTypes: ['metrics'],
+            dataStreamTypes: ['metrics'],
           } as unknown as ServiceEntitySummary,
         });
       });
@@ -206,7 +206,7 @@ describe('APM service template', () => {
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
           serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
           serviceEntitySummary: {
-            signalTypes: ['metrics', 'logs'],
+            dataStreamTypes: ['metrics', 'logs'],
           } as unknown as ServiceEntitySummary,
         });
       });
@@ -251,7 +251,7 @@ describe('APM service template', () => {
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
           serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
           serviceEntitySummary: {
-            signalTypes: ['logs'],
+            dataStreamTypes: ['logs'],
           } as unknown as ServiceEntitySummary,
         });
       });

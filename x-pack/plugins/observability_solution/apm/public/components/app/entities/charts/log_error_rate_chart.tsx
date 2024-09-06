@@ -15,7 +15,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getTimeSeriesColor, ChartType } from '../../../shared/charts/helper/get_timeseries_color';
 import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_chart_with_context';
-import { yLabelAsPercent } from '../../../../../common/utils/formatters';
+import { asInteger } from '../../../../../common/utils/formatters';
 import { TooltipContent } from '../../service_inventory/multi_signal_inventory/table/tooltip_content';
 import { Popover } from '../../service_inventory/multi_signal_inventory/table/popover';
 import {
@@ -69,7 +69,7 @@ export function LogErrorRateChart({ height }: { height: number }) {
       type: 'linemark',
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.logs.chart.logsErrorRate', {
-        defaultMessage: 'Log Error %',
+        defaultMessage: 'Log Error Rate',
       }),
     },
   ];
@@ -87,15 +87,15 @@ export function LogErrorRateChart({ height }: { height: number }) {
             <EuiTitle size="xs">
               <h2>
                 {i18n.translate('xpack.apm.logErrorRate', {
-                  defaultMessage: 'Log error %',
+                  defaultMessage: 'Log error rate',
                 })}{' '}
                 <Popover>
                   <TooltipContent
                     formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
                     description={
                       <FormattedMessage
-                        defaultMessage="% of logs where error detected for given {serviceName}."
-                        id="xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description"
+                        defaultMessage="Rate of error logs per minute observed for given {serviceName}."
+                        id="xpack.apm.logErrorRate.tooltip.description"
                         values={{
                           serviceName: (
                             <code
@@ -135,8 +135,7 @@ export function LogErrorRateChart({ height }: { height: number }) {
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
-        yLabelFormat={yLabelAsPercent}
-        yDomain={{ min: 0, max: 1 }}
+        yLabelFormat={asInteger}
       />
     </EuiPanel>
   );
