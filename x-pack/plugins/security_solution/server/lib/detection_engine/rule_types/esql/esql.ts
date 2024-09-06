@@ -29,6 +29,7 @@ import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RunOpts, SignalSource } from '../types';
+import { logEsqlRequest } from '../utils/logged_requests';
 
 import {
   addToSearchAfterReturn,
@@ -103,7 +104,7 @@ export const esqlExecutor = async ({
 
         if (isLoggedRequestsEnabled) {
           loggedRequests.push({
-            request: `POST _query\n${JSON.stringify(esqlRequest, null, 2)}`,
+            request: logEsqlRequest(esqlRequest),
             description: 'ES|QL request to find all matches',
           });
         }
