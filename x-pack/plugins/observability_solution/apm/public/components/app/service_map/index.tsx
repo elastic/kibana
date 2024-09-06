@@ -8,7 +8,6 @@
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { SignalTypes } from '../../../../common/entities/types';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
@@ -84,8 +83,7 @@ export function ServiceMapServiceDetail() {
   const { serviceEntitySummary } = useApmServiceContext();
 
   const hasLogsOnlySignal =
-    serviceEntitySummary?.signalTypes &&
-    isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
   if (hasLogsOnlySignal) {
     return (

@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { SignalTypes } from '../../../../common/entities/types';
 import { isServerlessAgentName } from '../../../../common/agent_name';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -67,8 +66,7 @@ export function TransactionOverview() {
   const { serviceEntitySummary } = useApmServiceContext();
 
   const hasLogsOnlySignal =
-    serviceEntitySummary?.signalTypes &&
-    isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
   if (hasLogsOnlySignal) {
     return (

@@ -9,7 +9,6 @@ import { EuiTitle } from '@elastic/eui';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { SignalTypes } from '../../../../common/entities/types';
 import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { ServiceOverviewDependenciesTable } from '../service_overview/service_overview_dependencies_table';
@@ -22,8 +21,7 @@ export function ServiceDependencies() {
   const { serviceEntitySummary } = useApmServiceContext();
 
   const hasLogsOnlySignal =
-    serviceEntitySummary?.signalTypes &&
-    isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
   if (hasLogsOnlySignal) {
     return (

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { SignalTypes } from '../../../../common/entities/types';
 import {
   isJavaAgentName,
   isJRubyAgentName,
@@ -30,8 +29,7 @@ export function Metrics() {
   const { serviceEntitySummary } = useApmServiceContext();
 
   const hasLogsOnlySignal =
-    serviceEntitySummary?.signalTypes &&
-    isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
   if (hasLogsOnlySignal) {
     return (

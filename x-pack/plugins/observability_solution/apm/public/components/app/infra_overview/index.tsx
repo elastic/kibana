@@ -6,7 +6,6 @@
  */
 import { EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { SignalTypes } from '../../../../common/entities/types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { InfraTabs } from './infra_tabs';
@@ -17,8 +16,7 @@ export function InfraOverview() {
   const { serviceEntitySummary } = useApmServiceContext();
 
   const hasLogsOnlySignal =
-    serviceEntitySummary?.signalTypes &&
-    isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
   if (hasLogsOnlySignal) {
     return (

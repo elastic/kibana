@@ -24,7 +24,6 @@ import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { Tab, useTabs } from './use_tabs';
-import { SignalTypes } from '../../../../../common/entities/types';
 
 interface Props {
   title: string;
@@ -78,8 +77,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
   }
 
   const hasLogsOnlySignal =
-    serviceEntitySummary?.signalTypes &&
-    isLogsOnlySignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
   return (
     <ApmMainTemplate
