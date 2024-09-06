@@ -29,7 +29,6 @@ export function PalettePanelContainer(props: {
               data-test-subj="lns_dynamicColoring_edit"
               palette={props.palette}
               type={FIXED_PROGRESSION}
-              onClick={onClick}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -46,6 +45,7 @@ export function PalettePanelContainer(props: {
                 iconType="controlsHorizontal"
                 onClick={onClick}
                 size="xs"
+                color="text"
               />
             </EuiToolTip>
           </EuiFlexItem>
