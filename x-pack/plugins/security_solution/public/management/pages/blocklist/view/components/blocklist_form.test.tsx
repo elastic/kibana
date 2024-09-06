@@ -380,7 +380,9 @@ describe('blocklist form', () => {
       entries: [createEntry('file.hash.*', [hash])],
     });
     render(createProps({ item }));
-    await user.type(screen.getByRole('combobox'), `${hash}{enter}`);
+    await user.click(screen.getByRole('combobox'));
+    await user.paste(hash);
+    await user.keyboard('[Enter]');
     expect(screen.queryByText(ERRORS.DUPLICATE_VALUE)).toBeTruthy();
   });
 
