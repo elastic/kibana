@@ -27,6 +27,14 @@ const expectLabel = (label: string) =>
 describe('Drag and drop reordering', () => {
   const onDrop = jest.fn();
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });

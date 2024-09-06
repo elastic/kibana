@@ -17,6 +17,7 @@ describe('UnifiedFieldList <FieldNameSearch />', () => {
   beforeAll(() => {
     jest.useFakeTimers();
   });
+
   afterAll(() => {
     jest.useRealTimers();
   });

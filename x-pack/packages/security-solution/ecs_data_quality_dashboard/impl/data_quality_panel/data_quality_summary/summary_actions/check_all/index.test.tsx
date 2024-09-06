@@ -81,6 +81,14 @@ const patternIndexNames = {
 const ilmPhases: string[] = ['hot', 'warm', 'unmanaged'];
 
 describe('CheckAll', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
