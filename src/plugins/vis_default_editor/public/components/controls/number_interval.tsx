@@ -72,7 +72,7 @@ function NumberIntervalParamEditor({
   setTouched,
   setValidity,
   setValue,
-}: AggParamEditorProps<string | undefined>) {
+}: AggParamEditorProps<string | undefined | number>) {
   const field = agg.getField();
   const fieldSupportsAuto = !field || field.type === 'number';
   const isAutoChecked = fieldSupportsAuto && isAutoInterval(value);
@@ -85,7 +85,7 @@ function NumberIntervalParamEditor({
   }, [isValid, setValidity]);
 
   const onChange = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
-    ({ target }: any) => setValue(isNaN(target.valueAsNumber) ? '' : target.valueAsNumber),
+    ({ target }) => setValue(isNaN(target.valueAsNumber) ? '' : target.valueAsNumber),
     [setValue]
   );
 
