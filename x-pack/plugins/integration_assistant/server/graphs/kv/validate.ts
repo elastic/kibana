@@ -18,7 +18,6 @@ interface KVResult {
 
 export async function handleKVValidate({
   state,
-  model,
   client,
 }: HandleKVNodeParams): Promise<Partial<KVState>> {
   const kvProcessor = state.kvProcessor;

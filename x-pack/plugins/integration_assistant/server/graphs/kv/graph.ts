@@ -60,6 +60,10 @@ const graphState: StateGraphArgs<KVState>['channels'] = {
     value: (x: object[], y?: object[]) => y ?? x,
     default: () => [],
   },
+  ecsVersion: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
 };
 
 function modelInput({ state }: KVBaseNodeParams): Partial<KVState> {

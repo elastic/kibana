@@ -116,6 +116,7 @@ export interface KVState {
   header: boolean;
   errors: object;
   additionalProcessors: object[];
+  ecsVersion: string;
 }
 
 export interface RelatedState {
