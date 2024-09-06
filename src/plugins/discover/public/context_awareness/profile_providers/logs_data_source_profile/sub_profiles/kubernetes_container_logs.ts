@@ -27,18 +27,6 @@ export const createKubernetesContainerLogsDataSourceProfileProvider = (
           MESSAGE_COLUMN,
         ],
       }),
-      getAdditionalCellActions: (prev) => () =>
-        [
-          ...prev(),
-          {
-            id: 'k8s-action',
-            getDisplayName: () => 'K8s action',
-            getIconType: () => 'bolt',
-            execute: () => {
-              alert('Example action executed');
-            },
-          },
-        ],
     },
     resolve: createResolve('logs-kubernetes.container_logs'),
   });

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
 import { ProfileProviderServices } from '../profile_provider_services';
 import { getRowIndicatorProvider } from './accessors';
@@ -20,25 +19,6 @@ export const createLogsDataSourceProfileProvider = (
   profile: {
     getRowIndicatorProvider,
     getCellRenderers,
-    getAdditionalCellActions: (prev) => () =>
-      [
-        ...prev(),
-        {
-          id: 'heart',
-          getDisplayName: (context) => `Heart ${context.field.name}`,
-          getIconType: () => 'heart',
-          execute: (context) => {
-            const str = `${context.field.name} = ${JSON.stringify(
-              omit(context, 'dataView'),
-              null,
-              2
-            )}`;
-            // eslint-disable-next-line no-console
-            console.log(str);
-            alert(str);
-          },
-        },
-      ],
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);

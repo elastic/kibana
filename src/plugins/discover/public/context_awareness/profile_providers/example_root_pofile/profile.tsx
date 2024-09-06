@@ -27,18 +27,6 @@ export const exampleRootProfileProvider: RootProfileProvider = {
         );
       },
     }),
-    getAdditionalCellActions: (prev) => () =>
-      [
-        ...prev(),
-        {
-          id: 'example-root-action',
-          getDisplayName: () => 'Example root action',
-          getIconType: () => 'plus',
-          execute: () => {
-            alert('Example root action executed');
-          },
-        },
-      ],
   },
   resolve: (params) => {
     if (params.solutionNavId != null) {
