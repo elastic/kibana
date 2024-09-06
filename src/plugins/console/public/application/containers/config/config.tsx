@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 
 import { Settings } from './settings';
 import { Variables } from './variables';
@@ -15,9 +15,12 @@ import type { SenseEditor } from '../../models';
 
 export interface Props {
   editorInstance: SenseEditor | null;
+  containerWidth: number;
 }
 
-export function Config({ editorInstance }: Props) {
+export function Config({ editorInstance, containerWidth }: Props) {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiPanel
       color="subdued"
@@ -26,7 +29,12 @@ export function Config({ editorInstance }: Props) {
       borderRadius="none"
       css={{ height: '100%' }}
     >
-      <EuiFlexGroup gutterSize="xl">
+      <EuiFlexGroup
+        gutterSize="xl"
+        direction={containerWidth < euiTheme.breakpoint.l ? 'column' : 'row'}
+        // Turn off default responsiveness
+        responsive={false}
+      >
         <EuiFlexItem>
           <Settings editorInstance={editorInstance} />
         </EuiFlexItem>

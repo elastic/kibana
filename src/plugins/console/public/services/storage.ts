@@ -12,7 +12,7 @@ import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 type IStorageEngine = typeof window.localStorage;
 
 export enum StorageKeys {
-  WIDTH = 'widths',
+  SIZE = 'panelSize',
   FOLDS = 'folds',
   VARIABLES = 'variables',
   DEFAULT_LANGUAGE = 'defaultLanguage',
