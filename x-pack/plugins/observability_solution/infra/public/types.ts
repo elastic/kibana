@@ -53,7 +53,7 @@ import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
-import { ITelemetryClient } from './services/telemetry';
+import { TelemetryServiceStart } from './services/telemetry';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface InfraClientSetupExports {}
@@ -61,7 +61,7 @@ export interface InfraClientSetupExports {}
 export interface InfraClientStartExports {
   inventoryViews: InventoryViewsServiceStart;
   metricsExplorerViews?: MetricsExplorerViewsServiceStart;
-  telemetry: ITelemetryClient;
+  telemetry: TelemetryServiceStart;
 }
 
 export interface InfraClientSetupDeps {
@@ -106,7 +106,6 @@ export interface InfraClientStartDeps {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
-  telemetry?: ITelemetryClient;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
