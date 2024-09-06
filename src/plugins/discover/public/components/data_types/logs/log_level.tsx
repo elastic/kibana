@@ -29,7 +29,7 @@ export function LogLevel({ level }: LogLevelProps) {
           iconSide="right"
           onClick={handleChipClick}
           onClickAriaLabel={handleChipClickAriaLabel}
-          css={[chipCss, { width: '80px', paddingInline: '4px' }]}
+          css={chipCss}
         />
       )}
     />

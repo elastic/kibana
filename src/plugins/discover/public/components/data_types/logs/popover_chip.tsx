@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement, useCallback, useState } from 'react';
+import React, { ReactElement } from 'react';
 import {
   EuiBadge,
   type EuiBadgeProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  useEuiFontSize,
   EuiPopoverFooter,
   EuiText,
   EuiButtonIcon,
 } from '@elastic/eui';
 import { css, SerializedStyles } from '@emotion/react';
-import { dynamic } from '@kbn/shared-ux-utility';
+import { useBoolean } from '@kbn/react-hooks';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { closeCellActionPopoverText, openCellActionPopoverAriaText } from './translations';
 import { FilterInButton } from './filter_in_button';
 import { FilterOutButton } from './filter_out_button';
 import { CopyButton } from './copy_button';
 
-const DataTablePopoverCellValue = dynamic(
-  () => import('@kbn/unified-data-table/src/components/data_table_cell_value')
-);
+const codeFontCSS = css`
+  font-family: ${euiThemeVars.euiCodeFontFamily};
+`;
 
 interface ChipWithPopoverProps {
   /**
@@ -91,14 +91,7 @@ interface ChipPopoverProps {
 }
 
 export function ChipPopover({ property, text, renderChip }: ChipPopoverProps) {
-  const xsFontSize = useEuiFontSize('xs').fontSize;
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const handleChipClick = useCallback(() => {
-    setIsPopoverOpen(!isPopoverOpen);
-  }, [isPopoverOpen]);
-
-  const closePopover = () => setIsPopoverOpen(false);
+  const [isPopoverOpen, { toggle: handleChipClick, off: closePopover }] = useBoolean(false);
 
   return (
     <EuiPopover
@@ -106,34 +99,23 @@ export function ChipPopover({ property, text, renderChip }: ChipPopoverProps) {
         handleChipClick,
         handleChipClickAriaLabel: openCellActionPopoverAriaText,
         chipCss: css`
-          font-size: ${xsFontSize};
-          display: flex;
-          justify-content: center;
-          margin-right: 4px;
           margin-top: -3px;
-          cursor: pointer;
         `,
       })}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="downCenter"
       panelPaddingSize="s"
-      panelStyle={{ minWidth: '24px' }}
     >
       <EuiFlexGroup
         gutterSize="none"
-        direction="row"
         responsive={false}
         data-test-subj="dataTableCellActionPopoverTitle"
       >
-        <EuiFlexItem>
-          <div style={{ maxWidth: '200px' }}>
-            <EuiText size="s">
-              <DataTablePopoverCellValue>
-                <span style={{ fontWeight: 700 }}>{property}</span> {text}
-              </DataTablePopoverCellValue>
-            </EuiText>
-          </div>
+        <EuiFlexItem style={{ maxWidth: '200px' }}>
+          <EuiText size="s" css={codeFontCSS}>
+            <strong>{property}</strong> {text}
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
@@ -147,15 +129,13 @@ export function ChipPopover({ property, text, renderChip }: ChipPopoverProps) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiPopoverFooter>
-        <EuiFlexGroup responsive={false} gutterSize="none" wrap={true}>
+        <EuiFlexGroup responsive={false} gutterSize="s" wrap={true}>
           <FilterInButton value={text} property={property} />
           <FilterOutButton value={text} property={property} />
         </EuiFlexGroup>
       </EuiPopoverFooter>
       <EuiPopoverFooter>
-        <EuiFlexGroup direction="column" alignItems="flexStart">
-          <CopyButton value={text} property={property} />
-        </EuiFlexGroup>
+        <CopyButton value={text} property={property} />
       </EuiPopoverFooter>
     </EuiPopover>
   );

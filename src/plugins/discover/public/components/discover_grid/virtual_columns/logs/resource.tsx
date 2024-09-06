@@ -11,6 +11,7 @@ import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { AgentName } from '@kbn/elastic-agent-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { LogDocument } from '@kbn/discover-utils/src';
+import { EuiFlexGroup } from '@elastic/eui';
 import * as constants from '../../../../../common/data_types/logs/constants';
 import { getUnformattedResourceFields } from './utils/resource';
 import { ChipWithPopover } from '../../../data_types/logs/popover_chip';
@@ -20,7 +21,7 @@ const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_i
 export const Resource = ({ row }: DataGridCellValueElementProps) => {
   const resourceDoc = getUnformattedResourceFields(row as LogDocument);
   return (
-    <div>
+    <EuiFlexGroup gutterSize="s">
       {(resourceDoc[constants.SERVICE_NAME_FIELD] as string) && (
         <ChipWithPopover
           property={constants.SERVICE_NAME_FIELD}
@@ -64,6 +65,6 @@ export const Resource = ({ row }: DataGridCellValueElementProps) => {
           rightSideIcon="arrowDown"
         />
       )}
-    </div>
+    </EuiFlexGroup>
   );
 };

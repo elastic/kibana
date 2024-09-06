@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useVirtualColumnServiceContext } from '../../../application/main/hooks/grid_customisations/use_virtual_column_services';
@@ -26,16 +26,15 @@ export const FilterOutButton = ({ property, value }: { property: string; value: 
   };
 
   return (
-    <EuiFlexItem key="removeFromFilterAction">
-      <EuiButtonEmpty
-        size="s"
-        iconType="minusInCircle"
-        aria-label={ariaFilterOutText}
-        onClick={onFilterOutAction}
-        data-test-subj={`dataTableCellAction_removeFromFilterAction_${property}`}
-      >
-        {filterOutText}
-      </EuiButtonEmpty>
-    </EuiFlexItem>
+    <EuiButtonEmpty
+      key="removeFromFilterAction"
+      size="s"
+      iconType="minusInCircle"
+      aria-label={ariaFilterOutText}
+      onClick={onFilterOutAction}
+      data-test-subj={`dataTableCellAction_removeFromFilterAction_${property}`}
+    >
+      {filterOutText}
+    </EuiButtonEmpty>
   );
 };

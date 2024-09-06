@@ -9,6 +9,7 @@
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import React from 'react';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { VirtualColumnServiceProvider } from '../../../application/main/hooks/grid_customisations/use_virtual_column_services';
 import { Resource } from '../../discover_grid/virtual_columns/logs/resource';
 import { Content } from '../../discover_grid/virtual_columns/logs/content';
@@ -27,8 +28,12 @@ export const getSummaryColumn =
 
     return (
       <VirtualColumnServiceProvider services={virtualColumnServices}>
-        <Resource {...props} />
-        <Content {...props} />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <Resource {...props} />
+          </EuiFlexItem>
+          <Content {...props} />
+        </EuiFlexGroup>
       </VirtualColumnServiceProvider>
     );
   };
