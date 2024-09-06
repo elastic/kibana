@@ -256,6 +256,6 @@ export const esqlExecutor = async ({
       result.success = false;
     }
 
-    return { ...result, state, loggedRequests };
+    return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
   });
 };

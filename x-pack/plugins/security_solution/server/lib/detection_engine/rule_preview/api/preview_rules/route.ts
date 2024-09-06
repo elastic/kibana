@@ -329,7 +329,7 @@ export const previewRulesRoute = (
                 warnings,
                 startedAt: startedAt.toDate().toISOString(),
                 duration: moment().diff(invocationStartTime, 'milliseconds'),
-                requests: loggedRequests,
+                ...(loggedRequests ? { requests: loggedRequests } : {}),
               });
 
               loggedStatusChanges.length = 0;
