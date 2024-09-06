@@ -39,6 +39,7 @@ interface ProgressControlProps {
   isRunning: boolean;
   shouldRerunAnalysis: boolean;
   runAnalysisDisabled?: boolean;
+  analysisInfo?: React.ReactNode;
 }
 
 /**
@@ -61,6 +62,7 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
     isRunning,
     shouldRerunAnalysis,
     runAnalysisDisabled = false,
+    analysisInfo = null,
   } = props;
 
   const progressOutput = Math.round(progress * 100);
@@ -136,6 +138,9 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
                   defaultMessage: 'Analysis complete',
                 })}
               </small>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} data-test-subj="aiopsAnalysisInfo">
+              {analysisInfo}
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}

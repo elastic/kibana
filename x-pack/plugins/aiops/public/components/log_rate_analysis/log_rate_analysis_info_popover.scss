@@ -1,0 +1,9 @@
+.aiopsLogRateAnalysisInfoPopover__panel {
+  max-width: $euiSize * 30;
+}
+
+.aiopsLogRateAnalysisInfoPopover__content {
+  max-height: 40vh;
+  padding: $euiSizeS;
+  @include euiYScrollWithShadows;
+}
