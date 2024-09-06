@@ -150,6 +150,7 @@ export const relatedTestState = {
   pipelineResults: [{ test: 'testresult' }],
   finalized: false,
   reviewed: false,
+  hasTriedOnce: false,
   currentPipeline: { test: 'testpipeline' },
   currentProcessors: [
     {

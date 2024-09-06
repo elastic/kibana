@@ -63,7 +63,6 @@ export const getRangesliderControlFactory = (
       const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step'>>(
         uuid,
         RANGE_SLIDER_CONTROL,
-        'rangeSliderDataView',
         initialState,
         {
           step: step$,
@@ -159,8 +158,8 @@ export const getRangesliderControlFactory = (
           if (error) {
             dataControl.api.setBlockingError(error);
           }
-          max$.next(max !== undefined ? Math.ceil(max) : undefined);
-          min$.next(min !== undefined ? Math.floor(min) : undefined);
+          max$.next(max);
+          min$.next(min);
         }
       );
 

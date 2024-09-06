@@ -9,15 +9,15 @@ import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
 import { SamplesFormat } from '../../../common';
 import type { CategorizationState } from '../../types';
-import type { CategorizationGraphParams, CategorizationBaseNodeParams } from './types';
-import { prefixSamples, formatSamples } from '../../util/samples';
-import { handleCategorization } from './categorization';
 import { handleValidatePipeline } from '../../util/graph';
-import { handleCategorizationValidation } from './validate';
-import { handleInvalidCategorization } from './invalid';
-import { handleErrors } from './errors';
-import { handleReview } from './review';
+import { formatSamples, prefixSamples } from '../../util/samples';
+import { handleCategorization } from './categorization';
 import { CATEGORIZATION_EXAMPLE_ANSWER, ECS_CATEGORIES, ECS_TYPES } from './constants';
+import { handleErrors } from './errors';
+import { handleInvalidCategorization } from './invalid';
+import { handleReview } from './review';
+import type { CategorizationBaseNodeParams, CategorizationGraphParams } from './types';
+import { handleCategorizationValidation } from './validate';
 
 const graphState: StateGraphArgs<CategorizationState>['channels'] = {
   lastExecutedChain: {
@@ -61,6 +61,10 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
     default: () => false,
   },
   reviewed: {
+    value: (x: boolean, y?: boolean) => y ?? x,
+    default: () => false,
+  },
+  hasTriedOnce: {
     value: (x: boolean, y?: boolean) => y ?? x,
     default: () => false,
   },
@@ -157,12 +161,20 @@ function modelRouter({ state }: CategorizationBaseNodeParams): string {
 
 function validationRouter({ state }: CategorizationBaseNodeParams): string {
   if (Object.keys(state.currentProcessors).length === 0) {
+    if (state.hasTriedOnce || state.reviewed) {
+      return 'modelOutput';
+    }
     return 'categorization';
   }
   return 'validateCategorization';
 }
 
 function chainRouter({ state }: CategorizationBaseNodeParams): string {
+  if (Object.keys(state.currentProcessors).length === 0) {
+    if (state.hasTriedOnce || state.reviewed) {
+      return 'modelOutput';
+    }
+  }
   if (Object.keys(state.errors).length > 0) {
     return 'errors';
   }
@@ -215,6 +227,7 @@ export async function getCategorizationGraph({ client, model }: CategorizationGr
       'handleValidatePipeline',
       (state: CategorizationState) => validationRouter({ state }),
       {
+        modelOutput: 'modelOutput',
         categorization: 'handleCategorization',
         validateCategorization: 'handleCategorizationValidation',
       }

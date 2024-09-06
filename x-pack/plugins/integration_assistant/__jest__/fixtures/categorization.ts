@@ -174,6 +174,7 @@ export const categorizationTestState = {
   previousInvalidCategorization: 'testinvalid',
   pipelineResults: [{ test: 'testresult' }],
   finalized: false,
+  hasTriedOnce: false,
   reviewed: false,
   currentPipeline: { test: 'testpipeline' },
   currentProcessors: [
