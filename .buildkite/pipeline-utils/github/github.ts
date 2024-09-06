@@ -92,6 +92,10 @@ export const doAnyChangesMatch = async (
   return anyFilesMatchRequired;
 };
 
+export const hasSelectiveChecks = async () => {
+  return [`.buildkite/scripts/steps/lint.sh`];
+};
+
 export function getGithubClient() {
   return github;
 }

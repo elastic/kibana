@@ -8,7 +8,12 @@
 
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
-import { areChangesSkippable, doAnyChangesMatch, getAgentImageConfig } from '#pipeline-utils';
+import {
+  areChangesSkippable,
+  doAnyChangesMatch,
+  getAgentImageConfig,
+  hasSelectiveChecks,
+} from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
@@ -40,6 +45,15 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+
+    const isSelective = await hasSelectiveChecks();
+    if (isSelective) {
+      isSelective.map((selectedPipeline: string) => pipeline.push(selectedPipeline));
+
+      // console.log([...new Set(pipeline)].join('\n'));
+      console.log(pipeline);
+      return;
+    }
 
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
