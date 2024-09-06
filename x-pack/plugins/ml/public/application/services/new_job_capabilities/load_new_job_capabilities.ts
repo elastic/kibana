@@ -9,7 +9,7 @@ import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public'
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import { getDataViewAndSavedSearchCallback } from '../../util/index_utils';
 import type { JobType } from '../../../../common/types/saved_objects';
-import type { MlApiServices } from '../ml_api_service';
+import type { MlApi } from '../ml_api_service';
 import { mlJobCapsServiceAnalyticsFactory } from './new_job_capabilities_service_analytics';
 import { mlJobCapsServiceFactory } from './new_job_capabilities_service';
 
@@ -21,7 +21,7 @@ export const DATA_FRAME_ANALYTICS = 'data-frame-analytics';
 export function loadNewJobCapabilities(
   dataViewId: string,
   savedSearchId: string,
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   dataViewsService: DataViewsContract,
   savedSearchService: SavedSearchPublicPluginStart,
   jobType: JobType
@@ -30,8 +30,8 @@ export function loadNewJobCapabilities(
     try {
       const serviceToUse =
         jobType === ANOMALY_DETECTOR
-          ? mlJobCapsServiceFactory(mlApiServices)
-          : mlJobCapsServiceAnalyticsFactory(mlApiServices);
+          ? mlJobCapsServiceFactory(mlApi)
+          : mlJobCapsServiceAnalyticsFactory(mlApi);
 
       if (dataViewId !== undefined) {
         // index pattern is being used
