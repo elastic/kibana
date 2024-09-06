@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { css, SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { closeCellActionPopoverText, openCellActionPopoverAriaText } from './translations';
@@ -29,79 +29,37 @@ const codeFontCSS = css`
   font-family: ${euiThemeVars.euiCodeFontFamily};
 `;
 
-interface ChipWithPopoverProps {
-  /**
-   * ECS mapping for the key
-   */
+interface CellActionsPopoverProps {
+  /* ECS mapping for the key */
   property: string;
-  /**
-   * Value for the mapping, which will be displayed
-   */
+  /* Value for the mapping, which will be displayed */
   text: string;
-  dataTestSubj?: string;
-  leftSideIcon?: React.ReactNode;
-  rightSideIcon?: EuiBadgeProps['iconType'];
-}
-
-export function ChipWithPopover({
-  property,
-  text,
-  dataTestSubj = `dataTablePopoverChip_${property}`,
-  leftSideIcon,
-  rightSideIcon,
-}: ChipWithPopoverProps) {
-  return (
-    <ChipPopover
-      property={property}
-      text={text}
-      renderChip={({ handleChipClick, handleChipClickAriaLabel, chipCss }) => (
-        <EuiBadge
-          color="hollow"
-          iconType={rightSideIcon}
-          iconSide="right"
-          data-test-subj={dataTestSubj}
-          onClick={handleChipClick}
-          onClickAriaLabel={handleChipClickAriaLabel}
-          css={chipCss}
-        >
-          <EuiFlexGroup gutterSize="xs">
-            {leftSideIcon && <EuiFlexItem>{leftSideIcon}</EuiFlexItem>}
-            <EuiFlexItem>{text}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiBadge>
-      )}
-    />
-  );
-}
-
-interface ChipPopoverProps {
-  /**
-   * ECS mapping for the key
-   */
-  property: string;
-  /**
-   * Value for the mapping, which will be displayed
-   */
-  text: string;
-  renderChip: (props: {
-    handleChipClick: () => void;
-    handleChipClickAriaLabel: string;
-    chipCss: SerializedStyles;
+  /* Props to forward to the trigger Badge */
+  renderPopoverTrigger: (props: {
+    popoverTriggerProps: {
+      onClick: () => void;
+      onClickAriaLabel: string;
+      'data-test-subj': string;
+    };
   }) => ReactElement;
 }
 
-export function ChipPopover({ property, text, renderChip }: ChipPopoverProps) {
-  const [isPopoverOpen, { toggle: handleChipClick, off: closePopover }] = useBoolean(false);
+export function CellActionsPopover({
+  property,
+  text,
+  renderPopoverTrigger,
+}: CellActionsPopoverProps) {
+  const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
+
+  const popoverTriggerProps = {
+    onClick: togglePopover,
+    onClickAriaLabel: openCellActionPopoverAriaText,
+    'data-test-subj': `dataTableCellActionsPopover_${property}`,
+  };
 
   return (
     <EuiPopover
-      button={renderChip({
-        handleChipClick,
-        handleChipClickAriaLabel: openCellActionPopoverAriaText,
-        chipCss: css`
-          margin-top: -3px;
-        `,
-      })}
+      button={renderPopoverTrigger({ popoverTriggerProps })}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="downCenter"
@@ -138,5 +96,31 @@ export function ChipPopover({ property, text, renderChip }: ChipPopoverProps) {
         <CopyButton value={text} property={property} />
       </EuiPopoverFooter>
     </EuiPopover>
+  );
+}
+
+interface FieldBadgeWithActionsProps {
+  /**
+   * ECS mapping for the key
+   */
+  property: string;
+  /**
+   * Value for the mapping, which will be displayed
+   */
+  text: string;
+  icon?: EuiBadgeProps['iconType'];
+}
+
+export function FieldBadgeWithActions({ property, text, icon }: FieldBadgeWithActionsProps) {
+  return (
+    <CellActionsPopover
+      property={property}
+      text={text}
+      renderPopoverTrigger={({ popoverTriggerProps }) => (
+        <EuiBadge {...popoverTriggerProps} color="hollow" iconType={icon} iconSide="left">
+          {text}
+        </EuiBadge>
+      )}
+    />
   );
 }

@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { CSSObject } from '@emotion/react';
+import React from 'react';
 import { LogLevelBadge } from '@kbn/discover-utils';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import React from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
 
 const dataTestSubj = 'logLevelBadgeCell';
-const badgeCss: CSSObject = { marginTop: '-4px' };
 
 export const getLogLevelBadgeCell =
   (logLevelField: string) => (props: DataGridCellValueElementProps) => {
@@ -23,11 +22,12 @@ export const getLogLevelBadgeCell =
     }
 
     return (
-      <LogLevelBadge
-        logLevel={value}
-        fallback={<span data-test-subj={`${dataTestSubj}-unknown`}>{value}</span>}
-        data-test-subj={dataTestSubj}
-        css={badgeCss}
-      />
+      <EuiFlexGroup alignItems="center" css={{ height: '100%' }}>
+        <LogLevelBadge
+          logLevel={value}
+          fallback={<span data-test-subj={`${dataTestSubj}-unknown`}>{value}</span>}
+          data-test-subj={dataTestSubj}
+        />
+      </EuiFlexGroup>
     );
   };

@@ -225,7 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const serviceNameChip = await cellElement.findByTestSubject(
-            'dataTablePopoverChip_service.name'
+            'dataTableCellActionsPopover_service.name'
           );
 
           const actionSelector = 'dataTableCellAction_addToFilterAction_service.name';
@@ -239,7 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await filterInButton.click();
           const rowWithLogLevelInfo = await testSubjects.findAll(
-            'dataTablePopoverChip_service.name'
+            'dataTableCellActionsPopover_service.name'
           );
 
           expect(rowWithLogLevelInfo.length).to.be(2);
