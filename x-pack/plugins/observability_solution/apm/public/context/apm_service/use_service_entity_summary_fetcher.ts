@@ -14,8 +14,6 @@ export type ServiceEntitySummary =
 
 export function useServiceEntitySummaryFetcher({
   serviceName,
-  start,
-  end,
   environment,
 }: {
   serviceName?: string;
@@ -27,13 +25,13 @@ export function useServiceEntitySummaryFetcher({
 
   const { data, status } = useFetcher(
     (callAPI) => {
-      if (isEntityCentricExperienceViewEnabled && serviceName && start && end && environment) {
+      if (isEntityCentricExperienceViewEnabled && serviceName && environment) {
         return callAPI('GET /internal/apm/entities/services/{serviceName}/summary', {
-          params: { path: { serviceName }, query: { end, environment, start } },
+          params: { path: { serviceName }, query: { environment } },
         });
       }
     },
-    [end, environment, isEntityCentricExperienceViewEnabled, serviceName, start]
+    [environment, isEntityCentricExperienceViewEnabled, serviceName]
   );
 
   return { serviceEntitySummary: data, serviceEntitySummaryStatus: status };
