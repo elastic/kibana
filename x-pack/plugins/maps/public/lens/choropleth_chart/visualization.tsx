@@ -32,22 +32,20 @@ export const getVisualization = ({
 }): Visualization<ChoroplethChartState> => ({
   id: 'lnsChoropleth',
 
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
       id: 'lnsChoropleth',
       icon: IconRegionMap,
       label: CHART_LABEL,
-      groupLabel: i18n.translate('xpack.maps.lens.groupLabel', {
-        defaultMessage: 'Map',
+      sortPriority: 10,
+      description: i18n.translate('xpack.maps.regionMap.visualizationDescription', {
+        defaultMessage: 'Show geographic data using colored regions.',
       }),
-      sortPriority: 1,
-      showExperimentalBadge: false,
     },
   ],
-
-  getVisualizationTypeId() {
-    return 'lnsChoropleth';
-  },
 
   clearLayer(state) {
     const newState = { ...state };

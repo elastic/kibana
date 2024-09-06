@@ -2288,7 +2288,7 @@ const locateDefinition: FunctionDefinition = {
   name: 'locate',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.locate', {
     defaultMessage:
-      'Returns an integer that indicates the position of a keyword substring within another string.',
+      'Returns an integer that indicates the position of a keyword substring within another string.\nReturns `0` if the substring cannot be found.\nNote that string positions start from `1`.',
   }),
   alias: undefined,
   signatures: [
