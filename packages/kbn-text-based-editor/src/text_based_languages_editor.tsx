@@ -100,7 +100,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
-  const [isLanguagePopoverOpen, setIsLanguagePopoverOpen] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
   // contains both client side validation and server messages
@@ -721,8 +720,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         measuredContainerWidth={measuredEditorWidth}
         hideQueryHistory={hideHistoryComponent}
         refetchHistoryItems={refetchHistoryItems}
-        isHelpMenuOpen={isLanguagePopoverOpen}
-        setIsHelpMenuOpen={setIsLanguagePopoverOpen}
       />
       <ResizableButton
         onMouseDownResizeHandler={onMouseDownResizeHandler}

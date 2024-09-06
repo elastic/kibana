@@ -9,11 +9,12 @@
 import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCode } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCode, EuiButtonIcon } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   LanguageDocumentationFlyout,
+  LanguageDocumentationInline,
   type LanguageDocumentationSections,
 } from '@kbn/language-documentation-popover';
 import { getLimitFromESQLQuery } from '@kbn/esql-utils';
@@ -42,8 +43,6 @@ interface EditorFooterProps {
   updateQuery: (qs: string) => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
-  isHelpMenuOpen: boolean;
-  setIsHelpMenuOpen: (status: boolean) => void;
   measuredContainerWidth: number;
   hideRunQueryText?: boolean;
   editorIsInline?: boolean;
@@ -74,13 +73,12 @@ export const EditorFooter = memo(function EditorFooter({
   isInCompactMode,
   measuredContainerWidth,
   code,
-  isHelpMenuOpen,
-  setIsHelpMenuOpen,
 }: EditorFooterProps) {
   const kibana = useKibana<TextBasedEditorDeps>();
   const { docLinks } = kibana.services;
 
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
+  const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
@@ -98,6 +96,16 @@ export const EditorFooter = memo(function EditorFooter({
     },
     [runQuery, updateQuery]
   );
+
+  const toggleHistoryComponent = useCallback(() => {
+    setIsHistoryOpen(!isHistoryOpen);
+    setIsLanguageComponentOpen(false);
+  }, [isHistoryOpen, setIsHistoryOpen]);
+
+  const toggleLanguageComponent = useCallback(() => {
+    setIsLanguageComponentOpen(!isLanguageComponentOpen);
+    setIsHistoryOpen(false);
+  }, [isLanguageComponentOpen, setIsHistoryOpen]);
 
   const limit = useMemo(() => getLimitFromESQLQuery(code), [code]);
 
@@ -304,8 +312,8 @@ export const EditorFooter = memo(function EditorFooter({
                         }
                       ),
                     }}
-                    isHelpMenuOpen={isHelpMenuOpen}
-                    onHelpMenuVisibilityChange={setIsHelpMenuOpen}
+                    isHelpMenuOpen={isLanguageComponentOpen}
+                    onHelpMenuVisibilityChange={setIsLanguageComponentOpen}
                   />
                 </EuiFlexItem>
               )}
@@ -318,31 +326,14 @@ export const EditorFooter = memo(function EditorFooter({
                   <SubmitFeedbackComponent isSpaceReduced={true} />
                   {!hideQueryHistory && (
                     <QueryHistoryAction
-                      toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
+                      toggleHistory={toggleHistoryComponent}
                       isHistoryOpen={isHistoryOpen}
                       isSpaceReduced={true}
                     />
                   )}
                   {documentationSections && (
                     <EuiFlexItem grow={false}>
-                      <LanguageDocumentationFlyout
-                        sections={documentationSections}
-                        searchInDescription
-                        linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
-                        buttonProps={{
-                          color: 'text',
-                          size: 'xs',
-                          'data-test-subj': 'TextBasedLangEditor-documentation',
-                          'aria-label': i18n.translate(
-                            'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
-                            {
-                              defaultMessage: 'Documentation',
-                            }
-                          ),
-                        }}
-                        isHelpMenuOpen={isHelpMenuOpen}
-                        onHelpMenuVisibilityChange={setIsHelpMenuOpen}
-                      />
+                      <EuiButtonIcon iconType="documentation" onClick={toggleLanguageComponent} />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
@@ -359,6 +350,15 @@ export const EditorFooter = memo(function EditorFooter({
             containerWidth={measuredContainerWidth}
             refetchHistoryItems={refetchHistoryItems}
             isInCompactMode={isInCompactMode}
+          />
+        </EuiFlexItem>
+      )}
+      {isLanguageComponentOpen && editorIsInline && (
+        <EuiFlexItem grow={false}>
+          <LanguageDocumentationInline
+            sections={documentationSections}
+            searchInDescription
+            linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
           />
         </EuiFlexItem>
       )}

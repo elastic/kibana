@@ -1,0 +1,74 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import React, { useCallback, useState, useRef, useMemo } from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme, euiScrollBarStyles, EuiSpacer } from '@elastic/eui';
+import { getFilteredGroups } from '../../utils/get_filtered_groups';
+import { DocumentationMainContent, DocumentationNavigation } from '../shared';
+import type { LanguageDocumentationSections } from '../../types';
+
+interface DocumentationInlineProps {
+  sections?: LanguageDocumentationSections;
+  searchInDescription?: boolean;
+  linkToDocumentation?: string;
+}
+
+const MAX_HEIGHT = 250;
+
+function DocumentationInline({
+  sections,
+  searchInDescription,
+  linkToDocumentation,
+}: DocumentationInlineProps) {
+  const theme = useEuiTheme();
+  const scrollBarStyles = euiScrollBarStyles(theme);
+  const [selectedSection, setSelectedSection] = useState<string | undefined>();
+  const [searchText, setSearchText] = useState('');
+
+  const scrollTargets = useRef<Record<string, HTMLElement>>({});
+
+  const filteredGroups = useMemo(() => {
+    return getFilteredGroups(searchText, searchInDescription, sections);
+  }, [sections, searchText, searchInDescription]);
+
+  const onNavigationChange = useCallback((selectedOptions) => {
+    setSelectedSection(selectedOptions.length ? selectedOptions[0].label : undefined);
+    if (selectedOptions.length) {
+      const scrollToElement = scrollTargets.current[selectedOptions[0].label];
+      scrollToElement.scrollIntoView();
+    }
+  }, []);
+
+  return (
+    <div
+      css={css`
+        padding: ${theme.euiTheme.size.base};
+        max-height: ${MAX_HEIGHT}px;
+        overflow-y: auto;
+        ${scrollBarStyles}
+      `}
+    >
+      <DocumentationNavigation
+        searchText={searchText}
+        setSearchText={setSearchText}
+        onNavigationChange={onNavigationChange}
+        filteredGroups={filteredGroups}
+        selectedSection={selectedSection}
+      />
+      <EuiSpacer size="s" />
+      <DocumentationMainContent
+        searchText={searchText}
+        scrollTargets={scrollTargets}
+        filteredGroups={filteredGroups}
+        sections={sections}
+      />
+    </div>
+  );
+}
+
+export const LanguageDocumentationInline = React.memo(DocumentationInline);

@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export { LanguageDocumentationPopover } from './src/components/documentation_popover';
-export { LanguageDocumentationFlyout } from './src/components/documentation_flyout';
-export { LanguageDocumentationPopoverContent } from './src/components/documentation_content';
+export { LanguageDocumentationPopover } from './src/components/as_popover';
+export { LanguageDocumentationPopoverContent } from './src/components/as_popover/popover_content';
+export { LanguageDocumentationFlyout } from './src/components/as_flyout';
+export { LanguageDocumentationInline } from './src/components/as_inline';
 export type { LanguageDocumentationSections } from './src/types';
