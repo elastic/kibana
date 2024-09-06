@@ -67,6 +67,7 @@ import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
 import type { Kubernetes } from './kubernetes';
+import type { Onboarding } from './onboarding';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
@@ -233,6 +234,7 @@ export interface SubPlugins {
   explore: Explore;
   kubernetes: Kubernetes;
   management: Management;
+  onboarding: Onboarding;
   overview: Overview;
   rules: Rules;
   threatIntelligence: ThreatIntelligence;
@@ -255,6 +257,7 @@ export interface StartedSubPlugins {
   explore: ReturnType<Explore['start']>;
   kubernetes: ReturnType<Kubernetes['start']>;
   management: ReturnType<Management['start']>;
+  onboarding: ReturnType<Onboarding['start']>;
   overview: ReturnType<Overview['start']>;
   rules: ReturnType<Rules['start']>;
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
