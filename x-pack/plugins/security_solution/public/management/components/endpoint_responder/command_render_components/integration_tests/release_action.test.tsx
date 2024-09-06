@@ -261,7 +261,6 @@ describe('When using the release action from response actions console', () => {
       });
     });
 
-    // TODO Not passing after the update to user-event v14 https://github.com/elastic/kibana/pull/189949
     it('should display completion output if done (no additional API calls)', async () => {
       const { apiMocks, render } = await prepareTestConsoleClosed();
       const { consoleManagerMockAccess } = await render();
