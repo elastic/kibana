@@ -13,7 +13,7 @@ servers:
 paths:
   /api/endpoint/action:
     get:
-      description: Get a list of action requests and their responses
+      description: Get a list of all response actions.
       operationId: EndpointGetActionsList
       parameters:
         - in: query
@@ -28,13 +28,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Get Actions List schema
+      summary: Get response actions
       tags:
         - Security Solution Endpoint Management API
   '/api/endpoint/action_log/{agent_id}':
     get:
       deprecated: true
-      description: Get action requests log
+      description: Get an action request log for the specified agent ID.
       operationId: EndpointGetActionLog
       parameters:
         - in: path
@@ -54,12 +54,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Get action requests log schema
+      summary: Get an action request log
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action_status:
     get:
-      description: Get action status
+      description: Get the status of response actions for the specified agent IDs.
       operationId: EndpointGetActionsStatus
       parameters:
         - in: query
@@ -77,12 +77,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ActionStatusSuccessResponse'
           description: OK
-      summary: Get Actions status schema
+      summary: Get response actions status
       tags:
         - Security Solution Endpoint Management API
   '/api/endpoint/action/{action_id}':
     get:
-      description: Get action details
+      description: Get the details of a response action using the action ID.
       operationId: EndpointGetActionsDetails
       parameters:
         - in: path
@@ -97,37 +97,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Get Action details schema
+      summary: Get action details
       tags:
         - Security Solution Endpoint Management API
-  '/api/endpoint/action/{action_id}/file/{file_id}/download`':
+  '/api/endpoint/action/{action_id}/file/{file_id}':
     get:
-      description: Download a file from an endpoint
-      operationId: EndpointFileDownload
-      parameters:
-        - in: path
-          name: action_id
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: file_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-          description: OK
-      summary: File Download schema
-      tags:
-        - Security Solution Endpoint Management API
-  '/api/endpoint/action/{action_id}/file/{file_id}`':
-    get:
-      description: Get file info
+      description: Get information for the specified file using the file ID.
       operationId: EndpointFileInfo
       parameters:
         - in: path
@@ -147,12 +122,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: File Info schema
+      summary: Get file information
+      tags:
+        - Security Solution Endpoint Management API
+  '/api/endpoint/action/{action_id}/file/{file_id}/download':
+    get:
+      description: Download a file from an endpoint.
+      operationId: EndpointFileDownload
+      parameters:
+        - in: path
+          name: action_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: file_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Download a file
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/execute:
     post:
-      description: Execute a given command on an endpoint
+      description: Run a shell command on an endpoint.
       operationId: EndpointExecuteAction
       requestBody:
         content:
@@ -167,12 +167,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Execute Action
+      summary: Run a command
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/get_file:
     post:
-      description: Get a file from an endpoint
+      description: Get a file from an endpoint.
       operationId: EndpointGetFileAction
       requestBody:
         content:
@@ -187,12 +187,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Get File Action
+      summary: Get a file
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/isolate:
     post:
-      description: Isolate an endpoint
+      description: >-
+        Isolate an endpoint from the network. The endpoint remains isolated
+        until it's released.
       operationId: EndpointIsolateAction
       requestBody:
         content:
@@ -207,18 +209,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Isolate Action
+      summary: Isolate an endpoint
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/kill_process:
     post:
-      description: Kill a running process on an endpoint
+      description: Terminate a running process on an endpoint.
       operationId: EndpointKillProcessAction
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KillOrSuspendActionSchema'
+              $ref: '#/components/schemas/KillProcessRouteRequestBody'
         required: true
       responses:
         '200':
@@ -227,12 +229,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Kill process Action
+      summary: Terminate a process
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/running_procs:
     post:
-      description: Get list of running processes on an endpoint
+      description: Get a list of all processes running on an endpoint.
       operationId: EndpointGetProcessesAction
       requestBody:
         content:
@@ -247,12 +249,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Get Running Processes Action
+      summary: Get running processes
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/scan:
     post:
-      description: Scan a file or directory
+      description: Scan a specific file or directory on an endpoint for malware.
       operationId: EndpointScanAction
       requestBody:
         content:
@@ -267,11 +269,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Scan Action
+      summary: Scan a file or directory
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/state:
     get:
+      description: >-
+        Get a response actions state, which reports whether encryption is
+        enabled.
       operationId: EndpointGetActionsState
       responses:
         '200':
@@ -280,18 +285,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ActionStateSuccessResponse'
           description: OK
-      summary: Get Action State schema
+      summary: Get actions state
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/suspend_process:
     post:
-      description: Suspend a running process on an endpoint
+      description: Suspend a running process on an endpoint.
       operationId: EndpointSuspendProcessAction
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KillOrSuspendActionSchema'
+              $ref: '#/components/schemas/SuspendProcessRouteRequestBody'
         required: true
       responses:
         '200':
@@ -300,12 +305,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Suspend process Action
+      summary: Suspend a process
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/unisolate:
     post:
-      description: Release an endpoint
+      description: 'Release an isolated endpoint, allowing it to rejoin a network.'
       operationId: EndpointUnisolateAction
       requestBody:
         content:
@@ -320,12 +325,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Unisolate Action
+      summary: Release an isolated endpoint
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/upload:
     post:
-      description: Upload a file to an endpoint
+      description: Upload a file to an endpoint.
       operationId: EndpointUploadAction
       requestBody:
         content:
@@ -340,12 +345,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Upload Action
+      summary: Upload a file
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/isolate:
     post:
       deprecated: true
+      description: >
+        Isolate an endpoint from the network.
+
+        > info
+
+        > This URL will return a 308 permanent redirect to `POST <kibana
+        host>:<port>/api/endpoint/action/isolate`.
       operationId: EndpointIsolateRedirect
       requestBody:
         content:
@@ -383,7 +395,7 @@ paths:
               schema:
                 example: /api/endpoint/action/isolate
                 type: string
-      summary: Permanently redirects to a new location
+      summary: Isolate an endpoint
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/metadata:
@@ -402,7 +414,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Get Metadata List schema
+      summary: Get a metadata list
       tags:
         - Security Solution Endpoint Management API
   '/api/endpoint/metadata/{id}':
@@ -421,7 +433,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Get Metadata schema
+      summary: Get metadata
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/metadata/transforms:
@@ -434,7 +446,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Get Metadata Transform schema
+      summary: Get metadata transforms
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/policy_response:
@@ -456,7 +468,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Get Policy Response schema
+      summary: Get a policy response
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/policy/summaries:
@@ -482,7 +494,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
-      summary: Get Agent Policy Summary schema
+      summary: Get an agent policy summary
       tags:
         - Security Solution Endpoint Management API
   '/api/endpoint/protection_updates_note/{package_policy_id}':
@@ -501,7 +513,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: OK
-      summary: Get Protection Updates Note schema
+      summary: Get a protection updates note
       tags:
         - Security Solution Endpoint Management API
     post:
@@ -528,7 +540,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: OK
-      summary: Create Update Protection Updates Note schema
+      summary: Create or update a protection updates note
       tags:
         - Security Solution Endpoint Management API
   '/api/endpoint/suggestions/{suggestion_type}':
@@ -570,6 +582,13 @@ paths:
   /api/endpoint/unisolate:
     post:
       deprecated: true
+      description: >
+        Release an isolated endpoint, allowing it to rejoin a network.
+
+        > info
+
+        > This URL will return a 308 permanent redirect to `POST <kibana
+        host>:<port>/api/endpoint/action/unisolate`.
       operationId: EndpointUnisolateRedirect
       requestBody:
         content:
@@ -607,7 +626,7 @@ paths:
               schema:
                 example: /api/endpoint/action/unisolate
                 type: string
-      summary: Permanently redirects to a new location
+      summary: Release an isolated endpoint
       tags:
         - Security Solution Endpoint Management API
 components:
@@ -722,6 +741,12 @@ components:
         type: string
       minItems: 1
       type: array
+    EntityId:
+      type: object
+      properties:
+        entity_id:
+          minLength: 1
+          type: string
     ExecuteRouteRequestBody:
       allOf:
         - type: object
@@ -813,7 +838,7 @@ components:
       $ref: '#/components/schemas/NoParametersRequestSchema'
     IsolateRouteRequestBody:
       $ref: '#/components/schemas/NoParametersRequestSchema'
-    KillOrSuspendActionSchema:
+    KillProcessRouteRequestBody:
       allOf:
         - type: object
           properties:
@@ -835,14 +860,12 @@ components:
           properties:
             parameters:
               oneOf:
+                - $ref: '#/components/schemas/Pid'
+                - $ref: '#/components/schemas/EntityId'
                 - type: object
                   properties:
-                    pid:
-                      minimum: 1
-                      type: integer
-                - type: object
-                  properties:
-                    entity_id:
+                    process_name:
+                      description: Valid for SentinelOne agent type only
                       minLength: 1
                       type: string
           required:
@@ -961,6 +984,12 @@ components:
               $ref: '#/components/schemas/PendingActionDataType'
         - additionalProperties: true
           type: object
+    Pid:
+      type: object
+      properties:
+        pid:
+          minimum: 1
+          type: integer
     ProtectionUpdatesNoteResponse:
       type: object
       properties:
@@ -1001,6 +1030,32 @@ components:
     SuccessResponse:
       type: object
       properties: {}
+    SuspendProcessRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - $ref: '#/components/schemas/Pid'
+                - $ref: '#/components/schemas/EntityId'
+          required:
+            - parameters
     Timeout:
       description: The maximum timeout value in milliseconds (optional)
       minimum: 1

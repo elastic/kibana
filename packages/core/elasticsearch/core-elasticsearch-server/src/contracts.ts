@@ -90,6 +90,12 @@ export interface ElasticsearchServiceSetup {
      */
     readonly config$: Observable<IElasticsearchConfig>;
   };
+
+  /**
+   * The public base URL (if any) that should be used by end users to access the Elasticsearch cluster.
+   */
+
+  readonly publicBaseUrl?: string;
 }
 
 /**

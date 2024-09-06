@@ -8539,6 +8539,10 @@
                 "path": "x-pack/plugins/spaces/server/routes/api/external/put.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/routes/api/internal/set_solution_space.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/api_keys/update.ts"
               },
@@ -9021,6 +9025,10 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/put.test.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/routes/api/internal/set_solution_space.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -14300,6 +14308,10 @@
               },
               {
                 "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/internal/has_es_data.ts"
+              },
+              {
+                "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/fields.ts"
               },
               {
@@ -16463,6 +16475,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/disable.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/schedule_now.ts"
               },
               {
                 "plugin": "securitySolution",

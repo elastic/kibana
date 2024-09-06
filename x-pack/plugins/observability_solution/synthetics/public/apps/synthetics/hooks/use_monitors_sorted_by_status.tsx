@@ -12,7 +12,10 @@ import { MonitorOverviewItem } from '../../../../common/runtime_types';
 import { selectOverviewState } from '../state/overview';
 import { useGetUrlParams } from './use_url_params';
 
-export function useMonitorsSortedByStatus() {
+export function useMonitorsSortedByStatus(): {
+  monitorsSortedByStatus: MonitorOverviewItem[];
+  downMonitors: Record<string, string[]> | null;
+} {
   const { statusFilter } = useGetUrlParams();
   const { status } = useSelector(selectOverviewStatus);
 

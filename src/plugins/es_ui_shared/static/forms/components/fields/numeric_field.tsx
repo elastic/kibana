@@ -24,7 +24,7 @@ export const NumericField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pro
   return (
     <EuiFormRow
       label={field.label}
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
