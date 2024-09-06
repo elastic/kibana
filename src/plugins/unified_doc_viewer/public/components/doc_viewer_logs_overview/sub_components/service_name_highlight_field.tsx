@@ -10,10 +10,20 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { HighlightField, HighlightFieldProps } from './highlight_field';
 import { useLogsOverviewContext } from '../../../hooks/use_logs_overview_provider';
+import { getUnifiedDocViewerServices } from '../../../plugin';
+
+const APM_LINK_TO_SERVICE_ENTITY_LOCATOR = 'APM_LINK_TO_SERVICE_ENTITY_LOCATOR';
 
 export function ServiceNameHighlightField(props: HighlightFieldProps) {
+  const { share } = getUnifiedDocViewerServices();
+  const { url: urlService } = share;
+  const apmLinkToServiceEntityLocator = urlService.locators.get<{ serviceName: string }>(
+    APM_LINK_TO_SERVICE_ENTITY_LOCATOR
+  );
+  const href = apmLinkToServiceEntityLocator?.getRedirectUrl({
+    serviceName: props.value as string,
+  });
   const { isEntityManagerEnabled } = useLogsOverviewContext();
-  const href = `/foo/app/apm/services/${props.value}`;
 
   return (
     <HighlightField {...props}>
