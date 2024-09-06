@@ -6,25 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { ConnectionRequestParams } from '@elastic/transport';
 import { Response } from './types';
 
-interface SearchResponse {
-  [key: string]: unknown;
-  requestParams?: ConnectionRequestParams;
-}
-
-export function moveRequestParamsToTopLevel(response: Response) {
-  const requestParams = (response.json as SearchResponse)?.requestParams;
+export function moveRequestParamsToTopLevel(response: Response): Response {
+  const requestParams = response.json?.requestParams;
   if (!requestParams) {
     return response;
   }
 
-  const json = { ...response.json } as SearchResponse;
-  delete json.requestParams;
   return {
     ...response,
-    json,
+    json: response.json ? { ...response.json, requestParams: undefined } : undefined,
     requestParams,
   };
 }

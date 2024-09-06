@@ -192,6 +192,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   // NOTE: initialRenderTime is only set once when the component mounts
   const visualizationRenderStartTime = useRef<number>(NaN);
   const dataReceivedTime = useRef<number>(NaN);
+  const esTookTime = useRef<number>(0);
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
@@ -203,9 +204,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           eventName: 'lensVisualizationRenderTime',
           duration: currentTime - visualizationRenderStartTime.current,
           key1: 'time_to_data',
-          value1: dataReceivedTime.current - visualizationRenderStartTime.current,
+          value1:
+            dataReceivedTime.current - visualizationRenderStartTime.current - esTookTime.current,
           key2: 'time_to_render',
           value2: currentTime - dataReceivedTime.current,
+          key3: 'es_took',
+          value3: esTookTime.current,
         });
       }
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
@@ -263,6 +267,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               searchService: plugins.data.search,
             }
           );
+          esTookTime.current = adapters?.requests.getRequests().reduce((maxTime, request) => {
+            const took = request.response?.json?.rawResponse?.took ?? 0;
+            return Math.max(maxTime, took);
+          }, 0);
         }
 
         if (requestWarnings.length) {
