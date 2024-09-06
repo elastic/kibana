@@ -27,8 +27,6 @@ export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
       'metrics-kubernetes*',
       'metrics-docker*',
       'metrics-aws*',
-      'metricbeat-*',
-      'logs-*',
     ];
   }
 }

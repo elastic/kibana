@@ -27,6 +27,10 @@ export interface SearchIndicesAppPluginStartDependencies {
   usageCollection?: UsageCollectionStart;
 }
 
+export interface SearchIndicesServicesContextDeps {
+  history: AppMountParameters['history'];
+  usageCollection?: UsageCollectionStart;
+}
 export type SearchIndicesServicesContext = CoreStart &
   SearchIndicesAppPluginStartDependencies & {
     history: AppMountParameters['history'];

@@ -31,7 +31,7 @@ export const ToggleField = ({ field, euiFieldProps = {}, idAria, ...rest }: Prop
 
   return (
     <EuiFormRow
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
