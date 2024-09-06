@@ -19,18 +19,17 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectIndexDetailPageHeader() {
       await testSubjects.existOrFail('searchIndexDetailsHeader', { timeout: 2000 });
     },
-    async expectIndexDetailPage(){
-      await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 })
+    async expectIndexDetailPage() {
+      await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
     },
-    async expectBackToIndicesButtonExists(){
-      await testSubjects.existOrFail('searchIndexDetailsBackToIndicesButton', { timeout: 2000 })
+    async expectBackToIndicesButtonExists() {
+      await testSubjects.existOrFail('searchIndexDetailsBackToIndicesButton', { timeout: 2000 });
     },
     async clickBackToIndicesButton() {
-      await testSubjects.click('searchIndexDetailsBackToIndicesButton')
+      await testSubjects.click('searchIndexDetailsBackToIndicesButton');
     },
-    async expectBackToIndicesButtonRedirectsToListPage(){
-      await testSubjects.existOrFail('indicesList')
-    }
-
+    async expectBackToIndicesButtonRedirectsToListPage() {
+      await testSubjects.existOrFail('indicesList');
+    },
   };
 }

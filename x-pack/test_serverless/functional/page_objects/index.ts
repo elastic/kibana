@@ -40,5 +40,5 @@ export const pageObjects = {
   svlManagementPage: SvlManagementPageProvider,
   svlIngestPipelines: SvlIngestPipelines,
   svlSearchHomePage: SvlSearchHomePageProvider,
-  svlSearchIndexDetailPage: SvlSearchIndexDetailPageProvider
+  svlSearchIndexDetailPage: SvlSearchIndexDetailPageProvider,
 };

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrProviderContext } from "../../ftr_provider_context";
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { testHasEmbeddedConsole } from './embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -20,9 +20,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const indexName = 'test-my-index';
 
-
-  describe('search index detail page', () =>{
-    before(async ()=>{
+  describe('search index detail page', () => {
+    before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
       await es.indices.create({ index: indexName });
       await retry.tryForTime(60 * 1000, async () => {
@@ -31,23 +30,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPage();
       });
-    })
+    });
 
     after(async () => {
       await esDeleteAllIndices(indexName);
-    })
-    it('loads index detail page', async () =>{
+    });
+    it('loads index detail page', async () => {
       await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
       await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPage();
     });
-    it('shoould redirect to indices list page', async () => {
+    it('should have embedded dev console', async () => {
+      await testHasEmbeddedConsole(pageObjects);
+    });
+    it('should redirect to indices list page', async () => {
       await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonExists();
       await pageObjects.svlSearchIndexDetailPage.clickBackToIndicesButton();
       await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonRedirectsToListPage();
-    })
-    it('should have embedded dev console', async () => {
-      await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPage();
-      await testHasEmbeddedConsole(pageObjects);
     });
-  })
+  });
 }
