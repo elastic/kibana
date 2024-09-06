@@ -282,8 +282,8 @@ export async function handleInstallPackageFailure({
   try {
     const installType = getInstallType({ pkgVersion, installedPkg });
     const attemptNumber = installedPkg?.attributes?.latest_install_failed_attempts?.length
-      ? installedPkg?.attributes?.latest_install_failed_attempts?.length
-      : 0;
+      ? installedPkg.attributes.latest_install_failed_attempts.length + 1
+      : 1;
 
     await updateInstallStatusToFailed({
       logger,
@@ -303,7 +303,7 @@ export async function handleInstallPackageFailure({
 
     // in case of reinstall, restart install where it left off
     // retry MAX_REINSTALL_RETRIES times before exiting, in case the error persists
-    if (installType === 'reinstall' && attemptNumber < MAX_REINSTALL_RETRIES) {
+    if (installType === 'reinstall' && attemptNumber <= MAX_REINSTALL_RETRIES) {
       logger.error(`Error installing ${pkgkey}: [${error.toString()}]`);
       logger.debug(
         `Retrying install of ${pkgkey} with install type: ${installType} - Attempt ${attemptNumber} `

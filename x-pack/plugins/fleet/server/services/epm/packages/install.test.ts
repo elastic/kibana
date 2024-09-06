@@ -762,13 +762,12 @@ describe('handleInstallPackageFailure', () => {
         pkgVersion: '2.0.0',
         spaceId: 'default',
       });
-
       expect(mockedLogger.error).toBeCalledWith(
         'Error installing test_package-2.0.0: [Error: test installing]'
       );
       expect(mockedLogger.debug).toBeCalledWith(
         expect.stringMatching(
-          /Retrying install of test_package-2.0.0 with install type: reinstall - Attempt 0/
+          /Retrying install of test_package-2.0.0 with install type: reinstall - Attempt 1/
         )
       );
       expect(mockedLogger.debug).toBeCalledWith(

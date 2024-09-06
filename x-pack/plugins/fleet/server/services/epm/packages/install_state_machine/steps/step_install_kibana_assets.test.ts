@@ -199,7 +199,7 @@ describe('cleanUpKibanaAssetsStep', () => {
     expect(mockedDeleteKibanaAssets).toBeCalledWith({
       installedObjects: installedKibana,
       spaceId: 'default',
-      packageInfo: packageInstallContext.packageInfo
+      packageInfo: packageInstallContext.packageInfo,
     });
   });
 
