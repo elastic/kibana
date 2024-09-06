@@ -1836,38 +1836,34 @@ async function getOptionArgsSuggestions(
 }
 
 const sortModifierSuggestions = {
-  ASC: (entered: string = '') =>
-    ({
-      label: 'ASC',
-      text: 'ASC'.slice(entered.length),
-      detail: '',
-      kind: 'Keyword',
-      sortText: '1-ASC',
-    } as SuggestionRawDefinition),
-  DESC: (entered: string = '') =>
-    ({
-      label: 'DESC',
-      text: 'DESC'.slice(entered.length),
-      detail: '',
-      kind: 'Keyword',
-      sortText: '1-DESC',
-    } as SuggestionRawDefinition),
-  NULLS_FIRST: (entered: string = '') =>
-    ({
-      label: 'NULLS FIRST',
-      text: 'NULLS FIRST'.slice(entered.length),
-      detail: '',
-      kind: 'Keyword',
-      sortText: '2-NULLS FIRST',
-    } as SuggestionRawDefinition),
-  NULLS_LAST: (entered: string = '') =>
-    ({
-      label: 'NULLS LAST',
-      text: 'NULLS LAST'.slice(entered.length),
-      detail: '',
-      kind: 'Keyword',
-      sortText: '2-NULLS LAST',
-    } as SuggestionRawDefinition),
+  ASC: {
+    label: 'ASC',
+    text: 'ASC',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '1-ASC',
+  } as SuggestionRawDefinition,
+  DESC: {
+    label: 'DESC',
+    text: 'DESC',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '1-DESC',
+  } as SuggestionRawDefinition,
+  NULLS_FIRST: {
+    label: 'NULLS FIRST',
+    text: 'NULLS FIRST',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '2-NULLS FIRST',
+  } as SuggestionRawDefinition,
+  NULLS_LAST: {
+    label: 'NULLS LAST',
+    text: 'NULLS LAST',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '2-NULLS LAST',
+  } as SuggestionRawDefinition,
 };
 
 export const suggestForSortCmd = async (innerText: string, getFieldsByType: GetFieldsByTypeFn) => {
@@ -1876,10 +1872,10 @@ export const suggestForSortCmd = async (innerText: string, getFieldsByType: GetF
   switch (pos) {
     case 'space2': {
       return [
-        sortModifierSuggestions.ASC(),
-        sortModifierSuggestions.DESC(),
-        sortModifierSuggestions.NULLS_FIRST(),
-        sortModifierSuggestions.NULLS_LAST(),
+        sortModifierSuggestions.ASC,
+        sortModifierSuggestions.DESC,
+        sortModifierSuggestions.NULLS_FIRST,
+        sortModifierSuggestions.NULLS_LAST,
         ...getFinalSuggestions({
           comma: true,
         }),
@@ -1888,16 +1884,16 @@ export const suggestForSortCmd = async (innerText: string, getFieldsByType: GetF
     case 'order': {
       const suggestions: SuggestionRawDefinition[] = [];
       for (const modifier of Object.values(sortModifierSuggestions)) {
-        if (modifier().label.startsWith(order)) {
-          suggestions.push(modifier(order));
+        if (modifier.label.startsWith(order)) {
+          suggestions.push(modifier);
         }
       }
       return suggestions;
     }
     case 'space3': {
       return [
-        sortModifierSuggestions.NULLS_FIRST(),
-        sortModifierSuggestions.NULLS_LAST(),
+        sortModifierSuggestions.NULLS_FIRST,
+        sortModifierSuggestions.NULLS_LAST,
         ...getFinalSuggestions({
           comma: true,
         }),
@@ -1906,8 +1902,8 @@ export const suggestForSortCmd = async (innerText: string, getFieldsByType: GetF
     case 'nulls': {
       const suggestions: SuggestionRawDefinition[] = [];
       for (const modifier of Object.values(sortModifierSuggestions)) {
-        if (modifier().label.startsWith(nulls)) {
-          suggestions.push(modifier(nulls));
+        if (modifier.label.startsWith(nulls)) {
+          suggestions.push(modifier);
         }
       }
       return suggestions;
