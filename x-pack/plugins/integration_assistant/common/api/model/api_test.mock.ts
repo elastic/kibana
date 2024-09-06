@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AnalyzeLogsRequestBody } from '../analyze_logs/analyze_logs_route';
 import type { BuildIntegrationRequestBody } from '../build_integration/build_integration';
 import type { CategorizationRequestBody } from '../categorization/categorization_route';
 import type { EcsMappingRequestBody } from '../ecs/ecs_route';
@@ -81,4 +82,11 @@ export const getRelatedRequestMock = (): RelatedRequestBody => ({
   rawSamples,
   connectorId: 'test-connector-id',
   currentPipeline: getPipelineMock(),
+});
+
+export const getAnalyzeLogsRequestBody = (): AnalyzeLogsRequestBody => ({
+  dataStreamName: 'test-data-stream-name',
+  packageName: 'test-package-name',
+  connectorId: 'test-connector-id',
+  logSamples: rawSamples,
 });
