@@ -20,14 +20,14 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
-import { TextObject } from '../../../common/text_object';
+import { TextObject } from '../../../../common/text_object';
 
 import {
   EditorContentSpinner,
   OutputPanelEmptyState,
   NetworkRequestStatusBar,
 } from '../../components';
-import { getAutocompleteInfo, StorageKeys } from '../../services';
+import { getAutocompleteInfo, StorageKeys } from '../../../services';
 import {
   useEditorReadContext,
   useServicesContext,
@@ -35,10 +35,9 @@ import {
   useRequestActionContext,
   useEditorActionContext,
 } from '../../contexts';
-import type { SenseEditor } from '../models';
 import { MonacoEditor } from './monaco_editor';
 import { MonacoEditorOutput } from './monaco_editor_output';
-import { getResponseWithMostSevereStatusCode } from '../../lib/utils';
+import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
 const INITIAL_PANEL_SIZE = 50;
 const PANEL_MIN_SIZE = '20%';
@@ -46,7 +45,6 @@ const DEBOUNCE_DELAY = 500;
 
 interface Props {
   loading: boolean;
-  setEditorInstance: (instance: SenseEditor) => void;
   containerWidth: number;
   inputEditorValue: string;
   setInputEditorValue: (value: string) => void;
@@ -55,7 +53,6 @@ interface Props {
 export const Editor = memo(
   ({
     loading,
-    setEditorInstance,
     containerWidth,
     inputEditorValue,
     setInputEditorValue,
