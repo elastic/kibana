@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { rootRequest } from './common';
 
 export const createConnector = (connector: Record<string, unknown>) =>
-  rootRequest({
+  rootRequest<Connector>({
     method: 'POST',
     url: '/api/actions/action',
     body: connector,
