@@ -57,7 +57,7 @@ while read -r config; do
 
   start=$(date +%s)
 
-  if [[ "${USE_CHROME_BETA:-}" =~ /^(true|1)$/ ]]; then
+  if [[ "${USE_CHROME_BETA:-}" =~ ^(1|true)$ ]]; then
     echo "USE_CHROME_BETA was set - using google-chrome-beta"
     export TEST_BROWSER_BINARY_PATH="$(which google-chrome-beta)"
   fi
