@@ -10,36 +10,32 @@ import { i18n } from '@kbn/i18n';
 import { InvestigationNoteResponse } from '@kbn/investigation-shared';
 import React, { useState } from 'react';
 import { ResizableTextInput } from './resizable_text_input';
-import { useUpdateInvestigationNote } from '../../../../hooks/use_update_investigation_note';
+import { useInvestigation } from '../../contexts/investigation_context';
 
 interface Props {
-  investigationId: string;
   note: InvestigationNoteResponse;
-  onCancel: () => void;
-  onUpdate: () => void;
+  onClose: () => void;
 }
 
-export function EditNoteForm({ investigationId, note, onCancel, onUpdate }: Props) {
+export function EditNoteForm({ note, onClose }: Props) {
   const [noteInput, setNoteInput] = useState(note.content);
-  const { mutateAsync: updateNote, isLoading: isUpdating } = useUpdateInvestigationNote();
+  const { updateNote, isUpdatingNote } = useInvestigation();
 
-  const handleUpdateNote = async () => {
-    await updateNote({ investigationId, noteId: note.id, note: { content: noteInput.trim() } });
-    onUpdate();
+  const onUpdate = async () => {
+    await updateNote(note.id, noteInput.trim());
+    onClose();
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <ResizableTextInput
-          disabled={isUpdating}
+          disabled={isUpdatingNote}
           value={noteInput}
           onChange={(value) => {
             setNoteInput(value);
           }}
-          onSubmit={() => {
-            handleUpdateNote();
-          }}
+          onSubmit={onUpdate}
           placeholder={note.content}
         />
       </EuiFlexItem>
@@ -47,7 +43,7 @@ export function EditNoteForm({ investigationId, note, onCancel, onUpdate }: Prop
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton
-            disabled={isUpdating}
+            disabled={isUpdatingNote}
             data-test-subj="cancelEditNoteButton"
             color="text"
             aria-label={i18n.translate(
@@ -55,7 +51,7 @@ export function EditNoteForm({ investigationId, note, onCancel, onUpdate }: Prop
               { defaultMessage: 'Cancel' }
             )}
             size="m"
-            onClick={() => onCancel()}
+            onClick={() => onClose()}
           >
             {i18n.translate('xpack.investigateApp.investigationNotes.cancelEditButtonLabel', {
               defaultMessage: 'Cancel',
@@ -70,12 +66,10 @@ export function EditNoteForm({ investigationId, note, onCancel, onUpdate }: Prop
               'xpack.investigateApp.investigationNotes.updateNoteButtonLabel',
               { defaultMessage: 'Update note' }
             )}
-            disabled={isUpdating || noteInput.trim() === ''}
-            isLoading={isUpdating}
+            disabled={isUpdatingNote || noteInput.trim() === ''}
+            isLoading={isUpdatingNote}
             size="m"
-            onClick={() => {
-              handleUpdateNote();
-            }}
+            onClick={onUpdate}
           >
             {i18n.translate('xpack.investigateApp.investigationNotes.updateNoteButtonLabel', {
               defaultMessage: 'Update note',
