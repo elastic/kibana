@@ -220,7 +220,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KillOrSuspendActionSchema'
+              $ref: '#/components/schemas/KillProcessRouteRequestBody'
         required: true
       responses:
         '200':
@@ -296,7 +296,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KillOrSuspendActionSchema'
+              $ref: '#/components/schemas/SuspendProcessRouteRequestBody'
         required: true
       responses:
         '200':
@@ -741,6 +741,12 @@ components:
         type: string
       minItems: 1
       type: array
+    EntityId:
+      type: object
+      properties:
+        entity_id:
+          minLength: 1
+          type: string
     ExecuteRouteRequestBody:
       allOf:
         - type: object
@@ -832,7 +838,7 @@ components:
       $ref: '#/components/schemas/NoParametersRequestSchema'
     IsolateRouteRequestBody:
       $ref: '#/components/schemas/NoParametersRequestSchema'
-    KillOrSuspendActionSchema:
+    KillProcessRouteRequestBody:
       allOf:
         - type: object
           properties:
@@ -854,14 +860,12 @@ components:
           properties:
             parameters:
               oneOf:
+                - $ref: '#/components/schemas/Pid'
+                - $ref: '#/components/schemas/EntityId'
                 - type: object
                   properties:
-                    pid:
-                      minimum: 1
-                      type: integer
-                - type: object
-                  properties:
-                    entity_id:
+                    process_name:
+                      description: Valid for SentinelOne agent type only
                       minLength: 1
                       type: string
           required:
@@ -980,6 +984,12 @@ components:
               $ref: '#/components/schemas/PendingActionDataType'
         - additionalProperties: true
           type: object
+    Pid:
+      type: object
+      properties:
+        pid:
+          minimum: 1
+          type: integer
     ProtectionUpdatesNoteResponse:
       type: object
       properties:
@@ -1020,6 +1030,32 @@ components:
     SuccessResponse:
       type: object
       properties: {}
+    SuspendProcessRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - $ref: '#/components/schemas/Pid'
+                - $ref: '#/components/schemas/EntityId'
+          required:
+            - parameters
     Timeout:
       description: The maximum timeout value in milliseconds (optional)
       minimum: 1

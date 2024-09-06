@@ -78,7 +78,6 @@ export class SyntheticsEsClient {
 
     const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
     const startTime = process.hrtime();
-
     const startTimeNow = Date.now();
 
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
@@ -90,7 +89,8 @@ export class SyntheticsEsClient {
       esError = e;
       esRequestStatus = RequestStatus.ERROR;
     }
-    if (this.request) {
+    const isInspectorEnabled = await this.getInspectEnabled();
+    if (isInspectorEnabled && this.request) {
       this.inspectableEsQueries.push(
         getInspectResponse({
           esError,
@@ -102,9 +102,7 @@ export class SyntheticsEsClient {
           startTime: startTimeNow,
         })
       );
-    }
-    const isInspectorEnabled = await this.getInspectEnabled();
-    if (isInspectorEnabled && this.request) {
+
       debugESCall({
         startTime,
         request: this.request,
@@ -125,7 +123,8 @@ export class SyntheticsEsClient {
     TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest,
     TDocument = unknown
   >(
-    requests: MsearchMultisearchBody[]
+    requests: MsearchMultisearchBody[],
+    operationName?: string
   ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
     const searches: Array<MsearchMultisearchHeader | MsearchMultisearchBody> = [];
     for (const request of requests) {
@@ -133,15 +132,41 @@ export class SyntheticsEsClient {
       searches.push(request);
     }
 
-    const results = await this.baseESClient.msearch(
-      {
-        searches,
-      },
-      { meta: true }
-    );
+    const startTimeNow = Date.now();
+
+    let res: any;
+    let esError: any;
+
+    try {
+      res = await this.baseESClient.msearch(
+        {
+          searches,
+        },
+        { meta: true }
+      );
+    } catch (e) {
+      esError = e;
+    }
+
+    const isInspectorEnabled = await this.getInspectEnabled();
+    if (isInspectorEnabled && this.request) {
+      requests.forEach((request, index) => {
+        this.inspectableEsQueries.push(
+          getInspectResponse({
+            esError,
+            esRequestParams: { index: SYNTHETICS_INDEX_PATTERN, ...request },
+            esRequestStatus: RequestStatus.OK,
+            esResponse: res.body.responses[index],
+            kibanaRequest: this.request!,
+            operationName: operationName ?? '',
+            startTime: startTimeNow,
+          })
+        );
+      });
+    }
 
     return {
-      responses: results.body.responses as unknown as Array<
+      responses: res.body.responses as unknown as Array<
         InferSearchResponseOf<TDocument, TSearchRequest>
       >,
     };
@@ -193,6 +218,9 @@ export class SyntheticsEsClient {
     return {};
   }
   async getInspectEnabled() {
+    if (this.isDev) {
+      return true;
+    }
     if (!this.uiSettings) {
       return false;
     }

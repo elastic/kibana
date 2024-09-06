@@ -8,8 +8,8 @@
 import { uniq } from 'lodash';
 import {
   type MetricsUIAggregation,
-  ESBasicMetricAggRT,
   type MetricsAPITimerange,
+  isBasicMetricAgg,
 } from '@kbn/metrics-data-access-plugin/common';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
@@ -74,7 +74,7 @@ const aggregationsToModules = async (
 ): Promise<string[]> => {
   const uniqueFields = Object.values(aggregations)
     .reduce<Array<string | undefined>>((fields, agg) => {
-      if (ESBasicMetricAggRT.is(agg)) {
+      if (isBasicMetricAgg(agg)) {
         return uniq(fields.concat(Object.values(agg).map((a) => a?.field)));
       }
       return fields;
