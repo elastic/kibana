@@ -498,10 +498,7 @@ export const initializeDashboard = async ({
       (existingSession && incomingEmbeddable ? existingSession : session.start());
 
     untilDashboardReady().then(async (container) => {
-      // Bug in main where panels are loaded before control filters are ready
-      // Want to migrate to react embeddable controls with same behavior
-      // TODO - do not load panels until control filters are ready
-      //await container.untilContainerInitialized();
+      await container.untilContainerInitialized();
       startDashboardSearchSessionIntegration.bind(container)(
         creationOptions?.searchSessionSettings
       );

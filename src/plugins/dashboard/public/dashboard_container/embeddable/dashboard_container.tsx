@@ -184,7 +184,7 @@ export class DashboardContainer
   private scrollPosition?: number;
 
   // setup
-  // public untilContainerInitialized: () => Promise<void>;
+  public untilContainerInitialized: () => Promise<void>;
 
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
@@ -223,7 +223,6 @@ export class DashboardContainer
     initialComponentState?: DashboardPublicState
   ) {
     const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
-    /*
     async function untilContainerInitialized(): Promise<void> {
       return new Promise((resolve) => {
         controlGroupApi$
@@ -239,7 +238,6 @@ export class DashboardContainer
           });
       });
     }
-    */
 
     const {
       usageCollection,
@@ -264,7 +262,7 @@ export class DashboardContainer
     );
 
     this.controlGroupApi$ = controlGroupApi$;
-    //this.untilContainerInitialized = untilContainerInitialized;
+    this.untilContainerInitialized = untilContainerInitialized;
 
     this.trackPanelAddMetric = usageCollection.reportUiCounter?.bind(
       usageCollection,
