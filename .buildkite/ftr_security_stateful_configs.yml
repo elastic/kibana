@@ -62,8 +62,12 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists_items/trial_license_complete_tier/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists/trial_license_complete_tier/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/lists_items/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists/import_export/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists/items/crud_items/crud/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists/items/crud_items/rbac/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists/lists/crud_lists/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists/lists/list_utils/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/value_lists/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/explore/hosts/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/explore/network/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/explore/users/trial_license_complete_tier/configs/ess.config.ts

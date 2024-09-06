@@ -43,9 +43,9 @@ steps:
   - group: 'API MKI - Detection Engine - '
     key: api_test_detections_engine
     steps:
-      - label: Running exception_lists:qa:serverless
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:qa:serverless
-        key: exception_lists:qa:serverless
+      - label: Running exception_lists_import_export:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists_import_export:qa:serverless
+        key: exception_lists_import_export:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -61,9 +61,9 @@ steps:
   - group: 'API MKI - Detection Engine - '
     key: api_test_detections_engine
     steps:
-      - label: Running exception_lists_items:qa:serverless
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists_items:qa:serverless
-        key: exception_lists_items:qa:serverless
+      - label: Running exception_lists_items_crud:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists_items_crud:qa:serverless
+        key: exception_lists_items_crud:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -76,9 +76,63 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running lists_items:qa:serverless
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh lists_items:qa:serverless
-        key: lists_items:qa:serverless
+  - group: 'API MKI - Detection Engine - '
+    key: api_test_detections_engine
+    steps:
+      - label: Running exception_lists_items_crud_rbac:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists_items_crud_rbac:qa:serverless
+        key: exception_lists_items_crud_rbac:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
+              limit: 2
+
+  - group: 'API MKI - Detection Engine - '
+    key: api_test_detections_engine
+    steps:
+      - label: Running exception_lists_crud_lists:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists_crud_lists:qa:serverless
+        key: exception_lists_crud_lists:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
+              limit: 2
+
+  - group: 'API MKI - Detection Engine - '
+    key: api_test_detections_engine
+    steps:
+      - label: Running exception_lists_list_utils:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists_list_utils:qa:serverless
+        key: exception_lists_list_utils:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
+              limit: 2
+
+      - label: Running value_lists:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh value_lists:qa:serverless
+        key: value_lists:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
