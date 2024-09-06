@@ -472,7 +472,21 @@ ROW 1
 ROW
   // One is important here
   1 +
-  2`);
+    2`);
+      });
+
+      test('second operand with top comment', () => {
+        const query = `ROW
+        1 +
+          // Two is more important here
+          2`;
+        const text = reprint(query).text;
+
+        expect('\n' + text).toBe(`
+ROW
+  1 +
+    // Two is more important here
+    2`);
       });
     });
   });

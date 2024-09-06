@@ -164,17 +164,25 @@ export class WrappingPrettyPrinter {
         remaining: inp.remaining,
         flattenBinExpOfType: group,
       };
+      const rightTab = isLeftChild ? this.opts.tab : '';
+      const rightIndent = inp.indent + rightTab + (oneArgumentPerLine ? this.opts.tab : '');
       const rightInput: Input = {
-        indent: inp.indent + this.opts.tab,
+        indent: rightIndent,
         remaining: inp.remaining - this.opts.tab.length,
         flattenBinExpOfType: group,
       };
       const leftOut = ctx.visitArgument(0, leftInput);
       const rightOut = ctx.visitArgument(1, rightInput);
-      const rightTab = isLeftChild ? this.opts.tab : '';
-      const txt = `${leftOut.txt} ${operator}\n${inp.indent}${rightTab}${rightOut.txt}${suffix}`;
 
-      return { txt, indented: leftOut.indented || rightOut.indented };
+      let txt = `${leftOut.txt} ${operator}\n`;
+
+      if (!rightOut.indented) {
+        txt += rightIndent;
+      }
+
+      txt += rightOut.txt + suffix;
+
+      return { txt, indented: leftOut.indented };
     }
 
     let txt: string = '';
@@ -191,6 +199,8 @@ export class WrappingPrettyPrinter {
 
     const length = leftFormatted.length + rightFormatted.length + operator.length + 2;
     const fitsOnOneLine = length <= inp.remaining;
+
+    let indented = false;
 
     if (fitsOnOneLine) {
       txt = `${leftFormatted} ${operator} ${rightFormatted}${suffix}`;
@@ -210,10 +220,17 @@ export class WrappingPrettyPrinter {
       const leftOut = ctx.visitArgument(0, leftInput);
       const rightOut = ctx.visitArgument(1, rightInput);
 
-      txt = `${leftOut.txt} ${operator}\n${inp.indent}${this.opts.tab}${rightOut.txt}${suffix}`;
+      txt = `${leftOut.txt} ${operator}\n`;
+
+      if (!rightOut.indented) {
+        txt += `${inp.indent}${this.opts.tab}`;
+      }
+
+      txt += `${rightOut.txt}${suffix}`;
+      indented = leftOut.indented;
     }
 
-    return { txt };
+    return { txt, indented };
   }
 
   private printArguments(
