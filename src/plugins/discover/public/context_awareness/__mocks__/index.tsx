@@ -33,6 +33,17 @@ export const createContextAwarenessMocks = ({
         ...prev(),
         rootProfile: () => <>root-profile</>,
       })),
+      getAdditionalCellActions: jest.fn((prev) => () => [
+        ...prev(),
+        {
+          getDisplayName: () => 'Root action',
+          getIconType: () => 'minus',
+          isCompatible: () => false,
+          execute: () => {
+            alert('Root action executed');
+          },
+        },
+      ]),
     },
     resolve: jest.fn(() => ({
       isMatch: true,
@@ -70,6 +81,16 @@ export const createContextAwarenessMocks = ({
         ],
         rowHeight: 3,
       })),
+      getAdditionalCellActions: jest.fn((prev) => () => [
+        ...prev(),
+        {
+          getDisplayName: () => 'Data source action',
+          getIconType: () => 'plus',
+          execute: () => {
+            alert('Data source action executed');
+          },
+        },
+      ]),
     },
     resolve: jest.fn(() => ({
       isMatch: true,

@@ -11,6 +11,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import type {
+  AdditionalCellAction,
   AdditionalCellActionContext,
   DiscoverCellAction,
   DiscoverCellActionExecutionContext,
@@ -21,7 +22,7 @@ import { useProfileAccessor } from './use_profile_accessor';
 
 export const DISCOVER_CELL_ACTIONS_TRIGGER: Trigger = { id: 'DISCOVER_CELL_ACTIONS_TRIGGER_ID' };
 
-const DISCOVER_CELL_ACTION_TYPE = 'discover-cellAction-type';
+export const DISCOVER_CELL_ACTION_TYPE = 'discover-cellAction-type';
 
 export const useAdditionalCellActions = ({
   dataSource,
@@ -40,32 +41,9 @@ export const useAdditionalCellActions = ({
 
   useEffect(() => {
     const currentInstanceId = uuidv4();
-    const actions = additionalCellActions.map((action, i) => {
-      const createFactory = createCellActionFactory<DiscoverCellAction>(() => ({
-        type: DISCOVER_CELL_ACTION_TYPE,
-        getIconType: (context) => action.getIconType(toCellActionContext(context)),
-        getDisplayName: (context) => action.getDisplayName(toCellActionContext(context)),
-        getDisplayNameTooltip: (context) => action.getDisplayName(toCellActionContext(context)),
-        execute: async (context) => action.execute(toCellActionContext(context)),
-        isCompatible: async ({ data, metadata }) => {
-          if (metadata?.instanceId !== currentInstanceId || data.length !== 1) {
-            return false;
-          }
-
-          const field = data[0]?.field;
-
-          if (!field || !metadata.dataView?.getFieldByName(field.name)) {
-            return false;
-          }
-
-          return action.isCompatible?.({ field, ...metadata }) ?? true;
-        },
-      }));
-
-      const factory = createFactory();
-
-      return factory({ id: uuidv4(), order: i });
-    });
+    const actions = additionalCellActions.map((action, i) =>
+      createCellAction(currentInstanceId, action, i)
+    );
 
     actions.forEach((action) => {
       uiActions.registerAction(action);
@@ -90,7 +68,38 @@ export const useAdditionalCellActions = ({
   );
 };
 
-const toCellActionContext = ({
+export const createCellAction = (
+  instanceId: string,
+  action: AdditionalCellAction,
+  order: number
+) => {
+  const createFactory = createCellActionFactory<DiscoverCellAction>(() => ({
+    type: DISCOVER_CELL_ACTION_TYPE,
+    getIconType: (context) => action.getIconType(toCellActionContext(context)),
+    getDisplayName: (context) => action.getDisplayName(toCellActionContext(context)),
+    getDisplayNameTooltip: (context) => action.getDisplayName(toCellActionContext(context)),
+    execute: async (context) => action.execute(toCellActionContext(context)),
+    isCompatible: async ({ data, metadata }) => {
+      if (metadata?.instanceId !== instanceId || data.length !== 1) {
+        return false;
+      }
+
+      const field = data[0]?.field;
+
+      if (!field || !metadata.dataView?.getFieldByName(field.name)) {
+        return false;
+      }
+
+      return action.isCompatible?.({ field, ...metadata }) ?? true;
+    },
+  }));
+
+  const factory = createFactory();
+
+  return factory({ id: uuidv4(), order });
+};
+
+export const toCellActionContext = ({
   data,
   metadata,
 }: DiscoverCellActionExecutionContext): AdditionalCellActionContext => ({
