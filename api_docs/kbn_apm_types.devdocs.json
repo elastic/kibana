@@ -53,7 +53,7 @@
             "label": "name",
             "description": [],
             "signature": [
-              "\"java\" | \"ruby\" | \"go\" | \"dotnet\" | \"php\" | \"otlp\" | \"android/java\" | \"iOS/swift\" | \"rum-js\" | \"js-base\" | \"nodejs\" | \"python\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\""
+              "\"java\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"ruby\" | \"rum-js\" | \"android/java\" | \"otlp\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\""
             ],
             "path": "packages/kbn-apm-types/src/es_schemas/ui/fields/agent.ts",
             "deprecated": false,
@@ -2678,7 +2678,7 @@
         "label": "AgentName",
         "description": [],
         "signature": [
-          "\"java\" | \"ruby\" | \"go\" | \"dotnet\" | \"php\" | \"otlp\" | \"android/java\" | \"iOS/swift\" | \"rum-js\" | \"js-base\" | \"nodejs\" | \"python\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\""
+          "\"java\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"ruby\" | \"rum-js\" | \"android/java\" | \"otlp\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\""
         ],
         "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
@@ -3025,7 +3025,7 @@
           "\nWe cannot mark these arrays as const and derive their type\nbecause we need to be able to assign them as mutable entities for ES queries."
         ],
         "signature": [
-          "\"java\" | \"ruby\" | \"go\" | \"dotnet\" | \"php\" | \"android/java\" | \"iOS/swift\" | \"rum-js\" | \"js-base\" | \"nodejs\" | \"python\""
+          "\"java\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"ruby\" | \"rum-js\" | \"android/java\""
         ],
         "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,

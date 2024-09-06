@@ -354,11 +354,13 @@ export default ({ getService }: FtrProviderContext) => {
 
         const status2 = await riskEngineRoutes.getStatus();
 
-        expect(status2.body).to.eql({
-          risk_engine_status: 'ENABLED',
-          legacy_risk_engine_status: 'NOT_INSTALLED',
-          is_max_amount_of_risk_engines_reached: true,
-        });
+        expect(status2.body.risk_engine_status).to.be('ENABLED');
+        expect(status2.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
+        expect(status2.body.is_max_amount_of_risk_engines_reached).to.be(true);
+
+        expect(status2.body.risk_engine_task_status.runAt).to.be.a('string');
+        expect(status2.body.risk_engine_task_status.status).to.be('idle');
+        expect(status2.body.risk_engine_task_status.startedAt).to.be(undefined);
 
         await riskEngineRoutes.disable();
         const status3 = await riskEngineRoutes.getStatus();
@@ -372,11 +374,13 @@ export default ({ getService }: FtrProviderContext) => {
         await riskEngineRoutes.enable();
         const status4 = await riskEngineRoutes.getStatus();
 
-        expect(status4.body).to.eql({
-          risk_engine_status: 'ENABLED',
-          legacy_risk_engine_status: 'NOT_INSTALLED',
-          is_max_amount_of_risk_engines_reached: true,
-        });
+        expect(status4.body.risk_engine_status).to.be('ENABLED');
+        expect(status4.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
+        expect(status4.body.is_max_amount_of_risk_engines_reached).to.be(true);
+
+        expect(status4.body.risk_engine_task_status.runAt).to.be.a('string');
+        expect(status4.body.risk_engine_task_status.status).to.be('idle');
+        expect(status4.body.risk_engine_task_status.startedAt).to.be(undefined);
       });
 
       it('should return status of legacy risk engine', async () => {
@@ -393,11 +397,13 @@ export default ({ getService }: FtrProviderContext) => {
 
         const status2 = await riskEngineRoutes.getStatus();
 
-        expect(status2.body).to.eql({
-          risk_engine_status: 'ENABLED',
-          legacy_risk_engine_status: 'NOT_INSTALLED',
-          is_max_amount_of_risk_engines_reached: true,
-        });
+        expect(status2.body.risk_engine_status).to.be('ENABLED');
+        expect(status2.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
+        expect(status2.body.is_max_amount_of_risk_engines_reached).to.be(true);
+
+        expect(status2.body.risk_engine_task_status.runAt).to.be.a('string');
+        expect(status2.body.risk_engine_task_status.status).to.be('idle');
+        expect(status2.body.risk_engine_task_status.startedAt).to.be(undefined);
       });
     });
   });
