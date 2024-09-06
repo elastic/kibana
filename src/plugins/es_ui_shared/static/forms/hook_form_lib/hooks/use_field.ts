@@ -549,7 +549,7 @@ export const useField = <T, FormType = FormData, I = T>(
       type,
       label,
       labelAppend,
-      helpText,
+      helpText: typeof helpText === 'function' ? helpText() : helpText,
       value,
       errors,
       isPristine,

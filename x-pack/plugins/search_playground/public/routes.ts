@@ -5,5 +5,8 @@
  * 2.0.
  */
 
+export const SEARCH_PLAYGROUND_APP_ID = `search_playground`;
 export const ROOT_PATH = '/';
+
 export const SEARCH_PLAYGROUND_CHAT_PATH = `${ROOT_PATH}chat`;
+export const SEARCH_PLAYGROUND_SEARCH_PATH = `${ROOT_PATH}search`;

@@ -44,6 +44,7 @@ import { reactRouterNavigate, useDarkMode } from '@kbn/kibana-react-plugin/publi
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
+import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -72,7 +73,6 @@ import { useCapabilities } from '../../../components/use_capabilities';
 import type { CheckSecurityFeaturesResponse } from '../../security_features';
 import type { UserAPIClient } from '../../users';
 import type { IndicesAPIClient } from '../indices_api_client';
-import { KibanaPrivileges } from '../model';
 import type { PrivilegesAPIClient } from '../privileges_api_client';
 import type { RolesAPIClient } from '../roles_api_client';
 
@@ -205,6 +205,7 @@ function useRole(
   roleName?: string
 ) {
   const [role, setRole] = useState<Role | null>(null);
+
   useEffect(() => {
     const rolePromise = roleName
       ? rolesAPIClient.getRole(roleName)
@@ -350,7 +351,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   // We should keep the same mutable instance of Validator for every re-render since we'll
   // eventually enable validation after the first time user tries to save a role.
-  const { current: validator } = useRef(new RoleValidator({ shouldValidate: false }));
+  const { current: validator } = useRef(new RoleValidator({ shouldValidate: false, buildFlavor }));
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
   const [creatingRoleAlreadyExists, setCreatingRoleAlreadyExists] = useState<boolean>(false);
   const [previousName, setPreviousName] = useState<string>('');
@@ -775,7 +776,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiButton size="s" href={cloudOrgUrl}>
-                  Manage Members
+                  {i18n.translate('xpack.security.management.roles.manageRoleUsers', {
+                    defaultMessage: 'Manage Members',
+                  })}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

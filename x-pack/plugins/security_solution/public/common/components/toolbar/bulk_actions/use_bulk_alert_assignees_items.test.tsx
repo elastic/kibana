@@ -39,6 +39,7 @@ const mockUserProfiles = [
 
 const defaultProps: UseBulkAlertAssigneesItemsProps = {
   onAssigneesUpdate: () => {},
+  alertAssignments: [],
 };
 
 const mockAssigneeItems = [
@@ -168,6 +169,66 @@ describe('useBulkAlertAssigneesItems', () => {
       expect.any(Function),
       setAlertLoadingMock
     );
+  });
+
+  it('should set unnasign alert action to disabled if no assignees exist', () => {
+    const mockSetAlertAssignees = jest.fn();
+    (useSetAlertAssignees as jest.Mock).mockReturnValue(mockSetAlertAssignees);
+    const { result } = renderHook(
+      () =>
+        useBulkAlertAssigneesItems({
+          onAssigneesUpdate: () => {},
+          alertAssignments: [],
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    expect(
+      (
+        result.current.alertAssigneesItems[0] as unknown as {
+          disable: boolean;
+        }
+      ).disable
+    ).toBeFalsy();
+    expect(
+      (
+        result.current.alertAssigneesItems[1] as unknown as {
+          disable: boolean;
+        }
+      ).disable
+    ).toBeTruthy();
+  });
+
+  it('should set unnasign alert action to enabled if assignees exist', () => {
+    const mockSetAlertAssignees = jest.fn();
+    (useSetAlertAssignees as jest.Mock).mockReturnValue(mockSetAlertAssignees);
+    const { result } = renderHook(
+      () =>
+        useBulkAlertAssigneesItems({
+          onAssigneesUpdate: () => {},
+          alertAssignments: ['user1'],
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    expect(
+      (
+        result.current.alertAssigneesItems[0] as unknown as {
+          disable: boolean;
+        }
+      ).disable
+    ).toBeFalsy();
+    expect(
+      (
+        result.current.alertAssigneesItems[1] as unknown as {
+          disable: boolean;
+        }
+      ).disable
+    ).toBeFalsy();
   });
 
   it('should return 0 items for the VIEWER role', () => {

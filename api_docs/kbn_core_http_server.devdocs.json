@@ -3507,6 +3507,18 @@
                 "path": "src/plugins/usage_collection/server/routes/stats/stats.ts"
               },
               {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/health.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/metrics.ts"
+              },
+              {
                 "plugin": "licensing",
                 "path": "x-pack/plugins/licensing/server/routes/info.ts"
               },
@@ -3549,18 +3561,6 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/internal/get_content_summary.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/health.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/metrics.ts"
               },
               {
                 "plugin": "security",
@@ -3833,6 +3833,10 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/routes/get_aad_fields_by_rule_type.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "packages/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
                 "plugin": "banners",
@@ -4565,6 +4569,14 @@
               {
                 "plugin": "rollup",
                 "path": "x-pack/plugins/rollup/server/routes/api/jobs/register_get_route.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/plugins/search_indices/server/routes/status.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/plugins/search_indices/server/routes/status.ts"
               },
               {
                 "plugin": "searchInferenceEndpoints",
@@ -6549,6 +6561,10 @@
                 "path": "x-pack/plugins/rule_registry/server/routes/get_alert_summary.ts"
               },
               {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "packages/content-management/content_insights/content_insights_server/src/register.ts"
+              },
+              {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/tags/create_tag.ts"
               },
@@ -6675,10 +6691,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/indices.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -8527,6 +8539,10 @@
                 "path": "x-pack/plugins/spaces/server/routes/api/external/put.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/routes/api/internal/set_solution_space.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/api_keys/update.ts"
               },
@@ -9011,6 +9027,10 @@
                 "path": "x-pack/plugins/spaces/server/routes/api/external/put.test.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/routes/api/internal/set_solution_space.test.ts"
+              },
+              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
               },
@@ -9263,6 +9283,10 @@
               {
                 "plugin": "@kbn/test-suites-xpack",
                 "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/update.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -14284,6 +14308,10 @@
               },
               {
                 "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/internal/has_es_data.ts"
+              },
+              {
+                "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/fields.ts"
               },
               {
@@ -14389,6 +14417,10 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/get_states/get_states.ts"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/server/routes.ts"
               },
               {
                 "plugin": "ecsDataQualityDashboard",
@@ -15733,6 +15765,10 @@
                 "path": "x-pack/plugins/canvas/server/routes/workpad/import.ts"
               },
               {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_opt_in_stats.ts"
               },
@@ -15883,6 +15919,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "ml",
@@ -16133,6 +16173,10 @@
                 "path": "x-pack/plugins/file_upload/server/routes.ts"
               },
               {
+                "plugin": "fileUpload",
+                "path": "x-pack/plugins/file_upload/server/routes.ts"
+              },
+              {
                 "plugin": "integrationAssistant",
                 "path": "x-pack/plugins/integration_assistant/server/routes/ecs_routes.ts"
               },
@@ -16151,6 +16195,10 @@
               {
                 "plugin": "integrationAssistant",
                 "path": "x-pack/plugins/integration_assistant/server/routes/pipeline_routes.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/plugins/integration_assistant/server/routes/analyze_logs_routes.ts"
               },
               {
                 "plugin": "lists",
@@ -16427,6 +16475,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/disable.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/schedule_now.ts"
               },
               {
                 "plugin": "securitySolution",

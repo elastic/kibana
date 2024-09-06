@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dump } from 'js-yaml';
+import { safeDump } from 'js-yaml';
 
 interface SystemLogsStream {
   id: string;
@@ -36,7 +36,7 @@ export const generateSystemLogsYml = ({
   esHost: string[];
   uuid: string;
 }) => {
-  return dump({
+  return safeDump({
     outputs: {
       default: {
         type: 'elasticsearch',

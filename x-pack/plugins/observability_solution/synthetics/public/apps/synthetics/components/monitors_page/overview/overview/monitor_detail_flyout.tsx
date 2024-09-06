@@ -190,7 +190,7 @@ function DetailedFlyoutHeader({
           configId={configId}
           selectedLocation={selectedLocation}
           onChange={useCallback(
-            (id, label) => {
+            (id: any, label: any) => {
               if (currentLocation !== label) setCurrentLocation(label, id);
             },
             [currentLocation, setCurrentLocation]
