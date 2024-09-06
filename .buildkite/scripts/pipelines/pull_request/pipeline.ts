@@ -7,8 +7,7 @@
  */
 
 import fs from 'fs';
-// eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
-import { dump, load } from 'js-yaml';
+// import { dump, load } from 'js-yaml';
 import prConfigs from '../../../pull_requests.json';
 import { areChangesSkippable, doAnyChangesMatch, getAgentImageConfig } from '#pipeline-utils';
 
@@ -37,32 +36,32 @@ interface ModifyPipeline {
   };
 }
 
-const modifyPerfPipeline = (options: ModifyPipeline) => {
-  const str = fs.readFileSync(options.filename).toString();
+// const modifyPerfPipeline = (options: ModifyPipeline) => {
+//   const str = fs.readFileSync(options.filename).toString();
 
-  if (options.update) {
-    const parsedYml = load(str) as any;
-    const steps = parsedYml.steps;
+//   if (options.update) {
+//     const parsedYml = load(str) as any;
+//     const steps = parsedYml.steps;
 
-    if (options.update.label && steps && steps[0].label) {
-      steps[0].label = options.update.label;
-    }
+//     if (options.update.label && steps && steps[0].label) {
+//       steps[0].label = options.update.label;
+//     }
 
-    if (options.update.envs && steps && steps[0].env) {
-      const envs = options.update.envs;
-      // eslint-disable-next-line guard-for-in
-      for (const env in envs) {
-        steps[0].env[env] = envs[env];
-      }
-    }
-    // convert the modified object back to YAML format
-    const updatedYamlstr = dump(parsedYml);
+//     if (options.update.envs && steps && steps[0].env) {
+//       const envs = options.update.envs;
+//       // eslint-disable-next-line guard-for-in
+//       for (const env in envs) {
+//         steps[0].env[env] = envs[env];
+//       }
+//     }
+//     // convert the modified object back to YAML format
+//     const updatedYamlstr = dump(parsedYml);
 
-    return updatedYamlstr;
-  }
+//     return updatedYamlstr;
+//   }
 
-  return str;
-};
+//   return str;
+// };
 
 (async () => {
   const pipeline: string[] = [];
