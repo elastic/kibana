@@ -99,7 +99,7 @@ export function InvestigationListActions({
         <EuiButtonIcon
           data-test-subj="investigateAppInvestigationListDeleteButton"
           aria-label={i18n.translate(
-            'xpack.investigateApp.investigationList.tableCaption.ariaLabel',
+            'xpack.investigateApp.investigationList.deleteAction.ariaLabel',
             {
               defaultMessage: 'Delete investigation "{name}"',
               values: { name: investigation.title },
