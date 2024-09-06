@@ -81,7 +81,8 @@ export class ObservabilityOnboardingPlugin
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
     } = config;
-
+    const isServerlessBuild = this.ctx.env.packageInfo.buildFlavor === 'serverless';
+    const isDevEnvironment = this.ctx.env.mode.dev;
     const pluginSetupDeps = plugins;
 
     // set xpack.observability_onboarding.ui.enabled: true
@@ -112,7 +113,10 @@ export class ObservabilityOnboardingPlugin
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
             config,
             context: {
-              isServerless: Boolean(pluginSetupDeps.cloud?.isServerlessEnabled),
+              isDev: isDevEnvironment,
+              isCloud: Boolean(pluginSetupDeps.cloud?.isCloudEnabled),
+              isServerless:
+                Boolean(pluginSetupDeps.cloud?.isServerlessEnabled) || isServerlessBuild,
               stackVersion,
             },
           });
