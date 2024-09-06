@@ -57,6 +57,11 @@ while read -r config; do
 
   start=$(date +%s)
 
+  if [[ "${USE_CHROME_BETA:-}" =~ /^(true|1)$/ ]]; then
+    echo "USE_CHROME_BETA was set - using google-chrome-beta"
+    export TEST_BROWSER_BINARY_PATH="$(which google-chrome-beta)"
+  fi
+
   # prevent non-zero exit code from breaking the loop
   set +e;
   node ./scripts/functional_tests \
