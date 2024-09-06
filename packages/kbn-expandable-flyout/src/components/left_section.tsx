@@ -7,7 +7,7 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { LEFT_SECTION_TEST_ID } from './test_ids';
 
 interface LeftSectionProps {
@@ -24,16 +24,18 @@ interface LeftSectionProps {
 /**
  * Left section of the expanded flyout rendering a panel
  */
-export const LeftSection: React.FC<LeftSectionProps> = ({ component, width }: LeftSectionProps) => {
-  const style = useMemo<React.CSSProperties>(
-    () => ({ height: '100%', width: `${width}px` }),
-    [width]
-  );
-  return (
-    <EuiFlexItem grow data-test-subj={LEFT_SECTION_TEST_ID} style={style}>
-      {component}
-    </EuiFlexItem>
-  );
-};
+export const LeftSection: React.FC<LeftSectionProps> = memo(
+  ({ component, width }: LeftSectionProps) => {
+    const style = useMemo<React.CSSProperties>(
+      () => ({ height: '100%', width: `${width}px` }),
+      [width]
+    );
+    return (
+      <EuiFlexItem grow data-test-subj={LEFT_SECTION_TEST_ID} style={style}>
+        {component}
+      </EuiFlexItem>
+    );
+  }
+);
 
 LeftSection.displayName = 'LeftSection';
