@@ -66,7 +66,7 @@ export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDet
         : undefined;
 
     const legacyNodeDetailsQueryParams = !isSupportedByAssetDetails
-      ? rison.encodeUnknown(params._a ?? mappedAssetParams)
+      ? rison.encodeUnknown({ ...mappedAssetParams, ...params._a })
       : undefined;
 
     const assetDetailsQueryParams = isSupportedByAssetDetails
