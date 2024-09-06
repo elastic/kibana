@@ -6,7 +6,6 @@
  */
 import React, { createContext } from 'react';
 import { entityCentricExperience } from '@kbn/observability-plugin/common';
-import { ENTITY_FETCH_STATUS, useEntityManager } from '../../hooks/use_entity_manager';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 import {
@@ -15,10 +14,11 @@ import {
 } from '../../analytics/register_service_inventory_view_type_context';
 import { useKibana } from '../kibana_context/use_kibana';
 import { ApmPluginStartDeps, ApmServices } from '../../plugin';
+import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 
 export interface EntityManagerEnablementContextValue {
   isEntityManagerEnabled: boolean;
-  entityManagerEnablementStatus: ENTITY_FETCH_STATUS;
+  entityManagerEnablementStatus: FETCH_STATUS;
   isEnablementPending: boolean;
   refetch: () => void;
   serviceInventoryViewLocalStorageSetting: ServiceInventoryView;
@@ -53,9 +53,7 @@ export function EntityManagerEnablementContextProvider({
 }) {
   const { core } = useApmPluginContext();
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
-  const { isEnabled: isEntityManagerEnabled, status, refetch } = useEntityManager();
   const [tourState, setTourState] = useLocalStorage('apm.serviceEcoTour', TOUR_INITIAL_STATE);
-
   const [serviceInventoryViewLocalStorageSetting, setServiceInventoryViewLocalStorageSetting] =
     useLocalStorage(SERVICE_INVENTORY_STORAGE_KEY, ServiceInventoryView.classic);
 
@@ -64,8 +62,17 @@ export function EntityManagerEnablementContextProvider({
     true
   );
 
+  const {
+    data = { enabled: false },
+    status,
+    refetch,
+  } = useFetcher(
+    () => services.entityManager.entityClient.isManagedEntityDiscoveryEnabled(),
+    [services.entityManager.entityClient]
+  );
+
   const isEntityCentricExperienceViewEnabled =
-    isEntityManagerEnabled &&
+    data.enabled &&
     serviceInventoryViewLocalStorageSetting === ServiceInventoryView.entity &&
     isEntityCentricExperienceSettingEnabled;
 
@@ -85,9 +92,9 @@ export function EntityManagerEnablementContextProvider({
   return (
     <EntityManagerEnablementContext.Provider
       value={{
-        isEntityManagerEnabled,
+        isEntityManagerEnabled: data.enabled,
         entityManagerEnablementStatus: status,
-        isEnablementPending: status === ENTITY_FETCH_STATUS.LOADING,
+        isEnablementPending: status === FETCH_STATUS.LOADING,
         refetch,
         serviceInventoryViewLocalStorageSetting,
         setServiceInventoryViewLocalStorageSetting: handleServiceInventoryViewChange,

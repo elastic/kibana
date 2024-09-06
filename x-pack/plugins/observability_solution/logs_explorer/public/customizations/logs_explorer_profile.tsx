@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { waitFor } from 'xstate/lib/waitFor';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { UnifiedDocViewerLogsOverview } from '@kbn/unified-doc-viewer-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { LogsExplorerController } from '../controller';
 import type { LogsExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
@@ -148,11 +149,18 @@ export const createLogsExplorerProfileCustomizations =
           }),
           order: 0,
           component: (props) => (
-            <UnifiedDocViewerLogsOverview
-              {...props}
-              renderAIAssistant={logsAIAssistantFeature?.render}
-              isEntityManagerEnabled={isEntityManagerEnabled}
-            />
+            // Need this to redirect without a full page reload
+            <RedirectAppLinks
+              coreStart={{
+                application: core.application,
+              }}
+            >
+              <UnifiedDocViewerLogsOverview
+                {...props}
+                renderAIAssistant={logsAIAssistantFeature?.render}
+                isEntityManagerEnabled={isEntityManagerEnabled}
+              />
+            </RedirectAppLinks>
           ),
         });
 
