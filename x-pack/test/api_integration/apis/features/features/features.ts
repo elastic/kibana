@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { KibanaFeature } from '@kbn/features-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -182,7 +183,9 @@ export default function ({ getService }: FtrProviderContext) {
         ];
 
         const features = body.filter(
-          (f: KibanaFeature) => f.scope?.includes('spaces') && f.scope?.includes('security')
+          (f: KibanaFeature) =>
+            f.scope?.includes(KibanaFeatureScope.Spaces) &&
+            f.scope?.includes(KibanaFeatureScope.Security)
         );
 
         expect(features.every((f: KibanaFeature) => scopeAgnosticFeatures.includes(f.id))).to.be(
