@@ -19,6 +19,7 @@ import { SavedObjectInfoService } from './saved_object_info';
 import { RandomnessService } from './randomness';
 import { SupertestWithoutAuthProvider } from './supertest_without_auth';
 import { SamlAuthProvider } from './saml_auth';
+import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
 
 export const services = {
   es: EsProvider,
@@ -32,6 +33,8 @@ export const services = {
   indexPatterns: IndexPatternsService,
   savedObjectInfo: SavedObjectInfoService,
   randomness: RandomnessService,
-  supertestWithoutAuth: SupertestWithoutAuthProvider,
   samlAuth: SamlAuthProvider,
+  supertest: KibanaSupertestProvider,
+  esSupertest: ElasticsearchSupertestProvider,
+  supertestWithoutAuth: SupertestWithoutAuthProvider,
 };
