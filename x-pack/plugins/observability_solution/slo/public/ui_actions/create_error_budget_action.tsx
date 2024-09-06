@@ -12,19 +12,19 @@ import {
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import {
   ADD_SLO_ERROR_BUDGET_ACTION_ID,
   SLO_ERROR_BUDGET_ID,
 } from '../embeddable/slo/error_budget/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
-import { COMMON_SLO_GROUPING } from '../embeddable/slo/common/constants';
 export function createAddErrorBudgetPanelAction(
   getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_SLO_ERROR_BUDGET_ACTION_ID,
-    grouping: COMMON_SLO_GROUPING,
-    order: 10,
+    grouping: COMMON_OBSERVABILITY_GROUPING,
+    order: 6,
     getIconType: () => 'visLine',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);

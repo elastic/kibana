@@ -1,0 +1,19 @@
+## LEFT
+
+The `LEFT` function returns the substring that extracts a specified number of characters from a string, starting from the left.
+
+### Examples
+
+```esql
+FROM employees
+| KEEP last_name
+| EVAL left = LEFT(last_name, 3)
+| SORT last_name ASC
+| LIMIT 5
+```
+
+```esql
+ROW full_name = "John Doe"
+| EVAL first_name = LEFT(full_name, 4)
+| KEEP first_name
+```
