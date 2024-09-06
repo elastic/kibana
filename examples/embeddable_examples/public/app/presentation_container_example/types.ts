@@ -17,7 +17,6 @@ import {
 } from '@kbn/presentation-containers';
 import {
   PublishesDataLoading,
-  PublishesPanelTitle,
   PublishesTimeRange,
   PublishesUnsavedChanges,
   PublishesViewMode,
@@ -31,7 +30,6 @@ export type ParentApi = PresentationContainer &
   HasRuntimeChildState &
   PublishesDataLoading &
   PublishesViewMode &
-  Pick<PublishesPanelTitle, 'hidePanelTitle'> &
   PublishesReload &
   PublishesTimeRange &
   PublishesUnsavedChanges;

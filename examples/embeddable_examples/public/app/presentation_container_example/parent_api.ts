@@ -197,7 +197,6 @@ export function getParentApi() {
       getPanelCount: () => {
         return panels$.value.length;
       },
-      hidePanelTitle: new BehaviorSubject<boolean | undefined>(false),
       replacePanel: async (idToRemove: string, newPanel: PanelPackage<object>) => {
         // TODO remove method from interface? It should not be required
         return '';
