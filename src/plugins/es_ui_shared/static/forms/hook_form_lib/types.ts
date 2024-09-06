@@ -211,7 +211,7 @@ export interface FieldHook<T = unknown, I = T> {
 export interface FieldConfig<T = unknown, FormType extends FormData = FormData, I = T> {
   readonly label?: string;
   readonly labelAppend?: string | ReactNode;
-  readonly helpText?: string | ReactNode;
+  readonly helpText?: string | ReactNode | (() => ReactNode);
   readonly type?: string;
   readonly defaultValue?: T;
   readonly validations?: Array<ValidationConfig<FormType, string, I>>;
