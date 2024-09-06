@@ -224,7 +224,7 @@ export class SpacesClient implements ISpacesClient {
   }
 
   private validateDisabledFeatures = (space: v1.Space) => {
-    if (!space.disabledFeatures.length) {
+    if (!space.disabledFeatures.length || this.isServerless) {
       return;
     }
 
