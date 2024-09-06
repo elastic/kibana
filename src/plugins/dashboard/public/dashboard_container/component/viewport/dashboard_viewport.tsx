@@ -132,9 +132,7 @@ export const DashboardViewportComponent = () => {
             otherwise, there is a race condition where the panels can end up being squashed 
             TODO only render when dashboardInitialized
         */}
-        {viewportWidth !== 0 && (
-          <DashboardGrid viewportWidth={viewportWidth} />
-        )}
+        {viewportWidth !== 0 && <DashboardGrid viewportWidth={viewportWidth} />}
       </div>
     </div>
   );
