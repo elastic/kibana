@@ -18,11 +18,6 @@ import { merge, intersection } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import type {
-  AggregationsAggregate,
-  SearchResponse,
-  SearchTotalHits,
-} from '@elastic/elasticsearch/lib/api/types';
 import type { CompatibleModule } from '../../../common/constants/app';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
@@ -258,67 +253,57 @@ export class DataRecognizer {
     size: number = 15
   ): Promise<RecognizeModuleResultDataView[]> {
     const config = await this._findConfig(moduleId);
-    const matchingDataViews: RecognizeModuleResultDataView[] = [];
-
     if (config?.module.query === undefined) {
-      return matchingDataViews;
+      return [];
     }
 
     try {
-      const promises: Array<
-        Promise<SearchResponse<unknown, Record<string, AggregationsAggregate>>>
-      > = [];
-      // Keep track of which data view title is associated with which promise
-      const dataViewTitleMap: Record<string, Promise<any>> = {};
-      const dataViewsMap: Record<string, { id: string; name: string | undefined }> = {};
       const idsWithTitle = await this._dataViewsService.getIdsWithTitle();
-
-      idsWithTitle.forEach(({ id, title, name }) => {
-        dataViewsMap[title] = { id, name };
-        const promise = this._client.asCurrentUser.search(
-          {
-            index: title, // title is index pattern we can search by e.g. "filebeat-*"
-            size: 0,
-            body: {
-              query: config?.module.query,
-            },
-          },
-          { maxRetries: 0 }
-        );
-        dataViewTitleMap[title] = promise;
-        promises.push(promise);
+      // create temp objects with a function for running the query
+      const tempObjs = idsWithTitle.map(({ id, title, name }) => {
+        return {
+          id,
+          title,
+          name,
+          func: async () =>
+            this._client.asCurrentUser.search(
+              {
+                index: title, // title is index pattern we can search by e.g. "filebeat-*"
+                size: 0,
+                body: {
+                  query: config?.module.query,
+                },
+              },
+              { maxRetries: 0 }
+            ),
+        };
       });
 
-      const response = await Promise.all(promises);
-
-      const responseMap: Record<string, number> = Object.keys(dataViewTitleMap).reduce(
-        (acc, title, i) => {
+      // run all the queries in parallel
+      const response = await Promise.all(
+        tempObjs.map(async ({ id, name, title, func }) => {
+          const resp = await func();
           const totalHits =
-            typeof response[i].hits.total === 'number'
-              ? response[i].hits.total
-              : (response[i].hits?.total as SearchTotalHits)?.value ?? 0;
-          return Object.assign(acc, { [title]: totalHits });
-        },
-        {}
+            typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits?.total?.value ?? 0;
+          return { id, name, title, totalHits };
+        })
       );
 
-      for (const title in responseMap) {
-        if (Object.prototype.hasOwnProperty.call(responseMap, title)) {
-          const indexResponseHitsTotal = responseMap[title];
-          if (indexResponseHitsTotal > 0 && matchingDataViews.length < size) {
-            matchingDataViews.push({ title, ...(dataViewsMap[title] ?? {}) });
-          } else if (matchingDataViews.length >= size) {
-            break;
+      return response
+        .reduce<RecognizeModuleResultDataView[]>((acc, { id, title, name, totalHits }) => {
+          if (totalHits > 0) {
+            acc.push({ id, title, name });
           }
-        }
-      }
+          return acc;
+        }, [])
+        .slice(0, size);
     } catch (error) {
       mlLog.warn(
-        `Data recognizer error fetching and matching indices for query in ${config.module.id}. ${error}`
+        `Data recognizer error fetching and matching data views for query in ${config.module.id}. ${error}`
       );
     }
 
-    return matchingDataViews;
+    return [];
   }
 
   // called externally by an endpoint

@@ -118,7 +118,7 @@ export const OverviewTabContent: FC<Props> = ({
   const logsConfigsUrl = docLinks.links.ml.logsAnomalyDetectionConfigs;
   const metricsConfigsUrl = docLinks.links.ml.metricsAnomalyDetectionConfigs;
   const canCreateJob = usePermissionCheck('canCreateJob');
-  const { showContextualInsights: isServerless } = useEnabledFeatures();
+  const { showLogsSuppliedConfigurationsInfo } = useEnabledFeatures();
 
   const runDataRecongizer = async () => {
     setRunningDataRecognizer(true);
@@ -301,7 +301,7 @@ export const OverviewTabContent: FC<Props> = ({
                   </h2>
                 }
                 body={
-                  isServerless === false ? (
+                  showLogsSuppliedConfigurationsInfo === true ? (
                     <p>
                       <FormattedMessage
                         id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.unableToUseModuleHelpMessage"
