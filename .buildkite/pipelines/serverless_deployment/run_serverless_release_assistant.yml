@@ -4,7 +4,7 @@
 
 agents:
   image: family/kibana-ubuntu-2004
-  imageProject: elastic-images-prod
+  imageProject: elastic-images-qa
   provider: gcp
   machineType: n2-standard-2
 

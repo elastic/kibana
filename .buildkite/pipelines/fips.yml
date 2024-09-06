@@ -5,7 +5,7 @@ env:
 agents:
   provider: 'gcp'
   image: 'family/kibana-fips-ubuntu-2004'
-  imageProject: 'elastic-images-prod'
+  imageProject: 'elastic-images-qa'
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
