@@ -6,8 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks/dom';
-import { useNavigateVulnerabilities } from './use_navigate_findings';
-import { useNavigateFindings } from './use_navigate_findings';
+import { useNavigateVulnerabilities, useNavigateFindings } from './use_navigate_findings';
 import { useHistory } from 'react-router-dom';
 
 jest.mock('react-router-dom', () => ({
