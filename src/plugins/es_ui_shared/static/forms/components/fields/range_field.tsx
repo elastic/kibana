@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { ChangeEvent, useCallback } from 'react';
 import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
@@ -22,10 +22,13 @@ export const RangeField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { onChange: onFieldChange } = field;
 
-  const onChange: EuiRangeProps['onChange'] = useCallback(
+  const onChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
     (e) => {
-      const event = { ...e, value: `${e.currentTarget.value}` };
-      onFieldChange(event);
+      const event = {
+        ...e,
+        value: `${e.currentTarget.value}`,
+      };
+      onFieldChange(event as ChangeEvent<{ name?: string; value: string; checked?: boolean }>);
     },
     [onFieldChange]
   );
