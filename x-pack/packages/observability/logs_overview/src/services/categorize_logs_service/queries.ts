@@ -61,6 +61,7 @@ export const createCategorizationRequestParams = ({
   minDocsPerCategory = 0,
   additionalFilters = [],
   ignoredCategoryTerms = [],
+  maxCategoriesCount = 1000,
 }: {
   startTimestamp: string;
   endTimestamp: string;
@@ -71,6 +72,7 @@ export const createCategorizationRequestParams = ({
   minDocsPerCategory?: number;
   additionalFilters?: QueryDslQueryContainer[];
   ignoredCategoryTerms?: string[];
+  maxCategoriesCount?: number;
 }) => {
   const startMoment = moment(startTimestamp, isoTimestampFormat);
   const endMoment = moment(endTimestamp, isoTimestampFormat);
@@ -106,7 +108,7 @@ export const createCategorizationRequestParams = ({
       categories: {
         categorize_text: {
           field: messageField,
-          size: 1000,
+          size: maxCategoriesCount,
           categorization_analyzer: {
             tokenizer: 'standard',
           },

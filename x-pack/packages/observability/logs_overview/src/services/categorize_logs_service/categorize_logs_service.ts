@@ -6,11 +6,11 @@
  */
 
 import { MachineImplementationsFrom, assign, setup } from 'xstate5';
+import { LogCategory } from '../../types';
 import { getPlaceholderFor } from '../../utils/xstate5_utils';
 import { categorizeDocuments } from './categorize_documents';
 import { countDocuments } from './count_documents';
 import { CategorizeLogsServiceDependencies, LogCategorizationParams } from './types';
-import { LogCategory } from '../../types';
 
 export const categorizeLogsService = setup({
   types: {
@@ -18,14 +18,16 @@ export const categorizeLogsService = setup({
     output: {} as {
       categories: LogCategory[];
       documentCount: number;
+      hasReachedLimit: boolean;
       samplingProbability: number;
     },
     context: {} as {
       categories: LogCategory[];
       documentCount: number;
+      error?: Error;
+      hasReachedLimit: boolean;
       parameters: LogCategorizationParams;
       samplingProbability: number;
-      error?: Error;
     },
     events: {} as {
       type: 'cancel';
@@ -39,9 +41,12 @@ export const categorizeLogsService = setup({
     storeError: assign((_, params: { error: unknown }) => ({
       error: params.error instanceof Error ? params.error : new Error(String(params.error)),
     })),
-    storeCategories: assign(({ context }, params: { categories: LogCategory[] }) => ({
-      categories: [...context.categories, ...params.categories],
-    })),
+    storeCategories: assign(
+      ({ context }, params: { categories: LogCategory[]; hasReachedLimit: boolean }) => ({
+        categories: [...context.categories, ...params.categories],
+        hasReachedLimit: params.hasReachedLimit,
+      })
+    ),
     storeDocumentCount: assign(
       (_, params: { documentCount: number; samplingProbability: number }) => ({
         documentCount: params.documentCount,
@@ -50,16 +55,19 @@ export const categorizeLogsService = setup({
     ),
   },
   guards: {
-    requiresSampling: ({ context }) => context.samplingProbability < 1,
+    hasTooFewDocuments: (_guardArgs, params: { documentCount: number }) => params.documentCount < 1,
+    requiresSampling: (_guardArgs, params: { samplingProbability: number }) =>
+      params.samplingProbability < 1,
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QGMCGAXMUD2AnAlgF5gAy2UsAdMtgK4B26+9UAItsrQLZiOwDEEbPTCVmAN2wBrUWkw4CxMhWp1GzNh2690sBBI4Z8wgNoAGALrmLiUAAdssfE2G2QAD0QAmAJwAOSgAWP0CAZgA2M0CzAEZwgFYYgHYkgBoQAE9EJK8vIPCYsy8k+K94pJ8YmIBfavS5LDwiUnIqGgYmFnZOHj5BYVEDGWoMRsUWlXb1Lq1e3X16STljemsTGJskEAcnF3o3TwRfAOCwyOi4xJT0rKPQmMpQxPifJNCkyLK-cNr60YVmso2mpOpoejoBGBcLg8JQ7AAbDAAMzwXBG8iaSlaqg6Gm62j4CyWRlMlmsbh2zhWB28-iCIQiUViCWSaUyiD8D3iZh5MS8kSiXhilV+IAaAKxkxBeNmEP4aHoyDA8PJW0pexpRzpp0ZFxZ13ZCHipUofhewQqKXCXkCovFmImVCRYHQyAAFhoAMqoLgIyAAYX+TTg-REYkW0lkQfG3t98ID0fwcFV9kcVNcW0OhRKlDMPneZktPjKBtu4R84UejNCXh5SUCQqSdsTkqdLvdXp9foggYxBBDUJhuDhiPQKNwaPtMa78Z7ieTlgpaY1mcQ2fiufzSULr2L5TZtySfh8lC8x9rgXigXCoT8T2bfcB2Odro9LFj3d7YyTAgVSpVi5qsu1Krgg66bgWRYlgeHJ+HkNpeO825mqEl5eA+36tpQL4diwABKYBcKgzAaF+AIhkIYZDFGj7EARREkSwZHBrAKbbMBGagFmVoQeECShO8No1jc3iIUEHwvH43w+D4RT1hhEqOth7ZvlA9HEfQpHzpC0KwgiyKouimFgOpjFQMx-asYBqa7CBXFrjxeYRPxglhF4IkIIEfKPHBZo+NeISRDUdRii2Sk4appmaUx2nyqgirKmx6p2R4DkfLxLk5G5Hn3JWDavEkMTRFJ4SBGVtQhfQ2AQHAbhTk+FBLrZnGpQgAC04QeW1G4yb1fX9aECkOkCOLTGCBK6E16b7KBDYeYUG7vAkZplXmHzFEN4wjRFnZxgmj61UBzUzfZCB8SeTk5DEJXHJ1hqFQ813rcU8QoQJm0NW2r4aFFWkHfAR3TZqMQFhBJQNreDY2h5iEBDWnLHtahRFRtIX1VhSLEbOU0rqdQqxKeCTXgkiR+EUHlnJQRWJNEr104W8QfVhlFgDjKWHPjDz8lefHGtd5OGkJlA+PENbvJekR3vcFXVEAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QGMCGAXMUD2AnAlgF5gAy2UsAdMtgK4B26+9UAItsrQLZiOwDEEbPTCVmAN2wBrUWkw4CxMhWp1GzNh2690sBBI4Z8wgNoAGALrmLiUAAdssfE2G2QAD0QBmMwA5KACy+AQFmob4AjABMwQBsADQgAJ6IkYEAnJkA7FmxZlERmQGxAL4liXJYeESk5FQ0DEws7Jw8fILCogYy1BhVirUqDerNWm26+vSScsb01iYRNkggDk4u9G6eCD7+QSFhftFxiSkIvgCsWZSxEVlRsbFZ52Zm515lFX0KNcr1ak2aVo6ARCERiKbSWRfapKOqqRoaFraPiTaZGUyWExRJb2RzOWabbx+QLBULhI7FE7eWL+F45GnRPIRZkfECVb6wob-RFjYH8MC4XB4Sh2AA2GAAZnguL15DDBn8EaMgSiDDMMVZLG5VvjXMstjsSftyTFKclEOdzgFKF5zukvA8zBFnl50udWez5b94SNAcjdPw0PRkGBRdZtXj1oTtsS9mTDqaEuaEBF8udKFkIr5fK6olkzOksgEPdCBt6JWB0MgABYaADKqC4YsgAGFS-g4B0wd0oXKBg2m6LW+24OHljqo-rEMzbpQos8-K7fC9CknTrF0rEbbb0oVMoWIgF3eU2e3OVQK1XaywB82IG2+x2BAKhbgReL0FLcDLPf3G3eH36J8x1xNYCSnFNmSuecXhzdJlydTcqQQLJfHSOc0PyLJN3SMxYiPEtH3PShLxret-yHe8RwEIMQzDLVx0jcDQC2GdoIXOCENXZDsyiOcAiiKJ0iiPDLi8V1CKA4jSOvKAACUwC4VBmA0QDvk7UEughHpfxqBSlJUlg1OqUcGNA3UNggrMs347IjzdaIvGQwSvECXI8k3Z43gEiJJI5BUSMrMiWH05T6FU6j+UFYUxUlaVZSksBQsMqBjIIUycRWJi9RY6dIn8KIAjsu1zkc5CAmiG1fBiaIzB8B0QmPT4iICmSNGS8KjMi2jQxArKwJyjw8pswriocqInOTLwIi3ASD1yQpswCd5WXobAIDgNxdPPCMBss3KEAAWjXRBDvTfcLsu9Jlr8r04WGAEkXGeBGL26MBOQzIt2ut4cwmirCt8W6yzhNqbwo4dH0216LOjTMIjnBdYhK1DYgdHjihtZbUIdWIXJuYGflBoLZI6iKoZe8zJwOw9KtGt1kbuTcsmQrwi0oeCQjzZ5blwt1Cek5TKN22GIIKZbAgKC45pyLyeLwtz4Kyabs1QgWAs0kXqaGhBxdcnzpaE2XXmch0MORmaBJeLwjbKMogA */
   id: 'categorizeLogs',
   context: ({ input }) => ({
     categories: [],
     documentCount: 0,
+    hasReachedLimit: false,
     parameters: input,
-    samplingProbability: 0,
+    samplingProbability: 1,
   }),
   initial: 'countingDocuments',
   states: {
@@ -69,8 +77,24 @@ export const categorizeLogsService = setup({
         input: ({ context }) => context.parameters,
         onDone: [
           {
+            target: 'done',
+            guard: {
+              type: 'hasTooFewDocuments',
+              params: ({ event }) => event.output,
+            },
+            actions: [
+              {
+                type: 'storeDocumentCount',
+                params: ({ event }) => event.output,
+              },
+            ],
+          },
+          {
             target: 'fetchingSampledCategories',
-            guard: 'requiresSampling',
+            guard: {
+              type: 'requiresSampling',
+              params: ({ event }) => event.output,
+            },
             actions: [
               {
                 type: 'storeDocumentCount',
@@ -209,6 +233,7 @@ export const categorizeLogsService = setup({
   output: ({ context }) => ({
     categories: context.categories,
     documentCount: context.documentCount,
+    hasReachedLimit: context.hasReachedLimit,
     samplingProbability: context.samplingProbability,
   }),
 });

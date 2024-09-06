@@ -16,11 +16,13 @@ import { LogCategory, LogCategoryChange } from '../../types';
 
 // the fraction of a category's histogram below which the category is considered rare
 const rarityThreshold = 0.2;
+const maxCategoriesCount = 1000;
 
 export const categorizeDocuments = ({ search }: { search: ISearchGeneric }) =>
   fromPromise<
     {
       categories: LogCategory[];
+      hasReachedLimit: boolean;
     },
     LogCategorizationParams & {
       samplingProbability: number;
@@ -57,6 +59,7 @@ export const categorizeDocuments = ({ search }: { search: ISearchGeneric }) =>
         additionalFilters: documentFilters,
         ignoredCategoryTerms,
         minDocsPerCategory,
+        maxCategoriesCount,
       });
 
       const { rawResponse } = await lastValueFrom(search({ params: requestParams }));
@@ -76,6 +79,7 @@ export const categorizeDocuments = ({ search }: { search: ISearchGeneric }) =>
 
       return {
         categories: logCategories,
+        hasReachedLimit: logCategories.length >= maxCategoriesCount,
       };
     }
   );
