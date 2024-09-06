@@ -95,10 +95,10 @@ export type {
 export type { EnhancementRegistryDefinition } from './types';
 
 export {
-  ReactEmbeddableRenderer,
   type DefaultEmbeddableApi,
   type ReactEmbeddableFactory,
 } from './react_embeddable_system';
+export { ReactEmbeddableRendererLazy as ReactEmbeddableRenderer } from './react_embeddable_system/react_embeddable_renderer_lazy';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);

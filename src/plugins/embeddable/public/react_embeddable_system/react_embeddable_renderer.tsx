@@ -33,6 +33,37 @@ import {
 
 const ON_STATE_CHANGE_DEBOUNCE = 100;
 
+export interface Props<
+SerializedState extends object = object,
+RuntimeState extends object = SerializedState,
+Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+  SerializedState,
+  RuntimeState
+>,
+ParentApi extends HasSerializedChildState<SerializedState> = HasSerializedChildState<SerializedState>
+> {
+  type: string;
+  maybeId?: string;
+  getParentApi: () => ParentApi;
+  onApiAvailable?: (api: Api) => void;
+  panelProps?: Pick<
+    PresentationPanelProps<Api>,
+    | 'showShadow'
+    | 'showBorder'
+    | 'showBadges'
+    | 'showNotifications'
+    | 'hideLoader'
+    | 'hideHeader'
+    | 'hideInspector'
+  >;
+  hidePanelChrome?: boolean;
+  /**
+   * This `onAnyStateChange` callback allows the parent to keep track of the state of the embeddable
+   * as it changes. This is **not** expected to change over the lifetime of the component.
+   */
+  onAnyStateChange?: (state: SerializedPanelState<SerializedState>) => void;
+}
+
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
  *
@@ -54,28 +85,7 @@ export const ReactEmbeddableRenderer = <
   onAnyStateChange,
   onApiAvailable,
   hidePanelChrome,
-}: {
-  type: string;
-  maybeId?: string;
-  getParentApi: () => ParentApi;
-  onApiAvailable?: (api: Api) => void;
-  panelProps?: Pick<
-    PresentationPanelProps<Api>,
-    | 'showShadow'
-    | 'showBorder'
-    | 'showBadges'
-    | 'showNotifications'
-    | 'hideLoader'
-    | 'hideHeader'
-    | 'hideInspector'
-  >;
-  hidePanelChrome?: boolean;
-  /**
-   * This `onAnyStateChange` callback allows the parent to keep track of the state of the embeddable
-   * as it changes. This is **not** expected to change over the lifetime of the component.
-   */
-  onAnyStateChange?: (state: SerializedPanelState<SerializedState>) => void;
-}) => {
+}: Props<SerializedState, RuntimeState, Api, ParentApi>) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
   const firstLoadCompleteTime = useRef<number | null>(null);
 
