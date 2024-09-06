@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
+import type { EuiCardProps } from '@elastic/eui';
 import { EuiCard, EuiTitle } from '@elastic/eui';
 import { useCardStyles } from './card.styles';
 
@@ -15,10 +16,13 @@ interface CardProps {
   title: string;
   description: string;
   children: ReactNode;
+  onClick?: () => void;
+  href?: EuiCardProps['href'];
+  target?: EuiCardProps['target'];
 }
 
 export const Card: React.FC<CardProps> = React.memo((props) => {
-  const { icon, title, description, children } = props;
+  const { icon, title, description, children, onClick, href, target } = props;
 
   const IMAGE_WIDTH = 64;
 
@@ -27,7 +31,9 @@ export const Card: React.FC<CardProps> = React.memo((props) => {
   return (
     <EuiCard
       className={cardBodyStyle}
-      onClick={() => {}}
+      onClick={onClick}
+      href={href}
+      target={target}
       data-test-subj="data-ingestion-header-card"
       layout="horizontal"
       titleSize="xs"

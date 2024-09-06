@@ -58,7 +58,7 @@ export const VideoCard: React.FC<VideoCardProps> = React.memo((props) => {
 
   return (
     <>
-      <Card icon={icon} title={title} description={description}>
+      <Card onClick={showVideoModal} icon={icon} title={title} description={description}>
         <EuiButtonEmpty color="primary" onClick={showVideoModal} className={cardButtonStyle}>
           {i18n.DATA_INGESTION_HUB_HEADER_VIDEO_LINK_TITLE}
         </EuiButtonEmpty>

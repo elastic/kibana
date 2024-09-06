@@ -24,6 +24,8 @@ export const useHeaderCards: () => ReactNode[] = () => {
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
   const usersUrl = useUsersUrl();
 
+  const demoUrl = 'https://www.elastic.co/demo-gallery/security-overview';
+
   const headerCards = [
     <VideoCard
       icon={isDarkMode ? darkVideo : video}
@@ -41,7 +43,7 @@ export const useHeaderCards: () => ReactNode[] = () => {
       icon={isDarkMode ? darkDemo : demo}
       title={i18n.DATA_INGESTION_HUB_HEADER_DEMO_TITLE}
       description={i18n.DATA_INGESTION_HUB_HEADER_DEMO_DESCRIPTION}
-      href={'https://www.elastic.co/demo-gallery/security-overview'}
+      href={demoUrl}
       linkTitle={i18n.DATA_INGESTION_HUB_HEADER_DEMO_LINK_TITLE}
     />,
   ];

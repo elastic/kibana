@@ -22,6 +22,7 @@ export const useDataIngestionHubHeaderVideoModalStyles = () => {
       }),
       modalTitleStyles: css({ textAlign: 'center', fontSize: '1.375rem', fontWeight: 700 }),
       modalDescriptionStyles: css({ textAlign: 'center' }),
+      modalStyles: css({ width: 550 }),
     };
   }, []);
   return dataIngestionHubHeaderStyles;

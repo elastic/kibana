@@ -14,7 +14,20 @@ export const useCardStyles = () => {
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
 
   const cardBodyStyle = useMemo(() => {
-    const cardBaseStyle = { minWidth: '315px' };
+    const cardBaseStyle = {
+      minWidth: '315px',
+      ':hover': {
+        '.css-g3povl-euiCard__text-left-interactive': {
+          textDecoration: 'none',
+        },
+        '.euiButtonEmpty': {
+          textDecoration: 'underline',
+        },
+        '.euiLink': {
+          textDecoration: 'underline',
+        },
+      },
+    };
     return isDarkMode
       ? css({
           ...cardBaseStyle,
@@ -33,6 +46,7 @@ export const useCardStyles = () => {
         fontWeight: euiTheme.font.weight.semiBold,
         lineHeight: euiTheme.size.l,
         color: euiTheme.colors.title,
+        textDecoration: 'none',
       }),
       cardDescriptionStyle: css({
         fontSize: '12.25px',

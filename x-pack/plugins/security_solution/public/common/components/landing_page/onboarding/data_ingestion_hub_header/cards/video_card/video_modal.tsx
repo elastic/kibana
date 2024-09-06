@@ -33,18 +33,21 @@ interface DataIngestionHubVideoModalComponentProps {
 }
 
 export const DataIngestionHubVideoModal: React.FC<DataIngestionHubVideoModalComponentProps> =
-  React.memo((props) => {
-    const { onCloseModal, isOnboardingHubVisited } = props;
-
+  React.memo(({ onCloseModal, isOnboardingHubVisited }) => {
     const modalTitle = useGeneratedHtmlId();
-    const { modalFooterStyles, modalBodyStyles, modalTitleStyles, modalDescriptionStyles } =
-      useDataIngestionHubHeaderVideoModalStyles();
+    const {
+      modalStyles,
+      modalFooterStyles,
+      modalBodyStyles,
+      modalTitleStyles,
+      modalDescriptionStyles,
+    } = useDataIngestionHubHeaderVideoModalStyles();
 
     return (
       <EuiModal
         data-test-subj="data-ingestion-hub-video-modal"
         aria-labelledby={modalTitle}
-        style={{ width: 550 }}
+        className={modalStyles}
         onClose={onCloseModal}
       >
         <EuiModalBody className={modalBodyStyles}>

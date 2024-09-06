@@ -10,6 +10,7 @@ import { DataIngestionHubHeader } from '.';
 import darkRocket from '../images/dark_rocket.png';
 import { useCurrentUser } from '../../../../lib/kibana';
 import { useHeaderCards } from './cards/header_cards';
+import { VideoCard } from './cards/video_card/video_card';
 
 const mockSpace = {
   id: 'space',
@@ -40,12 +41,12 @@ jest.mock('./cards/header_cards', () => ({
 }));
 
 const mockUseCurrentUser = useCurrentUser as jest.Mock;
-const mockUseDataIngestionHubHeaderCards = useHeaderCards as jest.Mock;
+const mockUseHeaderCards = useHeaderCards as jest.Mock;
 
 describe('WelcomeHeaderComponent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseDataIngestionHubHeaderCards.mockReturnValue([]); // Return an empty array by default
+    mockUseHeaderCards.mockReturnValue([]);
   });
 
   it('should render fullName when fullName is provided', () => {
@@ -102,6 +103,9 @@ describe('WelcomeHeaderComponent', () => {
   });
 
   it('should display the modal when the "video" card is clicked', () => {
+    mockUseHeaderCards.mockReturnValue([
+      <VideoCard icon={'mockIcon.png'} title={'Video'} description={'Video description'} />,
+    ]);
     const { getByText, queryByTestId } = render(<DataIngestionHubHeader />);
 
     const cardElement = getByText('Watch video');

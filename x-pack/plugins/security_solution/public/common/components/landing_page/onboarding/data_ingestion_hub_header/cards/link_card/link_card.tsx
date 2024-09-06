@@ -23,7 +23,7 @@ export const LinkCard: React.FC<VideoCardProps> = React.memo((props) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <Card icon={icon} title={title} description={description}>
+    <Card href={href} target="_blank" icon={icon} title={title} description={description}>
       <EuiLink
         href={href}
         external={true}
