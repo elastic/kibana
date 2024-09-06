@@ -18,11 +18,12 @@ import { builtInDefinitions } from '../../lib/entities/built_in';
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 import { getClientsFromAPIKey } from '../../lib/utils';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { UnexpectedEntityManagerError } from '../../lib/errors';
 
 /**
  * @openapi
- * /internal/entities/managed/enablement:
- *   get:
+ * /internal/entities/managed_definitions/_status:
+ *   post:
  *     description: Check if managed (built-in) entity discovery is enabled. Enabled entity discovery requires a valid api key and the latest version of the builtin definitions installed and running.
  *     tags:
  *       - management
@@ -43,7 +44,7 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *                  example: api_key_not_found
  */
 export const checkEntityDiscoveryEnabledRoute = createEntityManagerServerRoute({
-  endpoint: 'GET /internal/entities/managed/enablement',
+  endpoint: 'POST /internal/entities/managed_definitions/_status',
   handler: async ({ response, logger, server }) => {
     try {
       logger.debug('reading entity discovery API key from saved object');
@@ -105,7 +106,7 @@ export const checkEntityDiscoveryEnabledRoute = createEntityManagerServerRoute({
       return response.ok({ body: { enabled: true } });
     } catch (err) {
       logger.error(err);
-      return response.customError({ statusCode: 500, body: err });
+      return response.customError({ statusCode: 500, body: new UnexpectedEntityManagerError(err) });
     }
   },
 });

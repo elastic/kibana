@@ -33,9 +33,10 @@ import {
   stopAndDeleteLatestTransform,
 } from '../../lib/entities/stop_and_delete_transform';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { UnexpectedEntityManagerError } from '../../lib/errors';
 
 export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
-  endpoint: 'POST /internal/entities/definition/{id}/_reset',
+  endpoint: 'POST /internal/entities/definitions/{id}/_reset',
   params: z.object({
     path: resetEntityDefinitionParamsSchema,
   }),
@@ -73,10 +74,21 @@ export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
       if (e instanceof EntityDefinitionNotFound) {
         return response.notFound({ body: e });
       }
-      if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
-        return response.customError({ body: e, statusCode: 400 });
+
+      if (e instanceof EntitySecurityException) {
+        return response.forbidden({
+          body: {
+            message:
+              'Current Kibana user does not have the required permissions to reset this definition',
+          },
+        });
       }
-      return response.customError({ body: e, statusCode: 500 });
+
+      if (e instanceof InvalidTransformError) {
+        return response.unprocessableContent({ body: e });
+      }
+
+      return response.customError({ body: new UnexpectedEntityManagerError(e), statusCode: 500 });
     }
   },
 });

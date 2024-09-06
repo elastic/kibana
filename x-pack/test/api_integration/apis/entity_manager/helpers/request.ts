@@ -16,12 +16,10 @@ export interface Auth {
 
 export const getInstalledDefinitions = async (
   supertest: Agent,
-  params: { auth?: Auth; id?: string } = {}
+  params: { auth?: Auth } = {}
 ): Promise<{ definitions: EntityDefinitionWithState[] }> => {
-  const { auth, id } = params;
-  let req = supertest
-    .get(`/internal/entities/definition${id ? `/${id}` : ''}`)
-    .set('kbn-xsrf', 'xxx');
+  const { auth } = params;
+  let req = supertest.get(`/internal/entities/definitions`).set('kbn-xsrf', 'xxx');
   if (auth) {
     req = req.auth(auth.username, auth.password);
   }
@@ -38,7 +36,7 @@ export const installDefinition = async (
 ) => {
   const { definition, installOnly = false } = params;
   return supertest
-    .post('/internal/entities/definition')
+    .post('/internal/entities/definitions')
     .query({ installOnly })
     .set('kbn-xsrf', 'xxx')
     .send(definition)
@@ -54,7 +52,7 @@ export const uninstallDefinition = (
 ) => {
   const { id, deleteData = false } = params;
   return supertest
-    .delete(`/internal/entities/definition/${id}`)
+    .delete(`/internal/entities/definitions/${id}`)
     .query({ deleteData })
     .set('kbn-xsrf', 'xxx')
     .send()
@@ -71,7 +69,7 @@ export const updateDefinition = (
 ) => {
   const { id, update, expectedCode = 200 } = params;
   return supertest
-    .patch(`/internal/entities/definition/${id}`)
+    .patch(`/internal/entities/definitions/${id}`)
     .set('kbn-xsrf', 'xxx')
     .send(update)
     .expect(expectedCode);
@@ -82,7 +80,7 @@ export const upgradeBuiltinDefinitions = async (
   definitions: EntityDefinition[]
 ): Promise<{ success: boolean }> => {
   const response = await supertest
-    .post('/api/entities/upgrade_builtin_definitions')
+    .post('/internal/entities_test/_upgrade_builtin_definitions')
     .set('kbn-xsrf', 'xxx')
     .send({ definitions })
     .expect(200);

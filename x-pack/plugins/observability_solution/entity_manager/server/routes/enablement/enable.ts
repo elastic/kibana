@@ -7,7 +7,6 @@
 
 import { createEntityDefinitionQuerySchema } from '@kbn/entities-schema';
 import { z } from '@kbn/zod';
-import { ERROR_API_KEY_SERVICE_DISABLED } from '../../../common/errors';
 import {
   canEnableEntityDiscovery,
   checkIfAPIKeysAreEnabled,
@@ -22,11 +21,12 @@ import { installBuiltInEntityDefinitions } from '../../lib/entities/install_enti
 import { startTransform } from '../../lib/entities/start_transform';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { UnexpectedEntityManagerError } from '../../lib/errors';
 
 /**
  * @openapi
- * /internal/entities/managed/enablement:
- *   put:
+ * /internal/entities/managed_definitions/_enable:
+ *   post:
  *     description: Enable managed (built-in) entity discovery.
  *     tags:
  *       - management
@@ -58,9 +58,11 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *                  example: API key service is not enabled; try configuring `xpack.security.authc.api_key.enabled` in your elasticsearch config
  *       403:
  *         description: The current user does not have the required permissions to enable entity discovery
+ *       422:
+ *         description: API key service is not enabled, the request cannot proceed
  */
 export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
-  endpoint: 'PUT /internal/entities/managed/enablement',
+  endpoint: 'POST /internal/entities/managed_definitions/_enable',
   params: z.object({
     query: createEntityDefinitionQuerySchema,
   }),
@@ -68,12 +70,10 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
     try {
       const apiKeysEnabled = await checkIfAPIKeysAreEnabled(server);
       if (!apiKeysEnabled) {
-        return response.ok({
+        return response.unprocessableContent({
           body: {
-            success: false,
-            reason: ERROR_API_KEY_SERVICE_DISABLED,
             message:
-              'API key service is not enabled; try configuring `xpack.security.authc.api_key.enabled` in your elasticsearch config',
+              'API key service is not enabled; verify the value of `xpack.security.authc.api_key.enabled` in your Elasticsearch config',
           },
         });
       }
@@ -106,12 +106,6 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
       }
 
       const apiKey = await generateEntityDiscoveryAPIKey(server, request);
-      if (apiKey === undefined) {
-        return response.customError({
-          statusCode: 500,
-          body: new Error('could not generate entity discovery API key'),
-        });
-      }
 
       await saveEntityDiscoveryAPIKey(soClient, apiKey);
 
@@ -133,7 +127,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
       return response.ok({ body: { success: true } });
     } catch (err) {
       logger.error(err);
-      return response.customError({ statusCode: 500, body: err });
+      return response.customError({ statusCode: 500, body: new UnexpectedEntityManagerError(err) });
     }
   },
 });

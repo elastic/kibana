@@ -19,10 +19,11 @@ import {
 } from '../../lib/entities/install_entity_definition';
 import { startTransform } from '../../lib/entities/start_transform';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { UnexpectedEntityManagerError } from '../../lib/errors';
 
 /**
  * @openapi
- * /internal/entities/definition:
+ * /internal/entities/definitions:
  *   patch:
  *     description: Update an entity definition.
  *     tags:
@@ -51,15 +52,17 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *               $ref: '#/components/schemas/entityDefinitionSchema'
  *       400:
  *         description: The entity definition cannot be installed; see the error for more details
+ *       403:
+ *         description: The user does not have the permissions to update this definition
  *       404:
  *         description: The entity definition does not exist
- *       403:
- *         description: User is not allowed to update the entity definition
  *       409:
  *         description: The entity definition is being updated by another request
+ *       422:
+ *         description: User tried updating a managed definition, which is not supported
  */
 export const updateEntityDefinitionRoute = createEntityManagerServerRoute({
-  endpoint: 'PATCH /internal/entities/definition/{id}',
+  endpoint: 'PATCH /internal/entities/definitions/{id}',
   params: z.object({
     path: z.object({ id: z.string() }),
     query: createEntityDefinitionQuerySchema,
@@ -84,7 +87,7 @@ export const updateEntityDefinitionRoute = createEntityManagerServerRoute({
       }
 
       if (installedDefinition.managed) {
-        return response.forbidden({
+        return response.unprocessableContent({
           body: { message: `Managed definition cannot be modified` },
         });
       }
@@ -111,10 +114,20 @@ export const updateEntityDefinitionRoute = createEntityManagerServerRoute({
     } catch (e) {
       logger.error(e);
 
-      if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
-        return response.customError({ body: e, statusCode: 400 });
+      if (e instanceof EntitySecurityException) {
+        return response.forbidden({
+          body: {
+            message:
+              'Current Kibana user does not have the required permissions to update this definition',
+          },
+        });
       }
-      return response.customError({ body: e, statusCode: 500 });
+
+      if (e instanceof InvalidTransformError) {
+        return response.badRequest({ body: e });
+      }
+
+      return response.customError({ body: new UnexpectedEntityManagerError(e), statusCode: 500 });
     }
   },
 });

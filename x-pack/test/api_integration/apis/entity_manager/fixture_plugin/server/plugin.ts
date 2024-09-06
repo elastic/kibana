@@ -15,7 +15,6 @@ import {
   Logger,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { upgradeBuiltInEntityDefinitions } from '@kbn/entityManager-plugin/server/lib/entities/upgrade_entity_definition';
 import { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -36,13 +35,11 @@ export class FixturePlugin implements Plugin<void, void, {}, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>) {
     core.http.createRouter().post(
       {
-        path: '/api/entities/upgrade_builtin_definitions',
+        path: '/internal/entities_test/_upgrade_builtin_definitions',
         validate: {
-          body: buildRouteValidationWithZod(
-            z.object({
-              definitions: z.array(entityDefinitionSchema),
-            })
-          ),
+          body: z.object({
+            definitions: z.array(entityDefinitionSchema),
+          }),
         },
       },
       async (

@@ -5,10 +5,23 @@
  * 2.0.
  */
 
-export class AssetNotFoundError extends Error {
-  constructor(ean: string) {
-    super(`Asset with ean (${ean}) not found in the provided time range`);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'AssetNotFoundError';
+export class UnexpectedEntityManagerError extends Error {
+  constructor(error: unknown) {
+    let message;
+    let cause;
+    if (error instanceof Error) {
+      message = error.message;
+      cause = error.cause;
+    } else {
+      // Realistically, this should never happen.
+      const realError = new Error(JSON.stringify(error));
+      message = realError.message;
+      cause = realError.cause;
+    }
+
+    super(`The Entity Manager faced an unexpected error: ${message}`, {
+      cause,
+    });
+    this.name = 'UnexpectedEntityManagerError';
   }
 }

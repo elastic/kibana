@@ -51,7 +51,7 @@ export const checkIfEntityDiscoveryAPIKeyIsValid = async (
 export const generateEntityDiscoveryAPIKey = async (
   server: EntityManagerServerSetup,
   req: KibanaRequest
-): Promise<EntityDiscoveryAPIKey | undefined> => {
+): Promise<EntityDiscoveryAPIKey> => {
   const apiKey = await server.security.authc.apiKeys.grantAsInternalUser(req, {
     name: 'Entity discovery API key',
     role_descriptors: {
@@ -63,11 +63,13 @@ export const generateEntityDiscoveryAPIKey = async (
     },
   });
 
-  if (apiKey !== null) {
-    return {
-      id: apiKey.id,
-      name: apiKey.name,
-      apiKey: apiKey.api_key,
-    };
+  if (apiKey === null) {
+    throw new Error('Failed to generate API key');
   }
+
+  return {
+    id: apiKey.id,
+    name: apiKey.name,
+    apiKey: apiKey.api_key,
+  };
 };

@@ -12,12 +12,12 @@ import {
 import { z } from '@kbn/zod';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
-import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { UnexpectedEntityManagerError } from '../../lib/errors';
 
 /**
  * @openapi
- * /internal/entities/definition:
+ * /internal/entities/definitions:
  *   delete:
  *     description: Uninstall an entity definition. This stops and deletes the transforms, ingest pipelines, definitions saved objects, and index templates for this entity definition.
  *     tags:
@@ -44,13 +44,15 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *               properties:
  *                 acknowledged:
  *                   type: boolean
+ *       403:
+ *         description: Entity definition with given ID not found
+ *       404:
+ *         description: The user does not have the permissions to delete this definition
  *       400:
  *         description: The entity definition cannot be removed; see the error for more details
- *       404:
- *         description: Entity definition with given ID not found
  */
 export const deleteEntityDefinitionRoute = createEntityManagerServerRoute({
-  endpoint: 'DELETE /internal/entities/definition/{id}',
+  endpoint: 'DELETE /internal/entities/definitions/{id}',
   params: z.object({
     path: deleteEntityDefinitionParamsSchema,
     query: deleteEntityDefinitionQuerySchema,
@@ -70,10 +72,17 @@ export const deleteEntityDefinitionRoute = createEntityManagerServerRoute({
       if (e instanceof EntityDefinitionNotFound) {
         return response.notFound({ body: e });
       }
-      if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
-        return response.customError({ body: e, statusCode: 400 });
+
+      if (e instanceof EntitySecurityException) {
+        return response.forbidden({
+          body: {
+            message:
+              'Current Kibana user does not have the required permissions to delete this definition',
+          },
+        });
       }
-      return response.customError({ body: e, statusCode: 500 });
+
+      return response.customError({ body: new UnexpectedEntityManagerError(e), statusCode: 500 });
     }
   },
 });

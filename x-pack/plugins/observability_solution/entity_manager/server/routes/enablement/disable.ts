@@ -12,11 +12,12 @@ import { canDisableEntityDiscovery } from '../../lib/auth/privileges';
 import { uninstallBuiltInEntityDefinitions } from '../../lib/entities/uninstall_entity_definition';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { UnexpectedEntityManagerError } from '../../lib/errors';
 
 /**
  * @openapi
- * /internal/entities/managed/enablement:
- *   delete:
+ * /internal/entities/managed_definitions/_disable:
+ *   post:
  *     description: Disable managed (built-in) entity discovery. This stops and deletes the transforms, ingest pipelines, definitions saved objects, and index templates for this entity definition, as well as the stored API key for entity discovery management.
  *     tags:
  *       - management
@@ -43,7 +44,7 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *         description: The current user does not have the required permissions to disable entity discovery
  */
 export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
-  endpoint: 'DELETE /internal/entities/managed/enablement',
+  endpoint: 'POST /internal/entities/managed_definitions/_disable',
   params: z.object({
     query: z.object({
       deleteData: z.optional(BooleanFromString).default(false),
@@ -87,7 +88,7 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
       return response.ok({ body: { success: true } });
     } catch (err) {
       logger.error(err);
-      return response.customError({ statusCode: 500, body: err });
+      return response.customError({ statusCode: 500, body: new UnexpectedEntityManagerError(err) });
     }
   },
 });

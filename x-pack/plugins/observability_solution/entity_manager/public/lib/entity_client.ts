@@ -27,12 +27,15 @@ type QueryParamOf<T extends { params?: any }> = Exclude<T['params'], undefined>[
 type DeleteEntityDefinitionQuery = QueryParamOf<
   ClientRequestParamsOf<
     EntityManagerRouteRepository,
-    'DELETE /internal/entities/managed/enablement'
+    'POST /internal/entities/managed_definitions/_disable'
   >
 >;
 
 type CreateEntityDefinitionQuery = QueryParamOf<
-  ClientRequestParamsOf<EntityManagerRouteRepository, 'PUT /internal/entities/managed/enablement'>
+  ClientRequestParamsOf<
+    EntityManagerRouteRepository,
+    'POST /internal/entities/managed_definitions/_enable'
+  >
 >;
 
 export class EntityClient {
@@ -43,14 +46,14 @@ export class EntityClient {
   }
 
   async isManagedEntityDiscoveryEnabled(): Promise<ManagedEntityEnabledResponse> {
-    return await this.repositoryClient('GET /internal/entities/managed/enablement');
+    return await this.repositoryClient('POST /internal/entities/managed_definitions/_status');
   }
 
   async enableManagedEntityDiscovery(
     query?: CreateEntityDefinitionQuery
   ): Promise<EnableManagedEntityResponse> {
     try {
-      return await this.repositoryClient('PUT /internal/entities/managed/enablement', {
+      return await this.repositoryClient('POST /internal/entities/managed_definitions/_enable', {
         params: {
           query: {
             installOnly: query?.installOnly,
@@ -69,7 +72,7 @@ export class EntityClient {
     query?: DeleteEntityDefinitionQuery
   ): Promise<DisableManagedEntityResponse> {
     try {
-      return await this.repositoryClient('DELETE /internal/entities/managed/enablement', {
+      return await this.repositoryClient('POST /internal/entities/managed_definitions/_disable', {
         params: {
           query: {
             deleteData: query?.deleteData,

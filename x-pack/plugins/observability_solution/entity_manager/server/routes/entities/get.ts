@@ -8,10 +8,11 @@
 import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
 import { z } from '@kbn/zod';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { UnexpectedEntityManagerError } from '../../lib/errors';
 
 /**
  * @openapi
- * /internal/entities/definition:
+ * /internal/entities/definitions:
  *   get:
  *     description: Get all installed entity definitions.
  *     tags:
@@ -49,7 +50,7 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *                                type: boolean
  */
 export const getEntityDefinitionRoute = createEntityManagerServerRoute({
-  endpoint: 'GET /internal/entities/definition',
+  endpoint: 'GET /internal/entities/definitions',
   params: z.object({
     query: getEntityDefinitionQuerySchema,
   }),
@@ -64,7 +65,7 @@ export const getEntityDefinitionRoute = createEntityManagerServerRoute({
       return response.ok({ body: result });
     } catch (e) {
       logger.error(e);
-      return response.customError({ body: e, statusCode: 500 });
+      return response.customError({ body: new UnexpectedEntityManagerError(e), statusCode: 500 });
     }
   },
 });

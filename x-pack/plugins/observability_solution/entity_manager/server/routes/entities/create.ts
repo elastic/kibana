@@ -12,10 +12,11 @@ import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_e
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { UnexpectedEntityManagerError } from '../../lib/errors';
 
 /**
  * @openapi
- * /internal/entities/definition:
+ * /internal/entities/definitions:
  *   post:
  *     description: Install an entity definition.
  *     tags:
@@ -36,19 +37,21 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  *           schema:
  *             $ref: '#/components/schemas/entityDefinitionSchema'
  *     responses:
- *       200:
+ *       201:
  *         description: Success
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/entityDefinitionSchema'
- *       409:
- *         description: An entity definition with this ID already exists
  *       400:
  *         description: The entity definition cannot be installed; see the error for more details but commonly due to validation failures of the definition ID or metrics format
+ *       403:
+ *         description: The user does not have the permissions to create a definition
+ *       409:
+ *         description: An entity definition with this ID already exists
  */
 export const createEntityDefinitionRoute = createEntityManagerServerRoute({
-  endpoint: 'POST /internal/entities/definition',
+  endpoint: 'POST /internal/entities/definitions',
   params: z.object({
     query: createEntityDefinitionQuerySchema,
     body: entityDefinitionSchema,
@@ -61,11 +64,11 @@ export const createEntityDefinitionRoute = createEntityManagerServerRoute({
         installOnly: params.query.installOnly,
       });
 
-      return response.ok({ body: definition });
+      return response.created({ body: definition });
     } catch (e) {
       logger.error(e);
 
-      if (e instanceof EntityDefinitionIdInvalid) {
+      if (e instanceof EntityDefinitionIdInvalid || e instanceof InvalidTransformError) {
         return response.badRequest({ body: e });
       }
 
@@ -73,11 +76,16 @@ export const createEntityDefinitionRoute = createEntityManagerServerRoute({
         return response.conflict({ body: e });
       }
 
-      if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
-        return response.customError({ body: e, statusCode: 400 });
+      if (e instanceof EntitySecurityException) {
+        return response.forbidden({
+          body: {
+            message:
+              'Current Kibana user does not have the required permissions to create a definition',
+          },
+        });
       }
 
-      return response.customError({ body: e, statusCode: 500 });
+      return response.customError({ body: new UnexpectedEntityManagerError(e), statusCode: 500 });
     }
   },
 });
