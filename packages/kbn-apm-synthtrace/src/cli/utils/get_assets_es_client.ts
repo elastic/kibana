@@ -10,6 +10,7 @@ import { Client } from '@elastic/elasticsearch';
 import { AssetsSynthtraceEsClient } from '../../lib/assets/assets_synthtrace_es_client';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
+import { getEsClientTlsSettings } from './ssl';
 
 export function getAssetsEsClient({
   target,
@@ -21,6 +22,7 @@ export function getAssetsEsClient({
 }) {
   const client = new Client({
     node: target,
+    tls: getEsClientTlsSettings(target),
   });
 
   return new AssetsSynthtraceEsClient({

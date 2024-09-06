@@ -23,7 +23,7 @@ Array [
   Object {
     "set": Object {
       "field": "entity.definitionVersion",
-      "value": "999.999.999",
+      "value": "1.0.0",
     },
   },
   Object {
@@ -73,21 +73,27 @@ if (ctx.entity?.metadata?.sourceIndex.data != null) {
     },
   },
   Object {
-    "script": Object {
-      "if": "ctx.entity.identity.log?.logger != null && ctx.entity.identity.log.logger.size() != 0",
-      "source": "if (ctx.log == null) {
-  ctx.log = new HashMap();
-}
-ctx.log.logger = ctx.entity.identity.log.logger.keySet().toArray()[0];",
+    "dot_expander": Object {
+      "field": "log.logger",
+      "path": "entity.identity.log.logger.top_metric",
     },
   },
   Object {
-    "script": Object {
-      "if": "ctx.entity.identity.event?.category != null && ctx.entity.identity.event.category.size() != 0",
-      "source": "if (ctx.event == null) {
-  ctx.event = new HashMap();
-}
-ctx.event.category = ctx.entity.identity.event.category.keySet().toArray()[0];",
+    "set": Object {
+      "field": "log.logger",
+      "value": "{{entity.identity.log.logger.top_metric.log.logger}}",
+    },
+  },
+  Object {
+    "dot_expander": Object {
+      "field": "event.category",
+      "path": "entity.identity.event.category.top_metric",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "event.category",
+      "value": "{{entity.identity.event.category.top_metric.event.category}}",
     },
   },
   Object {
@@ -106,6 +112,30 @@ ctx.event.category = ctx.entity.identity.event.category.keySet().toArray()[0];",
     "set": Object {
       "field": "_index",
       "value": ".entities.v1.latest.admin-console-services",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services@platform",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services-latest@platform",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services@custom",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services-latest@custom",
     },
   },
 ]

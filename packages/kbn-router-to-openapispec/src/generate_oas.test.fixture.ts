@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { schema } from '@kbn/config-schema';
 
 export const sharedOas = {
@@ -33,7 +33,7 @@ export const sharedOas = {
     '/bar': {
       get: {
         deprecated: true,
-        operationId: '/bar#0',
+        operationId: '%2Fbar#0',
         parameters: [
           {
             description: 'The version of the API to use',
@@ -121,6 +121,7 @@ export const sharedOas = {
         },
         responses: {
           '200': {
+            description: 'OK response oas-test-version-1\nOK response oas-test-version-2',
             content: {
               'application/json; Elastic-Api-Version=oas-test-version-1': {
                 schema: {
@@ -151,7 +152,7 @@ export const sharedOas = {
     '/foo/{id}/{path*}': {
       get: {
         description: 'route description',
-        operationId: '/foo/{id}/{path*}#0',
+        operationId: '%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#0',
         parameters: [
           {
             description: 'The version of the API to use',
@@ -275,7 +276,7 @@ export const sharedOas = {
       },
       post: {
         description: 'route description',
-        operationId: '/foo/{id}/{path*}#1',
+        operationId: '%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#1',
         parameters: [
           {
             description: 'The version of the API to use',
@@ -284,6 +285,16 @@ export const sharedOas = {
             schema: {
               default: '2023-10-31',
               enum: ['2023-10-31'],
+              type: 'string',
+            },
+          },
+          {
+            description: 'A required header to protect against CSRF attacks',
+            in: 'header',
+            name: 'kbn-xsrf',
+            required: true,
+            schema: {
+              example: 'true',
               type: 'string',
             },
           },

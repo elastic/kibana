@@ -474,25 +474,25 @@
           ", savedObject: { getEsType(): string; title: string; displayName: string; }, options: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-            "section": "def-common.SavedObjectsCreateOptions",
+            "section": "def-public.SavedObjectsCreateOptions",
             "text": "SavedObjectsCreateOptions"
           },
           ", services: { savedObjectsClient: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-            "section": "def-common.SavedObjectsClientContract",
+            "section": "def-public.SavedObjectsClientContract",
             "text": "SavedObjectsClientContract"
           },
           "; overlays: ",
           {
             "pluginId": "@kbn/core-overlays-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-            "section": "def-common.OverlayStart",
+            "section": "def-public.OverlayStart",
             "text": "OverlayStart"
           },
           "; }, startServices: ",
@@ -500,9 +500,9 @@
           ") => Promise<",
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-            "section": "def-common.SimpleSavedObject",
+            "section": "def-public.SimpleSavedObject",
             "text": "SimpleSavedObject"
           },
           "<",
@@ -605,9 +605,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SavedObjectsCreateOptions",
+                "section": "def-public.SavedObjectsCreateOptions",
                 "text": "SavedObjectsCreateOptions"
               }
             ],
@@ -637,9 +637,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                    "section": "def-common.SavedObjectsClientContract",
+                    "section": "def-public.SavedObjectsClientContract",
                     "text": "SavedObjectsClientContract"
                   }
                 ],
@@ -657,9 +657,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayStart",
+                    "section": "def-public.OverlayStart",
                     "text": "OverlayStart"
                   }
                 ],

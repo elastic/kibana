@@ -25,7 +25,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     const header = getPageObject('header');
 
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     beforeEach(async () => {
@@ -35,7 +35,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
-      await svlCommonPage.forceLogout();
     });
 
     it('creates a case', async () => {

@@ -24,6 +24,10 @@ describe('FormFields ', () => {
     appMockRender = createAppMockRenderer();
   });
 
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('renders correctly', async () => {
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>

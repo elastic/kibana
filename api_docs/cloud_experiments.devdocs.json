@@ -110,30 +110,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/experiments/is_solution_nav_enabled.ts"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/experiments/is_solution_nav_enabled.ts"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/plugin.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/plugin.tsx"
-          },
-          {
-            "plugin": "navigation",
-            "path": "src/plugins/navigation/public/types.ts"
-          },
-          {
-            "plugin": "navigation",
-            "path": "src/plugins/navigation/public/types.ts"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/types.ts"
           },
@@ -156,14 +132,6 @@
           {
             "plugin": "observabilityOnboarding",
             "path": "x-pack/plugins/observability_solution/observability_onboarding/public/plugin.ts"
-          },
-          {
-            "plugin": "navigation",
-            "path": "src/plugins/navigation/server/types.ts"
-          },
-          {
-            "plugin": "navigation",
-            "path": "src/plugins/navigation/server/types.ts"
           }
         ],
         "children": [
@@ -179,39 +147,19 @@
               "\nFetch the configuration assigned to variation `configKey`. If nothing is found, fallback to `defaultValue`."
             ],
             "signature": [
-              "<Data>(featureFlagName: \"security-solutions.add-integrations-url\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"observability_onboarding.experimental_onboarding_flow_enabled\" | \"solutionNavEnabled\", defaultValue: Data) => Promise<Data>"
+              "<Data>(featureFlagName: \"security-solutions.add-integrations-url\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"observability_onboarding.experimental_onboarding_flow_enabled\", defaultValue: Data) => Promise<Data>"
             ],
             "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/public/experiments/is_solution_nav_enabled.ts"
-              },
-              {
-                "plugin": "navigation",
-                "path": "src/plugins/navigation/public/plugin.tsx"
-              },
-              {
                 "plugin": "cloudChat",
                 "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/plugin.ts"
               },
               {
                 "plugin": "cloudChat",
                 "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/plugin.ts"
-              },
-              {
-                "plugin": "navigation",
-                "path": "src/plugins/navigation/public/plugin.test.ts"
-              },
-              {
-                "plugin": "navigation",
-                "path": "src/plugins/navigation/public/plugin.test.ts"
-              },
-              {
-                "plugin": "navigation",
-                "path": "src/plugins/navigation/public/plugin.test.ts"
               }
             ],
             "children": [
@@ -225,7 +173,7 @@
                   "The name of the key to find the config variation. {@link CloudExperimentsFeatureFlagNames }."
                 ],
                 "signature": [
-                  "\"security-solutions.add-integrations-url\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"observability_onboarding.experimental_onboarding_flow_enabled\" | \"solutionNavEnabled\""
+                  "\"security-solutions.add-integrations-url\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"observability_onboarding.experimental_onboarding_flow_enabled\""
                 ],
                 "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
                 "deprecated": false,
@@ -322,7 +270,7 @@
           "\nThe names of the feature flags declared in Kibana.\nValid keys are defined in {@link FEATURE_FLAG_NAMES}. When using a new feature flag, add the name to the list.\n"
         ],
         "signature": [
-          "\"security-solutions.add-integrations-url\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"observability_onboarding.experimental_onboarding_flow_enabled\" | \"solutionNavEnabled\""
+          "\"security-solutions.add-integrations-url\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"observability_onboarding.experimental_onboarding_flow_enabled\""
         ],
         "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
         "deprecated": false,

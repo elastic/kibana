@@ -25,6 +25,10 @@ describe('TemplateTags', () => {
     appMockRenderer = createAppMockRenderer();
   });
 
+  afterEach(async () => {
+    await appMockRenderer.clearQueryCache();
+  });
+
   it('renders template tags', async () => {
     appMockRenderer.render(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>

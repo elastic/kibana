@@ -16,7 +16,7 @@ export const buildTypesMappings = (
   types: SavedObjectsType[]
 ): SavedObjectsTypeMappingDefinitions => {
   return types.reduce<SavedObjectsTypeMappingDefinitions>((acc, { name: type, mappings }) => {
-    const duplicate = acc.hasOwnProperty(type);
+    const duplicate = Object.hasOwn(acc, type);
     if (duplicate) {
       throw new Error(`Type ${type} is already defined.`);
     }

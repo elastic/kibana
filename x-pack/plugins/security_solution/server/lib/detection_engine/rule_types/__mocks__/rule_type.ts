@@ -90,6 +90,7 @@ export const createRuleTypeMocks = (
   } as SavedObject<AlertAttributes>);
 
   const services = {
+    uiSettingsClient: { get: jest.fn().mockResolvedValue([]) },
     savedObjectsClient: mockSavedObjectsClient,
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     alertFactory: {
@@ -104,14 +105,14 @@ export const createRuleTypeMocks = (
     alertWithPersistence: jest.fn(),
     logger: loggerMock,
     shouldWriteAlerts: () => true,
-    dataViews: {
+    getDataViews: jest.fn().mockResolvedValue({
       createDataViewLazy: jest.fn().mockResolvedValue({
         getFields: jest.fn().mockResolvedValue({
           getFieldMapSorted: jest.fn().mockReturnValue({}),
         }),
         getSourceFiltering: jest.fn().mockReturnValue({ excludes: [] }),
       }),
-    },
+    }),
   };
 
   return {

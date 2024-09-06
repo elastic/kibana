@@ -26,9 +26,6 @@ const mockUseAssistantContext = {
   setSelectedSettingsTab,
   promptContexts: {},
   allQuickPrompts: MOCK_QUICK_PROMPTS,
-  knowledgeBase: {
-    isEnabledKnowledgeBase: true,
-  },
 };
 
 const testTitle = 'SPL_QUERY_CONVERSION_TITLE';

@@ -36,6 +36,7 @@ export interface BootDependencies extends ConsoleStartServices {
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
   isMonacoEnabled: boolean;
+  isDevMode: boolean;
 }
 
 export async function renderApp({
@@ -47,6 +48,7 @@ export async function renderApp({
   docLinks,
   autocompleteInfo,
   isMonacoEnabled,
+  isDevMode,
   ...startServices
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
@@ -86,6 +88,7 @@ export async function renderApp({
           },
           config: {
             isMonacoEnabled,
+            isDevMode,
           },
         }}
       >

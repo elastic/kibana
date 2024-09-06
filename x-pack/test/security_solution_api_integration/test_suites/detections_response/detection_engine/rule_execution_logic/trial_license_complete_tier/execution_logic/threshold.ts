@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
           field: 'host.id',
           value: 1, // This value generates 7 alerts with the current esArchive
         },
-        max_signals: 7,
+        max_signals: 8,
       };
       const { logs } = await previewRule({ supertest, rule });
       expect(logs[0].warnings).not.toContain(getMaxAlertsWarning());
@@ -346,7 +346,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(alerts.hits.hits).toHaveLength(1);
     });
 
-    describe('Timestamp override and fallback', async () => {
+    describe('Timestamp override and fallback', () => {
       before(async () => {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'
@@ -416,7 +416,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with host risk index', async () => {
+    describe('with host risk index', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
@@ -443,7 +443,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', async () => {
+    describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
         await kibanaServer.uiSettings.update({

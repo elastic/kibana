@@ -274,10 +274,14 @@ export type VersionedResponseBodyValidation =
 export interface VersionedRouteResponseValidation {
   [statusCode: number]: {
     /**
+     * A description of the response. This is required input for complete OAS documentation.
+     */
+    description?: string;
+    /**
      * A string representing the mime type of the response body.
      */
     bodyContentType?: string;
-    body: VersionedResponseBodyValidation;
+    body?: VersionedResponseBodyValidation;
   };
   unsafe?: { body?: boolean };
 }

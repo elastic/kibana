@@ -28,7 +28,7 @@ function assertInstanceOfZodType(schema: unknown): asserts schema is z.ZodTypeAn
 const instanceofZodTypeKind = <Z extends z.ZodFirstPartyTypeKind>(
   type: z.ZodTypeAny,
   zodTypeKind: Z
-): type is InstanceType<typeof z[Z]> => {
+): type is InstanceType<(typeof z)[Z]> => {
   return type?._def?.typeName === zodTypeKind;
 };
 

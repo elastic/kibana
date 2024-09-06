@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import { EuiTitle, EuiText, EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiTitle, EuiText, EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback } from 'react';
-import { QualityWarning } from '../../../../../common/log_analysis';
+import React, { useCallback, useMemo } from 'react';
+import { ApplicationStart } from '@kbn/core-application-browser';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
 import { LoadingOverlayWrapper } from '../../../loading_overlay_wrapper';
 import { IndexSetupRow } from './index_setup_row';
 import { AvailableIndex, ValidationIndicesError } from './validation';
+
+function getKibanaAdvancedSettingsHref(application: ApplicationStart) {
+  return application.getUrlForApp('management', {
+    path: `/kibana/settings?query=${encodeURIComponent('Log sources')}`,
+  });
+}
 
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   disabled?: boolean;
@@ -29,6 +37,15 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   previousQualityWarnings = [],
   validationErrors = [],
 }) => {
+  const {
+    services: { application },
+  } = useKibanaContextForPlugin();
+
+  const advancedSettingsHref = useMemo(
+    () => getKibanaAdvancedSettingsHref(application),
+    [application]
+  );
+
   const changeIsIndexSelected = useCallback(
     (indexName: string, isSelected: boolean) => {
       onChangeSelectedIndices(
@@ -41,7 +58,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   );
 
   const changeDatasetFilter = useCallback(
-    (indexName: string, datasetFilter) => {
+    (indexName: string, datasetFilter: DatasetFilter) => {
       onChangeSelectedIndices(
         indices.map((index) => {
           return index.name === indexName ? { ...index, datasetFilter } : index;
@@ -67,7 +84,20 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.infra.analysisSetup.indicesSelectionDescription"
-            defaultMessage="By default, Machine Learning analyzes log messages in all log indices configured for the source. You can choose to only analyze a subset of the index names. Every selected index name must match at least one index with log entries. You can also choose to only include a certain subset of datasets. Note that the dataset filter applies to all selected indices."
+            defaultMessage="By default, Machine Learning analyzes log messages in all log indices configured for the {advancedSettingsLink}. You can choose to only analyze a subset of the index names. Every selected index name must match at least one index with log entries. You can also choose to only include a certain subset of datasets. Note that the dataset filter applies to all selected indices."
+            values={{
+              advancedSettingsLink: (
+                <EuiLink
+                  data-test-subj="xpack.infra.analysisSetup.logSourcesSettingLink"
+                  href={advancedSettingsHref}
+                >
+                  <FormattedMessage
+                    id="xpack.infra.analysisSetup.logSourcesSettingLinkText"
+                    defaultMessage="log sources setting"
+                  />
+                </EuiLink>
+              ),
+            }}
           />
         </EuiText>
       </EuiFlexItem>

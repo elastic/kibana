@@ -8,8 +8,8 @@
 
 import { PublishingSubject } from '../publishing_subject';
 
-export interface PublishesUnsavedChanges {
-  unsavedChanges: PublishingSubject<object | undefined>;
+export interface PublishesUnsavedChanges<Runtime extends object = object> {
+  unsavedChanges: PublishingSubject<Partial<Runtime> | undefined>;
   resetUnsavedChanges: () => void;
 }
 

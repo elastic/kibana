@@ -9,6 +9,7 @@
   "kbn_references": [
     "@kbn/openapi-common",
     "@kbn/zod-helpers",
-    "@kbn/securitysolution-lists-common"
+    "@kbn/securitysolution-lists-common",
+    "@kbn/zod"
   ]
 }

@@ -9,8 +9,6 @@ paths:
       operationId: DuplicateExceptionList
       x-codegen-enabled: true
       summary: Duplicates an exception list
-      tags:
-        - Exceptions API
       parameters:
         - name: list_id
           in: query

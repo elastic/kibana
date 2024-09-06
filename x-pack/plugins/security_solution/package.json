@@ -24,12 +24,15 @@
     "cypress:dw:endpoint:open": "echo '\n** WARNING **: Run script `cypress:dw:endpoint:open` no longer valid! Use `cypress:dw:open` instead\n'",
     "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../target/kibana-security-solution/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../target/kibana-security-solution/cypress/results && yarn junit:transform && mkdir -p ../../../target/junit && cp ../../../target/kibana-security-solution/cypress/results/*.xml ../../../target/junit/",
     "test:generate": "node scripts/endpoint/resolver_generator",
-    "test:generate:serverless-dev": "node scripts/endpoint/resolver_generator --node http://elastic_serverless:changeme@127.0.0.1:9200 --kibana http://elastic_serverless:changeme@127.0.0.1:5601",
+    "test:generate:serverless-dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --no-warnings scripts/endpoint/resolver_generator --node https://elastic_serverless:changeme@127.0.0.1:9200 --kibana http://elastic_serverless:changeme@127.0.0.1:5601",
     "mappings:generate": "node scripts/mappings/mappings_generator",
     "mappings:load": "node scripts/mappings/mappings_loader",
     "junit:transform": "node scripts/junit_transformer --pathPattern '../../../target/kibana-security-solution/cypress/results/*.xml' --rootDirectory ../../../ --reportName 'Security Solution Cypress' --writeInPlace",
     "openapi:generate": "node scripts/openapi/generate",
     "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate",
-    "openapi:bundle": "node scripts/openapi/bundle"
+    "openapi:bundle:detections": "node scripts/openapi/bundle_detections",
+    "openapi:bundle:timeline": "node scripts/openapi/bundle_timeline",
+    "openapi:bundle:entity-analytics": "node scripts/openapi/bundle_entity_analytics",
+    "openapi:bundle:endpoint-management": "node scripts/openapi/bundle_endpoint_management"
   }
 }

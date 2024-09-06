@@ -18,8 +18,8 @@ import type {
   ColumnHeaderOptions,
   CellValueElementProps,
   RowRenderer,
+  TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
 import type {
   TimelineItem,
   TimelineNonEcsData,
@@ -32,12 +32,11 @@ import { useEventDetailsWidthContext } from '../../../../../common/components/ev
 import { EventColumnView } from './event_column_view';
 import type { inputsModel } from '../../../../../common/store';
 import { appSelectors } from '../../../../../common/store';
-import { timelineActions, timelineSelectors } from '../../../../store';
+import { timelineActions } from '../../../../store';
 import type { TimelineResultNote } from '../../../open_timeline/types';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
-import { timelineDefaults } from '../../../../store/defaults';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type {
   ControlColumnProps,
@@ -121,19 +120,9 @@ const StatefulEventComponent: React.FC<Props> = ({
 
   const [, setFocusedNotes] = useState<{ [eventId: string]: boolean }>({});
 
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const expandedDetail = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail ?? {}
-  );
-
-  const activeTab = tabType ?? TimelineTabs.query;
-  const activeExpandedDetail = expandedDetail[activeTab];
   const eventId = event._id;
 
-  const isDetailPanelExpanded: boolean =
-    (activeExpandedDetail?.panelView === 'eventDetail' &&
-      activeExpandedDetail?.params?.eventId === eventId) ||
-    false;
+  const isDetailPanelExpanded: boolean = false;
 
   const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
   const notesById = useDeepEqualSelector(getNotesByIds);

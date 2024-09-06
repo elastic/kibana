@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { fetchConnectorById } from '..';
 

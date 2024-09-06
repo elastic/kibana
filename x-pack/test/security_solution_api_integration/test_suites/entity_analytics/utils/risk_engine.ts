@@ -22,10 +22,12 @@ import {
   RISK_ENGINE_ENABLE_URL,
   RISK_ENGINE_STATUS_URL,
   RISK_ENGINE_PRIVILEGES_URL,
+  RISK_ENGINE_SCHEDULE_NOW_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
 import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import {
   createRule,
   waitForAlertsToBePresent,
@@ -571,6 +573,15 @@ export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namesp
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(expectStatusCode),
+
+  scheduleNow: async (expectStatusCode: number = 200) =>
+    await supertest
+      .post(routeWithNamespace(RISK_ENGINE_SCHEDULE_NOW_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send()
+      .expect(expectStatusCode),
 });
 
 interface Credentials {
@@ -579,7 +590,7 @@ interface Credentials {
 }
 
 export const riskEngineRouteHelpersFactoryNoAuth = (
-  supertestWithoutAuth: SuperTest.Agent,
+  supertestWithoutAuth: SupertestWithoutAuthProviderType,
   namespace?: string
 ) => ({
   privilegesForUser: async ({ username, password }: Credentials) =>

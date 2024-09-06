@@ -20,12 +20,13 @@ export const SecretsSchema = schema.object({
 });
 
 export const RunActionParamsSchema = schema.object({
-  body: schema.string(),
+  body: schema.any(),
   model: schema.maybe(schema.string()),
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
   temperature: schema.maybe(schema.number()),
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),
+  raw: schema.maybe(schema.boolean()),
 });
 
 export const RunApiResponseSchema = schema.object({
@@ -52,13 +53,34 @@ export const RunActionResponseSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
+export const RunActionRawResponseSchema = schema.any();
+
 export const InvokeAIActionParamsSchema = schema.object({
   messages: schema.any(),
+  systemInstruction: schema.maybe(schema.string()),
   model: schema.maybe(schema.string()),
   temperature: schema.maybe(schema.number()),
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  tools: schema.maybe(schema.arrayOf(schema.any())),
+  toolConfig: schema.maybe(
+    schema.object({
+      mode: schema.oneOf([schema.literal('AUTO'), schema.literal('ANY'), schema.literal('NONE')]),
+      allowedFunctionNames: schema.maybe(schema.arrayOf(schema.string())),
+    })
+  ),
+});
+
+export const InvokeAIRawActionParamsSchema = schema.object({
+  messages: schema.any(),
+  systemInstruction: schema.maybe(schema.string()),
+  model: schema.maybe(schema.string()),
+  temperature: schema.maybe(schema.number()),
+  stopSequences: schema.maybe(schema.arrayOf(schema.string())),
+  signal: schema.maybe(schema.any()),
+  timeout: schema.maybe(schema.number()),
+  tools: schema.maybe(schema.arrayOf(schema.any())),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
@@ -71,6 +93,8 @@ export const InvokeAIActionResponseSchema = schema.object({
     })
   ),
 });
+
+export const InvokeAIRawActionResponseSchema = schema.any();
 
 export const StreamingResponseSchema = schema.any();
 

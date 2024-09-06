@@ -20,7 +20,7 @@ import { getNormalizedDataStreams } from '../../../../common/services';
 import {
   MAX_TIME_COMPLETE_INSTALL,
   ASSETS_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 import { PACKAGES_SAVED_OBJECT_TYPE, FLEET_INSTALL_FORMAT_VERSION } from '../../../constants';
@@ -361,7 +361,7 @@ export async function _installPackage({
         const policyIdsToUpgrade = await packagePolicyService.listIds(savedObjectsClient, {
           page: 1,
           perPage: SO_SEARCH_LIMIT,
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+          kuery: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
         });
         logger.debug(
           `Package install - Package is flagged with keep_policies_up_to_date, upgrading its associated package policies ${policyIdsToUpgrade}`

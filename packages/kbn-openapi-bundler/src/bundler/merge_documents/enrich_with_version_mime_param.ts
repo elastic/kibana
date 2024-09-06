@@ -12,9 +12,12 @@ import { isRefNode } from '../process_document';
 import { getOasDocumentVersion } from '../../utils/get_oas_document_version';
 import { KNOWN_HTTP_METHODS } from './http_methods';
 
+const DEFAULT_API_VERSION = '2023-10-31';
+const VERSION_REGEX = /\d{4}-\d{2}-\d{2}/;
+
 export function enrichWithVersionMimeParam(resolvedDocuments: ResolvedDocument[]): void {
   for (const resolvedDocument of resolvedDocuments) {
-    const version = getOasDocumentVersion(resolvedDocument);
+    const version = extractApiVersion(resolvedDocument);
     const paths = resolvedDocument.document.paths as OpenAPIV3.PathsObject;
 
     for (const path of Object.keys(paths ?? {})) {
@@ -79,4 +82,14 @@ function enrichContentWithVersion(
     content[mimeTypeWithVersionParam] = content[mimeType];
     delete content[mimeType];
   }
+}
+
+function extractApiVersion(resolvedDocument: ResolvedDocument): string {
+  const version = getOasDocumentVersion(resolvedDocument);
+
+  if (!VERSION_REGEX.test(version)) {
+    return DEFAULT_API_VERSION;
+  }
+
+  return version < DEFAULT_API_VERSION ? DEFAULT_API_VERSION : version;
 }

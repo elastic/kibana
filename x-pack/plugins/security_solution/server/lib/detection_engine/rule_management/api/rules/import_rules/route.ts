@@ -23,7 +23,6 @@ import type { BulkError, ImportRuleResponse } from '../../../../routes/utils';
 import { buildSiemResponse, isBulkError, isImportRegular } from '../../../../routes/utils';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../../logic/import/create_rules_stream_from_ndjson';
-import { getReferencedExceptionLists } from '../../../logic/import/gather_referenced_exceptions';
 import type { RuleExceptionsPromiseFromStreams } from '../../../logic/import/import_rules_utils';
 import { importRules as importRulesHelper } from '../../../logic/import/import_rules_utils';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
@@ -118,7 +117,8 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
           const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
             parsedObjectsWithoutDuplicateErrors,
-            actionSOClient
+            actionSOClient,
+            actionsClient
           );
 
           // import actions-connectors
@@ -142,12 +142,6 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             ? []
             : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
 
-          // gather all exception lists that the imported rules reference
-          const foundReferencedExceptionLists = await getReferencedExceptionLists({
-            rules: parsedRules,
-            savedObjectsClient,
-          });
-
           const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
 
           const importRuleResponse: ImportRuleResponse[] = await importRulesHelper({
@@ -155,9 +149,10 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
             overwriteRules: request.query.overwrite,
             detectionRulesClient,
-            existingLists: foundReferencedExceptionLists,
             allowMissingConnectorSecrets: !!actionConnectors.length,
+            savedObjectsClient,
           });
+
           const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
           const successes = importRuleResponse.filter((resp) => {
             if (isImportRegular(resp)) {

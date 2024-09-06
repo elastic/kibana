@@ -8,10 +8,12 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
-import type { EntityType } from '@kbn/timelines-plugin/common';
 import { useDispatch } from 'react-redux';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import {
   getScopedActions,
   isActiveTimeline,
@@ -21,7 +23,6 @@ import {
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { useDetailPanel } from '../../../side_panel/hooks/use_detail_panel';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { isFullScreen } from '../../body/column_headers';
 import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../../../common/constants';
@@ -242,16 +243,8 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
   };
 };
 
-export const useSessionView = ({
-  scopeId,
-  entityType,
-  height,
-}: {
-  scopeId: string;
-  entityType?: EntityType;
-  height?: number;
-}) => {
-  const { sessionView } = useKibana().services;
+export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: number }) => {
+  const { sessionView, telemetry } = useKibana().services;
   const getScope = useMemo(() => {
     if (isTimelineScope(scopeId)) {
       return timelineSelectors.getTimelineByIdSelector();
@@ -264,7 +257,7 @@ export const useSessionView = ({
   const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
   const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
-  const { sessionViewConfig, activeTab } = useDeepEqualSelector((state) => ({
+  const { sessionViewConfig } = useDeepEqualSelector((state) => ({
     activeTab: timelineDefaults.activeTab,
     prevActiveTab: timelineDefaults.prevActiveTab,
     ...((getScope && getScope(state, scopeId)) ?? defaults),
@@ -289,13 +282,30 @@ export const useSessionView = ({
       return SourcererScopeName.default;
     }
   }, [scopeId]);
-  const { openEventDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
-    isFlyoutView: !isActiveTimeline(scopeId),
-    entityType,
-    sourcererScope,
-    scopeId,
-    tabType: isActiveTimeline(scopeId) ? activeTab : TimelineTabs.query,
-  });
+
+  const { selectedPatterns } = useSourcererDataView(sourcererScope);
+  const eventDetailsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
+
+  const { openFlyout } = useExpandableFlyoutApi();
+  const openAlertDetailsFlyout = useCallback(
+    (eventId?: string, onClose?: () => void) => {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName: eventDetailsIndex,
+            scopeId,
+          },
+        },
+      });
+      telemetry.reportDetailsFlyoutOpened({
+        location: scopeId,
+        panel: 'right',
+      });
+    },
+    [openFlyout, eventDetailsIndex, scopeId, telemetry]
+  );
 
   const sessionViewComponent = useMemo(() => {
     const sessionViewSearchBarHeight = 118;
@@ -303,7 +313,7 @@ export const useSessionView = ({
     return sessionViewConfig !== null
       ? sessionView.getSessionView({
           ...sessionViewConfig,
-          loadAlertDetails: openEventDetailsPanel,
+          loadAlertDetails: openAlertDetailsFlyout,
           isFullScreen: fullScreen,
           height: heightMinusSearchBar,
           canReadPolicyManagement,
@@ -313,15 +323,13 @@ export const useSessionView = ({
     height,
     sessionViewConfig,
     sessionView,
-    openEventDetailsPanel,
+    openAlertDetailsFlyout,
     fullScreen,
     canReadPolicyManagement,
   ]);
 
   return {
-    openEventDetailsPanel,
-    shouldShowDetailsPanel,
+    openEventDetailsPanel: openAlertDetailsFlyout,
     SessionView: sessionViewComponent,
-    DetailsPanel,
   };
 };

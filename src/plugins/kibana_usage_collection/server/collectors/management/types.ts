@@ -55,7 +55,6 @@ export interface UsageStats {
   'observability:logsExplorer:allowedDataViews': string[];
   'observability:logSources': string[];
   'observability:aiAssistantLogsIndexPattern': string;
-  'observability:aiAssistantResponseLanguage': string;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'visualization:heatmap:maxBuckets': number;
@@ -180,4 +179,5 @@ export interface UsageStats {
   'devTools:enablePersistentConsole': boolean;
   'aiAssistant:preferredAIAssistantType': string;
   'observability:profilingFetchTopNFunctionsFromStacktraces': boolean;
+  'securitySolution:excludedDataTiersForRuleExecution': string[];
 }

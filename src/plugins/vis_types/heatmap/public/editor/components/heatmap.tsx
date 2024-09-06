@@ -39,7 +39,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
   const { stateParams, uiState, setValue, setValidity, setTouched, showElasticChartsOptions } =
     props;
   const [valueAxis] = stateParams.valueAxes;
-  const isColorsNumberInvalid = stateParams.colorsNumber < 2 || stateParams.colorsNumber > 10;
+  const isColorsNumberInvalid = +stateParams.colorsNumber < 2 || +stateParams.colorsNumber > 10;
   const [isColorRangesValid, setIsColorRangesValid] = useState(false);
 
   const legendSize = stateParams.legendSize;
@@ -69,7 +69,10 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
     }
   }, [stateParams]);
 
-  const handleLegendSizeChange = useCallback((size) => setValue('legendSize', size), [setValue]);
+  const handleLegendSizeChange = useCallback(
+    (size?: LegendSize) => setValue('legendSize', size),
+    [setValue]
+  );
 
   return (
     <>

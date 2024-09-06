@@ -9,8 +9,7 @@ import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiToolTip, EuiSwitch, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
-import { RowRendererId } from '../../../../common/api/timeline';
+import { RowRendererValues } from '../../../../common/api/timeline';
 import type { State } from '../../../common/store';
 import { setExcludedRowRendererIds } from '../../store/actions';
 import { selectExcludedRowRendererIds } from '../../store/selectors';
@@ -19,12 +18,6 @@ import * as i18n from './translations';
 interface RowRendererSwitchProps {
   timelineId: string;
 }
-
-const CustomFormRow = styled(EuiFormRow)`
-  .euiFormRow__label {
-    font-weight: 400;
-  }
-`;
 
 export const RowRendererSwitch = React.memo(function RowRendererSwitch(
   props: RowRendererSwitchProps
@@ -40,7 +33,7 @@ export const RowRendererSwitch = React.memo(function RowRendererSwitch(
   );
 
   const isAnyRowRendererEnabled = useMemo(
-    () => Object.values(RowRendererId).some((id) => !excludedRowRendererIds.includes(id)),
+    () => RowRendererValues.some((id) => !excludedRowRendererIds.includes(id)),
     [excludedRowRendererIds]
   );
 
@@ -48,7 +41,7 @@ export const RowRendererSwitch = React.memo(function RowRendererSwitch(
     dispatch(
       setExcludedRowRendererIds({
         id: timelineId,
-        excludedRowRendererIds: Object.values(RowRendererId),
+        excludedRowRendererIds: RowRendererValues,
       })
     );
   }, [dispatch, timelineId]);
@@ -75,15 +68,15 @@ export const RowRendererSwitch = React.memo(function RowRendererSwitch(
 
   return (
     <EuiToolTip position="top" content={i18n.EVENT_RENDERERS_SWITCH_WARNING}>
-      <CustomFormRow display="columnCompressedSwitch" label={rowRendererLabel}>
+      <EuiFormRow hasChildLabel={false}>
         <EuiSwitch
           data-test-subj="row-renderer-switch"
-          label=""
+          label={rowRendererLabel}
           checked={isAnyRowRendererEnabled}
           onChange={onChange}
           compressed
         />
-      </CustomFormRow>
+      </EuiFormRow>
     </EuiToolTip>
   );
 });

@@ -108,7 +108,7 @@ export interface EndpointIndexUIQueryParams {
 }
 
 const transformStates = Object.values(TRANSFORM_STATES);
-export type TransformState = typeof transformStates[number];
+export type TransformState = (typeof transformStates)[number];
 
 export interface TransformStats {
   id: string;

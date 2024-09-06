@@ -45,7 +45,7 @@ export const persistableControlGroupInputKeys: Array<
 > = ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings', 'showApplySelections'];
 export type PersistableControlGroupInput = Pick<
   ControlGroupInput,
-  typeof persistableControlGroupInputKeys[number]
+  (typeof persistableControlGroupInputKeys)[number]
 >;
 
 /**

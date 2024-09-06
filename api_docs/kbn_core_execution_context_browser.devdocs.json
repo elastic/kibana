@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-execution-context-browser",
-        "id": "def-common.ExecutionContextSetup",
+        "id": "def-public.ExecutionContextSetup",
         "type": "Interface",
         "tags": [],
         "label": "ExecutionContextSetup",
@@ -35,7 +19,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
-            "id": "def-common.ExecutionContextSetup.context$",
+            "id": "def-public.ExecutionContextSetup.context$",
             "type": "Object",
             "tags": [],
             "label": "context$",
@@ -60,7 +44,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
-            "id": "def-common.ExecutionContextSetup.set",
+            "id": "def-public.ExecutionContextSetup.set",
             "type": "Function",
             "tags": [],
             "label": "set",
@@ -84,7 +68,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-execution-context-browser",
-                "id": "def-common.ExecutionContextSetup.set.$1",
+                "id": "def-public.ExecutionContextSetup.set.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "c$",
@@ -108,7 +92,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
-            "id": "def-common.ExecutionContextSetup.get",
+            "id": "def-public.ExecutionContextSetup.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -133,7 +117,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
-            "id": "def-common.ExecutionContextSetup.clear",
+            "id": "def-public.ExecutionContextSetup.clear",
             "type": "Function",
             "tags": [],
             "label": "clear",
@@ -151,7 +135,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
-            "id": "def-common.ExecutionContextSetup.getAsLabels",
+            "id": "def-public.ExecutionContextSetup.getAsLabels",
             "type": "Function",
             "tags": [],
             "label": "getAsLabels",
@@ -170,7 +154,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
-            "id": "def-common.ExecutionContextSetup.withGlobalContext",
+            "id": "def-public.ExecutionContextSetup.withGlobalContext",
             "type": "Function",
             "tags": [],
             "label": "withGlobalContext",
@@ -201,7 +185,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-execution-context-browser",
-                "id": "def-common.ExecutionContextSetup.withGlobalContext.$1",
+                "id": "def-public.ExecutionContextSetup.withGlobalContext.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -232,7 +216,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-execution-context-browser",
-        "id": "def-common.ExecutionContextStart",
+        "id": "def-public.ExecutionContextStart",
         "type": "Type",
         "tags": [],
         "label": "ExecutionContextStart",
@@ -242,9 +226,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-execution-context-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-            "section": "def-common.ExecutionContextSetup",
+            "section": "def-public.ExecutionContextSetup",
             "text": "ExecutionContextSetup"
           }
         ],
@@ -254,6 +238,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

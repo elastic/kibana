@@ -43,17 +43,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Machine Learning Detection Rules - Creation',
   {
-    // Skipped in MKI as tests depend on feature flag alertSuppressionForMachineLearningRuleEnabled
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForMachineLearningRuleEnabled',
-          ])}`,
-        ],
-      },
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;

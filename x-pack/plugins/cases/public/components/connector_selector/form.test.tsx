@@ -44,6 +44,10 @@ describe('ConnectorSelector', () => {
     });
   });
 
+  afterEach(async () => {
+    await appMock.clearQueryCache();
+  });
+
   it('should render', async () => {
     appMock.render(
       <FormTestComponent>

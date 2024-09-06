@@ -5,25 +5,33 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  HorizontalAlignment,
+} from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { isLocalModel } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import { TaskTypes } from '../../../common/types';
 import * as i18n from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
-import { FilterOptions } from './types';
-
-import { DeploymentStatusEnum } from './types';
+import { FilterOptions, InferenceEndpointUI, ServiceProviderKeys } from './types';
 
 import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
-import { EndpointsTable } from './endpoints_table';
 import { ServiceProviderFilter } from './filter/service_provider_filter';
 import { TaskTypeFilter } from './filter/task_type_filter';
 import { TableSearch } from './search/table_search';
-import { useTableColumns } from './render_table_columns/table_columns';
-import { useKibana } from '../../hooks/use_kibana';
+import { DeploymentStatus } from './render_table_columns/render_deployment_status/deployment_status';
+import { EndpointInfo } from './render_table_columns/render_endpoint/endpoint_info';
+import { ServiceProvider } from './render_table_columns/render_service_provider/service_provider';
+import { TaskType } from './render_table_columns/render_task_type/task_type';
+import { DeleteAction } from './render_table_columns/render_actions/actions/delete/delete_action';
+import { CopyIDAction } from './render_table_columns/render_actions/actions/copy_id/copy_id_action';
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
@@ -31,15 +39,8 @@ interface TabularPageProps {
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
   const [searchKey, setSearchKey] = React.useState('');
-  const [deploymentStatus, setDeploymentStatus] = React.useState<
-    Record<string, DeploymentStatusEnum>
-  >({});
   const { queryParams, setQueryParams, filterOptions, setFilterOptions } =
     useAllInferenceEndpointsState();
-
-  const {
-    services: { ml, notifications },
-  } = useKibana();
 
   const onFilterChangedCallback = useCallback(
     (newFilterOptions: Partial<FilterOptions>) => {
@@ -48,46 +49,79 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     [setFilterOptions]
   );
 
-  useEffect(() => {
-    const fetchDeploymentStatus = async () => {
-      const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
-      if (trainedModelStats) {
-        const newDeploymentStatus = trainedModelStats?.trained_model_stats.reduce(
-          (acc, modelStat) => {
-            if (modelStat.model_id) {
-              acc[modelStat.model_id] =
-                modelStat?.deployment_stats?.state === 'started'
-                  ? DeploymentStatusEnum.deployed
-                  : DeploymentStatusEnum.notDeployed;
-            }
-            return acc;
-          },
-          {} as Record<string, DeploymentStatusEnum>
-        );
-        setDeploymentStatus(newDeploymentStatus);
-      }
-    };
-
-    fetchDeploymentStatus().catch((error) => {
-      const errorObj = extractErrorProperties(error);
-      notifications?.toasts?.addError(errorObj.message ? new Error(error.message) : error, {
-        title: i18n.TRAINED_MODELS_STAT_GATHER_FAILED,
-      });
-    });
-  }, [ml, notifications]);
-
   const { paginatedSortedTableData, pagination, sorting } = useTableData(
     inferenceEndpoints,
     queryParams,
     filterOptions,
-    searchKey,
-    deploymentStatus
+    searchKey
   );
 
-  const tableColumns = useTableColumns();
+  const tableColumns: Array<EuiBasicTableColumn<InferenceEndpointUI>> = [
+    {
+      name: '',
+      render: ({ endpoint, deployment }: InferenceEndpointUI) =>
+        isLocalModel(endpoint) ? <DeploymentStatus status={deployment} /> : null,
+      align: 'center' as HorizontalAlignment,
+      width: '64px',
+    },
+    {
+      field: 'endpoint',
+      name: i18n.ENDPOINT,
+      render: (endpoint: InferenceAPIConfigResponse) => {
+        if (endpoint) {
+          return <EndpointInfo endpoint={endpoint} />;
+        }
+
+        return null;
+      },
+      sortable: true,
+      truncateText: true,
+    },
+    {
+      field: 'provider',
+      name: i18n.SERVICE_PROVIDER,
+      render: (provider: ServiceProviderKeys) => {
+        if (provider) {
+          return <ServiceProvider providerKey={provider} />;
+        }
+
+        return null;
+      },
+      sortable: false,
+      width: '185px',
+    },
+    {
+      field: 'type',
+      name: i18n.TASK_TYPE,
+      render: (type: TaskTypes) => {
+        if (type) {
+          return <TaskType type={type} />;
+        }
+
+        return null;
+      },
+      sortable: false,
+      width: '185px',
+    },
+    {
+      actions: [
+        {
+          render: (inferenceEndpoint: InferenceEndpointUI) => (
+            <CopyIDAction inferenceId={inferenceEndpoint.endpoint.inference_id} />
+          ),
+        },
+        {
+          render: (inferenceEndpoint: InferenceEndpointUI) => (
+            <DeleteAction selectedEndpoint={inferenceEndpoint} />
+          ),
+        },
+      ],
+      width: '165px',
+    },
+  ];
 
   const handleTableChange = useCallback(
-    ({ page, sort }) => {
+    ({ page, sort }: any) => {
       const newQueryParams = {
         ...queryParams,
         ...(sort && {
@@ -123,9 +157,10 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EndpointsTable
+        <EuiBasicTable
           columns={tableColumns}
-          data={paginatedSortedTableData}
+          itemId="id"
+          items={paginatedSortedTableData}
           onChange={handleTableChange}
           pagination={pagination}
           sorting={sorting}

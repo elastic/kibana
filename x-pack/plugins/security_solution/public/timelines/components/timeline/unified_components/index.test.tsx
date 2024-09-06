@@ -76,7 +76,7 @@ const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof Experimental
 jest.mock('../../../../common/lib/kibana');
 
 // unified-field-list is reporting multiple analytics events
-jest.mock(`@kbn/ebt/client`);
+jest.mock(`@elastic/ebt/client`);
 
 const columnsToDisplay = [
   ...defaultUdtHeaders,
@@ -111,9 +111,6 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
     events: localMockedTimelineData,
     refetch: jest.fn(),
     totalCount: localMockedTimelineData.length,
-    onEventClosed: jest.fn(),
-    expandedDetail: {},
-    showExpandedDetails: false,
     onChangePage: jest.fn(),
     dataLoadingState: DataLoadingState.loaded,
     updatedAt: Date.now(),

@@ -57,7 +57,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToUrl('management', 'kibana/spaces/edit/default', {
           shouldUseHashForSubUrl: false,
         });
+
+        await testSubjects.missingOrFail('userImpactWarning');
         await PageObjects.spaceSelector.changeSolutionView('classic');
+        await testSubjects.existOrFail('userImpactWarning'); // Warn that the change will impact other users
+
         await PageObjects.spaceSelector.clickSaveSpaceCreation();
         await PageObjects.spaceSelector.confirmModal();
 

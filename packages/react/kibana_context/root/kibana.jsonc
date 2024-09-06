@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/react-kibana-context-root",
   "owner": "@elastic/appex-sharedux"
 }

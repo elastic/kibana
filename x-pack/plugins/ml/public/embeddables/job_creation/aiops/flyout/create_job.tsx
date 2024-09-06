@@ -34,6 +34,8 @@ import {
 } from '../../../../application/jobs/new_job/job_from_pattern_analysis';
 import { useMlFromLensKibanaContext } from '../../common/context';
 import { JobDetails, type CreateADJobParams } from '../../common/job_details';
+import { mlJobServiceFactory } from '../../../../application/services/job_service';
+import { toastNotificationServiceProvider } from '../../../../application/services/toast_notification_service';
 
 interface Props {
   dataView: DataView;
@@ -48,10 +50,13 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       data,
       share,
       uiSettings,
-      mlServices: { mlApiServices },
       dashboardService,
+      notifications: { toasts },
+      mlServices: { mlApi },
     },
   } = useMlFromLensKibanaContext();
+  const toastNotificationService = toastNotificationServiceProvider(toasts);
+  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApi);
 
   const [categorizationType, setCategorizationType] = useState<CategorizationType>(
     CATEGORIZATION_TYPE.COUNT
@@ -72,7 +77,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
   const toggleStopOnWarn = useCallback(() => setStopOnWarn(!stopOnWarn), [stopOnWarn]);
 
   useMemo(() => {
-    const newJobCapsService = new NewJobCapsService(mlApiServices);
+    const newJobCapsService = new NewJobCapsService(mlApi);
     newJobCapsService.initializeFromDataVIew(dataView).then(() => {
       const options: EuiComboBoxOptionOption[] = [
         ...createFieldOptions(newJobCapsService.categoryFields, []),
@@ -81,7 +86,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       }));
       setCategoryFieldsOptions(options);
     });
-  }, [dataView, mlApiServices]);
+  }, [dataView, mlApi]);
 
   const quickJobCreator = useMemo(
     () =>
@@ -91,10 +96,10 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
         data.query.timefilter.timefilter,
         dashboardService,
         data,
-        mlApiServices
+        mlApi,
+        mlJobService
       ),
-
-    [dashboardService, data, mlApiServices, uiSettings]
+    [dashboardService, data, mlApi, mlJobService, uiSettings]
   );
 
   function createADJobInWizard() {

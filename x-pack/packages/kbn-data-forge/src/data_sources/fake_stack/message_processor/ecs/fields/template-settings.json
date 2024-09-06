@@ -4,7 +4,7 @@
   "template": {
     "settings": {
       "index": {
-        "final_pipeline": "kbn-data-forge-add-event-ingested",
+        "final_pipeline": "logs@custom",
         "codec" : "best_compression",
         "mapping": {
           "total_fields": {

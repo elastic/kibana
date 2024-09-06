@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { estypes } from '@elastic/elasticsearch';
 import { POD_FIELD, HOST_FIELD, CONTAINER_FIELD } from '../constants';
 import { host } from './host';
 import { pod } from './kubernetes/pod';
@@ -29,7 +30,7 @@ const catalog = {
 
 export const inventoryModels = Object.values(catalog);
 
-type InventoryModels<T extends InventoryItemType> = typeof catalog[T];
+export type InventoryModels<T extends InventoryItemType> = (typeof catalog)[T];
 
 export const findInventoryModel = <T extends InventoryItemType>(type: T): InventoryModels<T> => {
   const model = inventoryModels.find((m) => m.id === type);
@@ -68,4 +69,35 @@ export const findInventoryFields = (type: InventoryItemType) => {
   } else {
     return inventoryModel.fields;
   }
+};
+
+export const isBasicMetricAgg = (
+  agg: unknown
+): agg is Record<string, undefined | Pick<estypes.AggregationsMetricAggregationBase, 'field'>> => {
+  if (agg === null || typeof agg !== 'object') return false;
+
+  return Object.values(agg).some(
+    (value) =>
+      value === undefined ||
+      (value && 'field' in (value as estypes.AggregationsMetricAggregationBase))
+  );
+};
+
+export const isDerivativeAgg = (
+  agg: unknown
+): agg is Pick<estypes.AggregationsAggregationContainer, 'derivative'> => {
+  return !!(agg as estypes.AggregationsAggregationContainer).derivative;
+};
+
+export const isSumBucketAgg = (
+  agg: unknown
+): agg is Pick<estypes.AggregationsAggregationContainer, 'sum_bucket'> => {
+  return !!(agg as estypes.AggregationsAggregationContainer).sum_bucket;
+};
+
+export const isTermsWithAggregation = (
+  agg: unknown
+): agg is Pick<estypes.AggregationsAggregationContainer, 'terms' | 'aggregations'> => {
+  const aggContainer = agg as estypes.AggregationsAggregationContainer;
+  return !!(aggContainer.aggregations && aggContainer.terms);
 };

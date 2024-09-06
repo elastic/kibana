@@ -17,6 +17,7 @@ import {
   EuiHealth,
   EuiButtonEmpty,
   EuiPanel,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -33,6 +34,7 @@ import {
 } from '../assistant/settings/use_settings_updater/use_settings_updater';
 import { AssistantSettingsBottomBar } from '../assistant/settings/assistant_settings_bottom_bar';
 import { SETTINGS_UPDATED_TOAST_TITLE } from '../assistant/settings/translations';
+import { SETUP_KNOWLEDGE_BASE_BUTTON_TOOLTIP } from './translations';
 
 const ESQL_RESOURCE = 'esql';
 const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-knowledge-base-(SPACE)';
@@ -66,7 +68,8 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
   );
 
   const handleUpdateKnowledgeBaseSettings = useCallback(
-    (updatedKnowledgebase) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (updatedKnowledgebase: any) => {
       setHasPendingChanges(true);
       setUpdatedKnowledgeBaseSettings(updatedKnowledgebase);
     },
@@ -87,7 +90,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     isLoading,
     isFetching,
   } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
-  const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http });
+  const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
   // Resource enabled state
   const isElserEnabled = kbStatus?.elser_exists ?? false;
@@ -96,6 +99,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     (isElserEnabled && isESQLEnabled && kbStatus?.index_exists && kbStatus?.pipeline_exists) ??
     false;
   const isSetupInProgress = kbStatus?.is_setup_in_progress ?? false;
+  const isSetupAvailable = kbStatus?.is_setup_available ?? false;
 
   // Resource availability state
   const isLoadingKb = isLoading || isFetching || isSettingUpKB || isSetupInProgress;
@@ -111,21 +115,32 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     setupKB(ESQL_RESOURCE);
   }, [setupKB]);
 
+  const toolTipContent = !isSetupAvailable ? SETUP_KNOWLEDGE_BASE_BUTTON_TOOLTIP : undefined;
+
   const setupKnowledgeBaseButton = useMemo(() => {
     return isKnowledgeBaseSetup ? (
       <></>
     ) : (
-      <EuiButtonEmpty
-        color={'primary'}
-        data-test-subj={'setupKnowledgeBaseButton'}
-        onClick={onSetupKnowledgeBaseButtonClick}
-        size="xs"
-        isLoading={isLoadingKb}
-      >
-        {i18n.SETUP_KNOWLEDGE_BASE_BUTTON}
-      </EuiButtonEmpty>
+      <EuiToolTip position={'bottom'} content={toolTipContent}>
+        <EuiButtonEmpty
+          color={'primary'}
+          data-test-subj={'setupKnowledgeBaseButton'}
+          disabled={!isSetupAvailable}
+          onClick={onSetupKnowledgeBaseButtonClick}
+          size="xs"
+          isLoading={isLoadingKb}
+        >
+          {i18n.SETUP_KNOWLEDGE_BASE_BUTTON}
+        </EuiButtonEmpty>
+      </EuiToolTip>
     );
-  }, [isKnowledgeBaseSetup, isLoadingKb, onSetupKnowledgeBaseButtonClick]);
+  }, [
+    isKnowledgeBaseSetup,
+    isLoadingKb,
+    isSetupAvailable,
+    onSetupKnowledgeBaseButtonClick,
+    toolTipContent,
+  ]);
 
   //////////////////////////////////////////////////////////////////////////////////////////
   // Knowledge Base Resource

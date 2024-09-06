@@ -20,10 +20,12 @@ export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
+  formatESQLColumns,
   getTimeFieldFromESQLQuery,
-  getEarliestLatestParams,
-  hasEarliestLatestParams,
+  getStartEndParams,
+  hasStartEndParams,
+  retieveMetadataColumns,
   TextBasedLanguages,
 } from './src';
 
-export { ENABLE_ESQL } from './constants';
+export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

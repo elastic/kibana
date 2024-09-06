@@ -16,11 +16,24 @@ import {
   useEuiTheme,
   useEuiMinBreakpoint,
   type EuiPageHeaderProps,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-type Props = Pick<EuiPageHeaderProps, 'tabs' | 'title' | 'rightSideItems'>;
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common/inventory_models/types';
+import { PageTitleWithPopover } from './page_title_with_popover';
 
-export const FlyoutHeader = ({ title, tabs = [], rightSideItems = [] }: Props) => {
+type Props = Pick<EuiPageHeaderProps, 'tabs' | 'title' | 'rightSideItems'> & {
+  assetType: InventoryItemType;
+  loading: boolean;
+};
+
+export const FlyoutHeader = ({
+  title,
+  tabs = [],
+  rightSideItems = [],
+  assetType,
+  loading,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -39,7 +52,11 @@ export const FlyoutHeader = ({ title, tabs = [], rightSideItems = [] }: Props) =
           `}
         >
           <EuiTitle size="xs">
-            <h4>{title}</h4>
+            {loading ? (
+              <EuiLoadingSpinner size="m" />
+            ) : (
+              <h4>{assetType === 'host' ? <PageTitleWithPopover name={title ?? ''} /> : title}</h4>
+            )}
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem

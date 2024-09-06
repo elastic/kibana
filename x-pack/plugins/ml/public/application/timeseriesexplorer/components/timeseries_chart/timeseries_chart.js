@@ -161,9 +161,18 @@ class TimeseriesChartIntl extends Component {
   rowMouseenterSubscriber = null;
   rowMouseleaveSubscriber = null;
 
-  constructor(props) {
+  constructor(props, constructorContext) {
     super(props);
     this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
+
+    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
+      constructorContext.services.uiSettings,
+      constructorContext.services.mlServices.mlApi,
+      constructorContext.services.mlServices.mlResultsService
+    );
+    this.getTimeBuckets = timeBucketsServiceFactory(
+      constructorContext.services.uiSettings
+    ).getTimeBuckets;
   }
 
   componentWillUnmount() {
@@ -179,15 +188,6 @@ class TimeseriesChartIntl extends Component {
   }
 
   componentDidMount() {
-    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
-      this.context.services.uiSettings,
-      this.context.services.mlServices.mlApiServices,
-      this.context.services.mlServices.mlResultsService
-    );
-    this.getTimeBuckets = timeBucketsServiceFactory(
-      this.context.services.uiSettings
-    ).getTimeBuckets;
-
     const { svgWidth, svgHeight } = this.props;
     const { focusHeight: focusHeightIncoming, focusChartHeight: focusChartIncoming } = svgHeight
       ? getChartHeights(svgHeight)
@@ -2016,6 +2016,7 @@ class TimeseriesChartIntl extends Component {
     return (
       <>
         <RuleEditorFlyout
+          selectedJob={this.props.selectedJob}
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
         />
@@ -2035,6 +2036,7 @@ class TimeseriesChartIntl extends Component {
             >
               <LinksMenuUI
                 anomaly={this.state.popoverData}
+                selectedJob={this.props.selectedJob}
                 bounds={this.props.bounds}
                 showMapsLink={false}
                 showViewSeriesLink={false}

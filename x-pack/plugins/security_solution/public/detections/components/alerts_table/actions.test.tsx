@@ -33,7 +33,7 @@ import {
 import type { CreateTimeline, UpdateTimelineLoading } from './types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataProvider } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
@@ -381,7 +381,6 @@ describe('alert actions', () => {
             eventIdToNoteIds: {},
             eventType: 'all',
             excludedRowRendererIds: [],
-            expandedDetail: {},
             filters: [
               {
                 $state: {
@@ -441,9 +440,9 @@ describe('alert actions', () => {
                 sortDirection: 'desc',
               },
             ],
-            status: TimelineStatus.draft,
+            status: TimelineStatusEnum.draft,
             title: '',
-            timelineType: TimelineType.default,
+            timelineType: TimelineTypeEnum.default,
             templateTimelineId: null,
             templateTimelineVersion: null,
             version: null,

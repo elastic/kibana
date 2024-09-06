@@ -24,7 +24,7 @@ describe('registerEbtCounters', () => {
       .spyOn(core.analytics.telemetryCounter$, 'subscribe')
       .mockImplementation(((listener) => {
         internalListener = listener as (counter: TelemetryCounter) => void;
-      }) as typeof core.analytics.telemetryCounter$['subscribe']);
+      }) as (typeof core.analytics.telemetryCounter$)['subscribe']);
   });
 
   test('it subscribes to `analytics.telemetryCounters$`', () => {
@@ -53,6 +53,7 @@ describe('registerEbtCounters', () => {
   test('it reuses the usageCounter when it already exists', () => {
     const incrementCounterMock = jest.fn();
     usageCollection.getUsageCounterByDomainId.mockReturnValue({
+      domainId: 'abc123',
       incrementCounter: incrementCounterMock,
     });
     registerEbtCounters(core.analytics, usageCollection);

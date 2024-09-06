@@ -77,7 +77,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
   );
 
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
@@ -150,7 +150,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
   }, [actionParams]);
 
   const additionalFieldsOnChange = useCallback(
-    (value) => editSubActionProperty('additional_fields', value),
+    (value: string | null) => editSubActionProperty('additional_fields', value),
     [editSubActionProperty]
   );
 
@@ -166,7 +166,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         error={errors['subActionParams.incident.short_description']}
         isInvalid={
           errors['subActionParams.incident.short_description'] !== undefined &&
-          errors['subActionParams.incident.short_description'].length > 0 &&
+          Number(errors['subActionParams.incident.short_description'].length) > 0 &&
           incident.short_description !== undefined
         }
         label={i18n.SHORT_DESCRIPTION_LABEL}

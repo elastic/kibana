@@ -11,20 +11,22 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { AlertsGrouping } from '@kbn/alerts-grouping';
 
+import { renderGroupPanel } from './grouping/render_group_panel';
 import { rulesLocatorID } from '../../../common';
-import { RulesParams } from '../../locators/rules';
-import { useKibana } from '../../utils/kibana_react';
+import { ALERT_STATUS_FILTER } from '../../components/alert_search_bar/constants';
+import { AlertsByGroupingAgg } from '../../components/alerts_table/types';
+import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
-import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useToasts } from '../../hooks/use_toast';
-import { renderRuleStats, RuleStatsState } from './components/rule_stats';
-import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
+import { RulesParams } from '../../locators/rules';
+import { useKibana } from '../../utils/kibana_react';
 import {
   alertSearchBarStateContainer,
   Provider,
@@ -34,8 +36,15 @@ import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_buck
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
+import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
+import { buildEsQuery } from '../../utils/build_es_query';
+import { renderRuleStats, RuleStatsState } from './components/rule_stats';
+import { getGroupStats } from './grouping/get_group_stats';
+import { getAggregationsByGroupingField } from './grouping/get_aggregations_by_grouping_field';
+import { DEFAULT_GROUPING_OPTIONS } from './grouping/constants';
+import { mergeBoolQueries } from './helpers/merge_bool_queries';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -48,13 +57,10 @@ function InternalAlertsPage() {
   const kibanaServices = useKibana().services;
   const {
     charts,
-    data: {
-      query: {
-        timefilter: { timefilter: timeFilterService },
-      },
-    },
+    data,
     http,
-    notifications: { toasts },
+    notifications,
+    dataViews,
     observabilityAIAssistant,
     share: {
       url: { locators },
@@ -67,6 +73,12 @@ function InternalAlertsPage() {
     },
     uiSettings,
   } = kibanaServices;
+  const { toasts } = notifications;
+  const {
+    query: {
+      timefilter: { timefilter: timeFilterService },
+    },
+  } = data;
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
@@ -241,16 +253,42 @@ function InternalAlertsPage() {
           </EuiFlexItem>
           <EuiFlexItem>
             {esQuery && (
-              <AlertsStateTable
-                alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-                configurationId={AlertConsumers.OBSERVABILITY}
-                id={ALERTS_TABLE_ID}
+              <AlertsGrouping<AlertsByGroupingAgg>
                 featureIds={observabilityAlertFeatureIds}
-                query={esQuery}
-                showAlertStatusWithFlapping
-                pageSize={ALERTS_PER_PAGE}
-                cellContext={{ observabilityRuleTypeRegistry }}
-              />
+                defaultFilters={ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? []}
+                from={alertSearchBarStateProps.rangeFrom}
+                to={alertSearchBarStateProps.rangeTo}
+                globalFilters={alertSearchBarStateProps.filters}
+                globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
+                groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
+                defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
+                getAggregationsByGroupingField={getAggregationsByGroupingField}
+                renderGroupPanel={renderGroupPanel}
+                getGroupStats={getGroupStats}
+                services={{
+                  notifications,
+                  dataViews,
+                  http,
+                }}
+              >
+                {(groupingFilters) => {
+                  const groupQuery = buildEsQuery({
+                    filters: groupingFilters,
+                  });
+                  return (
+                    <AlertsStateTable
+                      id={ALERTS_TABLE_ID}
+                      featureIds={observabilityAlertFeatureIds}
+                      configurationId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
+                      query={mergeBoolQueries(esQuery, groupQuery)}
+                      showAlertStatusWithFlapping
+                      initialPageSize={ALERTS_PER_PAGE}
+                      cellContext={{ observabilityRuleTypeRegistry }}
+                      alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+                    />
+                  );
+                }}
+              </AlertsGrouping>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

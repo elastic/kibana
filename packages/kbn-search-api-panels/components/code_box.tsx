@@ -43,6 +43,7 @@ interface CodeBoxProps {
   sharePlugin?: SharePluginStart;
   consoleRequest?: string;
   showTopBar?: boolean;
+  consoleTitle?: string;
 }
 
 export const CodeBox: React.FC<CodeBoxProps> = ({
@@ -56,15 +57,43 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   setSelectedLanguage,
   sharePlugin,
   consoleRequest,
+  consoleTitle,
   showTopBar = true,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+
+  const getAriaLabel = (name: string) =>
+    consoleTitle
+      ? i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
+          defaultMessage: '{context} {languageName}',
+          values: { context: consoleTitle, languageName: name },
+        })
+      : i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectLabel', {
+          defaultMessage: 'Select a programming language for the code snippet {languageName}',
+          values: { languageName: name },
+        });
+
+  const getCopyButtonAriaLabel = consoleTitle
+    ? i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyAriaLabel', {
+        defaultMessage: 'Copy the {context} code snippet',
+        values: { context: consoleTitle },
+      })
+    : i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyLabel', {
+        defaultMessage: 'Copy the code snippet',
+      });
 
   const items = languages
     ? languages.map((language) => (
         <EuiContextMenuItem
           key={language.id}
           icon={`${assetBasePath}/${language.iconType}`}
+          aria-label={i18n.translate(
+            'searchApiPanels.welcomeBanner.codeBox.selectChangeAriaLabel',
+            {
+              defaultMessage: 'Change language to {languageName} for every instance on this page',
+              values: { languageName: language.name },
+            }
+          )}
           onClick={() => {
             if (setSelectedLanguage) {
               setSelectedLanguage(language);
@@ -80,9 +109,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   const button = selectedLanguage ? (
     <EuiThemeProvider colorMode="dark">
       <EuiButtonEmpty
-        aria-label={i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
-          defaultMessage: 'Select a programming language',
-        })}
+        aria-label={getAriaLabel(selectedLanguage.name)}
         color="text"
         iconType="arrowDown"
         iconSide="left"
@@ -122,7 +149,13 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiCopy textToCopy={codeSnippet}>
                   {(copy) => (
-                    <EuiButtonEmpty color="text" iconType="copyClipboard" size="s" onClick={copy}>
+                    <EuiButtonEmpty
+                      color="text"
+                      iconType="copyClipboard"
+                      size="s"
+                      onClick={copy}
+                      aria-label={getCopyButtonAriaLabel}
+                    >
                       {i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyButtonLabel', {
                         defaultMessage: 'Copy',
                       })}

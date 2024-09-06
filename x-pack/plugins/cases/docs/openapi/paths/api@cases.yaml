@@ -1,5 +1,5 @@
 post:
-  summary: Creates a case in the default space.
+  summary: Create a case
   operationId: createCaseDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the
@@ -36,7 +36,7 @@ post:
             $ref: '../components/schemas/4xx_response.yaml'
  
 delete:
-  summary: Deletes one or more cases in the default space.
+  summary: Delete cases
   operationId: deleteCaseDefaultSpace
   description: >
     You must have `read` or `all` privileges and the `delete` sub-feature
@@ -59,7 +59,7 @@ delete:
             $ref: '../components/schemas/4xx_response.yaml'
 
 patch:
-  summary: Updates one or more cases in the default space.
+  summary: Update cases
   operationId: updateCaseDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the 

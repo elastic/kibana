@@ -32,6 +32,9 @@ export const getBaseRuleParams = (): BaseRuleParams => {
     description: 'Detecting root and admin users',
     falsePositives: [],
     immutable: false,
+    ruleSource: {
+      type: 'internal',
+    },
     from: 'now-6m',
     to: 'now',
     severity: 'high',

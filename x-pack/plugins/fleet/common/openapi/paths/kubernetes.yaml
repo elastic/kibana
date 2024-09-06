@@ -1,7 +1,7 @@
 get:
   summary: Get full K8s agent manifest
   tags:
-    - Kubernetes
+    - Fleet Kubernetes
   responses:
     '200':
       description: OK

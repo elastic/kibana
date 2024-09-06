@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export interface User {
-  id: string;
-}
+export type { User } from '@kbn/apm-types/es_schemas_raw';

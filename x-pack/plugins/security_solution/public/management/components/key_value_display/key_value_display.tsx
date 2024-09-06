@@ -9,8 +9,8 @@ import React, { memo } from 'react';
 import { css } from '@emotion/react';
 
 export interface KeyValueDisplayProps {
-  name: string;
-  value: string;
+  name: React.ReactNode;
+  value: React.ReactNode;
 }
 export const KeyValueDisplay = memo<KeyValueDisplayProps>(({ name, value }) => {
   return (

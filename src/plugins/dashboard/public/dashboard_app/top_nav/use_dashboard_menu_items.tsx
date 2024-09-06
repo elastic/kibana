@@ -18,19 +18,18 @@ import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
 import { pluginServices } from '../../services/plugin_services';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
-import { DashboardRedirect } from '../../dashboard_container/types';
-import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
+import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
 
 export const useDashboardMenuItems = ({
-  redirectTo,
   isLabsShown,
   setIsLabsShown,
+  maybeRedirect,
   showResetChange,
 }: {
-  redirectTo: DashboardRedirect;
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
+  maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
 }) => {
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
@@ -76,22 +75,6 @@ export const useDashboardMenuItems = ({
       });
     },
     [dashboardTitle, hasUnsavedChanges, lastSavedId, dashboard]
-  );
-
-  const maybeRedirect = useCallback(
-    (result?: SaveDashboardReturn) => {
-      if (!result) return;
-      const { redirectRequired, id } = result;
-      if (redirectRequired) {
-        redirectTo({
-          id,
-          editMode: true,
-          useReplace: true,
-          destination: 'dashboard',
-        });
-      }
-    },
-    [redirectTo]
   );
 
   /**

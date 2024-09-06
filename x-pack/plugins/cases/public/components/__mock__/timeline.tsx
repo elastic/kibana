@@ -23,9 +23,6 @@ export const timelineIntegrationMock = {
   hooks: {
     useInsertTimeline: jest.fn(),
   },
-  ui: {
-    renderTimelineDetailsPanel: () => mockTimelineComponent('timeline-details-panel'),
-  },
 };
 
 export const useTimelineContextMock = useTimelineContext as jest.Mock;

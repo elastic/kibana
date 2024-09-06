@@ -7,32 +7,16 @@
  */
 import Boom from '@hapi/boom';
 import { formatErrors, strictKeysRt } from '@kbn/io-ts-utils';
+import { IoTsParamsObject } from '@kbn/server-route-repository-utils';
 import { isLeft } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
-import { isEmpty, isPlainObject, omitBy } from 'lodash';
-import { RouteParamsRT } from './typings';
 
-interface KibanaRequestParams {
-  body: unknown;
-  query: unknown;
-  params: unknown;
-}
-
-export function decodeRequestParams<T extends RouteParamsRT>(
-  params: KibanaRequestParams,
+export function decodeRequestParams<T extends IoTsParamsObject>(
+  params: Partial<{ path: any; query: any; body: any }>,
   paramsRt: T
 ): t.OutputOf<T> {
-  const paramMap = omitBy(
-    {
-      path: params.params,
-      body: params.body,
-      query: params.query,
-    },
-    (val) => val === null || val === undefined || (isPlainObject(val) && isEmpty(val))
-  );
-
   // decode = validate
-  const result = strictKeysRt(paramsRt).decode(paramMap);
+  const result = strictKeysRt(paramsRt).decode(params);
 
   if (isLeft(result)) {
     throw Boom.badRequest(formatErrors(result.left));

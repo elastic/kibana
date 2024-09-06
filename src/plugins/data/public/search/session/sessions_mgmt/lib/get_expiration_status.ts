@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { SearchSessionsConfigSchema } from '../../../../../config';
+import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 
 export const getExpirationStatus = (config: SearchSessionsConfigSchema, expires: string | null) => {
   const tNow = moment.utc().valueOf();
@@ -43,7 +43,7 @@ export const getExpirationStatus = (config: SearchSessionsConfigSchema, expires:
     });
   }
 
-  if (durationToExpire.valueOf() > 0 && expiresInDays <= sufficientDays) {
+  if (durationToExpire.asMilliseconds() > 0 && expiresInDays <= sufficientDays) {
     return { toolTipContent, statusContent };
   }
 };

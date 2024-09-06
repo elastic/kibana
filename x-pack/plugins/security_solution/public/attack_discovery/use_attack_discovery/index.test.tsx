@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useKibana } from '../../common/lib/kibana';
+import { useLoadConnectors } from '@kbn/elastic-assistant';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
+import { renderHook, act } from '@testing-library/react-hooks';
+import React from 'react';
+
+import { useKibana } from '../../common/lib/kibana';
 import { usePollApi } from '../hooks/use_poll_api';
 import { useAttackDiscovery } from '.';
 import { ERROR_GENERATING_ATTACK_DISCOVERIES } from '../pages/translations';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
+
+jest.mock('../../assistant/use_assistant_availability', () => ({
+  useAssistantAvailability: jest.fn(() => ({
+    hasAssistantPrivilege: true,
+    isAssistantEnabled: true,
+  })),
+}));
 
 jest.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields'
@@ -37,15 +46,13 @@ jest.mock('@kbn/elastic-assistant', () => ({
     alertsIndexPattern: 'alerts-index-pattern',
     assistantAvailability: mockAssistantAvailability(),
     knowledgeBase: {
-      isEnabledRAGAlerts: true,
-      isEnabledKnowledgeBase: true,
       latestAlerts: 20,
     },
   }),
-  useLoadConnectors: () => ({
+  useLoadConnectors: jest.fn(() => ({
     isFetched: true,
     data: mockConnectors,
-  }),
+  })),
 }));
 const mockAttackDiscoveryPost = {
   timestamp: '2024-06-13T17:50:59.409Z',
@@ -225,5 +232,27 @@ describe('useAttackDiscovery', () => {
     expect(result.current.failureReason).toEqual('something bad');
     expect(result.current.isLoading).toBe(false);
     expect(result.current.lastUpdated).toEqual(null);
+  });
+
+  describe('when zero connectors are configured', () => {
+    beforeEach(() => {
+      (useLoadConnectors as jest.Mock).mockReturnValue({
+        isFetched: true,
+        data: [], // <-- zero connectors configured
+      });
+
+      renderHook(() => useAttackDiscovery({ connectorId: 'test-id', setLoadingConnectorId }));
+    });
+
+    afterEach(() => {
+      (useLoadConnectors as jest.Mock).mockReturnValue({
+        isFetched: true,
+        data: mockConnectors,
+      });
+    });
+
+    it('does NOT call pollApi when zero connectors are configured', () => {
+      expect(mockPollApi.pollApi).not.toHaveBeenCalled();
+    });
   });
 });

@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         NAMESPACE
       );
       await PageObjects.observabilityLogsExplorer.ingestLogEntries(DATA_STREAM_NAME, docs);
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginAsViewer();
     });
 
     beforeEach(async () => {
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after('clean up archives', async () => {
       if (cleanupDataStreamSetup) {
-        cleanupDataStreamSetup();
+        await cleanupDataStreamSetup();
       }
     });
 

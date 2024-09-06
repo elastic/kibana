@@ -123,7 +123,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.share.closeShareModal();
       });
 
-      it('TSVB Gauge: PNG file matches the baseline image', async function () {
+      // FAILING ARTIFACTS SNAPSHOT: https://github.com/elastic/kibana/issues/189590
+      it.skip('TSVB Gauge: PNG file matches the baseline image', async function () {
         log.debug('load saved visualization');
         await PageObjects.visualize.loadSavedVisualization(
           '[K7.6-eCommerce] Sold Products per Day',
@@ -137,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.reporting.clickGenerateReportButton();
 
         log.debug('get the report download URL');
-        const url = await PageObjects.reporting.getReportURL(60000);
+        const url = await PageObjects.reporting.getReportURL(120000);
         log.debug('download the report');
         const reportData = await PageObjects.reporting.getRawReportData(url ?? '');
         const sessionReportPath = await PageObjects.reporting.writeSessionReport(

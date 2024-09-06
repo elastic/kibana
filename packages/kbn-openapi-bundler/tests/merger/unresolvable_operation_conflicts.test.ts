@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { OpenAPIV3 } from 'openapi-types';
 import { createOASDocument } from '../create_oas_document';
 import { mergeSpecs } from './merge_specs';
 
@@ -266,11 +267,15 @@ describe('OpenAPI Merger - unresolvable operation object conflicts', () => {
         '/api/my/endpoint': {
           get: {
             requestBody: {
-              // SomeRequestBody definition is omitted for brivity since it's not validated by the merger
               $ref: '#/components/requestBodies/SomeRequestBody',
             },
             responses: {},
           },
+        },
+      },
+      components: {
+        requestBodies: {
+          SomeRequestBody: {} as OpenAPIV3.RequestBodyObject,
         },
       },
     });
@@ -299,11 +304,15 @@ describe('OpenAPI Merger - unresolvable operation object conflicts', () => {
           get: {
             responses: {
               200: {
-                // SomeResponse definition is omitted for brivity since it's not validated by the merger
                 $ref: '#/components/responses/SomeResponse',
               },
             },
           },
+        },
+      },
+      components: {
+        responses: {
+          SomeResponse: {} as OpenAPIV3.ResponseObject,
         },
       },
     });

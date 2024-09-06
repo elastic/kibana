@@ -40,7 +40,7 @@ import type {
   NetworkTopCountriesColumnsNetworkDetails,
 } from '../../network/components/network_top_countries_table/columns';
 import type { TlsColumns } from '../../network/components/tls_table/columns';
-import type { UncommonProcessTableColumns } from '../../hosts/components/uncommon_process_table';
+import type { UncommonProcessTableColumns } from '../../hosts/components/uncommon_process_table/columns';
 import type { HostRiskScoreColumns } from '../../../entity_analytics/components/host_risk_score_table';
 
 import type { UsersColumns } from '../../network/components/users_table/columns';
@@ -96,7 +96,7 @@ declare type BasicTableColumns =
   | UsersColumns
   | UsersTableColumns;
 
-declare type SiemTables = BasicTableProps<BasicTableColumns>;
+export declare type SiemTables = BasicTableProps<BasicTableColumns>;
 
 // Using telescoping templates to remove 'any' that was polluting downstream column type checks
 export interface BasicTableProps<T> {
@@ -307,8 +307,8 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                 onChange={onChange}
                 sorting={tableSorting}
               />
-              <FooterAction>
-                <EuiFlexItem>
+              <FooterAction justifyContent="space-between">
+                <EuiFlexItem grow={false}>
                   {itemsPerRow &&
                     itemsPerRow.length > 0 &&
                     totalCount >= itemsPerRow[0].numberOfRow && (

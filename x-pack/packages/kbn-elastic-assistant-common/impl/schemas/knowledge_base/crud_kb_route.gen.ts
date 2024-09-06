@@ -11,10 +11,10 @@
  *
  * info:
  *   title: KnowledgeBase API endpoints
- *   version: 2023-10-31
+ *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 /**
  * AI assistant KnowledgeBase.
@@ -69,6 +69,7 @@ export const ReadKnowledgeBaseResponse = z.object({
   elser_exists: z.boolean().optional(),
   esql_exists: z.boolean().optional(),
   index_exists: z.boolean().optional(),
+  is_setup_available: z.boolean().optional(),
   is_setup_in_progress: z.boolean().optional(),
   pipeline_exists: z.boolean().optional(),
 });

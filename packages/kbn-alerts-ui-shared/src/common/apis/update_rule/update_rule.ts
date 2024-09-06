@@ -21,6 +21,7 @@ export const UPDATE_FIELDS: Array<keyof UpdateRuleBody> = [
   'schedule',
   'params',
   'alertDelay',
+  'flapping',
 ];
 
 export const UPDATE_FIELDS_WITH_ACTIONS: Array<keyof UpdateRuleBody> = [
@@ -30,6 +31,7 @@ export const UPDATE_FIELDS_WITH_ACTIONS: Array<keyof UpdateRuleBody> = [
   'params',
   'alertDelay',
   'actions',
+  'flapping',
 ];
 
 export async function updateRule({

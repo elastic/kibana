@@ -10,6 +10,7 @@ import fetch from 'node-fetch';
 import { format, parse, Url } from 'url';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
+import { getFetchAgent } from './ssl';
 
 async function discoverAuth(parsedTarget: Url) {
   const possibleCredentials = [`admin:changeme`, `elastic:changeme`, `elastic_serverless:changeme`];
@@ -20,7 +21,9 @@ async function discoverAuth(parsedTarget: Url) {
     });
     let status: number;
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        agent: getFetchAgent(url),
+      });
       status = response.status;
     } catch (err) {
       status = 0;
@@ -43,6 +46,7 @@ async function getKibanaUrl({ target, logger }: { target: string; logger: Logger
       method: 'HEAD',
       follow: 1,
       redirect: 'manual',
+      agent: getFetchAgent(target),
     });
 
     const discoveredKibanaUrl =
@@ -62,6 +66,7 @@ async function getKibanaUrl({ target, logger }: { target: string; logger: Logger
 
     const redirectedResponse = await fetch(discoveredKibanaUrlWithAuth, {
       method: 'HEAD',
+      agent: getFetchAgent(discoveredKibanaUrlWithAuth),
     });
 
     if (redirectedResponse.status !== 200) {

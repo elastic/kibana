@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Dataset quality home', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.loginWithRole('admin');
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     describe('with no datasets available', () => {

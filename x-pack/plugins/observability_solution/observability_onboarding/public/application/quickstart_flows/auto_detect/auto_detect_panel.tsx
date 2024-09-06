@@ -33,11 +33,23 @@ import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { LocatorButtonEmpty } from '../shared/locator_button_empty';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
+import { FeedbackButtons } from '../shared/feedback_buttons';
+import { useAutoDetectTelemetry } from './use_auto_detect_telemetry';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const command = data ? getAutoDetectCommand(data) : undefined;
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
+
+  useAutoDetectTelemetry(
+    status,
+    installedIntegrations.map(({ title, pkgName, pkgVersion, installSource }) => ({
+      title,
+      pkgName,
+      pkgVersion,
+      installSource,
+    }))
+  );
 
   if (error) {
     return <EmptyPrompt error={error} onRetryClick={refetch} />;
@@ -57,7 +69,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
           {
             title: i18n.translate(
               'xpack.observability_onboarding.autoDetectPanel.runTheCommandOnLabel',
-              { defaultMessage: 'Run the command on your host' }
+              { defaultMessage: 'Install standalone Elastic Agent on your host' }
             ),
             status: status === 'notStarted' ? 'current' : 'complete',
             children: command ? (
@@ -113,6 +125,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       { defaultMessage: 'Your data is ready to explore!' }
                     )}
                     isLoading={false}
+                    data-test-subj="observabilityOnboardingAutoDetectPanelDataReceivedProgressIndicator"
                   />
                 ) : status === 'awaitingData' ? (
                   <ProgressIndicator
@@ -120,6 +133,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       'xpack.observability_onboarding.autoDetectPanel.installingElasticAgentFlexItemLabel',
                       { defaultMessage: 'Waiting for data to arrive...' }
                     )}
+                    data-test-subj="observabilityOnboardingAutoDetectPanelAwaitingDataProgressIndicator"
                   />
                 ) : status === 'inProgress' ? (
                   <ProgressIndicator
@@ -127,6 +141,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       'xpack.observability_onboarding.autoDetectPanel.lookingForLogFilesFlexItemLabel',
                       { defaultMessage: 'Waiting for installation to complete...' }
                     )}
+                    data-test-subj="observabilityOnboardingAutoDetectPanelInProgressProgressIndicator"
                   />
                 ) : null}
                 {(status === 'awaitingData' || status === 'dataReceived') &&
@@ -242,6 +257,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
           },
         ]}
       />
+      <FeedbackButtons flow="auto-detect" />
     </EuiPanel>
   );
 };

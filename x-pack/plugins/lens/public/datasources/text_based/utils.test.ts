@@ -291,7 +291,7 @@ describe('Text based languages utils', () => {
       const expressionsMock = expressionsPluginMock.createStartContract();
       const updatedState = await getStateFromAggregateQuery(
         state,
-        { esql: 'FROM my-fake-index-pattern | WHERE time <= ?latest' },
+        { esql: 'FROM my-fake-index-pattern | WHERE time <= ?t_end' },
         {
           ...dataViewsMock,
           getIdsWithTitle: jest.fn().mockReturnValue(
@@ -361,7 +361,7 @@ describe('Text based languages utils', () => {
             errors: [],
             index: '4',
             query: {
-              esql: 'FROM my-fake-index-pattern | WHERE time <= ?latest',
+              esql: 'FROM my-fake-index-pattern | WHERE time <= ?t_end',
             },
             timeField: 'time',
           },

@@ -134,7 +134,7 @@ RUN for iter in {1..10}; do \
     (exit $exit_code)
 {{/ubuntu}}
 {{#wolfi}}
-RUN apk --no-cache add bash curl fontconfig libstdc++ freetype nss findutils shadow
+RUN apk --no-cache add bash curl fontconfig libstdc++ libnss findutils shadow
 {{/wolfi}}
 
 # Bring in Kibana from the initial stage.
@@ -152,8 +152,8 @@ WORKDIR /usr/share/kibana
 {{#fips}}
 
 # Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
-RUN /usr/bin/echo -e '\n--enable-fips' >> config/node.options
-RUN /usr/bin/echo '--openssl-config=/usr/share/kibana/config/nodejs.cnf' >> config/node.options
+RUN /bin/echo -e '\n--enable-fips' >> config/node.options
+RUN echo '--openssl-config=/usr/share/kibana/config/nodejs.cnf' >> config/node.options
 COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
 ENV OPENSSL_MODULES=/usr/share/kibana/openssl/lib/ossl-modules
 ENV XPACK_SECURITY_EXPERIMENTAL_FIPSMODE_ENABLED=true
@@ -231,7 +231,7 @@ ENTRYPOINT ["/bin/tini", "--"]
 CMD ["/app/kibana.sh"]
 # Generate a stub command that will be overwritten at runtime
 RUN mkdir /app && \
-    /usr/bin/echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
+    /bin/echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
     chmod 0555 /app/kibana.sh
 {{/cloud}}
 

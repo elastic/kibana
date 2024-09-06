@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/unified-field-list",
   "description": "Contains functionality for the field list and field stats which can be integrated into apps",
   "owner": "@elastic/kibana-data-discovery"

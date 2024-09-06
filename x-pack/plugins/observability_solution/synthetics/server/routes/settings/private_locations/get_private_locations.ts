@@ -52,21 +52,24 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
 
 export const getPrivateLocationsAndAgentPolicies = async (
   savedObjectsClient: SavedObjectsClientContract,
-  syntheticsMonitorClient: SyntheticsMonitorClient
+  syntheticsMonitorClient: SyntheticsMonitorClient,
+  excludeAgentPolicies: boolean = false
 ): Promise<SyntheticsPrivateLocationsAttributes & { agentPolicies: AgentPolicyInfo[] }> => {
   try {
     const [privateLocations, agentPolicies] = await Promise.all([
       getPrivateLocations(savedObjectsClient),
-      syntheticsMonitorClient.privateLocationAPI.getAgentPolicies(),
+      excludeAgentPolicies
+        ? new Promise<void>((resolve) => resolve())
+        : syntheticsMonitorClient.privateLocationAPI.getAgentPolicies(),
     ]);
     return {
       locations: privateLocations || [],
-      agentPolicies,
+      agentPolicies: agentPolicies || [],
     };
-  } catch (getErr) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return { locations: [], agentPolicies: [] };
     }
-    throw getErr;
+    throw error;
   }
 };

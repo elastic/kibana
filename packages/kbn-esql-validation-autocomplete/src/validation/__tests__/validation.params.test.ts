@@ -23,18 +23,18 @@ test('should allow param inside agg function argument', async () => {
 test('allow params in WHERE command expressions', async () => {
   const { validate } = await setup();
 
-  const res1 = await validate('FROM index | WHERE stringField >= ?earliest');
+  const res1 = await validate('FROM index | WHERE textField >= ?t_start');
   const res2 = await validate(`
     FROM index
-      | WHERE stringField >= ?earliest
-      | WHERE stringField <= ?0
-      | WHERE stringField == ?
+      | WHERE textField >= ?t_start
+      | WHERE textField <= ?0
+      | WHERE textField == ?
   `);
   const res3 = await validate(`
     FROM index
-      | WHERE stringField >= ?earliest
-        AND stringField <= ?0
-        AND stringField == ?
+      | WHERE textField >= ?t_start
+        AND textField <= ?0
+        AND textField == ?
   `);
 
   expect(res1).toMatchObject({ errors: [], warnings: [] });

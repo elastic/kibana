@@ -1,12 +1,15 @@
 openapi: 3.0.0
 info:
   title: Manage Knowledge Base Entries API endpoint
-  version: '2023-10-31'
+  version: '1'
 paths:
-  /api/elastic_assistant/knowledge_base/entries:
+  /internnal/elastic_assistant/knowledge_base/entries:
     post:
-      operationId: CreateKnowledgeBaseEntry
       x-codegen-enabled: true
+      # This API is still behind the `assistantKnowledgeBaseByDefault` feature flag
+      x-internal: true
+      x-labels: [ess, serverless]
+      operationId: CreateKnowledgeBaseEntry
       description: Create a Knowledge Base Entry
       summary: Create a Knowledge Base Entry
       tags:
@@ -31,10 +34,13 @@ paths:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
 
-  /api/elastic_assistant/knowledge_base/entries/{id}:
+  /internal/elastic_assistant/knowledge_base/entries/{id}:
     get:
-      operationId: ReadKnowledgeBaseEntry
       x-codegen-enabled: true
+      # This API is still behind the `assistantKnowledgeBaseByDefault` feature flag
+      x-internal: true
+      x-labels: [ess, serverless]
+      operationId: ReadKnowledgeBaseEntry
       description: Read a Knowledge Base Entry
       summary: Read a Knowledge Base Entry
       tags:
@@ -60,8 +66,11 @@ paths:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
     put:
-      operationId: UpdateKnowledgeBaseEntry
       x-codegen-enabled: true
+      # This API is still behind the `assistantKnowledgeBaseByDefault` feature flag
+      x-internal: true
+      x-labels: [ess, serverless]
+      operationId: UpdateKnowledgeBaseEntry
       description: Update a Knowledge Base Entry
       summary: Update a Knowledge Base Entry
       tags:
@@ -93,8 +102,11 @@ paths:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
     delete:
-      operationId: DeleteKnowledgeBaseEntry
       x-codegen-enabled: true
+      # This API is still behind the `assistantKnowledgeBaseByDefault` feature flag
+      x-internal: true
+      x-labels: [ess, serverless]
+      operationId: DeleteKnowledgeBaseEntry
       description: Deletes a single Knowledge Base Entry using the `id` field
       summary: Deletes a single Knowledge Base Entry using the `id` field
       tags:

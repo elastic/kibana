@@ -353,16 +353,15 @@ describe('Response actions history', () => {
     });
 
     it('should show multiple hostnames correctly', async () => {
-      const data = await getActionListMock({ actionCount: 1 });
-      data.data[0] = {
-        ...data.data[0],
+      const data = await getActionListMock({
+        actionCount: 1,
         hosts: {
-          ...data.data[0].hosts,
           'agent-b': { name: 'Host-agent-b' },
           'agent-c': { name: '' },
           'agent-d': { name: 'Host-agent-d' },
         },
-      };
+        agentIds: ['agent-a', 'agent-b', 'agent-c', 'agent-d'],
+      });
 
       useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
@@ -376,14 +375,11 @@ describe('Response actions history', () => {
     });
 
     it('should show display host is unenrolled for a single agent action when metadata host name is empty', async () => {
-      const data = await getActionListMock({ actionCount: 1 });
-      data.data[0] = {
-        ...data.data[0],
-        hosts: {
-          ...data.data[0].hosts,
-          'agent-a': { name: '' },
-        },
-      };
+      const data = await getActionListMock({
+        actionCount: 1,
+        agentIds: ['agent-a'],
+        hosts: { 'agent-a': { name: '' } },
+      });
 
       useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
@@ -397,16 +393,15 @@ describe('Response actions history', () => {
     });
 
     it('should show display host is unenrolled for a single agent action when metadata host names are empty', async () => {
-      const data = await getActionListMock({ actionCount: 1 });
-      data.data[0] = {
-        ...data.data[0],
+      const data = await getActionListMock({
+        actionCount: 1,
+        agentIds: ['agent-a', 'agent-b', 'agent-c'],
         hosts: {
-          ...data.data[0].hosts,
           'agent-a': { name: '' },
           'agent-b': { name: '' },
           'agent-c': { name: '' },
         },
-      };
+      });
 
       useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
@@ -1234,7 +1229,7 @@ describe('Response actions history', () => {
                           command === 'get-file'
                             ? 'ra_get-file_error_not-found'
                             : command === 'scan'
-                            ? 'ra_scan_error_scan_invalid-input'
+                            ? 'ra_scan_error_invalid-input'
                             : 'non_existing_code_for_test',
                       },
                     },
@@ -1389,7 +1384,7 @@ describe('Response actions history', () => {
                       command === 'get-file'
                         ? 'ra_get-file_error_not-found'
                         : command === 'scan'
-                        ? 'ra_scan_error_scan_invalid-input'
+                        ? 'ra_scan_error_invalid-input'
                         : 'non_existing_code_for_test',
                     content: undefined,
                   },
@@ -1401,7 +1396,7 @@ describe('Response actions history', () => {
                       command === 'get-file'
                         ? 'ra_get-file_error_invalid-input'
                         : command === 'scan'
-                        ? 'ra_scan_error_scan_invalid-input'
+                        ? 'ra_scan_error_invalid-input'
                         : 'non_existing_code_for_test',
                     content: undefined,
                   },
@@ -1496,7 +1491,6 @@ describe('Response actions history', () => {
     beforeEach(() => {
       featureFlags = {
         responseActionUploadEnabled: true,
-        responseActionScanEnabled: false,
       };
 
       mockedContext.setExperimentalFlag(featureFlags);
@@ -1516,37 +1510,7 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should show a list of actions (without `scan`) when opened', () => {
-      mockedContext.setExperimentalFlag({
-        ...featureFlags,
-        responseActionScanEnabled: false,
-      });
-      render();
-      const { getByTestId, getAllByTestId } = renderResult;
-
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
-      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
-      expect(filterList).toBeTruthy();
-      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
-        RESPONSE_ACTION_API_COMMANDS_NAMES.length - 1
-      );
-      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
-        'isolate. To check this option, press Enter.',
-        'release. To check this option, press Enter.',
-        'kill-process. To check this option, press Enter.',
-        'suspend-process. To check this option, press Enter.',
-        'processes. To check this option, press Enter.',
-        'get-file. To check this option, press Enter.',
-        'execute. To check this option, press Enter.',
-        'upload. To check this option, press Enter.',
-      ]);
-    });
-
     it('should show a list of actions (with `scan`) when opened', () => {
-      mockedContext.setExperimentalFlag({
-        ...featureFlags,
-        responseActionScanEnabled: true,
-      });
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 

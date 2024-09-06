@@ -22,7 +22,10 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '@kbn/security-solution-plugin/common/constants';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
@@ -85,10 +88,8 @@ export default ({ getService }: FtrProviderContext) => {
     'user.name': ['root'],
   };
 
-  // The tests described in this file rely on the
-  // 'alertSuppressionForMachineLearningRuleEnabled' feature flag, and are thus
-  // skipped in MKI
-  describe('@ess @serverless @skipInServerlessMKI Machine Learning Detection Rule - Alert Suppression', () => {
+  // NOTE: Add to second quality gate after feature is GA
+  describe('@ess @serverless Machine Learning Detection Rule - Alert Suppression', () => {
     describe('with an active ML Job', () => {
       before(async () => {
         // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
@@ -616,7 +617,6 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({
               'user.name': ['irrelevant'],
               [TIMESTAMP]: timestamp,
-              [ALERT_START]: timestamp,
             })
           );
 
@@ -634,7 +634,6 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({
               'user.name': ['irrelevant'],
               [TIMESTAMP]: timestamp,
-              [ALERT_START]: timestamp,
             })
           );
           expect(previewAlerts[1]._source).toEqual(
@@ -656,7 +655,6 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               [TIMESTAMP]: timestamp,
-              [ALERT_START]: timestamp,
               [ALERT_ORIGINAL_TIME]: timestamp,
               [ALERT_SUPPRESSION_START]: timestamp,
               [ALERT_SUPPRESSION_END]: timestamp,
@@ -1100,6 +1098,63 @@ export default ({ getService }: FtrProviderContext) => {
               })
             );
           });
+        });
+      });
+
+      describe('with enrichments', () => {
+        const kibanaServer = getService('kibanaServer');
+
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+          await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+          await kibanaServer.uiSettings.update({
+            [ENABLE_ASSET_CRITICALITY_SETTING]: true,
+          });
+        });
+
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+          await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+        });
+
+        beforeEach(async () => {
+          const timestamp = new Date().toISOString();
+          const anomalyWithKnownEntities = {
+            ...baseAnomaly,
+            timestamp,
+            user: { name: 'root' },
+            host: { name: 'zeek-newyork-sha-aa8df15' },
+          };
+          await indexListOfDocuments([anomalyWithKnownEntities]);
+
+          ruleProps = {
+            ...baseRuleProps,
+            from: timestamp,
+            alert_suppression: {
+              group_by: ['host.name'],
+              missing_fields_strategy: 'suppress',
+            },
+          };
+        });
+
+        it('should be enriched with host risk score', async () => {
+          const { previewId } = await previewRule({ supertest, rule: ruleProps });
+          const previewAlerts = await getPreviewAlerts({ es, previewId });
+          expect(previewAlerts).toHaveLength(1);
+          const alertSource = previewAlerts[0]._source;
+
+          expect(alertSource?.host?.risk?.calculated_level).toBe('Low');
+          expect(alertSource?.host?.risk?.calculated_score_norm).toBe(23);
+        });
+
+        it('should be enriched alert with criticality_level', async () => {
+          const { previewId } = await previewRule({ supertest, rule: ruleProps });
+          const previewAlerts = await getPreviewAlerts({ es, previewId });
+          expect(previewAlerts).toHaveLength(1);
+          const fullAlert = previewAlerts[0]._source;
+
+          expect(fullAlert?.['host.asset.criticality']).toBe('medium_impact');
+          expect(fullAlert?.['user.asset.criticality']).toBe('extreme_impact');
         });
       });
     });

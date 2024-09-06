@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { AggregationsCardinalityAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { AggregationsCardinalityAggregate } from '@elastic/elasticsearch/lib/api/types';
 import {
   Connector,
   ConnectorConfigProperties,

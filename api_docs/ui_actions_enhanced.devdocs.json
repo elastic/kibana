@@ -1040,9 +1040,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -1110,9 +1110,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-public.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
@@ -1136,9 +1136,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<",
@@ -1166,9 +1166,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<",
@@ -1209,9 +1209,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ", { uiActions, licensing }: ",
@@ -1239,9 +1239,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-public.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -3368,9 +3368,9 @@
               "(context: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.EmbeddableApiContext",
+                "section": "def-public.EmbeddableApiContext",
                 "text": "EmbeddableApiContext"
               },
               ") => Promise<boolean>"
@@ -3389,9 +3389,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-common.EmbeddableApiContext",
+                    "section": "def-public.EmbeddableApiContext",
                     "text": "EmbeddableApiContext"
                   }
                 ],
@@ -3829,9 +3829,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-server.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -3907,9 +3907,9 @@
               "(_core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, { embeddable }: UiActionsEnhancedServerSetupDependencies) => { registerActionFactory: (definition: ",
@@ -3944,9 +3944,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"

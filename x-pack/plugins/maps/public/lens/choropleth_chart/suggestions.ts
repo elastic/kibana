@@ -49,7 +49,7 @@ export function getSuggestions(
     })
     .forEach((bucket) => {
       for (const tableId in activeData) {
-        if (activeData.hasOwnProperty(tableId)) {
+        if (Object.hasOwn(activeData, tableId)) {
           const emsSuggestion = getEmsSuggestion(
             emsFileLayers,
             activeData[tableId],

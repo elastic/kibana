@@ -11,6 +11,7 @@ import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InventoryMetric, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { InfraPageTemplate } from '../../../../components/shared/templates/infra_page_template';
 import { NodeDetailsMetricDataResponseRT } from '../../../../../common/http_api/node_details_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTemplateHeaderBreadcrumbs } from '../../../../components/asset_details/hooks/use_page_header';
@@ -22,7 +23,6 @@ import { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { InfraMetadata } from '../../../../../common/http_api/metadata_api';
 import { PageError } from './page_error';
 import { MetadataContext } from '../containers/metadata_context';
-import { MetricsPageTemplate } from '../../page_template';
 
 interface Props {
   name: string;
@@ -90,7 +90,7 @@ export const NodeDetailsPage = (props: Props) => {
   }
 
   return (
-    <MetricsPageTemplate
+    <InfraPageTemplate
       pageHeader={{
         pageTitle: props.name,
         rightSideItems: [
@@ -132,6 +132,6 @@ export const NodeDetailsPage = (props: Props) => {
           </SideNavContext.Provider>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </MetricsPageTemplate>
+    </InfraPageTemplate>
   );
 };
