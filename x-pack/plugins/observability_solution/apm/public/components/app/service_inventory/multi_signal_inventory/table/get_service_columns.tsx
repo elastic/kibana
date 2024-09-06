@@ -35,7 +35,7 @@ import { ITableColumn } from '../../../../shared/managed_table';
 import { NotAvailableApmMetrics } from '../../../../shared/not_available_popover/not_available_apm_metrics';
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { ServiceInventoryFieldName } from './multi_signal_services_table';
-import { EntityServiceListItem, SignalTypes } from '../../../../../../common/entities/types';
+import { EntityDataStreamType } from '../../../../../../common/entities/types';
 import { isApmSignal, isLogsSignal } from '../../../../../utils/get_signal_type';
 import { ColumnHeader } from './column_header';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
@@ -43,6 +43,8 @@ import { NotAvailableLogsMetrics } from '../../../../shared/not_available_popove
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/entities/services/detailed_statistics'>;
+
+type EntityServiceListItem = APIReturnType<'GET /internal/apm/entities/services'>['services'][0];
 
 export function getServiceColumns({
   query,
@@ -64,19 +66,14 @@ export function getServiceColumns({
         defaultMessage: 'Name',
       }),
       sortable: true,
-      render: (_, { serviceName, agentName, signalTypes }) => (
+      render: (_, { serviceName, agentName, dataStreamTypes }) => (
         <TruncateWithTooltip
           data-test-subj="apmServiceListAppLink"
           text={serviceName}
           content={
             <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <ServiceLink
-                  signalTypes={signalTypes}
-                  serviceName={serviceName}
-                  agentName={agentName}
-                  query={query}
-                />
+                <ServiceLink serviceName={serviceName} agentName={agentName} query={query} />
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -91,10 +88,10 @@ export function getServiceColumns({
       sortable: true,
       width: `${unit * 9}px`,
       dataType: 'number',
-      render: (_, { environments, signalTypes }) => (
+      render: (_, { environments, dataStreamTypes }) => (
         <EnvironmentBadge
           environments={environments}
-          isMetricsSignalType={signalTypes.includes(SignalTypes.METRICS)}
+          isMetricsSignalType={dataStreamTypes.includes(EntityDataStreamType.METRICS)}
         />
       ),
       align: RIGHT_ALIGNMENT,
@@ -107,10 +104,10 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, serviceName, signalTypes }) => {
+      render: (_, { metrics, serviceName, dataStreamTypes }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
 
-        return !isApmSignal(signalTypes) ? (
+        return !isApmSignal(dataStreamTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
@@ -131,10 +128,10 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, serviceName, signalTypes }) => {
+      render: (_, { metrics, serviceName, dataStreamTypes }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
 
-        return !isApmSignal(signalTypes) ? (
+        return !isApmSignal(dataStreamTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
@@ -155,10 +152,10 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, serviceName, signalTypes }) => {
+      render: (_, { metrics, serviceName, dataStreamTypes }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
 
-        return !isApmSignal(signalTypes) ? (
+        return !isApmSignal(dataStreamTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
@@ -206,8 +203,8 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, serviceName, signalTypes, hasLogMetrics }) => {
-        if (isLogsSignal(signalTypes) && !hasLogMetrics) {
+      render: (_, { metrics, serviceName, dataStreamTypes, hasLogMetrics }) => {
+        if (isLogsSignal(dataStreamTypes) && !hasLogMetrics) {
           return <NotAvailableLogsMetrics />;
         }
 
@@ -258,8 +255,8 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, serviceName, signalTypes, hasLogMetrics }) => {
-        if (isLogsSignal(signalTypes) && !hasLogMetrics) {
+      render: (_, { metrics, serviceName, dataStreamTypes, hasLogMetrics }) => {
+        if (isLogsSignal(dataStreamTypes) && !hasLogMetrics) {
           return <NotAvailableLogsMetrics />;
         }
 

@@ -256,6 +256,34 @@ paths:
       summary: List Asset Criticality Records
       tags:
         - Security Solution Entity Analytics API
+  /api/risk_score/engine/schedule_now:
+    post:
+      operationId: ScheduleRiskEngineNow
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineScheduleNowResponse'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineScheduleNowErrorResponse'
+          description: Unexpected error
+      summary: Schedule the risk engine to run as soon as possible
+      tags:
+        - Security Solution Entity Analytics API
 components:
   schemas:
     AssetCriticalityBulkUploadErrorItem:
@@ -328,6 +356,33 @@ components:
         - host.name
         - user.name
       type: string
+    RiskEngineScheduleNowErrorResponse:
+      type: object
+      properties:
+        full_error:
+          type: string
+        message:
+          type: string
+      required:
+        - message
+        - full_error
+    RiskEngineScheduleNowResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+    TaskManagerUnavailableResponse:
+      description: Task manager is unavailable
+      type: object
+      properties:
+        message:
+          type: string
+        status_code:
+          minimum: 400
+          type: integer
+      required:
+        - status_code
+        - message
   securitySchemes:
     BasicAuth:
       scheme: basic
