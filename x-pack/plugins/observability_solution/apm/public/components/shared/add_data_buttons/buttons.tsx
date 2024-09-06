@@ -8,7 +8,7 @@
 // Disabling it for now until the EUI team fixes it
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiButtonSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -38,7 +38,7 @@ interface AddApmDataProps {
   onClick?: () => void;
   'data-test-subj': string;
   fill?: boolean;
-  size?: 's' | 'm';
+  size?: EuiButtonSize;
 }
 
 export function AddApmData({ onClick, fill = false, size = 's', ...props }: AddApmDataProps) {
