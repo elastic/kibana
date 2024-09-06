@@ -7,7 +7,6 @@
  */
 
 import type { ConnectionRequestParams } from '@elastic/transport';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
 
 /**
  * The status a request can have.
@@ -55,7 +54,8 @@ export interface RequestStatistic {
 }
 
 export interface Response {
-  json?: IKibanaSearchResponse;
+  // TODO replace object with IKibanaSearchResponse once IKibanaSearchResponse is seperated from data plugin.
+  json?: object;
   requestParams?: ConnectionRequestParams;
   time?: number;
 }

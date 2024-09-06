@@ -28,6 +28,7 @@ import { DropIllustration } from '@kbn/chart-icons';
 import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
+import { estypes } from '@elastic/elasticsearch';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
@@ -267,8 +268,17 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               searchService: plugins.data.search,
             }
           );
-          esTookTime.current = adapters.requests.getRequests().reduce((maxTime, request) => {
-            const took = request.response?.json?.rawResponse?.took ?? 0;
+          esTookTime.current = adapters.requests.getRequests().reduce((maxTime, { response }) => {
+            if (response === undefined) {
+              return maxTime;
+            }
+            const took =
+              (
+                response.json as {
+                  rawResponse: estypes.SearchResponse | undefined;
+                }
+              )?.rawResponse?.took ?? 0;
+
             return Math.max(maxTime, took);
           }, 0);
         }
