@@ -230,12 +230,21 @@ export class ConsolePageObject extends FtrService {
     }
   }
 
+  public async clickExportButton() {
+    await this.testSubjects.click('consoleExportButton');
+  }
+
   public async clickHelpIcon() {
     await this.testSubjects.click('consoleHelpButton');
   }
 
   public async clickShortcutsIcon() {
     await this.testSubjects.click('consoleShortcutsButton');
+  }
+
+  public async setFileToUpload(path: string) {
+    const input = await this.find.byCssSelector('#importConsoleFile');
+    await input.type(path);
   }
 
   public async isHelpPopoverOpen() {

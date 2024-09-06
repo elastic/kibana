@@ -22,6 +22,7 @@ export interface Store {
   currentTextObject: TextObject | null;
   currentView: string;
   restoreRequestFromHistory: RequestToRestore | null;
+  fileToImport: string | null;
 }
 
 export const initialValue: Store = produce<Store>(
@@ -31,6 +32,7 @@ export const initialValue: Store = produce<Store>(
     currentTextObject: null,
     currentView: SHELL_TAB_ID,
     restoreRequestFromHistory: null,
+    fileToImport: null,
   },
   identity
 );
@@ -41,7 +43,8 @@ export type Action =
   | { type: 'updateSettings'; payload: DevToolsSettings }
   | { type: 'setCurrentView'; payload: string }
   | { type: 'setRequestToRestore'; payload: RequestToRestore }
-  | { type: 'clearRequestToRestore' };
+  | { type: 'clearRequestToRestore' }
+  | { type: 'setFileToImport'; payload: string | null };
 
 export const reducer: Reducer<Store, Action> = (state, action) =>
   produce<Store>(state, (draft) => {
@@ -76,6 +79,11 @@ export const reducer: Reducer<Store, Action> = (state, action) =>
 
     if (action.type === 'clearRequestToRestore') {
       draft.restoreRequestFromHistory = null;
+      return;
+    }
+
+    if (action.type === 'setFileToImport') {
+      draft.fileToImport = action.payload;
       return;
     }
 
