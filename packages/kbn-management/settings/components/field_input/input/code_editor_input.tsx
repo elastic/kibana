@@ -53,7 +53,7 @@ export const CodeEditorInput = ({
   const onUpdate = useUpdate({ onInputChange, field });
 
   const updateValue = useCallback(
-    async (newValue: string, onUpdateFn) => {
+    async (newValue: string, onUpdateFn: typeof onUpdate) => {
       let parsedValue;
 
       // Validate JSON syntax
