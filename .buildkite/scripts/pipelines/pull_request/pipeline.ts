@@ -357,19 +357,22 @@ const modifyPerfPipeline = (options: ModifyPipeline) => {
       GITHUB_PR_LABELS.includes('ci:perf-check:dashboard') ||
       GITHUB_PR_LABELS.includes('ci:perf-check:so-crud')
     ) {
-      const journeyGroupsStr = GITHUB_PR_LABELS.split(' ')
-        .map((label) => label.trim())
-        .filter((label) => label.startsWith('ci:perf-check:'))
-        .map((label) => label.replace('ci:perf-check:', ''))
-        .join(',');
+      // const journeyGroupsStr = GITHUB_PR_LABELS.split(' ')
+      //   .map((label) => label.trim())
+      //   .filter((label) => label.startsWith('ci:perf-check:'))
+      //   .map((label) => label.replace('ci:perf-check:', ''))
+      //   .join(',');
+      // pipeline.push(
+      //   modifyPerfPipeline({
+      //     filename: '.buildkite/pipelines/pull_request/single_user_performance_check.yml',
+      //     update: {
+      //       label: `Run single user performance journeys, groups: ${journeyGroupsStr}`,
+      //       envs: { JOURNEY_GROUPS: journeyGroupsStr },
+      //     },
+      //   })
+      // );
       pipeline.push(
-        modifyPerfPipeline({
-          filename: '.buildkite/pipelines/pull_request/single_user_performance_check.yml',
-          update: {
-            label: `Run single user performance journeys, groups: ${journeyGroupsStr}`,
-            envs: { JOURNEY_GROUPS: journeyGroupsStr },
-          },
-        })
+        getPipeline('.buildkite/pipelines/pull_request/single_user_performance_check.yml')
       );
     }
 
