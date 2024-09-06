@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc: string } = {
+export const logsOnlyEmptyStateContent: { title: string; content: string; imgName: string } = {
   title: i18n.translate('xpack.apm.serviceTabEmptyState.infrastructureTitle', {
     defaultMessage: 'Understand what your service is running on',
   }),
@@ -15,5 +15,5 @@ export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc
     defaultMessage:
       'Troubleshoot service problems by seeing the infrastructure your service is running on.',
   }),
-  imgSrc: 'service_tab_empty_state_infrastructure.png',
+  imgName: 'service_tab_empty_state_infrastructure.png',
 };

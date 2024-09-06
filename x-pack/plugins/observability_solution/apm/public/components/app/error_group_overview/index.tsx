@@ -44,7 +44,7 @@ export function ErrorGroupOverview() {
       <ServiceTabEmptyState
         title={logsOnlyEmptyStateContent.title}
         content={logsOnlyEmptyStateContent.content}
-        imgSrc={logsOnlyEmptyStateContent.imgSrc}
+        imgName={logsOnlyEmptyStateContent.imgName}
       />
     );
   }

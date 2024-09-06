@@ -25,7 +25,7 @@ import { AddApmData } from '../../shared/add_data_buttons/buttons';
 export interface ServiceTabEmptyStateProps {
   title: string;
   content: string;
-  imgSrc?: string;
+  imgName?: string;
   dismissable?: boolean;
   onDissmiss?: () => void;
 }
@@ -47,7 +47,7 @@ const learnMoreLink = {
 export function ServiceTabEmptyState({
   title,
   content,
-  imgSrc,
+  imgName,
   onDissmiss,
 }: ServiceTabEmptyStateProps) {
   const { euiTheme } = useEuiTheme();
@@ -94,7 +94,7 @@ export function ServiceTabEmptyState({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {!imgSrc && (
+          {!imgName && (
             <EuiFlexItem
               style={{
                 maxHeight: `${euiTheme.base * 14}px`,
@@ -121,7 +121,7 @@ export function ServiceTabEmptyState({
           )}
         </EuiFlexGroup>
       </EuiPanel>
-      {imgSrc && (
+      {imgName && (
         <>
           <EuiSpacer size="l" />
           <EuiImage src={imgSrc} alt={content} size="fullWidth" style={{ opacity: 0.4 }} />

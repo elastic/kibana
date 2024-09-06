@@ -93,7 +93,7 @@ export function ServiceMapServiceDetail() {
       <ServiceTabEmptyState
         title={logsOnlyEmptyStateContent.title}
         content={logsOnlyEmptyStateContent.content}
-        imgSrc={logsOnlyEmptyStateContent.imgSrc}
+        imgName={logsOnlyEmptyStateContent.imgName}
       />
     );
   }

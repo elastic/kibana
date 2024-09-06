@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc: string } = {
+export const logsOnlyEmptyStateContent: { title: string; content: string; imgName: string } = {
   title: i18n.translate('xpack.apm.serviceTabEmptyState.serviceMapTitle', {
     defaultMessage: 'Visualise the dependencies between your services',
   }),
@@ -15,5 +15,5 @@ export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc
     defaultMessage:
       'See your services dependencies at a glance to help identify dependencies that may be affecting your service.',
   }),
-  imgSrc: 'service_tab_empty_state_service_map.png',
+  imgName: 'service_tab_empty_state_service_map.png',
 };

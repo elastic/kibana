@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc: string } = {
+export const logsOnlyEmptyStateContent: { title: string; content: string; imgName: string } = {
   title: i18n.translate('xpack.apm.serviceTabEmptyState.metricsTitle', {
     defaultMessage: 'View core metrics for your application',
   }),
@@ -15,5 +15,5 @@ export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc
     defaultMessage:
       'View metric trends for the instances of your service to identify performance bottlenecks that could be affecting your users.',
   }),
-  imgSrc: 'service_tab_empty_state_metrics.png',
+  imgName: 'service_tab_empty_state_metrics.png',
 };

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc: string } = {
+export const logsOnlyEmptyStateContent: { title: string; content: string; imgName: string } = {
   title: i18n.translate('xpack.apm.serviceTabEmptyState.errorGroupOverviewTitle', {
     defaultMessage: 'Identify transaction errors with your applications',
   }),
@@ -15,5 +15,5 @@ export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc
     defaultMessage:
       'Analyse errors down to the specific transaction to pin-point specific errors within your service.',
   }),
-  imgSrc: 'service_tab_empty_state_errors.png',
+  imgName: 'service_tab_empty_state_errors.png',
 };
