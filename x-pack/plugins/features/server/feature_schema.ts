@@ -290,9 +290,7 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
 
   if (unknownScopesEntries.length) {
     throw new Error(
-      `Feature privilege ${feature.id} has unknown scope entries: ${unknownScopesEntries.join(
-        ', '
-      )}`
+      `Feature ${feature.id} has unknown scope entries: ${unknownScopesEntries.join(', ')}`
     );
   }
 
