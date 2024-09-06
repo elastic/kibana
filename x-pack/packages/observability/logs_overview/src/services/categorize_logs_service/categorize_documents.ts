@@ -62,7 +62,9 @@ export const categorizeDocuments = ({ search }: { search: ISearchGeneric }) =>
         maxCategoriesCount,
       });
 
-      const { rawResponse } = await lastValueFrom(search({ params: requestParams }));
+      const { rawResponse } = await lastValueFrom(
+        search({ params: requestParams }, { abortSignal: signal })
+      );
 
       if (rawResponse.aggregations == null) {
         throw new Error('No aggregations found in large categories response');
