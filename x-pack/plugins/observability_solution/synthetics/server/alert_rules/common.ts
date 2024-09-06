@@ -192,32 +192,11 @@ export const setRecoveredAlertsContext = ({
     let isUp = false;
     let linkMessage = '';
     let monitorSummary: MonitorSummaryStatusRule = {};
-    let lastErrorMessage;
+    let lastErrorMessage = alertHit?.['error.message'];
 
     if (recoveredAlertId && locationId) {
       monitorSummary = getMonitorSummary({
-        monitorInfo: {
-          monitor: {
-            id: recoveredAlertId,
-            name: alertHit['monitor.name'],
-            type: alertHit['monitor.type'],
-          },
-          error: {
-            message: alertHit['error.message'],
-          },
-          url: {
-            full: alertHit['url.full'],
-          },
-          observer: {
-            geo: {
-              name: alertHit['observer.geo.name'],
-            },
-          },
-          '@timestamp': state.lastCheckedAt,
-          state: {
-            id: state.stateId,
-          },
-        },
+        monitorInfo: previousDownConfigs[recoveredAlertId]?.ping,
         statusMessage: RECOVERED_LABEL,
         locationId,
         configId: state.configId,
@@ -228,6 +207,9 @@ export const setRecoveredAlertsContext = ({
         numberOfChecks,
         locationsThreshold,
       });
+      if (monitorSummary.lastErrorMessage) {
+        lastErrorMessage = monitorSummary.lastErrorMessage;
+      }
     }
 
     if (!groupByLocation) {

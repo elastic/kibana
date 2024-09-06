@@ -257,7 +257,7 @@ export class StatusRuleExecutor {
           useTimeWindow: isTimeWindow || false,
         });
         if (doesMonitorMeetLocationThreshold) {
-          const alertId = isCustomRule ? `${idWithLocation}_custom` : idWithLocation;
+          const alertId = idWithLocation;
           const monitorSummary = this.getMonitorDownSummary({
             statusConfig,
           });
