@@ -17149,10 +17149,10 @@ eslint-plugin-cypress@^2.15.1:
   dependencies:
     globals "^13.20.0"
 
-eslint-plugin-depend@^0.10.0:
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-depend/-/eslint-plugin-depend-0.10.0.tgz#b92b614467c291e42c3815e42b2134d3952660af"
-  integrity sha512-ERt7CCVY8uo3aYVu0nzpoJ+IyA4iLaRw/NEoKIrK9B3bMtL/urGeJRS5IVRI3ueQjSqUSOt0z8CSi5OcUbHfsw==
+eslint-plugin-depend@^0.11.0:
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-depend/-/eslint-plugin-depend-0.11.0.tgz#ef82f6d8c6ae924a42c489dd6bd5b9f3f4eeba82"
+  integrity sha512-IwF06BrcdYoELuFd18sdVHhvDfF23xbr8pG/ONqrwB4gXjJ7281mEDEmACKWyvMY63afph8+2aOLbeuvr9mbdg==
   dependencies:
     fd-package-json "^1.2.0"
     module-replacements "^2.1.0"

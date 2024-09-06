@@ -7,17 +7,21 @@
 
 import { mergeEntities } from './merge_entities';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { EntityLatestServiceRaw } from '../types';
 
 describe('mergeEntities', () => {
   it('modifies one service', () => {
-    const entities = [
+    const entities: EntityLatestServiceRaw[] = [
       {
-        serviceName: 'service-1',
-        environment: 'test',
-        agentName: 'nodejs' as AgentName as AgentName,
-        signalTypes: ['metrics', 'logs'],
+        service: {
+          name: 'service-1',
+          environment: 'test',
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: ['metrics', 'logs'] },
         entity: {
-          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
             logRate: 1,
             logErrorRate: null,
@@ -27,17 +31,17 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:test',
-          hasLogMetrics: true,
         },
       },
     ];
     const result = mergeEntities({ entities });
     expect(result).toEqual([
       {
-        agentName: 'nodejs' as AgentName as AgentName,
-        signalTypes: ['metrics', 'logs'],
+        agentName: 'nodejs' as AgentName,
+        dataStreamTypes: ['metrics', 'logs'],
         environments: ['test'],
-        latestTimestamp: '2024-06-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 0.3333333333333333,
@@ -48,20 +52,22 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-1',
-        hasLogMetrics: true,
       },
     ]);
   });
 
   it('joins two service with the same name ', () => {
-    const entities = [
+    const entities: EntityLatestServiceRaw[] = [
       {
-        serviceName: 'service-1',
-        environment: 'env-service-1',
-        agentName: 'nodejs' as AgentName as AgentName,
-        signalTypes: ['foo'],
+        service: {
+          name: 'service-1',
+          environment: 'env-service-1',
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: ['foo'] },
         entity: {
-          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-03-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-03-05T10:34:40.810Z',
           metrics: {
             logRate: 1,
             logErrorRate: null,
@@ -71,16 +77,18 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:env-service-1',
-          hasLogMetrics: true,
         },
       },
       {
-        serviceName: 'service-1',
-        environment: 'env-service-2',
-        agentName: 'nodejs' as AgentName as AgentName,
-        signalTypes: ['bar'],
+        service: {
+          name: 'service-1',
+          environment: 'env-service-2',
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: ['bar'] },
         entity: {
-          latestTimestamp: '2024-03-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-03-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-03-05T10:34:40.810Z',
           metrics: {
             logRate: 10,
             logErrorRate: 10,
@@ -90,16 +98,18 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'apm-only-1:synthtrace-env-2',
-          hasLogMetrics: true,
         },
       },
       {
-        serviceName: 'service-2',
-        environment: 'env-service-3',
-        agentName: 'java' as AgentName,
-        signalTypes: ['baz'],
+        service: {
+          name: 'service-2',
+          environment: 'env-service-3',
+        },
+        agent: { name: ['java'] },
+        data_stream: { type: ['baz'] },
         entity: {
-          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
             logRate: 15,
             logErrorRate: 15,
@@ -109,16 +119,18 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-2:env-service-3',
-          hasLogMetrics: true,
         },
       },
       {
-        serviceName: 'service-2',
-        environment: 'env-service-4',
-        agentName: 'java' as AgentName,
-        signalTypes: ['baz'],
+        service: {
+          name: 'service-2',
+          environment: 'env-service-4',
+        },
+        agent: { name: ['java'] },
+        data_stream: { type: ['baz'] },
         entity: {
-          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
             logRate: 5,
             logErrorRate: 5,
@@ -128,7 +140,6 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-2:env-service-3',
-          hasLogMetrics: true,
         },
       },
     ];
@@ -137,9 +148,10 @@ describe('mergeEntities', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs' as AgentName,
-        signalTypes: ['foo', 'bar'],
+        dataStreamTypes: ['foo', 'bar'],
         environments: ['env-service-1', 'env-service-2'],
-        latestTimestamp: '2024-03-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-03-05T10:34:40.810Z',
+        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 0.3333333333333333,
@@ -157,13 +169,13 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-1',
-        hasLogMetrics: true,
       },
       {
         agentName: 'java' as AgentName,
-        signalTypes: ['baz'],
+        dataStreamTypes: ['baz'],
         environments: ['env-service-3', 'env-service-4'],
-        latestTimestamp: '2024-06-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 15,
@@ -181,19 +193,21 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-2',
-        hasLogMetrics: true,
       },
     ]);
   });
   it('handles duplicate environments and data streams', () => {
-    const entities = [
+    const entities: EntityLatestServiceRaw[] = [
       {
-        serviceName: 'service-1',
-        environment: 'test',
-        agentName: 'nodejs' as AgentName,
-        signalTypes: ['metrics', 'logs'],
+        service: {
+          name: 'service-1',
+          environment: 'test',
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: ['metrics', 'logs'] },
         entity: {
-          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
             logRate: 5,
             logErrorRate: 5,
@@ -203,16 +217,18 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:test',
-          hasLogMetrics: true,
         },
       },
       {
-        serviceName: 'service-1',
-        environment: 'test',
-        agentName: 'nodejs' as AgentName,
-        signalTypes: ['metrics', 'logs'],
+        service: {
+          name: 'service-1',
+          environment: 'test',
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: ['metrics', 'logs'] },
         entity: {
-          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
             logRate: 10,
             logErrorRate: 10,
@@ -222,16 +238,18 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:test',
-          hasLogMetrics: true,
         },
       },
       {
-        serviceName: 'service-1',
-        environment: 'prod',
-        agentName: 'nodejs' as AgentName,
-        signalTypes: ['foo'],
+        service: {
+          name: 'service-1',
+          environment: 'prod',
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: ['foo'] },
         entity: {
-          latestTimestamp: '2024-23-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-23-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-23-05T10:34:40.810Z',
           metrics: {
             logRate: 0.333,
             logErrorRate: 0.333,
@@ -241,7 +259,6 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:prod',
-          hasLogMetrics: true,
         },
       },
     ];
@@ -249,9 +266,10 @@ describe('mergeEntities', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs' as AgentName,
-        signalTypes: ['metrics', 'logs', 'foo'],
+        dataStreamTypes: ['metrics', 'logs', 'foo'],
         environments: ['test', 'prod'],
-        latestTimestamp: '2024-23-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-23-05T10:34:40.810Z',
+        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 5,
@@ -276,19 +294,21 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-1',
-        hasLogMetrics: true,
       },
     ]);
   });
   it('handles null environment', () => {
-    const entity = [
+    const entity: EntityLatestServiceRaw[] = [
       {
-        serviceName: 'service-1',
-        environment: undefined,
-        agentName: 'nodejs' as AgentName,
-        signalTypes: [],
+        service: {
+          name: 'service-1',
+          environment: undefined,
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: [] },
         entity: {
-          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
             logRate: 1,
             logErrorRate: null,
@@ -298,7 +318,6 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name'],
           id: 'service-1:test',
-          hasLogMetrics: true,
         },
       },
     ];
@@ -306,9 +325,10 @@ describe('mergeEntities', () => {
     expect(entityResult).toEqual([
       {
         agentName: 'nodejs' as AgentName,
-        signalTypes: [],
+        dataStreamTypes: [],
         environments: [],
-        latestTimestamp: '2024-06-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 0.3333333333333333,
@@ -319,17 +339,19 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-1',
-        hasLogMetrics: true,
       },
     ]);
 
-    const entities = [
+    const entities: EntityLatestServiceRaw[] = [
       {
-        serviceName: 'service-1',
-        agentName: 'nodejs' as AgentName,
-        signalTypes: [],
+        service: {
+          name: 'service-1',
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: [] },
         entity: {
-          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
             logRate: 1,
             logErrorRate: null,
@@ -339,15 +361,17 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name'],
           id: 'service-1:test',
-          hasLogMetrics: true,
         },
       },
       {
-        serviceName: 'service-1',
-        agentName: 'nodejs' as AgentName,
-        signalTypes: [],
+        service: {
+          name: 'service-1',
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: [] },
         entity: {
-          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
             logRate: 1,
             logErrorRate: null,
@@ -357,7 +381,6 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name'],
           id: 'service-1:test',
-          hasLogMetrics: true,
         },
       },
     ];
@@ -365,9 +388,10 @@ describe('mergeEntities', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs' as AgentName,
-        signalTypes: [],
+        dataStreamTypes: [],
         environments: [],
-        latestTimestamp: '2024-06-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 0.3333333333333333,
@@ -385,19 +409,21 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-1',
-        hasLogMetrics: true,
       },
     ]);
   });
 
   it('handles undefined environment', () => {
-    const entity = [
+    const entity: EntityLatestServiceRaw[] = [
       {
-        serviceName: 'service-1',
-        agentName: 'nodejs' as AgentName,
-        signalTypes: [],
+        service: {
+          name: 'service-1',
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: [] },
         entity: {
-          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
             logRate: 1,
             logErrorRate: null,
@@ -407,17 +433,17 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name'],
           id: 'service-1:test',
-          hasLogMetrics: true,
         },
       },
     ];
     const entityResult = mergeEntities({ entities: entity });
     expect(entityResult).toEqual([
       {
-        agentName: 'nodejs' as AgentName,
-        signalTypes: [],
+        agentName: 'nodejs',
+        dataStreamTypes: [],
         environments: [],
-        latestTimestamp: '2024-06-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 0.3333333333333333,
@@ -428,17 +454,19 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-1',
-        hasLogMetrics: true,
       },
     ]);
 
-    const entities = [
+    const entities: EntityLatestServiceRaw[] = [
       {
-        serviceName: 'service-1',
-        agentName: 'nodejs' as AgentName,
-        signalTypes: [],
+        service: {
+          name: 'service-1',
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: [] },
         entity: {
-          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
             logRate: 1,
             logErrorRate: null,
@@ -448,15 +476,17 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name'],
           id: 'service-1:test',
-          hasLogMetrics: true,
         },
       },
       {
-        serviceName: 'service-1',
-        agentName: 'nodejs' as AgentName,
-        signalTypes: [],
+        service: {
+          name: 'service-1',
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: [] },
         entity: {
-          latestTimestamp: '2024-06-05T10:34:40.810Z',
+          firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
           metrics: {
             logRate: 1,
             logErrorRate: null,
@@ -466,7 +496,57 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name'],
           id: 'service-1:test',
-          hasLogMetrics: true,
+        },
+      },
+    ];
+    const result = mergeEntities({ entities });
+    expect(result).toEqual([
+      {
+        agentName: 'nodejs',
+        dataStreamTypes: [],
+        environments: [],
+        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        hasLogMetrics: true,
+        metrics: [
+          {
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+            logErrorRate: null,
+            logRate: 1,
+            throughput: 0,
+          },
+          {
+            logRate: 1,
+            logErrorRate: null,
+            throughput: 0,
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+          },
+        ],
+        serviceName: 'service-1',
+      },
+    ]);
+  });
+
+  it('has no logs when log rate is not returned', () => {
+    const entities: EntityLatestServiceRaw[] = [
+      {
+        service: {
+          name: 'service-1',
+          environment: 'test',
+        },
+        agent: { name: ['nodejs'] },
+        data_stream: { type: ['metrics'] },
+        entity: {
+          firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+          metrics: {
+            throughput: 0,
+            failedTransactionRate: 0.3333333333333333,
+            latency: 10,
+          },
+          identityFields: ['service.name', 'service.environment'],
+          id: 'service-1:test',
         },
       },
     ];
@@ -474,27 +554,18 @@ describe('mergeEntities', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs' as AgentName,
-        signalTypes: [],
-        environments: [],
-        latestTimestamp: '2024-06-05T10:34:40.810Z',
+        dataStreamTypes: ['metrics'],
+        environments: ['test'],
+        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        hasLogMetrics: false,
         metrics: [
           {
             failedTransactionRate: 0.3333333333333333,
             latency: 10,
-            logErrorRate: null,
-            logRate: 1,
             throughput: 0,
-          },
-          {
-            logRate: 1,
-            logErrorRate: null,
-            throughput: 0,
-            failedTransactionRate: 0.3333333333333333,
-            latency: 10,
           },
         ],
         serviceName: 'service-1',
-        hasLogMetrics: true,
       },
     ]);
   });

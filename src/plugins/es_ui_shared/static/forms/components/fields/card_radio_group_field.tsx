@@ -38,7 +38,7 @@ export const CardRadioGroupField = ({
     <EuiFormRow
       label={field.label}
       labelType="legend"
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

@@ -294,6 +294,18 @@ describe('autocomplete.suggest', () => {
           [',', '| ', '+ $0', '- $0']
         );
       });
+
+      test('count(/) to suggest * for all', async () => {
+        const { assertSuggestions } = await setup();
+
+        const expected = [
+          '*',
+          ...getFieldNamesByType(['any']).map((field) => `${field}`),
+          ...allEvaFunctions,
+        ];
+        await assertSuggestions('from a | stats count(/)', expected);
+        await assertSuggestions('from a | stats var0 = count(/)', expected);
+      });
     });
   });
 });
