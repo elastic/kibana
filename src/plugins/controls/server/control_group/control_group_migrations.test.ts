@@ -7,56 +7,59 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuidv4 } from 'uuid';
+
 import {
-  ControlWidth,
-  ControlPanelState,
+  getDefaultControlGroupState,
+  mockDataControlState,
+  mockOptionsListControlState,
+} from '../..//common/mocks';
+import {
+  type ControlPanelState,
+  type ControlWidth,
+  type DefaultDataControlState,
+  type SerializedControlState,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
-  OptionsListEmbeddableInput,
-  RangeSliderEmbeddableInput,
-  getDefaultControlGroupInput,
-  ControlGroupInput,
-} from '..';
-import { mockOptionsListEmbeddableInput, mockRangeSliderEmbeddableInput } from '../mocks';
+  ControlGroupSerializedState,
+  ControlGroupRuntimeState,
+  DefaultControlState,
+  ControlPanelsState,
+} from '../../common';
 import { removeHideExcludeAndHideExists } from './control_group_migrations';
 
 describe('migrate control group', () => {
-  const getOptionsListControl = (order: number, input?: Partial<OptionsListEmbeddableInput>) => {
+  const getOptionsListControl = (order: number, input?: Partial<DefaultDataControlState>) => {
     return {
       type: OPTIONS_LIST_CONTROL,
       order,
       width: 'small' as ControlWidth,
       grow: true,
-      explicitInput: { ...mockOptionsListEmbeddableInput, ...input },
-    } as ControlPanelState;
+      explicitInput: { ...mockOptionsListControlState, ...input },
+    } as ControlPanelState<SerializedControlState<DefaultDataControlState>>;
   };
 
-  const getRangeSliderControl = (order: number, input?: Partial<RangeSliderEmbeddableInput>) => {
+  const getRangeSliderControl = (order: number, input?: Partial<object>) => {
     return {
       type: RANGE_SLIDER_CONTROL,
       order,
       width: 'medium' as ControlWidth,
       grow: false,
-      explicitInput: { ...mockRangeSliderEmbeddableInput, ...input },
-    } as ControlPanelState;
+      explicitInput: { ...mockDataControlState, ...input },
+    } as ControlPanelState<SerializedControlState<DefaultDataControlState>>;
   };
 
-  const getControlGroupInput = (panels: ControlPanelState[]): ControlGroupInput => {
-    const panelsObjects = panels.reduce((acc, panel) => {
-      return { ...acc, [panel.explicitInput.id]: panel };
-    }, {});
-
+  const getControlGroupState = (panels: ControlPanelsState): ControlGroupRuntimeState => {
     return {
-      id: 'testControlGroupMigration',
-      ...getDefaultControlGroupInput(),
-      panels: panelsObjects,
+      ...getDefaultControlGroupState(),
+      initialChildControlState: panels,
     };
   };
 
   describe('remove hideExclude and hideExists', () => {
     test('should migrate single options list control', () => {
-      const migratedControlGroupInput: ControlGroupInput = removeHideExcludeAndHideExists(
-        getControlGroupInput([getOptionsListControl(0, { id: 'testPanelId', hideExclude: true })])
+      const migratedControlGroupInput: ControlGroupRuntimeState = removeHideExcludeAndHideExists(
+        getControlGroupState([getOptionsListControl(0, { id: 'testPanelId', hideExclude: true })])
       );
       expect(migratedControlGroupInput.panels).toEqual({
         testPanelId: getOptionsListControl(0, { id: 'testPanelId' }),
@@ -64,7 +67,7 @@ describe('migrate control group', () => {
     });
     test('should migrate multiple options list controls', () => {
       const migratedControlGroupInput: ControlGroupInput = removeHideExcludeAndHideExists(
-        getControlGroupInput([
+        getControlGroupState([
           getOptionsListControl(0, { id: 'testPanelId1' }),
           getOptionsListControl(1, { id: 'testPanelId2', hideExclude: false }),
           getOptionsListControl(2, { id: 'testPanelId3', hideExists: true }),
@@ -101,7 +104,7 @@ describe('migrate control group', () => {
 
     test('should migrate multiple different types of controls', () => {
       const migratedControlGroupInput: ControlGroupInput = removeHideExcludeAndHideExists(
-        getControlGroupInput([
+        getControlGroupState([
           getOptionsListControl(0, {
             id: 'testPanelId1',
             hideExists: true,

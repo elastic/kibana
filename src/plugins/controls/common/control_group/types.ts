@@ -7,25 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { ControlStyle, DefaultControlState, ParentIgnoreSettings } from '../types';
+
 export const CONTROL_GROUP_TYPE = 'control_group';
 
 export type ControlGroupChainingSystem = 'HIERARCHICAL' | 'NONE';
 
-export interface ControlGroupTelemetry {
-  total: number;
-  chaining_system: {
-    [key: string]: number;
-  };
-  label_position: {
-    [key: string]: number;
-  };
-  ignore_settings: {
-    [key: string]: number;
-  };
-  by_type: {
-    [key: string]: {
-      total: number;
-      details: { [key: string]: number };
-    };
-  };
+export type FieldFilterPredicate = (f: DataViewField) => boolean;
+
+/**
+ * ----------------------------------------------------------------
+ * Control group state
+ * ----------------------------------------------------------------
+ */
+
+export interface ControlGroupEditorConfig {
+  hideDataViewSelector?: boolean;
+  hideWidthSettings?: boolean;
+  hideAdditionalSettings?: boolean;
+  fieldFilterPredicate?: FieldFilterPredicate;
 }
+
+export interface ControlGroupRuntimeState<State extends DefaultControlState = DefaultControlState> {
+  chainingSystem: ControlGroupChainingSystem;
+  labelPosition: ControlStyle; // TODO: Rename this type to ControlLabelPosition
+  autoApplySelections: boolean;
+  ignoreParentSettings?: ParentIgnoreSettings;
+
+  initialChildControlState: ControlPanelsState<State>;
+
+  /*
+   * Configuration settings that are never persisted
+   * - remove after https://github.com/elastic/kibana/issues/189939 is resolved
+   */
+  editorConfig?: ControlGroupEditorConfig;
+}
+
+export interface ControlGroupSerializedState
+  extends Pick<ControlGroupRuntimeState, 'chainingSystem' | 'editorConfig'> {
+  panelsJSON: string; // stringified version of ControlSerializedState
+  ignoreParentSettingsJSON: string;
+  // In runtime state, we refer to this property as `labelPosition`;
+  // to avoid migrations, we will continue to refer to this property as `controlStyle` in the serialized state
+  controlStyle: ControlStyle;
+  // In runtime state, we refer to the inverse of this property as `autoApplySelections`
+  // to avoid migrations, we will continue to refer to this property as `showApplySelections` in the serialized state
+  showApplySelections: boolean | undefined;
+}
+
+/**
+ * ----------------------------------------------------------------
+ * Control group panel state
+ * ----------------------------------------------------------------
+ */
+
+export interface ControlPanelsState<State extends DefaultControlState = DefaultControlState> {
+  [panelId: string]: ControlPanelState<State>;
+}
+
+export type ControlPanelState<State extends DefaultControlState = DefaultControlState> = State & {
+  type: string;
+  order: number;
+};

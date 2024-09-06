@@ -9,13 +9,18 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL, TIME_SLIDER_CONTROL } from '../../../common';
-import { ControlGroupRuntimeState, ControlPanelsState } from './types';
+import {
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
+  type ControlGroupRuntimeState,
+  type ControlPanelsState,
+  type DefaultDataControlState,
+  type OptionsListControlState,
+} from '../../../common';
 import { pluginServices } from '../../services';
-import { OptionsListControlState } from '../controls/data_controls/options_list_control/types';
-import { RangesliderControlState } from '../controls/data_controls/range_slider/types';
-import { DefaultDataControlState } from '../controls/data_controls/types';
 import { getDataControlFieldRegistry } from '../controls/data_controls/data_control_editor_utils';
+import type { RangesliderControlState } from '../controls/data_controls/range_slider/types';
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;
 

@@ -17,22 +17,27 @@ import { TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { act, fireEvent, render, RenderResult, waitFor } from '@testing-library/react';
 
+import {
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+  type DefaultDataControlState,
+} from '../../../../common';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
-jest.mock('../../control_factory_registry', () => ({
-  ...jest.requireActual('../../control_factory_registry'),
-  getAllControlTypes: jest.fn(),
-  getControlFactory: jest.fn(),
-}));
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../../common';
-import { ControlGroupApi } from '../../control_group/types';
+import type { ControlGroupApi } from '../../control_group/types';
+import type { ControlFactory } from '../types';
 import { DataControlEditor } from './data_control_editor';
 import {
   getMockedOptionsListControlFactory,
   getMockedRangeSliderControlFactory,
   getMockedSearchControlFactory,
 } from './mocks/factory_mocks';
-import { ControlFactory } from '../types';
-import { DataControlApi, DataControlFactory, DefaultDataControlState } from './types';
+import type { DataControlApi, DataControlFactory } from './types';
+
+jest.mock('../../control_factory_registry', () => ({
+  ...jest.requireActual('../../control_factory_registry'),
+  getAllControlTypes: jest.fn(),
+  getControlFactory: jest.fn(),
+}));
 
 const mockDataViews = dataViewPluginMocks.createStartContract();
 const mockDataView = createStubDataView({

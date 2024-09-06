@@ -19,7 +19,6 @@ import { dataServiceFactory } from './data/data.story';
 import { dataViewsServiceFactory } from './data_views/data_views.story';
 import { embeddableServiceFactory } from './embeddable/embeddable.story';
 import { httpServiceFactory } from './http/http.stub';
-import { optionsListServiceFactory } from './options_list/options_list.story';
 import { overlaysServiceFactory } from './overlays/overlays.story';
 import { settingsServiceFactory } from './settings/settings.story';
 import { storageServiceFactory } from './storage/storage_service.stub';
@@ -37,7 +36,6 @@ export const providers: PluginServiceProviders<ControlsServices> = {
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   storage: new PluginServiceProvider(storageServiceFactory),
   controls: new PluginServiceProvider(controlsServiceFactory),
-  optionsList: new PluginServiceProvider(optionsListServiceFactory),
 };
 
 export const pluginServices = new PluginServices<ControlsServices>();

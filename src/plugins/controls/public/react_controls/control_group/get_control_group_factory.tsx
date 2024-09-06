@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
+
 import { CoreStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -20,31 +21,30 @@ import {
   combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
 import {
-  apiPublishesDataViews,
   PublishesDataViews,
+  apiPublishesDataViews,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { ControlStyle, ParentIgnoreSettings } from '../..';
-import {
+
+import type {
   ControlGroupChainingSystem,
-  CONTROL_GROUP_TYPE,
-  DEFAULT_CONTROL_STYLE,
-} from '../../../common';
-import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
-import { initControlsManager } from './init_controls_manager';
-import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
-import { deserializeControlGroup } from './serialization_utils';
-import {
-  ControlGroupApi,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
   ControlPanelsState,
-} from './types';
-import { ControlGroup } from './components/control_group';
-import { initSelectionsManager } from './selections_manager';
-import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
+  ControlStyle,
+  ParentIgnoreSettings,
+} from '../../../common';
+import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_STYLE } from '../../../common';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
+import { ControlGroup } from './components/control_group';
+import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
+import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
+import { initControlsManager } from './init_controls_manager';
+import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
+import { initSelectionsManager } from './selections_manager';
+import { deserializeControlGroup } from './serialization_utils';
+import { ControlGroupApi } from './types';
 
 const DEFAULT_CHAINING_SYSTEM = 'HIERARCHICAL';
 

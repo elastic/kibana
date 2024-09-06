@@ -8,12 +8,11 @@
  */
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-import { ControlInput, ControlWidth, DataControlInput } from '../common/types';
 import { ControlsServiceType } from './services/controls/types';
 
 export interface CanClearSelections {
@@ -23,31 +22,6 @@ export interface CanClearSelections {
 export const isClearableControl = (control: unknown): control is CanClearSelections => {
   return typeof (control as CanClearSelections).clearSelections === 'function';
 };
-
-/**
- * Control embeddable editor types
- */
-export interface ControlEditorProps<T extends ControlInput = ControlInput> {
-  initialInput?: Partial<T>;
-  fieldType: string;
-  onChange: (partial: Partial<T>) => void;
-  setControlEditorValid: (isValid: boolean) => void;
-}
-
-export interface DataControlField {
-  field: DataViewField;
-  compatibleControlTypes: string[];
-}
-
-export interface DataControlFieldRegistry {
-  [fieldName: string]: DataControlField;
-}
-
-export interface DataControlEditorChanges {
-  input: Partial<DataControlInput>;
-  width?: ControlWidth;
-  grow?: boolean;
-}
 
 /**
  * Plugin types
@@ -71,6 +45,3 @@ export interface ControlsPluginStartDeps {
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
-
-// re-export from common
-export type { ControlInput, ControlStyle, ControlWidth, DataControlInput } from '../common/types';

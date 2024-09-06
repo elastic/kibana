@@ -7,6 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './control_group/mocks';
-export * from './options_list/mocks';
-export * from './range_slider/mocks';
+import { DEFAULT_CONTROL_STYLE } from './control_group/control_group_constants';
+import { ControlGroupRuntimeState } from './control_group/types';
+import { OptionsListControlState } from './options_list';
+import { DefaultDataControlState, SerializedControlState } from './types';
+
+export const mockDataControlState = {
+  id: 'id',
+  fieldName: 'sample field',
+  dataViewId: 'sample id',
+  value: ['0', '10'],
+} as DefaultDataControlState;
+
+export const mockOptionsListControlState = {
+  ...mockDataControlState,
+  selectedOptions: [],
+  runPastTimeout: false,
+  singleSelect: false,
+  exclude: false,
+} as OptionsListControlState;
+
+export const getDefaultControlGroupState =
+  (): ControlGroupRuntimeState<SerializedControlState> => ({
+    initialChildControlState: {},
+    labelPosition: DEFAULT_CONTROL_STYLE,
+    chainingSystem: 'HIERARCHICAL',
+    autoApplySelections: true,
+    ignoreParentSettings: {
+      ignoreFilters: false,
+      ignoreQuery: false,
+      ignoreTimerange: false,
+      ignoreValidations: false,
+    },
+  });

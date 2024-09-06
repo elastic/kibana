@@ -26,18 +26,16 @@ import {
   PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
+import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 
-import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { ControlGroupChainingSystem } from '../../../common/control_group/types';
-import { ControlStyle } from '../../types';
-import { DefaultControlState } from '../controls/types';
+import { ControlStyle, ParentIgnoreSettings } from '../../../common';
+import {
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlPanelState,
+} from '../../../common/control_group/types';
 import { ControlFetchContext } from './control_fetch/control_fetch';
-import { ParentIgnoreSettings } from '../../../common';
-
-export interface ControlPanelsState<ControlState extends ControlPanelState = ControlPanelState> {
-  [panelId: string]: ControlState;
-}
 
 export type ControlGroupUnsavedChanges = Omit<
   ControlGroupRuntimeState,
@@ -45,8 +43,6 @@ export type ControlGroupUnsavedChanges = Omit<
 > & {
   filters: Filter[] | undefined;
 };
-
-export type ControlPanelState = DefaultControlState & { type: string; order: number };
 
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
@@ -72,34 +68,7 @@ export type ControlGroupApi = PresentationContainer &
     labelPosition: PublishingSubject<ControlStyle>;
   };
 
-export interface ControlGroupRuntimeState {
-  chainingSystem: ControlGroupChainingSystem;
-  labelPosition: ControlStyle; // TODO: Rename this type to ControlLabelPosition
-  autoApplySelections: boolean;
-  ignoreParentSettings?: ParentIgnoreSettings;
-
-  initialChildControlState: ControlPanelsState<ControlPanelState>;
-  /** TODO: Handle the editor config, which is used with the control group renderer component */
-  editorConfig?: {
-    hideDataViewSelector?: boolean;
-    hideWidthSettings?: boolean;
-    hideAdditionalSettings?: boolean;
-  };
-}
-
 export type ControlGroupEditorState = Pick<
   ControlGroupRuntimeState,
   'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
 >;
-
-export interface ControlGroupSerializedState {
-  chainingSystem: ControlGroupChainingSystem;
-  panelsJSON: string;
-  ignoreParentSettingsJSON: string;
-  // In runtime state, we refer to this property as `labelPosition`;
-  // to avoid migrations, we will continue to refer to this property as `controlStyle` in the serialized state
-  controlStyle: ControlStyle;
-  // In runtime state, we refer to the inverse of this property as `autoApplySelections`
-  // to avoid migrations, we will continue to refer to this property as `showApplySelections` in the serialized state
-  showApplySelections: boolean | undefined;
-}

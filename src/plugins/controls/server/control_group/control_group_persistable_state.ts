@@ -7,34 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SavedObjectReference } from '@kbn/core/types';
 import {
   EmbeddableInput,
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common/types';
-import { SavedObjectReference } from '@kbn/core/types';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { ControlGroupInput, ControlPanelState } from './types';
+
+import type { ControlPanelsState, SerializedControlState } from '../../common';
 import {
   makeControlOrdersZeroBased,
   removeHideExcludeAndHideExists,
 } from './control_group_migrations';
+import type { SerializableControlGroupState } from './control_group_persistence';
 
-type ControlGroupInputWithType = Partial<ControlGroupInput> & { type: string };
-
-const getPanelStatePrefix = (state: ControlPanelState) => `${state.explicitInput.id}:`;
+const getPanelStatePrefix = (state: SerializedControlState) => `${state.explicitInput.id}:`;
 
 export const createControlGroupInject = (
   persistableStateService: EmbeddablePersistableStateService
 ): EmbeddablePersistableStateService['inject'] => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
-    const workingState = { ...state } as EmbeddableStateWithType | ControlGroupInputWithType;
+    const workingState = { ...state } as EmbeddableStateWithType | SerializableControlGroupState;
 
+    let workingPanels: ControlPanelsState<SerializedControlState> = {};
     if ('panels' in workingState) {
-      workingState.panels = { ...workingState.panels };
+      workingPanels = { ...workingState.panels };
 
-      for (const [key, panel] of Object.entries(workingState.panels)) {
-        workingState.panels[key] = { ...panel };
+      for (const [key, panel] of Object.entries(workingPanels)) {
+        workingPanels[key] = {
+          ...panel,
+        };
         // Find the references for this panel
         const prefix = getPanelStatePrefix(panel);
 
@@ -45,13 +48,13 @@ export const createControlGroupInject = (
         const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
 
         const { type, ...injectedState } = persistableStateService.inject(
-          { ...workingState.panels[key].explicitInput, type: workingState.panels[key].type },
+          { ...workingPanels[key].explicitInput, type: workingPanels[key].type },
           panelReferences
         );
-        workingState.panels[key].explicitInput = injectedState as EmbeddableInput;
+        workingPanels[key].explicitInput = injectedState as EmbeddableInput;
       }
     }
-    return workingState as EmbeddableStateWithType;
+    return { ...workingState, panels: workingPanels } as unknown as EmbeddableStateWithType;
   };
 };
 
@@ -59,7 +62,7 @@ export const createControlGroupExtract = (
   persistableStateService: EmbeddablePersistableStateService
 ): EmbeddablePersistableStateService['extract'] => {
   return (state: EmbeddableStateWithType) => {
-    const workingState = { ...state } as EmbeddableStateWithType | ControlGroupInputWithType;
+    const workingState = { ...state } as EmbeddableStateWithType | SerializableControlGroupState;
     const references: SavedObjectReference[] = [];
 
     if ('panels' in workingState) {
@@ -83,7 +86,8 @@ export const createControlGroupExtract = (
         references.push(...mappedReferences);
 
         const { type, ...restOfState } = panelState;
-        workingState.panels[key].explicitInput = restOfState as EmbeddableInput;
+        (workingState.panels as ControlPanelsState<SerializedControlState>)[key].explicitInput =
+          restOfState as EmbeddableInput;
       }
     }
     return { state: workingState as EmbeddableStateWithType, references };
@@ -92,12 +96,12 @@ export const createControlGroupExtract = (
 
 export const migrations: MigrateFunctionsObject = {
   '8.2.0': (state) => {
-    const controlInput = state as unknown as ControlGroupInput;
+    const controlInput = state as unknown as SerializableControlGroupState;
     // for hierarchical chaining it is required that all control orders start at 0.
     return makeControlOrdersZeroBased(controlInput);
   },
   '8.7.0': (state) => {
-    const controlInput = state as unknown as ControlGroupInput;
+    const controlInput = state as unknown as SerializableControlGroupState;
     // need to set `hideExclude` and `hideExists` to `undefined` for all options list controls.
     return removeHideExcludeAndHideExists(controlInput);
   },

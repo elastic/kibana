@@ -18,3 +18,20 @@ export interface ParentIgnoreSettings {
   ignoreTimerange?: boolean;
   ignoreValidations?: boolean;
 }
+
+export interface DefaultControlState {
+  grow?: boolean;
+  width?: ControlWidth;
+}
+
+export interface SerializedControlState<ControlStateType extends object = object>
+  extends DefaultControlState {
+  type: string;
+  explicitInput: { id: string } & ControlStateType;
+}
+
+export interface DefaultDataControlState extends DefaultControlState {
+  dataViewId: string;
+  fieldName: string;
+  title?: string; // custom control label
+}

@@ -39,15 +39,23 @@ import {
   LazyFieldPicker,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { DataControlFieldRegistry } from '../../../types';
-import { CONTROL_WIDTH_OPTIONS } from '../../..';
-import { ControlWidth, DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../../common';
 
+import {
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+  type ControlWidth,
+  type DefaultDataControlState,
+} from '../../../../common';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
-import { ControlGroupApi } from '../../control_group/types';
+import type { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditorStrings } from './data_control_constants';
 import { getDataControlFieldRegistry } from './data_control_editor_utils';
-import { DataControlFactory, DefaultDataControlState, isDataControlFactory } from './types';
+import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
+import {
+  isDataControlFactory,
+  type DataControlFactory,
+  type DataControlFieldRegistry,
+} from './types';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
