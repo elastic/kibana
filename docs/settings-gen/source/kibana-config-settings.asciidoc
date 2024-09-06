@@ -5,6 +5,14 @@
 
 
 
+[float]
+[[general-alert-action-settings]]
+=== General settings
+
+Something
+
+Something else.
+
 `xpack.encryptedSavedObjects.encryptionKey`::
 A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in {es}. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties.
 +
@@ -20,13 +28,14 @@ Default: `true` +
 Type: static +
 ====
 
-
 `xpack.actions.allowedHosts` {ess-icon}::
+A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
++
+Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
 +
 ====
 Default: `["*"]` +
 ====
-
 
 `xpack.actions.customHostSettings` {ess-icon}::
 A list of custom host settings to override existing global settings. Default: an empty list.
@@ -39,14 +48,12 @@ The settings in `xpack.actions.customHostSettings` can be used to override the g
 +
 include::../examples/example-xpack.actions.customHostSettings.asciidoc[]
 
-
 `xpack.actions.customHostSettings[n].url` {ess-icon}::
 A URL associated with this custom host setting.  Should be in the form of `protocol://hostname:port`, where `protocol` is `https` or `smtp`.  If the port is not provided, 443 is used for `https` and 25 is used for `smtp`.  The `smtp` URLs are used for the Email actions that use this server, and the `https` URLs are used for actions which use `https` to connect to services.
 +
 Entries with `https` URLs can use the `ssl` options, and entries with `smtp` URLs can use both the `ssl` and `smtp` options.
 +
 No other URL values should be part of this URL, including paths, query strings, and authentication information.  When an http or smtp request is made as part of running an action, only the protocol, hostname, and port of the URL for that request are used to look up these configuration values.
-
 
 `xpack.actions.customHostSettings[n].smtp.ignoreTLS` {ess-icon}::
 A boolean value indicating that TLS must not be used for this connection. The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
@@ -55,14 +62,12 @@ A boolean value indicating that TLS must not be used for this connection. The op
 Default: `false` +
 ====
 
-
 `xpack.actions.customHostSettings[n].smtp.requireTLS` {ess-icon}::
 A boolean value indicating that TLS must be used for this connection. The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
 +
 ====
 Default: `false` +
 ====
-
 
 `xpack.actions.customHostSettings[n].ssl.rejectUnauthorized`::
 +
@@ -73,7 +78,6 @@ A boolean value indicating whether to bypass server certificate validation.
 Overrides the general `xpack.actions.rejectUnauthorized` configuration for requests made for this hostname/port.
 
 
-
 [[action-config-custom-host-verification-mode]] `action-config-custom-host-verification-mode` {ess-icon}::
 Controls the verification of the server certificate that {kib} receives when making an outbound SSL/TLS connection to the host server. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
 +
@@ -82,19 +86,76 @@ Options: `full`, `certificate`, `none` +
 Default: `full` +
 ====
 
-
 `xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesFiles`::
 A file name or list of file names of PEM-encoded certificate files to use to validate the server.
 
-
 `xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData` {ess-icon}::
 The contents of one or more PEM-encoded certificate files in multiline format. This configuration can be used for environments where the files cannot be made available.
-
 
 
 [[action-config-email-domain-allowlist]] `xpack.actions.email.domain_allowlist` {ess-icon}::
 A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed.
 +
 WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not supported in {kib} 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly.
+
+
+[float]
+[[action-settings]]
+=== Action settings
+
+Something
+
+Something else.
+
+Even more.
+
+`test.setting`::
+Some description.
++
+====
+Options: `yes`, `no`, `maybe` +
+Default: `true` +
+Type: static +
+====
+
+
+[float]
+[[preconfigured-connector-settings]]
+=== Preconfigured connector settings
+
+These settings vary depending on which type of preconfigured connector you're adding. For example:
+
+Something else.
+
+Even more.
+
+`test.setting`::
+Some description.
++
+====
+Options: `yes`, `no`, `maybe` +
+Default: `true` +
+Type: static +
+====
+
+
+[float]
+[[alert-settings]]
+=== Alerting settings
+
+Something
+
+Something else.
+
+Even more.
+
+`test.setting`::
+Some description.
++
+====
+Options: `yes`, `no`, `maybe` +
+Default: `true` +
+Type: static +
+====
 
 

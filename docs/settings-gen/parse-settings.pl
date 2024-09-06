@@ -52,114 +52,148 @@ sub parsefile {
   $asciidocoutput .= "\n".'// '."Collection: ".$collection;
   $asciidocoutput .= "\n".'// '."Product: ".$product."\n\n";
 
-  my $settings = $yaml->[0]{settings};
-  for my $setting (@$settings) {
+  my $groups = $yaml->[0]{groups};
+  for my $group (@$groups) {
 
-    # Grab the setting name, description, and other properties
-    my $setting_name = $setting->{setting};
-    my $setting_id = $setting->{id};   
-    my $setting_description = $setting->{description};
-    my $setting_note = $setting->{note};
-    my $setting_warning = $setting->{warning};
-    my $setting_tip = $setting->{tip};
-    my $setting_default = $setting->{default};
-    my $setting_type = $setting->{type};
-    my $setting_options = $setting->{options};
-    my $setting_platforms = $setting->{platforms};
-    my $setting_example = $setting->{example};
-    my $setting_state = $setting->{state};
-    my $setting_state_guidance = $setting->{state_guidance};
-
-    # check if supported on Cloud (these settings are marked with a Cloud icon)
-    my $supported_cloud = 0;
-    for my $platform (@$setting_platforms) {
-      if ($platform =~ /cloud/) {$supported_cloud = 1;}
-    }
-
-    # build the description paragraphs
-    my $setting_description_string = "";
-    for my $paragraph (@$setting_description) {
-      $setting_description_string .= $paragraph."\n".'+'."\n";
+    # Grab the group name, description, and other properties
+    my $group_id = $group->{group_id};
+    my $group_name = $group->{group};
+    my $group_description = $group->{description};
+  
+    # Add the group info to the asciidoc file contents
+    $asciidocoutput .= "\n\n";
+    $asciidocoutput .= "[float]\n[[".$group_id."]]\n=== ".$group_name."\n\n";
+  
+    # build the group preamble paragraphs
+    my $group_description_string = "";
+    for my $paragraph (@$group_description) {
+      $group_description_string .= $paragraph."\n\n";
     }
     # remove the + sign after the last paragraph of the description
-    if ($setting_description_string) {
-      $setting_description_string =~ s/\+$//;
-      chomp ($setting_description_string);
+    if ($group_description_string) {
+      $group_description_string =~ s/\+$//;
+      chomp ($group_description_string);
+    }
+    if ($group_description_string) {
+      $asciidocoutput .= $group_description_string;
+    }
+  
+  
+  
+  
+  
+  
+  
+    my $settings = $group->{settings};
+    for my $setting (@$settings) {
+  
+      # Grab the setting name, description, and other properties
+      my $setting_name = $setting->{setting};
+      my $setting_id = $setting->{id};   
+      my $setting_description = $setting->{description};
+      my $setting_note = $setting->{note};
+      my $setting_warning = $setting->{warning};
+      my $setting_tip = $setting->{tip};
+      my $setting_default = $setting->{default};
+      my $setting_type = $setting->{type};
+      my $setting_options = $setting->{options};
+      my $setting_platforms = $setting->{platforms};
+      my $setting_example = $setting->{example};
+      my $setting_state = $setting->{state};
+      my $setting_state_guidance = $setting->{state_guidance};
+  
+      # check if supported on Cloud (these settings are marked with a Cloud icon)
+      my $supported_cloud = 0;
+      for my $platform (@$setting_platforms) {
+        if ($platform =~ /cloud/) {$supported_cloud = 1;}
       }
-
-    # build the list of supported options
-    my $setting_options_string = "";
-    for my $option (@$setting_options) {
-      $setting_options_string .= '`'.$option.'`, ';
-    }
-    # remove the comma after the last option in the list
-    if ($setting_options_string) {$setting_options_string =~ s/, $//;}
-
-    # build the list of supported platforms
-    my $setting_platforms_string = "";
-    for my $platform (@$setting_platforms) {
-      $setting_platforms_string .= '`'.$platform.'`, ';
-    }
-    # remove the comma after the last platform in the list
-    if ($setting_platforms_string) {$setting_platforms_string =~ s/, $//;}
-
-    # Add the settings info to the asciidoc file contents
-    $asciidocoutput .= "\n\n";
-    if ($setting_id) {
-      $asciidocoutput .= "\n".'[['.$setting_id.']] ';
-    }
-    $asciidocoutput .= '`'.$setting_name.'`';
-    if ($supported_cloud) {
-      $asciidocoutput .= ' {ess-icon}';
-    }
-    $asciidocoutput .= '::'."\n";
-    if ($setting_state) {
-      $asciidocoutput .= "+\n**".$setting_state."** ";
-      if ($setting_state_guidance) {
-        $asciidocoutput .= $setting_state_guidance."\n+\n";
+  
+      # build the description paragraphs
+      my $setting_description_string = "";
+      for my $paragraph (@$setting_description) {
+        $setting_description_string .= $paragraph."\n".'+'."\n";
       }
-    }
-
-    if ($setting_description_string) {
-      $asciidocoutput .= $setting_description_string;
-    }
-    if ($setting_note) {
-      $asciidocoutput .= "+\nNOTE: ".$setting_note."\n";
-    }
-    if ($setting_warning) {
-      $asciidocoutput .= "+\nWARNING: ".$setting_warning."\n";
-    }
-    if ($setting_tip) {
-      $asciidocoutput .= "+\nTIP: ".$setting_tip."\n";
-    }
-
-    # If any of these are defined (setting options, setting default value, settting type...) add those inside a box.
-    # We put a " +" at the end of each line to to achieve single spacing inside the box.
-
-    if (($setting_options_string) || ($setting_default) || ($setting_type)) {
-      $asciidocoutput .= "+\n====\n";
-
-      if ($setting_options_string) {
-        $asciidocoutput .= "Options: ".$setting_options_string.' +'."\n";
+      # remove the + sign after the last paragraph of the description
+      if ($setting_description_string) {
+        $setting_description_string =~ s/\+$//;
+        chomp ($setting_description_string);
       }
-      if ($setting_default) {
-        $asciidocoutput .= "Default: ".'`'.$setting_default.'`'.' +'."\n";
+  
+      # build the list of supported options
+      my $setting_options_string = "";
+      for my $option (@$setting_options) {
+        $setting_options_string .= '`'.$option.'`, ';
       }
-      # Removing this. Instead, settings supported on Cloud will be marked with the "C" icon.
-      # if ($setting_platforms_string) {
-      #   $asciidocoutput .= "+\nPlatforms: ".$setting_platforms_string."\n";
-      # }
-      if ($setting_type) {
-        $asciidocoutput .= "Type: ".$setting_type.' +'."\n";
+      # remove the comma after the last option in the list
+      if ($setting_options_string) {$setting_options_string =~ s/, $//;}
+  
+      # build the list of supported platforms
+      my $setting_platforms_string = "";
+      for my $platform (@$setting_platforms) {
+        $setting_platforms_string .= '`'.$platform.'`, ';
       }
-      $asciidocoutput .= "====\n";
-    }
-
-    # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
-    if ($setting_example) {
-      $asciidocoutput .= "+\n**Example**\n+\ninclude::../examples/".$setting_example."[]\n";
+      # remove the comma after the last platform in the list
+      if ($setting_platforms_string) {$setting_platforms_string =~ s/, $//;}
+  
+      # Add the settings info to the asciidoc file contents
+      $asciidocoutput .= "\n";
+      if ($setting_id) {
+        $asciidocoutput .= "\n".'[['.$setting_id.']] ';
+      }
+      $asciidocoutput .= '`'.$setting_name.'`';
+      if ($supported_cloud) {
+        $asciidocoutput .= ' {ess-icon}';
+      }
+      $asciidocoutput .= '::'."\n";
+      if ($setting_state) {
+        $asciidocoutput .= "+\n**".$setting_state."** ";
+        if ($setting_state_guidance) {
+          $asciidocoutput .= $setting_state_guidance."\n+\n";
+        }
+      }
+  
+      if ($setting_description_string) {
+        $asciidocoutput .= $setting_description_string;
+      }
+      if ($setting_note) {
+        $asciidocoutput .= "+\nNOTE: ".$setting_note."\n";
+      }
+      if ($setting_warning) {
+        $asciidocoutput .= "+\nWARNING: ".$setting_warning."\n";
+      }
+      if ($setting_tip) {
+        $asciidocoutput .= "+\nTIP: ".$setting_tip."\n";
+      }
+  
+      # If any of these are defined (setting options, setting default value, settting type...) add those inside a box.
+      # We put a " +" at the end of each line to to achieve single spacing inside the box.
+  
+      if (($setting_options_string) || ($setting_default) || ($setting_type)) {
+        $asciidocoutput .= "+\n====\n";
+  
+        if ($setting_options_string) {
+          $asciidocoutput .= "Options: ".$setting_options_string.' +'."\n";
+        }
+        if ($setting_default) {
+          $asciidocoutput .= "Default: ".'`'.$setting_default.'`'.' +'."\n";
+        }
+        # Removing this. Instead, settings supported on Cloud will be marked with the "C" icon.
+        # if ($setting_platforms_string) {
+        #   $asciidocoutput .= "+\nPlatforms: ".$setting_platforms_string."\n";
+        # }
+        if ($setting_type) {
+          $asciidocoutput .= "Type: ".$setting_type.' +'."\n";
+        }
+        $asciidocoutput .= "====\n";
+      }
+  
+      # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
+      if ($setting_example) {
+        $asciidocoutput .= "+\n**Example**\n+\ninclude::../examples/".$setting_example."[]\n";
+      }
     }
   }
+
 
   # Just in case we need to grab all of the keys, this is how:
   # foreach my $key (keys %hash) { ... }

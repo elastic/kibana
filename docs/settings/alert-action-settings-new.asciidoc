@@ -17,15 +17,9 @@ Alerting and actions are enabled by default in {kib}, but require you to configu
 
 You can configure the following settings in the `kibana.yml` file.
 
-[float]
-[[general-alert-action-settings]]
-=== General settings
 
 include::../settings-gen/source/kibana-config-settings.asciidoc[]
 
-[float]
-[[action-settings]]
-=== Action settings
 
 
 
@@ -155,7 +149,7 @@ xpack.actions.run:
 Specifies the maximum number of actions that can be queued. Default: 1000000
 
 [float]
-[[preconfigured-connector-settings]]
+[[preconfigured-connector-settings-old]]
 === Preconfigured connector settings
 
 These settings vary depending on which type of preconfigured connector you're adding.
@@ -496,7 +490,7 @@ NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the h
 For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `false`.
 
 [float]
-[[alert-settings]]
+[[alert-settings-old]]
 === Alerting settings
 
 `xpack.alerting.maxEphemeralActionsPerAlert` {ess-icon}::
