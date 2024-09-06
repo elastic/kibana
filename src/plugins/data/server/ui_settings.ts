@@ -578,5 +578,21 @@ export function getUiSettings(
       schema: schema.number(),
       requiresPageReload: true,
     },
+    [UI_SETTINGS.SEARCH_EXCLUDED_DATA_TIERS]: {
+      name: i18n.translate('data.advancedSettings.searchExcludedDataTiers', {
+        defaultMessage: 'Excluded Data Tiers From Search',
+      }),
+      value: [],
+      description: i18n.translate('data.advancedSettings.searchExcludedDataTiersDesc', {
+        defaultMessage: `Specify the data tiers to exclude from search, such as data_cold and/or data_frozen. 
+          When configured, indices allocated in the selected tiers will be ignored from search requests.`,
+      }),
+      type: 'array',
+      category: ['search'],
+      schema: schema.arrayOf(
+        schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
+      ),
+      requiresPageReload: false,
+    },
   };
 }

@@ -77,6 +77,7 @@ export interface UsageStats {
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:enableCcsWarning': boolean;
   'search:includeFrozen': boolean;
+  'search:search_excluded_data_tiers': string[];
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
   'courier:customRequestPreference': string;
