@@ -285,28 +285,28 @@ describe('formatJS Runner', () => {
         Map {
           "home.tutorial.unexpectedStatusCheckStateErrorDescription" => Object {
             "defaultMessage": "Unexpected status check state {statusCheckState}",
-            "end": 663,
+            "end": 777,
             "file": "intl_prop.tsx",
             "hasValuesObject": true,
             "id": "home.tutorial.unexpectedStatusCheckStateErrorDescription",
-            "start": 499,
+            "start": 613,
             "valuesKeys": Array [
               "statusCheckState",
             ],
           },
           "message_with_no_values" => Object {
             "defaultMessage": "Pipeline batch delay",
-            "end": 904,
+            "end": 1018,
             "file": "intl_prop.tsx",
             "id": "message_with_no_values",
-            "start": 815,
+            "start": 929,
           },
           "messsage_inside_component" => Object {
             "defaultMessage": "Pipeline batch delay",
-            "end": 1125,
+            "end": 1239,
             "file": "intl_prop.tsx",
             "id": "messsage_inside_component",
-            "start": 1021,
+            "start": 1135,
           },
         }
       `);
@@ -318,28 +318,28 @@ describe('formatJS Runner', () => {
         Map {
           "home.tutorial.unexpectedStatusCheckStateErrorDescription" => Object {
             "defaultMessage": "Unexpected status check state {statusCheckState}",
-            "end": 663,
+            "end": 777,
             "file": "intl_prop.tsx",
             "hasValuesObject": true,
             "id": "home.tutorial.unexpectedStatusCheckStateErrorDescription",
-            "start": 499,
+            "start": 613,
             "valuesKeys": Array [
               "statusCheckState",
             ],
           },
           "message_with_no_values" => Object {
             "defaultMessage": "Pipeline batch delay",
-            "end": 904,
+            "end": 1018,
             "file": "intl_prop.tsx",
             "id": "message_with_no_values",
-            "start": 815,
+            "start": 929,
           },
           "messsage_inside_component" => Object {
             "defaultMessage": "Pipeline batch delay",
-            "end": 1125,
+            "end": 1239,
             "file": "intl_prop.tsx",
             "id": "messsage_inside_component",
-            "start": 1021,
+            "start": 1135,
           },
         }
       `);
