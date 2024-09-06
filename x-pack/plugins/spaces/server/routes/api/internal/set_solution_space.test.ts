@@ -10,6 +10,7 @@ import * as Rx from 'rxjs';
 import type { RouteValidatorConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initSetSolutionSpaceApi } from './set_solution_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
@@ -43,7 +44,7 @@ describe('PUT /internal/spaces/space/{id}/solution', () => {
       basePath: httpService.basePath,
     });
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
