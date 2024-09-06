@@ -16,7 +16,7 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { LogsSharedLocators } from '../common/locators';
 import type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
-import type { LogsOverviewProps } from './components/logs_overview';
+import type { SelfContainedLogsOverview } from './components/logs_overview';
 import type { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views';
 
 // Our own setup and start contract values
@@ -28,7 +28,7 @@ export interface LogsSharedClientSetupExports {
 export interface LogsSharedClientStartExports {
   logViews: LogViewsServiceStart;
   LogAIAssistant?: (props: Omit<LogAIAssistantProps, 'observabilityAIAssistant'>) => JSX.Element;
-  LogsOverview: (props: LogsOverviewProps) => JSX.Element;
+  LogsOverview: SelfContainedLogsOverview;
 }
 
 export interface LogsSharedClientSetupDeps {

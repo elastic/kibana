@@ -6,7 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
+import moment from 'moment';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { CONTAINER_ID, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -17,6 +19,63 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 export function ServiceLogs() {
+  const {
+    services: {
+      logsShared: { LogsOverview },
+    },
+  } = useKibana();
+
+  const isLogsOverviewEnabled = LogsOverview.useIsEnabled();
+
+  if (isLogsOverviewEnabled) {
+    return <ServiceLogsOverview />;
+  } else {
+    return <ClassicServiceLogsStream />;
+  }
+}
+
+export function ClassicServiceLogsStream() {
+  const { serviceName } = useApmServiceContext();
+
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useAnyOfApmParams('/services/{serviceName}/logs');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { data } = useFetcher(
+    (callApmApi) => {
+      if (start && end) {
+        return callApmApi('GET /internal/apm/services/{serviceName}/infrastructure_attributes', {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+            },
+          },
+        });
+      }
+    },
+    [environment, kuery, serviceName, start, end]
+  );
+
+  return (
+    <LogStream
+      logView={{ type: 'log-view-reference', logViewId: 'default' }}
+      columns={[{ type: 'timestamp' }, { type: 'message' }]}
+      height={'60vh'}
+      startTimestamp={moment(start).valueOf()}
+      endTimestamp={moment(end).valueOf()}
+      query={getInfrastructureKQLFilter({ data, serviceName, environment })}
+      showFlyoutAction
+    />
+  );
+}
+
+export function ServiceLogsOverview() {
   const {
     services: { logsShared },
   } = useKibana();
@@ -53,20 +112,7 @@ export function ServiceLogs() {
     [environment, kuery, serviceName, start, end]
   );
 
-  // TODO: filter by service name and environment
   return <logsShared.LogsOverview documentFilters={logFilters} timeRange={timeRange} />;
-
-  // return (
-  //   <LogStream
-  //     logView={{ type: 'log-view-reference', logViewId: 'default' }}
-  //     columns={[{ type: 'timestamp' }, { type: 'message' }]}
-  //     height={'60vh'}
-  //     startTimestamp={moment(start).valueOf()}
-  //     endTimestamp={moment(end).valueOf()}
-  //     query={getInfrastructureKQLFilter({ data, serviceName, environment })}
-  //     showFlyoutAction
-  //   />
-  // );
 }
 
 export function getInfrastructureKQLFilter({

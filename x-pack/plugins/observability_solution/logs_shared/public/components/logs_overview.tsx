@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID } from '@kbn/management-settings-ids';
 import type {
-  LogsOverviewDependencies,
   LogsOverviewProps as FullLogsOverviewProps,
+  LogsOverviewDependencies,
 } from '@kbn/observability-logs-overview';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
 
 const LazyLogsOverview = dynamic(() =>
   import('@kbn/observability-logs-overview').then((mod) => ({ default: mod.LogsOverview }))
@@ -18,7 +20,23 @@ const LazyLogsOverview = dynamic(() =>
 
 export type LogsOverviewProps = Omit<FullLogsOverviewProps, 'dependencies'>;
 
-export const createLogsOverview =
-  (dependencies: LogsOverviewDependencies) => (props: LogsOverviewProps) => {
+export const createLogsOverview = (dependencies: LogsOverviewDependencies) => {
+  const SelfContainedLogsOverview = (props: LogsOverviewProps) => {
     return <LazyLogsOverview dependencies={dependencies} {...props} />;
   };
+
+  const isEnabled$ = dependencies.uiSettings.client.get$(
+    OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID,
+    defaultIsEnabled
+  );
+
+  SelfContainedLogsOverview.useIsEnabled = (): boolean => {
+    return useObservable<boolean>(isEnabled$, defaultIsEnabled);
+  };
+
+  return SelfContainedLogsOverview;
+};
+
+const defaultIsEnabled = false;
+
+export type SelfContainedLogsOverview = ReturnType<typeof createLogsOverview>;
