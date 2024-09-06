@@ -28,9 +28,10 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     lifecycle,
     next_generation_managed_by: nextGenerationManagedBy,
   } = dataStreamFromEs;
-  const meteringStorageSize = meteringStorageSizeBytes
-    ? new ByteSizeValue(meteringStorageSizeBytes).toString()
-    : undefined;
+  const meteringStorageSize =
+    meteringStorageSizeBytes !== undefined
+      ? new ByteSizeValue(meteringStorageSizeBytes).toString()
+      : undefined;
 
   return {
     name,
