@@ -317,6 +317,7 @@ export class TaskManagerPlugin
       });
 
       const taskPartitioner = new TaskPartitioner({
+        logger: this.logger,
         podName: this.taskManagerId!,
         kibanaDiscoveryService: this.kibanaDiscoveryService,
         kibanasPerPartition: this.config.kibanas_per_partition,
