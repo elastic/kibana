@@ -30,6 +30,7 @@ import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RunOpts, SignalSource } from '../types';
 import { logEsqlRequest } from '../utils/logged_requests';
+import * as i18n from './translations';
 
 import {
   addToSearchAfterReturn,
@@ -105,7 +106,7 @@ export const esqlExecutor = async ({
         if (isLoggedRequestsEnabled) {
           loggedRequests.push({
             request: logEsqlRequest(esqlRequest),
-            description: 'ES|QL request to find all matches',
+            description: i18n.ESQL_SEARCH_REQUEST_DESCRIPTION,
           });
         }
 

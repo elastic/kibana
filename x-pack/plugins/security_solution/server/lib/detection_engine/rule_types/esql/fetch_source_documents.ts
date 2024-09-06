@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logQueryRequest } from '../utils/logged_requests';
+import * as i18n from './translations';
 
 interface FetchSourceDocumentsArgs {
   isRuleAggregating: boolean;
@@ -61,7 +62,7 @@ export const fetchSourceDocuments = async ({
   if (loggedRequests) {
     loggedRequests.push({
       request: logQueryRequest(searchBody, { index, ignoreUnavailable }),
-      description: `Retrieve source documents when ES|QL query is not aggregable`,
+      description: i18n.FIND_SOURCE_DOCUMENTS_REQUEST_DESCRIPTION,
     });
   }
 
