@@ -33,7 +33,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const pipelineRequestBody = ingestPipelines.fixtures.createPipelineBody();
         const { body } = await supertestWithAdminScope
           .post(ingestPipelines.fixtures.apiBasePath)
-          .send(pipelineRequestBody);
+          .send(pipelineRequestBody)
           .expect(200);
 
         expect(body).to.eql({
