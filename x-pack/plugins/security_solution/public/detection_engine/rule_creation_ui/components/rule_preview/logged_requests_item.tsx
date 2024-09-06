@@ -13,7 +13,9 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { EuiSpacer, EuiCodeBlock, useEuiPaddingSize } from '@elastic/eui';
+import { css } from '@emotion/css';
+
+import { EuiSpacer, EuiCodeBlock, useEuiPaddingSize, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
@@ -28,6 +30,7 @@ const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs>> = ({
   const paddingLeft = useEuiPaddingSize('l');
   return (
     <OptimizedAccordion
+      data-test-subj="preview-logged-requests-item-accordion"
       buttonContent={
         <>
           {startedAt ? (
@@ -43,23 +46,32 @@ const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs>> = ({
         </>
       }
       id={`ruleExecution-${startedAt}`}
-      css={`
+      css={css`
         padding-left: ${paddingLeft};
       `}
     >
       {(requests ?? []).map((request, key) => (
-        <div
-          css={`
+        <EuiFlexItem
+          key={key}
+          css={css`
             padding-left: ${paddingLeft};
           `}
         >
           <EuiSpacer size="l" />
-          {request?.description ?? null} {request?.duration ? `[${request.duration}ms]` : null}
+          <span data-test-subj="preview-logged-request-description">
+            {request?.description ?? null} {request?.duration ? `[${request.duration}ms]` : null}
+          </span>
           <EuiSpacer size="s" />
-          <EuiCodeBlock key={key} language="json" isCopyable overflowHeight={300} isVirtualized>
+          <EuiCodeBlock
+            language="json"
+            isCopyable
+            overflowHeight={300}
+            isVirtualized
+            data-test-subj="preview-logged-request-code-block"
+          >
             {request.request}
           </EuiCodeBlock>
-        </div>
+        </EuiFlexItem>
       ))}
     </OptimizedAccordion>
   );

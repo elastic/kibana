@@ -18,8 +18,8 @@ const LoggedRequestsComponent: FC<{ logs: RulePreviewLogs[] }> = ({ logs }) => {
     () => (
       <>
         <EuiSpacer size="m" />
-        {logs.map((log, key) => (
-          <React.Fragment key={key}>
+        {logs.map((log) => (
+          <React.Fragment key={log.startedAt}>
             <LoggedRequestsItem {...log} />
             <EuiSpacer size="s" />
           </React.Fragment>
@@ -36,7 +36,8 @@ const LoggedRequestsComponent: FC<{ logs: RulePreviewLogs[] }> = ({ logs }) => {
   return (
     <>
       <OptimizedAccordion
-        id={'previewLoggedRequestsAccordion'}
+        id="preview-logged-requests-accordion"
+        data-test-subj="preview-logged-requests-accordion"
         buttonContent={i18n.LOGGED_REQUESTS_ACCORDION_BUTTON}
       >
         {AccordionContent}
