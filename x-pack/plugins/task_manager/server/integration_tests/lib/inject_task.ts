@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import murmurhash from 'murmurhash';
 import { type ElasticsearchClient } from '@kbn/core/server';
 import { type ConcreteTaskInstance } from '../../task';
+import { MAX_PARTITIONS } from '../../lib/task_partitioner';
 
 export async function injectTask(
   esClient: ElasticsearchClient,
@@ -26,6 +28,7 @@ export async function injectTask(
         params: JSON.stringify(task.params),
         runAt: task.runAt.toISOString(),
         scheduledAt: task.scheduledAt.toISOString(),
+        partition: murmurhash.v3(id) % MAX_PARTITIONS,
       },
     },
   });

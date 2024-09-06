@@ -107,6 +107,7 @@ const taskPartitioner = new TaskPartitioner({
   podName: 'test',
   kibanaDiscoveryService: discoveryServiceMock,
   kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+  logger: taskManagerLogger,
 });
 
 // needs more tests in the similar to the `strategy_default.test.ts` test suite
@@ -1686,6 +1687,172 @@ describe('TaskClaiming', () => {
                           Object {
                             "exists": Object {
                               "field": "task.partition",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            "must": Array [
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "term": Object {
+                        "task.enabled": true,
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "terms": Object {
+                        "task.taskType": Array [
+                          "foo",
+                          "bar",
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "should": Array [
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "task.status": "idle",
+                            },
+                          },
+                          Object {
+                            "range": Object {
+                              "task.runAt": Object {
+                                "lte": "now",
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "bool": Object {
+                              "should": Array [
+                                Object {
+                                  "term": Object {
+                                    "task.status": "running",
+                                  },
+                                },
+                                Object {
+                                  "term": Object {
+                                    "task.status": "claiming",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "range": Object {
+                              "task.retryAt": Object {
+                                "lte": "now",
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "task.status": "unrecognized",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        }
+      `);
+    });
+
+    test(`it shouldn't filter for partitions when the node has no assigned partitions`, async () => {
+      jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
+      const taskManagerId = uuidv4();
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          createTaskRunner: jest.fn(),
+        },
+        bar: {
+          title: 'bar',
+          createTaskRunner: jest.fn(),
+        },
+      });
+      const claimedResults = await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+          definitions,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+      const [
+        {
+          args: {
+            search: [{ query }],
+          },
+        },
+      ] = claimedResults;
+
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Background task node "test" has no assigned partitions, claiming against all partitions'
+      );
+      expect(query).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "must": Object {
+                          "range": Object {
+                            "task.retryAt": Object {
+                              "gt": "now",
+                            },
+                          },
+                        },
+                        "should": Array [
+                          Object {
+                            "term": Object {
+                              "task.status": "running",
+                            },
+                          },
+                          Object {
+                            "term": Object {
+                              "task.status": "claiming",
                             },
                           },
                         ],
