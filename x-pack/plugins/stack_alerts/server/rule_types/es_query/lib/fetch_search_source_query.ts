@@ -24,9 +24,11 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
+import { checkForShardFailures } from '../util';
 
 export interface FetchSearchSourceQueryOpts {
   ruleId: string;
@@ -36,9 +38,10 @@ export interface FetchSearchSourceQueryOpts {
   spacePrefix: string;
   services: {
     logger: Logger;
-    searchSourceClient: ISearchStartSearchSource;
+    getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
     share: SharePluginStart;
-    dataViews: DataViewsContract;
+    getDataViews: () => Promise<DataViewsContract>;
+    ruleResultService?: PublicRuleResultService;
   };
   dateStart: string;
   dateEnd: string;
@@ -54,7 +57,8 @@ export async function fetchSearchSourceQuery({
   dateStart,
   dateEnd,
 }: FetchSearchSourceQueryOpts) {
-  const { logger, searchSourceClient } = services;
+  const { logger, getSearchSourceClient, ruleResultService } = services;
+  const searchSourceClient = await getSearchSourceClient();
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
 
@@ -87,10 +91,18 @@ export async function fetchSearchSourceQuery({
 
   const searchResult = await searchSource.fetch();
 
+  // result against CCS indices will return success response with errors nested within
+  // the _shards or _clusters field; look for these errors and bubble them up
+  const anyShardFailures = checkForShardFailures(searchResult);
+  if (anyShardFailures && ruleResultService) {
+    ruleResultService.addLastRunWarning(anyShardFailures);
+    ruleResultService.setLastRunOutcomeMessage(anyShardFailures);
+  }
+
   const link = await generateLink(
     initialSearchSource,
     services.share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!,
-    services.dataViews,
+    services.getDataViews,
     index,
     dateStart,
     dateEnd,
@@ -106,6 +118,7 @@ export async function fetchSearchSourceQuery({
       isGroupAgg,
       esResult: searchResult,
       sourceFieldsParams: params.sourceFields,
+      termField: params.termField,
     }),
     index: [index.name],
     query: searchRequestBody,
@@ -195,13 +208,14 @@ export async function updateSearchSource(
 export async function generateLink(
   searchSource: ISearchSource,
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
-  dataViews: DataViewsContract,
+  getDataViews: () => Promise<DataViewsContract>,
   dataViewToUpdate: DataView,
   dateStart: string,
   dateEnd: string,
   spacePrefix: string,
   filterToExcludeHitsFromPreviousRun: Filter | null
 ) {
+  const dataViews = await getDataViews();
   const prevFilters = [...((searchSource.getField('filter') as Filter[]) || [])];
 
   if (filterToExcludeHitsFromPreviousRun) {

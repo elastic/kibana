@@ -29,6 +29,7 @@ export enum AppIds {
   ROLES = 'roles',
   API_KEYS = 'api_keys',
   DATA_QUALITY = 'data_quality',
+  SPACES = 'spaces',
 }
 
 // Create new type that is a union of all the appId values

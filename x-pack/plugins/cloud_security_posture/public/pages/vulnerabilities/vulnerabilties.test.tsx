@@ -8,13 +8,12 @@ import React from 'react';
 import Chance from 'chance';
 import { Vulnerabilities } from './vulnerabilities';
 import {
-  CSP_LATEST_FINDINGS_DATA_VIEW,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { useDataView } from '../../common/api/use_data_view';
-import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
@@ -29,9 +28,9 @@ import { useLicenseManagementLocatorApi } from '../../common/api/use_license_man
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 
 jest.mock('../../common/api/use_data_view');
-jest.mock('../../common/api/use_setup_status_api');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 jest.mock('../../common/api/use_license_management_locator_api');
-jest.mock('../../common/hooks/use_subscription_status');
+jest.mock('../../common/hooks/use_is_subscription_status_valid');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_csp_integration_link');
 
@@ -39,13 +38,6 @@ const chance = new Chance();
 
 beforeEach(() => {
   jest.restoreAllMocks();
-
-  (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
-    createReactQueryResponse({
-      status: 'success',
-      data: true,
-    })
-  );
 
   (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
     createReactQueryResponse({
@@ -58,7 +50,7 @@ beforeEach(() => {
     status: 'success',
     data: createStubDataView({
       spec: {
-        id: CSP_LATEST_FINDINGS_DATA_VIEW,
+        id: CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
       },
     }),
   });
@@ -79,7 +71,9 @@ describe('<Vulnerabilities />', () => {
         status: 'success',
         data: {
           [VULN_MGMT_POLICY_TEMPLATE]: { status: 'not-deployed' },
-          indicesDetails: [{ index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' }],
+          indicesDetails: [
+            { index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, status: 'empty' },
+          ],
         },
       })
     );
@@ -105,7 +99,9 @@ describe('<Vulnerabilities />', () => {
         status: 'success',
         data: {
           [VULN_MGMT_POLICY_TEMPLATE]: { status: 'indexing' },
-          indicesDetails: [{ index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' }],
+          indicesDetails: [
+            { index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, status: 'empty' },
+          ],
         },
       })
     );
@@ -129,7 +125,9 @@ describe('<Vulnerabilities />', () => {
         status: 'success',
         data: {
           [VULN_MGMT_POLICY_TEMPLATE]: { status: 'index-timeout' },
-          indicesDetails: [{ index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' }],
+          indicesDetails: [
+            { index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, status: 'empty' },
+          ],
         },
       })
     );
@@ -152,7 +150,9 @@ describe('<Vulnerabilities />', () => {
         status: 'success',
         data: {
           [VULN_MGMT_POLICY_TEMPLATE]: { status: 'unprivileged' },
-          indicesDetails: [{ index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' }],
+          indicesDetails: [
+            { index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, status: 'empty' },
+          ],
         },
       })
     );
@@ -185,7 +185,7 @@ describe('<Vulnerabilities />', () => {
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-            { index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' },
+            { index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, status: 'empty' },
           ],
         },
       })

@@ -24,7 +24,7 @@ export const CheckBoxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pr
 
   return (
     <EuiFormRow
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

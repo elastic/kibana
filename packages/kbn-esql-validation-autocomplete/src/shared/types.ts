@@ -20,6 +20,7 @@ export interface ESQLCallbacks {
       hidden: boolean;
       title?: string;
       dataStreams?: Array<{ name: string; title?: string }>;
+      type?: string;
     }
   >;
   getFieldsFor?: CallbackFn<{ query: string }, ESQLRealField>;
@@ -27,6 +28,7 @@ export interface ESQLCallbacks {
     {},
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }
   >;
+  getPreferences?: () => Promise<{ histogramBarTarget: number }>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

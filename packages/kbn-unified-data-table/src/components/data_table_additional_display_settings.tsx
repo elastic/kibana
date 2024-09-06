@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFormRow, EuiHorizontalRule, EuiRange } from '@elastic/eui';
+import { EuiFormRow, EuiHorizontalRule, EuiRange, EuiRangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { RowHeightSettings, RowHeightSettingsProps } from './row_height_settings';
@@ -63,9 +63,9 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     [onChangeSampleSize]
   );
 
-  const onChangeActiveSampleSize = useCallback(
+  const onChangeActiveSampleSize = useCallback<NonNullable<EuiRangeProps['onChange']>>(
     (event) => {
-      if (!event.target.value) {
+      if (!('value' in event.target) || !event.target.value) {
         setActiveSampleSize('');
         return;
       }
@@ -124,6 +124,17 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   }
 
   if (onChangeSampleSize) {
+    let step = minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1;
+
+    if (
+      step > 1 &&
+      ((activeSampleSize && !checkIfValueIsMultipleOfStep(activeSampleSize, step)) ||
+        !checkIfValueIsMultipleOfStep(minRangeSampleSize, step) ||
+        !checkIfValueIsMultipleOfStep(maxAllowedSampleSize, step))
+    ) {
+      step = 1; // Eui is very strict about step, so we need to switch to 1 if the value is not a multiple of the step
+    }
+
     settings.push(
       <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
         <EuiRange
@@ -131,7 +142,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
           fullWidth
           min={minRangeSampleSize}
           max={maxAllowedSampleSize}
-          step={minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1}
+          step={step}
           showInput
           value={activeSampleSize}
           onChange={onChangeActiveSampleSize}
@@ -152,3 +163,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     </>
   );
 };
+
+function checkIfValueIsMultipleOfStep(value: number, step: number) {
+  return value % step === 0;
+}

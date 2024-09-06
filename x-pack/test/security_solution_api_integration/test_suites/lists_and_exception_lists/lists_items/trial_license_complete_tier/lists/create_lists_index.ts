@@ -9,15 +9,22 @@ import expect from '@kbn/expect';
 
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
+import TestAgent from 'supertest/lib/agent';
 import { deleteListsIndex } from '../../../utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
-  const supertest = getService('supertest');
   const log = getService('log');
+  const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless create_list_index_route', () => {
+  describe('@ess @serverless @serverlessQA create_list_index_route', () => {
+    let supertest: TestAgent;
+
+    before(async () => {
+      supertest = await utils.createSuperTest();
+    });
+
     beforeEach(async () => {
       await deleteListsIndex(supertest, log);
     });

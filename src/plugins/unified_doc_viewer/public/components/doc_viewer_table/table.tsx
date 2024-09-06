@@ -13,7 +13,6 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldSearch,
   EuiSpacer,
   EuiSelectableMessage,
   EuiDataGrid,
@@ -25,10 +24,10 @@ import {
   useResizeObserver,
   EuiSwitch,
   useEuiTheme,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getFieldIconType } from '@kbn/field-utils/src/utils/get_field_icon_type';
 import {
@@ -39,16 +38,9 @@ import {
   isNestedFieldParent,
   usePager,
 } from '@kbn/discover-utils';
-import {
-  FieldDescription,
-  fieldNameWildcardMatcher,
-  getFieldSearchMatchingHighlight,
-  getTextBasedColumnIconType,
-} from '@kbn/field-utils';
+import { getTextBasedColumnIconType } from '@kbn/field-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { FieldName } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import { TableFieldValue } from './table_cell_value';
 import {
   type TableRow,
   getFieldCellActions,
@@ -60,12 +52,16 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
+import { TableFilters, TableFiltersProps, useTableFilters } from './table_filters';
+import { TableCell } from './table_cell';
+import { getPinColumnControl } from './get_pin_control';
 
 export type FieldRecord = TableRow;
 
 interface ItemsEntry {
   pinnedItems: FieldRecord[];
   restItems: FieldRecord[];
+  allFields: TableFiltersProps['allFields'];
 }
 
 const MIN_NAME_COLUMN_WIDTH = 150;
@@ -74,7 +70,6 @@ const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500];
 const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
-const SEARCH_TEXT = 'discover:searchText';
 const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 
 const GRID_COLUMN_FIELD_NAME = 'name';
@@ -126,14 +121,6 @@ const updatePageSize = (newPageSize: number, storage: Storage) => {
   storage.set(PAGE_SIZE, newPageSize);
 };
 
-const getSearchText = (storage: Storage) => {
-  return storage.get(SEARCH_TEXT) || '';
-};
-const updateSearchText = debounce(
-  (newSearchText: string, storage: Storage) => storage.set(SEARCH_TEXT, newSearchText),
-  500
-);
-
 export const DocViewerTable = ({
   columns,
   columnsMeta,
@@ -147,11 +134,10 @@ export const DocViewerTable = ({
 }: DocViewRenderProps) => {
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats, storage, uiSettings, fieldsMetadata } = getUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
 
-  const [searchText, setSearchText] = useState(getSearchText(storage));
   const [pinnedFields, setPinnedFields] = useState<string[]>(
     getPinnedFields(currentDataViewId, storage)
   );
@@ -164,10 +150,6 @@ export const DocViewerTable = ({
     () => getShouldShowFieldHandler(Object.keys(flattened), dataView, showMultiFields),
     [flattened, dataView, showMultiFields]
   );
-
-  const searchPlaceholder = i18n.translate('unifiedDocViewer.docView.table.searchPlaceHolder', {
-    defaultMessage: 'Search field names',
-  });
 
   const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
 
@@ -196,14 +178,7 @@ export const DocViewerTable = ({
     [currentDataViewId, pinnedFields, storage]
   );
 
-  const onSearch = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newSearchText = event.currentTarget.value;
-      updateSearchText(newSearchText, storage);
-      setSearchText(newSearchText);
-    },
-    [storage]
-  );
+  const { onFilterField, ...tableFiltersProps } = useTableFilters(storage);
 
   const fieldToItem = useCallback(
     (field: string, isPinned: boolean) => {
@@ -261,49 +236,70 @@ export const DocViewerTable = ({
     ]
   );
 
-  const { pinnedItems, restItems } = Object.keys(flattened)
-    .sort((fieldA, fieldB) => {
-      const mappingA = mapping(fieldA);
-      const mappingB = mapping(fieldB);
-      const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
-      const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
-      return nameA.localeCompare(nameB);
-    })
-    .reduce<ItemsEntry>(
-      (acc, curFieldName) => {
-        if (!shouldShowFieldHandler(curFieldName)) {
-          return acc;
-        }
-        const shouldHideNullValue =
-          areNullValuesHidden && flattened[curFieldName] == null && isEsqlMode;
-        if (shouldHideNullValue) {
-          return acc;
-        }
-        if (pinnedFields.includes(curFieldName)) {
-          acc.pinnedItems.push(fieldToItem(curFieldName, true));
-        } else {
-          const fieldMapping = mapping(curFieldName);
-          if (
-            !searchText?.trim() ||
-            fieldNameWildcardMatcher(
-              { name: curFieldName, displayName: fieldMapping?.displayName },
-              searchText
-            )
-          ) {
-            // filter only unpinned fields
-            acc.restItems.push(fieldToItem(curFieldName, false));
-          }
-        }
+  const { pinnedItems, restItems, allFields } = useMemo(
+    () =>
+      Object.keys(flattened)
+        .sort((fieldA, fieldB) => {
+          const mappingA = mapping(fieldA);
+          const mappingB = mapping(fieldB);
+          const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
+          const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
+          return nameA.localeCompare(nameB);
+        })
+        .reduce<ItemsEntry>(
+          (acc, curFieldName) => {
+            if (!shouldShowFieldHandler(curFieldName)) {
+              return acc;
+            }
+            const shouldHideNullValue =
+              areNullValuesHidden && flattened[curFieldName] == null && isEsqlMode;
+            if (shouldHideNullValue) {
+              return acc;
+            }
 
-        return acc;
-      },
-      {
-        pinnedItems: [],
-        restItems: [],
-      }
-    );
+            const isPinned = pinnedFields.includes(curFieldName);
+            const row = fieldToItem(curFieldName, isPinned);
+
+            if (isPinned) {
+              acc.pinnedItems.push(row);
+            } else {
+              if (onFilterField(curFieldName, row.field.displayName, row.field.fieldType)) {
+                // filter only unpinned fields
+                acc.restItems.push(row);
+              }
+            }
+
+            acc.allFields.push({
+              name: curFieldName,
+              displayName: row.field.displayName,
+              type: row.field.fieldType,
+            });
+
+            return acc;
+          },
+          {
+            pinnedItems: [],
+            restItems: [],
+            allFields: [],
+          }
+        ),
+    [
+      areNullValuesHidden,
+      fieldToItem,
+      flattened,
+      isEsqlMode,
+      mapping,
+      onFilterField,
+      pinnedFields,
+      shouldShowFieldHandler,
+    ]
+  );
 
   const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
+
+  const leadingControlColumns = useMemo(() => {
+    return [getPinColumnControl({ rows })];
+  }, [rows]);
 
   const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
     initialPageSize: getPageSize(storage),
@@ -372,7 +368,7 @@ export const DocViewerTable = ({
   );
 
   const onHideNullValuesChange = useCallback(
-    (e) => {
+    (e: EuiSwitchEvent) => {
       setAreNullValuesHidden(e.target.checked);
     },
     [setAreNullValuesHidden]
@@ -380,60 +376,17 @@ export const DocViewerTable = ({
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useCallback(
     ({ rowIndex, columnId, isDetails }) => {
-      const row = rows[rowIndex];
-
-      if (!row) {
-        return null;
-      }
-
-      const {
-        action: { flattenedField },
-        field: { field, fieldMapping, fieldType, scripted, pinned },
-        value: { formattedValue, ignored },
-      } = row;
-
-      if (columnId === 'name') {
-        return (
-          <div>
-            <FieldName
-              fieldName={field}
-              fieldType={fieldType}
-              fieldMapping={fieldMapping}
-              scripted={scripted}
-              highlight={getFieldSearchMatchingHighlight(
-                fieldMapping?.displayName ?? field,
-                searchText
-              )}
-              isPinned={pinned}
-            />
-
-            {isDetails && !!fieldMapping ? (
-              <div>
-                <FieldDescription
-                  fieldsMetadataService={fieldsMetadata}
-                  field={fieldMapping}
-                  truncate={false}
-                />
-              </div>
-            ) : null}
-          </div>
-        );
-      }
-
-      if (columnId === 'value') {
-        return (
-          <TableFieldValue
-            field={field}
-            formattedValue={formattedValue}
-            rawValue={flattenedField}
-            ignoreReason={ignored}
-          />
-        );
-      }
-
-      return null;
+      return (
+        <TableCell
+          searchTerm={tableFiltersProps.searchTerm}
+          rows={rows}
+          rowIndex={rowIndex}
+          columnId={columnId}
+          isDetails={isDetails}
+        />
+      );
     },
-    [rows, searchText, fieldsMetadata]
+    [rows, tableFiltersProps.searchTerm]
   );
 
   const renderCellPopover = useCallback(
@@ -489,14 +442,7 @@ export const DocViewerTable = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiFieldSearch
-          aria-label={searchPlaceholder}
-          fullWidth
-          onChange={onSearch}
-          placeholder={searchPlaceholder}
-          value={searchText}
-          data-test-subj="unifiedDocViewerFieldsSearchInput"
-        />
+        <TableFilters {...tableFiltersProps} allFields={allFields} />
       </EuiFlexItem>
 
       {rows.length === 0 ? (
@@ -540,6 +486,7 @@ export const DocViewerTable = ({
             `}
           >
             <EuiDataGrid
+              key={`fields-table-${hit.id}`}
               {...GRID_PROPS}
               aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
                 defaultMessage: 'Field values',
@@ -551,6 +498,7 @@ export const DocViewerTable = ({
               renderCellValue={renderCellValue}
               renderCellPopover={renderCellPopover}
               pagination={pagination}
+              leadingControlColumns={leadingControlColumns}
             />
           </EuiFlexItem>
         </>

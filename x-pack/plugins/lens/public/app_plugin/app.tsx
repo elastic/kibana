@@ -399,13 +399,6 @@ export function App({
     [dataViews, uiActions, http, notifications, uiSettings, initialContext, dispatch]
   );
 
-  const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel: _onCancel }) => {
-    setIsSaveModalVisible(true);
-    setShouldCloseAndSaveTextBasedQuery(true);
-    saveAndExit.current = () => {
-      onSave();
-    };
-  }, []);
 
   const shortUrlService = useShortUrlService(locator, share);
 
@@ -467,7 +460,6 @@ export function App({
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
           indexPatternService={indexPatternService}
-          onTextBasedSavedAndExit={onTextBasedSavedAndExit}
           getUserMessages={getUserMessages}
           shortUrlService={shortUrlService}
           startServices={coreStart}

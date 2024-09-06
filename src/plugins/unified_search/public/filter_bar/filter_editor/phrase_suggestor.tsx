@@ -62,11 +62,12 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
     const isVersionFieldType = field?.esTypes?.includes('version');
 
     return (
+      // suggestions don't work for version fields
       shouldSuggestValues &&
       field &&
       field.aggregatable &&
       field.type === 'string' &&
-      !isVersionFieldType // suggestions don't work for version fields
+      !isVersionFieldType
     );
   }
 

@@ -16,7 +16,7 @@ import type { TimelinesTableProps } from '../timelines_table';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { OpenTimelineModalBody } from './open_timeline_modal_body';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
-import { TimelineType, TimelineStatus } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../../common/api/timeline';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../../../common/lib/kibana');
@@ -55,8 +55,8 @@ describe('OpenTimelineModal', () => {
     selectedItems: [],
     sortDirection: DEFAULT_SORT_DIRECTION,
     sortField: DEFAULT_SORT_FIELD,
-    timelineType: TimelineType.default,
-    timelineStatus: TimelineStatus.active,
+    timelineType: TimelineTypeEnum.default,
+    timelineStatus: TimelineStatusEnum.active,
     templateTimelineFilter: [<div key={0} />],
     title,
     totalSearchResultsCount: mockSearchResults.length,

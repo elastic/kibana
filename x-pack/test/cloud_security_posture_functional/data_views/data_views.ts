@@ -43,7 +43,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     'cspSecurity',
   ]);
 
-  describe('Data Views', async function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/189854
+  describe.skip('Data Views', async function () {
     this.tags(['cloud_security_posture_data_views', 'cloud_security_posture_spaces']);
     let cspSecurity = pageObjects.cspSecurity;
     let findings: typeof pageObjects.findings;

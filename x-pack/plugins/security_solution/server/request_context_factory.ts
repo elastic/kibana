@@ -9,6 +9,7 @@ import { memoize } from 'lodash';
 
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
+import type { BuildFlavor } from '@kbn/config';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
@@ -47,6 +48,7 @@ interface ConstructorOptions {
   ruleMonitoringService: IRuleMonitoringService;
   kibanaVersion: string;
   kibanaBranch: string;
+  buildFlavor: BuildFlavor;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -79,6 +81,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       config,
       kibanaVersion: options.kibanaVersion,
       kibanaBranch: options.kibanaBranch,
+      buildFlavor: options.buildFlavor,
     });
 
     const getAuditLogger = () => security?.audit.asScoped(request);

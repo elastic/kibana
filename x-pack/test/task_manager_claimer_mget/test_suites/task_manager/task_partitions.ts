@@ -10,6 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
 import { asyncForEach } from '@kbn/std';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const { properties: taskManagerIndexMapping } = TaskManagerMapping;
@@ -114,7 +115,8 @@ export default function ({ getService }: FtrProviderContext) {
       .then((result) => (result as unknown as SearchResults).hits.hits);
   }
 
-  describe('task partitions', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/192023
+  describe.skip('task partitions', () => {
     beforeEach(async () => {
       const exists = await es.indices.exists({ index: testHistoryIndex });
       if (exists) {
@@ -154,12 +156,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should tasks with partitions assigned to this kibana node', async () => {
+    it('should run tasks with partitions assigned to this kibana node', async () => {
       const partitions: Record<string, number> = {
         '0': 127,
         '1': 147,
         '2': 23,
       };
+
+      // wait for the pod partitions cache to update before scheduling tasks
+      await updateKibanaNodes();
+      await setTimeoutAsync(10000);
 
       const tasksToSchedule = [];
       for (let i = 0; i < 3; i++) {

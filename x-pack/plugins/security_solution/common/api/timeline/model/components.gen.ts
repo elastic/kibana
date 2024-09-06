@@ -14,8 +14,7 @@
  *   version: not applicable
  */
 
-import type { ZodTypeDef } from 'zod';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 /**
  * The type of timeline to create. Valid values are `default` and `template`.
@@ -32,6 +31,14 @@ export type DataProviderType = z.infer<typeof DataProviderType>;
 export const DataProviderType = z.enum(['default', 'template']);
 export type DataProviderTypeEnum = typeof DataProviderType.enum;
 export const DataProviderTypeEnum = DataProviderType.enum;
+
+/**
+ * The type of the timeline template.
+ */
+export type TemplateTimelineType = z.infer<typeof TemplateTimelineType>;
+export const TemplateTimelineType = z.enum(['elastic', 'custom']);
+export type TemplateTimelineTypeEnum = typeof TemplateTimelineType.enum;
+export const TemplateTimelineTypeEnum = TemplateTimelineType.enum;
 
 export type ColumnHeaderResult = z.infer<typeof ColumnHeaderResult>;
 export const ColumnHeaderResult = z.object({
@@ -50,46 +57,33 @@ export const ColumnHeaderResult = z.object({
 
 export type QueryMatchResult = z.infer<typeof QueryMatchResult>;
 export const QueryMatchResult = z.object({
-  field: z.string().optional(),
-  displayField: z.string().optional(),
-  value: z.string().optional(),
-  displayValue: z.string().optional(),
-  operator: z.string().optional(),
+  field: z.string().nullable().optional(),
+  displayField: z.string().nullable().optional(),
+  value: z.string().nullable().optional(),
+  displayValue: z.string().nullable().optional(),
+  operator: z.string().nullable().optional(),
 });
 
-export interface DataProviderResult {
-  id?: string;
-  name?: string;
-  enabled?: boolean;
-  excluded?: boolean;
-  kqlQuery?: string;
-  queryMatch?: QueryMatchResult;
-  and?: DataProviderResult[];
-  type?: DataProviderType;
-}
-export interface DataProviderResultInput {
-  id?: string;
-  name?: string;
-  enabled?: boolean;
-  excluded?: boolean;
-  kqlQuery?: string;
-  queryMatch?: QueryMatchResult;
-  and?: DataProviderResultInput[];
-  type?: DataProviderType;
-}
-export const DataProviderResult: z.ZodType<
-  DataProviderResult,
-  ZodTypeDef,
-  DataProviderResultInput
-> = z.object({
-  id: z.string().optional(),
-  name: z.string().optional(),
-  enabled: z.boolean().optional(),
-  excluded: z.boolean().optional(),
-  kqlQuery: z.string().optional(),
+export type DataProviderQueryMatch = z.infer<typeof DataProviderQueryMatch>;
+export const DataProviderQueryMatch = z.object({
+  enabled: z.boolean().nullable().optional(),
+  excluded: z.boolean().nullable().optional(),
+  id: z.string().nullable().optional(),
+  kqlQuery: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
   queryMatch: QueryMatchResult.optional(),
-  and: z.array(z.lazy(() => DataProviderResult)).optional(),
-  type: DataProviderType.optional(),
+});
+
+export type DataProviderResult = z.infer<typeof DataProviderResult>;
+export const DataProviderResult = z.object({
+  and: z.array(DataProviderQueryMatch).nullable().optional(),
+  enabled: z.boolean().nullable().optional(),
+  excluded: z.boolean().nullable().optional(),
+  id: z.string().nullable().optional(),
+  kqlQuery: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
+  queryMatch: QueryMatchResult.nullable().optional(),
+  type: DataProviderType.nullable().optional(),
 });
 
 export type RowRendererId = z.infer<typeof RowRendererId>;
@@ -154,31 +148,33 @@ export const SerializedFilterQueryResult = z.object({
     .object({
       kuery: z
         .object({
-          kind: z.string().optional(),
-          expression: z.string().optional(),
+          kind: z.string().nullable().optional(),
+          expression: z.string().nullable().optional(),
         })
+        .nullable()
         .optional(),
-      serializedQuery: z.string().optional(),
+      serializedQuery: z.string().nullable().optional(),
     })
+    .nullable()
     .optional(),
 });
 
-export type Sort = z.infer<typeof Sort>;
-export const Sort = z.object({
+export type SortObject = z.infer<typeof SortObject>;
+export const SortObject = z.object({
   columnId: z.string().nullable().optional(),
   columnType: z.string().nullable().optional(),
   sortDirection: z.string().nullable().optional(),
 });
 
+export type Sort = z.infer<typeof Sort>;
+export const Sort = z.union([SortObject, z.array(SortObject)]);
+
 export type SavedTimeline = z.infer<typeof SavedTimeline>;
 export const SavedTimeline = z.object({
-  columns: ColumnHeaderResult.nullable().optional(),
+  columns: z.array(ColumnHeaderResult).nullable().optional(),
   created: z.number().nullable().optional(),
   createdBy: z.string().nullable().optional(),
-  dataProviders: z
-    .array(z.lazy(() => DataProviderResult))
-    .nullable()
-    .optional(),
+  dataProviders: z.array(DataProviderResult).nullable().optional(),
   dataViewId: z.string().nullable().optional(),
   dateRange: z
     .object({
@@ -190,9 +186,11 @@ export const SavedTimeline = z.object({
   description: z.string().nullable().optional(),
   eqlOptions: z
     .object({
-      eventCategoryField: z.string().optional(),
-      tiebreakerField: z.string().optional(),
-      timestampField: z.string().optional(),
+      eventCategoryField: z.string().nullable().optional(),
+      query: z.string().nullable().optional(),
+      size: z.union([z.string().nullable(), z.number().nullable()]).optional(),
+      tiebreakerField: z.string().nullable().optional(),
+      timestampField: z.string().nullable().optional(),
     })
     .nullable()
     .optional(),

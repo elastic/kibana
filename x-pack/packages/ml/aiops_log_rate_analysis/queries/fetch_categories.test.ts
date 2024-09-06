@@ -67,7 +67,6 @@ describe('getCategoryRequest', () => {
     // time range filter whatsoever, for example for start/end (0,50).
     expect(query).toEqual({
       index: 'the-index',
-      size: 0,
       body: {
         query: {
           bool: {
@@ -117,6 +116,7 @@ describe('getCategoryRequest', () => {
             },
           },
         },
+        size: 0,
       },
     });
   });

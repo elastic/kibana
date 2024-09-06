@@ -555,7 +555,7 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
               // Note: if createNewCopies is disabled, the new object will have an originId property that matches the source ID, but this is not included in the HTTP response.
               expectNewCopyResponse(response, noConflictId, title);
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);
@@ -586,7 +586,7 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
                 expect(errors).to.be(undefined);
               }
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);
@@ -635,7 +635,7 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
                 ]);
               }
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);
@@ -683,7 +683,7 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
                 ]);
               }
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);
@@ -731,7 +731,7 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
                 ]);
               }
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);
@@ -780,7 +780,7 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
                 ]);
               }
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);

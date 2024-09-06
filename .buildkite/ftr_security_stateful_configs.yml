@@ -24,6 +24,9 @@ disabled:
   - x-pack/test/threat_intelligence_cypress/cli_config_parallel.ts
   - x-pack/test/threat_intelligence_cypress/config.ts
 
+  # Playwright
+  - x-pack/test/security_solution_playwright/playwright.config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/ess.config.ts
@@ -47,6 +50,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/large_prebuilt_rules_package/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/management/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/update_prebuilt_rules_package/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/prebuilt_rule_customization/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_bulk_actions/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/basic_license_essentials_tier/configs/ess.config.ts
@@ -83,4 +87,5 @@ enabled:
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
   - x-pack/test/cloud_security_posture_api/config.ts
   - x-pack/test/cloud_security_posture_functional/config.ts
+  - x-pack/test/cloud_security_posture_functional/config.agentless.ts
   - x-pack/test/cloud_security_posture_functional/data_views/config.ts

@@ -7,6 +7,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
+import { GenerationContext } from './get_generation_context';
 
 interface AdditionalProperties {
   /**
@@ -74,5 +75,12 @@ export interface NormalizedOperation {
   requestParams?: NormalizedSchemaItem;
   requestQuery?: NormalizedSchemaItem;
   requestBody?: NormalizedSchemaItem;
+  requestAttachment?: NormalizedSchemaItem;
   response?: NormalizedSchemaItem;
+}
+
+export interface ParsedSource {
+  sourcePath: string;
+  generatedPath: string;
+  generationContext: GenerationContext;
 }

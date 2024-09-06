@@ -30,6 +30,7 @@ import {
   MetadataListResponse,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
 
+import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import {
   generateAgentDocs,
@@ -37,14 +38,22 @@ import {
 } from '../../../../config/services/security_solution_edr_workflows_metadata';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const endpointTestResources = getService('endpointTestResources');
   const log = getService('log');
   const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
+  const utils = getService('securitySolutionUtils');
 
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
   describe('@ess @serverless @skipInServerlessMKI test metadata apis', function () {
+    let adminSupertest: TestAgent;
+    let t1AnalystSupertest: TestAgent;
+
+    before(async () => {
+      adminSupertest = await utils.createSuperTest();
+      t1AnalystSupertest = await utils.createSuperTest('t1_analyst');
+    });
+
     describe('list endpoints GET route', () => {
       const numberOfHostsInFixture = 2;
       let agent1Timestamp: number;
@@ -99,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return one entry for each host with default paging', async () => {
-        const res = await supertest
+        const res = await adminSupertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -116,7 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('metadata api should return page based on paging properties passed', async () => {
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -132,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('metadata api should return accurate total metadata if page index produces no result', async () => {
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -148,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('metadata api should return 400 when pagingProperties is below boundaries.', async () => {
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -161,7 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('metadata api should return page based on filters passed.', async () => {
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -177,7 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('metadata api should return page based on filters and paging passed.', async () => {
         const notIncludedIp = '10.101.149.26';
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -200,7 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('metadata api should return page based on host.os.Ext.variant filter.', async () => {
         const variantValue = 'Windows Pro';
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -220,7 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('metadata api should return the latest event for all the events for an endpoint', async () => {
         const targetEndpointIp = '10.101.149.26';
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -239,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('metadata api should return the latest event for all the events where policy status is not success', async () => {
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -259,7 +268,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('metadata api should return the endpoint based on the elastic agent id, and status should be healthy', async () => {
         const targetEndpointId = 'fc0ff548-feba-41b6-8367-65e8790d0eaf';
         const targetElasticAgentId = '023fa40c-411d-4188-a941-4147bfadd095';
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -281,7 +290,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('metadata api should return the endpoint based on the agent hostname', async () => {
         const targetEndpointId = 'fc0ff548-feba-41b6-8367-65e8790d0eaf';
         const targetAgentHostname = 'Example-host-name-XYZ';
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -300,7 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('metadata api should return all hosts when filter is empty string', async () => {
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -313,7 +322,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('`last_checkin` runtime field', () => {
         it('should sort based on `last_checkin` - because it is a runtime field', async () => {
-          const { body: bodyAsc }: { body: MetadataListResponse } = await supertest
+          const { body: bodyAsc }: { body: MetadataListResponse } = await adminSupertest
             .get(HOST_METADATA_LIST_ROUTE)
             .set('kbn-xsrf', 'xxx')
             .set('Elastic-Api-Version', '2023-10-31')
@@ -326,7 +335,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(bodyAsc.data[0].last_checkin).to.eql(new Date(agent1Timestamp).toISOString());
           expect(bodyAsc.data[1].last_checkin).to.eql(new Date(agent2Timestamp).toISOString());
 
-          const { body: bodyDesc }: { body: MetadataListResponse } = await supertest
+          const { body: bodyDesc }: { body: MetadataListResponse } = await adminSupertest
             .get(HOST_METADATA_LIST_ROUTE)
             .set('kbn-xsrf', 'xxx')
             .set('Elastic-Api-Version', '2023-10-31')
@@ -343,7 +352,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('sorting', () => {
         it('metadata api should return 400 with not supported sorting field', async () => {
-          await supertest
+          await adminSupertest
             .get(HOST_METADATA_LIST_ROUTE)
             .set('kbn-xsrf', 'xxx')
             .set('Elastic-Api-Version', '2023-10-31')
@@ -354,7 +363,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('metadata api should sort by enrollment date by default', async () => {
-          const { body }: { body: MetadataListResponse } = await supertest
+          const { body }: { body: MetadataListResponse } = await adminSupertest
             .get(HOST_METADATA_LIST_ROUTE)
             .set('kbn-xsrf', 'xxx')
             .set('Elastic-Api-Version', '2023-10-31')
@@ -368,7 +377,7 @@ export default function ({ getService }: FtrProviderContext) {
           it(`metadata api should be able to sort by ${field}`, async () => {
             let body: MetadataListResponse;
 
-            ({ body } = await supertest
+            ({ body } = await adminSupertest
               .get(HOST_METADATA_LIST_ROUTE)
               .set('kbn-xsrf', 'xxx')
               .set('Elastic-Api-Version', '2023-10-31')
@@ -381,7 +390,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(body.sortDirection).to.eql('asc');
             expect(body.sortField).to.eql(field);
 
-            ({ body } = await supertest
+            ({ body } = await adminSupertest
               .get(HOST_METADATA_LIST_ROUTE)
               .set('kbn-xsrf', 'xxx')
               .set('Elastic-Api-Version', '2023-10-31')
@@ -416,7 +425,7 @@ export default function ({ getService }: FtrProviderContext) {
         const config = getService('config');
         const ca = config.get('servers.kibana').certificateAuthorities;
 
-        await getService('supertestWithoutAuth')
+        await t1AnalystSupertest
           .get(METADATA_TRANSFORMS_STATUS_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -428,7 +437,7 @@ export default function ({ getService }: FtrProviderContext) {
         await endpointDataStreamHelpers.stopTransform(getService, `${currentTransformName}*`);
         await endpointDataStreamHelpers.stopTransform(getService, `${unitedTransformName}*`);
 
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(METADATA_TRANSFORMS_STATUS_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')
@@ -456,7 +465,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('correctly returns started transform stats', async () => {
-        const { body } = await supertest
+        const { body } = await adminSupertest
           .get(METADATA_TRANSFORMS_STATUS_ROUTE)
           .set('kbn-xsrf', 'xxx')
           .set('Elastic-Api-Version', '2023-10-31')

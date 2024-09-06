@@ -9,17 +9,29 @@ import React from 'react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useApplication } from '../../../common/lib/kibana/use_application';
-import { useAlertDataViews } from '../hooks/use_alert_data_view';
-import { CasesParamsFields } from './cases_params';
 import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
+import { useApplication } from '../../../common/lib/kibana/use_application';
+import { CasesParamsFields } from './cases_params';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { useGetAllCaseConfigurations } from '../../../containers/configure/use_get_all_case_configurations';
+import { useGetAllCaseConfigurationsResponse } from '../../configure_cases/__mock__';
+import { templatesConfigurationMock } from '../../../containers/mock';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('../../../common/lib/kibana/use_application');
-jest.mock('../hooks/use_alert_data_view');
+jest.mock('../../../common/lib/kibana/kibana_react');
+jest.mock('../../../containers/configure/use_get_all_case_configurations');
 
-const useAlertDataViewsMock = useAlertDataViews as jest.Mock;
+const useKibanaMock = jest.mocked(useKibana);
+const useAlertsDataViewMock = jest.mocked(useAlertsDataView);
 const useApplicationMock = useApplication as jest.Mock;
+const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
+
+useKibanaMock.mockReturnValue({
+  services: { ...createStartServicesMock(), data: { dataViews: {} } },
+} as unknown as ReturnType<typeof useKibana>);
 
 const actionParams = {
   subAction: 'run',
@@ -52,25 +64,27 @@ describe('CasesParamsFields renders', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useApplicationMock.mockReturnValueOnce({ appId: 'management' });
-    useAlertDataViewsMock.mockReturnValue({
-      loading: false,
-      dataViews: [
-        {
-          title: '.alerts-test',
-          fields: [
-            {
-              name: 'host.ip',
-              type: 'ip',
-              aggregatable: true,
-            },
-            {
-              name: 'host.geo.location',
-              type: 'geo_point',
-            },
-          ],
-        },
-      ],
+    useAlertsDataViewMock.mockReturnValue({
+      isLoading: false,
+      dataView: {
+        title: '.alerts-test',
+        fields: [
+          {
+            name: 'host.ip',
+            type: 'ip',
+            aggregatable: true,
+            searchable: true,
+          },
+          {
+            name: 'host.geo.location',
+            type: 'geo_point',
+            aggregatable: false,
+            searchable: true,
+          },
+        ],
+      },
     });
+    useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
   });
 
   it('all params fields are rendered', async () => {
@@ -79,18 +93,19 @@ describe('CasesParamsFields renders', () => {
     expect(await screen.findByTestId('group-by-alert-field-combobox')).toBeInTheDocument();
     expect(await screen.findByTestId('time-window-size-input')).toBeInTheDocument();
     expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
+    expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
     expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
   });
 
   it('renders loading state of grouping by fields correctly', async () => {
-    useAlertDataViewsMock.mockReturnValue({ loading: true });
+    useAlertsDataViewMock.mockReturnValue({ isLoading: true });
     render(<CasesParamsFields {...defaultProps} />);
 
     expect(await screen.findByRole('progressbar')).toBeInTheDocument();
   });
 
   it('disables dropdown when loading grouping by fields', async () => {
-    useAlertDataViewsMock.mockReturnValue({ loading: true });
+    useAlertsDataViewMock.mockReturnValue({ isLoading: true });
     render(<CasesParamsFields {...defaultProps} />);
 
     expect(await screen.findByRole('progressbar')).toBeInTheDocument();
@@ -119,6 +134,7 @@ describe('CasesParamsFields renders', () => {
       timeWindow: '7d',
       reopenClosedCases: false,
       groupingBy: [],
+      templateId: null,
     });
   });
 
@@ -161,29 +177,31 @@ describe('CasesParamsFields renders', () => {
     });
 
     it('updates grouping by field by search', async () => {
-      useAlertDataViewsMock.mockReturnValue({
-        loading: false,
-        dataViews: [
-          {
-            title: '.alerts-test',
-            fields: [
-              {
-                name: 'host.ip',
-                type: 'ip',
-                aggregatable: true,
-              },
-              {
-                name: 'host.geo.location',
-                type: 'geo_point',
-              },
-              {
-                name: 'alert.name',
-                type: 'string',
-                aggregatable: true,
-              },
-            ],
-          },
-        ],
+      useAlertsDataViewMock.mockReturnValue({
+        isLoading: false,
+        dataView: {
+          title: '.alerts-test',
+          fields: [
+            {
+              name: 'host.ip',
+              type: 'ip',
+              aggregatable: true,
+              searchable: true,
+            },
+            {
+              name: 'host.geo.location',
+              type: 'geo_point',
+              aggregatable: false,
+              searchable: true,
+            },
+            {
+              name: 'alert.name',
+              type: 'string',
+              aggregatable: true,
+              searchable: true,
+            },
+          ],
+        },
       });
 
       render(<CasesParamsFields {...defaultProps} />);
@@ -195,6 +213,67 @@ describe('CasesParamsFields renders', () => {
       userEvent.type(await screen.findByTestId('comboBoxSearchInput'), 'alert.name{enter}');
 
       expect(editAction.mock.calls[0][1].groupingBy).toEqual(['alert.name']);
+    });
+
+    it('renders default template correctly', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
+      expect(await screen.findByText('No template selected')).toBeInTheDocument();
+    });
+
+    it('renders selected templates correctly', async () => {
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            templates: templatesConfigurationMock,
+          },
+        ],
+      }));
+
+      const newProps = {
+        ...defaultProps,
+        producerId: 'siem',
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            ...actionParams.subActionParams,
+            templateId: templatesConfigurationMock[1].key,
+          },
+        },
+      };
+
+      render(<CasesParamsFields {...newProps} />);
+
+      expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
+      expect(await screen.findByText(templatesConfigurationMock[1].name)).toBeInTheDocument();
+    });
+
+    it('updates template correctly', async () => {
+      useGetAllCaseConfigurationsMock.mockReturnValueOnce({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            templates: templatesConfigurationMock,
+          },
+        ],
+      });
+
+      const selectedTemplate = templatesConfigurationMock[4];
+      const newProps = { ...defaultProps, producerId: 'siem' };
+
+      render(<CasesParamsFields {...newProps} />);
+
+      userEvent.selectOptions(
+        await screen.findByTestId('create-case-template-select'),
+        selectedTemplate.name
+      );
+
+      expect(editAction.mock.calls[0][1].templateId).toEqual(selectedTemplate.key);
+      expect(await screen.findByText(selectedTemplate.name)).toBeInTheDocument();
     });
 
     it('updates time window size', async () => {

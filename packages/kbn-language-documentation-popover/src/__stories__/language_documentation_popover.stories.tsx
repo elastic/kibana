@@ -66,5 +66,7 @@ storiesOf('Language documentation popover', module).add('default', () => (
     language="Test"
     sections={sections}
     buttonProps={{ color: 'text' }}
+    isHelpMenuOpen={true}
+    onHelpMenuVisibilityChange={() => {}}
   />
 ));

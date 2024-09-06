@@ -12,7 +12,7 @@ import { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synth
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { ProjectAPIKeyResponse } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/get_api_key';
-import { KibanaSupertestProvider } from '@kbn/test-suites-src/api_integration/services/supertest';
+import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export class SyntheticsMonitorTestService {
@@ -169,6 +169,19 @@ export class SyntheticsMonitorTestService {
           : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS
       )
       .send({ ids: Array.isArray(monitorId) ? monitorId : [monitorId] })
+      .set('kbn-xsrf', 'true');
+    expect(deleteResponse.status).to.eql(statusCode);
+    return deleteResponse;
+  }
+
+  async deleteMonitorByIdParam(monitorId?: string, statusCode = 200, spaceId?: string) {
+    const deleteResponse = await this.supertest
+      .delete(
+        spaceId
+          ? `/s/${spaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`
+          : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId
+      )
+      .send()
       .set('kbn-xsrf', 'true');
     expect(deleteResponse.status).to.eql(statusCode);
     return deleteResponse;

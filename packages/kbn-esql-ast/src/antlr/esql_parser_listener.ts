@@ -1,92 +1,102 @@
 // @ts-nocheck
-// Generated from src/antlr/esql_parser.g4 by ANTLR 4.13.1
+// Generated from src/antlr/esql_parser.g4 by ANTLR 4.13.2
 
 import {ParseTreeListener} from "antlr4";
 
 
-import { SingleStatementContext } from "./esql_parser";
-import { CompositeQueryContext } from "./esql_parser";
-import { SingleCommandQueryContext } from "./esql_parser";
-import { SourceCommandContext } from "./esql_parser";
-import { ProcessingCommandContext } from "./esql_parser";
-import { WhereCommandContext } from "./esql_parser";
-import { MatchExpressionContext } from "./esql_parser";
-import { LogicalNotContext } from "./esql_parser";
-import { BooleanDefaultContext } from "./esql_parser";
-import { IsNullContext } from "./esql_parser";
-import { RegexExpressionContext } from "./esql_parser";
-import { LogicalInContext } from "./esql_parser";
-import { LogicalBinaryContext } from "./esql_parser";
-import { RegexBooleanExpressionContext } from "./esql_parser";
-import { MatchBooleanExpressionContext } from "./esql_parser";
-import { ValueExpressionDefaultContext } from "./esql_parser";
-import { ComparisonContext } from "./esql_parser";
-import { OperatorExpressionDefaultContext } from "./esql_parser";
-import { ArithmeticBinaryContext } from "./esql_parser";
-import { ArithmeticUnaryContext } from "./esql_parser";
-import { DereferenceContext } from "./esql_parser";
-import { InlineCastContext } from "./esql_parser";
-import { ConstantDefaultContext } from "./esql_parser";
-import { ParenthesizedExpressionContext } from "./esql_parser";
-import { FunctionContext } from "./esql_parser";
-import { FunctionExpressionContext } from "./esql_parser";
-import { ToDataTypeContext } from "./esql_parser";
-import { RowCommandContext } from "./esql_parser";
-import { FieldsContext } from "./esql_parser";
-import { FieldContext } from "./esql_parser";
-import { FromCommandContext } from "./esql_parser";
-import { IndexPatternContext } from "./esql_parser";
-import { ClusterStringContext } from "./esql_parser";
-import { IndexStringContext } from "./esql_parser";
-import { MetadataContext } from "./esql_parser";
-import { MetadataOptionContext } from "./esql_parser";
-import { Deprecated_metadataContext } from "./esql_parser";
-import { MetricsCommandContext } from "./esql_parser";
-import { EvalCommandContext } from "./esql_parser";
-import { StatsCommandContext } from "./esql_parser";
-import { InlinestatsCommandContext } from "./esql_parser";
-import { QualifiedNameContext } from "./esql_parser";
-import { QualifiedNamePatternContext } from "./esql_parser";
-import { QualifiedNamePatternsContext } from "./esql_parser";
-import { IdentifierContext } from "./esql_parser";
-import { IdentifierPatternContext } from "./esql_parser";
-import { NullLiteralContext } from "./esql_parser";
-import { QualifiedIntegerLiteralContext } from "./esql_parser";
-import { DecimalLiteralContext } from "./esql_parser";
-import { IntegerLiteralContext } from "./esql_parser";
-import { BooleanLiteralContext } from "./esql_parser";
-import { InputParamsContext } from "./esql_parser";
-import { StringLiteralContext } from "./esql_parser";
-import { NumericArrayLiteralContext } from "./esql_parser";
-import { BooleanArrayLiteralContext } from "./esql_parser";
-import { StringArrayLiteralContext } from "./esql_parser";
-import { InputParamContext } from "./esql_parser";
-import { InputNamedOrPositionalParamContext } from "./esql_parser";
-import { LimitCommandContext } from "./esql_parser";
-import { SortCommandContext } from "./esql_parser";
-import { OrderExpressionContext } from "./esql_parser";
-import { KeepCommandContext } from "./esql_parser";
-import { DropCommandContext } from "./esql_parser";
-import { RenameCommandContext } from "./esql_parser";
-import { RenameClauseContext } from "./esql_parser";
-import { DissectCommandContext } from "./esql_parser";
-import { GrokCommandContext } from "./esql_parser";
-import { MvExpandCommandContext } from "./esql_parser";
-import { CommandOptionsContext } from "./esql_parser";
-import { CommandOptionContext } from "./esql_parser";
-import { BooleanValueContext } from "./esql_parser";
-import { NumericValueContext } from "./esql_parser";
-import { DecimalValueContext } from "./esql_parser";
-import { IntegerValueContext } from "./esql_parser";
-import { StringContext } from "./esql_parser";
-import { ComparisonOperatorContext } from "./esql_parser";
-import { ExplainCommandContext } from "./esql_parser";
-import { SubqueryExpressionContext } from "./esql_parser";
-import { ShowInfoContext } from "./esql_parser";
-import { MetaFunctionsContext } from "./esql_parser";
-import { EnrichCommandContext } from "./esql_parser";
-import { EnrichWithClauseContext } from "./esql_parser";
-import { LookupCommandContext } from "./esql_parser";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+
+import { SingleStatementContext } from "./esql_parser.js";
+import { CompositeQueryContext } from "./esql_parser.js";
+import { SingleCommandQueryContext } from "./esql_parser.js";
+import { SourceCommandContext } from "./esql_parser.js";
+import { ProcessingCommandContext } from "./esql_parser.js";
+import { WhereCommandContext } from "./esql_parser.js";
+import { MatchExpressionContext } from "./esql_parser.js";
+import { LogicalNotContext } from "./esql_parser.js";
+import { BooleanDefaultContext } from "./esql_parser.js";
+import { IsNullContext } from "./esql_parser.js";
+import { RegexExpressionContext } from "./esql_parser.js";
+import { LogicalInContext } from "./esql_parser.js";
+import { LogicalBinaryContext } from "./esql_parser.js";
+import { RegexBooleanExpressionContext } from "./esql_parser.js";
+import { MatchBooleanExpressionContext } from "./esql_parser.js";
+import { ValueExpressionDefaultContext } from "./esql_parser.js";
+import { ComparisonContext } from "./esql_parser.js";
+import { OperatorExpressionDefaultContext } from "./esql_parser.js";
+import { ArithmeticBinaryContext } from "./esql_parser.js";
+import { ArithmeticUnaryContext } from "./esql_parser.js";
+import { DereferenceContext } from "./esql_parser.js";
+import { InlineCastContext } from "./esql_parser.js";
+import { ConstantDefaultContext } from "./esql_parser.js";
+import { ParenthesizedExpressionContext } from "./esql_parser.js";
+import { FunctionContext } from "./esql_parser.js";
+import { FunctionExpressionContext } from "./esql_parser.js";
+import { ToDataTypeContext } from "./esql_parser.js";
+import { RowCommandContext } from "./esql_parser.js";
+import { FieldsContext } from "./esql_parser.js";
+import { FieldContext } from "./esql_parser.js";
+import { FromCommandContext } from "./esql_parser.js";
+import { IndexPatternContext } from "./esql_parser.js";
+import { ClusterStringContext } from "./esql_parser.js";
+import { IndexStringContext } from "./esql_parser.js";
+import { MetadataContext } from "./esql_parser.js";
+import { MetadataOptionContext } from "./esql_parser.js";
+import { Deprecated_metadataContext } from "./esql_parser.js";
+import { MetricsCommandContext } from "./esql_parser.js";
+import { EvalCommandContext } from "./esql_parser.js";
+import { StatsCommandContext } from "./esql_parser.js";
+import { QualifiedNameContext } from "./esql_parser.js";
+import { QualifiedNamePatternContext } from "./esql_parser.js";
+import { QualifiedNamePatternsContext } from "./esql_parser.js";
+import { IdentifierContext } from "./esql_parser.js";
+import { IdentifierPatternContext } from "./esql_parser.js";
+import { NullLiteralContext } from "./esql_parser.js";
+import { QualifiedIntegerLiteralContext } from "./esql_parser.js";
+import { DecimalLiteralContext } from "./esql_parser.js";
+import { IntegerLiteralContext } from "./esql_parser.js";
+import { BooleanLiteralContext } from "./esql_parser.js";
+import { InputParamsContext } from "./esql_parser.js";
+import { StringLiteralContext } from "./esql_parser.js";
+import { NumericArrayLiteralContext } from "./esql_parser.js";
+import { BooleanArrayLiteralContext } from "./esql_parser.js";
+import { StringArrayLiteralContext } from "./esql_parser.js";
+import { InputParamContext } from "./esql_parser.js";
+import { InputNamedOrPositionalParamContext } from "./esql_parser.js";
+import { LimitCommandContext } from "./esql_parser.js";
+import { SortCommandContext } from "./esql_parser.js";
+import { OrderExpressionContext } from "./esql_parser.js";
+import { KeepCommandContext } from "./esql_parser.js";
+import { DropCommandContext } from "./esql_parser.js";
+import { RenameCommandContext } from "./esql_parser.js";
+import { RenameClauseContext } from "./esql_parser.js";
+import { DissectCommandContext } from "./esql_parser.js";
+import { GrokCommandContext } from "./esql_parser.js";
+import { MvExpandCommandContext } from "./esql_parser.js";
+import { CommandOptionsContext } from "./esql_parser.js";
+import { CommandOptionContext } from "./esql_parser.js";
+import { BooleanValueContext } from "./esql_parser.js";
+import { NumericValueContext } from "./esql_parser.js";
+import { DecimalValueContext } from "./esql_parser.js";
+import { IntegerValueContext } from "./esql_parser.js";
+import { StringContext } from "./esql_parser.js";
+import { ComparisonOperatorContext } from "./esql_parser.js";
+import { ExplainCommandContext } from "./esql_parser.js";
+import { SubqueryExpressionContext } from "./esql_parser.js";
+import { ShowInfoContext } from "./esql_parser.js";
+import { MetaFunctionsContext } from "./esql_parser.js";
+import { EnrichCommandContext } from "./esql_parser.js";
+import { EnrichWithClauseContext } from "./esql_parser.js";
+import { LookupCommandContext } from "./esql_parser.js";
+import { InlinestatsCommandContext } from "./esql_parser.js";
+import { MatchCommandContext } from "./esql_parser.js";
+import { MatchQueryContext } from "./esql_parser.js";
 
 
 /**
@@ -535,16 +545,6 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitStatsCommand?: (ctx: StatsCommandContext) => void;
 	/**
-	 * Enter a parse tree produced by `esql_parser.inlinestatsCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.inlinestatsCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
-	/**
 	 * Enter a parse tree produced by `esql_parser.qualifiedName`.
 	 * @param ctx the parse tree
 	 */
@@ -992,5 +992,35 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitLookupCommand?: (ctx: LookupCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.inlinestatsCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.inlinestatsCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.matchCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterMatchCommand?: (ctx: MatchCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.matchCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitMatchCommand?: (ctx: MatchCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.matchQuery`.
+	 * @param ctx the parse tree
+	 */
+	enterMatchQuery?: (ctx: MatchQueryContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.matchQuery`.
+	 * @param ctx the parse tree
+	 */
+	exitMatchQuery?: (ctx: MatchQueryContext) => void;
 }
 

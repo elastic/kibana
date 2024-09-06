@@ -9,13 +9,10 @@ import type { EuiComboBox } from '@elastic/eui';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import React, { memo, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-
 import type { Filter } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { HeaderSection } from '../../../../common/components/header_section';
-
 import { InspectButtonContainer } from '../../../../common/components/inspect';
-
 import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
 import { FieldSelection } from '../../../../common/components/field_selection';
