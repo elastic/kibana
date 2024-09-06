@@ -687,6 +687,25 @@ export class MonacoEditorActionsProvider {
   }
 
   /*
+   * This function cleares out the editor content and replaces it with the provided requests
+   */
+  public async importRequestsToEditor(requestsToImport: string) {
+    const model = this.editor.getModel();
+
+    if (!model) {
+      return;
+    }
+
+    const edit: monaco.editor.IIdentifiedSingleEditOperation = {
+      range: model.getFullModelRange(),
+      text: requestsToImport,
+      forceMoveMarkers: true,
+    };
+
+    this.editor.executeEdits('restoreFromHistory', [edit]);
+  }
+
+  /*
    * This function inserts a request after the last request in the editor
    */
   public async appendRequestToEditor(
