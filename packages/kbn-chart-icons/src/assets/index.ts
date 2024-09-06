@@ -38,9 +38,17 @@ export { GlobeIllustration } from './globe_illustration';
 export { EuiIconLegend } from './legend';
 export { IconRegionMap } from './region_map';
 export { IconChartHeatmap } from './chart_heatmap';
+export { IconChartGauge } from './chart_gauge';
 export { IconChartHorizontalBullet } from './chart_horizontal_bullet';
 export { IconChartVerticalBullet } from './chart_vertical_bullet';
 export { IconChartGaugeSemiCircle } from './chart_gauge_semi_circle';
 export { IconChartGaugeArc } from './chart_gauge_arc';
 export { IconChartGaugeCircle } from './chart_gauge_circle';
+export { IconDonutHoleSmall, IconDonutHoleMedium, IconDonutHoleLarge } from './donut_hole_icons';
+export {
+  IconChartLinearSimple,
+  IconChartGaugeSemiCircleSimple,
+  IconChartGaugeArcSimple,
+  IconChartGaugeCircleSimple,
+} from './chart_gauge_simple_icons';
 export { IconChartTagcloud } from './chart_tagcloud';

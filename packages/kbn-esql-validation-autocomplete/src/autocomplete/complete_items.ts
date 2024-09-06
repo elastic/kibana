@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SuggestionRawDefinition } from './types';
+import type { ItemKind, SuggestionRawDefinition } from './types';
 import { builtinFunctions } from '../definitions/builtin';
 import { getAllCommands } from '../shared/helpers';
 import {
@@ -143,4 +143,16 @@ export const listCompleteItem: SuggestionRawDefinition = {
   }),
   sortText: 'A',
   command: TRIGGER_SUGGESTION_COMMAND,
+};
+
+export const allStarConstant: SuggestionRawDefinition = {
+  label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.allStarConstantDoc', {
+    defaultMessage: 'All (*)',
+  }),
+  text: '*',
+  kind: 'Constant' as ItemKind,
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.allStarConstantDoc', {
+    defaultMessage: 'All (*)',
+  }),
+  sortText: '1',
 };
