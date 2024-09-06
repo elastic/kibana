@@ -478,4 +478,5 @@ export const ecsTestState = {
   packageName: 'testpackage',
   dataStreamName: 'testDataStream',
   combinedSamples: '{"test1": "test1"}',
+  additionalProcessors: [],
 };

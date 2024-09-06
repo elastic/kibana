@@ -69,7 +69,7 @@ export interface EcsMappingState {
   chunkSize: number;
   lastExecutedChain: string;
   rawSamples: string[];
-  additionalProcessors?: ESProcessorItem[];
+  additionalProcessors: ESProcessorItem[];
   prefixedSamples: string[];
   combinedSamples: string;
   sampleChunks: string[];
