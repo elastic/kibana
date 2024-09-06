@@ -355,6 +355,7 @@ export class TaskRunner<
       ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
     });
 
+    this.logger.debug('yo');
     const {
       state: updatedRuleTypeState,
       error,
