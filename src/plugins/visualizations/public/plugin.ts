@@ -307,7 +307,10 @@ export class VisualizationsPlugin
          * this should be replaced to use only scoped history after moving legacy apps to browser routing
          */
         const history = createHashHistory();
-        const [{ createVisEmbeddableFromObject }, { renderApp }] = await Promise.all([import('./legacy/embeddable'), import('./visualize_app')];
+        const [{ createVisEmbeddableFromObject }, { renderApp }] = await Promise.all([
+          import('./legacy/embeddable'),
+          import('./visualize_app'),
+        ]);
         const services: VisualizeServices = {
           ...coreStart,
           history,
@@ -351,7 +354,6 @@ export class VisualizationsPlugin
         };
 
         params.element.classList.add('visAppWrapper');
-        const { renderApp } = await import('./visualize_app');
         if (pluginsStart.screenshotMode.isScreenshotMode()) {
           params.element.classList.add('visEditorScreenshotModeActive');
           // @ts-expect-error TS error, cannot find type declaration for scss
