@@ -16,7 +16,7 @@ import { convertAlertingRuleToRuleResponse } from '../converters/convert_alertin
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import type { ImportRuleArgs } from '../detection_rules_client_interface';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
-import { validateMlAuth } from '../utils';
+import { validateMlAuth, toggleRuleEnabledOnUpdate } from '../utils';
 import { createRule } from './create_rule';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 
@@ -65,10 +65,9 @@ export const importRule = async ({
     });
 
     // We strip `enabled` from the rule object to use in the rules client and need to enable it separately if user has enabled the updated rule
-    if (ruleWithUpdates.enabled) {
-      await rulesClient.enableRule(updatedRule);
-    }
-    return convertAlertingRuleToRuleResponse({ ...updatedRule, enabled: ruleWithUpdates.enabled });
+    const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleWithUpdates);
+
+    return convertAlertingRuleToRuleResponse({ ...updatedRule, enabled });
   }
 
   /* Rule does not exist, so we'll create it */
