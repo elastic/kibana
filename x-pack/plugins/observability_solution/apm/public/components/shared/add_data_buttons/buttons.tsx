@@ -41,7 +41,7 @@ interface AddApmDataProps {
   size?: EuiButtonSize;
 }
 
-export function AddApmData({ onClick, fill = false, size = 's', ...props }: AddApmDataProps) {
+export function AddApmData({ fill = false, size = 's', ...props }: AddApmDataProps) {
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
 
@@ -49,7 +49,7 @@ export function AddApmData({ onClick, fill = false, size = 's', ...props }: AddA
     <EuiButton
       data-test-subj={props['data-test-subj']}
       size={size}
-      onClick={onClick}
+      onClick={props.onClick}
       href={basePath.prepend(addApmData.link)}
       fill={fill}
     >
