@@ -20,6 +20,7 @@ import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/as
 import { assetCriticalityFieldMap } from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
+import { ensureAssetCriticalityEnrichPolicies } from './asset_criticality_enrich_policy';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -54,6 +55,8 @@ export class AssetCriticalityDataClient {
         mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
       },
     });
+
+    await ensureAssetCriticalityEnrichPolicies(this.options.namespace, this.options.esClient);
 
     this.options.auditLogger?.log({
       message: 'User installed asset criticality Elasticsearch resources',
