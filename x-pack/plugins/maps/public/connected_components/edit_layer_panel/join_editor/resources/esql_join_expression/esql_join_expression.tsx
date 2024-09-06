@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiPopover, EuiExpression } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { ExpressionPreview } from '../common/expression_preview';
 import { JoinField } from '../..';
 import {
   ESESQLTermSourceDescriptor,
@@ -26,8 +26,6 @@ interface Props {
 }
 
 export function ESQLJoinExpression(props: Props) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const expressionValue =
     props.sourceDescriptor.term !== undefined && props.sourceDescriptor.esql !== undefined
       ? i18n.translate('xpack.maps.termJoinExpression.value', {
@@ -41,30 +39,8 @@ export function ESQLJoinExpression(props: Props) {
           defaultMessage: '-- configure ES|QL join --',
         });
 
-  return (
-    <EuiPopover
-      id={props.sourceDescriptor.id}
-      isOpen={isPopoverOpen}
-      closePopover={() => {
-        setIsPopoverOpen(false);
-      }}
-      ownFocus
-      initialFocus="body" /* avoid initialFocus on Combobox */
-      anchorPosition="leftCenter"
-      button={
-        <EuiExpression
-          onClick={() => {
-            setIsPopoverOpen(!isPopoverOpen);
-          }}
-          description={i18n.translate('xpack.maps.esqlJoinExpressions.description', {
-            defaultMessage: 'Join with',
-          })}
-          uppercase={false}
-          value={expressionValue}
-        />
-      }
-      repositionOnScroll={true}
-    >
+  function renderESQLJoinPopup() {
+    return (
       <ESQLJoinPopoverContent
         leftSourceName={props.leftSourceName}
         leftValue={props.leftValue}
@@ -73,6 +49,14 @@ export function ESQLJoinExpression(props: Props) {
         sourceDescriptor={props.sourceDescriptor}
         onSourceDescriptorChange={props.onSourceDescriptorChange}
       />
-    </EuiPopover>
+    );
+  }
+
+  return (
+    <ExpressionPreview
+      previewText={expressionValue}
+      renderPopup={renderESQLJoinPopup}
+      popOverId={props.sourceDescriptor.id}
+    />
   );
 }

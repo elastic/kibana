@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiPopover, EuiExpression } from '@elastic/eui';
+import React  from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { ExpressionPreview } from '../common/expression_preview';
 import {
   ESTermSourceDescriptor,
   JoinSourceDescriptor,
@@ -32,8 +32,6 @@ interface Props {
 }
 
 export function TermJoinExpression(props: Props) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const { size, term } = props.sourceDescriptor;
   const expressionValue =
     term !== undefined
@@ -54,30 +52,8 @@ export function TermJoinExpression(props: Props) {
           defaultMessage: '-- configure term join --',
         });
 
-  return (
-    <EuiPopover
-      id={props.sourceDescriptor.id}
-      isOpen={isPopoverOpen}
-      closePopover={() => {
-        setIsPopoverOpen(false);
-      }}
-      ownFocus
-      initialFocus="body" /* avoid initialFocus on Combobox */
-      anchorPosition="leftCenter"
-      button={
-        <EuiExpression
-          onClick={() => {
-            setIsPopoverOpen(!isPopoverOpen);
-          }}
-          description={i18n.translate('xpack.maps.termJoinExpression.description', {
-            defaultMessage: 'Join with',
-          })}
-          uppercase={false}
-          value={expressionValue}
-        />
-      }
-      repositionOnScroll={true}
-    >
+  function renderTermJoinPopup() {
+    return (
       <TermJoinPopoverContent
         leftSourceName={props.leftSourceName}
         leftValue={props.leftValue}
@@ -87,6 +63,14 @@ export function TermJoinExpression(props: Props) {
         onSourceDescriptorChange={props.onSourceDescriptorChange}
         rightFields={props.rightFields}
       />
-    </EuiPopover>
+    );
+  }
+
+  return (
+    <ExpressionPreview
+      previewText={expressionValue}
+      renderPopup={renderTermJoinPopup}
+      popOverId={props.sourceDescriptor.id}
+    />
   );
 }

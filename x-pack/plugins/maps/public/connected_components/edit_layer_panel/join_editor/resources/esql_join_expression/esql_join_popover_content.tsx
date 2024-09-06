@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 // import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LeftFieldSelector } from '../common/left_field_selector/left_field_selector';
+import { LeftFieldSelector } from '../common/left_field_selector';
 import { JoinField } from '../..';
 import type {
   ESESQLTermSourceDescriptor,

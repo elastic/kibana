@@ -233,7 +233,10 @@ export class Join extends Component<Props, State> {
     let globalFilterCheckbox;
     let globalTimeCheckbox;
 
-    if (isJoinConfigComplete) {
+    if (
+      isJoinConfigComplete &&
+      (right.type === SOURCE_TYPES.ES_DISTANCE_SOURCE || SOURCE_TYPES.ES_TERM_SOURCE)
+    ) {
       metricsExpression = (
         <EuiFlexItem grow={false}>
           <MetricsExpression
