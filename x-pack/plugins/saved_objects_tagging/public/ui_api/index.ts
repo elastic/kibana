@@ -21,7 +21,6 @@ import { buildGetSearchBarFilter } from './get_search_bar_filter';
 import { buildParseSearchQuery } from './parse_search_query';
 import { buildConvertNameToReference } from './convert_name_to_reference';
 import { buildGetTagList } from './get_tag_list';
-import { hasTagDecoration } from './has_tag_decoration';
 
 interface GetUiApiOptions extends StartServices {
   capabilities: TagsCapabilities;
@@ -50,7 +49,6 @@ export const getUiApi = ({
     getSearchBarFilter: buildGetSearchBarFilter({ getTagList }),
     parseSearchQuery: buildParseSearchQuery({ cache }),
     convertNameToReference: buildConvertNameToReference({ cache }),
-    hasTagDecoration,
     getTagIdsFromReferences,
     getTagIdFromName: (tagName: string) => convertTagNameToId(tagName, cache.getState()),
     updateTagsReferences,

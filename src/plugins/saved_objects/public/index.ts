@@ -10,11 +10,6 @@ import { SavedObjectsPublicPlugin } from './plugin';
 
 export type { OnSaveProps, OriginSaveModalProps, SaveModalState, SaveResult } from './save_modal';
 export { SavedObjectSaveModal, SavedObjectSaveModalOrigin, showSaveModal } from './save_modal';
-export type {
-  SavedObjectDecorator,
-  SavedObjectDecoratorFactory,
-  SavedObjectDecoratorConfig,
-} from './saved_object';
 export { checkForDuplicateTitle, saveWithConfirmation, isErrorNonFatal } from './saved_object';
 export type { SavedObjectSaveOpts, SavedObject, SavedObjectConfig } from './types';
 export type { SavedObjectsStart, SavedObjectSetup } from './plugin';

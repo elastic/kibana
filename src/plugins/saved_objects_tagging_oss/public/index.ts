@@ -22,11 +22,8 @@ export type {
   ParsedSearchQuery,
   ParseSearchQueryOptions,
   SavedObjectSaveModalTagSelectorComponentProps,
-  SavedObjectTagDecoratorTypeGuard,
   GetTableColumnDefinitionOptions,
 } from './api';
-
-export type { TagDecoratedSavedObject } from './decorator';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SavedObjectTaggingOssPlugin(initializerContext);

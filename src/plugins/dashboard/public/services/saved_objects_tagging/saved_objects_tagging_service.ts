@@ -28,7 +28,6 @@ export const savedObjectsTaggingServiceFactory: SavedObjectsTaggingServiceFactor
     ui: {
       components,
       parseSearchQuery,
-      hasTagDecoration,
       getSearchBarFilter,
       updateTagsReferences,
       getTagIdsFromReferences,
@@ -41,7 +40,6 @@ export const savedObjectsTaggingServiceFactory: SavedObjectsTaggingServiceFactor
     hasApi: true,
     api: taggingApi,
     components,
-    hasTagDecoration,
     parseSearchQuery,
     getSearchBarFilter,
     updateTagsReferences,
