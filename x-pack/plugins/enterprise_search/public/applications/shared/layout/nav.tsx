@@ -41,8 +41,6 @@ import {
 import { INFERENCE_ENDPOINTS_PATH } from '../../enterprise_search_relevance/routes';
 import { KibanaLogic } from '../kibana';
 
-import { LicensingLogic } from '../licensing';
-
 import { generateNavLink } from './nav_link_helpers';
 
 /**
@@ -54,8 +52,6 @@ import { generateNavLink } from './nav_link_helpers';
 export const useEnterpriseSearchNav = (alwaysReturn = false) => {
   const { isSearchHomepageEnabled, searchHomepage, isSidebarEnabled, productAccess } =
     useValues(KibanaLogic);
-
-  const { hasEnterpriseLicense } = useValues(LicensingLogic);
 
   const indicesNavItems = useIndicesNav();
 
@@ -161,29 +157,25 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
         defaultMessage: 'Build',
       }),
     },
-    ...(hasEnterpriseLicense
-      ? [
-          {
-            id: 'relevance',
-            items: [
-              {
-                id: 'inference_endpoints',
-                name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
-                  defaultMessage: 'Inference Endpoints',
-                }),
-                ...generateNavLink({
-                  shouldNotCreateHref: true,
-                  shouldShowActiveForSubroutes: true,
-                  to: INFERENCE_ENDPOINTS_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
-                }),
-              },
-            ],
-            name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
-              defaultMessage: 'Relevance',
-            }),
-          },
-        ]
-      : []),
+    {
+      id: 'relevance',
+      items: [
+        {
+          id: 'inference_endpoints',
+          name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
+            defaultMessage: 'Inference Endpoints',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: INFERENCE_ENDPOINTS_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
+          }),
+        },
+      ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
+        defaultMessage: 'Relevance',
+      }),
+    },
     {
       id: 'es_getting_started',
       items: [
