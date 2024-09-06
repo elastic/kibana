@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const filterBar = getService('filterBar');
 
-  describe('Dashboard to TSVB to Lens', function describeIndexTests() {
+  describe.only('Dashboard to TSVB to Lens', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
     });
@@ -89,7 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickVisType('metrics');
       await testSubjects.click('visualizesaveAndReturnButton');
-      await panelActions.legacySaveToLibrary(visTitle);
+      await panelActions.saveToLibrary(visTitle);
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
@@ -125,7 +125,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const titles = await dashboard.getPanelTitles();
       expect(titles[0]).to.be(`${visTitle} (converted)`);
 
-      await dashboardPanelActions.expectNotLinkedToLibrary(titles[0], true);
+      await dashboardPanelActions.expectNotLinkedToLibrary(titles[0]);
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.removePanel();
     });
