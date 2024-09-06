@@ -7,7 +7,6 @@
  */
 
 import fs from 'fs';
-// import { dump, load } from 'js-yaml';
 import prConfigs from '../../../pull_requests.json';
 import { areChangesSkippable, doAnyChangesMatch, getAgentImageConfig } from '#pipeline-utils';
 
@@ -28,40 +27,10 @@ const getPipeline = (filename: string, removeSteps = true) => {
   return removeSteps ? str.replace(/^steps:/, '') : str;
 };
 
-// interface ModifyPipeline {
-//   filename: string;
-//   update?: {
-//     label?: string;
-//     envs?: { [key: string]: string };
-//   };
-// }
-
-// const modifyPerfPipeline = (options: ModifyPipeline) => {
-//   const str = fs.readFileSync(options.filename).toString();
-
-//   if (options.update) {
-//     const parsedYml = load(str) as any;
-//     const steps = parsedYml.steps;
-
-//     if (options.update.label && steps && steps[0].label) {
-//       steps[0].label = options.update.label;
-//     }
-
-//     if (options.update.envs && steps && steps[0].env) {
-//       const envs = options.update.envs;
-//       // eslint-disable-next-line guard-for-in
-//       for (const env in envs) {
-//         steps[0].env[env] = envs[env];
-//       }
-//     }
-//     // convert the modified object back to YAML format
-//     const updatedYamlstr = dump(parsedYml);
-
-//     return updatedYamlstr;
-//   }
-
-//   return str;
-// };
+const getPerfPipeline = (filename: string, groups: string) => {
+  const str = fs.readFileSync(filename).toString();
+  return str.replace(/journey_groups/g, groups);
+};
 
 (async () => {
   const pipeline: string[] = [];
@@ -356,22 +325,17 @@ const getPipeline = (filename: string, removeSteps = true) => {
       GITHUB_PR_LABELS.includes('ci:perf-check:dashboard') ||
       GITHUB_PR_LABELS.includes('ci:perf-check:so-crud')
     ) {
-      // const journeyGroupsStr = GITHUB_PR_LABELS.split(' ')
-      //   .map((label) => label.trim())
-      //   .filter((label) => label.startsWith('ci:perf-check:'))
-      //   .map((label) => label.replace('ci:perf-check:', ''))
-      //   .join(',');
-      // pipeline.push(
-      //   modifyPerfPipeline({
-      //     filename: '.buildkite/pipelines/pull_request/single_user_performance_check.yml',
-      //     update: {
-      //       label: `Run single user performance journeys, groups: ${journeyGroupsStr}`,
-      //       envs: { JOURNEY_GROUPS: journeyGroupsStr },
-      //     },
-      //   })
-      // );
+      const journeyGroups = GITHUB_PR_LABELS.split(',')
+        .map((label) => label.trim())
+        .filter((label) => label.startsWith('ci:perf-check:'))
+        .map((label) => label.replace('ci:perf-check:', ''))
+        .join(',');
+      console.log(`perf pipeline with groups: ${journeyGroups}`);
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/single_user_performance_check.yml')
+        getPerfPipeline(
+          '.buildkite/pipelines/pull_request/single_user_performance_check.yml',
+          journeyGroups
+        )
       );
     }
 

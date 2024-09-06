@@ -1,7 +1,8 @@
 steps:
   - command: .buildkite/scripts/steps/functional/performance_playwright.sh
-    label: 'Run single user performance journeys'
+    label: 'Run single user performance journeys, groups: journey_groups'
     env:
+      JOURNEY_GROUPS: 'journey_groups'
       PERFORMANCE_ENABLE_TELEMETRY: true
     agents:
       queue: kb-static-ubuntu
