@@ -11,7 +11,7 @@ import { getApiOperationsList } from './lib/get_api_operations_list';
 import { getComponents } from './lib/get_components';
 import { getImportsMap, ImportsMap } from './lib/get_imports_map';
 import { normalizeSchema } from './lib/normalize_schema';
-import { NormalizedOperation, OpenApiDocument } from './openapi_types';
+import { NormalizedOperation, OpenApiDocument, ParsedSource } from './openapi_types';
 import { getInfo } from './lib/get_info';
 import { getCircularRefs } from './lib/get_circular_refs';
 
@@ -21,6 +21,12 @@ export interface GenerationContext {
   info: OpenAPIV3.InfoObject;
   imports: ImportsMap;
   circularRefs: Set<string>;
+}
+
+export interface BundleGenerationContext {
+  operations: NormalizedOperation[];
+  sources: ParsedSource[];
+  info: OpenAPIV3.InfoObject;
 }
 
 export function getGenerationContext(document: OpenApiDocument): GenerationContext {
