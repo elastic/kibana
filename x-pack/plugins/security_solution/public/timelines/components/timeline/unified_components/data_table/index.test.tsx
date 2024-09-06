@@ -229,7 +229,7 @@ describe('unified data table', () => {
     async () => {
       const rowHeight = {
         initial: 2,
-        new: 4,
+        new: 1,
       };
       const customMockStore = createMockStore();
 
@@ -240,9 +240,7 @@ describe('unified data table', () => {
         })
       );
 
-      render(
-        <TestComponent store={customMockStore} events={[mockTimelineData[0]]} totalCount={1} />
-      );
+      render(<TestComponent store={customMockStore} />);
 
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
