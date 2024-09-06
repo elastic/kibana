@@ -1,7 +1,12 @@
-[[chart-types]]
-== Supported chart types
-
 [[aggregation-reference]]
+== Create panels with editors
+
+{kib} provides several editors that you can use to create panels of your data. Each editor supports different features and {ref}/search-aggregations.html[{es} aggregations]. To choose the best editor for your data, review the following information.
+
+[float]
+[[chart-types]]
+=== Supported panel types
+
 [options="header"]
 |===
 
@@ -489,3 +494,9 @@ Pipeline aggregations are dependent on the outputs calculated from other aggrega
 |===
 
 For information about {es} pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
+
+include::lens.asciidoc[]
+include::tsvb.asciidoc[]
+include::vega.asciidoc[]
+include::aggregation-based.asciidoc[]
+include::timelion.asciidoc[]

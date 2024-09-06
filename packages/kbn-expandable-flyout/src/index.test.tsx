@@ -14,6 +14,7 @@ import { ExpandableFlyout } from '.';
 import {
   LEFT_SECTION_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
+  SETTINGS_MENU_BUTTON_TEST_ID,
   RIGHT_SECTION_TEST_ID,
 } from './components/test_ids';
 import { type State } from './state';
@@ -132,5 +133,27 @@ describe('ExpandableFlyout', () => {
 
     expect(queryByTestId('my-test-flyout')).toBeNull();
     expect(queryByTestId(RIGHT_SECTION_TEST_ID)).toBeNull();
+  });
+
+  it('should render the menu to change display options', () => {
+    const state = {
+      byId: {
+        [id]: {
+          right: {
+            id: 'key',
+          },
+          left: undefined,
+          preview: undefined,
+        },
+      },
+    };
+
+    const { getByTestId } = render(
+      <TestProvider state={state}>
+        <ExpandableFlyout registeredPanels={registeredPanels} />
+      </TestProvider>
+    );
+
+    expect(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 });
