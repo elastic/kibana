@@ -11,6 +11,7 @@ import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiText, EuiTextColor } from 
 import { i18n } from '@kbn/i18n';
 import type { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
 import { indexPatterns } from '@kbn/data-plugin/public';
+import { ESQLJoinExpression } from './esql_join_expression';
 import { SpatialJoinExpression } from './spatial_join_expression';
 import { TermJoinExpression } from './term_join_expression';
 import { MetricsExpression } from './metrics_expression';
@@ -21,6 +22,7 @@ import {
   AbstractESJoinSourceDescriptor,
   AggDescriptor,
   ESDistanceSourceDescriptor,
+  ESESQLTermSourceDescriptor,
   ESTermSourceDescriptor,
   JoinDescriptor,
   JoinSourceDescriptor,
@@ -98,6 +100,7 @@ export class Join extends Component<Props, State> {
   }
 
   _onLeftFieldChange = (leftField: string) => {
+    console.log('on left field change!', leftField);
     this.props.onChange({
       leftField,
       right: this.props.join.right,
@@ -105,6 +108,8 @@ export class Join extends Component<Props, State> {
   };
 
   _onRightSourceDescriptorChange = (sourceDescriptor: Partial<JoinSourceDescriptor>) => {
+    console.log('right source descriptor change', sourceDescriptor);
+
     const indexPatternId = (sourceDescriptor as Partial<AbstractESJoinSourceDescriptor>)
       .indexPatternId;
     if (this.state.indexPattern?.id !== indexPatternId) {
@@ -195,6 +200,17 @@ export class Join extends Component<Props, State> {
       joinExpression = (
         <SpatialJoinExpression
           sourceDescriptor={right as Partial<ESDistanceSourceDescriptor>}
+          onSourceDescriptorChange={this._onRightSourceDescriptorChange}
+        />
+      );
+    } else if (right.type === SOURCE_TYPES.ES_ESQL_TERM_SOURCE) {
+      joinExpression = (
+        <ESQLJoinExpression
+          leftSourceName={leftSourceName}
+          leftValue={join.leftField}
+          leftFields={leftFields}
+          onLeftFieldChange={this._onLeftFieldChange}
+          sourceDescriptor={right as Partial<ESESQLTermSourceDescriptor>}
           onSourceDescriptorChange={this._onRightSourceDescriptorChange}
         />
       );

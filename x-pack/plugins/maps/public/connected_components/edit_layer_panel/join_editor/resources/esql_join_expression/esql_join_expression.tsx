@@ -8,30 +8,40 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiExpression } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { JoinField } from '../..';
 import {
-  ESDistanceSourceDescriptor,
+  ESESQLTermSourceDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
-import { SpatialJoinPopoverContent } from './spatial_join_popover_content';
+import { ESQLJoinPopoverContent } from './esql_join_popover_content';
 
 interface Props {
-  sourceDescriptor: Partial<ESDistanceSourceDescriptor>;
+  sourceDescriptor: Partial<ESESQLTermSourceDescriptor>;
   onSourceDescriptorChange: (sourceDescriptor: Partial<JoinSourceDescriptor>) => void;
+
+  // Left field props
+  leftValue?: string;
+  leftFields: JoinField[];
+  onLeftFieldChange: (leftField: string) => void;
 }
 
-export function SpatialJoinExpression(props: Props) {
+export function ESQLJoinExpression(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const { geoField } = props.sourceDescriptor;
-  const expressionValue =
-    geoField !== undefined
-      ? i18n.translate('xpack.maps.spatialJoinExpression.value', {
-          defaultMessage: 'features from {geoField}',
-          values: { geoField },
-        })
-      : i18n.translate('xpack.maps.spatialJoinExpression.emptyValue', {
-          defaultMessage: '-- configure spatial join --',
-        });
+  console.log({ isPopoverOpen });
+
+  // const { geoField } = props.sourceDescriptor;
+  // const expressionValue =
+  //   geoField !== undefined
+  //     ? i18n.translate('xpack.maps.spatialJoinExpression.value', {
+  //         defaultMessage: 'features from {geoField}',
+  //         values: { geoField },
+  //       })
+  //     : i18n.translate('xpack.maps.spatialJoinExpression.emptyValue', {
+  //         defaultMessage: '-- configure spatial join --',
+  //       });
+
+  const expressionValue = `FROM foobar`;
 
   return (
     <EuiPopover
@@ -48,7 +58,7 @@ export function SpatialJoinExpression(props: Props) {
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
           }}
-          description={i18n.translate('xpack.maps.spatialJoinExpression.description', {
+          description={i18n.translate('xpack.maps.esqlJoinExpressions.description', {
             defaultMessage: 'Join with',
           })}
           uppercase={false}
@@ -57,9 +67,12 @@ export function SpatialJoinExpression(props: Props) {
       }
       repositionOnScroll={true}
     >
-      <SpatialJoinPopoverContent
+      <ESQLJoinPopoverContent
         sourceDescriptor={props.sourceDescriptor}
         onSourceDescriptorChange={props.onSourceDescriptorChange}
+        leftSourceName={props.leftSourceName}
+        leftValue={props.leftValue}
+        leftFields={props.leftFields}
       />
     </EuiPopover>
   );

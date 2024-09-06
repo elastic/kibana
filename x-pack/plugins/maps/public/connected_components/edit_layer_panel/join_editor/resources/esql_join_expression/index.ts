@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SpatialJoinExpression } from './spatial_join_expression';
+export { ESQLJoinExpression } from './esql_join_expression';

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DEFAULT_WITHIN_DISTANCE, ESDistanceSource } from './es_distance_source';
+export { ESESQLTermSource } from './es_esql_term_source';

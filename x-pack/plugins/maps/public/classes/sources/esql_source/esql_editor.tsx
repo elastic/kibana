@@ -39,6 +39,8 @@ export function ESQLEditor(props: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [localQuery, setLocalQuery] = useState<AggregateQuery>({ esql: props.esql });
 
+  console.log('esql edior');
+
   return (
     <>
       <TextBasedLangEditor
