@@ -130,7 +130,7 @@ describe('When rendering the command list (help output)', () => {
         return <div data-test-subj="custom-help">{'help output'}</div>;
       };
       render({ HelpComponent });
-      await enterCommand('help', { submitClick: true });
+      await enterCommand('help');
 
       expect(renderResult.getByTestId('custom-help')).toBeInTheDocument();
     });
@@ -142,7 +142,7 @@ describe('When rendering the command list (help output)', () => {
         return <div data-test-subj="custom-help">{'help output'}</div>;
       };
       render({ HelpComponent });
-      await enterCommand('help', { submitClick: true });
+      await enterCommand('help');
 
       expect(renderResult.getByTestId('custom-help')).toBeInTheDocument();
     });

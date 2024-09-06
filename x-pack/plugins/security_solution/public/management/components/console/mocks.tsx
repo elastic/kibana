@@ -10,7 +10,7 @@
 import React, { memo, useEffect } from 'react';
 import { EuiCode } from '@elastic/eui';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { within } from '@testing-library/react';
+import { fireEvent, within } from '@testing-library/react';
 import { convertToTestId } from './components/command_list';
 import { Console } from './console';
 import type {
@@ -135,12 +135,10 @@ export const enterConsoleCommand = async (
     inputOnly = false,
     useKeyboard = false,
     dataTestSubj = 'test',
-    submitClick = false,
   }: Partial<{
     inputOnly: boolean;
     useKeyboard: boolean;
     dataTestSubj: string;
-    submitClick: boolean;
   }> = {}
 ): Promise<void> => {
   const keyCaptureInput = renderResult.getByTestId(`${dataTestSubj}-keyCapture-input`);
@@ -156,16 +154,12 @@ export const enterConsoleCommand = async (
     await user.type(keyCaptureInput, cmd);
   }
 
-  // user-event v14 has a problem with {enter} not working on certain inputs
-  // so this provides a workaround to submit via click instead.
-  // See here for a related discussion: https://github.com/testing-library/user-event/discussions/1164
-  if (submitClick) {
-    await user.click(renderResult.getByTestId(`${dataTestSubj}-inputTextSubmitButton`));
-    return;
-  }
-
   if (!inputOnly) {
-    await user.keyboard('{enter}');
+    // user-event v14 has a problem with [Enter] not working on certain inputs
+    // so this uses fireEvent instead for the time being.
+    // See here for a related discussion: https://github.com/testing-library/user-event/discussions/1164
+    // await user.keyboard('[Enter]');
+    fireEvent.keyDown(keyCaptureInput, { key: 'enter', keyCode: 13 });
   }
 };
 

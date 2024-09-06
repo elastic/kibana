@@ -193,9 +193,9 @@ describe.skip('When entering data into the Console input', () => {
   describe('and when the command input history popover is opened', () => {
     const renderWithInputHistory = async (inputText: string = '') => {
       render();
-      await enterCommand('help', { submitClick: true });
-      await enterCommand('cmd2 --help', { submitClick: true });
-      await enterCommand('cmd1 --help', { submitClick: true });
+      await enterCommand('help');
+      await enterCommand('cmd2 --help');
+      await enterCommand('cmd1 --help');
 
       if (inputText) {
         enterCommand(inputText, { inputOnly: true });

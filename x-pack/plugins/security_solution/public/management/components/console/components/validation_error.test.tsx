@@ -41,7 +41,7 @@ describe('ValidationError component', () => {
 
   it('should display message and help output if command is not hidden from help', async () => {
     render();
-    await enterCommand('cmd1', { submitClick: true });
+    await enterCommand('cmd1');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       'this command is not active'
@@ -52,7 +52,7 @@ describe('ValidationError component', () => {
   it('should only display message (no help) if command is hidden from help', async () => {
     command.helpHidden = true;
     render();
-    await enterCommand('cmd1', { submitClick: true });
+    await enterCommand('cmd1');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       'this command is not active'

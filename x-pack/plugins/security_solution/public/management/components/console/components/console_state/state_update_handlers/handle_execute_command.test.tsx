@@ -27,19 +27,19 @@ describe('When a Console command is entered by the user', () => {
 
   it('should clear the command output history when `clear` is entered', async () => {
     render();
-    await enterCommand('help', { submitClick: true });
-    await enterCommand('help', { submitClick: true });
+    await enterCommand('help');
+    await enterCommand('help');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(2);
 
-    await enterCommand('clear', { submitClick: true });
+    await enterCommand('clear');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(0);
   });
 
   it('should show individual command help when `--help` option is used', async () => {
     render();
-    await enterCommand('cmd2 --help', { submitClick: true });
+    await enterCommand('cmd2 --help');
 
     expect(renderResult.getByTestId('test-commandUsage')).toBeTruthy();
   });
@@ -55,28 +55,28 @@ describe('When a Console command is entered by the user', () => {
     }
 
     render();
-    await enterCommand('cmd2 --help', { submitClick: true });
+    await enterCommand('cmd2 --help');
 
     expect(renderResult.getByTestId('cmd-help')).toBeTruthy();
   });
 
   it('should execute a command entered', async () => {
     render();
-    await enterCommand('cmd1', { submitClick: true });
+    await enterCommand('cmd1');
 
     expect(renderResult.getByTestId('exec-output')).toBeTruthy();
   });
 
   it('should allow multiple of the same options if `allowMultiples` is `true`', async () => {
     render();
-    await enterCommand('cmd3 --foo one --foo two', { submitClick: true });
+    await enterCommand('cmd3 --foo one --foo two');
 
     expect(renderResult.getByTestId('exec-output')).toBeTruthy();
   });
 
   it('should show error if unknown command', async () => {
     render();
-    await enterCommand('foo-foo', { submitClick: true });
+    await enterCommand('foo-foo');
 
     expect(renderResult.getByTestId('test-unknownCommandError').textContent).toEqual(
       'Unsupported text/commandThe text you entered foo-foo is unsupported! Click  Help or type help for assistance.'
@@ -85,7 +85,7 @@ describe('When a Console command is entered by the user', () => {
 
   it('should show error if options are used but command supports none', async () => {
     render();
-    await enterCommand('cmd1 --foo', { submitClick: true });
+    await enterCommand('cmd1 --foo');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Command does not support any arguments'
@@ -94,7 +94,7 @@ describe('When a Console command is entered by the user', () => {
 
   it('should show error if unknown (single) argument is used', async () => {
     render();
-    await enterCommand('cmd2 --file test --foo', { submitClick: true });
+    await enterCommand('cmd2 --file test --foo');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'The following cmd2 argument is not supported by this command: --foo'
@@ -103,7 +103,7 @@ describe('When a Console command is entered by the user', () => {
 
   it('should show error if unknown (multiple) arguments are used', async () => {
     render();
-    await enterCommand('cmd2 --file test --foo --bar', { submitClick: true });
+    await enterCommand('cmd2 --file test --foo --bar');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'The following cmd2 arguments are not supported by this command: --foo, --bar'
@@ -112,7 +112,7 @@ describe('When a Console command is entered by the user', () => {
 
   it('should show error if unknown arguments are used along with the `--help` argument', async () => {
     render();
-    await enterCommand('cmd2 one two three --help', { submitClick: true });
+    await enterCommand('cmd2 one two three --help');
 
     expect(renderResult.getByTestId('test-badArgument').textContent).toMatch(
       /Unsupported argument/
@@ -121,7 +121,7 @@ describe('When a Console command is entered by the user', () => {
 
   it('should show error if values are given to the `--help` argument', async () => {
     render();
-    await enterCommand('cmd2 --help one --help', { submitClick: true });
+    await enterCommand('cmd2 --help one --help');
 
     expect(renderResult.getByTestId('test-badArgument').textContent).toMatch(
       /Unsupported argument/
@@ -130,7 +130,7 @@ describe('When a Console command is entered by the user', () => {
 
   it('should show error if any required option is not set', async () => {
     render();
-    await enterCommand('cmd2 --ext one', { submitClick: true });
+    await enterCommand('cmd2 --ext one');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Missing required argument: --file'
@@ -139,7 +139,7 @@ describe('When a Console command is entered by the user', () => {
 
   it('should show error if argument is used more than once', async () => {
     render();
-    await enterCommand('cmd2 --file one --file two', { submitClick: true });
+    await enterCommand('cmd2 --file one --file two');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --file'
@@ -148,7 +148,7 @@ describe('When a Console command is entered by the user', () => {
 
   it("should show error returned by the option's `validate()` callback", async () => {
     render();
-    await enterCommand('cmd2 --file one --bad foo', { submitClick: true });
+    await enterCommand('cmd2 --file one --bad foo');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --bad. This is a bad value'
@@ -157,7 +157,7 @@ describe('When a Console command is entered by the user', () => {
 
   it('should show error if no options were provided, but command requires some', async () => {
     render();
-    await enterCommand('cmd2', { submitClick: true });
+    await enterCommand('cmd2');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Missing required arguments: --file'
@@ -166,7 +166,7 @@ describe('When a Console command is entered by the user', () => {
 
   it('should show error if all arguments are optional, but at least 1 must be defined', async () => {
     render();
-    await enterCommand('cmd4', { submitClick: true });
+    await enterCommand('cmd4');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'At least one argument must be used'
@@ -183,7 +183,7 @@ describe('When a Console command is entered by the user', () => {
     cmd1Definition.validate = () => 'command is invalid';
 
     render();
-    await enterCommand('cmd1', { submitClick: true });
+    await enterCommand('cmd1');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       'command is invalid'
@@ -200,7 +200,7 @@ describe('When a Console command is entered by the user', () => {
     cmd1Definition.validate = () => 'command is invalid';
 
     render();
-    await enterCommand('cmd1 --help', { submitClick: true });
+    await enterCommand('cmd1 --help');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'command is invalid'
@@ -209,7 +209,7 @@ describe('When a Console command is entered by the user', () => {
 
   it('should show error no options were provided, but has exclusive or arguments', async () => {
     render();
-    await enterCommand('cmd6', { submitClick: true });
+    await enterCommand('cmd6');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'This command supports only one of the following arguments: --foo, --bar'
@@ -218,7 +218,7 @@ describe('When a Console command is entered by the user', () => {
 
   it('should show error when it has multiple exclusive arguments', async () => {
     render();
-    await enterCommand('cmd6 --foo 234 --bar 123', { submitClick: true });
+    await enterCommand('cmd6 --foo 234 --bar 123');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'This command supports only one of the following arguments: --foo, --bar'
@@ -227,14 +227,14 @@ describe('When a Console command is entered by the user', () => {
 
   it('should show success when one exclusive argument is used', async () => {
     render();
-    await enterCommand('cmd6 --foo 234', { submitClick: true });
+    await enterCommand('cmd6 --foo 234');
 
     expect(renderResult.getByTestId('exec-output')).toBeTruthy();
   });
 
   it('should show success when the other exclusive argument is used', async () => {
     render();
-    await enterCommand('cmd6 --bar 234', { submitClick: true });
+    await enterCommand('cmd6 --bar 234');
 
     expect(renderResult.getByTestId('exec-output')).toBeTruthy();
   });
@@ -254,7 +254,7 @@ describe('When a Console command is entered by the user', () => {
     it('should validate argument with `mustHaveValue=non-empty-string', async () => {
       setValidation('non-empty-string');
       const { getByTestId } = render();
-      await enterCommand('cmd3 --foo=""', { submitClick: true });
+      await enterCommand('cmd3 --foo=""');
 
       expect(getByTestId('test-badArgument-message')).toHaveTextContent(
         executionTranslations.mustHaveValue('foo')
@@ -264,7 +264,7 @@ describe('When a Console command is entered by the user', () => {
     it('should validate argument with `mustHaveValue=truthy', async () => {
       setValidation('truthy');
       const { getByTestId } = render();
-      await enterCommand('cmd3 --foo=""', { submitClick: true });
+      await enterCommand('cmd3 --foo=""');
 
       expect(getByTestId('test-badArgument-message')).toHaveTextContent(
         executionTranslations.mustHaveValue('foo')
@@ -274,7 +274,7 @@ describe('When a Console command is entered by the user', () => {
     it('should validate argument with `mustHaveValue=number', async () => {
       setValidation('number');
       const { getByTestId } = render();
-      await enterCommand('cmd3 --foo="hi"', { submitClick: true });
+      await enterCommand('cmd3 --foo="hi"');
 
       expect(getByTestId('test-badArgument-message')).toHaveTextContent(
         executionTranslations.mustBeNumber('foo')
@@ -284,7 +284,7 @@ describe('When a Console command is entered by the user', () => {
     it('should validate argument with `mustHaveValue=number-greater-than-zero', async () => {
       setValidation('number-greater-than-zero');
       const { getByTestId } = render();
-      await enterCommand('cmd3 --foo="0"', { submitClick: true });
+      await enterCommand('cmd3 --foo="0"');
 
       expect(getByTestId('test-badArgument-message')).toHaveTextContent(
         executionTranslations.mustBeGreaterThanZero('foo')

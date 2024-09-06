@@ -72,7 +72,7 @@ const prepareTestConsoleClosed = async () => {
 
   const render = async () => {
     const { consoleManagerMockAccess, renderResult } = await _render();
-    await enterConsoleCommand(renderResult, user, 'release', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
@@ -104,7 +104,7 @@ describe('When using the release action from response actions console', () => {
   it('should show an error if the `isolation` capability is not present in the endpoint', async () => {
     const { render, user } = prepareTest();
     const { renderResult } = await render([]);
-    await enterConsoleCommand(renderResult, user, 'release', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
@@ -116,7 +116,7 @@ describe('When using the release action from response actions console', () => {
   it('should call `release` api when command is entered', async () => {
     const { apiMocks, render, user } = prepareTest();
     const { renderResult } = await render();
-    await enterConsoleCommand(renderResult, user, 'release', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
@@ -155,7 +155,7 @@ describe('When using the release action from response actions console', () => {
   it('should call the action status api after creating the `release` request', async () => {
     const { apiMocks, render, user } = prepareTest();
     const { renderResult } = await render();
-    await enterConsoleCommand(renderResult, user, 'release', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -165,7 +165,7 @@ describe('When using the release action from response actions console', () => {
   it('should show success when `release` action completes with no errors', async () => {
     const { render, user } = prepareTest();
     const { renderResult } = await render();
-    await enterConsoleCommand(renderResult, user, 'release', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('release-success')).toBeTruthy();
@@ -192,7 +192,7 @@ describe('When using the release action from response actions console', () => {
     };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
 
-    await enterConsoleCommand(renderResult, user, 'release', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('release-actionFailure').textContent).toMatch(
@@ -216,7 +216,7 @@ describe('When using the release action from response actions console', () => {
     );
 
     // enter command
-    await enterConsoleCommand(renderResult, user, 'release', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'release');
     // hide console
     await consoleManagerMockAccess.hideOpenedConsole();
 

@@ -88,7 +88,7 @@ describe('When using isolate action from response actions console', () => {
 
   it('should show an error if the `isolation` capability is not present in the endpoint', async () => {
     await render([]);
-    await enterConsoleCommand(renderResult, user, 'isolate', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'isolate');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'isolate')
@@ -97,7 +97,7 @@ describe('When using isolate action from response actions console', () => {
 
   it('should call `isolate` api when command is entered', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'isolate', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'isolate');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
@@ -132,7 +132,7 @@ describe('When using isolate action from response actions console', () => {
 
   it('should call the action status api after creating the `isolate` request', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'isolate', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'isolate');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -141,7 +141,7 @@ describe('When using isolate action from response actions console', () => {
 
   it('should show success when `isolate` action completes with no errors', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'isolate', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'isolate');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('isolate-success')).toBeTruthy();
@@ -164,7 +164,7 @@ describe('When using isolate action from response actions console', () => {
     };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
-    await enterConsoleCommand(renderResult, user, 'isolate', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'isolate');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('isolate-actionFailure').textContent).toMatch(
@@ -179,7 +179,7 @@ describe('When using isolate action from response actions console', () => {
     await render();
 
     // enter command
-    await enterConsoleCommand(renderResult, user, 'isolate', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'isolate');
     // hide console
     await consoleManagerMockAccess.hideOpenedConsole();
 
@@ -203,7 +203,7 @@ describe('When using isolate action from response actions console', () => {
 
       render = async () => {
         const response = await _render();
-        await enterConsoleCommand(response, user, 'isolate', { submitClick: true });
+        await enterConsoleCommand(response, user, 'isolate');
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);

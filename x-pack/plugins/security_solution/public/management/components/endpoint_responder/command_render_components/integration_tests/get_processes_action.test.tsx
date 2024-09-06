@@ -108,7 +108,7 @@ describe('When using processes action from response actions console', () => {
   it('should show an error if the `running_processes` capability is not present in the endpoint', async () => {
     setConsoleCommands([]);
     await render();
-    await enterConsoleCommand(renderResult, user, 'processes', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'processes');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'processes')
@@ -117,7 +117,7 @@ describe('When using processes action from response actions console', () => {
 
   it('should call `running-procs` api when command is entered', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'processes', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'processes');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.processes).toHaveBeenCalledTimes(1);
@@ -152,7 +152,7 @@ describe('When using processes action from response actions console', () => {
 
   it('should call the action status api after creating the `processes` request', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'processes', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'processes');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -161,7 +161,7 @@ describe('When using processes action from response actions console', () => {
 
   it('should show success when `processes` action completes with no errors', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'processes', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'processes');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('getProcessesSuccessCallout')).toBeTruthy();
@@ -185,7 +185,7 @@ describe('When using processes action from response actions console', () => {
     pendingDetailResponse.data.errors = ['error one', 'error two'];
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
-    await enterConsoleCommand(renderResult, user, 'processes', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'processes');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('getProcesses-actionFailure').textContent).toMatch(
@@ -201,7 +201,7 @@ describe('When using processes action from response actions console', () => {
       message: 'this is an error',
     } as never);
     await render();
-    await enterConsoleCommand(renderResult, user, 'processes', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'processes');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('getProcesses-apiFailure').textContent).toMatch(
@@ -216,7 +216,7 @@ describe('When using processes action from response actions console', () => {
 
       render = async () => {
         const response = await _render();
-        await enterConsoleCommand(response, user, 'processes', { submitClick: true });
+        await enterConsoleCommand(response, user, 'processes');
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.processes).toHaveBeenCalledTimes(1);
@@ -289,7 +289,7 @@ describe('When using processes action from response actions console', () => {
 
     it('should display processes command --help', async () => {
       await render();
-      await enterConsoleCommand(renderResult, user, 'processes --help', { submitClick: true });
+      await enterConsoleCommand(renderResult, user, 'processes --help');
 
       await waitFor(() => {
         expect(renderResult.getByTestId('test-helpOutput').textContent).toEqual(
@@ -316,7 +316,7 @@ describe('When using processes action from response actions console', () => {
 
     it('should call the api with agentType of SentinelOne', async () => {
       await render();
-      await enterConsoleCommand(renderResult, user, 'processes', { submitClick: true });
+      await enterConsoleCommand(renderResult, user, 'processes');
 
       await waitFor(() => {
         expect(apiMocks.responseProvider.processes).toHaveBeenCalledWith({
@@ -329,7 +329,7 @@ describe('When using processes action from response actions console', () => {
 
     it('should display download link to access results', async () => {
       await render();
-      await enterConsoleCommand(renderResult, user, 'processes', { submitClick: true });
+      await enterConsoleCommand(renderResult, user, 'processes');
 
       await waitFor(() => {
         expect(renderResult.getByTestId('getProcessesSuccessCallout').textContent).toEqual(
@@ -354,7 +354,7 @@ describe('When using processes action from response actions console', () => {
 
       it('should error if user enters `process` command', async () => {
         await render();
-        await enterConsoleCommand(renderResult, user, 'processes', { submitClick: true });
+        await enterConsoleCommand(renderResult, user, 'processes');
 
         await waitFor(() => {
           expect(renderResult.getByTestId('test-validationError')).toHaveTextContent(

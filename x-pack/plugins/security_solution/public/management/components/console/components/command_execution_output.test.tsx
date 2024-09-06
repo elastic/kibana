@@ -38,7 +38,7 @@ describe('When using CommandExecutionOutput component', () => {
 
     render = async (props = {}) => {
       renderResult = renderConsole(props);
-      await enterCommand('cmd1', { submitClick: true });
+      await enterCommand('cmd1');
       return renderResult;
     };
   });

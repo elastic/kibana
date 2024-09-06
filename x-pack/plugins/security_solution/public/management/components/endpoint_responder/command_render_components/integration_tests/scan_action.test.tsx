@@ -116,7 +116,7 @@ describe('When using scan action from response actions console', () => {
 
   it('should show an error if the `scan` capability is not present in the endpoint', async () => {
     await render([]);
-    await enterConsoleCommand(renderResult, user, 'scan --path="one/two"', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'scan --path="one/two"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'scan')
@@ -126,7 +126,7 @@ describe('When using scan action from response actions console', () => {
   it('should show an error if the `scan` is not authorized', async () => {
     endpointPrivileges.canWriteScanOperations = false;
     await render();
-    await enterConsoleCommand(renderResult, user, 'scan --path="one/two"', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'scan --path="one/two"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       INSUFFICIENT_PRIVILEGES_FOR_COMMAND
@@ -135,7 +135,7 @@ describe('When using scan action from response actions console', () => {
 
   it('should show an error if `scan` is entered without `--path` argument', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'scan', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'scan');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Missing required arguments: --path'
@@ -144,7 +144,7 @@ describe('When using scan action from response actions console', () => {
 
   it('should show error if `--path` is empty string', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'scan --path=""', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'scan --path=""');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument --path must have a value'
@@ -153,7 +153,7 @@ describe('When using scan action from response actions console', () => {
 
   it('should call the `scan` api with the expected payload', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'scan --path="one/two"', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'scan --path="one/two"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.scan).toHaveBeenCalledWith({
@@ -193,7 +193,7 @@ describe('When using scan action from response actions console', () => {
 
   it('should work with `--help argument`', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'scan --help', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'scan --help');
 
     expect(renderResult.getByTestId('test-helpOutput').textContent).toEqual(
       'AboutScan the host for malwareUsagescan --path [--comment]Examplescan --path "/full/path/to/folder" --comment "Scan folder for malware"Required parameters--path - The absolute path to a file or directory to be scannedOptional parameters--comment - A comment to go along with the action'
@@ -202,7 +202,7 @@ describe('When using scan action from response actions console', () => {
 
   it('should display pending message', async () => {
     await render();
-    await enterConsoleCommand(renderResult, user, 'scan --path="one/two"', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'scan --path="one/two"');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('scan-pending').textContent).toEqual(
@@ -234,7 +234,7 @@ describe('When using scan action from response actions console', () => {
     apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
 
     await render();
-    await enterConsoleCommand(renderResult, user, 'scan --path="one/two"', { submitClick: true });
+    await enterConsoleCommand(renderResult, user, 'scan --path="one/two"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();

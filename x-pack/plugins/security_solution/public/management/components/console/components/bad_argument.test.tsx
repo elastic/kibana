@@ -36,7 +36,7 @@ describe('BadArgument component', () => {
 
   it('should display message and help output if command is not hidden from help', async () => {
     render();
-    await enterCommand('cmd1 --foo', { submitClick: true });
+    await enterCommand('cmd1 --foo');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument --foo must have a value'
@@ -47,7 +47,7 @@ describe('BadArgument component', () => {
   it('should only display message (no help) if command is hidden from help', async () => {
     command.helpHidden = true;
     render();
-    await enterCommand('cmd1 --foo', { submitClick: true });
+    await enterCommand('cmd1 --foo');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument --foo must have a value'
