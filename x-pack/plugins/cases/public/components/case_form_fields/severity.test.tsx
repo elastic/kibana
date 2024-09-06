@@ -16,12 +16,15 @@ import { FormTestComponent } from '../../common/test_utils';
 
 const onSubmit = jest.fn();
 
-// FLAKY: https://github.com/elastic/kibana/issues/188951
-describe.skip('Severity form field', () => {
+describe('Severity form field', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('renders', async () => {
@@ -32,7 +35,7 @@ describe.skip('Severity form field', () => {
     );
 
     expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-severity-selection')).not.toHaveAttribute('disabled');
+    expect(await screen.findByTestId('case-severity-selection')).toBeEnabled();
   });
 
   // default to LOW in this test configuration
@@ -76,6 +79,6 @@ describe.skip('Severity form field', () => {
       </FormTestComponent>
     );
 
-    expect(await screen.findByTestId('case-severity-selection')).toHaveAttribute('disabled');
+    expect(await screen.findByTestId('case-severity-selection')).toBeDisabled();
   });
 });

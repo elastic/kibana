@@ -5,7 +5,14 @@
  * 2.0.
  */
 
+import {
+  ActionsClientBedrockChatModel,
+  ActionsClientChatOpenAI,
+  ActionsClientGeminiChatModel,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { SamplesFormat } from '../common';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -47,6 +54,7 @@ export interface CategorizationState {
   pipelineResults: object[];
   finalized: boolean;
   reviewed: boolean;
+  hasTriedOnce: boolean;
   currentPipeline: object;
   currentProcessors: object[];
   invalidCategorization: object[];
@@ -69,6 +77,9 @@ export interface EcsMappingState {
   finalized: boolean;
   currentMapping: object;
   finalMapping: object;
+  chunkMapping: object;
+  useFinalMapping: boolean;
+  hasTriedOnce: boolean;
   currentPipeline: object;
   duplicateFields: string[];
   missingKeys: string[];
@@ -76,6 +87,16 @@ export interface EcsMappingState {
   results: object;
   samplesFormat: string;
   ecsVersion: string;
+}
+
+export interface LogFormatDetectionState {
+  lastExecutedChain: string;
+  logSamples: string[];
+  exAnswer: string;
+  finalized: boolean;
+  samplesFormat: SamplesFormat;
+  ecsVersion: string;
+  results: object;
 }
 
 export interface RelatedState {
@@ -91,9 +112,16 @@ export interface RelatedState {
   pipelineResults: object[];
   finalized: boolean;
   reviewed: boolean;
+  hasTriedOnce: boolean;
   currentPipeline: object;
   currentProcessors: object[];
   initialPipeline: object;
   results: object;
   lastExecutedChain: string;
 }
+
+export type ChatModels =
+  | ActionsClientChatOpenAI
+  | ActionsClientBedrockChatModel
+  | ActionsClientSimpleChatModel
+  | ActionsClientGeminiChatModel;

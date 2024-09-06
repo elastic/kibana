@@ -74,7 +74,7 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
   }, [processor, unsavedFormState]);
 
   const formSerializer = useCallback(
-    (formState) => {
+    (formState: any) => {
       return {
         type: formState.type,
         fields: formState.customOptions

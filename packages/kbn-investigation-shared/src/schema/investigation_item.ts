@@ -8,20 +8,23 @@
 
 import * as t from 'io-ts';
 
-const esqlItemSchema = t.type({
+const itemSchema = t.type({
   title: t.string,
-  type: t.literal('esql'),
-  params: t.type({
-    esql: t.string,
-    suggestion: t.any,
-  }),
+  type: t.string,
+  params: t.record(t.string, t.any),
 });
 
-const investigationItemsSchema = esqlItemSchema; // replace with union with various item types
-
 const investigationItemSchema = t.intersection([
-  t.type({ id: t.string, createdAt: t.number, createdBy: t.string }),
-  investigationItemsSchema,
+  t.type({
+    id: t.string,
+    createdAt: t.number,
+    createdBy: t.string,
+  }),
+  itemSchema,
 ]);
 
-export { investigationItemSchema, investigationItemsSchema, esqlItemSchema };
+type Item = t.TypeOf<typeof itemSchema>;
+type InvestigationItem = t.TypeOf<typeof investigationItemSchema>;
+
+export type { Item, InvestigationItem };
+export { investigationItemSchema, itemSchema };

@@ -19,7 +19,7 @@ import { getGeneratedFilePath } from './lib/get_generated_file_path';
 import { removeGenArtifacts } from './lib/remove_gen_artifacts';
 import { lint } from './openapi_linter';
 import { getGenerationContext } from './parser/get_generation_context';
-import type { OpenApiDocument } from './parser/openapi_types';
+import type { OpenApiDocument, ParsedSource } from './parser/openapi_types';
 import { initTemplateService, TemplateName } from './template_service/template_service';
 
 export interface GeneratorConfig {
@@ -54,11 +54,12 @@ export const generate = async (config: GeneratorConfig) => {
   const schemaPaths = await globby([sourceFilesGlob]);
 
   console.log(`🕵️‍♀️   Found ${schemaPaths.length} schemas, parsing`);
-  let parsedSources = await Promise.all(
+  let parsedSources: ParsedSource[] = await Promise.all(
     schemaPaths.map(async (sourcePath) => {
       const parsedSchema = (await SwaggerParser.parse(sourcePath)) as OpenApiDocument;
       return {
         sourcePath,
+        generatedPath: getGeneratedFilePath(sourcePath),
         generationContext: getGenerationContext(parsedSchema),
       };
     })
@@ -67,6 +68,10 @@ export const generate = async (config: GeneratorConfig) => {
   parsedSources = parsedSources.filter(
     ({ generationContext }) =>
       generationContext.operations.length > 0 || generationContext.components !== undefined
+  );
+  parsedSources.sort((a, b) => a.sourcePath.localeCompare(b.sourcePath));
+  parsedSources.forEach((source) =>
+    source.generationContext.operations.sort((a, b) => a.operationId.localeCompare(b.operationId))
   );
 
   console.log(`🧹  Cleaning up any previously generated artifacts`);
@@ -92,26 +97,24 @@ export const generate = async (config: GeneratorConfig) => {
       // Sort the operations by operationId so the output is deterministic
       .sort((a, b) => a.operationId.localeCompare(b.operationId));
 
-    const result = TemplateService.compileTemplate(templateName, {
+    const result = TemplateService.compileBundleTemplate(templateName, {
       operations,
-      components: {},
+      sources: parsedSources,
       info: {
         title,
         version: 'Bundle (no version)',
       },
-      imports: {},
-      circularRefs: new Set<string>(),
     });
 
     await fs.writeFile(bundle.outFile, result);
     console.log(`📖  Wrote bundled artifact to ${chalk.bold(bundle.outFile)}`);
   } else {
     await Promise.all(
-      parsedSources.map(async ({ sourcePath, generationContext }) => {
+      parsedSources.map(async ({ generatedPath, generationContext }) => {
         const result = TemplateService.compileTemplate(templateName, generationContext);
 
         // Write the generation result to disk
-        await fs.writeFile(getGeneratedFilePath(sourcePath), result);
+        await fs.writeFile(generatedPath, result);
       })
     );
   }

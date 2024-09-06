@@ -14,6 +14,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { Router } from '@kbn/shared-ux-router';
 
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { SyntheticsSharedContext } from './contexts/synthetics_shared_context';
 import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
@@ -72,13 +73,15 @@ const Application = (props: SyntheticsAppProps) => {
           <PresentationContextProvider>
             <Router history={appMountParameters.history}>
               <SyntheticsSettingsContextProvider {...props}>
-                <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                  <InspectorContextProvider>
-                    <PageRouter />
-                    <ActionMenu appMountParameters={appMountParameters} />
-                    <TestNowModeFlyoutContainer />
-                  </InspectorContextProvider>
-                </div>
+                <PerformanceContextProvider>
+                  <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                    <InspectorContextProvider>
+                      <PageRouter />
+                      <ActionMenu appMountParameters={appMountParameters} />
+                      <TestNowModeFlyoutContainer />
+                    </InspectorContextProvider>
+                  </div>
+                </PerformanceContextProvider>
               </SyntheticsSettingsContextProvider>
             </Router>
           </PresentationContextProvider>

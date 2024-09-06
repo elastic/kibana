@@ -11,7 +11,7 @@ import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
-interface Props {
+export interface Props {
   field: FieldHook;
   euiFieldProps: {
     options: Array<
@@ -29,7 +29,7 @@ export const SelectField = ({ field, euiFieldProps, idAria, ...rest }: Props) =>
   return (
     <EuiFormRow
       label={field.label}
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

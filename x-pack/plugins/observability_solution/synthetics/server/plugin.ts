@@ -25,7 +25,7 @@ import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor
 import { initSyntheticsServer } from './server';
 import { syntheticsFeature } from './feature';
 import { registerSyntheticsSavedObjects } from './saved_objects/saved_objects';
-import { UptimeConfig } from '../common/config';
+import { UptimeConfig } from './config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
