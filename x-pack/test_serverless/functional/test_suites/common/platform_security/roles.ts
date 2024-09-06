@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { clearAllRoles } from '../../../../shared/lib';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Note: this suite is currently only called from the feature flags test config:
@@ -17,8 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'svlManagementPage', 'security']);
   const browser = getService('browser');
-  const es = getService('es');
-  const log = getService('log');
+  const platformSecurityUtils = getService('platformSecurityUtils');
 
   describe('Roles', function () {
     describe('as Viewer', () => {
@@ -43,7 +41,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await clearAllRoles(es, log);
+        await platformSecurityUtils.clearAllRoles();
       });
 
       it('should not display reserved roles', async () => {

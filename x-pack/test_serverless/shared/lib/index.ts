@@ -9,4 +9,3 @@ export * from './security';
 export * from './object_remover';
 export * from './space_path_prefix';
 export * from './cases';
-export * from './platform_security';

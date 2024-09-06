@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import type { Role } from '@kbn/security-plugin-types-common';
 import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
-import { clearAllRoles } from '../../../../shared/lib';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Notes:
@@ -25,6 +24,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 // esServerArgs: ['xpack.security.authc.native_roles.enabled=true'],
 
 export default function ({ getService }: FtrProviderContext) {
+  const platformSecurityUtils = getService('platformSecurityUtils');
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestWithAdminScope: SupertestWithRoleScopeType;
   const es = getService('es');
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
       after(async () => {
-        await clearAllRoles(es);
+        await platformSecurityUtils.clearAllRoles();
       });
 
       describe('Create Role', () => {
