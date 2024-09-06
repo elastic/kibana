@@ -33,7 +33,7 @@ import type { AnomalyExplorerChartsService } from '../application/services/anoma
 import type { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
 import type { MlFieldFormatService } from '../application/services/field_format_service';
 import type { MlJobService } from '../application/services/job_service';
-import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlApi } from '../application/services/ml_api_service';
 import type { MlResultsService } from '../application/services/results_service';
 import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
@@ -235,13 +235,13 @@ export interface AnomalyChartsServices {
   anomalyExplorerService: AnomalyExplorerChartsService;
   mlFieldFormatService: MlFieldFormatService;
   mlResultsService: MlResultsService;
-  mlApiServices?: MlApiServices;
+  mlApi?: MlApi;
 }
 
 export interface SingleMetricViewerServices {
   anomalyExplorerService: AnomalyExplorerChartsService;
   anomalyDetectorService: AnomalyDetectorService;
-  mlApiServices: MlApiServices;
+  mlApi: MlApi;
   mlCapabilities: MlCapabilitiesService;
   mlFieldFormatService: MlFieldFormatService;
   mlJobService: MlJobService;
