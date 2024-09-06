@@ -63,7 +63,12 @@ export const importRule = async ({
       id: existingRule.id,
       data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
     });
-    return convertAlertingRuleToRuleResponse(updatedRule);
+
+    // We strip `enabled` from the rule object to use in the rules client and need to enable it separately if user has enabled the updated rule
+    if (ruleWithUpdates.enabled) {
+      await rulesClient.enableRule(updatedRule);
+    }
+    return convertAlertingRuleToRuleResponse({ ...updatedRule, enabled: ruleWithUpdates.enabled });
   }
 
   /* Rule does not exist, so we'll create it */
