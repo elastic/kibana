@@ -124,8 +124,6 @@ export function createBulkExecutionEnqueuerFunction({
       try {
         validateConnector({ id, connector, actionTypeRegistry });
       } catch (e) {
-        console.log(e);
-        console.log(connector);
         logger.warn(`Skipped the actions for the connector: ${name} (${id}). Error: ${e.message}`);
         continue;
       }
