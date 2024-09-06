@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-export function getGeneratedFilePath(sourcePath: string) {
+export function getGeneratedFilePath(sourcePath: string, extension: string, outputDir?: string) {
+  const filePath = outputDir
+    ? `${outputDir}/${sourcePath.substring(sourcePath.lastIndexOf('/') + 1)}`
+    : sourcePath;
+
   // Remove any double extension like `.schema.yaml` or `.schema.yml` and replace with `.gen.ts`
-  const secondToLastDot = sourcePath.lastIndexOf('.', sourcePath.lastIndexOf('.') - 1);
-  return `${sourcePath.substring(0, secondToLastDot)}.gen.ts`;
+  const secondToLastDot = filePath.lastIndexOf('.', filePath.lastIndexOf('.') - 1);
+  return `${filePath.substring(0, secondToLastDot)}.${extension}.ts`;
 }
