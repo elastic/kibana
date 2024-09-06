@@ -56,7 +56,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { BackfillClient } from '../backfill_client/backfill_client';
 import { ElasticsearchError } from '../lib';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { RulesSettingsService } from './rules-settings/rules_settings_service';
+import { RulesSettingsService } from './rules_settings/rules_settings_service';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;

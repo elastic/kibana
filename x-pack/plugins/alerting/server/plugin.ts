@@ -113,7 +113,7 @@ import { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/t
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
-import { RulesSettingsService } from './task_runner/rules-settings/rules_settings_service';
+import { RulesSettingsService } from './task_runner/rules_settings/rules_settings_service';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
