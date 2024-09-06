@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { getSummaryColumn } from '../../../../components/data_types/logs/summary_column';
 import { LOG_LEVEL_FIELDS } from '../../../../../common/data_types/logs/constants';
 import { getLogLevelBadgeCell } from '../../../../components/data_types/logs/log_level_badge_cell';
 import type { DataSourceProfileProvider } from '../../../profiles';
+import { ProfileProviderServices } from '../../profile_provider_services';
 
-export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRenderers'] =
-  (prev) => () => ({
+export const makeGetCellRenderersHandler =
+  (services: ProfileProviderServices): DataSourceProfileProvider['profile']['getCellRenderers'] =>
+  (prev) =>
+  () => ({
     ...prev(),
     ...LOG_LEVEL_FIELDS.reduce(
       (acc, field) => ({
@@ -21,4 +25,5 @@ export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRend
       }),
       {}
     ),
+    _source: getSummaryColumn({ data: services.data }),
   });
