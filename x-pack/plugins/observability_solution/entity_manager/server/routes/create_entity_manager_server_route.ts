@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { createServerRouteFactory } from '@kbn/server-route-repository';
+import { EntityManagerRouteHandlerResources } from './types';
 
-export const createEntityDefinitionQuerySchema = z.object({
-  installOnly: z.optional(BooleanFromString).default(false),
-});
+export const createEntityManagerServerRoute =
+  createServerRouteFactory<EntityManagerRouteHandlerResources>();
