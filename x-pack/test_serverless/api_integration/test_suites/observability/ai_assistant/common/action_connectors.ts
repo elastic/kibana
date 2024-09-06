@@ -6,7 +6,6 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { Agent } from 'supertest';
 import type {
   InternalRequestHeader,
   RoleCredentials,
@@ -46,7 +45,7 @@ export async function createProxyActionConnector({
   internalReqHeader,
 }: {
   log: ToolingLog;
-  supertest: Agent;
+  supertest: SupertestWithoutAuthProviderType;
   port: number;
   roleAuthc: RoleCredentials;
   internalReqHeader: InternalRequestHeader;
