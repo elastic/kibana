@@ -152,8 +152,11 @@ export class WrappingPrettyPrinter {
     const groupRight = binaryExpressionGroup(right);
     const continueVerticalFlattening = group && inp.flattenBinExpOfType === group;
     const suffix = inp.suffix ?? '';
+    const oneArgumentPerLine =
+      getPrettyPrintStats(left).hasLineBreakingDecorations ||
+      getPrettyPrintStats(right).hasLineBreakingDecorations;
 
-    if (continueVerticalFlattening) {
+    if (continueVerticalFlattening || oneArgumentPerLine) {
       const parent = ctx.parent?.node;
       const isLeftChild = isBinaryExpression(parent) && parent.args[0] === node;
       const leftInput: Input = {
@@ -171,7 +174,7 @@ export class WrappingPrettyPrinter {
       const rightTab = isLeftChild ? this.opts.tab : '';
       const txt = `${leftOut.txt} ${operator}\n${inp.indent}${rightTab}${rightOut.txt}${suffix}`;
 
-      return { txt };
+      return { txt, indented: leftOut.indented || rightOut.indented };
     }
 
     let txt: string = '';

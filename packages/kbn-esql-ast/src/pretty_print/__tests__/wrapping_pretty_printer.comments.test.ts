@@ -468,9 +468,11 @@ ROW 1
           2`;
         const text = reprint(query).text;
 
-        console.log(text);
-
-        expect(text).toBe(`ROW /* 1 */ /* 2 */ 1 /* 3 */ /* 4 */ + 2`);
+        expect('\n' + text).toBe(`
+ROW
+  // One is important here
+  1 +
+  2`);
       });
     });
   });
