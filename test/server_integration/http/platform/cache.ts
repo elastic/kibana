@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../services/types';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -22,12 +23,17 @@ export default function ({ getService }: FtrProviderContext) {
     it('allows translation bundles to be cached', async () => {
       await supertest
         .get('/translations/en.json')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect('Cache-Control', 'public, max-age=31536000, immutable')
         .expect(200);
     });
 
     it('allows the bootstrap bundles to be cached', async () => {
-      await supertest.get('/bootstrap.js').expect('Cache-Control', 'must-revalidate').expect(200);
+      await supertest
+        .get('/bootstrap.js')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect('Cache-Control', 'must-revalidate')
+        .expect(200);
     });
   });
 }
