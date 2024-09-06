@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsBulkResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsBulkResponse, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import { RunNowResult, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   RawAction,
@@ -25,6 +25,7 @@ interface CreateExecuteFunctionOptions {
   actionTypeRegistry: ActionTypeRegistryContract;
   inMemoryConnectors: InMemoryConnector[];
   configurationUtilities: ActionsConfigurationUtilities;
+  logger: Logger;
 }
 
 export interface ExecuteOptions
@@ -80,6 +81,7 @@ export function createBulkExecutionEnqueuerFunction({
   isESOCanEncrypt,
   inMemoryConnectors,
   configurationUtilities,
+  logger,
 }: CreateExecuteFunctionOptions): BulkExecutionEnqueuer<ExecutionResponse> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
@@ -113,30 +115,32 @@ export function createBulkExecutionEnqueuerFunction({
       inMemoryConnectors,
       connectorIds
     );
-    const skippedConnectors: string[] = [];
+    const runnableActions: ExecuteOptions[] = [];
 
     for (const c of connectors) {
       const { id, connector, isInMemory } = c;
+      const { actionTypeId, name } = connector;
 
-      if (connector.isMissingSecrets) {
-        skippedConnectors.push(id);
+      try {
+        validateConnector({ id, connector, actionTypeRegistry });
+      } catch (e) {
+        console.log(e);
+        console.log(connector);
+        logger.warn(`Skipped the actions for the connector: ${name} (${id}). Error: ${e.message}`);
         continue;
       }
 
-      const { actionTypeId } = connector;
-      if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
-        actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+      const actionsWithCurrentConnector = actionsToExecute.filter((action) => action.id === id);
+
+      if (actionsWithCurrentConnector.length > 0) {
+        runnableActions.push(...actionsWithCurrentConnector);
       }
 
       actionTypeIds[id] = actionTypeId;
       connectorIsInMemory[id] = isInMemory;
     }
 
-    const actionsWithoutSkippedConnectors = actionsToExecute.filter(
-      (action) => !skippedConnectors.includes(action.id)
-    );
-
-    const actions = actionsWithoutSkippedConnectors.map((actionToExecute) => {
+    const actions = runnableActions.map((actionToExecute) => {
       // Get saved object references from action ID and relatedSavedObjects
       const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
         actionToExecute.id,
@@ -192,7 +196,7 @@ export function createBulkExecutionEnqueuerFunction({
 
     return {
       errors: actionsOverLimit.length > 0,
-      items: actionsWithoutSkippedConnectors
+      items: runnableActions
         .map((a) => ({
           id: a.id,
           actionTypeId: a.actionTypeId,
@@ -213,6 +217,7 @@ export function createEphemeralExecutionEnqueuerFunction({
   taskManager,
   actionTypeRegistry,
   inMemoryConnectors,
+  logger,
 }: CreateExecuteFunctionOptions): ExecutionEnqueuer<RunNowResult> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
@@ -252,6 +257,28 @@ export function createEphemeralExecutionEnqueuerFunction({
       scope: ['actions'],
     });
   };
+}
+
+function validateConnector({
+  id,
+  connector,
+  actionTypeRegistry,
+}: {
+  id: string;
+  connector: InMemoryConnector | RawAction;
+  actionTypeRegistry: ActionTypeRegistryContract;
+}) {
+  const { name, isMissingSecrets, actionTypeId } = connector;
+
+  if (isMissingSecrets) {
+    throw new Error(
+      `Unable to execute action because no secrets are defined for the "${name}" connector.`
+    );
+  }
+
+  if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
+    actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+  }
 }
 
 function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorOptions['source']) {
