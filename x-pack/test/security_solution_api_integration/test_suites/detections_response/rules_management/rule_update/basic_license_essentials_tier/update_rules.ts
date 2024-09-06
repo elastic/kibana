@@ -103,6 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('@skipInServerless', function () {
+        /* Wrapped in `describe` block, because `this.tags` only works in `describe` blocks */
         this.tags('skipFIPS');
         it('should return a 403 forbidden if it is a machine learning job', async () => {
           await createRule(supertest, log, getSimpleRule('rule-1'));

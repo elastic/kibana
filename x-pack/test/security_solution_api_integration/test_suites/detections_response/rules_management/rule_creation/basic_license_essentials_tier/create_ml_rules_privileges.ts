@@ -50,6 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('@ess', function () {
+        /* Wrapped in `describe` block, because `this.tags` only works in `describe` blocks */
         this.tags('skipFIPS');
         it('should give a 403 when trying to create a single Machine Learning rule since the license is basic', async function () {
           const { body } = await supertest
@@ -67,19 +68,17 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('@serverless', function () {
-        it('@serverless should give a 200 when trying to create a single Machine Learning rule since the license is essentials', async () => {
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-            .send(getSimpleMlRule())
-            .expect(200);
+      it('@serverless should give a 200 when trying to create a single Machine Learning rule since the license is essentials', async () => {
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .send(getSimpleMlRule())
+          .expect(200);
 
-          const bodyToCompare = removeServerGeneratedProperties(body);
-          const expectedRule = updateUsername(getSimpleMlRule(), await utils.getUsername());
-          expect(bodyToCompare).toEqual(expect.objectContaining(expectedRule));
-        });
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        const expectedRule = updateUsername(getSimpleMlRule(), await utils.getUsername());
+        expect(bodyToCompare).toEqual(expect.objectContaining(expectedRule));
       });
     });
   });
