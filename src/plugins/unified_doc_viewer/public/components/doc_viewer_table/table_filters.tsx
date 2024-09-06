@@ -23,7 +23,7 @@ export const LOCAL_STORAGE_KEY_SEARCH_TERM = 'discover:searchText';
 export const LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES = 'unifiedDocViewer:selectedFieldTypes';
 
 const searchPlaceholder = i18n.translate('unifiedDocViewer.docView.table.searchPlaceHolder', {
-  defaultMessage: 'Search field names',
+  defaultMessage: 'Search field names or values',
 });
 
 interface TableFiltersCommonProps {
