@@ -26,7 +26,7 @@ import {
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
 } from '@kbn/search-api-panels';
-import type { Index } from '@kbn/index-management';
+import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services';
 import { languageDefinitions, curlDefinition } from './languages';
