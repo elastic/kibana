@@ -287,7 +287,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   );
 
   const handleNewConversationDefaultChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const isChecked = e.target.checked;
       const defaultNewSystemPrompts = systemPromptSettings.filter(
         (p) => p.isNewConversationDefault

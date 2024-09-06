@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-type Method = 'get' | 'post' | 'put' | 'delete';
+type Method = 'get' | 'post' | 'put' | 'patch' | 'delete';
 
 export function parseEndpoint(endpoint: string) {
   const parts = endpoint.split(' ');
@@ -15,7 +15,7 @@ export function parseEndpoint(endpoint: string) {
   const pathname = parts[1].trim();
   const version = parts[2]?.trim();
 
-  if (!['get', 'post', 'put', 'delete'].includes(method)) {
+  if (!['get', 'post', 'put', 'patch', 'delete'].includes(method)) {
     throw new Error(`Endpoint ${endpoint} was not prefixed with a valid HTTP method`);
   }
 

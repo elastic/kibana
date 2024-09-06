@@ -51,7 +51,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const [useNewColorMapping, setUseNewColorMapping] = useState(canUseColorMapping);
 
   const setConfig = useCallback(
-    ({ color }) => {
+    ({ color }: { color?: string }) => {
       if (!currentLayer) {
         return;
       }

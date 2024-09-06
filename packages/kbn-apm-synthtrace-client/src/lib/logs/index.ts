@@ -48,6 +48,7 @@ export type LogDocument = Fields &
     'orchestrator.resource.id'?: string;
     'kubernetes.pod.uid'?: string;
     'aws.s3.bucket.name'?: string;
+    'aws.kinesis.name'?: string;
     'orchestrator.namespace'?: string;
     'container.name'?: string;
     'cloud.provider'?: string;
