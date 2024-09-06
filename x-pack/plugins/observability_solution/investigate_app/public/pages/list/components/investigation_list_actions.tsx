@@ -92,7 +92,7 @@ export function InvestigationListActions({
         </EuiModal>
       )}
       <EuiToolTip
-        content={i18n.translate('xpack.investigateApp.investigationList.tableCaption', {
+        content={i18n.translate('xpack.investigateApp.investigationList.deleteAction', {
           defaultMessage: 'Delete',
         })}
       >
