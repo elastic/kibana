@@ -176,15 +176,15 @@ async function slackExecutor(
 
     // special handling for 5xx
     if (status >= 500) {
-      return retryResult(actionId, TaskErrorSource.FRAMEWORK);
+      return retryResult(actionId, err.message, TaskErrorSource.FRAMEWORK);
     }
 
     // special handling for rate limiting
     if (status === 429) {
       return pipe(
         getRetryAfterIntervalFromHeaders(headers),
-        map((retry) => retryResultSeconds(actionId, err.message, retry, TaskErrorSource.USER)),
-        getOrElse(() => retryResult(actionId, TaskErrorSource.USER))
+        map((retry) => retryResultSeconds(actionId, err.message, retry)),
+        getOrElse(() => retryResult(actionId, err.message, TaskErrorSource.USER))
       );
     }
 
@@ -248,6 +248,7 @@ function serviceErrorResult(
 
 function retryResult(
   actionId: string,
+  serviceMessage: string,
   errorSource: TaskErrorSource
 ): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate(
@@ -262,14 +263,14 @@ function retryResult(
     retry: true,
     actionId,
     errorSource,
+    serviceMessage,
   };
 }
 
 function retryResultSeconds(
   actionId: string,
   message: string,
-  retryAfter: number,
-  errorSource: TaskErrorSource = TaskErrorSource.FRAMEWORK
+  retryAfter: number
 ): ConnectorTypeExecutorResult<void> {
   const retryEpoch = Date.now() + retryAfter * 1000;
   const retry = new Date(retryEpoch);
@@ -289,6 +290,6 @@ function retryResultSeconds(
     retry,
     actionId,
     serviceMessage: message,
-    errorSource,
+    errorSource: TaskErrorSource.USER,
   };
 }
