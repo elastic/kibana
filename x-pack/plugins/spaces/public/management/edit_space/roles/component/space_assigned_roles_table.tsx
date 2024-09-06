@@ -82,9 +82,7 @@ const getTableColumns = ({
       field: 'privileges',
       name: i18n.translate(
         'xpack.spaces.management.spaceDetails.rolesTable.column.privileges.title',
-        {
-          defaultMessage: 'Privileges',
-        }
+        { defaultMessage: 'Privileges' }
       ),
       render: (_, record) => {
         const uniquePrivilege = new Set(
@@ -97,9 +95,7 @@ const getTableColumns = ({
                 privilegeBaseTuple.push(
                   i18n.translate(
                     'xpack.spaces.management.spaceDetails.rolesTable.column.privileges.customPrivilege',
-                    {
-                      defaultMessage: 'custom',
-                    }
+                    { defaultMessage: 'custom' }
                   )
                 );
               } else {
@@ -118,24 +114,18 @@ const getTableColumns = ({
       field: 'metadata',
       name: i18n.translate(
         'xpack.spaces.management.spaceDetails.rolesTable.column.roleType.title',
-        {
-          defaultMessage: 'Role type',
-        }
+        { defaultMessage: 'Role type' }
       ),
       render: (_value: Role['metadata']) => {
         return React.createElement(EuiBadge, {
           children: _value?._reserved
             ? i18n.translate(
                 'xpack.spaces.management.spaceDetails.rolesTable.column.roleType.reserved',
-                {
-                  defaultMessage: 'Reserved',
-                }
+                { defaultMessage: 'Reserved' }
               )
             : i18n.translate(
                 'xpack.spaces.management.spaceDetails.rolesTable.column.roleType.custom',
-                {
-                  defaultMessage: 'Custom',
-                }
+                { defaultMessage: 'Custom' }
               ),
           color: _value?._reserved ? undefined : 'success',
         });
@@ -166,9 +156,7 @@ const getTableColumns = ({
             isRoleReserved(role)
               ? i18n.translate(
                   'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableDescription.isReserved',
-                  {
-                    defaultMessage: `Can't perform actions on a reserved role`,
-                  }
+                  { defaultMessage: `Can't perform actions on a reserved role` }
                 )
               : i18n.translate(
                   'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableDescription.isAssignedToAll',
@@ -185,9 +173,7 @@ const getTableColumns = ({
           icon: 'pencil',
           name: i18n.translate(
             'xpack.spaces.management.spaceDetails.rolesTable.column.actions.edit.title',
-            {
-              defaultMessage: 'Remove from space',
-            }
+            { defaultMessage: 'Remove from space' }
           ),
           isPrimary: true,
           description: i18n.translate(
@@ -208,15 +194,11 @@ const getTableColumns = ({
           color: 'danger',
           name: i18n.translate(
             'xpack.spaces.management.spaceDetails.rolesTable.column.actions.remove.title',
-            {
-              defaultMessage: 'Remove from space',
-            }
+            { defaultMessage: 'Remove from space' }
           ),
           description: i18n.translate(
             'xpack.spaces.management.spaceDetails.rolesTable.column.actions.edit.description',
-            {
-              defaultMessage: 'Click this action to remove the user from this space.',
-            }
+            { defaultMessage: 'Click this action to remove the user from this space.' }
           ),
           showOnHover: true,
           available: (rowRecord) => isEditableRole(rowRecord),
@@ -364,9 +346,7 @@ export const SpaceAssignedRolesTable = ({
                   >
                     {i18n.translate(
                       'xpack.spaces.management.spaceDetails.rolesTable.bulkActions.contextMenuOpener',
-                      {
-                        defaultMessage: 'Bulk actions',
-                      }
+                      { defaultMessage: 'Bulk actions' }
                     )}
                   </EuiButtonEmpty>
                 }
@@ -411,9 +391,7 @@ export const SpaceAssignedRolesTable = ({
                         onClick: setSelectedRoles.bind(null, []),
                         children: i18n.translate(
                           'xpack.spaces.management.spaceDetails.rolesTable.clearRolesSelection',
-                          {
-                            defaultMessage: 'Clear selection',
-                          }
+                          { defaultMessage: 'Clear selection' }
                         ),
                       }
                     : {
@@ -424,9 +402,7 @@ export const SpaceAssignedRolesTable = ({
                           {
                             defaultMessage:
                               'Select {count, plural, one {role} other {all {count} roles}}',
-                            values: {
-                              count: selectableRoles.length,
-                            },
+                            values: { count: selectableRoles.length },
                           }
                         ),
                       }),
@@ -463,13 +439,13 @@ export const SpaceAssignedRolesTable = ({
       if (isRoleReserved(role)) {
         return i18n.translate(
           'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.isReserved',
-          { defaultMessage: 'Can not select a role that is reserved' }
+          { defaultMessage: `You can't select a role that is reserved` }
         );
       }
       if (isRoleAssignedToAll(role)) {
         return i18n.translate(
           'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.isRoleAssignedToAll',
-          { defaultMessage: 'Can not select a role that is assigned to all spaces' }
+          { defaultMessage: `You can't select a role that is assigned to all spaces` }
         );
       }
 
