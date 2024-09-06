@@ -9,10 +9,11 @@ import { i18n } from '@kbn/i18n';
 
 export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc: string } = {
   title: i18n.translate('xpack.apm.serviceTabEmptyState.transactionsTitle', {
-    defaultMessage: 'TBD',
+    defaultMessage: 'Troubleshoot latency, throughput and errors',
   }),
   content: i18n.translate('xpack.apm.serviceTabEmptyState.transactionsContent', {
-    defaultMessage: 'TBD',
+    defaultMessage:
+      "Troubleshoot your service's performance by analysing latency, throughput and errors down to the specific transaction.",
   }),
   imgSrc: 'TBD',
 };

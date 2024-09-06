@@ -9,10 +9,11 @@ import { i18n } from '@kbn/i18n';
 
 export const logsOnlyEmptyStateContent: { title: string; content: string; imgSrc: string } = {
   title: i18n.translate('xpack.apm.serviceTabEmptyState.metricsTitle', {
-    defaultMessage: 'TBD',
+    defaultMessage: 'View core metrics for your application',
   }),
   content: i18n.translate('xpack.apm.serviceTabEmptyState.metricsContent', {
-    defaultMessage: 'TBD',
+    defaultMessage:
+      'View metric trends for the instances of your service to identify performance bottlenecks that could be affecting your users.',
   }),
   imgSrc: 'TBD',
 };
