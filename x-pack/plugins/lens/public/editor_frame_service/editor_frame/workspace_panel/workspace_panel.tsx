@@ -267,7 +267,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               searchService: plugins.data.search,
             }
           );
-          esTookTime.current = adapters?.requests.getRequests().reduce((maxTime, request) => {
+          esTookTime.current = adapters.requests.getRequests().reduce((maxTime, request) => {
             const took = request.response?.json?.rawResponse?.took ?? 0;
             return Math.max(maxTime, took);
           }, 0);
