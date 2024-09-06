@@ -13,7 +13,6 @@ import { SvlReportingServiceProvider } from './svl_reporting';
 import { DataViewApiProvider } from './data_view_api';
 import { PlatformSecurityUtilsProvider } from './platform_security_utils';
 
-
 export type {
   InternalRequestHeader,
   RoleCredentials,
