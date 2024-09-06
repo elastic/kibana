@@ -48,7 +48,8 @@ export async function cleanupArchiveEntriesStep(context: InstallContext) {
     !force &&
     retryFromLastState &&
     initialState === INSTALL_STATES.SAVE_ARCHIVE_ENTRIES &&
-    installedPkg?.attributes
+    installedPkg?.attributes?.package_assets &&
+    installedPkg.attributes.package_assets.length > 0
   ) {
     const { package_assets: packageAssets } = installedPkg.attributes;
 

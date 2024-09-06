@@ -207,7 +207,7 @@ async function bulkDeleteSavedObjects(
   }
 }
 
-function deleteESAssets(
+export function deleteESAssets(
   installedObjects: EsAssetReference[],
   esClient: ElasticsearchClient
 ): Array<Promise<unknown>> {

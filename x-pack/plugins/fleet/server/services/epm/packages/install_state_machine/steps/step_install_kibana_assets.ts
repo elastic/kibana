@@ -54,7 +54,8 @@ export async function cleanUpKibanaAssetsStep(context: InstallContext) {
     !force &&
     retryFromLastState &&
     initialState === INSTALL_STATES.INSTALL_KIBANA_ASSETS &&
-    installedPkg?.attributes
+    installedPkg?.attributes?.installed_kibana &&
+    installedPkg.attributes.installed_kibana.length > 0
   ) {
     const { installed_kibana: installedObjects } = installedPkg.attributes;
     logger.debug('Retry transition - clean up Kibana assets first');

@@ -46,7 +46,8 @@ export async function cleanupTransformsStep(context: InstallContext) {
     !force &&
     retryFromLastState &&
     initialState === INSTALL_STATES.INSTALL_TRANSFORMS &&
-    installedPkg?.attributes
+    installedPkg?.attributes?.installed_es &&
+    installedPkg.attributes.installed_es.length > 0
   ) {
     const { installed_es: installedEs } = installedPkg.attributes;
 
