@@ -6,14 +6,10 @@
  */
 
 import { Integration } from '../../common';
-import { configureNunjucks, renderPackageManifestYAML } from './build_integration';
+import { renderPackageManifestYAML } from './build_integration';
 import yaml from 'js-yaml';
 
 describe('renderPackageManifestYAML', () => {
-  beforeEach(() => {
-    configureNunjucks();
-  });
-
   test('generates the package manifest correctly', () => {
     const integration: Integration = {
       title: 'Sample Integration',

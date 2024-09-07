@@ -19,7 +19,7 @@ import { createPipeline } from './pipeline';
 
 const initialVersion = '1.0.0';
 
-export function configureNunjucks() {
+function configureNunjucks() {
   const templateDir = joinPath(__dirname, '../templates');
   const agentTemplates = joinPath(templateDir, 'agent');
   const manifestTemplates = joinPath(templateDir, 'manifest');
