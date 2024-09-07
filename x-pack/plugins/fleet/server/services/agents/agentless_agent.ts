@@ -242,7 +242,11 @@ class AgentlessAgentService {
       const errorLogCodeCause = `${error.code}  ${this.convertCauseErrorsToString(error)}`;
 
       if (!axios.isAxiosError(error)) {
-        logger.error(`[Agentless API] Deleting agentless deployment failed with an error ${error}`);
+        logger.error(
+          `[Agentless API] Deleting agentless deployment failed with an error ${JSON.stringify(
+            error
+          )} ${JSON.stringify(requestConfigDebug)}`
+        );
       }
       if (error.response) {
         logger.error(
