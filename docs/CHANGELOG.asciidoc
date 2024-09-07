@@ -112,7 +112,7 @@ Observability::
 * Change infra plugin feature name from Metrics to Infrastructure ({kibana-pull}189432[#189432]).
 
 [float]
-[[deprecations-8.11.0]]
+[[deprecations-7.17.24]]
 === Deprecations
 
 * Removes support for Heartbeat browser monitor screenshots for lower versions of Heartbeat. Please upgrade to Heartbeat 7.17.24 to continue using Heartbeat browser monitor screenshots. ({kibana-pull}189911[#189911])
