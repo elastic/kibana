@@ -18,7 +18,7 @@ import { createPipeline } from './pipeline';
 
 const initialVersion = '1.0.0';
 
-export async function buildPackage(integration: Integration): Promise<Buffer> {
+export function configureNunjucks() {
   const templateDir = joinPath(__dirname, '../templates');
   const agentTemplates = joinPath(templateDir, 'agent');
   const manifestTemplates = joinPath(templateDir, 'manifest');
@@ -26,6 +26,10 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   nunjucks.configure([templateDir, agentTemplates, manifestTemplates, systemTestTemplates], {
     autoescape: false,
   });
+}
+
+export async function buildPackage(integration: Integration): Promise<Buffer> {
+  configureNunjucks();
 
   const workingDir = joinPath(getDataPath(), `integration-assistant-${generateUniqueId()}`);
   const packageDirectoryName = `${integration.name}-${initialVersion}`;
@@ -116,7 +120,13 @@ async function createZipArchive(workingDir: string, packageDirectoryName: string
   return buffer;
 }
 
-function createPackageManifest(packageDir: string, integration: Integration): void {
+/**
+ * Prepare the package manifest for an integration.
+ *
+ * @param integration - The integration object.
+ * @returns The package manifest as a string.
+ */
+export function preparePackageManifest(integration: Integration): string {
   const uniqueInputs: { [key: string]: { type: string; title: string; description: string } } = {};
 
   integration.dataStreams.forEach((dataStream: DataStream) => {
@@ -133,7 +143,7 @@ function createPackageManifest(packageDir: string, integration: Integration): vo
 
   const uniqueInputsList = Object.values(uniqueInputs);
 
-  const packageManifest = nunjucks.render('package_manifest.yml.njk', {
+  return nunjucks.render('package_manifest.yml.njk', {
     format_version: '3.1.4',
     package_title: integration.title,
     package_name: integration.name,
@@ -144,6 +154,9 @@ function createPackageManifest(packageDir: string, integration: Integration): vo
     min_version: '^8.13.0',
     inputs: uniqueInputsList,
   });
+}
 
+function createPackageManifest(packageDir: string, integration: Integration): void {
+  const packageManifest = preparePackageManifest(integration);
   createSync(joinPath(packageDir, 'manifest.yml'), packageManifest);
 }
