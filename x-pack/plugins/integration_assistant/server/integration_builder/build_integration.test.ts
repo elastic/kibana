@@ -6,10 +6,10 @@
  */
 
 import { Integration } from '../../common';
-import { configureNunjucks, preparePackageManifest } from './build_integration';
+import { configureNunjucks, renderPackageManifestYAML } from './build_integration';
 import yaml from 'js-yaml';
 
-describe('preparePackageManifest', () => {
+describe('renderPackageManifestYAML', () => {
   beforeEach(() => {
     configureNunjucks();
   });
@@ -50,7 +50,7 @@ describe('preparePackageManifest', () => {
       ],
     };
 
-    const manifestContent = preparePackageManifest(integration);
+    const manifestContent = renderPackageManifestYAML(integration);
 
     // The manifest content must be parseable as YAML.
     const manifest = yaml.safeLoad(manifestContent);

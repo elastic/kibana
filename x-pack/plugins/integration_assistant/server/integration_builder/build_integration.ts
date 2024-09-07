@@ -9,6 +9,7 @@ import AdmZip from 'adm-zip';
 import nunjucks from 'nunjucks';
 import { getDataPath } from '@kbn/utils';
 import { join as joinPath } from 'path';
+import { safeDump } from 'js-yaml';
 import type { DataStream, Integration } from '../../common';
 import { createSync, ensureDirSync, generateUniqueId, removeDirSync } from '../util';
 import { createAgentInput } from './agent';
@@ -120,13 +121,82 @@ async function createZipArchive(workingDir: string, packageDirectoryName: string
   return buffer;
 }
 
+/* eslint-disable @typescript-eslint/naming-convention */
 /**
- * Prepare the package manifest for an integration.
+ * Creates a package manifest dictionary.
+ *
+ * @param format_version - The format version of the package.
+ * @param package_name - The name of the package.
+ * @param package_title - The title of the package.
+ * @param package_version - The version of the package.
+ * @param package_description - The description of the package.
+ * @param min_version - The minimum version of Kibana required for the package.
+ * @param has_package_logo - Indicates whether the package has a logo.
+ * @param inputs - An array of unique input objects containing type, title, and description.
+ * @param package_owner - The owner of the package.
+ * @returns The package manifest dictionary.
+ */
+function createPackageManifestDict(
+  format_version: string,
+  package_name: string,
+  package_title: string,
+  package_version: string,
+  package_description: string,
+  min_version: string,
+  has_package_logo: boolean,
+  inputs: Array<{ type: string; title: string; description: string }>,
+  package_owner: string
+): object {
+  const data: { [key: string]: string | object } = {
+    format_version,
+    name: package_name,
+    title: package_title,
+    version: package_version,
+    description: package_description,
+    type: 'integration',
+    categories: ['security', 'iam'],
+    conditions: {
+      kibana: {
+        version: min_version,
+      },
+    },
+    policy_templates: [
+      {
+        name: package_name,
+        title: package_title,
+        description: package_description,
+        inputs: inputs.map((input) => ({
+          type: input.type,
+          title: `${input.title} : ${input.type}`,
+          description: input.description,
+        })),
+      },
+    ],
+    owner: {
+      github: package_owner,
+      type: 'elastic',
+    },
+  };
+
+  if (has_package_logo) {
+    data.icons = {
+      src: '/img/logo.svg',
+      title: `${package_title} Logo`,
+      size: '32x32',
+      type: 'image/svg+xml',
+    };
+  }
+  return data;
+}
+/* eslint-enable @typescript-eslint/naming-convention */
+
+/**
+ * Render the package manifest for an integration.
  *
  * @param integration - The integration object.
- * @returns The package manifest as a string.
+ * @returns The package manifest YAML rendered into a string.
  */
-export function preparePackageManifest(integration: Integration): string {
+export function renderPackageManifestYAML(integration: Integration): string {
   const uniqueInputs: { [key: string]: { type: string; title: string; description: string } } = {};
 
   integration.dataStreams.forEach((dataStream: DataStream) => {
@@ -141,22 +211,22 @@ export function preparePackageManifest(integration: Integration): string {
     });
   });
 
-  const uniqueInputsList = Object.values(uniqueInputs);
+  const packageData = createPackageManifestDict(
+    '3.1.4', // format_version
+    integration.name, // package_name
+    integration.title, // package_title
+    initialVersion, // package_version
+    integration.description, // package_description
+    '^8.13.0', // min_version
+    integration.logo !== undefined, // has_package_logo
+    Object.values(uniqueInputs), // inputs
+    '@elastic/custom-integrations' // package_owner
+  );
 
-  return nunjucks.render('package_manifest.yml.njk', {
-    format_version: '3.1.4',
-    package_title: integration.title,
-    package_name: integration.name,
-    package_version: initialVersion,
-    package_description: integration.description,
-    package_logo: integration.logo,
-    package_owner: '@elastic/custom-integrations',
-    min_version: '^8.13.0',
-    inputs: uniqueInputsList,
-  });
+  return safeDump(packageData);
 }
 
 function createPackageManifest(packageDir: string, integration: Integration): void {
-  const packageManifest = preparePackageManifest(integration);
+  const packageManifest = renderPackageManifestYAML(integration);
   createSync(joinPath(packageDir, 'manifest.yml'), packageManifest);
 }
