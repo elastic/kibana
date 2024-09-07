@@ -151,11 +151,16 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
 }
 
 function makeProxy(flat: Record<string, any>, indexPattern?: DataView) {
+  const metaFields = new Set(indexPattern?.metaFields);
+
   function comparator(a: string | symbol, b: string | symbol) {
-    const aIsMeta = indexPattern?.metaFields?.includes(String(a));
-    const bIsMeta = indexPattern?.metaFields?.includes(String(b));
+    if (typeof a === 'symbol' || typeof b === 'symbol') {
+      return 0;
+    }
+    const aIsMeta = metaFields.has(a);
+    const bIsMeta = metaFields.has(b);
     if (aIsMeta && bIsMeta) {
-      return String(a).localeCompare(String(b));
+      return a < b ? -1 : a > b ? 1 : 0;
     }
     if (aIsMeta) {
       return 1;
@@ -163,7 +168,7 @@ function makeProxy(flat: Record<string, any>, indexPattern?: DataView) {
     if (bIsMeta) {
       return -1;
     }
-    return String(a).localeCompare(String(b));
+    return a < b ? -1 : a > b ? 1 : 0;
   }
 
   let cachedKeys: Array<string | symbol> | undefined;
