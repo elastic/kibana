@@ -211,6 +211,8 @@ export function renderPackageManifestYAML(integration: Integration): string {
     });
   });
 
+  const uniqueInputsList = Object.values(uniqueInputs);
+
   const packageData = createPackageManifestDict(
     '3.1.4', // format_version
     integration.name, // package_name
@@ -219,7 +221,7 @@ export function renderPackageManifestYAML(integration: Integration): string {
     integration.description, // package_description
     '^8.13.0', // min_version
     integration.logo !== undefined, // has_package_logo
-    Object.values(uniqueInputs), // inputs
+    uniqueInputsList, // inputs
     '@elastic/custom-integrations' // package_owner
   );
 
