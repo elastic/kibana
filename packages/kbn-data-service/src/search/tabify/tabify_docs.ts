@@ -151,25 +151,44 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
 }
 
 function makeProxy(flat: Record<string, any>, indexPattern?: DataView) {
-  const metaFields = new Set(indexPattern?.metaFields);
+  const getComparator = () => {
+    const metaFields = new Set(indexPattern?.metaFields);
+    const lowerMap = new Map<string, string>();
+    let aLower: string | undefined;
+    let bLower: string | undefined;
 
-  function comparator(a: string | symbol, b: string | symbol) {
-    if (typeof a === 'symbol' || typeof b === 'symbol') {
-      return 0;
-    }
-    const aIsMeta = metaFields.has(a);
-    const bIsMeta = metaFields.has(b);
-    if (aIsMeta && bIsMeta) {
-      return a < b ? -1 : a > b ? 1 : 0;
-    }
-    if (aIsMeta) {
-      return 1;
-    }
-    if (bIsMeta) {
-      return -1;
-    }
-    return a < b ? -1 : a > b ? 1 : 0;
-  }
+    const compareLower = (a: string, b: string) => {
+      aLower = lowerMap.get(a);
+      if (aLower === undefined) {
+        aLower = a.toLowerCase();
+        lowerMap.set(a, aLower);
+      }
+      bLower = lowerMap.get(b);
+      if (bLower === undefined) {
+        bLower = b.toLowerCase();
+        lowerMap.set(b, bLower);
+      }
+      return aLower < bLower ? -1 : aLower > bLower ? 1 : 0;
+    };
+
+    return (a: string | symbol, b: string | symbol) => {
+      if (typeof a === 'symbol' || typeof b === 'symbol') {
+        return 0;
+      }
+      const aIsMeta = metaFields.has(a);
+      const bIsMeta = metaFields.has(b);
+      if (aIsMeta && bIsMeta) {
+        return compareLower(a, b);
+      }
+      if (aIsMeta) {
+        return 1;
+      }
+      if (bIsMeta) {
+        return -1;
+      }
+      return compareLower(a, b);
+    };
+  };
 
   let cachedKeys: Array<string | symbol> | undefined;
 
@@ -184,7 +203,7 @@ function makeProxy(flat: Record<string, any>, indexPattern?: DataView) {
     },
     ownKeys: (target) => {
       if (!cachedKeys) {
-        cachedKeys = Reflect.ownKeys(target).sort(comparator);
+        cachedKeys = Reflect.ownKeys(target).sort(getComparator());
       }
       return cachedKeys;
     },
