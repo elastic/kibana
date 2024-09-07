@@ -10,7 +10,8 @@ import Path from 'path';
 import { createTestServerlessInstances } from '@kbn/core-test-helpers-kbn-server';
 import { createBasicDocumentsMigrationTest } from '../../migrations/shared_suites/zdt/basic_document_migration';
 
-describe('serverless - ZDT upgrades - basic document migration', () => {
+// Disabled, only runs off main branch
+describe.skip('serverless - ZDT upgrades - basic document migration', () => {
   const startElasticsearch = async () => {
     const { startES } = createTestServerlessInstances({
       adjustTimeout: jest.setTimeout,
