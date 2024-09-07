@@ -13,7 +13,7 @@ describe('test chunks', () => {
     const chunkSize = 2;
     const result = mergeAndChunkSamples(objects, chunkSize);
     expect(result).toStrictEqual([
-      JSON.stringify({ a: 1, b: 2 }, null, 2),
+      JSON.stringify({ a: [1, 2], b: [2, 3] }, null, 2),
       JSON.stringify({ c: { d: 3 }, e: 4 }, null, 2),
     ]);
   });
