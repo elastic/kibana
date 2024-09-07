@@ -146,7 +146,7 @@ function createPackageManifestDict(
   package_owner: string,
   min_version: string,
   inputs: Array<{ type: string; title: string; description: string }>
-): object {
+): { [key: string]: string | object } {
   const data: { [key: string]: string | object } = {
     format_version,
     name: package_name,
