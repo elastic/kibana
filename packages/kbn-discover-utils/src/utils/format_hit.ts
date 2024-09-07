@@ -41,54 +41,81 @@ export function formatHit(
   fieldFormats: FieldFormatsStart
 ): FormattedHit {
   const cached = formattedHitCache.get(hit.raw);
+
   if (cached && cached.maxEntries === maxEntries) {
     return cached.formattedHit;
   }
 
   const highlights = hit.raw.highlight ?? {};
-  // Flatten the object using the flattenHit implementation we use across Discover for flattening documents.
   const flattened = hit.flattened;
+  const flattenedKeys = Object.keys(flattened);
+  const formattedHit: FormattedHit = [];
 
-  const highlightPairs: FormattedHit = [];
-  const sourcePairs: FormattedHit = [];
+  let totalCount = 0;
 
-  // Add each flattened field into the corresponding array for highlighted or other fields,
-  // depending on whether the original hit had a highlight for it. That way we can later
-  // put highlighted fields first in the document summary.
-  Object.entries(flattened).forEach(([key, val]) => {
-    // Retrieve the (display) name of the fields, if it's a mapped field on the data view
+  const maybeAddToFormattedHit = (key: string) => {
     const field = dataView.fields.getByName(key);
-    const displayKey = field?.displayName;
-    const pairs = highlights[key] ? highlightPairs : sourcePairs;
-    // Format the raw value using the regular field formatters for that field
-    const formattedValue = formatFieldValue(val, hit.raw, fieldFormats, dataView, field);
+
     // If the field was a mapped field, we validate it against the fieldsToShow list, if not
     // we always include it into the result.
-    if (displayKey) {
+    if (field?.displayName) {
       if (shouldShowFieldHandler(key)) {
-        pairs.push([displayKey, formattedValue, key]);
+        if (++totalCount > maxEntries) {
+          return;
+        }
+
+        formattedHit.push([
+          // Retrieve the (display) name of the fields, if it's a mapped field on the data view
+          field.displayName,
+          // Format the raw value using the regular field formatters for that field
+          formatFieldValue(flattened[key], hit.raw, fieldFormats, dataView, field),
+          key,
+        ]);
       }
     } else {
-      pairs.push([key, formattedValue, key]);
+      if (++totalCount > maxEntries) {
+        return;
+      }
+
+      formattedHit.push([
+        key,
+        // Format the raw value using the regular field formatters for that field
+        formatFieldValue(flattened[key], hit.raw, fieldFormats, dataView, field),
+        key,
+      ]);
     }
-  });
-  const pairs = [...highlightPairs, ...sourcePairs];
-  const formatted =
-    // If document has more formatted fields than configured via MAX_DOC_FIELDS_DISPLAYED we cut
-    // off additional fields and instead show a summary how many more field exists.
-    pairs.length <= maxEntries
-      ? pairs
-      : [
-          ...pairs.slice(0, maxEntries),
-          [
-            i18n.translate('discover.formatHit.moreFields', {
-              defaultMessage: 'and {count} more {count, plural, one {field} other {fields}}',
-              values: { count: pairs.length - maxEntries },
-            }),
-            '',
-            null,
-          ] as const,
-        ];
-  formattedHitCache.set(hit.raw, { formattedHit: formatted, maxEntries });
-  return formatted;
+  };
+
+  // Add highlighted fields first if any exist
+  if (Object.keys(highlights).length) {
+    for (const key of flattenedKeys) {
+      if (highlights[key]) {
+        maybeAddToFormattedHit(key);
+      }
+    }
+  }
+
+  // Add remaining fields after
+  for (const key of flattenedKeys) {
+    if (!highlights[key]) {
+      maybeAddToFormattedHit(key);
+    }
+  }
+
+  // If document has more formatted fields than configured via MAX_DOC_FIELDS_DISPLAYED we cut
+  // off additional fields and instead show a summary how many more field exists.
+  if (totalCount > maxEntries) {
+    formattedHit.push([
+      i18n.translate('discover.formatHit.moreFields', {
+        defaultMessage: 'and {count} more {count, plural, one {field} other {fields}}',
+        values: { count: totalCount - maxEntries },
+      }),
+      '',
+      null,
+    ]);
+  }
+
+  formattedHitCache.set(hit.raw, { formattedHit, maxEntries });
+
+  return formattedHit;
 }
