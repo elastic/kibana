@@ -126,26 +126,26 @@ async function createZipArchive(workingDir: string, packageDirectoryName: string
  * Creates a package manifest dictionary.
  *
  * @param format_version - The format version of the package.
- * @param package_name - The name of the package.
  * @param package_title - The title of the package.
+ * @param package_name - The name of the package.
  * @param package_version - The version of the package.
  * @param package_description - The description of the package.
- * @param min_version - The minimum version of Kibana required for the package.
- * @param has_package_logo - Indicates whether the package has a logo.
- * @param inputs - An array of unique input objects containing type, title, and description.
+ * @param package_logo - The package logo file name, if present.
  * @param package_owner - The owner of the package.
+ * @param min_version - The minimum version of Kibana required for the package.
+ * @param inputs - An array of unique input objects containing type, title, and description.
  * @returns The package manifest dictionary.
  */
 function createPackageManifestDict(
   format_version: string,
-  package_name: string,
   package_title: string,
+  package_name: string,
   package_version: string,
   package_description: string,
+  package_logo: string | undefined,
+  package_owner: string,
   min_version: string,
-  has_package_logo: boolean,
-  inputs: Array<{ type: string; title: string; description: string }>,
-  package_owner: string
+  inputs: Array<{ type: string; title: string; description: string }>
 ): object {
   const data: { [key: string]: string | object } = {
     format_version,
@@ -178,7 +178,7 @@ function createPackageManifestDict(
     },
   };
 
-  if (has_package_logo) {
+  if (package_logo !== undefined && package_logo !== '') {
     data.icons = {
       src: '/img/logo.svg',
       title: `${package_title} Logo`,
@@ -215,14 +215,14 @@ export function renderPackageManifestYAML(integration: Integration): string {
 
   const packageData = createPackageManifestDict(
     '3.1.4', // format_version
-    integration.name, // package_name
     integration.title, // package_title
+    integration.name, // package_name
     initialVersion, // package_version
     integration.description, // package_description
+    integration.logo, // package_logo
+    '@elastic/custom-integrations', // package_owner
     '^8.13.0', // min_version
-    integration.logo !== undefined, // has_package_logo
-    uniqueInputsList, // inputs
-    '@elastic/custom-integrations' // package_owner
+    uniqueInputsList // inputs
   );
 
   return safeDump(packageData);
