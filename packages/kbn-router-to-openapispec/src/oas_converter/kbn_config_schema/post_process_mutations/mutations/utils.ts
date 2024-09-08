@@ -35,6 +35,13 @@ export const processDeprecated = (schema: OpenAPIV3.SchemaObject): void => {
   }
 };
 
+export const processDiscontinued = (schema: OpenAPIV3.SchemaObject): void => {
+  if (metaFields.META_FIELD_X_OAS_DISCONTINUED in schema) {
+    schema.discontinued = 'version';
+    deleteField(schema, metaFields.META_FIELD_X_OAS_DISCONTINUED);
+  }
+};
+
 /** Just for type convenience */
 export const deleteField = (schema: Record<any, unknown>, field: string): void => {
   delete schema[field];

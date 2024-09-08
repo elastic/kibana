@@ -16,7 +16,7 @@ import {
   type WhenOptions,
   CustomHelpers,
 } from 'joi';
-import { META_FIELD_X_OAS_DEPRECATED } from '../oas_meta_fields';
+import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
 
@@ -33,6 +33,10 @@ export interface TypeMeta {
    * Whether this field is deprecated.
    */
   deprecated?: boolean;
+  /**
+   * A stack version or date stating when a deprecated field will be removed.
+   */
+  discontinued?: string;
 }
 
 export interface TypeOptions<T> {
@@ -129,6 +133,8 @@ export abstract class Type<V> {
       if (options.meta.deprecated) {
         schema = schema.meta({ [META_FIELD_X_OAS_DEPRECATED]: true });
       }
+      if (options.meta.deprecated && options.meta.discontinued)
+        schema = schema.meta({ [META_FIELD_X_OAS_DISCONTINUED]: options.meta.discontinued });
     }
 
     // Attach generic error handler only if it hasn't been attached yet since
