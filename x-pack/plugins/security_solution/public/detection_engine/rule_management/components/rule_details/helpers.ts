@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import type { RuleFieldsDiff, ThreeWayDiff } from '../../../../../common/api/detection_engine';
 import { ThreeWayDiffOutcome } from '../../../../../common/api/detection_engine';
 import type { FieldsGroupDiff } from '../../model/rule_details/rule_field_diff';
@@ -68,4 +69,17 @@ export function getQueryLanguageLabel(language: string) {
     default:
       return language;
   }
+}
+
+/**
+ * Assigns type `Filter` to items that have a `meta` property. Removes any other items.
+ */
+export function typeCheckFilters(filters: unknown[]): Filter[] {
+  return filters.filter((f) => {
+    if (typeof f === 'object' && f !== null && 'meta' in f) {
+      return true;
+    }
+
+    return false;
+  }) as Filter[];
 }

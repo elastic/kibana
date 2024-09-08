@@ -8,11 +8,11 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
 import { DataSourceType } from '../../../../../../../../../common/api/detection_engine';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { Query, Filters } from '../../../../rule_definition_section';
+import { typeCheckFilters } from '../../../../helpers';
 
 interface EqlQueryReadOnlyProps {
   eqlQuery: DiffableAllFields['eql_query'];
@@ -27,7 +27,9 @@ export function EqlQueryReadOnly({ eqlQuery, dataSource }: EqlQueryReadOnlyProps
     },
   ];
 
-  if (eqlQuery.filters.length > 0) {
+  const filters = typeCheckFilters(eqlQuery.filters);
+
+  if (filters.length > 0) {
     const index =
       dataSource?.type === DataSourceType.index_patterns ? dataSource.index_patterns : undefined;
 
@@ -36,9 +38,7 @@ export function EqlQueryReadOnly({ eqlQuery, dataSource }: EqlQueryReadOnlyProps
 
     listItems.push({
       title: descriptionStepI18n.FILTERS_LABEL,
-      description: (
-        <Filters filters={eqlQuery.filters as Filter[]} index={index} dataViewId={dataViewId} />
-      ),
+      description: <Filters filters={filters} index={index} dataViewId={dataViewId} />,
     });
   }
 

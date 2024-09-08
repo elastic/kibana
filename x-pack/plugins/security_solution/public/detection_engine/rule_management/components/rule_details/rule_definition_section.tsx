@@ -481,7 +481,7 @@ const prepareDefinitionSectionListItems = (
         ),
         description: (
           <Filters
-            filters={savedQuery.attributes.filters as Filter[]}
+            filters={savedQuery.attributes.filters}
             data-test-subj="savedQueryFiltersPropertyValue"
             dataViewId={'data_view_id' in rule ? rule.data_view_id : undefined}
             index={'index' in rule ? rule.index : undefined}
