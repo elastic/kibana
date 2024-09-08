@@ -28,6 +28,7 @@ export function Config({ editorInstance, containerWidth }: Props) {
       hasShadow={false}
       borderRadius="none"
       css={{ height: '100%' }}
+      data-test-subj="consoleConfigPanel"
     >
       <EuiFlexGroup
         gutterSize="xl"

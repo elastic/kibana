@@ -152,6 +152,7 @@ export function History({ containerWidth }: Props) {
       hasShadow={false}
       borderRadius="none"
       css={{ height: '100%' }}
+      data-test-subj="consoleHistoryPanel"
     >
       <EuiResizableContainer
         style={{ height: '100%' }}

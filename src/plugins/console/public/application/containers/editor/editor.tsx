@@ -138,6 +138,7 @@ export const Editor = memo(
           style={{ height: '100%' }}
           direction={containerWidth < euiTheme.breakpoint.l ? 'vertical' : 'horizontal'}
           onPanelWidthChange={(sizes) => onPanelSizeChange(sizes)}
+          data-test-subj="consoleEditorContainer"
         >
           {(EuiResizablePanel, EuiResizableButton) => (
             <>

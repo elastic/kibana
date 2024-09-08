@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { downloadFileAs } from '@kbn/share-plugin/public';
+import { loadTabFromURL } from './load_tab_from_url';
 import { getConsoleTourStepProps } from './get_console_tour_step_props';
 import { useServicesContext } from '../../contexts';
 import { MAIN_PANEL_LABELS } from './i18n';
@@ -66,6 +67,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
+  const initialLoad = useRef(true);
 
   const [resizeRef, setResizeRef] = useState<HTMLDivElement | null>(null);
   const containerDimensions = useResizeObserver(resizeRef);
@@ -75,26 +77,35 @@ export function Main({ isEmbeddable = false }: MainProps) {
     services: { notifications, routeHistory },
   } = useServicesContext();
 
+  // Update currentView on initial load if URL contains tabs
+  useEffect(() => {
+    if (!isEmbeddable && initialLoad.current) {
+      loadTabFromURL(routeHistory.location.hash, currentView, (tab) =>
+        dispatch({ type: 'setCurrentView', payload: tab })
+      );
+      initialLoad.current = false;
+    }
+  }, [isEmbeddable, currentView, dispatch, routeHistory]);
+
+  // Update the currentView when URL changes
   useEffect(() => {
     if (!isEmbeddable) {
       const unlisten = routeHistory.listen(() => {
         window.dispatchEvent(new HashChangeEvent('hashchange'));
-
-        const routeView = routeHistory.location.hash?.substring(2); // Remove #/ chars from hash path
-        if (
-          routeView &&
-          routeView !== currentView &&
-          [SHELL_TAB_ID, CONFIG_TAB_ID, HISTORY_TAB_ID].includes(routeView)
-        ) {
-          dispatch({ type: 'setCurrentView', payload: routeView });
-        }
+        loadTabFromURL(routeHistory.location.hash, currentView, (tab) =>
+          dispatch({ type: 'setCurrentView', payload: tab })
+        );
       });
-
-      routeHistory.push(`#/${currentView}`);
-
       return () => unlisten();
     }
-  }, [isEmbeddable, currentView, dispatch, routeHistory]);
+  }, [currentView, dispatch, isEmbeddable, routeHistory]);
+
+  // Update the URL hash when currentView changes
+  useEffect(() => {
+    if (!isEmbeddable && routeHistory.location.hash !== `#/${currentView}`) {
+      routeHistory.push(`#/${currentView}`);
+    }
+  }, [currentView, isEmbeddable, routeHistory]);
 
   const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
   const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
