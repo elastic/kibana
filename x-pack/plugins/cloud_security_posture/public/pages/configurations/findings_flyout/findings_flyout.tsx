@@ -37,7 +37,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
-import { CSP_DATASET, getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
+import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { benchmarksNavigation } from '../../../common/navigation/constants';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
