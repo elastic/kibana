@@ -6147,9 +6147,17 @@
             "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
-          ">; } & { start: number; end: number; }; }; }) => Promise<",
-          "ServiceEntities",
-          " | undefined>; } & ",
+          ">; } & { start: number; end: number; }; }; }) => Promise<{ metrics: { latency: number; throughput: number; failedTransactionRate: number; logRate: number; logErrorRate: number; }; serviceName: string; agentName: ",
+          {
+            "pluginId": "@kbn/elastic-agent-utils",
+            "scope": "common",
+            "docId": "kibKbnElasticAgentUtilsPluginApi",
+            "section": "def-common.AgentName",
+            "text": "AgentName"
+          },
+          "; dataStreamTypes: ",
+          "EntityDataStreamType",
+          "[]; environments: string[]; hasLogMetrics: boolean; }>; } & ",
           "APMRouteCreateOptions",
           "; \"POST /internal/apm/entities/services/detailed_statistics\": { endpoint: \"POST /internal/apm/entities/services/detailed_statistics\"; params?: ",
           "TypeC",
@@ -6357,9 +6365,17 @@
             "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
-          ">; } & { kuery: string; } & { start: number; end: number; }; }; }) => Promise<",
-          "EntityServicesResponse",
-          ">; } & ",
+          ">; } & { kuery: string; } & { start: number; end: number; }; }; }) => Promise<{ services: { metrics: { latency: number; throughput: number; failedTransactionRate: number; logRate: number; logErrorRate: number; }; serviceName: string; agentName: ",
+          {
+            "pluginId": "@kbn/elastic-agent-utils",
+            "scope": "common",
+            "docId": "kibKbnElasticAgentUtilsPluginApi",
+            "section": "def-common.AgentName",
+            "text": "AgentName"
+          },
+          "; dataStreamTypes: ",
+          "EntityDataStreamType",
+          "[]; environments: string[]; hasLogMetrics: boolean; }[]; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/services/{serviceName}/alerts_count\": { endpoint: \"GET /internal/apm/services/{serviceName}/alerts_count\"; params?: ",
           "TypeC",

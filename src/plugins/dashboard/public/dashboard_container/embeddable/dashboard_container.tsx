@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
+import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { I18nStart, KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import {
   type PublishingSubject,
@@ -15,8 +17,6 @@ import {
   apiPublishesUnsavedChanges,
   getPanelTitle,
   PublishesViewMode,
-  PublishesDataLoading,
-  apiPublishesDataLoading,
 } from '@kbn/presentation-publishing';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -33,7 +33,7 @@ import {
   type EmbeddableOutput,
   type IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   HasRuntimeChildState,
@@ -41,7 +41,6 @@ import {
   HasSerializedChildState,
   TrackContentfulRender,
   TracksQueryPerformance,
-  combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
 import { PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
@@ -52,18 +51,14 @@ import { omit } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { BehaviorSubject, Subject, Subscription, first, skipWhile, switchMap } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
-import { DashboardAttributes, DashboardContainerInput, DashboardPanelState } from '../../../common';
-import {
-  getReferencesForControls,
-  getReferencesForPanelId,
-} from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { DashboardContainerInput, DashboardPanelState } from '../../../common';
+import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import {
   DASHBOARD_APP_ID,
   DASHBOARD_UI_METRIC_ID,
@@ -90,10 +85,7 @@ import {
   showSettings,
 } from './api';
 import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
-import {
-  combineDashboardFiltersWithControlGroupFilters,
-  startSyncingDashboardControlGroup,
-} from './create/controls/dashboard_control_group_integration';
+import { combineDashboardFiltersWithControlGroupFilters } from './create/controls/dashboard_control_group_integration';
 import { initializeDashboard } from './create/create_dashboard';
 import {
   DashboardCreationOptions,
@@ -101,7 +93,6 @@ import {
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
-import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -157,7 +148,7 @@ export class DashboardContainer
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
-  public controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+  public controlGroup?: ControlGroupContainer;
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
@@ -166,7 +157,6 @@ export class DashboardContainer
   public reload$ = new Subject<void>();
   public timeRestore$: BehaviorSubject<boolean | undefined>;
   public timeslice$: BehaviorSubject<[number, number] | undefined>;
-  public unifiedSearchFilters$?: PublishingSubject<Filter[] | undefined>;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
   public readonly executionContext: KibanaExecutionContext;
@@ -182,9 +172,6 @@ export class DashboardContainer
   public firstLoad: boolean = true;
   private hadContentfulRender = false;
   private scrollPosition?: number;
-
-  // setup
-  public untilContainerInitialized: () => Promise<void>;
 
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
@@ -211,7 +198,6 @@ export class DashboardContainer
     | undefined;
   // new embeddable framework
   public savedObjectReferences: Reference[] = [];
-  public controlGroupInput: DashboardAttributes['controlGroupInput'] | undefined;
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -222,42 +208,18 @@ export class DashboardContainer
     creationOptions?: DashboardCreationOptions,
     initialComponentState?: DashboardPublicState
   ) {
-    const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
-    async function untilContainerInitialized(): Promise<void> {
-      return new Promise((resolve) => {
-        controlGroupApi$
-          .pipe(
-            skipWhile((controlGroupApi) => !controlGroupApi),
-            switchMap(async (controlGroupApi) => {
-              await controlGroupApi?.untilInitialized();
-            }),
-            first()
-          )
-          .subscribe(() => {
-            resolve();
-          });
-      });
-    }
-
     const {
       usageCollection,
       embeddable: { getEmbeddableFactory },
     } = pluginServices.getServices();
-
     super(
       {
         ...initialInput,
       },
       { embeddableLoaded: {} },
       getEmbeddableFactory,
-      parent,
-      {
-        untilContainerInitialized,
-      }
+      parent
     );
-
-    this.controlGroupApi$ = controlGroupApi$;
-    this.untilContainerInitialized = untilContainerInitialized;
 
     this.trackPanelAddMetric = usageCollection.reportUiCounter?.bind(
       usageCollection,
@@ -350,41 +312,7 @@ export class DashboardContainer
       DashboardContainerInput
     >(this.publishingSubscription, this, 'lastReloadRequestTime');
 
-    startSyncingDashboardControlGroup(this);
-
     this.executionContext = initialInput.executionContext;
-
-    this.dataLoading = new BehaviorSubject<boolean | undefined>(false);
-    this.publishingSubscription.add(
-      combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
-        this,
-        'dataLoading',
-        apiPublishesDataLoading,
-        undefined,
-        // flatten method
-        (values) => {
-          return values.some((isLoading) => isLoading);
-        }
-      ).subscribe((isAtLeastOneChildLoading) => {
-        (this.dataLoading as BehaviorSubject<boolean | undefined>).next(isAtLeastOneChildLoading);
-      })
-    );
-
-    this.dataViews = new BehaviorSubject<DataView[] | undefined>(this.getAllDataViews());
-
-    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(this.getInput().query);
-    this.query$ = query$;
-    this.publishingSubscription.add(
-      this.getInput$().subscribe((input) => {
-        if (!deepEqual(query$.getValue() ?? [], input.query)) {
-          query$.next(input.query);
-        }
-      })
-    );
-  }
-
-  public setControlGroupApi(controlGroupApi: ControlGroupApi) {
-    (this.controlGroupApi$ as BehaviorSubject<ControlGroupApi | undefined>).next(controlGroupApi);
   }
 
   public getAppContext() {
@@ -470,10 +398,10 @@ export class DashboardContainer
       panels,
     } = this.input;
 
-    const combinedFilters = combineDashboardFiltersWithControlGroupFilters(
-      filters,
-      this.controlGroupApi$?.value
-    );
+    let combinedFilters = filters;
+    if (this.controlGroup) {
+      combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
+    }
     const hasCustomTimeRange = Boolean(
       (panels[id]?.explicitInput as Partial<InheritedChildInput>)?.timeRange
     );
@@ -502,6 +430,7 @@ export class DashboardContainer
   public destroy() {
     super.destroy();
     this.cleanupStateTools();
+    this.controlGroup?.destroy();
     this.diffingSubscription.unsubscribe();
     this.publishingSubscription.unsubscribe();
     this.integrationSubscriptions.unsubscribe();
@@ -687,12 +616,16 @@ export class DashboardContainer
   public forceRefresh(refreshControlGroup: boolean = true) {
     this.dispatch.setLastReloadRequestTimeToNow({});
     if (refreshControlGroup) {
+      this.controlGroup?.reload();
+
       // only reload all panels if this refresh does not come from the control group.
       this.reload$.next();
     }
   }
 
-  public async asyncResetToLastSavedState() {
+  public onDataViewsUpdate$ = new Subject<DataView[]>();
+
+  public resetToLastSavedState() {
     this.dispatch.resetToLastSavedInput({});
     const {
       explicitInput: { timeRange, refreshInterval },
@@ -701,8 +634,8 @@ export class DashboardContainer
       },
     } = this.getState();
 
-    if (this.controlGroupApi$.value) {
-      await this.controlGroupApi$.value.asyncResetUnsavedChanges();
+    if (this.controlGroup) {
+      this.controlGroup.resetToLastSavedState();
     }
 
     // if we are using the unified search integration, we need to force reset the time picker.
@@ -747,6 +680,7 @@ export class DashboardContainer
 
     const initializeResult = await initializeDashboard({
       creationOptions: this.creationOptions,
+      controlGroup: this.controlGroup,
       untilDashboardReady,
       loadDashboardReturn,
     });
@@ -761,6 +695,9 @@ export class DashboardContainer
         omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput')
       );
       this.dispatch.setManaged(loadDashboardReturn?.managed);
+      if (this.controlGroup) {
+        this.controlGroup.setSavedState(loadDashboardReturn.dashboardInput?.controlGroupInput);
+      }
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
       this.setExpandedPanelId(undefined);
@@ -784,7 +721,7 @@ export class DashboardContainer
    */
   public setAllDataViews = (newDataViews: DataView[]) => {
     this.allDataViews = newDataViews;
-    (this.dataViews as BehaviorSubject<DataView[] | undefined>).next(newDataViews);
+    this.onDataViewsUpdate$.next(newDataViews);
   };
 
   public getExpandedPanelId = () => {
@@ -807,6 +744,7 @@ export class DashboardContainer
   public clearOverlays = () => {
     this.dispatch.setHasOverlays(false);
     this.dispatch.setFocusedPanelId(undefined);
+    this.controlGroup?.closeAllFlyouts();
     this.overlayRef?.close();
   };
 
@@ -911,22 +849,6 @@ export class DashboardContainer
     };
   };
 
-  public getSerializedStateForControlGroup = () => {
-    return {
-      rawState: this.controlGroupInput
-        ? (this.controlGroupInput as ControlGroupSerializedState)
-        : ({
-            controlStyle: 'oneLine',
-            chainingSystem: 'HIERARCHICAL',
-            showApplySelections: false,
-            panelsJSON: '{}',
-            ignoreParentSettingsJSON:
-              '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
-          } as ControlGroupSerializedState),
-      references: getReferencesForControls(this.savedObjectReferences),
-    };
-  };
-
   private restoredRuntimeState: UnsavedPanelState | undefined = undefined;
   public setRuntimeStateForChild = (childId: string, state: object) => {
     const runtimeState = this.restoredRuntimeState ?? {};
@@ -935,10 +857,6 @@ export class DashboardContainer
   };
   public getRuntimeStateForChild = (childId: string) => {
     return this.restoredRuntimeState?.[childId];
-  };
-
-  public getRuntimeStateForControlGroup = () => {
-    return this.getRuntimeStateForChild(PANELS_CONTROL_GROUP_KEY);
   };
 
   public removePanel(id: string) {

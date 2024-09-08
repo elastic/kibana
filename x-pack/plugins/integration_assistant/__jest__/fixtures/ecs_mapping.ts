@@ -454,6 +454,7 @@ export const ecsTestState = {
   ecsVersion: 'testversion',
   chunkMapping: { test1: 'test1' },
   useFinalMapping: false,
+  hasTriedOnce: false,
   currentMapping: { test1: 'test1' },
   lastExecutedChain: 'testchain',
   rawSamples: ['{"test1": "test1"}'],
