@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
-import { DataSourceType } from '../../../../../../../../../common/api/detection_engine';
 import type {
   SavedKqlQuery,
   DiffableRule,
@@ -18,7 +17,7 @@ import { Query, SavedQueryName, Filters } from '../../../../rule_definition_sect
 import * as ruleDetailsI18n from '../../../../translations';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { useGetSavedQuery } from '../../../../../../../../detections/pages/detection_engine/rules/use_get_saved_query';
-import { getQueryLanguageLabel } from '../../../../helpers';
+import { getDataSourceProps, getQueryLanguageLabel } from '../../../../helpers';
 
 interface SavedQueryProps {
   kqlQuery: SavedKqlQuery;
@@ -55,17 +54,11 @@ export function SavedKqlQueryReadOnly({ kqlQuery, dataSource, ruleType }: SavedQ
   }
 
   if (savedQuery.attributes.filters) {
-    const index =
-      dataSource?.type === DataSourceType.index_patterns ? dataSource.index_patterns : undefined;
-
-    const dataViewId =
-      dataSource?.type === DataSourceType.data_view ? dataSource.data_view_id : undefined;
+    const dataSourceProps = getDataSourceProps(dataSource);
 
     listItems.push({
       title: descriptionStepI18n.SAVED_QUERY_FILTERS_LABEL,
-      description: (
-        <Filters filters={savedQuery.attributes.filters} index={index} dataViewId={dataViewId} />
-      ),
+      description: <Filters filters={savedQuery.attributes.filters} {...dataSourceProps} />,
     });
   }
 

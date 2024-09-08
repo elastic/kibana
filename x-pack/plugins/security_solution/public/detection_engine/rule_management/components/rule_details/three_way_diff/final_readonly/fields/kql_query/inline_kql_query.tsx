@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
-import { DataSourceType } from '../../../../../../../../../common/api/detection_engine';
 import type {
   DiffableAllFields,
   InlineKqlQuery,
@@ -16,7 +15,7 @@ import type {
 import { Query, Filters } from '../../../../rule_definition_section';
 import * as ruleDetailsI18n from '../../../../translations';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
-import { getQueryLanguageLabel, typeCheckFilters } from '../../../../helpers';
+import { getDataSourceProps, getQueryLanguageLabel, typeCheckFilters } from '../../../../helpers';
 
 const defaultI18nLabels = {
   query: descriptionStepI18n.QUERY_LABEL,
@@ -53,15 +52,11 @@ export function InlineKqlQueryReadOnly({
   const filters = typeCheckFilters(kqlQuery.filters);
 
   if (filters.length > 0) {
-    const index =
-      dataSource?.type === DataSourceType.index_patterns ? dataSource.index_patterns : undefined;
-
-    const dataViewId =
-      dataSource?.type === DataSourceType.data_view ? dataSource.data_view_id : undefined;
+    const dataSourceProps = getDataSourceProps(dataSource);
 
     listItems.push({
       title: i18nLabels.filters,
-      description: <Filters filters={filters} index={index} dataViewId={dataViewId} />,
+      description: <Filters filters={filters} {...dataSourceProps} />,
     });
   }
 
