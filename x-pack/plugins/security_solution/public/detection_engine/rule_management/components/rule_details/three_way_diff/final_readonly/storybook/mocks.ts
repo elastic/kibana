@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataSourceType, KqlQueryType } from '../../../../../../../../common/api/detection_engine';
 import type {
@@ -87,6 +88,8 @@ export function mockDataView(spec: Partial<DataViewDeps['spec']> = {}): DataView
         '@timestamp': {
           name: '@timestamp',
           type: 'date',
+          searchable: true,
+          aggregatable: true,
         },
       },
       ...spec,
@@ -95,8 +98,8 @@ export function mockDataView(spec: Partial<DataViewDeps['spec']> = {}): DataView
       getDefaultInstance: () => ({
         toJSON: () => ({}),
       }),
-    },
-  } as unknown as DataViewDeps);
+    } as unknown as FieldFormatsStartCommon,
+  });
 
   return dataView;
 }
