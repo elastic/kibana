@@ -52,10 +52,7 @@ function MockMlData({ children }: { children: React.ReactNode }) {
 
   queryClient.setQueryData([GET_MODULES_QUERY_KEY, {}], mockedModulesData);
 
-  queryClient.setQueryData(
-    [GET_RECOGNIZER_QUERY_KEY, { indexPatternName: undefined }],
-    mockedCompatibleModules
-  );
+  queryClient.setQueryData([GET_RECOGNIZER_QUERY_KEY, {}], mockedCompatibleModules);
 
   return <>{children}</>;
 }
