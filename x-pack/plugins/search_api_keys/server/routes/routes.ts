@@ -8,15 +8,56 @@
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
-import { fetchClusterHasApiKeys, fetchUserStartPrivileges } from '../lib/privileges';
+import { schema } from '@kbn/config-schema';
+import { APIRoutes } from '../../common/types';
+import { getAPIKeyById } from '../lib/get_key_by_id';
 import { createAPIKey } from '../lib/create_key';
-
-const BASE_PATH = '/internal/search_api_keys';
+import { fetchClusterHasApiKeys, fetchUserStartPrivileges } from '../lib/privileges';
 
 export function registerRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
-      path: `${BASE_PATH}/create`,
+      path: APIRoutes.API_KEYS,
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+      options: {
+        access: 'internal',
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const core = await context.core;
+        const client = core.elasticsearch.client.asCurrentUser;
+        const apiKey = await getAPIKeyById(request.params.id, client, logger);
+
+        if (!apiKey || !apiKey.invalidated) {
+          return response.customError({
+            body: { message: 'API key is expired or invalid.' },
+            statusCode: 401,
+          });
+        }
+
+        return response.ok({
+          body: apiKey,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (e) {
+        logger.error(`Error fetching API Key`);
+        logger.error(e);
+        return response.customError({
+          body: { message: e.message },
+          statusCode: 500,
+        });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: APIRoutes.API_KEYS,
       validate: {},
       options: {
         access: 'internal',
