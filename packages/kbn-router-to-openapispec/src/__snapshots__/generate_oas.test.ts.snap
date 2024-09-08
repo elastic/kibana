@@ -138,6 +138,7 @@ Object {
     "/bar": Object {
       "get": Object {
         "deprecated": true,
+        "discontinued": "route discontinued version or date",
         "operationId": "%2Fbar#0",
         "parameters": Array [
           Object {
@@ -163,6 +164,12 @@ Object {
                   "deprecatedFoo": Object {
                     "deprecated": true,
                     "description": "deprecated foo",
+                    "type": "string",
+                  },
+                  "discontinuedFoo": Object {
+                    "deprecated": true,
+                    "description": "discontinued foo",
+                    "discontinued": "versionOrDate",
                     "type": "string",
                   },
                   "foo": Object {
@@ -595,6 +602,12 @@ OK response oas-test-version-2",
                   "deprecatedFoo": Object {
                     "deprecated": true,
                     "description": "deprecated foo",
+                    "type": "string",
+                  },
+                  "discontinuedFoo": Object {
+                    "deprecated": true,
+                    "description": "discontinued foo",
+                    "discontinued": "versionOrDate",
                     "type": "string",
                   },
                   "foo": Object {

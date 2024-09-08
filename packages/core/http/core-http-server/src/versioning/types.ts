@@ -91,6 +91,14 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    * @default false
    */
   deprecated?: boolean;
+
+  /**
+   * Release version or date that this route will be removed
+   * Use with `deprecated: true`
+   *
+   * @default undefined
+   */
+  discontinued?: string;
 };
 
 /**

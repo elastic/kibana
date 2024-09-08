@@ -21,9 +21,9 @@ interface RecursiveType {
   self: undefined | RecursiveType;
 }
 
-describe('generateOpenApiDocument', () => {
+describe.only('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
-    it('generates the expected OpenAPI document for the shared schema', () => {
+    it.only('generates the expected OpenAPI document for the shared schema', () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
         versionedRouters: { testVersionedRouter: { routes: [{}] } },

@@ -64,7 +64,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
     summary: 'versioned route',
     access: 'public',
     deprecated: true,
-    discontinued: 'route discontinued date or version',
+    discontinued: 'route discontinued version or date',
     options: {
       tags: ['ignore-me', 'oas-tag:versioned'],
     },
@@ -87,7 +87,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
                     meta: {
                       description: 'discontinued foo',
                       deprecated: true,
-                      discontinued: 'foo discontinued date or version',
+                      discontinued: 'foo discontinued version or date',
                     },
                   })
                 ),
@@ -99,12 +99,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
               body: () =>
                 schema.object(
                   { fooResponseWithDescription: schema.string() },
-                  {
-                    meta: {
-                      description: 'fooResponse',
-                      discontinued: 'fooResponse',
-                    },
-                  }
+                  { meta: { description: 'fooResponse' } }
                 ),
             },
           },

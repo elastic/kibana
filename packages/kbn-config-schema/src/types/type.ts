@@ -34,7 +34,7 @@ export interface TypeMeta {
    */
   deprecated?: boolean;
   /**
-   * A stack version or date stating when a deprecated field will be removed.
+   * Release version or date that this route will be removed
    */
   discontinued?: string;
 }

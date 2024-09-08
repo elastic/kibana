@@ -207,6 +207,14 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * @remarks This will be surfaced in OAS documentation.
    */
   deprecated?: boolean;
+
+  /**
+   * Release version or date that this route will be removed
+   * Use with `deprecated: true`
+   *
+   * @remarks This will be surfaced in OAS documentation.
+   */
+  discontinued?: string;
 }
 
 /**
