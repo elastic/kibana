@@ -43,10 +43,10 @@ const OverrideColumn = styled(EuiFlexItem)`
   text-overflow: ellipsis;
 `;
 
-const OverrideValueColumn = styled(EuiFlexItem)`
-  width: 30px;
-  max-width: 30px;
+const OverrideValueColumn = styled.div`
+  width: 50px;
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
 `;
 
@@ -96,16 +96,18 @@ export const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItem
         <span data-test-subj="severityOverrideField">{`${severityMappingItem.field}:`}</span>
       </EuiToolTip>
     </OverrideColumn>
-    <OverrideValueColumn>
+    <EuiFlexItem grow={false}>
       <EuiToolTip
         content={severityMappingItem.value}
         data-test-subj={`severityOverrideValue-${severityMappingItem.value}`}
       >
-        <span data-test-subj="severityOverrideValue">
-          {defaultToEmptyTag(severityMappingItem.value)}
-        </span>
+        <OverrideValueColumn>
+          <span data-test-subj="severityOverrideValue">
+            {defaultToEmptyTag(severityMappingItem.value)}
+          </span>
+        </OverrideValueColumn>
       </EuiToolTip>
-    </OverrideValueColumn>
+    </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiIcon type={'sortRight'} />
     </EuiFlexItem>
