@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
+import { configureStore } from '@reduxjs/toolkit';
 import { merge } from 'lodash';
 import { Subject } from 'rxjs';
+import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { ReactQueryClientProvider } from '../../../../../../../common/containers/query_client/query_client_provider';
@@ -36,7 +38,7 @@ function createKibanaServicesMock(overrides?: Partial<CoreStart>) {
     },
     settings: {
       client: {
-        get: () => {},
+        get: (key: string, defaultOverride?: unknown) => defaultOverride,
         get$: () => new Subject(),
         set: () => {},
       },
@@ -45,6 +47,20 @@ function createKibanaServicesMock(overrides?: Partial<CoreStart>) {
   };
 
   return merge(baseMock, overrides);
+}
+
+function createMockStore() {
+  const store = configureStore({
+    reducer: {
+      app: () => ({
+        enableExperimental: {
+          prebuiltRulesCustomizationEnabled: true,
+        },
+      }),
+    },
+  });
+
+  return store;
 }
 
 interface StorybookProvidersProps {
@@ -58,9 +74,13 @@ export function ThreeWayDiffStorybookProviders({
 }: StorybookProvidersProps) {
   const KibanaReactContext = createKibanaReactContext(createKibanaServicesMock(kibanaServicesMock));
 
+  const store = createMockStore();
+
   return (
     <KibanaReactContext.Provider>
-      <ReactQueryClientProvider>{children}</ReactQueryClientProvider>
+      <ReactQueryClientProvider>
+        <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>
+      </ReactQueryClientProvider>
     </KibanaReactContext.Provider>
   );
 }

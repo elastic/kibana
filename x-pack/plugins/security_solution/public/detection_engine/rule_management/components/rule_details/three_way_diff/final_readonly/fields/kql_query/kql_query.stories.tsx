@@ -75,6 +75,25 @@ InlineKqlQueryWithDataView.args = {
   },
 };
 
+export const InlineKqlQueryWithoutDataSource = Template.bind({});
+
+/*
+  Filters should still be displayed if no `data_source` is provided.
+  Component would fall back to the default index pattern in such case.
+*/
+InlineKqlQueryWithoutDataSource.args = {
+  finalDiffableRule: {
+    kql_query: inlineKqlQuery,
+  },
+  kibanaServicesMock: {
+    data: {
+      dataViews: {
+        create: async () => mockDataView(),
+      },
+    },
+  },
+};
+
 export const SavedKqlQueryWithIndexPatterns = Template.bind({});
 
 SavedKqlQueryWithIndexPatterns.args = {

@@ -54,12 +54,12 @@ export function SavedKqlQueryReadOnly({ kqlQuery, dataSource, ruleType }: SavedQ
     });
   }
 
-  if (savedQuery.attributes.filters && dataSource) {
+  if (savedQuery.attributes.filters) {
     const index =
-      dataSource.type === DataSourceType.index_patterns ? dataSource.index_patterns : undefined;
+      dataSource?.type === DataSourceType.index_patterns ? dataSource.index_patterns : undefined;
 
     const dataViewId =
-      dataSource.type === DataSourceType.data_view ? dataSource.data_view_id : undefined;
+      dataSource?.type === DataSourceType.data_view ? dataSource.data_view_id : undefined;
 
     listItems.push({
       title: descriptionStepI18n.SAVED_QUERY_FILTERS_LABEL,

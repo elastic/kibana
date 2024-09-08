@@ -58,6 +58,7 @@ import {
   useRequiredFieldsStyles,
 } from './rule_definition_section.styles';
 import { getQueryLanguageLabel } from './helpers';
+import { useDefaultIndexPattern } from './use_default_index_pattern';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -84,9 +85,11 @@ export const Filters = ({
 }: FiltersProps) => {
   const flattenedFilters = mapAndFlattenFilters(filters);
 
+  const defaultIndexPattern = useDefaultIndexPattern();
+
   const { indexPattern } = useRuleIndexPattern({
     dataSourceType: dataViewId ? DataSourceType.DataView : DataSourceType.IndexPatterns,
-    index: index ?? [],
+    index: index ?? defaultIndexPattern,
     dataViewId,
   });
 
@@ -480,6 +483,8 @@ const prepareDefinitionSectionListItems = (
           <Filters
             filters={savedQuery.attributes.filters as Filter[]}
             data-test-subj="savedQueryFiltersPropertyValue"
+            dataViewId={'data_view_id' in rule ? rule.data_view_id : undefined}
+            index={'index' in rule ? rule.index : undefined}
           />
         ),
       });

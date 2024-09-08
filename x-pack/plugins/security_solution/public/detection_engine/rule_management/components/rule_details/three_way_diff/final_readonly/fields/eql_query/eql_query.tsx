@@ -27,12 +27,12 @@ export function EqlQueryReadOnly({ eqlQuery, dataSource }: EqlQueryReadOnlyProps
     },
   ];
 
-  if (eqlQuery.filters.length > 0 && dataSource) {
+  if (eqlQuery.filters.length > 0) {
     const index =
-      dataSource.type === DataSourceType.index_patterns ? dataSource.index_patterns : undefined;
+      dataSource?.type === DataSourceType.index_patterns ? dataSource.index_patterns : undefined;
 
     const dataViewId =
-      dataSource.type === DataSourceType.data_view ? dataSource.data_view_id : undefined;
+      dataSource?.type === DataSourceType.data_view ? dataSource.data_view_id : undefined;
 
     listItems.push({
       title: descriptionStepI18n.FILTERS_LABEL,
