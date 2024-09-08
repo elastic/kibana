@@ -51,6 +51,7 @@ import {
   isBelowMinVersion,
   type NewPackagePolicyPostureInput,
   POSTURE_NAMESPACE,
+  POLICY_TEMPLATE_FORM_DTS,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -830,7 +831,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     if (isLoading) {
       return (
-        <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexGroup justifyContent="spaceAround" data-test-subj={POLICY_TEMPLATE_FORM_DTS.LOADER}>
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" />
           </EuiFlexItem>
