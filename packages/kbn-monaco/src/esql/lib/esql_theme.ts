@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { euiThemeVars, darkMode } from '@kbn/ui-theme';
@@ -44,13 +45,13 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     // commands
     ...buildRuleGroup(
       [
-        'metrics',
+        'dev_metrics',
         'meta',
         'metadata',
-        'match',
+        'dev_match',
         'mv_expand',
         'stats',
-        'inlinestats',
+        'dev_inlinestats',
         'dissect',
         'grok',
         'keep',
@@ -67,7 +68,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'in',
         'as',
         'limit',
-        'lookup',
+        'dev_lookup',
         'null',
         'enrich',
         'on',
