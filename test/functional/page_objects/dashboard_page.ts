@@ -157,10 +157,12 @@ export class DashboardPageObject extends FtrService {
     const endIndexOfFilters = url.indexOf('?');
     const endIndexOfMax = url.substring(startOfIdIndex).indexOf('/');
     if (endIndexOfMax === -1) {
-      return url.substring(startOfIdIndex, endIndexOfFilters + startOfIdIndex);
+      return url.substring(startOfIdIndex, endIndexOfFilters);
     }
     const endIndex =
-      endIndexOfFilters + startOfIdIndex > endIndexOfMax ? endIndexOfFilters : endIndexOfMax;
+      endIndexOfFilters + startOfIdIndex > endIndexOfMax
+        ? endIndexOfFilters + startOfIdIndex
+        : endIndexOfMax + startOfIdIndex;
     const id = url.substring(startOfIdIndex, endIndex < 0 ? url.length : endIndex + startOfIdIndex);
     return id;
   }
