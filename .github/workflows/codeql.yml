@@ -32,13 +32,14 @@ jobs:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
 
-    - name: setup node
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: '.nvmrc'
-    - name: yarn kbn bootstrap
-      run: |
-        yarn kbn bootstrap --no-validate --no-vscode
+    # TODO: Possibly required to follow all call paths, however, when enabled, the step below runs out of memory.
+    # Possible workarounds: Apply for access to the GitHub beta where we can use beefier machines, or run it ourselves on Buildkite
+    # - name: yarn kbn bootstrap
+    #   run: |
+    #     mkdir ~/.npm-global
+    #     npm config set prefix '~/.npm-global'
+    #     export PATH=~/.npm-global/bin:$PATH
+    #     yarn kbn bootstrap --no-validate --no-vscode
 
     - name: Set sha and branch
       run: |

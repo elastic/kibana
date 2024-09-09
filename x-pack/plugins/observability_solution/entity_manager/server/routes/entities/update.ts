@@ -13,11 +13,12 @@ import { z } from '@kbn/zod';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
 import { findEntityDefinitionById } from '../../lib/entities/find_entity_definition';
+import { startTransforms } from '../../lib/entities/start_transforms';
 import {
   installationInProgress,
   reinstallEntityDefinition,
 } from '../../lib/entities/install_entity_definition';
-import { startTransform } from '../../lib/entities/start_transform';
+
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 /**
@@ -104,7 +105,7 @@ export const updateEntityDefinitionRoute = createEntityManagerServerRoute({
       });
 
       if (!params.query.installOnly) {
-        await startTransform(esClient, updatedDefinition, logger);
+        await startTransforms(esClient, updatedDefinition, logger);
       }
 
       return response.ok({ body: updatedDefinition });
