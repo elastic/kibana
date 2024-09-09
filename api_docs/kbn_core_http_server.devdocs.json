@@ -4783,14 +4783,6 @@
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/get.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/check.ts"
-              },
-              {
                 "plugin": "profiling",
                 "path": "x-pack/plugins/observability_solution/profiling/server/routes/apm.ts"
               },
@@ -7361,14 +7353,6 @@
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/create.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/reset.ts"
-              },
-              {
                 "plugin": "profiling",
                 "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
               },
@@ -8891,10 +8875,6 @@
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/enable.ts"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
@@ -9283,10 +9263,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack",
                 "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/update.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -9829,14 +9805,6 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/delete.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/disable.ts"
               },
               {
                 "plugin": "synthetics",
