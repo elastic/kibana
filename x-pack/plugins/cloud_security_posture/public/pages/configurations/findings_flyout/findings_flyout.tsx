@@ -37,7 +37,10 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
-import { CSP_DATASET, getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
+import {
+  CSP_MISCONFIGURATIONS_DATASET,
+  getDatasetDisplayName,
+} from '../../../common/utils/get_dataset_display_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { benchmarksNavigation } from '../../../common/navigation/constants';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
@@ -170,7 +173,7 @@ const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }
 
   const ruleFlyoutLink =
     // currently we only support rule linking for native CSP findings
-    finding.data_stream.dataset === CSP_DATASET &&
+    finding.data_stream.dataset === CSP_MISCONFIGURATIONS_DATASET &&
     finding.rule?.benchmark?.version &&
     finding.rule?.benchmark?.id &&
     finding.rule?.id
@@ -197,7 +200,8 @@ const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }
   }
 };
 
-const isNativeCspFinding = (finding: CspFinding) => finding.data_stream.dataset === CSP_DATASET;
+const isNativeCspFinding = (finding: CspFinding) =>
+  finding.data_stream.dataset === CSP_MISCONFIGURATIONS_DATASET;
 
 const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
   const { euiTheme } = useEuiTheme();
