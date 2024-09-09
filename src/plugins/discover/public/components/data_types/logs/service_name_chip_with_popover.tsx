@@ -7,44 +7,40 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import { EuiLink } from '@elastic/eui';
 import { OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE } from '@kbn/management-settings-ids';
-import { HighlightField, HighlightFieldProps } from './highlight_field';
-import { getUnifiedDocViewerServices } from '../../../plugin';
+import { type ChipWithPopoverProps, ChipWithPopover } from './popover_chip';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 const SERVICE_ENTITY_LOCATOR = 'SERVICE_ENTITY_LOCATOR';
 
-export function ServiceNameHighlightField(props: HighlightFieldProps) {
-  const {
-    share: { url: urlService },
-    core,
-  } = getUnifiedDocViewerServices();
-
+export function ServiceNameChipWithPopover(props: ChipWithPopoverProps) {
+  const { share, core } = useDiscoverServices();
   const isEntityCentricExperienceSettingEnabled = core.uiSettings.get(
     OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE
   );
+  const urlService = share?.url;
 
-  const apmLinkToServiceEntityLocator = urlService.locators.get<{ serviceName: string }>(
+  const apmLinkToServiceEntityLocator = urlService?.locators.get<{ serviceName: string }>(
     SERVICE_ENTITY_LOCATOR
   );
   const href = apmLinkToServiceEntityLocator?.getRedirectUrl({
-    serviceName: props.value as string,
+    serviceName: props.text,
   });
 
   const routeLinkProps = href
     ? getRouterLinkProps({
         href,
-        onClick: () =>
-          apmLinkToServiceEntityLocator?.navigate({ serviceName: props.value as string }),
+        onClick: () => apmLinkToServiceEntityLocator?.navigate({ serviceName: props.text }),
       })
     : undefined;
 
   return (
-    <HighlightField {...props}>
+    <ChipWithPopover {...props}>
       {isEntityCentricExperienceSettingEnabled && routeLinkProps
         ? ({ content }) => <EuiLink {...routeLinkProps}>{content}</EuiLink>
         : undefined}
-    </HighlightField>
+    </ChipWithPopover>
   );
 }

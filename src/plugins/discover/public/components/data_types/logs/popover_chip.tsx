@@ -30,7 +30,11 @@ const DataTablePopoverCellValue = dynamic(
   () => import('@kbn/unified-data-table/src/components/data_table_cell_value')
 );
 
-interface ChipWithPopoverProps {
+type ChipWithPopoverChildrenType = (props: {
+  content: string;
+}) => React.ReactNode | React.ReactNode;
+
+export interface ChipWithPopoverProps {
   /**
    * ECS mapping for the key
    */
@@ -42,6 +46,7 @@ interface ChipWithPopoverProps {
   dataTestSubj?: string;
   leftSideIcon?: React.ReactNode;
   rightSideIcon?: EuiBadgeProps['iconType'];
+  children?: ChipWithPopoverChildrenType;
 }
 
 export function ChipWithPopover({
@@ -50,6 +55,7 @@ export function ChipWithPopover({
   dataTestSubj = `dataTablePopoverChip_${property}`,
   leftSideIcon,
   rightSideIcon,
+  children,
 }: ChipWithPopoverProps) {
   return (
     <ChipPopover
@@ -71,7 +77,9 @@ export function ChipWithPopover({
           </EuiFlexGroup>
         </EuiBadge>
       )}
-    />
+    >
+      {children}
+    </ChipPopover>
   );
 }
 
@@ -89,9 +97,10 @@ interface ChipPopoverProps {
     handleChipClickAriaLabel: string;
     chipCss: SerializedStyles;
   }) => ReactElement;
+  children?: ChipWithPopoverChildrenType;
 }
 
-export function ChipPopover({ property, text, renderChip }: ChipPopoverProps) {
+export function ChipPopover({ property, text, renderChip, children }: ChipPopoverProps) {
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -131,7 +140,8 @@ export function ChipPopover({ property, text, renderChip }: ChipPopoverProps) {
           <div style={{ maxWidth: '200px' }}>
             <EuiText size="s">
               <DataTablePopoverCellValue>
-                <span style={{ fontWeight: 700 }}>{property}</span> {text}
+                <span style={{ fontWeight: 700 }}>{property}</span>{' '}
+                {typeof children === 'function' ? children({ content: text }) : text}
               </DataTablePopoverCellValue>
             </EuiText>
           </div>

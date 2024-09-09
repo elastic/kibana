@@ -17,7 +17,6 @@ import type { LogsExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { createCustomSearchBar } from './custom_search_bar';
 import { createCustomUnifiedHistogram } from './custom_unified_histogram';
-import { entityManagerEnabled } from '../services/entity_manager/entity_manager_enabled';
 
 const LazyCustomDataSourceFilters = dynamic(() => import('./custom_data_source_filters'));
 const LazyCustomDataSourceSelector = dynamic(() => import('./custom_data_source_selector'));
@@ -48,11 +47,6 @@ export const createLogsExplorerProfileCustomizations =
      * create the DataView and set it in the stateContainer from Discover
      */
     await waitFor(service, (state) => state.matches('initialized'), { timeout: 30000 });
-
-    const isEntityManagerEnabled = await entityManagerEnabled({
-      core,
-      entityManager: plugins.entityManager,
-    });
 
     /**
      * Replace the DataViewPicker with a custom `DataSourceSelector` to pick integrations streams
@@ -151,7 +145,6 @@ export const createLogsExplorerProfileCustomizations =
             <UnifiedDocViewerLogsOverview
               {...props}
               renderAIAssistant={logsAIAssistantFeature?.render}
-              isEntityManagerEnabled={isEntityManagerEnabled}
             />
           ),
         });
