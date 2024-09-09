@@ -32,6 +32,8 @@ function handleCopy(event: ClipboardEvent) {
   }
 
   let tsvData = '';
+  let totalCellsCount = 0;
+  let totalRowsCount = 0;
 
   const rows = grid.querySelectorAll('[role="row"]');
   rows.forEach((row) => {
@@ -39,23 +41,29 @@ function handleCopy(event: ClipboardEvent) {
       '[role="gridcell"]:not(.euiDataGridRowCell--controlColumn) .euiDataGridRowCell__content'
     );
     const cellsTextContent: string[] = [];
-    let hasSelectedCell = false;
+    let hasSelectedCellsInRow = false;
 
     cells.forEach((cell) => {
       if (ranges.some((range) => range?.intersectsNode(cell))) {
         cellsTextContent.push(cell.textContent || '');
-        hasSelectedCell = true;
+        hasSelectedCellsInRow = true;
+        totalCellsCount++;
       } else {
         cellsTextContent.push(''); // placeholder for empty cells
       }
     });
 
-    if (cellsTextContent.length > 0 && hasSelectedCell) {
+    if (cellsTextContent.length > 0 && hasSelectedCellsInRow) {
       tsvData += cellsTextContent.join('\t') + '\n';
+      totalRowsCount++;
     }
   });
 
-  if (tsvData && event.clipboardData) {
+  if (totalRowsCount === 1) {
+    tsvData = tsvData.trim();
+  }
+
+  if (totalCellsCount > 1 && tsvData && event.clipboardData) {
     event.preventDefault();
     event.clipboardData.setData('text/plain', tsvData);
   }
