@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export async function deleteFilterLists(toastNotifications, mlApiServices, filterListsToDelete) {
+export async function deleteFilterLists(toastNotifications, mlApi, filterListsToDelete) {
   if (filterListsToDelete === undefined || filterListsToDelete.length === 0) {
     return;
   }
@@ -28,7 +28,7 @@ export async function deleteFilterLists(toastNotifications, mlApiServices, filte
   for (const filterList of filterListsToDelete) {
     const filterId = filterList.filter_id;
     try {
-      await mlApiServices.filters.deleteFilter(filterId);
+      await mlApi.filters.deleteFilter(filterId);
     } catch (resp) {
       console.log('Error deleting filter list:', resp);
       toastNotifications.addDanger(
