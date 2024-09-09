@@ -60,7 +60,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe.only('/internal/observability_ai_assistant/chat/complete', () => {
+  describe('/internal/observability_ai_assistant/chat/complete', () => {
     let proxy: LlmProxy;
     let connectorId: string;
 
@@ -220,7 +220,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.only('when creating a new conversation', () => {
+    describe('when creating a new conversation', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -232,7 +232,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('creates a new conversation', async () => {
-        console.log('events', events);
         expect(omit(events[0], 'id')).to.eql({
           type: StreamingChatResponseEventType.ChatCompletionChunk,
           message: {

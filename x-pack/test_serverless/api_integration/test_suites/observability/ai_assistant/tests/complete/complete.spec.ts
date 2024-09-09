@@ -145,7 +145,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    it.skip('returns a streaming response from the server', async () => {
+    it('returns a streaming response from the server', async () => {
       const interceptor = proxy.intercept('conversation', () => true);
 
       const receivedChunks: any[] = [];
