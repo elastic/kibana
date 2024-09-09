@@ -103,7 +103,7 @@ class AnnotationsTableUI extends Component {
     };
     this.mlJobService = mlJobServiceFactory(
       toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
-      props.kibana.services.mlServices.mlApiServices
+      props.kibana.services.mlServices.mlApi
     );
   }
 
@@ -115,11 +115,11 @@ class AnnotationsTableUI extends Component {
       isLoading: true,
     });
 
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
 
     if (dataCounts.processed_record_count > 0) {
       // Load annotations for the selected job.
-      ml.annotations
+      mlApi.annotations
         .getAnnotations$({
           jobIds: [job.job_id],
           earliestMs: null,
@@ -223,6 +223,7 @@ class AnnotationsTableUI extends Component {
   openSingleMetricView = async (annotation = {}) => {
     const {
       services: {
+        chrome: { recentlyAccessed },
         application: { navigateToUrl },
         share,
       },
@@ -307,7 +308,12 @@ class AnnotationsTableUI extends Component {
       { absolute: true }
     );
 
-    addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, singleMetricViewerLink);
+    addItemToRecentlyAccessed(
+      'timeseriesexplorer',
+      job.job_id,
+      singleMetricViewerLink,
+      recentlyAccessed
+    );
     await navigateToUrl(singleMetricViewerLink);
   };
 
@@ -558,7 +564,7 @@ class AnnotationsTableUI extends Component {
                 );
           },
           enabled: (annotation) => isTimeSeriesViewJob(this.getJob(annotation.job_id)),
-          icon: 'visLine',
+          icon: 'singleMetricViewer',
           type: 'icon',
           onClick: (annotation) => this.openSingleMetricView(annotation),
           'data-test-subj': `mlAnnotationsActionOpenInSingleMetricViewer`,
