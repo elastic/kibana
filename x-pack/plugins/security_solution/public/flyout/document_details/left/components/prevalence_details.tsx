@@ -6,7 +6,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiCallOut,
@@ -22,7 +22,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useLicense } from '../../../../common/hooks/use_license';
@@ -34,9 +33,8 @@ import {
   PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_HOST_LINK_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_USER_LINK_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
@@ -50,15 +48,8 @@ import {
 } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { IS_OPERATOR } from '../../../../../common/types';
-import { useKibana } from '../../../../common/lib/kibana';
-import {
-  HOST_NAME_FIELD_NAME,
-  USER_NAME_FIELD_NAME,
-} from '../../../../timelines/components/timeline/body/renderers/constants';
-import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
-import { UserPreviewPanelKey } from '../../../entity_details/user_right';
-import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
+import { CellActions } from '../../shared/components/cell_actions';
 
 export const PREVALENCE_TAB_ID = 'prevalence';
 const DEFAULT_FROM = 'now-30d';
@@ -95,13 +86,9 @@ interface PrevalenceDetailsRow extends PrevalenceData {
    */
   isPreviewEnabled: boolean;
   /**
-   * Callback to open host preview
+   * Scope id to pass to the preview link
    */
-  openHostPreview: (hostName: string) => void;
-  /**
-   * Callback to open user preview
-   */
-  openUserPreview: (userName: string) => void;
+  scopeId: string;
 }
 
 const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
@@ -128,33 +115,27 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     render: (data: PrevalenceDetailsRow) => (
       <EuiFlexGroup direction="column" gutterSize="none">
         {data.values.map((value) => {
-          if (data.isPreviewEnabled && data.field === HOST_NAME_FIELD_NAME) {
+          if (data.isPreviewEnabled && hasPreview(data.field)) {
             return (
               <EuiFlexItem key={value}>
-                <EuiLink
-                  data-test-subj={PREVALENCE_DETAILS_TABLE_HOST_LINK_CELL_TEST_ID}
-                  onClick={() => data.openHostPreview(value)}
-                >
-                  <EuiText size="xs">{value}</EuiText>
-                </EuiLink>
-              </EuiFlexItem>
-            );
-          }
-          if (data.isPreviewEnabled && data.field === USER_NAME_FIELD_NAME) {
-            return (
-              <EuiFlexItem key={value}>
-                <EuiLink
-                  data-test-subj={PREVALENCE_DETAILS_TABLE_USER_LINK_CELL_TEST_ID}
-                  onClick={() => data.openUserPreview(value)}
-                >
-                  <EuiText size="xs">{value}</EuiText>
-                </EuiLink>
+                <CellActions field={data.field} value={value}>
+                  <PreviewLink
+                    field={data.field}
+                    value={value}
+                    scopeId={data.scopeId}
+                    data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
+                  >
+                    <EuiText size="xs">{value}</EuiText>
+                  </PreviewLink>
+                </CellActions>
               </EuiFlexItem>
             );
           }
           return (
             <EuiFlexItem key={value}>
-              <EuiText size="xs">{value}</EuiText>
+              <CellActions field={data.field} value={value}>
+                <EuiText size="xs">{value}</EuiText>
+              </CellActions>
             </EuiFlexItem>
           );
         })}
@@ -348,8 +329,6 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
 export const PrevalenceDetails: React.FC = () => {
   const { dataFormattedForFieldBrowser, investigationFields, scopeId } =
     useDocumentDetailsContext();
-  const { openPreviewPanel } = useExpandableFlyoutApi();
-  const { telemetry } = useKibana().services;
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
@@ -395,42 +374,6 @@ export const PrevalenceDetails: React.FC = () => {
     },
   });
 
-  const openHostPreview = useCallback(
-    (hostName: string) => {
-      openPreviewPanel({
-        id: HostPreviewPanelKey,
-        params: {
-          hostName,
-          scopeId,
-          banner: HOST_PREVIEW_BANNER,
-        },
-      });
-      telemetry.reportDetailsFlyoutOpened({
-        location: scopeId,
-        panel: 'preview',
-      });
-    },
-    [openPreviewPanel, scopeId, telemetry]
-  );
-
-  const openUserPreview = useCallback(
-    (userName: string) => {
-      openPreviewPanel({
-        id: UserPreviewPanelKey,
-        params: {
-          userName,
-          scopeId,
-          banner: USER_PREVIEW_BANNER,
-        },
-      });
-      telemetry.reportDetailsFlyoutOpened({
-        location: scopeId,
-        panel: 'preview',
-      });
-    },
-    [openPreviewPanel, scopeId, telemetry]
-  );
-
   // add timeRange to pass it down to timeline and license to drive the rendering of the last 2 prevalence columns
   const items = useMemo(
     () =>
@@ -440,18 +383,9 @@ export const PrevalenceDetails: React.FC = () => {
         to: absoluteEnd,
         isPlatinumPlus,
         isPreviewEnabled,
-        openHostPreview,
-        openUserPreview,
+        scopeId,
       })),
-    [
-      data,
-      absoluteStart,
-      absoluteEnd,
-      isPlatinumPlus,
-      isPreviewEnabled,
-      openHostPreview,
-      openUserPreview,
-    ]
+    [data, absoluteStart, absoluteEnd, isPlatinumPlus, isPreviewEnabled, scopeId]
   );
 
   const upsell = (
