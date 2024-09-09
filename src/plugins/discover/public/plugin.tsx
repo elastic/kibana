@@ -53,15 +53,13 @@ import {
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
 import type { ConfigSchema, ExperimentalFeatures } from '../server/config';
-import {
-  DataSourceProfileService,
-  DISCOVER_CELL_ACTIONS_TRIGGER,
-  DocumentProfileService,
-  ProfilesManager,
-  RootProfileService,
-} from './context_awareness';
 import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
 import { deserializeState } from './embeddable/utils/serialization_utils';
+import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
+import { RootProfileService } from './context_awareness/profiles/root_profile';
+import { DataSourceProfileService } from './context_awareness/profiles/data_source_profile';
+import { DocumentProfileService } from './context_awareness/profiles/document_profile';
+import { ProfilesManager } from './context_awareness/profiles_manager';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
