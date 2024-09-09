@@ -16,7 +16,7 @@ import {
   COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 import type { BrushEvent } from '@elastic/charts';
-import { PingStatus } from '../../../../../../common/runtime_types';
+import { MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
 
 export const SUCCESS_VIZ_COLOR = VISUALIZATION_COLORS[0];
 export const DANGER_VIZ_COLOR = VISUALIZATION_COLORS[VISUALIZATION_COLORS.length - 1];
@@ -114,28 +114,26 @@ export function createTimeBuckets(intervalMinutes: number, from: number, to: num
 
 export function createStatusTimeBins(
   timeBuckets: MonitorStatusTimeBucket[],
-  pingStatuses: PingStatus[]
+  heatmapData: MonitorStatusHeatmapBucket[]
 ): MonitorStatusTimeBin[] {
-  let iPingStatus = 0;
-  return (timeBuckets ?? []).map((bucket) => {
-    const currentBin: MonitorStatusTimeBin = {
-      start: bucket.start,
-      end: bucket.end,
-      ups: 0,
-      downs: 0,
-      value: 0,
-    };
-    while (
-      iPingStatus < pingStatuses.length &&
-      moment(pingStatuses[iPingStatus].timestamp).valueOf() < bucket.end
-    ) {
-      currentBin.ups += pingStatuses[iPingStatus]?.summary.up ?? 0;
-      currentBin.downs += pingStatuses[iPingStatus]?.summary.down ?? 0;
-      currentBin.value = getStatusEffectiveValue(currentBin.ups, currentBin.downs);
-      iPingStatus++;
-    }
+  return timeBuckets.map(({ start, end }) => {
+    const { ups, downs } = heatmapData
+      .filter(({ key }) => key >= start && key <= end)
+      .reduce(
+        (acc, cur) => ({
+          ups: acc.ups + cur.up.value,
+          downs: acc.downs + cur.down.value,
+        }),
+        { ups: 0, downs: 0 }
+      );
 
-    return currentBin;
+    return {
+      start,
+      end,
+      ups,
+      downs,
+      value: ups + downs === 0 ? 0 : getStatusEffectiveValue(ups, downs),
+    };
   });
 }
 
