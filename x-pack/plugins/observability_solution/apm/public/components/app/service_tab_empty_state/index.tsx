@@ -19,7 +19,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 import { AddApmData } from '../../shared/add_data_buttons/buttons';
 import { emptyStateDefinitions, EmptyStateKey } from './constants';
@@ -47,6 +48,7 @@ const baseImgFolder = '/plugins/apm/assets/service_tab_empty_state';
 
 export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStateProps) {
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const imgFolder = `${baseImgFolder}/${
     useUiSetting('theme:darkMode') === 'enabled' ? 'dark' : 'light'
   }`;
@@ -54,6 +56,12 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
   const imgSrc = useKibanaUrl(
     `${imgFolder}/${imgName ? imgName : 'service_tab_empty_state_overview.png'}`
   );
+
+  function handleAddAPMClick() {
+    services.telemetry.reportEntityInventoryAddData({
+      view: 'add_apm_cta',
+    });
+  }
 
   return (
     <>
@@ -72,6 +80,7 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
                   data-test-subj="ServiceTabEmptyStateAddApmButton"
                   size="m"
                   fill={true}
+                  onClick={handleAddAPMClick}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
