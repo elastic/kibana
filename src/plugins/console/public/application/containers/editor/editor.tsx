@@ -155,7 +155,7 @@ export const Editor = memo(
                     paddingSize="none"
                     grow={true}
                     className="consoleEditorPanel"
-                    style={{ top: 0 }}
+                    style={{ top: 0, height: 'calc(100% - 40px)' }}
                   >
                     {loading ? (
                       <EditorContentSpinner />
