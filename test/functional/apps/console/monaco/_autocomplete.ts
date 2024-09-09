@@ -224,7 +224,7 @@ GET _search
           await PageObjects.console.monaco.clearEditorText();
 
           for (const char of method.slice(0, -1)) {
-            await PageObjects.console.sleepForDebouncePeriod(500);
+            await PageObjects.console.sleepForDebouncePeriod();
             log.debug('Key type "%s"', char);
             await PageObjects.console.monaco.enterText(char); // e.g. 'P' -> 'Po' -> 'Pos'
             await retry.waitFor('autocomplete to be visible', () =>
@@ -234,7 +234,7 @@ GET _search
           }
 
           for (const char of [method.at(-1), ' ', '_']) {
-            await PageObjects.console.sleepForDebouncePeriod(500);
+            await PageObjects.console.sleepForDebouncePeriod();
             log.debug('Key type "%s"', char);
             await PageObjects.console.monaco.enterText(char!); // e.g. 'Post ' -> 'Post _'
           }

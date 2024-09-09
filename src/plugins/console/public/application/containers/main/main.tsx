@@ -83,11 +83,6 @@ export function Main({ isEmbeddable = false }: MainProps) {
     localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(tourState));
   }, [tourState]);
 
-  // Clean up request output when switching tabs
-  useEffect(() => {
-    requestDispatch({ type: 'cleanRequest', payload: undefined });
-  }, [currentView, requestDispatch]);
-
   const consoleTourStepProps: ConsoleTourStepProps[] = getConsoleTourStepProps(
     tourStepProps,
     actions,
@@ -95,6 +90,13 @@ export function Main({ isEmbeddable = false }: MainProps) {
   );
 
   const { done, error, retry } = useDataInit();
+
+  useEffect(() => {
+    // Clean up request output when switching tabs
+    requestDispatch({ type: 'cleanRequest', payload: undefined });
+    // When switching tabs, restore the editor content to the last saved state
+    retry();
+  }, [currentView, requestDispatch, retry]);
 
   const { currentTextObject } = useEditorReadContext();
   const [inputEditorValue, setInputEditorValue] = useState<string>(currentTextObject?.text ?? '');

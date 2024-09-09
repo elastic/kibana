@@ -34,7 +34,6 @@ import {
   useServicesContext,
   useRequestReadContext,
   useRequestActionContext,
-  useEditorActionContext,
 } from '../../contexts';
 import type { SenseEditor } from '../../models';
 import { MonacoEditor, MonacoEditorOutput } from './monaco';
@@ -62,7 +61,7 @@ export const Editor = memo(
   }: Props) => {
     const { euiTheme } = useEuiTheme();
     const {
-      services: { storage },
+      services: { storage, objectStorageClient },
       config: { isMonacoEnabled } = {},
     } = useServicesContext();
 
@@ -73,7 +72,6 @@ export const Editor = memo(
     } = useRequestReadContext();
 
     const dispatch = useRequestActionContext();
-    const editorDispatch = useEditorActionContext();
 
     const [fetchingMappings, setFetchingMappings] = useState(false);
 
@@ -100,16 +98,16 @@ export const Editor = memo(
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     const debouncedUpdateLocalStorageValue = useCallback(
       debounce((textObject: TextObject) => {
-        editorDispatch({ type: 'setCurrentTextObject', payload: textObject });
+        objectStorageClient.text.update(textObject);
       }, DEBOUNCE_DELAY),
       []
     );
 
-    // Always keep the currentTextObject in sync with the value in the editor
+    // Always keep the localstorage in sync with the value in the editor
     // to avoid losing the text object when the user navigates away from the shell
     useEffect(() => {
-      // Only update when its not empty, this is to avoid setting the currentTextObject
-      // to the example text when the user clears the editor.
+      // Only update when its not empty, this is to avoid setting the localstorage value
+      // to an empty string that will then be replaced by the example request.
       if (inputEditorValue !== '') {
         const textObject = {
           ...currentTextObject,
