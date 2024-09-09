@@ -11,8 +11,8 @@ import {
   ActionsClientGeminiChatModel,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
-import { SamplesFormat } from '../common';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { SamplesFormat } from '../common';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
