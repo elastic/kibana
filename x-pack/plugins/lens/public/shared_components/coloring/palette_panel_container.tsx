@@ -9,8 +9,9 @@ import { i18n } from '@kbn/i18n';
 import React, { MutableRefObject } from 'react';
 import { EuiButtonIcon, EuiFlexItem, EuiColorPaletteDisplay, EuiToolTip } from '@elastic/eui';
 import { FIXED_PROGRESSION } from '@kbn/coloring';
-import { SettingWithSiblingFlyout } from '../setting_with_sibling_flyout';
+import { css } from '@emotion/react';
 
+import { SettingWithSiblingFlyout } from '../setting_with_sibling_flyout';
 export function PalettePanelContainer(props: {
   palette: string[];
   siblingRef: MutableRefObject<HTMLDivElement | null>;
@@ -25,11 +26,27 @@ export function PalettePanelContainer(props: {
       SettingTrigger={({ onClick }: { onClick: () => void }) => (
         <>
           <EuiFlexItem>
-            <EuiColorPaletteDisplay
-              data-test-subj="lns_dynamicColoring_edit"
-              palette={props.palette}
-              type={FIXED_PROGRESSION}
-            />
+            <EuiToolTip
+              content={i18n.translate('xpack.lens.colorMapping.editColors', {
+                defaultMessage: 'Edit colors',
+              })}
+            >
+              <button
+                onClick={onClick}
+                aria-label={i18n.translate('xpack.lens.colorMapping.editColors', {
+                  defaultMessage: 'Edit colors',
+                })}
+                css={css`
+                  width: 100%;
+                `}
+              >
+                <EuiColorPaletteDisplay
+                  data-test-subj="lns_dynamicColoring_edit"
+                  palette={props.palette}
+                  type={FIXED_PROGRESSION}
+                />
+              </button>
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiToolTip
