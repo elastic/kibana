@@ -27,6 +27,22 @@ import type { EditorRequest } from '../../types';
 import { useServicesContext } from '../../../../../contexts';
 import { StorageKeys } from '../../../../../../services';
 import { DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES } from '../../../../../../../common/constants';
+import { css } from "@emotion/react";
+
+const styles = {
+  // Remove the default underline on hover for the context menu items since it
+  // will also be applied to the language selector button, and apply it only to
+  // the text in the context menu item.
+  button: css`
+    &:hover {
+      text-decoration: none !important;
+
+      .languageSelector {
+        text-decoration: underline;
+      }
+    }
+  `,
+};
 
 interface Props {
   getRequests: () => Promise<EditorRequest[]>;
@@ -186,10 +202,11 @@ export const ContextMenu = ({
         onCopyAsSubmit();
       }}
       icon="copyClipboard"
+      css={styles.button}
     >
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexGroup gutterSize="xs" alignItems="center" className="languageSelector">
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 tagName="span"
