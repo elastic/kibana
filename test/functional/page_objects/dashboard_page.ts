@@ -154,17 +154,14 @@ export class DashboardPageObject extends FtrService {
   public getDashboardIdFromUrl(url: string) {
     const urlSubstring = '#/view/';
     const startOfIdIndex = url.indexOf(urlSubstring) + urlSubstring.length;
-    // need to account for a maximized panel id
-    const endIndexOfFilters = url.substring(startOfIdIndex).indexOf('?');
+    const endIndexOfFilters = url.indexOf('?');
     const endIndexOfMax = url.substring(startOfIdIndex).indexOf('/');
     if (endIndexOfMax === -1) {
-      return url.substring(
-        startOfIdIndex,
-        endIndexOfFilters < 0 ? url.length : startOfIdIndex + endIndexOfFilters
-      );
+      return url.substring(startOfIdIndex, endIndexOfFilters + startOfIdIndex);
     }
-    const endIndex = endIndexOfFilters > endIndexOfMax ? endIndexOfFilters : endIndexOfMax;
-    const id = url.substring(startOfIdIndex, endIndex < 0 ? url.length : endIndex);
+    const endIndex =
+      endIndexOfFilters + startOfIdIndex > endIndexOfMax ? endIndexOfFilters : endIndexOfMax;
+    const id = url.substring(startOfIdIndex, endIndex < 0 ? url.length : endIndex + startOfIdIndex);
     return id;
   }
 
