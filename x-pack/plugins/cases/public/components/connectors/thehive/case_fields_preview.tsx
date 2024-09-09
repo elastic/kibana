@@ -12,22 +12,11 @@ import { ConnectorTypes } from '../../../../common/types/domain';
 import type { ConnectorFieldsPreviewProps } from '../types';
 import { ConnectorCard } from '../card';
 import * as i18n from './translations';
+import { TheHiveTLP } from './types';
 
-const mapTLP = (tlpValue: number | string): string => {
-  switch (tlpValue) {
-    case '0':
-      return 'CLEAR';
-    case '1':
-      return 'GREEN';
-    case '2':
-      return 'AMBER';
-    case '3':
-      return 'AMBER+STRICT';
-    case '4':
-      return 'RED';
-    default:
-      return 'AMBER';
-  }
+const mapTLP = (tlpValue: number): string => {
+  const tlpValues = Object.values(TheHiveTLP);
+  return tlpValues[tlpValue] || TheHiveTLP.AMBER;
 };
 
 const TheHiveFieldsPreviewComponent: React.FunctionComponent<

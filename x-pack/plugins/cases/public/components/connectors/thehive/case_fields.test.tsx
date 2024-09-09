@@ -17,7 +17,7 @@ import { TheHiveTLP } from './types';
 
 describe('TheHive Cases Fields', () => {
   const fields = {
-    TLP: '1',
+    TLP: 1,
   };
 
   let appMockRenderer: AppMockRenderer;
@@ -45,6 +45,8 @@ describe('TheHive Cases Fields', () => {
     );
 
     userEvent.selectOptions(screen.getByTestId('tlp-field'), '4');
-    expect(await screen.findByTestId('tlp-field')).toHaveValue(TheHiveTLP.RED);
+    expect(await screen.findByTestId('tlp-field')).toHaveValue(
+      Object.values(TheHiveTLP).indexOf(TheHiveTLP.RED).toString()
+    );
   });
 });

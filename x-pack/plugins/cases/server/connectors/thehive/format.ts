@@ -27,7 +27,7 @@ export const format: Format = (theCase) => {
   const { tlp = null } = (theCase.connector.fields as ConnectorTheHiveTypeFields['fields']) ?? {};
   return {
     tags: theCase.tags,
-    tlp: typeof tlp === 'string' ? parseInt(tlp, 10) : tlp,
+    tlp,
     severity: mapSeverity(theCase.severity),
   };
 };

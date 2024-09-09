@@ -124,7 +124,7 @@ const ConnectorSwimlaneTypeFieldsRt = rt.strict({
  */
 
 export const TheHiveFieldsRt = rt.strict({
-  tlp: rt.union([rt.number, rt.string, rt.null]),
+  tlp: rt.union([rt.number, rt.null]),
 });
 
 export type TheHiveFieldsType = rt.TypeOf<typeof TheHiveFieldsRt>;

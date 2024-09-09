@@ -12,7 +12,7 @@ describe('TheHive formatter', () => {
   const theCase = {
     tags: ['tag1'],
     severity: 'high',
-    connector: { fields: { tlp: '1' } },
+    connector: { fields: { tlp: 1 } },
   } as Case;
 
   it('it formats correctly', async () => {

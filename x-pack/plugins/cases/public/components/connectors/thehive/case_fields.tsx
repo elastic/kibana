@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField, useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { ConnectorFieldsProps } from '../types';
 import * as i18n from './translations';
@@ -15,30 +15,20 @@ import { TheHiveTLP } from './types';
 
 const { emptyField } = fieldValidators;
 
-const tlpOptions: Array<{ text: string; value: string }> = [
-  {
-    text: 'CLEAR',
-    value: TheHiveTLP.CLEAR,
-  },
-  {
-    text: 'GREEN',
-    value: TheHiveTLP.GREEN,
-  },
-  {
-    text: 'AMBER',
-    value: TheHiveTLP.AMBER,
-  },
-  {
-    text: 'AMBER+STRICT',
-    value: TheHiveTLP.AMBER_STRICT,
-  },
-  {
-    text: 'RED',
-    value: TheHiveTLP.RED,
-  },
-];
+const tlpOptions: Array<{ text: string; value: number }> = Object.entries(TheHiveTLP).map(
+  ([_, value], index) => ({
+    text: value,
+    value: index,
+  })
+);
 
 const TheHiveFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = () => {
+  const form = useFormContext();
+
+  const onTLPChange: (value: string) => void = (value: string) => {
+    form.setFieldValue('fields.tlp', parseInt(value, 10));
+  };
+
   return (
     <div data-test-subj={'connector-fields-Thehive'}>
       <UseField
@@ -51,13 +41,14 @@ const TheHiveFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ()
               validator: emptyField(i18n.TLP_REQUIRED),
             },
           ],
+          defaultValue: tlpOptions[2].value,
         }}
+        onChange={onTLPChange}
         componentProps={{
           euiFieldProps: {
             'data-test-subj': 'tlp-field',
             options: tlpOptions,
             fullWidth: true,
-            hasNoInitialSelection: true,
           },
         }}
       />

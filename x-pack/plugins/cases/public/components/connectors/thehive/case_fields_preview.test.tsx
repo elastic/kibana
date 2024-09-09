@@ -15,7 +15,7 @@ import { createQueryWithMarkup } from '../../../common/test_utils';
 
 describe('TheHive Fields: Preview', () => {
   const fields = {
-    tlp: '1',
+    tlp: 1,
   };
 
   let appMockRenderer: AppMockRenderer;
