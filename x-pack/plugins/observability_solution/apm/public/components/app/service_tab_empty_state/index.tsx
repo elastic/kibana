@@ -43,9 +43,11 @@ const learnMoreLink = {
   href: 'https://www.elastic.co/observability/application-performance-monitoring',
 };
 
+const baseImgFolder = '/plugins/apm/assets/service_tab_empty_state';
+
 export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStateProps) {
   const { euiTheme } = useEuiTheme();
-  const imgFolder = `/plugins/apm/assets/service_tab_empty_state/${
+  const imgFolder = `${baseImgFolder}/${
     useUiSetting('theme:darkMode') === 'enabled' ? 'dark' : 'light'
   }`;
   const imgName2 = emptyStateDefinitions[id].imgName;
