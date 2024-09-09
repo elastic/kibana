@@ -116,7 +116,7 @@ export const createConversations = async (
 };
 
 export const createBasePrompts = async (notifications: NotificationsStart, http: HttpSetup) => {
-  const promptsToCreate = BASE_SECURITY_QUICK_PROMPTS;
+  const promptsToCreate = [...BASE_SECURITY_QUICK_PROMPTS];
 
   // post bulk create
   const bulkResult = await bulkUpdatePrompts(

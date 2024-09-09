@@ -263,7 +263,7 @@ export const useCurrentConversation = ({
     const newConversation = await createConversation({
       title: NEW_CHAT,
       ...(currentConversation?.apiConfig != null &&
-      currentConversation?.apiConfig?.actionTypeId !== null
+      currentConversation?.apiConfig?.actionTypeId != null
         ? {
             apiConfig: {
               ...currentConversation.apiConfig,
