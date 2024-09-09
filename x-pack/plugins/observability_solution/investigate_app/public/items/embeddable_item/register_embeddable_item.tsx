@@ -34,8 +34,9 @@ function ReactEmbeddable({ type, config, timeRange: { from, to }, savedObjectId 
         from,
         to,
       },
+      savedObjectId,
     };
-  }, [config, from, to]);
+  }, [config, from, to, savedObjectId]);
 
   const configWithOverridesRef = useRef(configWithOverrides);
 
