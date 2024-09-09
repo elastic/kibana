@@ -16,7 +16,6 @@ import type {
   RouteSecurity,
   RouteSecurityGetter,
 } from '@kbn/core/server';
-import { OnPostAuthResultType } from '@kbn/core/server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 
@@ -48,7 +47,6 @@ export function initAPIAuthorization(
       : request.route.options.security;
 
     if (security) {
-      // TODO: [Authz] Implement in https://github.com/elastic/kibana/issues/191713
       if (isAuthzDisabled(security.authz)) {
         logger.warn(
           `Route authz is disabled for ${request.url.pathname}${request.url.search}": ${security.authz.reason}`
@@ -85,8 +83,9 @@ export function initAPIAuthorization(
           const anyRequired = kbPrivilege.anyRequired ?? [];
 
           return (
-            allRequired.every((privilege: string) => kibanaPrivileges[privilege]) ||
-            anyRequired.some((privilege: string) => kibanaPrivileges[privilege])
+            allRequired.every((privilege: string) => kibanaPrivileges[privilege]) &&
+            (!anyRequired.length ||
+              anyRequired.some((privilege: string) => kibanaPrivileges[privilege]))
           );
         }
 
@@ -122,7 +121,7 @@ export function initAPIAuthorization(
         security
       );
 
-      return { type: OnPostAuthResultType.authzResult, authzResult: kibanaPrivileges };
+      return toolkit.authzResultNext(kibanaPrivileges);
     }
 
     const tags = request.route.options.tags;

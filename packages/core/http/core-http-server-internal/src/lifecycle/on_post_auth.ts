@@ -39,6 +39,9 @@ const postAuthResult = {
 
 const toolkit: OnPostAuthToolkit = {
   next: postAuthResult.next,
+  authzResultNext: (authzResult: Record<string, boolean>) => {
+    return { type: OnPostAuthResultType.authzResult, authzResult };
+  },
 };
 
 /**

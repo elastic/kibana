@@ -44,6 +44,7 @@ export type OnPostAuthResult = OnPostAuthNextResult | OnPostAuthAuthzResult;
 export interface OnPostAuthToolkit {
   /** To pass request to the next handler */
   next: () => OnPostAuthResult;
+  authzResultNext: (authzResult: Record<string, boolean>) => OnPostAuthAuthzResult;
 }
 
 /**
