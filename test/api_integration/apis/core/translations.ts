@@ -8,7 +8,6 @@
  */
 
 import expect from '@kbn/expect';
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -16,31 +15,22 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('translations', () => {
     it(`returns the translations with the correct headers`, async () => {
-      await supertest
-        .get('/translations/en.json')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .then((response) => {
-          expect(response.body.locale).to.eql('en');
+      await supertest.get('/translations/en.json').then((response) => {
+        expect(response.body.locale).to.eql('en');
 
-          expect(response.header).to.have.property(
-            'content-type',
-            'application/json; charset=utf-8'
-          );
-          expect(response.header).to.have.property(
-            'cache-control',
-            'public, max-age=31536000, immutable'
-          );
-          expect(response.header).not.to.have.property('etag');
-        });
+        expect(response.header).to.have.property('content-type', 'application/json; charset=utf-8');
+        expect(response.header).to.have.property(
+          'cache-control',
+          'public, max-age=31536000, immutable'
+        );
+        expect(response.header).not.to.have.property('etag');
+      });
     });
 
     it(`returns a 404 when not using the correct locale`, async () => {
-      await supertest
-        .get('/translations/foo.json')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .then((response) => {
-          expect(response.status).to.eql(404);
-        });
+      await supertest.get('/translations/foo.json').then((response) => {
+        expect(response.status).to.eql(404);
+      });
     });
   });
 }
