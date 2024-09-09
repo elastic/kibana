@@ -196,7 +196,14 @@ export const setRecoveredAlertsContext = ({
       }
     );
     let isUp = false;
-    let linkMessage = '';
+    const syntheticsStateId = state.stateId;
+    let linkMessage = getDefaultLinkMessage({
+      basePath,
+      spaceId,
+      syntheticsStateId,
+      configId,
+      locationId,
+    });
     let monitorSummary: MonitorSummaryStatusRule = getDefaultRecoveredSummary({
       recoveredAlert,
       tz,
@@ -255,6 +262,8 @@ export const setRecoveredAlertsContext = ({
         recoveryReason = summary.recoveryReason;
         lastErrorMessage = summary.lastErrorMessage;
       }
+      // Cannot display link message for deleted monitors or deleted locations
+      linkMessage = '';
     }
 
     if (configId && recoveredAlertId && locationId && upConfigs[recoveredAlertId]) {
@@ -306,6 +315,31 @@ export const setRecoveredAlertsContext = ({
         : {}),
     };
     alertsClient.setAlertData({ id: recoveredAlertId, context });
+  }
+};
+
+export const getDefaultLinkMessage = ({
+  basePath,
+  spaceId,
+  syntheticsStateId,
+  configId,
+  locationId,
+}: {
+  basePath?: IBasePath;
+  spaceId?: string;
+  syntheticsStateId?: string;
+  configId?: string;
+  locationId?: string;
+}) => {
+  if (basePath && spaceId && syntheticsStateId && configId && locationId) {
+    const relativeViewInAppUrl = getRelativeViewInAppUrl({
+      configId,
+      locationId,
+      stateId: syntheticsStateId,
+    });
+    return getFullViewInAppMessage(basePath, spaceId, relativeViewInAppUrl);
+  } else {
+    return '';
   }
 };
 
