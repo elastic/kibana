@@ -44,7 +44,6 @@ export const SEND_TO_TIMELINE_BUTTON = '[data-test-subj="sendToTimelineEmptyButt
 export const SHOW_ANONYMIZED_BUTTON = '[data-test-subj="showAnonymizedValues"]';
 export const SUBMIT_CHAT = '[data-test-subj="submit-chat"]';
 export const SYSTEM_PROMPT = '[data-test-subj="promptSuperSelect"]';
-export const PROMPT_SELECT = '[data-test-subj="promptSuperSelect"]';
 export const SYSTEM_PROMPT_BODY_INPUT = '[data-test-subj="systemPromptModalPromptText"]';
 export const SYSTEM_PROMPT_TITLE_INPUT =
   '[data-test-subj="systemPromptSelector"] [data-test-subj="comboBoxSearchInput"]';

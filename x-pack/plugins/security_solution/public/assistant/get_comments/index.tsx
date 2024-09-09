@@ -120,7 +120,10 @@ export const getComments: GetAssistantMessages = ({
             timelineAvatar: (
               <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
             ),
-            timestamp: currentConversation.messages[0].timestamp,
+            timestamp:
+              currentConversation.messages[0].timestamp.length === 0
+                ? new Date().toLocaleString()
+                : new Date(currentConversation.messages[0].timestamp).toLocaleString(),
             children: (
               <StreamComment
                 abortStream={abortStream}

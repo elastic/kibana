@@ -44,7 +44,7 @@ import {
   SHOW_ANONYMIZED_BUTTON,
   ASSISTANT_SETTINGS_BUTTON,
   SEND_TO_TIMELINE_BUTTON,
-  PROMPT_SELECT,
+  SYSTEM_PROMPT,
 } from '../screens/ai_assistant';
 import { TOASTER } from '../screens/alerts_detection_rules';
 
@@ -119,7 +119,7 @@ export const sendQuickPrompt = (prompt: string) => {
 };
 
 export const selectSystemPrompt = (systemPrompt: string) => {
-  cy.get(PROMPT_SELECT).click();
+  cy.get(SYSTEM_PROMPT).click();
   cy.get(SYSTEM_PROMPT_SELECT(systemPrompt)).click();
   assertSystemPromptSelected(systemPrompt);
 };
