@@ -15,10 +15,9 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import apm from 'elastic-apm-node';
+import apm, { Logger } from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
 
-import { omit } from 'lodash';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import {
   TaskClaimerOpts,
@@ -47,7 +46,6 @@ import { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
 import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
 import { TaskPartitioner } from '../lib/task_partitioner';
-import { getRetryAt } from '../lib/get_retry_at';
 
 interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
@@ -61,6 +59,7 @@ interface OwnershipClaimingOpts {
   definitions: TaskTypeDictionary;
   taskMaxAttempts: Record<string, number>;
   taskPartitioner: TaskPartitioner;
+  logger: Logger;
 }
 
 const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
@@ -125,6 +124,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     size: initialCapacity * TaskCost.Tiny * SIZE_MULTIPLIER_FOR_TASK_FETCH,
     taskMaxAttempts,
     taskPartitioner,
+    logger,
   });
 
   if (docs.length === 0)
@@ -187,21 +187,16 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   // build the updated task objects we'll claim
-  const now = new Date();
   const taskUpdates: ConcreteTaskInstance[] = [];
   for (const task of tasksToRun) {
     taskUpdates.push({
-      // omits "enabled" field from task updates so we don't overwrite
-      // any user initiated changes to "enabled" while the task was running
-      ...omit(task, 'enabled'),
+      ...task,
       scheduledAt:
         task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
           ? task.retryAt
           : task.runAt,
-      status: TaskStatus.Running,
-      startedAt: now,
-      attempts: task.attempts + 1,
-      retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
+      status: TaskStatus.Claiming,
+      retryAt: claimOwnershipUntil,
       ownerId: taskStore.taskManagerId,
     });
   }
@@ -324,6 +319,7 @@ async function searchAvailableTasks({
   getCapacity,
   size,
   taskPartitioner,
+  logger,
 }: OwnershipClaimingOpts): Promise<SearchAvailableTasksResponse> {
   const excludedTaskTypes = new Set(getExcludedTaskTypes(definitions, excludedTaskTypePatterns));
   const claimPartitions = buildClaimPartitions({
@@ -334,6 +330,11 @@ async function searchAvailableTasks({
     definitions,
   });
   const partitions = await taskPartitioner.getPartitions();
+  if (partitions.length === 0) {
+    logger.warn(
+      `Background task node "${taskPartitioner.getPodName()}" has no assigned partitions, claiming against all partitions`
+    );
+  }
 
   const sort: NonNullable<SearchOpts['sort']> = getClaimSort(definitions);
   const searches: SearchOpts[] = [];
@@ -357,7 +358,7 @@ async function searchAvailableTasks({
     const queryUnlimitedTasks = matchesClauses(
       queryForUnlimitedTasks,
       filterDownBy(InactiveTasks),
-      tasksWithPartitions(partitions)
+      partitions.length ? tasksWithPartitions(partitions) : undefined
     );
     searches.push({
       query: queryUnlimitedTasks,
@@ -384,7 +385,7 @@ async function searchAvailableTasks({
     const query = matchesClauses(
       queryForLimitedTasks,
       filterDownBy(InactiveTasks),
-      tasksWithPartitions(partitions)
+      partitions.length ? tasksWithPartitions(partitions) : undefined
     );
     searches.push({
       query,

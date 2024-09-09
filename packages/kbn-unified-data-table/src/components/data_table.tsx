@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -1135,7 +1136,9 @@ export const UnifiedDataTable = ({
               trailingControlColumns={trailingControlColumns}
               cellContext={cellContext}
               renderCellPopover={renderCustomPopover}
-              virtualizationOptions={VIRTUALIZATION_OPTIONS}
+              // Don't use row overscan when showing Document column since
+              // rendering so much DOM content in each cell impacts performance
+              virtualizationOptions={defaultColumns ? undefined : VIRTUALIZATION_OPTIONS}
             />
           )}
         </div>
