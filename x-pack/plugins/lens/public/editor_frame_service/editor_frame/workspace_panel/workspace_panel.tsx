@@ -269,15 +269,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             }
           );
           esTookTime.current = adapters.requests.getRequests().reduce((maxTime, { response }) => {
-            if (response === undefined) {
-              return maxTime;
-            }
             const took =
-              (
-                response.json as {
-                  rawResponse: estypes.SearchResponse | undefined;
-                }
-              )?.rawResponse?.took ?? 0;
+              (response?.json as { rawResponse: estypes.SearchResponse | undefined } | undefined)
+                ?.rawResponse?.took ?? 0;
 
             return Math.max(maxTime, took);
           }, 0);
