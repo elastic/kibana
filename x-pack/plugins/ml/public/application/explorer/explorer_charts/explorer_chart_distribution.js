@@ -158,19 +158,34 @@ export class ExplorerChartDistribution extends React.Component {
         .key((d) => d.entity)
         .entries(chartData)
         .sort((a, b) => {
+          // To display calendar event markers we populate the chart with fake data points.
+          // If a category has fake data points, it should be sorted to the end.
+          const aHasFakeData = a.values.some((d) => d.isFakeDataPoint);
+          const bHasFakeData = b.values.some((d) => d.isFakeDataPoint);
+
+          if (aHasFakeData && !bHasFakeData) {
+            return 1;
+          }
+
+          if (bHasFakeData && !aHasFakeData) {
+            return -1;
+          }
+
           return b.values.length - a.values.length;
         })
         .filter((d, i) => {
           // only filter for rare charts
           if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
-            return i < categoryLimit || d.key === highlight;
+            return (
+              i < categoryLimit || d.key === highlight || d.values.some((d) => d.isFakeDataPoint)
+            );
           }
           return true;
         })
         .map((d) => d.key);
 
       chartData = chartData.filter((d) => {
-        return scaleCategories.includes(d.entity);
+        return scaleCategories.includes(d.entity) || d.isFakeDataPoint;
       });
 
       if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
@@ -590,7 +605,8 @@ export class ExplorerChartDistribution extends React.Component {
             });
           }
         }
-      } else if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
+        // Show the value only if entity is defined, otherwise it is an empty point showing only the event.
+      } else if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION && marker.entity) {
         tooltipData.push({
           label: i18n.translate(
             'xpack.ml.explorer.distributionChart.valueWithoutAnomalyScoreLabel',

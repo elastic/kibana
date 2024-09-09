@@ -1124,9 +1124,17 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         each(scheduledEvents, (events, time) => {
           const chartPoint = findChartPointForTime(chartDataForPointSearch, Number(time));
           if (chartPoint !== undefined) {
-            // Note if the scheduled event coincides with an absence of the underlying metric data,
-            // we don't worry about plotting the event.
             chartPoint.scheduledEvents = events;
+          } else {
+            // If there's no underlying metric data point for the scheduled event,
+            // create a new chart point with a value of 0.
+            const eventChartPoint: ChartPoint = {
+              date: Number(time),
+              value: 0,
+              scheduledEvents: events,
+              isFakeDataPoint: true,
+            };
+            chartData.push(eventChartPoint);
           }
         });
       }
