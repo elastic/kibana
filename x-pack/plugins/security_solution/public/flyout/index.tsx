@@ -140,6 +140,7 @@ export const TIMELINE_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.tim
  * Flyout used for the Security Solution application
  * We keep the default EUI 1000 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1001)
  * We propagate the onClose callback to the rest of Security Solution using a window event 'expandable-flyout-on-close-SecuritySolution'
+ * This flyout support push/overlay mode. The value is saved in local storage.
  */
 export const SecuritySolutionFlyout = memo(() => {
   const onClose = useCallback(
@@ -167,6 +168,7 @@ SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
  * Flyout used in Timeline
  * We set the z-index to 1002 to ensure it is always rendered above Timeline (which has a z-index of 1001)
  * We propagate the onClose callback to the rest of Security Solution using a window event 'expandable-flyout-on-close-Timeline'
+ * This flyout does not support push mode, because timeline being rendered in a modal (EUiPortal), it's very difficult to dynamically change its width.
  */
 export const TimelineFlyout = memo(() => {
   const { euiTheme } = useEuiTheme();
@@ -187,6 +189,12 @@ export const TimelineFlyout = memo(() => {
       paddingSize="none"
       customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
       onClose={onClose}
+      flyoutCustomProps={{
+        pushVsOverlay: {
+          disabled: true,
+          tooltip: 'Push mode is not supported in Timeline',
+        },
+      }}
     />
   );
 });
