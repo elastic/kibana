@@ -6,7 +6,6 @@
  */
 
 import _ from 'lodash';
-import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 import { filter, take, toArray } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -56,7 +55,6 @@ jest.mock('../constants', () => ({
   ],
 }));
 
-let fakeTimer: sinon.SinonFakeTimers;
 const taskManagerLogger = mockLogger();
 
 beforeEach(() => jest.clearAllMocks());
@@ -107,16 +105,11 @@ const taskPartitioner = new TaskPartitioner({
   podName: 'test',
   kibanaDiscoveryService: discoveryServiceMock,
   kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+  logger: taskManagerLogger,
 });
 
 // needs more tests in the similar to the `strategy_default.test.ts` test suite
 describe('TaskClaiming', () => {
-  beforeAll(() => {
-    fakeTimer = sinon.useFakeTimers();
-  });
-
-  afterAll(() => fakeTimer.restore());
-
   beforeEach(() => {
     jest.clearAllMocks();
     jest
@@ -406,27 +399,21 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[0],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[0].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[1],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[2],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -505,11 +492,9 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[2],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -614,11 +599,9 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[2],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -716,11 +699,9 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[2],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -866,19 +847,15 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[1],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[2],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -956,19 +933,15 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[1],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[2],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -1046,19 +1019,15 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[1],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[2],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -1149,35 +1118,27 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[0],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[1],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[2],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[4],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -1275,35 +1236,27 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[0],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[0].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[1],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[2],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[3],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[3].runAt,
+            status: 'claiming',
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -1378,35 +1331,27 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[0],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[0].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[1],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[2],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[3],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[3].runAt,
+            status: 'claiming',
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -1497,35 +1442,27 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[0],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[0].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[1],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[2],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[3],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[3].runAt,
+            status: 'claiming',
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -1598,35 +1535,27 @@ describe('TaskClaiming', () => {
         [
           {
             ...fetchedTasks[0],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[0].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[1],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[2],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
           },
           {
             ...fetchedTasks[3],
-            attempts: 1,
             ownerId: 'test-test',
-            retryAt: new Date('1970-01-01T00:05:30.000Z'),
-            status: 'running',
-            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+            retryAt: fetchedTasks[3].runAt,
+            status: 'claiming',
           },
         ],
         { validate: false, excludeLargeFields: true }
@@ -1686,6 +1615,172 @@ describe('TaskClaiming', () => {
                           Object {
                             "exists": Object {
                               "field": "task.partition",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            "must": Array [
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "term": Object {
+                        "task.enabled": true,
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "terms": Object {
+                        "task.taskType": Array [
+                          "foo",
+                          "bar",
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "should": Array [
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "task.status": "idle",
+                            },
+                          },
+                          Object {
+                            "range": Object {
+                              "task.runAt": Object {
+                                "lte": "now",
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "bool": Object {
+                              "should": Array [
+                                Object {
+                                  "term": Object {
+                                    "task.status": "running",
+                                  },
+                                },
+                                Object {
+                                  "term": Object {
+                                    "task.status": "claiming",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "range": Object {
+                              "task.retryAt": Object {
+                                "lte": "now",
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "task.status": "unrecognized",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        }
+      `);
+    });
+
+    test(`it shouldn't filter for partitions when the node has no assigned partitions`, async () => {
+      jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
+      const taskManagerId = uuidv4();
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          createTaskRunner: jest.fn(),
+        },
+        bar: {
+          title: 'bar',
+          createTaskRunner: jest.fn(),
+        },
+      });
+      const claimedResults = await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+          definitions,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+      const [
+        {
+          args: {
+            search: [{ query }],
+          },
+        },
+      ] = claimedResults;
+
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Background task node "test" has no assigned partitions, claiming against all partitions'
+      );
+      expect(query).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "must": Object {
+                          "range": Object {
+                            "task.retryAt": Object {
+                              "gt": "now",
+                            },
+                          },
+                        },
+                        "should": Array [
+                          Object {
+                            "term": Object {
+                              "task.status": "running",
+                            },
+                          },
+                          Object {
+                            "term": Object {
+                              "task.status": "claiming",
                             },
                           },
                         ],
