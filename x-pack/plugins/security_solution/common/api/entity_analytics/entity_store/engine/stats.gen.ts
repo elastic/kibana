@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { EntityType, IndexPattern, EngineStatus } from './common.gen';
+import { EntityType, IndexPattern, EngineStatus } from '../common.gen';
 
 export type GetEntityStoreStatsRequestParams = z.infer<typeof GetEntityStoreStatsRequestParams>;
 export const GetEntityStoreStatsRequestParams = z.object({

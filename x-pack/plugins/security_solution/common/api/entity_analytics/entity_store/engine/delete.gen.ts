@@ -16,7 +16,8 @@
 
 import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
-import { EntityType } from './common.gen';
+
+import { EntityType } from '../common.gen';
 
 export type DeleteEntityStoreRequestQuery = z.infer<typeof DeleteEntityStoreRequestQuery>;
 export const DeleteEntityStoreRequestQuery = z.object({

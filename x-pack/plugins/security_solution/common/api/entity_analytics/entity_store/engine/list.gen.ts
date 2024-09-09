@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { EngineDescriptor } from './common.gen';
+import { EngineDescriptor } from '../common.gen';
 
 export type ListEntityStoreEnginesResponse = z.infer<typeof ListEntityStoreEnginesResponse>;
 export const ListEntityStoreEnginesResponse = z.object({
