@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -14,7 +15,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPopover,
-  EuiPopoverTitle,
   EuiDescriptionList,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
@@ -57,10 +57,9 @@ function ErrorsWarningsContent({
   type: 'error' | 'warning';
   onErrorClick: (error: MonacoMessage) => void;
 }) {
-  const { label, color } = getConstsByType(type, items.length);
+  const { color } = getConstsByType(type, items.length);
   return (
     <div style={{ width: 500 }}>
-      <EuiPopoverTitle paddingSize="s">{label}</EuiPopoverTitle>
       <EuiDescriptionList>
         {items.map((item, index) => {
           return (
@@ -130,6 +129,9 @@ export function ErrorsWarningsFooterPopover({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            anchorPosition="downLeft"
+            hasArrow={false}
+            panelPaddingSize="s"
             button={
               <EuiText
                 size="xs"

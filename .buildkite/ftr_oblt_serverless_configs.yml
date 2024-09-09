@@ -6,9 +6,6 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_runner.ts
 
-  # Serverless feature flag config files (move to enabled after tests are added)
-  - x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts
-
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test_serverless/api_integration/test_suites/observability/config.ts
@@ -17,6 +14,7 @@ enabled:
   - x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.context_awareness.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group1.ts

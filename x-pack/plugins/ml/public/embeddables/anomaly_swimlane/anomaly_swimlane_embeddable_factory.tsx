@@ -59,7 +59,7 @@ export const getServices = async (
     [coreStart, pluginsStart],
     { AnomalyDetectorService },
     { AnomalyTimelineService },
-    { mlApiServicesProvider },
+    { mlApiProvider },
     { mlResultsServiceProvider },
   ] = await Promise.all([
     getStartServices(),
@@ -74,7 +74,7 @@ export const getServices = async (
   const anomalyTimelineService = new AnomalyTimelineService(
     pluginsStart.data.query.timefilter.timefilter,
     coreStart.uiSettings,
-    mlResultsServiceProvider(mlApiServicesProvider(httpService))
+    mlResultsServiceProvider(mlApiProvider(httpService))
   );
 
   return [

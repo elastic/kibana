@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import type { ReactWrapper, ComponentType } from 'enzyme';
 import { mount } from 'enzyme';
 import copy from 'copy-to-clipboard';
 
@@ -33,7 +33,9 @@ describe('UserActionCopyLink ', () => {
   let wrapper: ReactWrapper;
 
   beforeAll(() => {
-    wrapper = mount(<UserActionCopyLink {...props} />, { wrappingComponent: TestProviders });
+    wrapper = mount(<UserActionCopyLink {...props} />, {
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
+    });
   });
 
   beforeEach(() => {

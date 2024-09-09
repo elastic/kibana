@@ -43,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('edits to a by value lens panel are properly applied', async () => {
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardPanelActions.clickEdit();
-      await PageObjects.lens.switchToVisualization('donut');
+      await PageObjects.lens.switchToVisualization('pie');
       await PageObjects.lens.saveAndReturn();
       await PageObjects.dashboard.waitForRenderComplete();
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -229,7 +230,7 @@ export function ColorRangeItem({
           append={getAppend(rangeType, mode)}
           onBlur={onLeaveFocus}
           data-test-subj={`lnsPalettePanel_dynamicColoring_range_value_${index}`}
-          prepend={<span className="euiFormLabel">{isLast ? '\u2264' : '\u2265'}</span>}
+          prepend={isLast ? '\u2264' : '\u2265'}
           aria-label={i18n.translate('coloring.dynamicColoring.customPalette.rangeAriaLabel', {
             defaultMessage: 'Range {index}',
             values: {
