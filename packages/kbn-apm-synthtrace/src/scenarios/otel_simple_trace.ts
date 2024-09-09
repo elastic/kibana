@@ -27,7 +27,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
             return [
               oteld.metric(id).timestamp(timestamp),
               oteld.transaction(id).timestamp(timestamp),
-              oteld.error(id).timestamp(timestamp),
+              // oteld.error(id).timestamp(timestamp),
             ];
           })
         );
