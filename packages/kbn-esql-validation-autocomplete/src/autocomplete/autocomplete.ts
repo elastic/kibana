@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { uniq, uniqBy } from 'lodash';
@@ -51,6 +52,7 @@ import {
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import {
+  allStarConstant,
   colonCompleteItem,
   commaCompleteItem,
   commandAutocompleteDefinitions,
@@ -715,6 +717,9 @@ async function getExpressionSuggestionsByType(
           // check if lastWord is an existing field
           const column = getColumnByName(lastWord, references);
           if (column) {
+            if (['grok', 'dissect'].includes(command.name)) {
+              return [];
+            }
             // now we know that the user has already entered a column,
             // so suggest comma and pipe
             // const NON_ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
@@ -734,6 +739,7 @@ async function getExpressionSuggestionsByType(
             suggestions.push(
               ...fieldSuggestions.map((suggestion) => ({
                 ...suggestion,
+                text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
                 command: TRIGGER_SUGGESTION_COMMAND,
                 rangeToReplace,
               }))
@@ -744,6 +750,7 @@ async function getExpressionSuggestionsByType(
           suggestions.push(
             ...fieldSuggestions.map((suggestion) => ({
               ...suggestion,
+              text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
               command: TRIGGER_SUGGESTION_COMMAND,
             }))
           );
@@ -1454,6 +1461,7 @@ async function getFunctionArgsSuggestions(
         })
       );
   }
+
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
     if (command.name !== 'stats') {
@@ -1474,6 +1482,11 @@ async function getFunctionArgsSuggestions(
     }
   }
 
+  // For special case of COUNT, suggest * if cursor is in empty spot
+  // e.g. count( / ) -> suggest `*`
+  if (fnDefinition.name === 'count' && !arg) {
+    suggestions.push(allStarConstant);
+  }
   return suggestions;
 }
 
