@@ -12,7 +12,7 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import { HighlightField, HighlightFieldProps } from './highlight_field';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 
-const APM_LINK_TO_TRACE_LOCATOR = 'APM_LINK_TO_TRACE_LOCATOR';
+const TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR = 'TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR';
 
 export function TraceIdHighlightField(props: HighlightFieldProps) {
   const {
@@ -20,7 +20,7 @@ export function TraceIdHighlightField(props: HighlightFieldProps) {
   } = getUnifiedDocViewerServices();
 
   const apmLinkToServiceEntityLocator = urlService.locators.get<{ traceId: string }>(
-    APM_LINK_TO_TRACE_LOCATOR
+    TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR
   );
   const href = apmLinkToServiceEntityLocator?.getRedirectUrl({
     traceId: props.value as string,
