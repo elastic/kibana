@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const dashboardCustomizePanel = getService('dashboardCustomizePanel');
   const dashboardBadgeActions = getService('dashboardBadgeActions');
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const panelActions = getService('dashboardPanelActions');
@@ -47,7 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
-      await dashboardPanelActions.customizePanel();
+      await panelActions.customizePanel();
       await dashboardCustomizePanel.enableCustomTimeRange();
       await dashboardCustomizePanel.openDatePickerQuickMenu();
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
@@ -84,7 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
 
-      await dashboardPanelActions.customizePanel();
+      await panelActions.customizePanel();
       await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutOpen();
       await dashboardCustomizePanel.enableCustomTimeRange();
       await dashboardCustomizePanel.openDatePickerQuickMenu();
@@ -114,7 +113,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const titles = await dashboard.getPanelTitles();
       expect(titles[0]).to.be(`${visTitle} (converted)`);
-      await dashboardPanelActions.expectNotLinkedToLibrary(titles[0], true);
+      await panelActions.expectNotLinkedToLibrary(titles[0], true);
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.removePanel();
     });
