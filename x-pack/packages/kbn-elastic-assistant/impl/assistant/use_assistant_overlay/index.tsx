@@ -135,25 +135,15 @@ export const useAssistantOverlay = (
     async (showOverlay: boolean, shouldCreateConversation: boolean = false) => {
       if (promptContextId != null) {
         if (shouldCreateConversation) {
-          console.log('test 2', conversations);
           let conversation;
           if (!isLoading) {
-            console.log('test 4');
             conversation = conversationTitle
               ? Object.values(conversations).find((conv) => conv.title === conversationTitle)
               : undefined;
           }
-          console.log('condtions:', {
-            full: isAssistantEnabled && !conversation && defaultConnector && !isLoading,
-            isAssistantEnabled,
-            conversationMissing: !conversation,
-            defaultConnector,
-            isLoading,
-          });
 
           if (isAssistantEnabled && !conversation && defaultConnector && !isLoading) {
             try {
-              console.log('test 3');
               await createConversation({
                 apiConfig: {
                   ...apiConfig,
@@ -168,13 +158,11 @@ export const useAssistantOverlay = (
             }
           }
         }
-        console.log('test 1', assistantContextShowOverlay);
         assistantContextShowOverlay({
           showOverlay,
           promptContextId,
           conversationTitle: conversationTitle ?? undefined,
         });
-        console.log('test 1b');
       }
     },
     [
