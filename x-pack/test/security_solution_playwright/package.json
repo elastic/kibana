@@ -1,0 +1,15 @@
+{
+  "author": "Elastic", 
+  "name": "security_solution_playwright",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "playwright:open": "node ../../plugins/security_solution/scripts/run_playwright/start_playwright open --config-file ../../test/security_solution_playwright/playwright.config.ts",
+    "playwright:run": "node ../../plugins/security_solution/scripts/run_playwright/start_playwright run --config-file ../../test/security_solution_playwright/playwright.config.ts",
+    "open:ess": "npm run playwright:open -- --ftr-config-file ../security_solution_cypress/cli_config",
+    "run:ess": "npm run playwright:run -- --ftr-config-file ../security_solution_cypress/cli_config",
+    "open:serverless": "npm run playwright:open -- --ftr-config-file ../security_solution_cypress/serverless_config",
+    "run:serverless": "npm run playwright:run -- --ftr-config-file ../security_solution_cypress/serverless_config"
+  }
+}

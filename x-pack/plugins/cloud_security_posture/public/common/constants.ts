@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
 import {
@@ -27,11 +26,6 @@ import eksLogo from '../assets/icons/cis_eks_logo.svg';
 import aksLogo from '../assets/icons/cis_aks_logo.svg';
 import gkeLogo from '../assets/icons/cis_gke_logo.svg';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
-
-export const statusColors = {
-  passed: euiThemeVars.euiColorSuccess,
-  failed: euiThemeVars.euiColorVis9,
-};
 
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
@@ -248,6 +242,7 @@ export const VULNERABILITY_FIELDS = {
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
   CLOUD_PROVIDER: 'cloud.provider',
   DESCRIPTION: 'vulnerability.description',
+  SOURCE: 'data_stream.dataset',
 } as const;
 export const VULNERABILITY_GROUPING_OPTIONS = {
   NONE: 'none',
