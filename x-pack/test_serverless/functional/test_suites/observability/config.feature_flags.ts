@@ -22,6 +22,7 @@ export default createTestConfig({
     '--xpack.infra.enabled=true',
     '--xpack.infra.featureFlags.customThresholdAlertsEnabled=true',
     '--xpack.security.roleManagementEnabled=true',
+    `--xpack.cloud.serverless.project_id='fakeprojectid'`,
     `--xpack.cloud.base_url='https://cloud.elastic.co'`,
     `--xpack.cloud.organization_url='/account/members'`,
     `--xpack.spaces.maxSpaces=100`, // enables spaces UI capabilities

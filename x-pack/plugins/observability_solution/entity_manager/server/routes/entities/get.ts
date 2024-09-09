@@ -4,14 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
 import { z } from '@kbn/zod';
-import { RequestHandlerContext } from '@kbn/core/server';
-import {
-  GetEntityDefinitionQuerySchema,
-  getEntityDefinitionQuerySchema,
-} from '@kbn/entities-schema';
-import { SetupRouteOptions } from '../types';
+import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 /**
  * @openapi
@@ -53,34 +48,26 @@ import { SetupRouteOptions } from '../types';
  *                     allOf:
  *                       - $ref: '#/components/schemas/entityDefinitionSchema'
  */
-export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
-  router,
-  getScopedClient,
-  logger,
-}: SetupRouteOptions<T>) {
-  router.get<{ id?: string }, GetEntityDefinitionQuerySchema, unknown>(
-    {
-      path: '/internal/entities/definition/{id?}',
-      validate: {
-        query: getEntityDefinitionQuerySchema.strict(),
-        params: z.object({ id: z.optional(z.string()) }),
-      },
-    },
-    async (context, request, res) => {
-      try {
-        const client = await getScopedClient({ request });
-        const result = await client.getEntityDefinitions({
-          id: request.params.id,
-          page: request.query.page,
-          perPage: request.query.perPage,
-          includeState: request.query.includeState,
-        });
+export const getEntityDefinitionRoute = createEntityManagerServerRoute({
+  endpoint: 'GET /internal/entities/definition/{id?}',
+  params: z.object({
+    query: getEntityDefinitionQuerySchema,
+    path: z.object({ id: z.optional(z.string()) }),
+  }),
+  handler: async ({ request, response, params, logger, getScopedClient }) => {
+    try {
+      const client = await getScopedClient({ request });
+      const result = await client.getEntityDefinitions({
+        id: params?.path?.id,
+        page: params?.query?.page,
+        perPage: params?.query?.perPage,
+        includeState: params?.path?.includeState,
+      });
 
-        return res.ok({ body: result });
-      } catch (e) {
-        logger.error(e);
-        return res.customError({ body: e, statusCode: 500 });
-      }
+      return response.ok({ body: result });
+    } catch (e) {
+      logger.error(e);
+      return response.customError({ body: e, statusCode: 500 });
     }
-  );
-}
+  },
+});
