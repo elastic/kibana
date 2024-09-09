@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { performance } from 'perf_hooks';
-import { partition } from 'lodash';
 
 import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -28,6 +27,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
   WrapSuppressedHits,
+  WrapSuppressedSequences,
 } from '../types';
 import {
   addToSearchAfterReturn,
@@ -50,11 +50,6 @@ import {
   bulkCreateSuppressedSequencesInMemory,
 } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
-import {
-  ALERT_ANCESTORS,
-  ALERT_BUILDING_BLOCK_TYPE,
-  ALERT_GROUP_ID,
-} from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -72,6 +67,7 @@ interface EqlExecutorParams {
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
   wrapSuppressedHits: WrapSuppressedHits;
+  wrapSuppressedSequences: WrapSuppressedSequences;
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
   isAlertSuppressionActive: boolean;
@@ -206,7 +202,7 @@ export const eqlExecutor = async ({
               ruleExecutionLogger,
               tuple,
               alertSuppression: completeRule.ruleParams.alertSuppression,
-              wrapSuppressedHits: wrapSuppressedSequences,
+              wrapSuppressedSequences,
               alertTimestampOverride,
               alertWithSuppression,
               experimentalFeatures,

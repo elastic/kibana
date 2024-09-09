@@ -26,6 +26,11 @@ import type { RuleServices } from '../types';
 import { createEnrichEventsFunction } from './enrichments';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
+import {
+  isEqlBuildingBlockAlert,
+  isEqlShellAlert,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/model/alerts/8.0.0';
+import { ALERT_GROUP_ID } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
@@ -105,6 +110,22 @@ export const bulkCreateWithSuppression = async <
     wrappedDocs.map((doc) => doc._source[ALERT_INSTANCE_ID])
   );
 
+  let myfunc;
+
+  if (buildingBlockAlerts != null && buildingBlockAlerts.length > 0)
+    myfunc = (newAlertSource: unknown) => {
+      return buildingBlockAlerts?.filter((someAlert) => {
+        // console.error('SOME ALERT GROUP ID', someAlert?._source[ALERT_GROUP_ID]);
+        // console.error('NEW ALERT GROUP ID', newAlerts[0]?._source[ALERT_GROUP_ID]);
+
+        return (
+          isEqlBuildingBlockAlert(newAlertSource) &&
+          isEqlShellAlert(newAlertSource) &&
+          someAlert?._source?.[ALERT_GROUP_ID] === newAlertSource?.[ALERT_GROUP_ID]
+        );
+      });
+    };
+
   const { createdAlerts, errors, suppressedAlerts, alertsWereTruncated } =
     await alertWithSuppression(
       wrappedDocs.map((doc) => ({
@@ -118,7 +139,7 @@ export const bulkCreateWithSuppression = async <
       alertTimestampOverride,
       isSuppressionPerRuleExecution,
       maxAlerts,
-      buildingBlockAlerts // do the same map as wrappedDocs
+      myfunc // do the same map as wrappedDocs
     );
 
   const end = performance.now();

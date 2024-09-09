@@ -6,7 +6,6 @@
  */
 
 import type {
-  ALERT_BUILDING_BLOCK_TYPE,
   ALERT_REASON,
   ALERT_RISK_SCORE,
   ALERT_RULE_AUTHOR,
@@ -34,12 +33,14 @@ import type {
   ALERT_RULE_VERSION,
   ALERT_SEVERITY,
   ALERT_STATUS,
-  ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+
+import { ALERT_BUILDING_BLOCK_TYPE, ALERT_UUID } from '@kbn/rule-data-utils';
+
 // TODO: Create and import 8.0.0 versioned ListArray schema
 import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 // TODO: Create and import 8.0.0 versioned alerting-types schemas
@@ -57,7 +58,6 @@ import type {
   ALERT_RULE_ACTIONS,
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_FALSE_POSITIVES,
-  ALERT_GROUP_ID,
   ALERT_GROUP_INDEX,
   ALERT_RULE_IMMUTABLE,
   ALERT_RULE_MAX_SIGNALS,
@@ -69,6 +69,7 @@ import type {
   ALERT_RULE_TIMELINE_TITLE,
   ALERT_RULE_TIMESTAMP_OVERRIDE,
 } from '../../../../../field_maps/field_names';
+import { ALERT_GROUP_ID } from '../../../../../field_maps/field_names';
 // TODO: Create and import 8.0.0 versioned RuleAlertAction type
 import type { SearchTypes } from '../../../../../detection_engine/types';
 import type { RuleAction } from '../../rule_schema';
@@ -163,7 +164,16 @@ export interface EqlShellFields800 extends BaseFields800 {
 
 export type EqlBuildingBlockAlert800 = AlertWithCommonFields800<EqlBuildingBlockFields800>;
 
+export const isEqlBuildingBlockAlert = (
+  alertObject: unknown
+): alertObject is EqlBuildingBlockAlert800 =>
+  (alertObject as EqlBuildingBlockAlert800)?.[ALERT_BUILDING_BLOCK_TYPE] != null;
+
 export type EqlShellAlert800 = AlertWithCommonFields800<EqlShellFields800>;
+
+export const isEqlShellAlert = (alertObject: unknown): alertObject is EqlShellAlert800 =>
+  (alertObject as EqlShellAlert800)?.[ALERT_UUID] != null &&
+  (alertObject as EqlShellAlert800)?.[ALERT_GROUP_ID] != null;
 
 export type GenericAlert800 = AlertWithCommonFields800<BaseFields800>;
 

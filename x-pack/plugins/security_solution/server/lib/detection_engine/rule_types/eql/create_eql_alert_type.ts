@@ -90,8 +90,7 @@ export const createEqlAlertType = (
 
       const wrapSuppressedHits = (
         events: SignalSourceHit[],
-        buildReasonMessage: BuildReasonMessage,
-        skipGenerateId: boolean
+        buildReasonMessage: BuildReasonMessage
       ) =>
         wrapSuppressedAlerts({
           events,
@@ -103,7 +102,6 @@ export const createEqlAlertType = (
           alertTimestampOverride,
           ruleExecutionLogger,
           publicBaseUrl,
-          skipGenerateId,
           primaryTimestamp,
           secondaryTimestamp,
         });

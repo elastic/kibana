@@ -8,7 +8,6 @@
 import pick from 'lodash/pick';
 import get from 'lodash/get';
 import sortBy from 'lodash/sortBy';
-import isEmpty from 'lodash/isEmpty';
 
 import {
   ALERT_SUPPRESSION_DOCS_COUNT,
@@ -18,7 +17,6 @@ import {
   ALERT_SUPPRESSION_END,
 } from '@kbn/rule-data-utils';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { SignalSourceHit } from '../types';
 
 export interface SuppressionTerm {
   field: string;
@@ -47,11 +45,11 @@ export const getSuppressionAlertFields = ({
     `primary timestamp: ${primaryTimestamp}, secondaryTimestamp: ${secondaryTimestamp}, fallbackTimestamp: ${fallbackTimestamp}`
   );
   console.error('WHAT ARE FIELDS', JSON.stringify(fields));
-  const suppressionTime = new Date(
-    get(fields, primaryTimestamp) ??
-      (secondaryTimestamp && get(fields, secondaryTimestamp)) ??
-      fallbackTimestamp
-  );
+  const primeTimestamp = get(fields, primaryTimestamp) as string;
+  const secondTimestamp =
+    secondaryTimestamp != null ? (get(fields, secondaryTimestamp) as string) : fallbackTimestamp;
+
+  const suppressionTime = new Date(primeTimestamp ?? secondTimestamp);
 
   // console.error('SUPPRESSION TIME');
 

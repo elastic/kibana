@@ -27,15 +27,19 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
-import {
-  ALERT_GROUP_ID,
-  ALERT_ORIGINAL_TIME,
-} from '@kbn/security-solution-plugin/common/field_maps/field_names';
+// import {
+//   ALERT_GROUP_ID,
+//   ALERT_ORIGINAL_TIME,
+// } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
 import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
+// import {
+//   isEqlBuildingBlockAlert,
+//   isEqlShellAlert,
+// } from '@kbn/security-solution-plugin/common/api/detection_engine/model/alerts/8.0.0';
 
 /**
  * Alerts returned from BE have date type coerced to ISO strings
@@ -65,10 +69,10 @@ const augmentAlerts = <T>({
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
 }) => {
-  console.error(
-    'DO AUGMENTED ALERTS HAVE INSTANCE IDS',
-    alerts.map((alert) => alert._source[ALERT_INSTANCE_ID])
-  );
+  // console.error(
+  //   'DO AUGMENTED ALERTS HAVE INSTANCE IDS',
+  //   alerts.map((alert) => alert._source[ALERT_INSTANCE_ID])
+  // );
   const commonRuleFields = getCommonAlertFields(options);
   return alerts.map((alert) => {
     return {
@@ -383,327 +387,282 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               currentTimeOverride,
               isRuleExecutionOnly,
               maxAlerts,
-              buildingBlockAlerts
+              getMatchingBuildingBlockAlerts
             ) => {
-              try {
-                // console.error(
-                //   'ALERT WITH SUPPRESSION INSTANCE IDS',
-                //   alerts.map((doc) => doc._source[ALERT_INSTANCE_ID])
-                // );
-                console.error(
-                  'ALERT WITH SUPPRESSION original times',
-                  alerts.map((doc) => doc._source[ALERT_ORIGINAL_TIME])
-                );
-                const ruleDataClientWriter = await ruleDataClient.getWriter({
-                  namespace: options.spaceId,
+              // console.error(
+              //   'ALERT WITH SUPPRESSION INSTANCE IDS',
+              //   alerts.map((doc) => doc._source[ALERT_INSTANCE_ID])
+              // );
+              // console.error(
+              //   'ALERT WITH SUPPRESSION original times',
+              //   alerts.map((doc) => doc._source[ALERT_ORIGINAL_TIME])
+              // );
+              const ruleDataClientWriter = await ruleDataClient.getWriter({
+                namespace: options.spaceId,
+              });
+
+              // Only write alerts if:
+              // - writing is enabled
+              //   AND
+              //   - rule execution has not been cancelled due to timeout
+              //     OR
+              //   - if execution has been cancelled due to timeout, if feature flags are configured to write alerts anyway
+              const writeAlerts =
+                ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
+
+              let alertsWereTruncated = false;
+
+              if (writeAlerts && alerts.length > 0) {
+                const suppressionWindowStart = dateMath.parse(suppressionWindow, {
+                  forceNow: currentTimeOverride,
                 });
 
-                // Only write alerts if:
-                // - writing is enabled
-                //   AND
-                //   - rule execution has not been cancelled due to timeout
-                //     OR
-                //   - if execution has been cancelled due to timeout, if feature flags are configured to write alerts anyway
-                const writeAlerts =
-                  ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
+                if (!suppressionWindowStart) {
+                  throw new Error('Failed to parse suppression window');
+                }
 
-                let alertsWereTruncated = false;
+                const filteredDuplicates = await filterDuplicateAlerts({
+                  alerts,
+                  ruleDataClient,
+                  spaceId: options.spaceId,
+                });
 
-                if (writeAlerts && alerts.length > 0) {
-                  const suppressionWindowStart = dateMath.parse(suppressionWindow, {
-                    forceNow: currentTimeOverride,
-                  });
-
-                  if (!suppressionWindowStart) {
-                    throw new Error('Failed to parse suppression window');
-                  }
-
-                  const filteredDuplicates = await filterDuplicateAlerts({
-                    alerts,
-                    ruleDataClient,
-                    spaceId: options.spaceId,
-                  });
-
-                  if (filteredDuplicates.length === 0) {
-                    return {
-                      createdAlerts: [],
-                      errors: {},
-                      suppressedAlerts: [],
-                      alertsWereTruncated,
-                    };
-                  }
-
-                  const suppressionAlertSearchRequest = {
-                    body: {
-                      size: filteredDuplicates.length,
-                      query: {
-                        bool: {
-                          filter: [
-                            {
-                              range: {
-                                [ALERT_START]: {
-                                  gte: suppressionWindowStart.toISOString(),
-                                },
-                              },
-                            },
-                            {
-                              terms: {
-                                [ALERT_INSTANCE_ID]: filteredDuplicates.map(
-                                  (alert) => alert._source[ALERT_INSTANCE_ID]
-                                ),
-                              },
-                            },
-                            {
-                              bool: {
-                                must_not: {
-                                  term: {
-                                    [ALERT_WORKFLOW_STATUS]: 'closed',
-                                  },
-                                },
-                              },
-                            },
-                          ],
-                        },
-                      },
-                      collapse: {
-                        field: ALERT_INSTANCE_ID,
-                      },
-                      sort: [
-                        {
-                          [ALERT_START]: {
-                            order: 'desc' as const,
-                          },
-                        },
-                      ],
-                    },
-                  };
-
-                  const response = await ruleDataClient
-                    .getReader({ namespace: options.spaceId })
-                    .search<
-                      typeof suppressionAlertSearchRequest,
-                      BackendAlertWithSuppressionFields870<{}>
-                    >(suppressionAlertSearchRequest);
-
-                  const existingAlertsByInstanceId = response.hits.hits.reduce<
-                    Record<string, estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>>
-                  >((acc, hit) => {
-                    acc[hit._source[ALERT_INSTANCE_ID]] = hit;
-                    return acc;
-                  }, {});
-
-                  // filter out alerts that were already suppressed
-                  // alert was suppressed if its suppression ends is older
-                  // than suppression end of existing alert
-                  // if existing alert was created earlier during the same
-                  // rule execution - then alerts can be counted as not suppressed yet
-                  // as they are processed for the first time against this existing alert
-                  const nonSuppressedAlerts = filteredDuplicates.filter((alert) => {
-                    const existingAlert =
-                      existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
-
-                    if (
-                      !existingAlert ||
-                      existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === options.executionId
-                    ) {
-                      return true;
-                    }
-
-                    return !isExistingDateGtEqThanAlert(
-                      existingAlert,
-                      alert,
-                      ALERT_SUPPRESSION_END
-                    );
-                  });
-
-                  if (nonSuppressedAlerts.length === 0) {
-                    return {
-                      createdAlerts: [],
-                      errors: {},
-                      suppressedAlerts: [],
-                      alertsWereTruncated,
-                    };
-                  }
-
-                  const { alertCandidates, suppressedAlerts: suppressedInMemoryAlerts } =
-                    suppressAlertsInMemory(nonSuppressedAlerts);
-
-                  const [duplicateAlerts, newAlerts] = partition(alertCandidates, (alert) => {
-                    const existingAlert =
-                      existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
-
-                    // if suppression enabled only on rule execution, we need to suppress alerts only against
-                    // alert created in the same rule execution. Otherwise, we need to create a new alert to accommodate per rule execution suppression
-                    if (isRuleExecutionOnly) {
-                      return (
-                        existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === options.executionId
-                      );
-                    } else {
-                      return existingAlert != null;
-                    }
-                  });
-
-                  console.error('ARE THERE DUPLICATE ALERTS', duplicateAlerts?.length);
-
-                  const duplicateAlertUpdates = duplicateAlerts.flatMap((alert) => {
-                    const existingAlert =
-                      existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
-                    const existingDocsCount =
-                      existingAlert._source?.[ALERT_SUPPRESSION_DOCS_COUNT] ?? 0;
-
-                    return [
-                      {
-                        update: {
-                          _id: existingAlert._id,
-                          _index: existingAlert._index,
-                          require_alias: false,
-                        },
-                      },
-                      {
-                        doc: {
-                          // see if this is where the original time
-                          // is not being set correctly
-                          // when suppressing on per rule exec.
-                          ...getUpdatedSuppressionBoundaries(
-                            existingAlert,
-                            alert,
-                            options.executionId
-                          ),
-                          [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
-                          [ALERT_SUPPRESSION_DOCS_COUNT]:
-                            existingDocsCount + alert._source[ALERT_SUPPRESSION_DOCS_COUNT] + 1,
-                        },
-                      },
-                    ];
-                  });
-
-                  let enrichedAlerts = newAlerts;
-                  console.error('WHAT ARE ENRICHED ALERTS LENGTH BEFORE', enrichedAlerts?.length);
-
-                  if (enrichAlerts) {
-                    try {
-                      enrichedAlerts = await enrichAlerts(enrichedAlerts, {
-                        spaceId: options.spaceId,
-                      });
-                    } catch (e) {
-                      logger.debug('Enrichments failed');
-                    }
-                  }
-
-                  console.error('WHAT ARE ENRICHED ALERTS LENGTH AFTER', enrichedAlerts?.length);
-
-                  if (maxAlerts && enrichedAlerts.length > maxAlerts) {
-                    enrichedAlerts.length = maxAlerts;
-                    alertsWereTruncated = true;
-                  }
-
-                  const augmentedAlerts = augmentAlerts({
-                    alerts: enrichedAlerts,
-                    options,
-                    kibanaVersion: ruleDataClient.kibanaVersion,
-                    currentTimeOverride,
-                  });
-
-                  // console.error(
-                  //   'WHAT IS AUGMENTED ALERT',
-                  //   augmentedAlerts.map(
-                  //     (augAlert) => augAlert._source._source['kibana.alert.group.id']
-                  //   )
-                  // );
-
-                  const matchingBuildingBlockAlerts = buildingBlockAlerts?.filter((someAlert) => {
-                    // console.error('SOME ALERT GROUP ID', someAlert?._source[ALERT_GROUP_ID]);
-                    // console.error('NEW ALERT GROUP ID', newAlerts[0]?._source[ALERT_GROUP_ID]);
-
-                    return (
-                      someAlert?._source[ALERT_GROUP_ID] ===
-                      newAlerts[0]?._source['kibana.alert.group.id']
-                    );
-                  });
-
-                  const augmentedBuildingBlockAlerts =
-                    newAlerts?.length > 0 && buildingBlockAlerts?.length > 0
-                      ? augmentAlerts({
-                          alerts: matchingBuildingBlockAlerts,
-                          options,
-                          kibanaVersion: ruleDataClient.kibanaVersion,
-                          currentTimeOverride,
-                        })
-                      : [];
-
-                  // console.error('DO WE HAVE NEW ALERTS?', newAlerts?.length);
-                  // console.error('DO WE HAVE BUILDING BLOCK ALERTS?? ', buildingBlockAlerts?.length);
-                  // console.error(
-                  //   'DO THE MAP ALERTS TO BULK CREATE CONTAIN THE INSTANCE IDS',
-                  //   JSON.stringify(mapAlertsToBulkCreate(augmentedAlerts))
-                  // );
-                  const bulkResponse = await ruleDataClientWriter.bulk({
-                    body: [
-                      ...duplicateAlertUpdates,
-                      ...mapAlertsToBulkCreate(augmentedAlerts),
-                      ...(newAlerts?.length > 0
-                        ? mapAlertsToBulkCreate(augmentedBuildingBlockAlerts)
-                        : []),
-                    ],
-                    refresh: true,
-                  });
-
-                  if (bulkResponse == null) {
-                    return {
-                      createdAlerts: [],
-                      errors: {},
-                      suppressedAlerts: [],
-                      alertsWereTruncated: false,
-                    };
-                  }
-
-                  const createdAlerts = augmentedAlerts
-                    .map((alert, idx) => {
-                      const responseItem =
-                        bulkResponse.body.items[idx + duplicateAlerts.length].create;
-                      return {
-                        _id: responseItem?._id ?? '',
-                        _index: responseItem?._index ?? '',
-                        ...alert._source,
-                      };
-                    })
-                    .filter(
-                      (_, idx) =>
-                        bulkResponse.body.items[idx + duplicateAlerts.length].create?.status === 201
-                    )
-                    // Security solution's EQL rule consists of building block alerts which should be filtered out.
-                    // Building block alerts have additional "kibana.alert.group.index" attribute which is absent for the root alert.
-                    .filter((alert) => !Object.keys(alert).includes(ALERT_GROUP_INDEX));
-
-                  createdAlerts.forEach((alert) =>
-                    options.services.alertFactory
-                      .create(alert._id)
-                      .replaceState({
-                        signals_count: 1,
-                      })
-                      .scheduleActions(type.defaultActionGroupId, {
-                        rule: mapKeys(snakeCase, {
-                          ...options.params,
-                          name: options.rule.name,
-                          id: options.rule.id,
-                        }),
-                        results_link: type.getViewInAppRelativeUrl?.({
-                          rule: { ...options.rule, params: options.params },
-                          start: Date.parse(alert[TIMESTAMP]),
-                          end: Date.parse(alert[TIMESTAMP]),
-                        }),
-                        alerts: [formatAlert?.(alert) ?? alert],
-                      })
-                  );
-
+                if (filteredDuplicates.length === 0) {
                   return {
-                    createdAlerts,
-                    suppressedAlerts: [...duplicateAlerts, ...suppressedInMemoryAlerts],
-                    errors: errorAggregator(bulkResponse.body, [409]),
+                    createdAlerts: [],
+                    errors: {},
+                    suppressedAlerts: [],
                     alertsWereTruncated,
                   };
-                } else {
-                  logger.debug('Writing is disabled.');
+                }
+
+                const suppressionAlertSearchRequest = {
+                  body: {
+                    size: filteredDuplicates.length,
+                    query: {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              [ALERT_START]: {
+                                gte: suppressionWindowStart.toISOString(),
+                              },
+                            },
+                          },
+                          {
+                            terms: {
+                              [ALERT_INSTANCE_ID]: filteredDuplicates.map(
+                                (alert) => alert._source[ALERT_INSTANCE_ID]
+                              ),
+                            },
+                          },
+                          {
+                            bool: {
+                              must_not: {
+                                term: {
+                                  [ALERT_WORKFLOW_STATUS]: 'closed',
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    collapse: {
+                      field: ALERT_INSTANCE_ID,
+                    },
+                    sort: [
+                      {
+                        [ALERT_START]: {
+                          order: 'desc' as const,
+                        },
+                      },
+                    ],
+                  },
+                };
+
+                const response = await ruleDataClient
+                  .getReader({ namespace: options.spaceId })
+                  .search<
+                    typeof suppressionAlertSearchRequest,
+                    BackendAlertWithSuppressionFields870<{}>
+                  >(suppressionAlertSearchRequest);
+
+                const existingAlertsByInstanceId = response.hits.hits.reduce<
+                  Record<string, estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>>
+                >((acc, hit) => {
+                  acc[hit._source[ALERT_INSTANCE_ID]] = hit;
+                  return acc;
+                }, {});
+
+                // filter out alerts that were already suppressed
+                // alert was suppressed if its suppression ends is older
+                // than suppression end of existing alert
+                // if existing alert was created earlier during the same
+                // rule execution - then alerts can be counted as not suppressed yet
+                // as they are processed for the first time against this existing alert
+                const nonSuppressedAlerts = filteredDuplicates.filter((alert) => {
+                  const existingAlert =
+                    existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
+
+                  if (
+                    !existingAlert ||
+                    existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === options.executionId
+                  ) {
+                    return true;
+                  }
+
+                  return !isExistingDateGtEqThanAlert(existingAlert, alert, ALERT_SUPPRESSION_END);
+                });
+
+                if (nonSuppressedAlerts.length === 0) {
+                  return {
+                    createdAlerts: [],
+                    errors: {},
+                    suppressedAlerts: [],
+                    alertsWereTruncated,
+                  };
+                }
+
+                const { alertCandidates, suppressedAlerts: suppressedInMemoryAlerts } =
+                  suppressAlertsInMemory(nonSuppressedAlerts);
+
+                const [duplicateAlerts, newAlerts] = partition(alertCandidates, (alert) => {
+                  const existingAlert =
+                    existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
+
+                  // if suppression enabled only on rule execution, we need to suppress alerts only against
+                  // alert created in the same rule execution. Otherwise, we need to create a new alert to accommodate per rule execution suppression
+                  if (isRuleExecutionOnly) {
+                    return (
+                      existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === options.executionId
+                    );
+                  } else {
+                    return existingAlert != null;
+                  }
+                });
+
+                console.error('ARE THERE DUPLICATE ALERTS', duplicateAlerts?.length);
+
+                const duplicateAlertUpdates = duplicateAlerts.flatMap((alert) => {
+                  const existingAlert =
+                    existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
+                  const existingDocsCount =
+                    existingAlert._source?.[ALERT_SUPPRESSION_DOCS_COUNT] ?? 0;
+
+                  return [
+                    {
+                      update: {
+                        _id: existingAlert._id,
+                        _index: existingAlert._index,
+                        require_alias: false,
+                      },
+                    },
+                    {
+                      doc: {
+                        // see if this is where the original time
+                        // is not being set correctly
+                        // when suppressing on per rule exec.
+                        ...getUpdatedSuppressionBoundaries(
+                          existingAlert,
+                          alert,
+                          options.executionId
+                        ),
+                        [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
+                        [ALERT_SUPPRESSION_DOCS_COUNT]:
+                          existingDocsCount + alert._source[ALERT_SUPPRESSION_DOCS_COUNT] + 1,
+                      },
+                    },
+                  ];
+                });
+
+                let enrichedAlerts = newAlerts;
+                console.error('WHAT ARE ENRICHED ALERTS LENGTH BEFORE', enrichedAlerts?.length);
+
+                if (enrichAlerts) {
+                  try {
+                    enrichedAlerts = await enrichAlerts(enrichedAlerts, {
+                      spaceId: options.spaceId,
+                    });
+                  } catch (e) {
+                    logger.debug('Enrichments failed');
+                  }
+                }
+
+                console.error('WHAT ARE ENRICHED ALERTS LENGTH AFTER', enrichedAlerts?.length);
+
+                if (maxAlerts && enrichedAlerts.length > maxAlerts) {
+                  enrichedAlerts.length = maxAlerts;
+                  alertsWereTruncated = true;
+                }
+
+                const augmentedAlerts = augmentAlerts({
+                  alerts: enrichedAlerts,
+                  options,
+                  kibanaVersion: ruleDataClient.kibanaVersion,
+                  currentTimeOverride,
+                });
+
+                // console.error(
+                //   'WHAT IS AUGMENTED ALERT',
+                //   augmentedAlerts.map(
+                //     (augAlert) => augAlert._source._source['kibana.alert.group.id']
+                //   )
+                // );
+
+                /**
+                 * buildingBlockAlerts?.filter((someAlert) => {
+                  // console.error('SOME ALERT GROUP ID', someAlert?._source[ALERT_GROUP_ID]);
+                  // console.error('NEW ALERT GROUP ID', newAlerts[0]?._source[ALERT_GROUP_ID]);
+
+                  return (
+                    isEqlBuildingBlockAlert(someAlert?._source) &&
+                    isEqlShellAlert(newAlerts?.[0]?._source) &&
+                    someAlert?._source?.[ALERT_GROUP_ID] === newAlerts[0]?._source[ALERT_GROUP_ID]
+                  );
+                });
+                 */
+
+                console.error('is it defined', getMatchingBuildingBlockAlerts);
+
+                // TODO: move all this stuff into a utility function
+                // only create building block alerts for the new eql shell alert
+                const matchingBuildingBlockAlerts =
+                  newAlerts?.length > 0 && getMatchingBuildingBlockAlerts != null
+                    ? getMatchingBuildingBlockAlerts(newAlerts[0]?._source)
+                    : [];
+
+                const augmentedBuildingBlockAlerts =
+                  getMatchingBuildingBlockAlerts != null && newAlerts?.length > 0
+                    ? augmentAlerts({
+                        alerts: matchingBuildingBlockAlerts as unknown as Array<{
+                          _id: string;
+                          _source: unknown;
+                        }>,
+                        options,
+                        kibanaVersion: ruleDataClient.kibanaVersion,
+                        currentTimeOverride,
+                      })
+                    : [];
+
+                // console.error('DO WE HAVE NEW ALERTS?', newAlerts?.length);
+                // console.error('DO WE HAVE BUILDING BLOCK ALERTS?? ', buildingBlockAlerts?.length);
+                // console.error(
+                //   'DO THE MAP ALERTS TO BULK CREATE CONTAIN THE INSTANCE IDS',
+                //   JSON.stringify(mapAlertsToBulkCreate(augmentedAlerts))
+                // );
+                const bulkResponse = await ruleDataClientWriter.bulk({
+                  body: [
+                    ...duplicateAlertUpdates,
+                    ...mapAlertsToBulkCreate(augmentedAlerts),
+                    ...(newAlerts?.length > 0
+                      ? mapAlertsToBulkCreate(augmentedBuildingBlockAlerts)
+                      : []),
+                  ],
+                  refresh: true,
+                });
+
+                if (bulkResponse == null) {
                   return {
                     createdAlerts: [],
                     errors: {},
@@ -711,8 +670,60 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     alertsWereTruncated: false,
                   };
                 }
-              } catch (exc) {
-                console.error('BIG TIME EXCEPTION', exc);
+
+                const createdAlerts = augmentedAlerts
+                  .map((alert, idx) => {
+                    const responseItem =
+                      bulkResponse.body.items[idx + duplicateAlerts.length].create;
+                    return {
+                      _id: responseItem?._id ?? '',
+                      _index: responseItem?._index ?? '',
+                      ...alert._source,
+                    };
+                  })
+                  .filter(
+                    (_, idx) =>
+                      bulkResponse.body.items[idx + duplicateAlerts.length].create?.status === 201
+                  )
+                  // Security solution's EQL rule consists of building block alerts which should be filtered out.
+                  // Building block alerts have additional "kibana.alert.group.index" attribute which is absent for the root alert.
+                  .filter((alert) => !Object.keys(alert).includes(ALERT_GROUP_INDEX));
+
+                createdAlerts.forEach((alert) =>
+                  options.services.alertFactory
+                    .create(alert._id)
+                    .replaceState({
+                      signals_count: 1,
+                    })
+                    .scheduleActions(type.defaultActionGroupId, {
+                      rule: mapKeys(snakeCase, {
+                        ...options.params,
+                        name: options.rule.name,
+                        id: options.rule.id,
+                      }),
+                      results_link: type.getViewInAppRelativeUrl?.({
+                        rule: { ...options.rule, params: options.params },
+                        start: Date.parse(alert[TIMESTAMP]),
+                        end: Date.parse(alert[TIMESTAMP]),
+                      }),
+                      alerts: [formatAlert?.(alert) ?? alert],
+                    })
+                );
+
+                return {
+                  createdAlerts,
+                  suppressedAlerts: [...duplicateAlerts, ...suppressedInMemoryAlerts],
+                  errors: errorAggregator(bulkResponse.body, [409]),
+                  alertsWereTruncated,
+                };
+              } else {
+                logger.debug('Writing is disabled.');
+                return {
+                  createdAlerts: [],
+                  errors: {},
+                  suppressedAlerts: [],
+                  alertsWereTruncated: false,
+                };
               }
             },
           },

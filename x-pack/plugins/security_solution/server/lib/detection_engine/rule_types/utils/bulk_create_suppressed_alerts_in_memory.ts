@@ -18,6 +18,7 @@ import type {
   SignalSourceHit,
   SignalSource,
   WrapSequences,
+  WrapSuppressedSequences,
 } from '../types';
 import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../constants';
 import { addToSearchAfterReturn } from './utils';
@@ -37,6 +38,7 @@ import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
+  wrapSuppressedSequences: WrapSuppressedSequences;
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
   alertSuppression?: AlertSuppressionCamel;
@@ -73,7 +75,7 @@ export interface BulkCreateSuppressedSequencesParams
     | 'ruleExecutionLogger'
     | 'tuple'
     | 'alertSuppression'
-    | 'wrapSuppressedHits'
+    | 'wrapSuppressedSequences'
     | 'alertWithSuppression'
     | 'alertTimestampOverride'
   > {
@@ -178,7 +180,7 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
   ruleExecutionLogger,
   tuple,
   alertSuppression,
-  wrapSuppressedHits,
+  wrapSuppressedSequences,
   alertWithSuppression,
   alertTimestampOverride,
   experimentalFeatures,
@@ -190,7 +192,7 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
     AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
   let suppressibleSequences: Array<EqlHitsSequence<SignalSource>> = [];
-  const unsuppressibleWrappedDocs: Array<EqlHitsSequence<SignalSource>> = [];
+  const unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>> = [];
 
   if (!suppressOnMissingFields) {
     sequences.forEach((sequence) => {
@@ -198,7 +200,7 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
       // contain a value, then wrap sequence normally,
       // otherwise wrap as suppressed
       // ask product
-      const [eventsWithFields, eventsWithoutFields] = partitionMissingFieldsEvents(
+      const [eventsWithFields] = partitionMissingFieldsEvents(
         sequence.events,
         alertSuppression?.groupBy || [],
         ['fields'],
@@ -207,7 +209,7 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
 
       if (eventsWithFields.length === 0) {
         // unsuppressible sequence alert
-        unsuppressibleWrappedDocs.push(wrapSequences([sequence], buildReasonMessage));
+        unsuppressibleWrappedDocs.concat(...wrapSequences([sequence], buildReasonMessage));
         console.error('unsuppressible docs', unsuppressibleWrappedDocs.length);
       } else {
         suppressibleSequences.push(sequence);
@@ -218,7 +220,10 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
   }
 
   // refactor the below into a separate function
-  const suppressibleWrappedDocs = wrapSuppressedHits(suppressibleSequences, buildReasonMessage);
+  const suppressibleWrappedDocs = wrapSuppressedSequences(
+    suppressibleSequences,
+    buildReasonMessage
+  );
 
   // once we have wrapped thing similarly to
   // build alert group from sequence,

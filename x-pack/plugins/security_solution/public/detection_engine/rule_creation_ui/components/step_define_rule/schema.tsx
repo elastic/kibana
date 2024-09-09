@@ -17,7 +17,6 @@ import {
   customValidators,
 } from '../../../../common/components/threat_match/helpers';
 import {
-  isEqlRule,
   isEsqlRule,
   isNewTermsRule,
   isThreatMatchRule,
