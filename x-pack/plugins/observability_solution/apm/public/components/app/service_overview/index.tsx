@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -83,18 +83,19 @@ export function ServiceOverview() {
             {showApmOverview ? <ApmOverview /> : null}
             {/* Only shows Logs overview when entity has Logs signal */}
             {hasLogsSignal ? (
-              <EuiFlexItem>
+              <>
                 {hasLogsOnlySignal && !dismissedLogsOnlyEmptyState && (
-                  <>
+                  <EuiFlexItem>
                     <ServiceTabEmptyState
                       id="serviceOverview"
                       onDissmiss={() => setDismissedLogsOnlyEmptyState(true)}
                     />
-                    <EuiSpacer size="m" />
-                  </>
+                  </EuiFlexItem>
                 )}
-                <LogsOverview />
-              </EuiFlexItem>
+                <EuiFlexItem>
+                  <LogsOverview />
+                </EuiFlexItem>
+              </>
             ) : null}
           </EuiFlexGroup>
         </ChartPointerEventContextProvider>
