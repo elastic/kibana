@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'context']);
+  const { common, header, timePicker } = getPageObjects(['common', 'header', 'timePicker']);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -32,9 +32,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
       await rowActions[0].click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await browser.pressKeys(browser.keys.TAB);
       await browser.pressKeys(browser.keys.SPACE);
       await browser.pressKeys(browser.keys.TAB);
