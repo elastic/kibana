@@ -15,24 +15,13 @@ import pLimit from 'p-limit';
 import { ScriptInferenceClient } from '../util/kibana_client';
 import { convertToMarkdown } from './convert_to_markdown';
 
-interface ExtractedDocEntry {
-  /** the title of the page **/
-  title: string;
-  /** the content that should be used **/
-  content: string;
-  /** LLM instructions to perform doc generation **/
-  instructions?: string;
-  /** if true, no page will be generated for this entry.
-   * Note that the file will still be used as context to generate the other entries
-   **/
-  skip?: boolean;
-}
-
 /**
  * The pages that will be extracted but only used as context
  * for the LLM for the enhancement tasks of the documentation entries.
  */
 const contextArticles = [
+  'esql.html',
+  'esql-syntax.html',
   'esql-kibana.html',
   'esql-query-api.html',
   'esql-limitations.html',
@@ -57,9 +46,6 @@ export interface ExtractionOutput {
   commands: ExtractedCommandOrFunc[];
   functions: ExtractedCommandOrFunc[];
   pages: ExtractedPage[];
-  /**
-   * The list of file that were not processed
-   */
   skippedFile: string[];
 }
 
@@ -117,9 +103,6 @@ async function processFile({
   const basename = Path.basename(fileFullPath);
   const fileContent = (await Fs.readFile(fileFullPath)).toString('utf-8');
 
-  // TODO: esql-syntax.html
-  // TODO: esql.html
-
   if (basename === 'esql-commands.html') {
     // process commands
     await processCommands({
@@ -142,7 +125,7 @@ async function processFile({
     const $element = load(fileContent)('*');
     output.pages.push({
       sourceFile: basename,
-      name: basename.substring(5, basename.length - 5),
+      name: basename === 'esql.html' ? 'overview' : basename.substring(5, basename.length - 5),
       content: getSimpleText($element),
     });
   } else {
@@ -252,57 +235,6 @@ async function processCommands({
   );
 
   output.commands.push(...markdownFiles);
-}
-
-export async function extractDocEntriesOld({
-  file,
-  log,
-}: {
-  file: string;
-  log: ToolingLog;
-}): Promise<ExtractedDocEntry[]> {
-  const fileContents = await Fs.readFile(file);
-  const $element = load(fileContents.toString())('*');
-
-  // TODO: remove
-  if (Path.basename(file) !== 'esql-commands.html') {
-    return [];
-  }
-
-  switch (Path.basename(file)) {
-    case 'esql-syntax.html':
-      return [
-        {
-          title: 'Syntax',
-          content: getSimpleText($element),
-          instructions: `Generate a description of Elastic ES|QL syntax. Make sure to reuse as much as possible the provided content of file and be as complete as possible.
-                    For timespan literals, generate at least five examples of full ES|QL queries, using a mix commands and functions, using different intervals and units.
-                    **Make sure you use timespan literals, such as \`1 day\` or \`24h\` or \`7 weeks\` in these examples**.
-                    Combine ISO timestamps with time span literals and NOW().
-                    Make sure the example queries are using different combinations of syntax, commands and functions for each, and use BUCKET at least twice
-                    When using DATE_TRUNC, make sure you DO NOT wrap the timespan in single or double quotes.
-                    Do not use the Cast operator. In your examples, make sure to only use commands and functions that exist in the provided documentation.
-                    `,
-        },
-      ];
-
-    case 'esql.html':
-      return [
-        {
-          title: 'Overview',
-          content: getSimpleText($element).replace(
-            /The ES\|QL documentation is organized in these sections(.*)$/,
-            ''
-          ),
-          instructions: `Generate a description of ES|QL as a language. Ignore links to other documents. From Limitations, include the known limitations, but ignore limitations that are specific to a command.
-                      Include a summary of what is mentioned in the CROSS_CLUSTER, Kibana and API sections. Explain how to use the REST API with an example and mention important information for Kibana usage and cross cluster querying.`,
-        },
-      ];
-
-    default:
-      log.debug('Dropping file', file);
-      return [];
-  }
 }
 
 function getSimpleText($element: Cheerio<AnyNode>) {

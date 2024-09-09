@@ -93,7 +93,7 @@ yargs(process.argv.slice(2))
 
           const tempFileName = Path.join(REPO_ROOT, './extraction.json');
 
-          //await Fs.writeFile(tempFileName, JSON.stringify(extraction, undefined, 2));
+          // await Fs.writeFile(tempFileName, JSON.stringify(extraction, undefined, 2));
           const extraction = JSON.parse((await Fs.readFile(tempFileName)).toString('utf-8'));
 
           const docFiles = await generateDoc({
