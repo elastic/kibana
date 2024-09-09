@@ -33,7 +33,6 @@ export const bulkEnableDisableRules = async ({
   mlAuthz,
 }: BulkEnableDisableRulesArgs): Promise<BulkEnableDisableRulesOutcome> => {
   const errors: Array<PromisePoolError<RuleAlertType, Error>> = [];
-  const updatedRules: RuleAlertType[] = [];
 
   // In the first step, we validate if the rules can be enabled
   const validatedRules: RuleAlertType[] = [];
