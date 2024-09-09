@@ -10,7 +10,7 @@ import { rangeQuery, existsQuery } from '@kbn/observability-plugin/server';
 import { DegradedFieldResponse } from '../../../../common/api_types';
 import { MAX_DEGRADED_FIELDS } from '../../../../common/constants';
 import { createDatasetQualityESClient } from '../../../utils';
-import { _IGNORED, TIMESTAMP } from '../../../../common/es_fields';
+import { _IGNORED, INDEX, TIMESTAMP } from '../../../../common/es_fields';
 import { getFieldIntervalInSeconds } from './get_interval';
 
 export async function getDegradedFields({
@@ -43,6 +43,15 @@ export async function getDegradedFields({
             field: TIMESTAMP,
           },
         },
+        index: {
+          terms: {
+            size: 1,
+            field: INDEX,
+            order: {
+              _key: 'desc',
+            },
+          },
+        },
         timeSeries: {
           date_histogram: {
             field: TIMESTAMP,
@@ -70,16 +79,21 @@ export async function getDegradedFields({
     aggs,
   });
 
+  const result =
+    response.aggregations?.degradedFields.buckets.map((bucket) => ({
+      name: bucket.key as string,
+      count: bucket.doc_count,
+      lastOccurrence: bucket.lastOccurrence.value,
+      timeSeries: bucket.timeSeries.buckets.map((timeSeriesBucket) => ({
+        x: timeSeriesBucket.key,
+        y: timeSeriesBucket.doc_count,
+      })),
+      indexFieldWasLastPresentIn: bucket.index.buckets[0].key,
+    })) ?? [];
+
+  console.table(result);
+
   return {
-    degradedFields:
-      response.aggregations?.degradedFields.buckets.map((bucket) => ({
-        name: bucket.key as string,
-        count: bucket.doc_count,
-        lastOccurrence: bucket.lastOccurrence.value,
-        timeSeries: bucket.timeSeries.buckets.map((timeSeriesBucket) => ({
-          x: timeSeriesBucket.key,
-          y: timeSeriesBucket.doc_count,
-        })),
-      })) ?? [],
+    degradedFields: result,
   };
 }

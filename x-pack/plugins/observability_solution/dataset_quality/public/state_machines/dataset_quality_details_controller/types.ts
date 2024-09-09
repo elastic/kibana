@@ -12,6 +12,7 @@ import {
   DataStreamDetails,
   DataStreamSettings,
   DegradedField,
+  DegradedFieldAnalysis,
   DegradedFieldResponse,
   DegradedFieldValues,
   NonAggregatableDatasets,
@@ -45,6 +46,7 @@ export interface WithDefaultControllerState {
   isIndexNotFoundError?: boolean;
   integration?: Integration;
   expandedDegradedField?: string;
+  isDegradedFieldFlyoutOpen?: boolean;
 }
 
 export interface WithDataStreamDetails {
@@ -78,6 +80,10 @@ export interface WithIntegration {
 
 export interface WithDegradedFieldValues {
   degradedFieldValues: DegradedFieldValues;
+}
+
+export interface WithDegradeFieldAnalysis {
+  degradedFieldAnalysis: DegradedFieldAnalysis;
 }
 
 export type DefaultDatasetQualityDetailsContext = Pick<
@@ -117,12 +123,25 @@ export type DatasetQualityDetailsControllerTypeState =
       context: WithDefaultControllerState & WithDegradedFieldsData;
     }
   | {
-      value: 'initializing.initializeFixItFlow.ignoredValues.fetching';
+      value:
+        | 'initializing.degradedFieldFlyout.initializing.ignoredValues.fetching'
+        | 'initializing.degradedFieldFlyout.initializing.analyze.fetching';
       context: WithDefaultControllerState & WithDegradedFieldsData;
     }
   | {
-      value: 'initializing.initializeFixItFlow.ignoredValues.done';
+      value: 'initializing.degradedFieldFlyout.initializing.ignoredValues.done';
       context: WithDefaultControllerState & WithDegradedFieldsData & WithDegradedFieldValues;
+    }
+  | {
+      value: 'initializing.degradedFieldFlyout.initializing.analyze.done';
+      context: WithDefaultControllerState & WithDegradedFieldsData & WithDegradeFieldAnalysis;
+    }
+  | {
+      value: 'initializing.degradedFieldFlyout.initialized';
+      context: WithDefaultControllerState &
+        WithDegradedFieldsData &
+        WithDegradedFieldValues &
+        WithDegradeFieldAnalysis;
     }
   | {
       value:
@@ -170,4 +189,5 @@ export type DatasetQualityDetailsControllerEvent =
   | DoneInvokeEvent<DegradedFieldValues>
   | DoneInvokeEvent<DataStreamSettings>
   | DoneInvokeEvent<Integration>
-  | DoneInvokeEvent<Dashboard[]>;
+  | DoneInvokeEvent<Dashboard[]>
+  | DoneInvokeEvent<DegradedFieldAnalysis>;

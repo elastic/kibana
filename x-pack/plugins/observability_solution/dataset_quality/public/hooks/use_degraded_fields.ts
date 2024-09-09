@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useSelector } from '@xstate/react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { orderBy } from 'lodash';
 import { DegradedField } from '../../common/data_streams_stats';
 import { SortDirection } from '../../common/types';
@@ -15,6 +15,11 @@ import {
 } from '../../common/constants';
 import { useKibanaContextForPlugin } from '../utils';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
+import {
+  degradedFieldCauseFieldIgnored,
+  degradedFieldCauseFieldLimitExceeded,
+  degradedFieldCauseFieldMalformed,
+} from '../../common/translations';
 
 export type DegradedFieldSortField = keyof DegradedField;
 
@@ -24,7 +29,10 @@ export function useDegradedFields() {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
 
-  const { degradedFields, expandedDegradedField } = useSelector(service, (state) => state.context);
+  const { degradedFields, expandedDegradedField, isDegradedFieldFlyoutOpen } = useSelector(
+    service,
+    (state) => state.context
+  );
   const { data, table } = degradedFields ?? {};
   const { page, rowsPerPage, sort } = table;
 
@@ -66,6 +74,10 @@ export function useDegradedFields() {
     state.matches('initializing.dataStreamDegradedFields.fetching')
   );
 
+  const hasDataStreamSettingsLoaded = useSelector(service, (state) =>
+    state.matches('initializing.dataStreamSettings.initializeIntegrations')
+  );
+
   const closeDegradedFieldFlyout = useCallback(
     () => service.send({ type: 'CLOSE_DEGRADED_FIELD_FLYOUT' }),
     [service]
@@ -82,14 +94,84 @@ export function useDegradedFields() {
     [expandedDegradedField, service]
   );
 
+  useEffect(() => {
+    if (
+      hasDataStreamSettingsLoaded &&
+      expandedDegradedField &&
+      !isDegradedFieldsLoading &&
+      !isDegradedFieldFlyoutOpen
+    ) {
+      service.send({
+        type: 'OPEN_DEGRADED_FIELD_FLYOUT',
+        fieldName: expandedDegradedField,
+      });
+    }
+  }, [
+    isDegradedFieldsLoading,
+    expandedDegradedField,
+    service,
+    isDegradedFieldFlyoutOpen,
+    hasDataStreamSettingsLoaded,
+  ]);
+
   const degradedFieldValues = useSelector(service, (state) =>
-    state.matches('initializing.initializeFixItFlow.ignoredValues.done')
+    state.matches('initializing.degradedFieldFlyout.initialized')
       ? state.context.degradedFieldValues
       : undefined
   );
 
+  const degradedFieldAnalysis = useSelector(service, (state) =>
+    state.matches('initializing.degradedFieldFlyout.initialized')
+      ? state.context.degradedFieldAnalysis
+      : undefined
+  );
+
+  // This piece only cater field limit issue at the moment.
+  // In future this will cater the other 2 reasons as well
+  const degradedFieldAnalysisResult = useMemo(() => {
+    if (!degradedFieldAnalysis) {
+      return undefined;
+    }
+
+    // 1st check if it's a field limit issue
+    if (degradedFieldAnalysis.isFieldLimitIssue) {
+      return {
+        potentialCause: degradedFieldCauseFieldLimitExceeded,
+        shouldDisplayMitigation: true,
+        shouldDisplayValues: false,
+      };
+    }
+
+    // 2nd check if it's a ignored above issue
+    const fieldMapping = degradedFieldAnalysis.fieldMapping;
+
+    if (fieldMapping && fieldMapping?.type === 'keyword' && fieldMapping?.ignore_above) {
+      const isAnyValueExceedingIgnoreAbove = degradedFieldValues?.values.some(
+        (value) => value.length > fieldMapping.ignore_above!
+      );
+      if (isAnyValueExceedingIgnoreAbove) {
+        return {
+          potentialCause: degradedFieldCauseFieldIgnored,
+          shouldDisplayMitigation: false,
+          shouldDisplayValues: true,
+        };
+      }
+    }
+
+    // 3rd check if its a ignore_malformed issue. There is no check, at the moment.
+    return {
+      potentialCause: degradedFieldCauseFieldMalformed,
+      shouldDisplayMitigation: false,
+      shouldDisplayValues: false,
+    };
+  }, [degradedFieldAnalysis, degradedFieldValues]);
+
   const isDegradedFieldsValueLoading = useSelector(service, (state) => {
-    return !state.matches('initializing.initializeFixItFlow.ignoredValues.done');
+    return state.matches('initializing.degradedFieldFlyout.initializing.ignoredValues.fetching');
+  });
+
+  const isAnalysisInProgress = useSelector(service, (state) => {
+    return state.matches('initializing.degradedFieldFlyout.initializing.analyze.fetching');
   });
 
   return {
@@ -105,5 +187,8 @@ export function useDegradedFields() {
     closeDegradedFieldFlyout,
     degradedFieldValues,
     isDegradedFieldsValueLoading,
+    isAnalysisInProgress,
+    degradedFieldAnalysis,
+    degradedFieldAnalysisResult,
   };
 }

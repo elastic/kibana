@@ -402,3 +402,45 @@ export const fieldIgnoredText = i18n.translate(
     defaultMessage: 'field ignored',
   }
 );
+
+export const degradedFieldPotentialCauseColumnName = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.potentialCause',
+  {
+    defaultMessage: 'Potential cause',
+  }
+);
+
+export const degradedFieldCurrentFieldLimitColumnName = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.currentFieldLimit',
+  {
+    defaultMessage: 'Field limit',
+  }
+);
+
+export const degradedFieldCauseFieldLimitExceeded = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.cause.fieldLimitExceeded',
+  {
+    defaultMessage: 'field limit exceeded',
+  }
+);
+
+export const degradedFieldCauseFieldIgnored = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.cause.fieldIgnored',
+  {
+    defaultMessage: 'field ignored',
+  }
+);
+
+export const degradedFieldCauseFieldMalformed = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.cause.fieldMalformed',
+  {
+    defaultMessage: 'field malformed',
+  }
+);
+
+export const degradedFieldMessageIssueDoesNotExistInLatestIndex = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.message.issueDoesNotExistInLatestIndex',
+  {
+    defaultMessage: 'The issue did not occur on the latest backing index!',
+  }
+);

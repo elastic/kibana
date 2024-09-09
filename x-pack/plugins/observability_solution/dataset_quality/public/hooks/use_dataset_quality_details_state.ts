@@ -28,6 +28,7 @@ export const useDatasetQualityDetailsState = () => {
     breakdownField,
     isIndexNotFoundError,
     expandedDegradedField,
+    isDegradedFieldFlyoutOpen,
   } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
@@ -150,5 +151,6 @@ export const useDatasetQualityDetailsState = () => {
     canUserAccessDashboards,
     canUserViewIntegrations,
     expandedDegradedField,
+    isDegradedFieldFlyoutOpen,
   };
 };

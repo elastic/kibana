@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiFlyout,
@@ -15,9 +15,11 @@ import {
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
+  EuiTextColor,
 } from '@elastic/eui';
-import { useDegradedFields } from '../../../hooks';
+import { useDatasetQualityDetailsState, useDegradedFields } from '../../../hooks';
 import {
+  degradedFieldMessageIssueDoesNotExistInLatestIndex,
   fieldIgnoredText,
   overviewDegradedFieldsSectionTitle,
 } from '../../../../common/translations';
@@ -26,10 +28,20 @@ import { DegradedFieldInfo } from './field_info';
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DegradedFieldFlyout() {
-  const { closeDegradedFieldFlyout, expandedDegradedField } = useDegradedFields();
+  const { closeDegradedFieldFlyout, expandedDegradedField, renderedItems } = useDegradedFields();
+  const { dataStreamSettings } = useDatasetQualityDetailsState();
   const pushedFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'pushedFlyoutTitle',
   });
+
+  const fieldList = useMemo(() => {
+    return renderedItems.find((item) => {
+      return item.name === expandedDegradedField;
+    });
+  }, [renderedItems, expandedDegradedField]);
+
+  const isUserViewingTheIssueOnLatestBackingIndex =
+    dataStreamSettings?.lastBackingIndexName === fieldList?.indexFieldWasLastPresentIn;
 
   return (
     <EuiFlyout
@@ -47,9 +59,17 @@ export default function DegradedFieldFlyout() {
             {expandedDegradedField} <span style={{ fontWeight: 400 }}>{fieldIgnoredText}</span>
           </EuiText>
         </EuiTitle>
+        {!isUserViewingTheIssueOnLatestBackingIndex && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiTextColor color="danger">
+              {degradedFieldMessageIssueDoesNotExistInLatestIndex}
+            </EuiTextColor>
+          </>
+        )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <DegradedFieldInfo />
+        <DegradedFieldInfo fieldList={fieldList} />
       </EuiFlyoutBody>
     </EuiFlyout>
   );
