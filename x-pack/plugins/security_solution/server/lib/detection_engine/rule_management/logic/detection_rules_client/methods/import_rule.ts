@@ -58,9 +58,13 @@ export const importRule = async (
       data: ruleUpdateParams,
     });
 
-     // We strip `enabled` from the rule object to use in the rules client and need to enable it separately if user has enabled the updated rule
-     const { enabled: isNowEnabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleToImport.enabled);
-     enabled = isNowEnabled;
+    // We strip `enabled` from the rule object to use in the rules client and need to enable it separately if user has enabled the updated rule
+    const { enabled: isNowEnabled } = await toggleRuleEnabledOnUpdate(
+      rulesClient,
+      existingRule,
+      ruleToImport.enabled
+    );
+    enabled = isNowEnabled;
   } else {
     /* Rule does not exist, so we'll create it */
     const ruleCreateParams = convertCreateAPIToInternalSchema(ruleToImport, {
@@ -74,7 +78,9 @@ export const importRule = async (
   }
 
   /* Trying to convert an internal rule to a RuleResponse object */
-  const parseResult = RuleResponse.safeParse(internalRuleToAPIResponse({...importedInternalRule, enabled}));
+  const parseResult = RuleResponse.safeParse(
+    internalRuleToAPIResponse({ ...importedInternalRule, enabled })
+  );
 
   if (!parseResult.success) {
     throw new RuleResponseValidationError({
