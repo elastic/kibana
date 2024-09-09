@@ -54,6 +54,16 @@
   }
 
   .embPanel__hoverActions {
+    .embPanel--dragHandle {
+      visibility: hidden;
+    }
+  }
+}
+
+// Hide hover actions when dashboard has an overlay
+.dshDashboardGrid__item--blurred,
+.dshDashboardGrid__item--focused {
+  .embPanel__hoverActions {
     visibility: hidden;
   }
 }

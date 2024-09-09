@@ -58,6 +58,7 @@ export const DashboardViewportComponent = () => {
   const description = dashboard.select((state) => state.explicitInput.description);
   const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
   const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
+  const fullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
 
   const { ref: resizeRef, width: viewportWidth } = useDebouncedWidthObserver(!!focusedPanelId);
 
@@ -70,6 +71,7 @@ export const DashboardViewportComponent = () => {
     <div
       className={classNames('dshDashboardViewportWrapper', {
         'dshDashboardViewportWrapper--defaultBg': !useMargins,
+        'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
     >
       {controlGroup && viewMode !== ViewMode.PRINT ? (
