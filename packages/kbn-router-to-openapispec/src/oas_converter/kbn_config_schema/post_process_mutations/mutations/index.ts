@@ -65,7 +65,7 @@ export const processAllTypes = (schema: OpenAPIV3.SchemaObject): void => {
 export const processAnyType = (schema: OpenAPIV3.SchemaObject): void => {
   // Map schema to an empty object: `{}`
   for (const key of Object.keys(schema)) {
-    deleteField(schema as Record<any, unknown>, key);
+    deleteField(schema as unknown as Record<any, unknown>, key);
   }
 };
 
