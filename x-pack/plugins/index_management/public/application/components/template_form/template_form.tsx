@@ -22,7 +22,7 @@ import {
 } from '../shared';
 import { documentationService } from '../../services/documentation';
 import { SectionError } from '../section_error';
-import { serializeAsESLifecycle } from '../../../../common/lib/data_stream_serialization';
+import { serializeAsESLifecycle } from '../../../../common/lib';
 import {
   SimulateTemplateFlyoutContent,
   SimulateTemplateProps,

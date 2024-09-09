@@ -14,7 +14,10 @@ import {
   SecurityHasPrivilegesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MeteringStats } from '../../../lib/types';
-import { deserializeDataStream, deserializeDataStreamList } from '../../../../common/lib';
+import {
+  deserializeDataStream,
+  deserializeDataStreamList,
+} from '../../../lib/data_stream_serialization';
 import { EnhancedDataStreamFromEs } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';

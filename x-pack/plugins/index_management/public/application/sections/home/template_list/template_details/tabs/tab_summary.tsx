@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { reactRouterNavigate } from '../../../../../../shared_imports';
 import { useAppContext } from '../../../../../app_context';
-import { serializeAsESLifecycle } from '../../../../../../../common/lib/data_stream_serialization';
+import { serializeAsESLifecycle } from '../../../../../../../common/lib';
 import { getLifecycleValue } from '../../../../../lib/data_streams';
 import { TemplateDeserialized } from '../../../../../../../common';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../../constants';

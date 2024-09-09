@@ -6,7 +6,7 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { DataStream, EnhancedDataStreamFromEs, Health, DataRetention } from '../types';
+import type { DataStream, EnhancedDataStreamFromEs, Health } from '../../common';
 
 export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs): DataStream {
   const {
@@ -77,59 +77,3 @@ export function deserializeDataStreamList(
 ): DataStream[] {
   return dataStreamsFromEs.map((dataStream) => deserializeDataStream(dataStream));
 }
-
-export const splitSizeAndUnits = (field: string): { size: string; unit: string } => {
-  let size = '';
-  let unit = '';
-
-  const result = /(\d+)(\w+)/.exec(field);
-  if (result) {
-    size = result[1];
-    unit = result[2];
-  }
-
-  return {
-    size,
-    unit,
-  };
-};
-
-export const serializeAsESLifecycle = (lifecycle?: DataRetention): DataStream['lifecycle'] => {
-  if (!lifecycle || !lifecycle?.enabled) {
-    return undefined;
-  }
-
-  const { infiniteDataRetention, value, unit } = lifecycle;
-
-  if (infiniteDataRetention) {
-    return {
-      enabled: true,
-    };
-  }
-
-  return {
-    enabled: true,
-    data_retention: `${value}${unit}`,
-  };
-};
-
-export const deserializeESLifecycle = (lifecycle?: DataStream['lifecycle']): DataRetention => {
-  if (!lifecycle || !lifecycle?.enabled) {
-    return { enabled: false };
-  }
-
-  if (!lifecycle.data_retention) {
-    return {
-      enabled: true,
-      infiniteDataRetention: true,
-    };
-  }
-
-  const { size, unit } = splitSizeAndUnits(lifecycle.data_retention as string);
-
-  return {
-    enabled: true,
-    value: Number(size),
-    unit,
-  };
-};
