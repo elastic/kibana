@@ -10,7 +10,6 @@ import {
   repeatedSearchResultsWithSortId,
   repeatedSearchResultsWithNoSortId,
   sampleDocSearchResultsNoSortIdNoHits,
-  sampleDocWithSortId,
 } from '../__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
