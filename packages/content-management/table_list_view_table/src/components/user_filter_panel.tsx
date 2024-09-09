@@ -25,7 +25,10 @@ interface Context {
 
 const UserFilterContext = React.createContext<Context | null>(null);
 
-export const UserFilterContextProvider: FC<Context> = ({ children, ...props }) => {
+export const UserFilterContextProvider: FC<React.PropsWithChildren<Context>> = ({
+  children,
+  ...props
+}) => {
   if (!props.enabled) {
     return <>{children}</>;
   }
