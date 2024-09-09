@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { suggest } from './autocomplete';
@@ -11,29 +12,18 @@ import { evalFunctionDefinitions } from '../definitions/functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import {
+  getAddDateHistogramSnippet,
+  getDateLiterals,
   getSafeInsertText,
-  getUnitDuration,
   TIME_SYSTEM_PARAMS,
   TRIGGER_SUGGESTION_COMMAND,
 } from './factories';
-import { camelCase, partition } from 'lodash';
+import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import {
-  FunctionParameter,
-  FunctionReturnType,
-  isFieldType,
-  isReturnType,
-  isSupportedDataType,
-  SupportedDataType,
-} from '../definitions/types';
-import { getParamAtPosition } from './helper';
-import { nonNullable } from '../shared/helpers';
 import {
   policies,
   getFunctionSignaturesByReturnType,
   getFieldNamesByType,
-  getLiteralsByType,
-  getDateLiteralsByFieldType,
   createCustomCallbackMocks,
   createCompletionContext,
   getPolicyFields,
@@ -43,10 +33,7 @@ import {
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_STRING_TYPES } from '../shared/esql_types';
-
-const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
-const powParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
-const log10ParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
+import { log10ParameterTypes, powParameterTypes } from './__tests__/constants';
 
 const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
 describe('autocomplete', () => {
@@ -156,6 +143,19 @@ describe('autocomplete', () => {
         ['and', 'or', 'not']
       ),
     ]);
+
+    const expectedComparisonWithDateSuggestions = [
+      ...getDateLiterals(),
+      ...getFieldNamesByType(['date']),
+      // all functions compatible with a keywordField type
+      ...getFunctionSignaturesByReturnType('where', ['date'], { scalar: true }),
+    ];
+    testSuggestions('from a | where dateField == /', expectedComparisonWithDateSuggestions);
+
+    testSuggestions('from a | where dateField < /', expectedComparisonWithDateSuggestions);
+
+    testSuggestions('from a | where dateField >= /', expectedComparisonWithDateSuggestions);
+
     const expectedComparisonWithTextFieldSuggestions = [
       ...getFieldNamesByType(['text', 'keyword', 'ip', 'version']),
       ...getFunctionSignaturesByReturnType('where', ['text', 'keyword', 'ip', 'version'], {
@@ -271,10 +271,23 @@ describe('autocomplete', () => {
       `dissect keywordField ${constantPattern} |`,
     ];
     for (const subExpression of subExpressions) {
-      testSuggestions(`from a | ${subExpression} grok /`, getFieldNamesByType(ESQL_STRING_TYPES));
+      testSuggestions(
+        `from a | ${subExpression} grok /`,
+        getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+      );
       testSuggestions(`from a | ${subExpression} grok keywordField /`, [constantPattern], ' ');
       testSuggestions(`from a | ${subExpression} grok keywordField ${constantPattern} /`, ['| ']);
     }
+
+    testSuggestions(
+      'from a | grok /',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
+    testSuggestions(
+      'from a | grok key/',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
+    testSuggestions('from a | grok keywordField/', []);
   });
 
   describe('dissect', () => {
@@ -286,10 +299,9 @@ describe('autocomplete', () => {
       `dissect keywordField ${constantPattern} append_separator = ":" |`,
     ];
     for (const subExpression of subExpressions) {
-      // Unskip once https://github.com/elastic/kibana/issues/190070 is fixed
-      testSuggestions.skip(
+      testSuggestions(
         `from a | ${subExpression} dissect /`,
-        getFieldNamesByType(ESQL_STRING_TYPES)
+        getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
       );
       testSuggestions(`from a | ${subExpression} dissect keywordField /`, [constantPattern], ' ');
       testSuggestions(
@@ -306,6 +318,16 @@ describe('autocomplete', () => {
         ['| ']
       );
     }
+
+    testSuggestions(
+      'from a | dissect /',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
+    testSuggestions(
+      'from a | dissect key/',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
+    testSuggestions('from a | dissect keywordField/', []);
   });
 
   describe('sort', () => {
@@ -429,459 +451,7 @@ describe('autocomplete', () => {
     }
   });
 
-  describe('eval', () => {
-    testSuggestions('from a | eval /', [
-      'var0 = ',
-      ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
-    ]);
-    testSuggestions('from a | eval doubleField /', [
-      ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-        'double',
-      ]),
-      ',',
-      '| ',
-    ]);
-    testSuggestions('from index | EVAL keywordField not /', ['LIKE $0', 'RLIKE $0', 'IN $0']);
-    testSuggestions('from index | EVAL keywordField NOT /', ['LIKE $0', 'RLIKE $0', 'IN $0']);
-    testSuggestions('from index | EVAL doubleField in /', ['( $0 )']);
-    testSuggestions(
-      'from index | EVAL doubleField in (/)',
-      [
-        ...getFieldNamesByType('double').filter((name) => name !== 'doubleField'),
-        ...getFunctionSignaturesByReturnType('eval', 'double', { scalar: true }),
-      ],
-      '('
-    );
-    testSuggestions('from index | EVAL doubleField not in /', ['( $0 )']);
-    testSuggestions('from index | EVAL not /', [
-      ...getFieldNamesByType('boolean'),
-      ...getFunctionSignaturesByReturnType('eval', 'boolean', { scalar: true }),
-    ]);
-    testSuggestions(
-      'from a | eval a=/',
-      [...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true })],
-      '='
-    );
-    testSuggestions(
-      'from a | eval a=abs(doubleField), b= /',
-      [...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true })],
-      '='
-    );
-    testSuggestions('from a | eval a=doubleField, /', [
-      'var0 = ',
-      ...getFieldNamesByType('any'),
-      'a',
-      ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
-    ]);
-    testSuggestions(
-      'from a | eval a=round(/)',
-      [
-        ...getFieldNamesByType(roundParameterTypes),
-        ...getFunctionSignaturesByReturnType(
-          'eval',
-          roundParameterTypes,
-          { scalar: true },
-          undefined,
-          ['round']
-        ),
-      ],
-      '('
-    );
-    testSuggestions(
-      'from a | eval a=raund(/)', // note the typo in round
-      [],
-      '('
-    );
-    testSuggestions(
-      'from a | eval a=raund(/', // note the typo in round
-      []
-    );
-    testSuggestions(
-      'from a | eval raund(/', // note the typo in round
-      []
-    );
-    testSuggestions(
-      'from a | eval raund(5, /', // note the typo in round
-      [],
-      ' '
-    );
-    testSuggestions(
-      'from a | eval var0 = raund(5, /', // note the typo in round
-      [],
-      ' '
-    );
-    testSuggestions('from a | eval a=round(doubleField) /', [
-      ',',
-      '| ',
-      ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-        'double',
-      ]),
-    ]);
-    testSuggestions(
-      'from a | eval a=round(doubleField, /',
-      [
-        ...getFieldNamesByType('integer'),
-        ...getFunctionSignaturesByReturnType('eval', 'integer', { scalar: true }, undefined, [
-          'round',
-        ]),
-      ],
-      ' '
-    );
-    testSuggestions(
-      'from a | eval round(doubleField, /',
-      [
-        ...getFieldNamesByType('integer'),
-        ...getFunctionSignaturesByReturnType('eval', 'integer', { scalar: true }, undefined, [
-          'round',
-        ]),
-      ],
-      ' '
-    );
-    testSuggestions('from a | eval a=round(doubleField),/', [
-      'var0 = ',
-      ...getFieldNamesByType('any'),
-      'a',
-      ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
-    ]);
-    testSuggestions('from a | eval a=round(doubleField) + /', [
-      ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, {
-        scalar: true,
-      }),
-    ]);
-    testSuggestions('from a | eval a=round(doubleField)+ /', [
-      ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, {
-        scalar: true,
-      }),
-    ]);
-    testSuggestions('from a | eval a=doubleField+ /', [
-      ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, {
-        scalar: true,
-      }),
-    ]);
-    testSuggestions('from a | eval a=`any#Char$Field`+ /', [
-      ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, {
-        scalar: true,
-      }),
-    ]);
-    testSuggestions(
-      'from a | stats avg(doubleField) by keywordField | eval /',
-      [
-        'var0 = ',
-        '`avg(doubleField)`',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
-      ],
-      ' ',
-      // make aware EVAL of the previous STATS command
-      [[], undefined, undefined]
-    );
-    testSuggestions(
-      'from a | eval abs(doubleField) + 1 | eval /',
-      [
-        'var0 = ',
-        ...getFieldNamesByType('any'),
-        '`abs(doubleField) + 1`',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
-      ],
-      ' '
-    );
-    testSuggestions(
-      'from a | stats avg(doubleField) by keywordField | eval /',
-      [
-        'var0 = ',
-        '`avg(doubleField)`',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
-      ],
-      ' ',
-      // make aware EVAL of the previous STATS command with the buggy field name from expression
-      [[{ name: 'avg_doubleField_', type: 'double' }], undefined, undefined]
-    );
-    testSuggestions(
-      'from a | stats avg(doubleField), avg(kubernetes.something.something) by keywordField | eval /',
-      [
-        'var0 = ',
-        '`avg(doubleField)`',
-        '`avg(kubernetes.something.something)`',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
-      ],
-      ' ',
-      // make aware EVAL of the previous STATS command with the buggy field name from expression
-      [
-        [
-          { name: 'avg_doubleField_', type: 'double' },
-          { name: 'avg_kubernetes.something.something_', type: 'double' },
-        ],
-        undefined,
-        undefined,
-      ]
-    );
-
-    testSuggestions(
-      'from a | eval a=round(doubleField), b=round(/)',
-      [
-        ...getFieldNamesByType(roundParameterTypes),
-        ...getFunctionSignaturesByReturnType(
-          'eval',
-          roundParameterTypes,
-          { scalar: true },
-          undefined,
-          ['round']
-        ),
-      ],
-      '('
-    );
-    // test that comma is correctly added to the suggestions if minParams is not reached yet
-    testSuggestions('from a | eval a=concat( /', [
-      ...getFieldNamesByType(['text', 'keyword']).map((v) => `${v}, `),
-      ...getFunctionSignaturesByReturnType(
-        'eval',
-        ['text', 'keyword'],
-        { scalar: true },
-        undefined,
-        ['concat']
-      ).map((v) => ({ ...v, text: `${v.text},` })),
-    ]);
-    testSuggestions(
-      'from a | eval a=concat(textField, /',
-      [
-        ...getFieldNamesByType(['text', 'keyword']),
-        ...getFunctionSignaturesByReturnType(
-          'eval',
-          ['text', 'keyword'],
-          { scalar: true },
-          undefined,
-          ['concat']
-        ),
-      ],
-      ' '
-    );
-    // test that the arg type is correct after minParams
-    testSuggestions(
-      'from a | eval a=cidr_match(ipField, textField, /',
-      [
-        ...getFieldNamesByType('text'),
-        ...getFunctionSignaturesByReturnType('eval', 'text', { scalar: true }, undefined, [
-          'cidr_match',
-        ]),
-      ],
-      ' '
-    );
-    // test that comma is correctly added to the suggestions if minParams is not reached yet
-    testSuggestions('from a | eval a=cidr_match(/', [
-      ...getFieldNamesByType('ip').map((v) => `${v}, `),
-      ...getFunctionSignaturesByReturnType('eval', 'ip', { scalar: true }, undefined, [
-        'cidr_match',
-      ]).map((v) => ({ ...v, text: `${v.text},` })),
-    ]);
-    testSuggestions(
-      'from a | eval a=cidr_match(ipField, /',
-      [
-        ...getFieldNamesByType(['text', 'keyword']),
-        ...getFunctionSignaturesByReturnType(
-          'eval',
-          ['text', 'keyword'],
-          { scalar: true },
-          undefined,
-          ['cidr_match']
-        ),
-      ],
-      ' '
-    );
-    // test deep function nesting suggestions (and check that the same function is not suggested)
-    // round(round(
-    // round(round(round(
-    // etc...
-
-    for (const nesting of [1, 2, 3, 4]) {
-      testSuggestions(
-        `from a | eval a=${Array(nesting).fill('round(/').join('')}`,
-        [
-          ...getFieldNamesByType(roundParameterTypes),
-          ...getFunctionSignaturesByReturnType(
-            'eval',
-            roundParameterTypes,
-            { scalar: true },
-            undefined,
-            ['round']
-          ),
-        ],
-        '('
-      );
-    }
-
-    const absParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
-
-    // Smoke testing for suggestions in previous position than the end of the statement
-    testSuggestions('from a | eval var0 = abs(doubleField) / | eval abs(var0)', [
-      ',',
-      '| ',
-      ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-        'double',
-      ]),
-    ]);
-    testSuggestions('from a | eval var0 = abs(b/) | eval abs(var0)', [
-      ...getFieldNamesByType(absParameterTypes),
-      ...getFunctionSignaturesByReturnType('eval', absParameterTypes, { scalar: true }, undefined, [
-        'abs',
-      ]),
-    ]);
-
-    // Test suggestions for each possible param, within each signature variation, for each function
-    for (const fn of evalFunctionDefinitions) {
-      // skip this fn for the moment as it's quite hard to test
-      if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
-        for (const signature of fn.signatures) {
-          signature.params.forEach((param, i) => {
-            if (i < signature.params.length) {
-              // This ref signature thing is probably wrong in a few cases, but it matches
-              // the logic in getFunctionArgsSuggestions. They should both be updated
-              const refSignature = fn.signatures[0];
-              const requiresMoreArgs =
-                i + 1 < (refSignature.minParams ?? 0) ||
-                refSignature.params.filter(({ optional }, j) => !optional && j > i).length > 0;
-
-              const allParamDefs = fn.signatures
-                .map((s) => getParamAtPosition(s, i))
-                .filter(nonNullable);
-
-              // get all possible types for this param
-              const [constantOnlyParamDefs, acceptsFieldParamDefs] = partition(
-                allParamDefs,
-                (p) => p.constantOnly || /_literal/.test(p.type as string)
-              );
-
-              const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataType[] =>
-                Array.from(new Set(paramDefs.map((p) => p.type))).filter(
-                  isSupportedDataType
-                ) as SupportedDataType[];
-
-              const suggestedConstants = param.literalSuggestions || param.literalOptions;
-
-              const addCommaIfRequired = (s: string | PartialSuggestionWithText) => {
-                // don't add commas to the empty string or if there are no more required args
-                if (!requiresMoreArgs || s === '' || (typeof s === 'object' && s.text === '')) {
-                  return s;
-                }
-                return typeof s === 'string' ? `${s}, ` : { ...s, text: `${s.text},` };
-              };
-
-              testSuggestions(
-                `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} /)`,
-                suggestedConstants?.length
-                  ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
-                  : [
-                      ...getDateLiteralsByFieldType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
-                      ),
-                      ...getFieldNamesByType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
-                      ),
-                      ...getFunctionSignaturesByReturnType(
-                        'eval',
-                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(
-                          isReturnType
-                        ) as FunctionReturnType[],
-                        { scalar: true },
-                        undefined,
-                        [fn.name]
-                      ),
-                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
-                    ].map(addCommaIfRequired),
-                ' '
-              );
-              testSuggestions(
-                `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
-                  i ? ',' : ''
-                } /)`,
-                suggestedConstants?.length
-                  ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
-                  : [
-                      ...getDateLiteralsByFieldType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
-                      ),
-                      ...getFieldNamesByType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
-                      ),
-                      ...getFunctionSignaturesByReturnType(
-                        'eval',
-                        getTypesFromParamDefs(acceptsFieldParamDefs) as FunctionReturnType[],
-                        { scalar: true },
-                        undefined,
-                        [fn.name]
-                      ),
-                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
-                    ].map(addCommaIfRequired),
-                ' '
-              );
-            }
-          });
-        }
-      }
-
-      // The above test fails cause it expects nested functions like
-      // DATE_EXTRACT(concat("aligned_day_","of_week_in_month"), date) to also be suggested
-      // which is actually valid according to func signature
-      // but currently, our autocomplete only suggests the literal suggestions
-      if (['date_extract', 'date_diff'].includes(fn.name)) {
-        const firstParam = fn.signatures[0].params[0];
-        const suggestedConstants = firstParam?.literalSuggestions || firstParam?.literalOptions;
-        const requiresMoreArgs = true;
-
-        testSuggestions(
-          `from a | eval ${fn.name}(/`,
-          suggestedConstants?.length
-            ? [...suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)]
-            : []
-        );
-      }
-    }
-
-    testSuggestions('from a | eval var0 = bucket(@timestamp, /', getUnitDuration(1), ' ');
-
-    describe('date math', () => {
-      const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
-      // If a literal number is detected then suggest also date period keywords
-      testSuggestions(
-        'from a | eval a = 1 /',
-        [
-          ...dateSuggestions,
-          ',',
-          '| ',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-            'integer',
-          ]),
-        ],
-        ' '
-      );
-      testSuggestions('from a | eval a = 1 year /', [',', '| ', 'IS NOT NULL', 'IS NULL']);
-      testSuggestions('from a | eval a = 1 day + 2 /', [',', '| ']);
-      testSuggestions(
-        'from a | eval 1 day + 2 /',
-        [
-          ...dateSuggestions,
-          ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-            'integer',
-          ]),
-        ],
-        ' '
-      );
-      testSuggestions(
-        'from a | eval var0=date_trunc(/)',
-        getLiteralsByType('time_literal').map((t) => `${t}, `),
-        '('
-      );
-      testSuggestions(
-        'from a | eval var0=date_trunc(2 /)',
-        [...dateSuggestions.map((t) => `${t}, `), ','],
-        ' '
-      );
-    });
-  });
-
+  // @TODO: get updated eval block from main
   describe('values suggestions', () => {
     testSuggestions('FROM "a/"', ['a ', 'b '], undefined, [
       ,
@@ -1020,7 +590,10 @@ describe('autocomplete', () => {
     ]);
 
     // DISSECT field
-    testSuggestions('FROM index1 | DISSECT b/', getFieldNamesByType(ESQL_STRING_TYPES));
+    testSuggestions(
+      'FROM index1 | DISSECT b/',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
 
     // DROP (first field)
     testSuggestions('FROM index1 | DROP f/', getFieldNamesByType('any'));
@@ -1052,7 +625,11 @@ describe('autocomplete', () => {
     ]);
 
     // GROK field
-    testSuggestions('FROM index1 | GROK f/', getFieldNamesByType(ESQL_STRING_TYPES), undefined);
+    testSuggestions(
+      'FROM index1 | GROK f/',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((field) => `${field} `),
+      undefined
+    );
 
     // KEEP (first field)
     testSuggestions('FROM index1 | KEEP f/', getFieldNamesByType('any'));
@@ -1110,6 +687,7 @@ describe('autocomplete', () => {
     // STATS argument BY expression
     testSuggestions('FROM index1 | STATS field BY f/', [
       'var0 = ',
+      getAddDateHistogramSnippet(),
       ...getFunctionSignaturesByReturnType('stats', 'any', { grouping: true, scalar: true }),
       ...getFieldNamesByType('any').map((field) => `${field} `),
     ]);
@@ -1322,6 +900,7 @@ describe('autocomplete', () => {
       'by'
     );
     testSuggestions('FROM a | STATS AVG(numberField) BY /', [
+      getAddDateHistogramSnippet(),
       attachTriggerCommand('var0 = '),
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
@@ -1331,6 +910,7 @@ describe('autocomplete', () => {
 
     // STATS argument BY assignment (checking field suggestions)
     testSuggestions('FROM a | STATS AVG(numberField) BY var0 = /', [
+      getAddDateHistogramSnippet(),
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
         .map(attachTriggerCommand),

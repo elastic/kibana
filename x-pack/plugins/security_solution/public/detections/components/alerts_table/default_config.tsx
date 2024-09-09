@@ -122,6 +122,34 @@ export const buildAlertsFilter = (ruleStaticId: string | null): Filter[] =>
       ]
     : [];
 
+export const buildAlertsFilterByRuleIds = (ruleIds: string[] | null): Filter[] => {
+  if (ruleIds == null || ruleIds.length === 0) {
+    return [];
+  }
+
+  const combinedQuery = {
+    bool: {
+      should: ruleIds.map((ruleId) => ({
+        term: {
+          [ALERT_RULE_RULE_ID]: ruleId,
+        },
+      })),
+      minimum_should_match: 1,
+    },
+  };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+      },
+      query: combinedQuery,
+    },
+  ];
+};
+
 export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] =>
   showBuildingBlockAlerts
     ? []

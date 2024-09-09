@@ -9,7 +9,9 @@ import useObservable from 'react-use/lib/useObservable';
 import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.json';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { CoreStart } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
 import type { Annotation } from '../../../../../common/types/annotations';
 import { AnnotationUpdatesService } from '../../../services/annotations_service';
@@ -17,9 +19,17 @@ import { AnnotationUpdatesService } from '../../../services/annotations_service'
 import { AnnotationFlyout } from '.';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
-jest.mock('../../../util/dependency_cache', () => ({
-  getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),
-}));
+const kibanaReactContextMock = createKibanaReactContext({
+  mlServices: {
+    mlApi: {
+      annotations: {
+        indexAnnotation: jest.fn().mockResolvedValue({}),
+        deleteAnnotation: jest.fn().mockResolvedValue({}),
+      },
+    },
+  },
+  notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } },
+} as unknown as Partial<CoreStart>);
 
 const MlAnnotationUpdatesContextProvider = ({
   annotationUpdatesService,
@@ -30,7 +40,9 @@ const MlAnnotationUpdatesContextProvider = ({
 }) => {
   return (
     <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
-      <IntlProvider>{children}</IntlProvider>
+      <IntlProvider>
+        <kibanaReactContextMock.Provider>{children}</kibanaReactContextMock.Provider>
+      </IntlProvider>
     </MlAnnotationUpdatesContext.Provider>
   );
 };

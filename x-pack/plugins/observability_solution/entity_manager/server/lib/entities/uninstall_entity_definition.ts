@@ -13,17 +13,16 @@ import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteIndices } from './delete_index';
 import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
 import { findEntityDefinitions } from './find_entity_definition';
-import {
-  stopAndDeleteHistoryBackfillTransform,
-  stopAndDeleteHistoryTransform,
-  stopAndDeleteLatestTransform,
-} from './stop_and_delete_transform';
-import { isBackfillEnabled } from './helpers/is_backfill_enabled';
+
 import {
   generateHistoryIndexTemplateId,
   generateLatestIndexTemplateId,
 } from './helpers/generate_component_id';
 import { deleteTemplate } from '../manage_index_templates';
+
+import { stopTransforms } from './stop_transforms';
+
+import { deleteTransforms } from './delete_transforms';
 
 export async function uninstallEntityDefinition({
   definition,
@@ -38,13 +37,8 @@ export async function uninstallEntityDefinition({
   logger: Logger;
   deleteData?: boolean;
 }) {
-  await Promise.all([
-    stopAndDeleteHistoryTransform(esClient, definition, logger),
-    stopAndDeleteLatestTransform(esClient, definition, logger),
-    isBackfillEnabled(definition)
-      ? stopAndDeleteHistoryBackfillTransform(esClient, definition, logger)
-      : Promise.resolve(),
-  ]);
+  await stopTransforms(esClient, definition, logger);
+  await deleteTransforms(esClient, definition, logger);
 
   await Promise.all([
     deleteHistoryIngestPipeline(esClient, definition, logger),

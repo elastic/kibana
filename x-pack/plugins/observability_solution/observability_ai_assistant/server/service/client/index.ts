@@ -166,7 +166,6 @@ export class ObservabilityAIAssistantClient {
     instructions: adHocInstructions = [],
     messages: initialMessages,
     signal,
-    responseLanguage = 'English',
     persist,
     kibanaPublicUrl,
     isPublic,
@@ -179,7 +178,6 @@ export class ObservabilityAIAssistantClient {
     signal: AbortSignal;
     functionClient: ChatFunctionClient;
     persist: boolean;
-    responseLanguage?: string;
     conversationId?: string;
     title?: string;
     isPublic?: boolean;
@@ -195,13 +193,6 @@ export class ObservabilityAIAssistantClient {
     return new LangTracer(context.active()).startActiveSpan(
       'complete',
       ({ tracer: completeTracer }) => {
-        if (responseLanguage) {
-          adHocInstructions.push({
-            instruction_type: 'application_instruction',
-            text: `You MUST respond in the users preferred language which is: ${responseLanguage}.`,
-          });
-        }
-
         const isConversationUpdate = persist && !!predefinedConversationId;
 
         const conversationId = persist ? predefinedConversationId || v4() : '';
@@ -252,7 +243,6 @@ export class ObservabilityAIAssistantClient {
                 switchMap((messages) =>
                   getGeneratedTitle({
                     messages,
-                    responseLanguage,
                     logger: this.dependencies.logger,
                     chat: (name, chatParams) => {
                       return this.chat(name, {
@@ -308,6 +298,7 @@ export class ObservabilityAIAssistantClient {
                 logger: this.dependencies.logger,
                 disableFunctions,
                 tracer: completeTracer,
+                connectorId,
               })
             );
           }),

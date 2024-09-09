@@ -10,11 +10,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiTitle } from '@ela
 import { AddToDashboard } from './add_to_dashboard';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../embeddables/constants';
 
-export const EmbeddablePanelWrapper: FC<{
-  title: string;
-  loading?: boolean;
-  titleAppend?: React.ReactNode;
-}> = ({ children, title, loading, titleAppend }) => {
+export const EmbeddablePanelWrapper: FC<
+  React.PropsWithChildren<{
+    title: string;
+    loading?: boolean;
+    titleAppend?: React.ReactNode;
+  }>
+> = ({ children, title, loading, titleAppend }) => {
   const isSyntheticsApp = window.location.pathname.includes('/app/synthetics');
 
   return (

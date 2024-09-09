@@ -20,7 +20,7 @@ const serviceTransactionFilter = (additionalFilters: string[] = []) => {
 
 export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
-    version: '1.0.0',
+    version: '1.0.2',
     id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
     name: 'Services from ECS data',
     description:
@@ -41,9 +41,6 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
         frequency: '2m',
         syncDelay: '2m',
       },
-    },
-    latest: {
-      lookback: '5m',
     },
     identityFields: ['service.name', { field: 'service.environment', optional: true }],
     displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
@@ -107,17 +104,13 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
       },
       {
         name: 'logErrorRate',
-        equation: 'A / B',
+        equation: 'A',
         metrics: [
           {
             name: 'A',
             aggregation: 'doc_count',
-            filter: 'log.level: "error" OR error.log.level: "error"',
-          },
-          {
-            name: 'B',
-            aggregation: 'doc_count',
-            filter: 'log.level: * OR error.log.level: *',
+            filter:
+              'log.level: "error" OR log.level: "ERROR" OR error.log.level: "error" OR error.log.level: "ERROR"',
           },
         ],
       },

@@ -28,7 +28,7 @@ export function VersionsPicker({
   );
 
   const handleChange = useCallback(
-    (changeEvent) => {
+    (changeEvent: React.ChangeEvent<HTMLSelectElement>) => {
       onChange(changeEvent.target.value as SelectedVersions);
     },
     [onChange]

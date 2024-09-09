@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -41,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
 
       const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
-      await panelActions.legacyUnlinkFromLibrary(originalPanel);
+      await panelActions.unlinkFromLibrary(originalPanel);
       await testSubjects.existOrFail('unlinkPanelSuccess');
 
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
@@ -59,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('save visualize panel to embeddable library', async () => {
       const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
-      await panelActions.legacySaveToLibrary('Rendering Test: heatmap - copy', originalPanel);
+      await panelActions.saveToLibrary('Rendering Test: heatmap - copy', originalPanel);
       await testSubjects.existOrFail('addPanelToLibrarySuccess');
 
       const updatedPanel = await testSubjects.find(
