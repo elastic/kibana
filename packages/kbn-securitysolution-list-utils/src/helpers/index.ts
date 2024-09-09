@@ -1051,3 +1051,25 @@ export const hasWrongOperatorWithWildcard = (
     }
   });
 };
+
+/**
+ * Event filters helper where given an exceptions list,
+ * determine if both 'subject_name' and 'trusted' are
+ * included in an entry with 'code_signature'
+ */
+export const hasPartialCodeSignatureEntry = (
+  items: ExceptionsBuilderReturnExceptionItem[]
+): boolean => {
+  let name = false;
+  let trusted = false;
+  items[0]?.entries.forEach((e) => {
+    if (e.type === 'nested') {
+      // check code_signature.ext
+    } else if (e.field === 'process.code_signature.subject_name') {
+      name = true;
+    } else if (e.field === 'process.code_signature.trusted') {
+      trusted = true;
+    }
+  });
+  return name !== trusted;
+};
