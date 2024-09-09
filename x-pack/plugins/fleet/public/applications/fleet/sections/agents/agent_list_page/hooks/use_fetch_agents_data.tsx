@@ -139,7 +139,7 @@ export function useFetchAgentsData() {
 
       if (urlParams.kuery !== newVal) {
         history.replace({
-          search: toUrlParams({ ...urlParams, kuery: newVal === '' ? null : newVal }),
+          search: toUrlParams({ ...urlParams, kuery: newVal === '' ? undefined : newVal }),
         });
       }
     },
