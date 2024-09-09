@@ -67,7 +67,11 @@ export class DefaultAlertService {
   }
 
   getMinimumRuleInterval() {
-    return this.server.alerting.getConfig().minimumScheduleInterval;
+    const minimumInterval = this.server.alerting.getConfig().minimumScheduleInterval;
+    const minimumIntervalInMs = parseDuration(minimumInterval.value);
+    const defaultIntervalInMs = parseDuration('1m');
+    const interval = minimumIntervalInMs < defaultIntervalInMs ? '1m' : minimumInterval.value;
+    return interval;
   }
 
   setupStatusRule() {
@@ -78,7 +82,7 @@ export class DefaultAlertService {
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_STATUS_RULE,
       `Synthetics status internal rule`,
-      minimumRuleInterval.value
+      minimumRuleInterval
     );
   }
 
@@ -90,7 +94,7 @@ export class DefaultAlertService {
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_TLS_RULE,
       `Synthetics internal TLS rule`,
-      minimumRuleInterval.value
+      minimumRuleInterval
     );
   }
 
@@ -151,7 +155,7 @@ export class DefaultAlertService {
       return this.updateDefaultAlert(
         SYNTHETICS_STATUS_RULE,
         `Synthetics status internal rule`,
-        minimumRuleInterval.value
+        minimumRuleInterval
       );
     } else {
       const rulesClient = (await this.context.alerting)?.getRulesClient();
@@ -167,7 +171,7 @@ export class DefaultAlertService {
       return this.updateDefaultAlert(
         SYNTHETICS_TLS_RULE,
         `Synthetics internal TLS rule`,
-        minimumRuleInterval.value
+        minimumRuleInterval
       );
     } else {
       const rulesClient = (await this.context.alerting)?.getRulesClient();
