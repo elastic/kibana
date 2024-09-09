@@ -112,7 +112,7 @@ import { createSoFindIterable } from './utils/create_so_find_iterable';
 import { isAgentlessEnabled } from './utils/agentless';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
-// import { agentlessAgentService } from './agents/agentless_agent';
+import { agentlessAgentService } from './agents/agentless_agent';
 
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
 

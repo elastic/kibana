@@ -1403,12 +1403,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
     }
 
-    if (agentlessAgentPolicies.length > 0) {
-      for (const agentPolicyId of agentlessAgentPolicies) {
-        await agentPolicyService.delete(soClient, esClient, agentPolicyId, { force: true });
-      }
-    }
-
     if (!options?.skipUnassignFromAgentPolicies) {
       let uniquePolicyIdsR = [
         ...new Set(

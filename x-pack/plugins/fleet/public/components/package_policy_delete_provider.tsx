@@ -10,7 +10,12 @@ import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useStartServices, sendDeletePackagePolicy, useConfig } from '../hooks';
+import {
+  useStartServices,
+  sendDeletePackagePolicy,
+  sendDeleteAgentPolicy,
+  useConfig,
+} from '../hooks';
 import { AGENTS_PREFIX } from '../../common/constants';
 import type { AgentPolicy } from '../types';
 import { sendGetAgents, useMultipleAgentPolicies } from '../hooks';
@@ -126,6 +131,24 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 defaultMessage: "Deleted integration ''{id}''",
                 values: { id: successfulResults[0].name || successfulResults[0].id },
               });
+
+          const agentlessPolicy = agentPolicies?.find((policy) => policy.supports_agentless);
+
+          if (!!agentlessPolicy) {
+            try {
+              await sendDeleteAgentPolicy({ agentPolicyId: agentlessPolicy.id });
+            } catch (e) {
+              notifications.toasts.addDanger(
+                i18n.translate(
+                  'xpack.fleet.deletePackagePolicy.fatalErrorAgentlessNotificationTitle',
+                  {
+                    defaultMessage: 'Error deleting agentless deployment',
+                  }
+                )
+              );
+            }
+          }
+
           notifications.toasts.addSuccess(successMessage);
         }
 
@@ -155,7 +178,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
       }
       closeModal();
     },
-    [closeModal, packagePolicies, notifications.toasts]
+    [closeModal, packagePolicies, notifications.toasts, agentPolicies]
   );
 
   const renderModal = () => {
