@@ -124,11 +124,9 @@ export function Dashboards() {
     }
   }, [
     allAvailableDashboards,
-    asset.type,
     currentDashboard?.dashboardSavedObjectId,
     dashboards,
     setUrlState,
-    telemetry,
     urlState?.dashboardId,
   ]);
 
