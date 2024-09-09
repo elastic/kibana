@@ -230,7 +230,12 @@ export class DashboardContainer
           .pipe(
             skipWhile((controlGroupApi) => !controlGroupApi),
             switchMap(async (controlGroupApi) => {
-              await controlGroupApi?.untilInitialized();
+              // Bug in main where panels are loaded before control filters are ready
+              // Want to migrate to react embeddable controls with same behavior
+              // TODO - do not load panels until control filters are ready
+              /*
+                await controlGroupApi?.untilInitialized();
+              */
             }),
             first()
           )
@@ -251,15 +256,8 @@ export class DashboardContainer
       },
       { embeddableLoaded: {} },
       getEmbeddableFactory,
-      parent
-      // Bug in main where panels are loaded before control filters are ready
-      // Want to migrate to react embeddable controls with same behavior
-      // TODO - do not load panels until control filters are ready
-      /*
-      {
-        untilContainerInitialized: undefined,
-      }
-      */
+      parent,
+      { untilContainerInitialized }
     );
 
     this.controlGroupApi$ = controlGroupApi$;
