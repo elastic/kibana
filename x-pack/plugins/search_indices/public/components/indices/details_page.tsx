@@ -52,17 +52,15 @@ export const SearchIndexDetailsPage = () => {
           iconType="boxesVertical"
           onClick={() => setShowMoreOptions(!showMoreOptions)}
           size="m"
-          data-test-subj="searchindexDetailsMoreOptionsButton"
-          aria-label={i18n.translate(
-            'xpack.searchIndices.detailsPage.moreOptionsButton.ariaLabel',
-            {
-              defaultMessage: 'More options',
-            }
-          )}
+          data-test-subj="moreOptionsActionButton"
+          aria-label={i18n.translate('xpack.searchIndices.moreOptions.ariaLabel', {
+            defaultMessage: 'More options',
+          })}
         />
       }
     >
       <EuiContextMenuPanel
+        data-test-subj="moreOptionsContextMenu"
         items={[
           <EuiContextMenuItem
             key="trash"
@@ -72,14 +70,12 @@ export const SearchIndexDetailsPage = () => {
             }}
             size="s"
             color="danger"
+            data-test-subj="moreOptionsDeleteIndex"
           >
             <EuiText size="s" color="danger">
-              {i18n.translate(
-                'xpack.searchIndices.detailsPage.moreOptionsButton.deleteIndexLabel',
-                {
-                  defaultMessage: 'Delete Index',
-                }
-              )}
+              {i18n.translate('xpack.searchIndices.moreOptions.deleteIndexLabel', {
+                defaultMessage: 'Delete Index',
+              })}
             </EuiText>
           </EuiContextMenuItem>,
         ]}
@@ -90,7 +86,7 @@ export const SearchIndexDetailsPage = () => {
   if (isLoading && !index) {
     return (
       <SectionLoading>
-        {i18n.translate('xpack.searchIndices.detailsPage.loadingDescription', {
+        {i18n.translate('xpack.searchIndices.loadingDescription', {
           defaultMessage: 'Loading index details…',
         })}
       </SectionLoading>

@@ -27,6 +27,7 @@ export const DeleteIndexModal: React.FC<DeleteIndexModelProps> = ({
   }, [navigateToIndexListPage, isSuccess]);
   return (
     <EuiConfirmModal
+      data-test-subj="deleteIndexActionModal"
       title={i18n.translate(
         'xpack.searchIndices.indexActionsMenu.deleteIndex.confirmModal.modalTitle',
         {

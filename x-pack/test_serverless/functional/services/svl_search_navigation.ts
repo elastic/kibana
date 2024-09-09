@@ -30,5 +30,13 @@ export function SvlSearchNavigationServiceProvider({
         await testSubjects.existOrFail('elasticsearchStartPage', { timeout: 2000 });
       });
     },
+    async navigateToIndexDetailPage(indexName: string) {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
+          shouldLoginIfPrompted: false,
+        });
+      });
+      await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
+    },
   };
 }

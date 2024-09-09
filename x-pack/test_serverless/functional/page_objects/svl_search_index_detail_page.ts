@@ -19,17 +19,44 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectIndexDetailPageHeader() {
       await testSubjects.existOrFail('searchIndexDetailsHeader', { timeout: 2000 });
     },
-    async expectIndexDetailPage() {
-      await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
+    async expectAPIReferenceDocLinkExists() {
+      await testSubjects.existOrFail('ApiReferenceDoc', { timeout: 2000 });
     },
     async expectBackToIndicesButtonExists() {
-      await testSubjects.existOrFail('searchIndexDetailsBackToIndicesButton', { timeout: 2000 });
+      await testSubjects.existOrFail('backToIndicesButton', { timeout: 2000 });
     },
     async clickBackToIndicesButton() {
-      await testSubjects.click('searchIndexDetailsBackToIndicesButton');
+      await testSubjects.click('backToIndicesButton');
     },
     async expectBackToIndicesButtonRedirectsToListPage() {
       await testSubjects.existOrFail('indicesList');
+    },
+    async expectMoreOptionsActionButtonExists() {
+      await testSubjects.existOrFail('moreOptionsActionButton');
+    },
+    async clickMoreOptionsActionsButton() {
+      await testSubjects.click('moreOptionsActionButton');
+    },
+    async expectMoreOptionsOverviewMenuIsShown() {
+      await testSubjects.existOrFail('moreOptionsContextMenu');
+    },
+    async expectDeleteIndexButtonExists() {
+      await testSubjects.existOrFail('moreOptionsDeleteIndex');
+    },
+    async clickDeleteIndexButton() {
+      await testSubjects.click('moreOptionsDeleteIndex');
+    },
+    async expectDeleteIndexModalExists() {
+      await testSubjects.existOrFail('deleteIndexActionModal');
+    },
+    async clickConfirmingDeleteIndex() {
+      await testSubjects.existOrFail('confirmModalConfirmButton');
+      await testSubjects.click('confirmModalConfirmButton');
+    },
+    async expectPageLoadErrorExists() {
+      await testSubjects.existOrFail('pageLoadError');
+      await testSubjects.existOrFail('loadingErrorBackToIndicesButton');
+      await testSubjects.existOrFail('reloadButton');
     },
   };
 }
