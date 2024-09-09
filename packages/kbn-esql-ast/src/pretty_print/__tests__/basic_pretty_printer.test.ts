@@ -153,22 +153,19 @@ describe('single line query', () => {
         expect(text).toBe('FROM a METADATA column1, _column2');
       });
 
-      // Un-skip when columns are parsed correctly: https://github.com/elastic/kibana/issues/189913
-      test.skip('nested fields', () => {
+      test('nested fields', () => {
         const { text } = reprint('FROM a | KEEP a.b');
 
         expect(text).toBe('FROM a | KEEP a.b');
       });
 
-      // Un-skip when columns are parsed correctly: https://github.com/elastic/kibana/issues/189913
-      test.skip('quoted nested fields', () => {
+      test('quoted nested fields', () => {
         const { text } = reprint('FROM index | KEEP `a`.`b`, c.`d`');
 
         expect(text).toBe('FROM index | KEEP a.b, c.d');
       });
 
-      // Un-skip when identifier names are escaped correctly.
-      test.skip('special character in identifier', () => {
+      test('special character in identifier', () => {
         const { text } = reprint('FROM a | KEEP `a 👉 b`, a.`✅`');
 
         expect(text).toBe('FROM a | KEEP `a 👉 b`, a.`✅`');
