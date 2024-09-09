@@ -155,7 +155,7 @@ describe('DetectionRulesClient.importRule', () => {
         ...existingRule,
         enabled: false,
       };
-      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(disabledExistingRule);
+      (readRules as jest.Mock).mockResolvedValueOnce(disabledExistingRule);
 
       const rule = await detectionRulesClient.importRule({
         ruleToImport: {
@@ -177,7 +177,7 @@ describe('DetectionRulesClient.importRule', () => {
       );
 
       expect(rule.enabled).toBe(true);
-      expect(rulesClient.enableRule).toHaveBeenCalledWith(
+      expect(rulesClient.enable).toHaveBeenCalledWith(
         expect.objectContaining({
           id: existingRule.id,
         })
@@ -189,7 +189,7 @@ describe('DetectionRulesClient.importRule', () => {
         ...existingRule,
         enabled: true,
       };
-      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(enabledExistingRule);
+      (readRules as jest.Mock).mockResolvedValueOnce(enabledExistingRule);
 
       const rule = await detectionRulesClient.importRule({
         ruleToImport: {
@@ -211,7 +211,7 @@ describe('DetectionRulesClient.importRule', () => {
       );
 
       expect(rule.enabled).toBe(false);
-      expect(rulesClient.disableRule).toHaveBeenCalledWith(
+      expect(rulesClient.disable).toHaveBeenCalledWith(
         expect.objectContaining({
           id: existingRule.id,
         })

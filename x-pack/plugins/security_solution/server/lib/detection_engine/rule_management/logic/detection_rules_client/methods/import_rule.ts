@@ -45,7 +45,7 @@ export const importRule = async (
   }
 
   let importedInternalRule: RuleAlertType;
-  let enabled: boolean = ruleToImport.enabled;
+  let enabled: boolean;
 
   if (existingRule && overwriteRules) {
     const ruleUpdateParams = convertUpdateAPIToInternalSchema({
@@ -75,6 +75,7 @@ export const importRule = async (
       data: ruleCreateParams,
       allowMissingConnectorSecrets,
     });
+    enabled = importedInternalRule.enabled;
   }
 
   /* Trying to convert an internal rule to a RuleResponse object */
