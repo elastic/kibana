@@ -34,4 +34,20 @@ export const RuleExecutionMetrics = z.object({
    * Duration in seconds of execution gap
    */
   execution_gap_duration_s: z.number().int().min(0).optional(),
+  /**
+   * Range of the execution gap
+   */
+  gap_range: z
+    .object({
+      /**
+       * Start of the execution gap
+       */
+      from: z.string(),
+      /**
+       * End of the execution gap
+       */
+      to: z.string(),
+    })
+    .nullable()
+    .optional(),
 });

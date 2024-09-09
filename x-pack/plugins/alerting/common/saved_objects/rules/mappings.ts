@@ -195,6 +195,16 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
                     gap_duration_s: {
                       type: 'float',
                     },
+                    gap_range: {
+                      properties: {
+                        from: {
+                          type: 'date',
+                        },
+                        to: {
+                          type: 'date',
+                        },
+                      },
+                    },
                   },
                 },
               },

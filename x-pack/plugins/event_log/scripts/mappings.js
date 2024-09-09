@@ -100,6 +100,35 @@ exports.EcsCustomPropertyMappings = {
                 type: 'keyword',
                 ignore_above: 1024,
               },
+              gap: {
+                properties: {
+                  status: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                  range: {
+                    properties: {
+                      from: {
+                        type: 'date',
+                      },
+                      to: {
+                        type: 'date',
+                      },
+                    },
+                  },
+                  intervals: {
+                    type: 'nested',
+                    properties: {
+                      from: {
+                        type: 'date',
+                      },
+                      to: {
+                        type: 'date',
+                      },
+                    },
+                  },
+                },
+              },
               execution: {
                 properties: {
                   uuid: {

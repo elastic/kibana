@@ -146,6 +146,25 @@ export const EventSchema = schema.maybe(
             rule: schema.maybe(
               schema.object({
                 consumer: ecsString(),
+                gap: schema.maybe(
+                  schema.object({
+                    status: ecsString(),
+                    range: schema.maybe(
+                      schema.object({
+                        from: ecsDate(),
+                        to: ecsDate(),
+                      })
+                    ),
+                    intervals: schema.maybe(
+                      schema.arrayOf(
+                        schema.object({
+                          from: ecsDate(),
+                          to: ecsDate(),
+                        })
+                      )
+                    ),
+                  })
+                ),
                 execution: schema.maybe(
                   schema.object({
                     uuid: ecsString(),

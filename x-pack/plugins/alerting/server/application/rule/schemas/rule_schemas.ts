@@ -122,6 +122,12 @@ export const monitoringSchema = schema.object({
         total_alerts_detected: schema.maybe(schema.nullable(schema.number())),
         total_alerts_created: schema.maybe(schema.nullable(schema.number())),
         gap_duration_s: schema.maybe(schema.nullable(schema.number())),
+        gar_range: schema.maybe(
+          schema.object({
+            from: schema.string(),
+            to: schema.string(),
+          })
+        ),
       }),
     }),
   }),

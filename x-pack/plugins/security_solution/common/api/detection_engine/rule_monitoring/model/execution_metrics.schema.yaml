@@ -25,3 +25,18 @@ components:
           description: Duration in seconds of execution gap
           type: integer
           minimum: 0
+        gap_range:
+          nullable: true
+          description: Range of the execution gap
+          type: object
+          required:
+            - from
+            - to
+          properties:
+            from:
+              description: Start of the execution gap
+              type: string
+            to:
+              description: End of the execution gap
+              type: string
+

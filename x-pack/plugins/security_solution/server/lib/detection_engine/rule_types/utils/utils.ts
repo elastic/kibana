@@ -68,7 +68,7 @@ import type {
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
 
-export const MAX_RULE_GAP_RATIO = 4;
+export const MAX_RULE_GAP_RATIO = 1;
 
 export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
@@ -490,10 +490,19 @@ export const getRuleRangeTuples = async ({
     0
   );
 
+  let gapRange;
+  if (remainingGapMilliseconds > 0 && previousStartedAt != null) {
+    gapRange = {
+      from: previousStartedAt.toISOString(),
+      to: moment(previousStartedAt).add(remainingGapMilliseconds).toDate().toISOString(),
+    };
+  }
+
   return {
     tuples: tuples.reverse(),
     remainingGap: moment.duration(remainingGapMilliseconds),
     warningStatusMessage,
+    gap: gapRange,
   };
 };
 
