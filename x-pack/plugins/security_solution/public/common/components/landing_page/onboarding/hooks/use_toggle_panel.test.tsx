@@ -59,7 +59,6 @@ describe('useTogglePanel', () => {
 
   const onboardingSteps: StepId[] = [
     CreateProjectSteps.createFirstProject,
-    OverviewSteps.getToKnowElasticSecurity,
     AddIntegrationsSteps.connectToDataSources,
     ViewDashboardSteps.analyzeData,
     EnablePrebuiltRulesSteps.enablePrebuiltRules,
@@ -119,12 +118,6 @@ describe('useTogglePanel', () => {
             stepsLeft: 0,
             activeStepIds: [CreateProjectSteps.createFirstProject],
           },
-          [QuickStartSectionCardsId.watchTheOverviewVideo]: {
-            id: QuickStartSectionCardsId.watchTheOverviewVideo,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
-          },
         },
         [SectionId.addAndValidateYourData]: {
           [AddAndValidateYourDataCardsId.addIntegrations]: {
@@ -180,12 +173,6 @@ describe('useTogglePanel', () => {
             timeInMins: 0,
             stepsLeft: 0,
             activeStepIds: [CreateProjectSteps.createFirstProject],
-          },
-          [QuickStartSectionCardsId.watchTheOverviewVideo]: {
-            id: QuickStartSectionCardsId.watchTheOverviewVideo,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
           },
         },
         [SectionId.addAndValidateYourData]: {
@@ -243,12 +230,6 @@ describe('useTogglePanel', () => {
             timeInMins: 0,
             stepsLeft: 0,
             activeStepIds: [CreateProjectSteps.createFirstProject],
-          },
-          [QuickStartSectionCardsId.watchTheOverviewVideo]: {
-            id: QuickStartSectionCardsId.watchTheOverviewVideo,
-            timeInMins: 0,
-            stepsLeft: 1,
-            activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
           },
         },
         [SectionId.addAndValidateYourData]: {
