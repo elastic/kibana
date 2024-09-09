@@ -14,21 +14,17 @@ import type { ESQLColumn } from '@kbn/es-types';
 import { TextBasedLangEditor } from '@kbn/esql/public';
 import { getESQLMeta, verifyGeometryColumn } from './esql_utils';
 
+export interface IOnEsqlChangeParams {
+  adhocDataViewId: string;
+  columns: ESQLColumn[];
+  dateFields: string[];
+  geoFields: string[];
+  esql: string;
+}
+
 interface Props {
   esql: string;
-  onESQLChange: ({
-    adhocDataViewId,
-    columns,
-    dateFields,
-    geoFields,
-    esql,
-  }: {
-    adhocDataViewId: string;
-    columns: ESQLColumn[];
-    dateFields: string[];
-    geoFields: string[];
-    esql: string;
-  }) => void;
+  onESQLChange: (IOnEsqlChangeParams) => void;
 }
 
 export function ESQLEditor(props: Props) {

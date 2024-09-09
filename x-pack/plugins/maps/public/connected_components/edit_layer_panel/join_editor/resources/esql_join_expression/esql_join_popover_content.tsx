@@ -24,6 +24,11 @@ import type {
   ESESQLTermSourceDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
+import {
+  ESQLEditor,
+  IOnEsqlChangeParams,
+} from '../../../../../classes/sources/esql_source/esql_editor';
+
 // import { getIndexPatternService } from '../../../../../kibana_services';
 // import { getGeoFields } from '../../../../../index_pattern_util';
 // import { GeoIndexPatternSelect } from '../../../../../components/geo_index_pattern_select';
@@ -47,71 +52,17 @@ interface Props {
 }
 
 export function ESQLJoinPopoverContent(props: Props) {
-  // const [rightDataView, setRightDataView] = useState<DataView | undefined>(undefined);
-  // const [rightGeoFields, setRightGeoFields] = useState<DataViewField[]>([]);
-  // const [isLoading, setIsLoading] = useState<boolean>(false);
-  // const [unableToLoadDataView, setUnableToLoadDataView] = useState<boolean>(false);
+  function onEsqlChange(params: IOnEsqlChangeParams) {
+    console.log(params);
+  }
 
-  // useEffect(() => {
-  //   if (props.sourceDescriptor.indexPatternId === undefined) {
-  //     return;
-  //   }
-  //
-  //   let ignore = false;
-  //   setIsLoading(true);
-  //   getIndexPatternService()
-  //     .get(props.sourceDescriptor.indexPatternId)
-  //     .then((dataView) => {
-  //       if (!ignore) {
-  //         setIsLoading(false);
-  //         setRightDataView(dataView);
-  //         setRightGeoFields(getGeoFields(dataView.fields));
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       if (!ignore) {
-  //         setIsLoading(false);
-  //         setUnableToLoadDataView(true);
-  //       }
-  //     });
-  //
-  //   return () => {
-  //     ignore = true;
-  //   };
-  //   // only run on mount
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
-  // const dataViewCallout = unableToLoadDataView ? (
-  //   <>
-  //     <EuiCallOut color="warning">
-  //       <p>
-  //         {i18n.translate('xpack.maps.spatialJoinExpression.noDataViewTitle', {
-  //           defaultMessage: 'Unable to load data view {dataViewId}.',
-  //           values: { dataViewId: props.sourceDescriptor.indexPatternId },
-  //         })}
-  //       </p>
-  //     </EuiCallOut>
-  //     <EuiSpacer size="s" />
-  //   </>
-  // ) : null;
-
-  // const geoFieldSelect = rightDataView ? (
-  //   <GeoFieldSelect
-  //     value={props.sourceDescriptor.geoField ? props.sourceDescriptor.geoField : ''}
-  //     onChange={(geoField?: string) => {
-  //       if (!geoField) {
-  //         return;
-  //       }
-  //       props.onSourceDescriptorChange({
-  //         ...props.sourceDescriptor,
-  //         geoField,
-  //       });
-  //     }}
-  //     geoFields={rightGeoFields}
-  //     isClearable={false}
-  //   />
-  // ) : null;
+  function renderEsqlInput() {
+    console.log('yow', props.leftValue);
+    if (!props.leftValue) {
+      return null;
+    }
+    return <ESQLEditor onESQLChange={onEsqlChange} esql={props.sourceDescriptor.esql || ''} />;
+  }
 
   return (
     <div style={{ width: 300 }}>
@@ -134,41 +85,7 @@ export function ESQLJoinPopoverContent(props: Props) {
         leftValue={props.leftValue}
       />
 
-      {/* <EuiSkeletonText lines={3} isLoading={isLoading}>*/}
-      <EuiSkeletonText lines={3} isLoading={false}>
-        foobar
-        {/* <EuiFormRow label={inputStrings.relationshipLabel}>*/}
-        {/*  <RelationshipExpression*/}
-        {/*    distance={*/}
-        {/*      typeof props.sourceDescriptor.distance === 'number'*/}
-        {/*        ? props.sourceDescriptor.distance*/}
-        {/*        : DEFAULT_WITHIN_DISTANCE*/}
-        {/*    }*/}
-        {/*    onDistanceChange={(distance: number) => {*/}
-        {/*      props.onSourceDescriptorChange({*/}
-        {/*        ...props.sourceDescriptor,*/}
-        {/*        distance,*/}
-        {/*      });*/}
-        {/*    }}*/}
-        {/*  />*/}
-        {/* </EuiFormRow>*/}
-        {/* {dataViewCallout}*/}
-        {/* <GeoIndexPatternSelect*/}
-        {/*  dataView={rightDataView}*/}
-        {/*  onChange={(dataView: DataView) => {*/}
-        {/*    setUnableToLoadDataView(false);*/}
-        {/*    setRightDataView(dataView);*/}
-        {/*    const geoFields = getGeoFields(dataView.fields);*/}
-        {/*    setRightGeoFields(geoFields);*/}
-        {/*    props.onSourceDescriptorChange({*/}
-        {/*      ...props.sourceDescriptor,*/}
-        {/*      indexPatternId: dataView.id,*/}
-        {/*      geoField: geoFields.length ? geoFields[0].name : undefined,*/}
-        {/*    });*/}
-        {/*  }}*/}
-        {/* />*/}
-        {/* {geoFieldSelect}*/}
-      </EuiSkeletonText>
+      {renderEsqlInput()}
     </div>
   );
 }
