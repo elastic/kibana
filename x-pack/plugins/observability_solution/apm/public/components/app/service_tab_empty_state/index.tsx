@@ -50,9 +50,9 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
   const imgFolder = `${baseImgFolder}/${
     useUiSetting('theme:darkMode') === 'enabled' ? 'dark' : 'light'
   }`;
-  const imgName2 = emptyStateDefinitions[id].imgName;
+  const imgName = emptyStateDefinitions[id].imgName;
   const imgSrc = useKibanaUrl(
-    `${imgFolder}/${imgName2 ? imgName2 : 'service_tab_empty_state_overview.png'}`
+    `${imgFolder}/${imgName ? imgName : 'service_tab_empty_state_overview.png'}`
   );
 
   return (
