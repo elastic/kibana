@@ -5,20 +5,15 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
+import { investigationKeys } from './query_key_factory';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useDeleteInvestigation({
-  onDeleteSuccess,
-  onDeleteFailure,
-}: {
-  onDeleteSuccess: () => void;
-  onDeleteFailure: () => void;
-}) {
+export function useDeleteInvestigation() {
+  const queryClient = useQueryClient();
   const {
     core: {
       http,
@@ -40,7 +35,11 @@ export function useDeleteInvestigation({
             defaultMessage: 'Investigation deleted successfully',
           })
         );
-        onDeleteSuccess();
+        queryClient.invalidateQueries({
+          queryKey: investigationKeys.list(),
+          exact: false,
+          refetchType: 'all',
+        });
       },
       onError: (error, {}, context) => {
         toasts.addError(
@@ -56,7 +55,6 @@ export function useDeleteInvestigation({
             }),
           }
         );
-        onDeleteFailure();
       },
     }
   );

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -24,22 +24,26 @@ import { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/
 import { useDeleteInvestigation } from '../../../hooks/use_delete_investigation';
 export function InvestigationListActions({
   investigation,
-  onDeleteAction,
 }: {
   investigation: InvestigationResponse;
-  onDeleteAction: () => void;
 }) {
   const handleDeleteEffects = () => {
-    onDeleteAction();
     setIsDeleteModalVisible(false);
   };
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const { mutateAsync: deleteInvestigation, isLoading: isDeleting } = useDeleteInvestigation({
-    onDeleteSuccess: handleDeleteEffects,
-    onDeleteFailure: handleDeleteEffects,
-  });
-
+  const {
+    mutate: deleteInvestigation,
+    isLoading: isDeleting,
+    isError,
+    isSuccess,
+  } = useDeleteInvestigation();
   const closeDeleteModal = () => setIsDeleteModalVisible(false);
+
+  useEffect(() => {
+    if (isError || isSuccess) {
+      closeDeleteModal();
+    }
+  }, [isError, isSuccess]);
 
   const modalTitleId = useGeneratedHtmlId();
 

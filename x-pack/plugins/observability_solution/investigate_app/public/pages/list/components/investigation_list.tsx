@@ -23,7 +23,7 @@ export function InvestigationList() {
       uiSettings,
     },
   } = useKibana();
-  const { data, isLoading, isError, refetch } = useFetchInvestigationList({
+  const { data, isLoading, isError } = useFetchInvestigationList({
     page: pageIndex + 1,
     perPage: pageSize,
   });
@@ -104,7 +104,7 @@ export function InvestigationList() {
     {
       name: 'Actions',
       render: (investigation: InvestigationResponse) => (
-        <InvestigationListActions investigation={investigation} onDeleteAction={() => refetch()} />
+        <InvestigationListActions investigation={investigation} />
       ),
     },
   ];

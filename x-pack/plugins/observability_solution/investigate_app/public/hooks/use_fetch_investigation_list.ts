@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery, QueryObserverResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { FindInvestigationsResponse } from '@kbn/investigation-shared';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
@@ -24,7 +24,6 @@ export interface UseFetchInvestigationListResponse {
   isSuccess: boolean;
   isError: boolean;
   data: FindInvestigationsResponse | undefined;
-  refetch: () => Promise<QueryObserverResult>;
 }
 
 export function useFetchInvestigationList({
@@ -38,45 +37,42 @@ export function useFetchInvestigationList({
     },
   } = useKibana();
 
-  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
-    {
-      queryKey: investigationKeys.list({
-        page,
-        perPage,
-      }),
-      queryFn: async ({ signal }) => {
-        return await http.get<FindInvestigationsResponse>(`/api/observability/investigations`, {
-          version: '2023-10-31',
-          query: {
-            ...(page !== undefined && { page }),
-            ...(perPage !== undefined && { perPage }),
-          },
-          signal,
-        });
-      },
-      cacheTime: 0,
-      refetchOnWindowFocus: false,
-      retry: (failureCount, error) => {
-        if (String(error) === 'Error: Forbidden') {
-          return false;
-        }
+  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
+    queryKey: investigationKeys.list({
+      page,
+      perPage,
+    }),
+    queryFn: async ({ signal }) => {
+      return await http.get<FindInvestigationsResponse>(`/api/observability/investigations`, {
+        version: '2023-10-31',
+        query: {
+          ...(page !== undefined && { page }),
+          ...(perPage !== undefined && { perPage }),
+        },
+        signal,
+      });
+    },
+    cacheTime: 0,
+    refetchOnWindowFocus: false,
+    retry: (failureCount, error) => {
+      if (String(error) === 'Error: Forbidden') {
+        return false;
+      }
 
-        return failureCount < 3;
-      },
-      onError: (error: Error) => {
-        toasts.addError(error, {
-          title: 'Something went wrong while fetching Investigations',
-        });
-      },
-    }
-  );
+      return failureCount < 3;
+    },
+    onError: (error: Error) => {
+      toasts.addError(error, {
+        title: 'Something went wrong while fetching Investigations',
+      });
+    },
+  });
 
   return {
     data,
     isInitialLoading,
     isLoading,
     isRefetching,
-    refetch,
     isSuccess,
     isError,
   };
