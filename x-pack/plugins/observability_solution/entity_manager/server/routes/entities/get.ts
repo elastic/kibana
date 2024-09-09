@@ -58,10 +58,10 @@ export const getEntityDefinitionRoute = createEntityManagerServerRoute({
     try {
       const client = await getScopedClient({ request });
       const result = await client.getEntityDefinitions({
-        id: params?.path?.id,
-        page: params?.query?.page,
-        perPage: params?.query?.perPage,
-        includeState: params?.path?.includeState,
+        id: params.path?.id,
+        page: params.query.page,
+        perPage: params.query.perPage,
+        includeState: params.query.includeState,
       });
 
       return response.ok({ body: result });
