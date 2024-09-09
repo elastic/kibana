@@ -21,10 +21,13 @@ export const useCustomBrowserCopyForGrid = () => {
 
 function handleCopy(event: ClipboardEvent) {
   const selection = window.getSelection();
-  const range = selection?.getRangeAt(0);
+  if (!selection) {
+    return;
+  }
+  const ranges = Array.from({ length: selection.rangeCount }, (_, i) => selection.getRangeAt(i));
   const grid = document.querySelector('[role="grid"]');
 
-  if (!range || !grid) {
+  if (!ranges.length || !grid) {
     return;
   }
 
@@ -39,11 +42,11 @@ function handleCopy(event: ClipboardEvent) {
     let hasSelectedCell = false;
 
     cells.forEach((cell) => {
-      if (range.intersectsNode(cell)) {
+      if (ranges.some((range) => range?.intersectsNode(cell))) {
         cellsTextContent.push(cell.textContent || '');
         hasSelectedCell = true;
       } else {
-        cellsTextContent.push('');
+        cellsTextContent.push(''); // placeholder for empty cells
       }
     });
 
