@@ -5,15 +5,15 @@ exports[`WeTried should render "we tried" message 1`] = `
   data-test-subj="weTriedContainer"
 >
   <h2
-    class="euiTitle emotion-euiTitle-l"
+    class="euiTitle css-nei9rn-euiTitle-l"
   >
     We couldn't activate monitoring
   </h2>
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule css-16ybxy8-euiHorizontalRule-half-l"
   />
   <div
-    class="euiText eui-textLeft emotion-euiText-m"
+    class="euiText eui-textLeft css-1py2xv4-euiText-m"
   >
     <p>
       No monitoring data found. Try setting the time filter to "Last 1 hour" or check if data is available for a different time period.

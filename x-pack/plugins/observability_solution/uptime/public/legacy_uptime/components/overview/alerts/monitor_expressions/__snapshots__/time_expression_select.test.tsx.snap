@@ -2,28 +2,28 @@
 
 exports[`TimeExpressionSelect component should renders against props 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  class="euiFlexGroup css-1l6dw9l-euiFlexGroup-responsive-s-flexStart-stretch-row"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   >
     <div
-      class="euiPopover emotion-euiPopover-inline-block"
+      class="euiPopover css-n7tnex-euiPopover-inline-block"
       id="timerange"
     >
       <span
         aria-label="Open the popover for time range value field"
-        class="euiExpression emotion-euiExpression-success"
+        class="euiExpression css-txh7ut-euiExpression-success"
         data-test-subj="xpack.synthetics.alerts.monitorStatus.timerangeValueExpression"
       >
         <span
-          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          class="euiExpression__description css-4exi8s-euiExpression__description-success-isUppercase"
         >
           within
         </span>
          
         <span
-          class="euiExpression__value emotion-euiExpression__value"
+          class="euiExpression__value css-1lfq7nz-euiExpression__value"
         >
           last 15
         </span>
@@ -31,23 +31,23 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
     </div>
   </div>
   <div
-    class="euiFlexItem emotion-euiFlexItem-grow-1"
+    class="euiFlexItem css-9sbomz-euiFlexItem-grow-1"
   >
     <div
-      class="euiPopover emotion-euiPopover-inline-block"
+      class="euiPopover css-n7tnex-euiPopover-inline-block"
       id="timerange-unit"
     >
       <span
         aria-label="Open the popover for time range unit select field"
-        class="euiExpression emotion-euiExpression-success"
+        class="euiExpression css-txh7ut-euiExpression-success"
         data-test-subj="xpack.synthetics.alerts.monitorStatus.timerangeUnitExpression"
       >
         <span
-          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          class="euiExpression__description css-4exi8s-euiExpression__description-success-isUppercase"
         />
          
         <span
-          class="euiExpression__value emotion-euiExpression__value"
+          class="euiExpression__value css-1lfq7nz-euiExpression__value"
         >
           minutes
         </span>
