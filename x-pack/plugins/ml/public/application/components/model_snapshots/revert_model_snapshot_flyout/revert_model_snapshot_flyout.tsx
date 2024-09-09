@@ -36,7 +36,7 @@ import type {
   ModelSnapshot,
   CombinedJobWithStats,
 } from '../../../../../common/types/anomaly_detection_jobs';
-import { useMlApiContext, useNotifications } from '../../../contexts/kibana';
+import { useMlApi, useNotifications } from '../../../contexts/kibana';
 import { chartLoaderProvider } from './chart_loader';
 import { mlResultsServiceProvider } from '../../../services/results_service';
 import type { LineChartPoint } from '../../../jobs/new_job/common/chart_loader';
@@ -63,10 +63,10 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
   closeFlyout,
   refresh,
 }) => {
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
   const { toasts } = useNotifications();
   const { loadAnomalyDataForJob, loadEventRateForJob } = useMemo(
-    () => chartLoaderProvider(mlResultsServiceProvider(ml)),
+    () => chartLoaderProvider(mlResultsServiceProvider(mlApi)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
@@ -139,7 +139,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
             }))
           : undefined;
 
-      ml.jobs
+      mlApi.jobs
         .revertModelSnapshot(job.job_id, currentSnapshot.snapshot_id, replay, end, events)
         .then(() => {
           toasts.addSuccess(

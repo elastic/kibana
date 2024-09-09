@@ -959,23 +959,15 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          ")[] | undefined; controlGroupState?: (Partial<",
+          ")[] | undefined; controlGroupInput?: ",
           {
             "pluginId": "controls",
-            "scope": "public",
-            "docId": "kibControlsPluginApi",
-            "section": "def-public.ControlGroupRuntimeState",
-            "text": "ControlGroupRuntimeState"
-          },
-          "> & ",
-          {
-            "pluginId": "@kbn/utility-types",
             "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.SerializableControlGroupInput",
+            "text": "SerializableControlGroupInput"
           },
-          ") | undefined; }"
+          " | undefined; }"
         ],
         "path": "src/plugins/dashboard/public/dashboard_container/types.ts",
         "deprecated": false,
