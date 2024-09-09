@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
@@ -69,30 +70,42 @@ export const isSupportedDataType = (
  *
  * The fate of these is uncertain. They may be removed in the future.
  */
-type ArrayType =
-  | 'double[]'
-  | 'unsigned_long[]'
-  | 'long[]'
-  | 'integer[]'
-  | 'counter_integer[]'
-  | 'counter_long[]'
-  | 'counter_double[]'
-  | 'keyword[]'
-  | 'text[]'
-  | 'boolean[]'
-  | 'any[]'
-  | 'date[]'
-  | 'date_period[]';
+const arrayTypes = [
+  'double[]',
+  'unsigned_long[]',
+  'long[]',
+  'integer[]',
+  'counter_integer[]',
+  'counter_long[]',
+  'counter_double[]',
+  'keyword[]',
+  'text[]',
+  'boolean[]',
+  'any[]',
+  'date[]',
+  'date_period[]',
+] as const;
+
+export type ArrayType = (typeof arrayTypes)[number];
 
 /**
  * This is the type of a parameter in a function definition.
  */
-export type FunctionParameterType = Omit<SupportedDataType, 'unsupported'> | ArrayType | 'any';
+export type FunctionParameterType = Exclude<SupportedDataType, 'unsupported'> | ArrayType | 'any';
+
+export const isParameterType = (str: string | undefined): str is FunctionParameterType =>
+  typeof str !== undefined &&
+  str !== 'unsupported' &&
+  ([...dataTypes, ...arrayTypes, 'any'] as string[]).includes(str as string);
 
 /**
  * This is the return type of a function definition.
  */
-export type FunctionReturnType = Omit<SupportedDataType, 'unsupported'> | 'any' | 'void';
+export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'> | 'any' | 'void';
+
+export const isReturnType = (str: string | FunctionParameterType): str is FunctionReturnType =>
+  str !== 'unsupported' &&
+  (dataTypes.includes(str as SupportedDataType) || str === 'any' || str === 'void');
 
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';

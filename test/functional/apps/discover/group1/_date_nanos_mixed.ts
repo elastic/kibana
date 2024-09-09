@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -40,6 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos_mixed');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await PageObjects.common.unsetTime();
     });
 
     it('shows a list of records of indices with date & date_nanos fields in the right order', async function () {
@@ -52,10 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(rowData3).to.contain('Jan 1, 2019 @ 12:10:30.123456789');
       const rowData4 = await PageObjects.discover.getDocTableIndex(isLegacy ? 7 : 4);
       expect(rowData4).to.contain('Jan 1, 2019 @ 12:10:30.123000000');
-    });
-
-    after(async () => {
-      await PageObjects.common.unsetTime();
     });
   });
 }

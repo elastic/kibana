@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Observable } from 'rxjs';
@@ -31,21 +32,17 @@ import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/p
 import { ParentIgnoreSettings } from '../..';
 import { ControlInputTransform } from '../../../common';
 import { ControlGroupChainingSystem } from '../../../common/control_group/types';
-import { ControlStyle, ControlWidth } from '../../types';
-import { DefaultControlState, PublishesControlDisplaySettings } from '../controls/types';
+import { ControlStyle } from '../../types';
+import { DefaultControlState } from '../controls/types';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 
-/** The control display settings published by the control group are the "default" */
-type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
-  labelPosition: PublishingSubject<ControlStyle>;
-};
 export interface ControlPanelsState<ControlState extends ControlPanelState = ControlPanelState> {
   [panelId: string]: ControlState;
 }
 
 export type ControlGroupUnsavedChanges = Omit<
   ControlGroupRuntimeState,
-  'initialChildControlState' | 'defaultControlGrow' | 'defaultControlWidth'
+  'initialChildControlState'
 > & {
   filters: Filter[] | undefined;
 };
@@ -60,7 +57,6 @@ export type ControlGroupApi = PresentationContainer &
   HasEditCapabilities &
   PublishesDataLoading &
   Pick<PublishesUnsavedChanges, 'unsavedChanges'> &
-  PublishesControlGroupDisplaySettings &
   PublishesTimeslice &
   Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification & PublishesReload> & {
     asyncResetUnsavedChanges: () => Promise<void>;
@@ -73,13 +69,11 @@ export type ControlGroupApi = PresentationContainer &
     openAddDataControlFlyout: (settings?: {
       controlInputTransform?: ControlInputTransform;
     }) => void;
-    lastUsedDataViewId$: PublishingSubject<string | undefined>;
+    labelPosition: PublishingSubject<ControlStyle>;
   };
 
 export interface ControlGroupRuntimeState {
   chainingSystem: ControlGroupChainingSystem;
-  defaultControlGrow?: boolean;
-  defaultControlWidth?: ControlWidth;
   labelPosition: ControlStyle; // TODO: Rename this type to ControlLabelPosition
   autoApplySelections: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;

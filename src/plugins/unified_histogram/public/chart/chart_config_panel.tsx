@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+
+import React, { ComponentProps, useCallback, useEffect, useRef, useState } from 'react';
 import type { Observable } from 'rxjs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { isEqual } from 'lodash';
+import { isEqual, isObject } from 'lodash';
 import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { EditLensConfigPanelComponent } from '@kbn/lens-plugin/public/plugin';
 import { deriveLensSuggestionFromLensAttributes } from '../utils/external_vis_context';
 
 import {
@@ -49,13 +52,16 @@ export function ChartConfigPanel({
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
 
-  const updatePanelState = useCallback(
+  const updatePanelState = useCallback<
+    ComponentProps<EditLensConfigPanelComponent>['updatePanelState']
+  >(
     (datasourceState, visualizationState, visualizationId) => {
       const updatedSuggestion: Suggestion = {
-        ...currentSuggestionContext?.suggestion,
-        visualizationId: visualizationId ?? currentSuggestionContext?.suggestion?.visualizationId,
-        ...(datasourceState && { datasourceState }),
-        ...(visualizationState && { visualizationState }),
+        ...currentSuggestionContext.suggestion!,
+        visualizationId:
+          visualizationId ?? currentSuggestionContext.suggestion?.visualizationId ?? '',
+        ...(isObject(datasourceState) && { datasourceState }),
+        ...(isObject(visualizationState) && { visualizationState }),
       };
       onSuggestionContextEdit({
         ...currentSuggestionContext,
@@ -65,7 +71,9 @@ export function ChartConfigPanel({
     [currentSuggestionContext, onSuggestionContextEdit]
   );
 
-  const updateSuggestion = useCallback(
+  const updateSuggestion = useCallback<
+    NonNullable<ComponentProps<EditLensConfigPanelComponent>['updateSuggestion']>
+  >(
     (attributes) => {
       const updatedSuggestion = deriveLensSuggestionFromLensAttributes({
         externalVisContext: {

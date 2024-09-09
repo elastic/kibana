@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -74,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('classic table in window 900x700', async function () {
+    describe('classic table in window 900x700', function () {
       before(async () => {
         await browser.setWindowSize(900, 700);
         await PageObjects.common.navigateToApp('discover');
@@ -93,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('classic table in window 600x700', async function () {
+    describe('classic table in window 600x700', function () {
       before(async () => {
         await browser.setWindowSize(600, 700);
         await PageObjects.common.navigateToApp('discover');
@@ -112,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('legacy', async function () {
+    describe('legacy', function () {
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -146,7 +147,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(skipButtonText === activeElementText).to.be(true);
       });
 
-      describe('expand a document row', async function () {
+      describe('expand a document row', function () {
         const rowToInspect = 1;
         beforeEach(async function () {
           // close the toggle if open
@@ -228,7 +229,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('add and remove columns', async function () {
+      describe('add and remove columns', function () {
         const extraColumns = ['phpmemory', 'ip'];
         const expectedFieldLength: Record<string, number> = {
           phpmemory: 1,

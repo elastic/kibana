@@ -127,7 +127,7 @@ describe('getGroupAggregations()', () => {
           type: 'keyword',
           script: {
             source:
-              "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
+              "if (!doc.containsKey(params['selectedGroup']) || doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
               " else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}",
             params: {
               selectedGroup: groupByField,

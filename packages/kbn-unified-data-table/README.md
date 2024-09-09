@@ -13,7 +13,7 @@ Props description:
 | **dataView** | DataView | The used data view. |
 | **loadingState** | DataLoadingState | Determines if data is currently loaded. |
 | **onFilter** | DocViewFilterFn | Function to add a filter in the grid cell or document flyout. |
-| **onResize** | (optional)(colSettings: { columnId: string; width: number }) => void; | Function triggered when a column is resized by the user. |
+| **onResize** | (optional)(colSettings: { columnId: string; width: number | undefind }) => void; | Function triggered when a column is resized by the user, passes `undefined` for auto-width. |
 | **onSetColumns** | (columns: string[], hideTimeColumn: boolean) => void; | Function to set all columns. |
 | **onSort** | (optional)(sort: string[][]) => void; | Function to change sorting of the documents, skipped when isSortEnabled is set to false. |
 | **rows** | (optional)DataTableRecord[] | Array of documents provided by Elasticsearch. |
@@ -81,7 +81,7 @@ Usage example:
       onFilter={() => {
         // Add logic to refetch the data when the filter by field was added/removed. Refetch data.
       }}
-      onResize={(colSettings: { columnId: string; width: number }) => {
+      onResize={(colSettings: { columnId: string; width: number | undefined }) => {
         // Update the table state with the new width for the column
       }}
       onSetColumns={(columns: string[], hideTimeColumn: boolean) => {

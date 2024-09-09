@@ -58,12 +58,17 @@ export const updateActionRoute = (
         access: 'public',
         summary: `Update a connector`,
         tags: ['oas-tag:connectors'],
-        // description:
-        //   'You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
       },
       validate: {
-        body: bodySchema,
-        params: paramSchema,
+        request: {
+          body: bodySchema,
+          params: paramSchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

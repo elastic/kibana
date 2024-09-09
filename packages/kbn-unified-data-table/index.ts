@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export { UnifiedDataTable, DataLoadingState } from './src/components/data_table';
@@ -24,7 +25,7 @@ export * as columnActions from './src/components/actions/columns';
 export { getRowsPerPageOptions } from './src/utils/rows_per_page';
 export { popularizeField } from './src/utils/popularize_field';
 
-export { useColumns } from './src/hooks/use_data_grid_columns';
+export { useColumns, type UseColumnsProps } from './src/hooks/use_data_grid_columns';
 export { OPEN_DETAILS, SELECT_ROW } from './src/components/data_table_columns'; // TODO: deprecate?
 export { DataTableRowControl } from './src/components/data_table_row_control';
 

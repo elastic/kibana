@@ -15,14 +15,17 @@ import { FormTestComponent } from '../../common/test_utils';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { FormFields } from './form_fields';
 
-// FLAKY: https://github.com/elastic/kibana/issues/188450
-describe.skip('FormFields ', () => {
+describe('FormFields ', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('renders correctly', async () => {

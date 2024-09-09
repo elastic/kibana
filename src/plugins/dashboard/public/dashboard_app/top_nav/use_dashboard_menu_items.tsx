@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { batch } from 'react-redux';
@@ -18,19 +19,18 @@ import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
 import { pluginServices } from '../../services/plugin_services';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
-import { DashboardRedirect } from '../../dashboard_container/types';
-import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
+import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
 
 export const useDashboardMenuItems = ({
-  redirectTo,
   isLabsShown,
   setIsLabsShown,
+  maybeRedirect,
   showResetChange,
 }: {
-  redirectTo: DashboardRedirect;
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
+  maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
 }) => {
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
@@ -76,22 +76,6 @@ export const useDashboardMenuItems = ({
       });
     },
     [dashboardTitle, hasUnsavedChanges, lastSavedId, dashboard]
-  );
-
-  const maybeRedirect = useCallback(
-    (result?: SaveDashboardReturn) => {
-      if (!result) return;
-      const { redirectRequired, id } = result;
-      if (redirectRequired) {
-        redirectTo({
-          id,
-          editMode: true,
-          useReplace: true,
-          destination: 'dashboard',
-        });
-      }
-    },
-    [redirectTo]
   );
 
   /**

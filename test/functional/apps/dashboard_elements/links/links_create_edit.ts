@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -38,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const LINKS_PANEL_NAME = 'Some links';
 
   describe('links panel create and edit', () => {
-    describe('creation', async () => {
+    describe('creation', () => {
       before(async () => {
         await dashboard.navigateToApp();
         await dashboard.preserveCrossAppState();
@@ -95,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardLinks.clickPanelEditorCloseButton();
       });
 
-      describe('by-value links panel', async () => {
+      describe('by-value links panel', () => {
         it('can create a new by-value links panel', async () => {
           await dashboardAddPanel.clickEditorMenuButton();
           await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
