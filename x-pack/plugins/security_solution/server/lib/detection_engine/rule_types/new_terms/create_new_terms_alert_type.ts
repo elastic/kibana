@@ -44,11 +44,13 @@ import { createEnrichEventsFunction } from '../utils/enrichments';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { multiTermsComposite } from './multi_terms_composite';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
+import type { CreateRuleAdditionalOptions } from '../types';
 
 export const createNewTermsAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateRuleOptions & CreateRuleAdditionalOptions
 ): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
-  const { logger, licensing, experimentalFeatures } = createOptions;
+  const { logger, licensing, experimentalFeatures, scheduleNotificationResponseActionsService } =
+    createOptions;
   return {
     id: NEW_TERMS_RULE_TYPE_ID,
     name: 'New Terms Rule',
@@ -414,6 +416,18 @@ export const createNewTermsAlertType = (
 
         afterKey = searchResultWithAggs.aggregations.new_terms.after_key;
       }
+
+      if (
+        completeRule.ruleParams.responseActions?.length &&
+        result.createdSignalsCount &&
+        scheduleNotificationResponseActionsService
+      ) {
+        scheduleNotificationResponseActionsService({
+          signals: result.createdSignals,
+          responseActions: completeRule.ruleParams.responseActions,
+        });
+      }
+
       return { ...result, state };
     },
   };

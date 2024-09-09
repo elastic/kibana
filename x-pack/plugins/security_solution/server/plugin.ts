@@ -311,7 +311,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       analytics: core.analytics,
     };
 
-    const queryRuleAdditionalOptions: CreateRuleAdditionalOptions = {
+    const ruleAdditionalOptions: CreateRuleAdditionalOptions = {
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
         endpointAppContextService: this.endpointAppContextService,
         osqueryCreateActionService: plugins.osquery.createActionService,
@@ -321,20 +321,18 @@ export class Plugin implements ISecuritySolutionPlugin {
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
 
     plugins.alerting.registerType(
-      securityRuleTypeWrapper(createEqlAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions }))
+      securityRuleTypeWrapper(createEqlAlertType({ ...ruleOptions, ...ruleAdditionalOptions }))
     );
     if (!experimentalFeatures.esqlRulesDisabled) {
       plugins.alerting.registerType(
-        securityRuleTypeWrapper(
-          createEsqlAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
-        )
+        securityRuleTypeWrapper(createEsqlAlertType({ ...ruleOptions, ...ruleAdditionalOptions }))
       );
     }
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
         createQueryAlertType({
           ...ruleOptions,
-          ...queryRuleAdditionalOptions,
+          ...ruleAdditionalOptions,
           id: SAVED_QUERY_RULE_TYPE_ID,
           name: 'Saved Query Rule',
         })
@@ -348,14 +346,16 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeWrapper(
         createQueryAlertType({
           ...ruleOptions,
-          ...queryRuleAdditionalOptions,
+          ...ruleAdditionalOptions,
           id: QUERY_RULE_TYPE_ID,
           name: 'Custom Query Rule',
         })
       )
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
-    plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType(ruleOptions)));
+    plugins.alerting.registerType(
+      securityRuleTypeWrapper(createNewTermsAlertType({ ...ruleOptions, ...ruleAdditionalOptions }))
+    );
 
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(

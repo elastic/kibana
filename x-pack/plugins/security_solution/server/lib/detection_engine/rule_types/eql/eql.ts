@@ -14,7 +14,6 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
-import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 import { buildEqlSearchRequest } from './build_eql_search_request';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 
@@ -198,7 +197,7 @@ export const eqlExecutor = async ({
         scheduleNotificationResponseActionsService
       ) {
         scheduleNotificationResponseActionsService({
-          signals: result.createdSignals.map((signal) => expandDottedObject(signal as object)),
+          signals: result.createdSignals,
           responseActions: completeRule.ruleParams.responseActions,
         });
       }

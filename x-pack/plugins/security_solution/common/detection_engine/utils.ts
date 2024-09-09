@@ -93,3 +93,6 @@ export const isSuppressionRuleConfiguredWithMissingFields = (ruleType: Type) =>
 export const isSuppressionRuleInGA = (ruleType: Type): boolean => {
   return isSuppressibleAlertRule(ruleType) && SUPPRESSIBLE_ALERT_RULES_GA.includes(ruleType);
 };
+
+export const shouldShowResponseActions = (ruleType: Type | undefined) =>
+  isQueryRule(ruleType) || isEsqlRule(ruleType) || isEqlRule(ruleType) || isNewTermsRule(ruleType);

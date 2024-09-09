@@ -22,8 +22,8 @@ export type Alert = ParsedTechnicalFields & {
   kibana: {
     alert?: {
       rule: {
+        uuid: string;
         name: string;
-        rule_id: string;
       };
     };
   };

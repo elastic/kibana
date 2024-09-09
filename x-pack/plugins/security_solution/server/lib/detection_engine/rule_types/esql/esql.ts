@@ -19,7 +19,6 @@ import {
 } from '@kbn/securitysolution-utils';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
-import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { wrapSuppressedEsqlAlerts } from './wrap_suppressed_esql_alerts';
@@ -232,12 +231,14 @@ export const esqlExecutor = async ({
         result.createdSignalsCount &&
         scheduleNotificationResponseActionsService
       ) {
+        console.log('123');
         scheduleNotificationResponseActionsService({
-          signals: result.createdSignals.map((signal) => expandDottedObject(signal as object)),
+          signals: result.createdSignals,
           responseActions: completeRule.ruleParams.responseActions,
         });
       }
 
+      console.log('234');
       // no more results will be found
       if (response.values.length < size) {
         ruleExecutionLogger.debug(

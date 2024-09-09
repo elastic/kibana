@@ -9,7 +9,12 @@ import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import { isEqual, xorWith } from 'lodash';
 import { stringifyZodError } from '@kbn/zod-helpers';
-import type { EqlRule, EsqlRule, QueryRule } from '../../../../../common/api/detection_engine';
+import type {
+  EqlRule,
+  EsqlRule,
+  NewTermsRule,
+  QueryRule,
+} from '../../../../../common/api/detection_engine';
 import {
   type ResponseAction,
   type RuleCreateProps,
@@ -21,10 +26,10 @@ import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import { isQueryRule, isEsqlRule, isEqlRule } from '../../../../../common/detection_engine/utils';
+import { shouldShowResponseActions } from '../../../../../common/detection_engine/utils';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
-import type { EqlRuleParams, EsqlRuleParams } from '../../rule_schema';
+import type { EqlRuleParams, EsqlRuleParams, NewTermsRuleParams } from '../../rule_schema';
 import {
   hasValidRuleType,
   type RuleAlertType,
@@ -65,11 +70,7 @@ export const validateResponseActionsPermissions = async (
   ruleUpdate: RuleCreateProps | RuleUpdateProps,
   existingRule?: RuleAlertType | null
 ): Promise<void> => {
-  if (
-    !isQueryRule(ruleUpdate.type) &&
-    !isEsqlRule(ruleUpdate.type) &&
-    !isEqlRule(ruleUpdate.type)
-  ) {
+  if (!shouldShowResponseActions(ruleUpdate.type)) {
     return;
   }
 
@@ -118,12 +119,12 @@ export const validateResponseActionsPermissions = async (
 
 function rulePayloadContainsResponseActions(
   rule: RuleCreateProps | RuleUpdateProps
-): rule is QueryRule | EsqlRule | EqlRule {
+): rule is QueryRule | EsqlRule | EqlRule | NewTermsRule {
   return 'response_actions' in rule;
 }
 
 function ruleObjectContainsResponseActions(
   rule?: RuleAlertType
-): rule is Rule<UnifiedQueryRuleParams | EsqlRuleParams | EqlRuleParams> {
+): rule is Rule<UnifiedQueryRuleParams | EsqlRuleParams | EqlRuleParams | NewTermsRuleParams> {
   return rule != null && 'params' in rule && 'responseActions' in rule?.params;
 }
