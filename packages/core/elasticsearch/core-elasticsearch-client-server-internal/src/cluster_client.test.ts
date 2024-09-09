@@ -918,6 +918,41 @@ describe('ClusterClient', () => {
         agentFactoryProvider,
         kibanaVersion,
       });
+      const request = {
+        headers: {
+          [AUTHORIZATION_HEADER]: 'yes',
+          hello: 'dolly',
+        },
+      };
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledTimes(1);
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({ [ES_SECONDARY_AUTH_HEADER]: 'yes' }),
+        })
+      );
+    });
+
+    it('uses the authorization header from the request when using a `KibanaFakeRequest`', () => {
+      const config = createConfig({
+        requestHeadersWhitelist: ['authorization', 'foo'],
+      });
+      authHeaders.get.mockReturnValue({
+        [AUTHORIZATION_HEADER]: 'will_not_be_used',
+      });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
       const apiKey = { id: 'foo', api_key: 'bar' };
       const request = getFakeKibanaRequest(apiKey);
 
