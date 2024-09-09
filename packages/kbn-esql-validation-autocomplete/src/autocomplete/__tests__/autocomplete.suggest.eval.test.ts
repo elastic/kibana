@@ -617,7 +617,12 @@ describe('autocomplete.suggest', () => {
           triggerCharacter: ' ',
         }
       );
-      await assertSuggestions('from a | eval case( integerField != /)', expectedNumericSuggestions);
+      await assertSuggestions('from a | eval case( integerField != /)', [
+        // Notice no extra space after field name
+        ...getFieldNamesByType('any').map((field) => `${field}`),
+        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }, undefined, []),
+        'var0 = ',
+      ]);
 
       // case( field > 0, >) suggests fields like normal
       await assertSuggestions(
