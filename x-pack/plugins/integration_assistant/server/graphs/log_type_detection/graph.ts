@@ -13,6 +13,7 @@ import { handleLogFormatDetection } from './detection';
 import { ESProcessorItem, SamplesFormat } from '../../../common';
 import { getKVGraph } from '../kv/graph';
 import { LogDetectionGraphParams, LogDetectionBaseNodeParams } from './types';
+import { LogFormat } from '../../constants';
 
 const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
   lastExecutedChain: {
@@ -86,7 +87,7 @@ function modelOutput({ state }: LogDetectionBaseNodeParams): Partial<LogFormatDe
 }
 
 function logFormatRouter({ state }: LogDetectionBaseNodeParams): string {
-  if (state.samplesFormat.name === 'structured') {
+  if (state.samplesFormat.name === LogFormat.STRUCTURED) {
     return 'structured';
   }
   // if (state.samplesFormat === LogFormat.UNSTRUCTURED) {

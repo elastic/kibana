@@ -18,11 +18,11 @@ export async function handleKVError({
   model,
 }: HandleKVNodeParams): Promise<Partial<KVState>> {
   const outputParser = new JsonOutputParser();
-  const kvHeaderGraph = KV_ERROR_PROMPT.pipe(model).pipe(outputParser);
+  const kvErrorGraph = KV_ERROR_PROMPT.pipe(model).pipe(outputParser);
   const proc = state.kvProcessor;
   const processor = proc[0].kv;
 
-  const kvInput = (await kvHeaderGraph.invoke({
+  const kvInput = (await kvErrorGraph.invoke({
     current_processor: JSON.stringify(processor, null, 2),
     errors: JSON.stringify(state.errors, null, 2),
     common_errors: JSON.stringify(COMMON_ERRORS, null, 2),
@@ -33,6 +33,6 @@ export async function handleKVError({
 
   return {
     kvProcessor,
-    lastExecutedChain: 'kv_header',
+    lastExecutedChain: 'kv_error',
   };
 }

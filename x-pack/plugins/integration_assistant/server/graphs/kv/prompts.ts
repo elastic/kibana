@@ -9,7 +9,7 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 export const KV_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
-    `You are an expert in creating Elasticsearch KV processors.Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
+    `You are an expert in creating Elasticsearch KV processors. Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
 
  <context>
  <samples>
@@ -19,7 +19,7 @@ export const KV_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
   ],
   [
     'human',
-    `Looking at the multiple log samples provided in the context, our goal is to create a KV processor that can parse the logs. Ana;yze the logs  to understand their structure, including any key-value pairs, delimiters, and patterns.
+    `Looking at the multiple log samples provided in the context, our goal is to create a KV processor that can parse the logs. Analyze the logs  to understand their structure, including any key-value pairs, delimiters, and patterns.
 
  Follow these steps to help improve the KV processor and apply it to each field step by step:
 
@@ -52,7 +52,7 @@ export const KV_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
  \`\`\`
  </example_response>`,
   ],
-  ['ai', 'Please find the KV processor below:'],
+  ['ai', 'Please find the JSON object below:'],
 ]);
 
 export const KV_HEADER_PROMPT = ChatPromptTemplate.fromMessages([

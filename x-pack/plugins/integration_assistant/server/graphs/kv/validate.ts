@@ -24,6 +24,7 @@ export async function handleKVValidate({
   const packageName = state.packageName;
   const dataStreamName = state.dataStreamName;
 
+  // Pick logSamples if there was no header detected.
   const samples = state.kvLogMessages.length > 0 ? state.kvLogMessages : state.logSamples;
 
   const { pipelineResults: kvOutputSamples, errors } = (await createJSONInput(
