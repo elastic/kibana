@@ -394,3 +394,7 @@ export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
     .flat()
     .find((vars) => vars?.name === key);
 };
+
+export const POLICY_TEMPLATE_FORM_DTS = {
+  LOADER: 'policy-template-form-loader',
+};
