@@ -51,4 +51,8 @@ describe('convert_timestamp', () => {
   it('should return null if timestamp is not passed', () => {
     expect(convertTimestamp()).toBe(null);
   });
+
+  it('should return null if timestamp is null', () => {
+    expect(convertTimestamp(null)).toBe(null);
+  });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function convertTimestamp(timestamp?: string | number): string | number | null {
+export function convertTimestamp(timestamp?: string | number | null): string | number | null {
   if (timestamp) {
     if (typeof timestamp === 'string') {
       const trimmedTimestamp = timestamp.trim();
