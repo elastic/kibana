@@ -143,6 +143,39 @@ describe('ActionsConnectorsHome', () => {
     expect(documentationButton).toBeEnabled();
   });
 
+  it('show "Create connector" and "Documentation" buttons when on Connectors Edit tab', async () => {
+    const props: RouteComponentProps<MatchParams> = {
+      history: createMemoryHistory({
+        initialEntries: ['/connectors/1'],
+      }),
+      location: createLocation('/connectors/1'),
+      match: {
+        isExact: true,
+        path: '/connectors/1',
+        url: '',
+        params: {
+          section: 'connectors',
+        },
+      },
+    };
+
+    render(
+      <IntlProvider locale="en">
+        <Router history={props.history}>
+          <QueryClientProvider client={queryClient}>
+            <ActionsConnectorsHome {...props} />
+          </QueryClientProvider>
+        </Router>
+      </IntlProvider>
+    );
+
+    const createConnectorButton = await screen.findByRole('button', { name: 'Create connector' });
+    expect(createConnectorButton).toBeEnabled();
+
+    const documentationButton = await screen.findByRole('link', { name: 'Documentation' });
+    expect(documentationButton).toBeEnabled();
+  });
+
   it('hide "Create connector" button when on Logs tab', async () => {
     const props: RouteComponentProps<MatchParams> = {
       history: createMemoryHistory({

@@ -102,6 +102,7 @@ describe('TaskPollingLifecycle', () => {
     pollIntervalConfiguration$: of(100),
     executionContext,
     taskPartitioner: new TaskPartitioner({
+      logger: taskManagerLogger,
       podName: 'test',
       kibanaDiscoveryService: {} as KibanaDiscoveryService,
       kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
