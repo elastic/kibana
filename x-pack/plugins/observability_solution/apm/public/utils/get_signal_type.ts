@@ -18,7 +18,5 @@ export function isLogsSignal(dataStreamTypes: EntityDataStreamType[]) {
 }
 
 export function isLogsOnlySignal(signalTypes: EntityDataStreamType[]) {
-  return false;
-  // Keeping it set to false to prevent release in serverless without telemetries
-  // Will be set to "!isApmSignal(signalTypes) && isLogsSignal(signalTypes);" when merging https://github.com/elastic/observability-dev/issues/3462
+  return !isApmSignal(signalTypes) && isLogsSignal(signalTypes);
 }
