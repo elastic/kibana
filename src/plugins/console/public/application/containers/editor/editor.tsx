@@ -114,7 +114,7 @@ export const Editor = memo(
           payload: editorValueRef.current!,
         });
       };
-    }, []);
+    }, [dispatchEditor]);
 
     // Always keep the localstorage in sync with the value in the editor
     // to avoid losing the text object when the user navigates away from the shell
