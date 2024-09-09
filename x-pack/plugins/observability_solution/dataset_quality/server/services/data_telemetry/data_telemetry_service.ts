@@ -6,12 +6,6 @@
  */
 
 import {
-  ConcreteTaskInstance,
-  TaskInstance,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
-import {
   from,
   defer,
   delay,
@@ -27,6 +21,12 @@ import {
 } from 'rxjs';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import {
+  ConcreteTaskInstance,
+  TaskInstance,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 
 import {
@@ -202,23 +202,21 @@ export class DataTelemetryService {
           }
           return of(dataStreamsAndIndicesInfo);
         }),
-        delay(BREATHE_DELAY_SHORT),
+        delay(BREATHE_DELAY_MEDIUM),
         switchMap((dataStreamsAndIndicesInfo) => {
           return addMappingsToIndices({
             esClient: this.esClient!,
             dataStreamsInfo: dataStreamsAndIndicesInfo,
             logsIndexPatterns: LOGS_DATASET_INDEX_PATTERNS,
-            breatheDelay: BREATHE_DELAY_MEDIUM,
           });
         }),
         delay(BREATHE_DELAY_SHORT),
         switchMap((dataStreamsAndIndicesInfo) => {
           return addNamespace({
             dataStreamsInfo: dataStreamsAndIndicesInfo,
-            breatheDelay: BREATHE_DELAY_SHORT,
           });
         }),
-        delay(BREATHE_DELAY_SHORT),
+        delay(BREATHE_DELAY_MEDIUM),
         switchMap((infoWithNamespace) => {
           return getIndexBasicStats({
             esClient: this.esClient!,
@@ -230,7 +228,6 @@ export class DataTelemetryService {
         switchMap((infoWithStats) => {
           return getIndexFieldStats({
             basicStats: infoWithStats,
-            breatheDelay: BREATHE_DELAY_SHORT,
           });
         }),
         delay(BREATHE_DELAY_SHORT),

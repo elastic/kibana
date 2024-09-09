@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type {
+import {
+  IndexName,
   IndicesGetMappingResponse,
   IndicesStatsResponse,
   Metadata,
@@ -19,9 +20,10 @@ export interface DatasetIndexPattern {
 
 export interface IndexBasicInfo {
   patternName: string;
+  shipper?: string;
   isDataStream: boolean;
   name: string;
-  latestIndex?: string;
+  indices: IndexName[];
   meta?: Metadata;
   mapping?: IndicesGetMappingResponse;
   namespace?: string;
@@ -29,6 +31,7 @@ export interface IndexBasicInfo {
 
 export interface DataStreamStatsPerNamespace {
   patternName: string;
+  shipper?: string;
   namespace?: string;
   totalDocuments: number;
   totalSize: number;
@@ -41,7 +44,11 @@ export interface DataStreamStatsPerNamespace {
   failureStoreStats: IndicesStatsResponse['indices'];
 }
 
-export interface DataStreamFieldStatsPerNamespace extends DataStreamStatsPerNamespace {
+export interface DataStreamStatsWithLevelsPerNamespace extends DataStreamStatsPerNamespace {
+  structureLevel: Record<number, number>;
+}
+
+export interface DataStreamFieldStatsPerNamespace extends DataStreamStatsWithLevelsPerNamespace {
   uniqueFields: string[];
   fieldsCount: Record<string, number>;
 }
@@ -50,6 +57,7 @@ export interface DataStreamStats {
   streamName: string;
   totalNamespaces: number;
   totalDocuments: number;
+  structureLevel: Record<number, number>;
   failureStoreDocuments: number;
   failureStoreIndices: number;
   totalSize: number;
@@ -64,6 +72,7 @@ export interface DataStreamStats {
 export interface DataTelemetryEvent {
   pattern_name: string;
   doc_count: number;
+  structure_level: Record<string, number>;
   failure_store_doc_count: number;
   index_count: number;
   namespace_count: number;

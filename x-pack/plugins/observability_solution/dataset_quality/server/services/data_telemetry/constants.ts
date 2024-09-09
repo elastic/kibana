@@ -13,11 +13,10 @@ export const LOGS_DATA_TELEMETRY_TASK_TYPE = 'logs-data-telemetry';
 export const LOGS_DATA_TELEMETRY_TASK_ID = 'logs-data-telemetry:collect-and-report-task-2';
 
 export const TELEMETRY_TASK_INTERVAL = 24 * 60; // 24 hours (in minutes)
-export const TELEMETRY_TASK_TIMEOUT = 18 * 60; // 18 hours (in minutes)
+export const TELEMETRY_TASK_TIMEOUT = 10; // 10 minutes
 
 export const BREATHE_DELAY_SHORT = 1000; // 1 seconds
 export const BREATHE_DELAY_MEDIUM = 5 * 1000; // 5 seconds
-export const BREATHE_DELAY_LONG = 60 * 1000; // 1 minute
 
 export const MAX_STREAMS_TO_REPORT = 1000;
 
@@ -55,6 +54,27 @@ const TELEMETRY_PATTERNS_BY_NAME = DATA_DATASETS_INDEX_PATTERNS_UNIQUE.reduce((a
 export const LOGS_DATASET_INDEX_PATTERNS = LOGS_INDEX_PATTERN_NAMES.flatMap<DatasetIndexPattern>(
   (patternName) => TELEMETRY_PATTERNS_BY_NAME[patternName] || []
 );
+
+export const LEVEL_2_RESOURCE_FIELDS = [
+  'host.name',
+  'service.name',
+  'host',
+  'hostname',
+  'host_name',
+];
+
+export const PROMINENT_LOG_ECS_FIELDS = [
+  'log.level',
+  'log.logger',
+  'log.origin.file.name',
+  'log.origin.function',
+  'log.origin.file.line',
+  'event.action',
+  'event.category',
+  'event.dataset',
+  'event.kind',
+  'log.file.path',
+];
 
 export const DATA_TELEMETRY_FIELDS = [
   'container.id',
