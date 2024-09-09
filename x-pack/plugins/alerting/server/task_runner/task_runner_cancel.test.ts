@@ -54,7 +54,7 @@ import { EVENT_LOG_ACTIONS } from '../plugin';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { rulesSettingsClientMock } from '../rules_settings_client.mock';
+import { rulesSettingsClientMock } from '../rules_settings/rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';

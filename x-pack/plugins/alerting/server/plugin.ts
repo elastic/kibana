@@ -66,7 +66,7 @@ import { ServerlessPluginSetup } from '@kbn/serverless/server';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
-import { RulesSettingsClientFactory } from './rules_settings_client_factory';
+import { RulesSettingsClientFactory, getRulesSettingsFeature } from './rules_settings';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
 import { AlertingRequestHandlerContext, ALERTING_FEATURE_ID, RuleAlertData } from './types';
@@ -106,7 +106,6 @@ import {
   type InitializationPromise,
   errorResult,
 } from './alerts_service';
-import { getRulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';

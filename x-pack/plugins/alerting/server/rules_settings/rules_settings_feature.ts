@@ -16,7 +16,7 @@ import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
   READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
-} from '../common';
+} from '../../common';
 
 export function getRulesSettingsFeature(isServerless: boolean): KibanaFeatureConfig {
   const settings = {

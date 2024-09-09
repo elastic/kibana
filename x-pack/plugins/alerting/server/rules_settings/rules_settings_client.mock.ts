@@ -11,7 +11,7 @@ import {
   RulesSettingsQueryDelayClientApi,
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
-} from './types';
+} from '../types';
 
 export type RulesSettingsClientMock = jest.Mocked<RulesSettingsClientApi>;
 export type RulesSettingsFlappingClientMock = jest.Mocked<RulesSettingsFlappingClientApi>;

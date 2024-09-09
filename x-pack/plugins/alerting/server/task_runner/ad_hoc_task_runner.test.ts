@@ -32,7 +32,7 @@ import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { rulesClientMock } from '../rules_client.mock';
-import { rulesSettingsClientMock } from '../rules_settings_client.mock';
+import { rulesSettingsClientMock } from '../rules_settings/rules_settings_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import {
   AlertingEventLogger,
