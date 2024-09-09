@@ -13,6 +13,7 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.24>>
 * <<release-notes-7.17.23>>
 * <<release-notes-7.17.22>>
 * <<release-notes-7.17.21>>
@@ -93,6 +94,28 @@ Review important information about the {kib} 7.17.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.17.24]]
+== {kib} 7.17.24
+
+The 7.17.24 release includes the following bug fixes.
+
+[float]
+[[fixes-v7.17.24]]
+=== Bug fixes
+
+Machine Learning::
+* Improving empty object creation ({kibana-pull}191836[#191836]).
+* Improving empty object creation ({kibana-pull}191518[#191518]).
+
+Observability::
+* Change infra plugin feature name from Metrics to Infrastructure ({kibana-pull}189432[#189432]).
+
+[float]
+[[deprecations-7.17.24]]
+=== Deprecations
+
+* Removes support for Heartbeat browser monitor screenshots for lower versions of Heartbeat. Please upgrade to Heartbeat 7.17.24 to continue using Heartbeat browser monitor screenshots. ({kibana-pull}189911[#189911])
 
 [[release-notes-7.17.23]]
 == {kib} 7.17.23
