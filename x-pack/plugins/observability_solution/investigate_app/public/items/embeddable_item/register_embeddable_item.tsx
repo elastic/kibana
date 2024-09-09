@@ -49,12 +49,14 @@ function ReactEmbeddable({ type, config, timeRange: { from, to }, savedObjectId 
   }, []);
 
   return (
-    <ReactEmbeddableRenderer
-      type={type}
-      getParentApi={() => api}
-      maybeId={savedObjectId}
-      hidePanelChrome
-    />
+    <div className={embeddableClassName}>
+      <ReactEmbeddableRenderer
+        type={type}
+        getParentApi={() => api}
+        maybeId={savedObjectId}
+        hidePanelChrome
+      />
+    </div>
   );
 }
 
