@@ -51,7 +51,7 @@ export function InvestigationList() {
   }
 
   const investigations = data?.results ?? [];
-  const { total } = data ?? {};
+  const total = data?.total ?? 0;
 
   const columns: Array<EuiBasicTableColumn<InvestigationResponse>> = [
     {
