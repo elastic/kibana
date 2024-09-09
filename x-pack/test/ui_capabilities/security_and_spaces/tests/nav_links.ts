@@ -42,25 +42,13 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
           case 'dual_privileges_all at everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('monitoring'));
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except(['monitoring']));
             break;
           case 'everything_space_all at everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.except(
-                'monitoring',
-                'enterpriseSearch',
-                'enterpriseSearchContent',
-                'enterpriseSearchAnalytics',
-                'enterpriseSearchApplications',
-                'enterpriseSearchAISearch',
-                'enterpriseSearchVectorSearch',
-                'enterpriseSearchSemanticSearch',
-                'enterpriseSearchElasticsearch',
-                'appSearch',
-                'workplaceSearch'
-              )
+              navLinksBuilder.except(['monitoring'], ['appSearch', 'workplaceSearch'])
             );
             break;
           case 'global_read at everything_space':
@@ -70,21 +58,15 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
               navLinksBuilder.except(
-                'monitoring',
-                'enterpriseSearch',
-                'enterpriseSearchContent',
-                'enterpriseSearchAnalytics',
-                'enterpriseSearchApplications',
-                'enterpriseSearchAISearch',
-                'enterpriseSearchVectorSearch',
-                'enterpriseSearchSemanticSearch',
-                'enterpriseSearchElasticsearch',
-                'observabilityAIAssistant',
-                'appSearch',
-                'workplaceSearch',
-                'guidedOnboardingFeature',
-                'securitySolutionAssistant',
-                'securitySolutionAttackDiscovery'
+                [
+                  'monitoring',
+                  'observabilityAIAssistant',
+
+                  'guidedOnboardingFeature',
+                  'securitySolutionAssistant',
+                  'securitySolutionAttackDiscovery',
+                ],
+                ['appSearch', 'workplaceSearch']
               )
             );
             break;
@@ -93,7 +75,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.only('kibana', 'foo', 'management')
+              navLinksBuilder.only(['kibana', 'foo', 'management'])
             );
             break;
           case 'superuser at nothing_space':
@@ -115,7 +97,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
           case 'nothing_space_read at everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only(['management']));
             break;
           default:
             throw new UnreachableError(scenario);

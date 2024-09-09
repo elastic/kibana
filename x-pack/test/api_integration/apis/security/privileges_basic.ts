@@ -41,6 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
             uptime: ['all', 'read', 'minimal_all', 'minimal_read'],
             apm: ['all', 'read', 'minimal_all', 'minimal_read'],
             osquery: ['all', 'read', 'minimal_all', 'minimal_read'],
+            enterpriseSearch: ['all', 'read', 'minimal_all', 'minimal_read'],
             ml: ['all', 'read', 'minimal_all', 'minimal_read'],
             siem: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
