@@ -39,10 +39,10 @@ export class ControlsPlugin
     _coreSetup: CoreSetup<ControlsPluginStartDeps, ControlsPluginStart>,
     _setupPlugins: ControlsPluginSetupDeps
   ): ControlsPluginSetup {
-    const { registerControlType } = controlsService;
+    const { registerControlFactory } = controlsService;
 
     return {
-      registerControlType, // TODO: Delete
+      registerControlFactory,
     };
   }
 
@@ -70,10 +70,10 @@ export class ControlsPlugin
       uiActions.attachAction(PANEL_HOVER_TRIGGER, clearControlAction.id);
     });
 
-    const { getControlFactory, getControlTypes } = controlsService;
+    const { getControlFactory, getAllControlTypes } = controlsService;
     return {
       getControlFactory,
-      getControlTypes,
+      getAllControlTypes,
     };
   }
 

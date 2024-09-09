@@ -27,12 +27,12 @@ export const isClearableControl = (control: unknown): control is CanClearSelecti
  * Plugin types
  */
 export interface ControlsPluginSetup {
-  registerControlType: ControlsServiceType['registerControlType'];
+  registerControlFactory: ControlsServiceType['registerControlFactory'];
 }
 
 export interface ControlsPluginStart {
   getControlFactory: ControlsServiceType['getControlFactory'];
-  getControlTypes: ControlsServiceType['getControlTypes'];
+  getAllControlTypes: ControlsServiceType['getAllControlTypes'];
 }
 
 export interface ControlsPluginSetupDeps {
