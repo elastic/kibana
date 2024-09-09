@@ -18,7 +18,6 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import apm, { Logger } from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
 
-import { omit } from 'lodash';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import {
   TaskClaimerOpts,
@@ -47,7 +46,6 @@ import { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
 import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
 import { TaskPartitioner } from '../lib/task_partitioner';
-import { getRetryAt } from '../lib/get_retry_at';
 
 interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
@@ -189,21 +187,16 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   // build the updated task objects we'll claim
-  const now = new Date();
   const taskUpdates: ConcreteTaskInstance[] = [];
   for (const task of tasksToRun) {
     taskUpdates.push({
-      // omits "enabled" field from task updates so we don't overwrite
-      // any user initiated changes to "enabled" while the task was running
-      ...omit(task, 'enabled'),
+      ...task,
       scheduledAt:
         task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
           ? task.retryAt
           : task.runAt,
-      status: TaskStatus.Running,
-      startedAt: now,
-      attempts: task.attempts + 1,
-      retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
+      status: TaskStatus.Claiming,
+      retryAt: claimOwnershipUntil,
       ownerId: taskStore.taskManagerId,
     });
   }
