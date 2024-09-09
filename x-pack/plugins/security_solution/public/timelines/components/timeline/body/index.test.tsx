@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { useKibana, useCurrentUser } from '../../../../common/lib/kibana';
@@ -223,7 +223,7 @@ describe('Body', () => {
     store?: { store: ReturnType<typeof createMockStore> }
   ) => {
     const wrapper = mount(childrenComponent, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       wrappingComponentProps: store ?? {},
     });
     await waitFor(() => wrapper.find('[data-test-subj="suricataRefs"]').exists());
