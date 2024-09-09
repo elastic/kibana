@@ -57,3 +57,5 @@ export {
 export type { LogsContextService } from './src';
 
 export * from './src/types';
+
+export { LOG_LEVEL_FIELD } from './src/field_constants';

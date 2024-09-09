@@ -17,6 +17,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly flyout = this.ctx.getService('flyout');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly common = this.ctx.getPageObject('common');
   private readonly dataViews = this.ctx.getService('dataViews');
   private readonly unifiedFieldList = this.ctx.getPageObject('unifiedFieldList');
   private readonly browser = this.ctx.getService('browser');
@@ -107,6 +108,27 @@ export class DiscoverPageObject extends FtrService {
   public async waitUntilSearchingHasFinished() {
     await this.testSubjects.missingOrFail('loadingSpinner', {
       timeout: this.defaultFindTimeout * 10,
+    });
+  }
+
+  public async waitForHistogram(visDataTestSubj?: string) {
+    const testSubjects = this.testSubjects;
+    async function getRenderingCount() {
+      const visualizationContainer = await testSubjects.find(
+        visDataTestSubj || 'lnsVisualizationContainer'
+      );
+      const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
+      return Number(renderingCount);
+    }
+    await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitFor('rendering count to stabilize', async () => {
+      const firstCount = await getRenderingCount();
+
+      await this.common.sleep(1000);
+
+      const secondCount = await getRenderingCount();
+
+      return firstCount === secondCount;
     });
   }
 

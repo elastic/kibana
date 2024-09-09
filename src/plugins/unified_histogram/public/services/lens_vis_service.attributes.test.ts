@@ -159,6 +159,155 @@ describe('LensVisService attributes', () => {
                   "accessors": Array [
                     "count_column",
                   ],
+                  "colorMapping": Object {
+                    "assignments": Array [
+                      Object {
+                        "color": Object {
+                          "colorCode": "#ffffff",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "trace",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#becfe3",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "debug",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#90b0d1",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "info",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#6092c0",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "notice",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#d6bf57",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "warning",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#df9352",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "error",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#e7664c",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "critical",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#da5e47",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "alert",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#cc5642",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "emergency",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#cc5642",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "fatal",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                    ],
+                    "colorMode": Object {
+                      "type": "categorical",
+                    },
+                    "paletteId": "eui_amsterdam_color_blind",
+                    "specialAssignments": Array [
+                      Object {
+                        "color": Object {
+                          "type": "loop",
+                        },
+                        "rule": Object {
+                          "type": "other",
+                        },
+                        "touched": false,
+                      },
+                    ],
+                  },
                   "layerId": "unifiedHistogram",
                   "layerType": "data",
                   "seriesType": "bar_stacked",
@@ -335,6 +484,155 @@ describe('LensVisService attributes', () => {
                   "accessors": Array [
                     "count_column",
                   ],
+                  "colorMapping": Object {
+                    "assignments": Array [
+                      Object {
+                        "color": Object {
+                          "colorCode": "#ffffff",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "trace",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#becfe3",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "debug",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#90b0d1",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "info",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#6092c0",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "notice",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#d6bf57",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "warning",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#df9352",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "error",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#e7664c",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "critical",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#da5e47",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "alert",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#cc5642",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "emergency",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#cc5642",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "fatal",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                    ],
+                    "colorMode": Object {
+                      "type": "categorical",
+                    },
+                    "paletteId": "eui_amsterdam_color_blind",
+                    "specialAssignments": Array [
+                      Object {
+                        "color": Object {
+                          "type": "loop",
+                        },
+                        "rule": Object {
+                          "type": "other",
+                        },
+                        "touched": false,
+                      },
+                    ],
+                  },
                   "layerId": "unifiedHistogram",
                   "layerType": "data",
                   "seriesType": "bar_stacked",
@@ -485,6 +783,155 @@ describe('LensVisService attributes', () => {
                   "accessors": Array [
                     "count_column",
                   ],
+                  "colorMapping": Object {
+                    "assignments": Array [
+                      Object {
+                        "color": Object {
+                          "colorCode": "#ffffff",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "trace",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#becfe3",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "debug",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#90b0d1",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "info",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#6092c0",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "notice",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#d6bf57",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "warning",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#df9352",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "error",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#e7664c",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "critical",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#da5e47",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "alert",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#cc5642",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "emergency",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                      Object {
+                        "color": Object {
+                          "colorCode": "#cc5642",
+                          "type": "colorCode",
+                        },
+                        "rule": Object {
+                          "type": "matchExactly",
+                          "values": Array [
+                            "fatal",
+                          ],
+                        },
+                        "touched": true,
+                      },
+                    ],
+                    "colorMode": Object {
+                      "type": "categorical",
+                    },
+                    "paletteId": "eui_amsterdam_color_blind",
+                    "specialAssignments": Array [
+                      Object {
+                        "color": Object {
+                          "type": "loop",
+                        },
+                        "rule": Object {
+                          "type": "other",
+                        },
+                        "touched": false,
+                      },
+                    ],
+                  },
                   "layerId": "unifiedHistogram",
                   "layerType": "data",
                   "seriesType": "bar_stacked",
@@ -687,6 +1134,7 @@ describe('LensVisService attributes', () => {
               },
               "layerId": "46aa21fa-b747-4543-bf90-0b40007c546d",
               "layerType": "data",
+              "layers": undefined,
               "legend": Object {
                 "isVisible": true,
                 "position": "right",
@@ -753,7 +1201,7 @@ describe('LensVisService attributes', () => {
   it('should use the correct histogram query when no suggestion passed', async () => {
     const histogramQuery = {
       esql: `from logstash-* | limit 10
-| EVAL timestamp=DATE_TRUNC(10 minute, @timestamp) | stats results = count(*) by timestamp | rename timestamp as \`@timestamp every 10 minute\``,
+| EVAL timestamp=DATE_TRUNC(10 minute, @timestamp) | INLINESTATS results = count(*) by timestamp | RENAME timestamp as \`@timestamp every 10 minute\``,
     };
     const lensVis = await getLensVisMock({
       filters,

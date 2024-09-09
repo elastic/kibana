@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ColorMapping } from '@kbn/coloring';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { Suggestion } from './types';
@@ -17,11 +18,13 @@ export const getLensAttributesFromSuggestion = ({
   query,
   suggestion,
   dataView,
+  colorMapping,
 }: {
   filters: Filter[];
   query: Query | AggregateQuery;
   suggestion: Suggestion | undefined;
   dataView?: DataView;
+  colorMapping?: ColorMapping.Config;
 }): {
   references: Array<{ name: string; id: string; type: string }>;
   visualizationType: string;
@@ -45,7 +48,24 @@ export const getLensAttributesFromSuggestion = ({
       : {
           formBased: {},
         };
-  const visualization = suggestionVisualizationState;
+
+  let visualization = suggestionVisualizationState;
+  if (
+    suggestion &&
+    'layers' in suggestionVisualizationState &&
+    colorMapping &&
+    Array.isArray(suggestionVisualizationState.layers)
+  ) {
+    visualization = {
+      ...suggestionVisualizationState,
+      layers: suggestionVisualizationState.layers.map((layer) => {
+        return {
+          ...layer,
+          ...(colorMapping && { colorMapping }),
+        };
+      }),
+    };
+  }
   const attributes = {
     title:
       suggestion?.title ??

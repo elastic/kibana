@@ -257,8 +257,11 @@ export const UnifiedHistogramLayout = ({
     filters: originalFilters,
     timeRange: originalTimeRange,
   });
+  const { euiTheme } = useEuiTheme();
 
-  const [lensVisService] = useState(() => new LensVisService({ services, lensSuggestionsApi }));
+  const [lensVisService] = useState(
+    () => new LensVisService({ services, lensSuggestionsApi, euiTheme })
+  );
   const lensVisServiceCurrentSuggestionContext = useObservable(
     lensVisService.currentSuggestionContext$
   );
@@ -320,7 +323,6 @@ export const UnifiedHistogramLayout = ({
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const showFixedPanels = isMobile || !chart || chart.hidden;
-  const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;
   const minMainPanelHeight = euiTheme.base * 10;
 

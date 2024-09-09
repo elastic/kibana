@@ -16,6 +16,7 @@ import { type QueryParams } from '../utils/external_vis_context';
 import { unifiedHistogramServicesMock } from './services';
 import { histogramESQLSuggestionMock } from './suggestions';
 import { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
+import { EuiThemeComputed } from '@elastic/eui';
 
 const TIME_RANGE: TimeRange = {
   from: '2022-11-17T00:00:00.000Z',
@@ -54,6 +55,11 @@ export const getLensVisMock = async ({
   const lensApi = await unifiedHistogramServicesMock.lens.stateHelperApi();
   const lensService = new LensVisService({
     services: unifiedHistogramServicesMock,
+    euiTheme: {
+      colors: {
+        lightShade: '#ffffff',
+      },
+    } as EuiThemeComputed,
     lensSuggestionsApi: allSuggestions
       ? (...params) => {
           const context = params[0];

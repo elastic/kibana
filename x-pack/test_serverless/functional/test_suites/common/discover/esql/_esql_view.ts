@@ -321,6 +321,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await PageObjects.discover.waitForHistogram('xyVisChart');
         let retries = 0;
         await retry.try(async () => {
           if (retries > 0) {
