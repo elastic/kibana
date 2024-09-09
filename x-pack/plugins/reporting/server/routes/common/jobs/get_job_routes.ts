@@ -108,12 +108,12 @@ export const commonJobsRouteHandlerFactory = (
       counters,
       { isInternal },
       async (doc) => {
-        // FIXME look for potential report job task in task manager and remove that too
-
         const docIndex = doc.index;
         const stream = await getContentStream(reporting, { id: docId, index: docIndex });
         const reportingSetup = reporting.getPluginSetupDeps();
         const logger = reportingSetup.logger.get('delete-report');
+
+        logger.debug(`Deleting report ${docId}`);
 
         // An "error" event is emitted if an error is
         // passed to the `stream.end` callback from
@@ -123,6 +123,48 @@ export const commonJobsRouteHandlerFactory = (
           logger.error(err);
         });
 
+        // 1. Look for a task in task manager associated with the report job
+        try {
+          let taskId: string | undefined;
+          const { taskManager } = await reporting.getPluginStartDeps();
+          const result = await taskManager.fetch({
+            query: {
+              match: {
+                'task.taskType': 'report:execute',
+              },
+            },
+            size: 1000, // NOTE: this is an arbitrary size that is likely to include all running and pending reporting tasks in most deployments
+          });
+
+          if (result.docs.length > 0) {
+            // The task params are stored as a string of JSON. In order to find the task that corresponds to
+            // the report to delete, we need to check each task's params, look for the report id, and see if it
+            // matches our docId to delete.
+            for (const task of result.docs) {
+              const { params } = task;
+              if (params.id === docId) {
+                // found the matching task
+                taskId = task.id;
+                logger.debug(
+                  `Found a Task Manager task associated with the report being deleted: ${taskId}. Task status: ${task.status}.`
+                );
+                break;
+              }
+            }
+            if (taskId) {
+              // remove the task that was found
+              await taskManager.remove(taskId);
+              logger.debug(`Deleted Task Manager task ${taskId}.`);
+            }
+          }
+        } catch (error) {
+          logger.error(
+            'Encountered an error in finding a task associated with the report being deleted'
+          );
+          logger.error(error);
+        }
+
+        // 2. Remove the report document
         try {
           // Overwriting existing content with an
           // empty buffer to remove all the chunks.
