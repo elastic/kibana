@@ -30,7 +30,8 @@ export const SearchIndexDetailsPage = () => {
       restrictWidth={false}
       data-test-subj="searchIndicesDetailsPage"
       grow={false}
-      bottomBorder={false}
+      panelled
+      bottomBorder
     >
       <EuiPageSection>
         <EuiButton
@@ -49,10 +50,14 @@ export const SearchIndexDetailsPage = () => {
         data-test-subj="searchIndexDetailsHeader"
         pageTitle={index?.name}
         rightSideItems={[]}
+
       />
       <EuiSpacer size="l" />
 
       <div data-test-subj="searchIndexDetailsContent" />
+      <EuiPageTemplate.Section grow={false}>
+
+      </EuiPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>
   );
