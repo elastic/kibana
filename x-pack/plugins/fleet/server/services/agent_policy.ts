@@ -112,7 +112,7 @@ import { createSoFindIterable } from './utils/create_so_find_iterable';
 import { isAgentlessEnabled } from './utils/agentless';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
-import { agentlessAgentService } from './agents/agentless_agent';
+// import { agentlessAgentService } from './agents/agentless_agent';
 
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
 
@@ -1184,16 +1184,7 @@ class AgentPolicyService {
       });
     }
 
-    try {
-      await soClient.delete(savedObjectType, id);
-    } catch (error) {
-      // Temporarily ignore 404 until we resolve save object 404 errors with agentless policy
-      if (error.statusCode === 404 && !agentPolicy.supports_agentless) {
-        throw error;
-      }
-      logger.error(`Error deleting  save object for agent policy ${id}`);
-    }
-
+    await soClient.delete(savedObjectType, id);
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
       spaceId: soClient.getCurrentNamespace(),
     });
