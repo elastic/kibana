@@ -12,7 +12,6 @@ export const HOST_ENTITY_DEFINITION: EntityDefinition = entityDefinitionSchema.p
   name: 'EA Host Store',
   type: 'node',
   indexPatterns: ['log*'],
-  filter: '@timestamp >= now-5m',
   identityFields: ['host.name'],
   displayNameTemplate: '{{host.name}}',
   metadata: [
@@ -37,7 +36,6 @@ export const USER_ENTITY_DEFINITION: EntityDefinition = entityDefinitionSchema.p
   name: 'EA User Store',
   type: 'node',
   indexPatterns: ['log*'],
-  filter: '@timestamp >= now-5m',
   identityFields: ['user.name'],
   displayNameTemplate: '{{user.name}}',
   metadata: [

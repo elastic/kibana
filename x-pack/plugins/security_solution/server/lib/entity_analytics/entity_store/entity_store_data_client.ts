@@ -8,7 +8,10 @@
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 
-import type { InitEntityStoreResponse } from '../../../../common/api/entity_analytics/entity_store/engine/init.gen';
+import type {
+  InitEntityStoreRequestBody,
+  InitEntityStoreResponse,
+} from '../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 import type {
   EngineDescriptor,
   EntityType,
@@ -39,14 +42,21 @@ export class EntityStoreDataClient {
       -H 'elastic-api-version: 2023-10-31' \
       http:///elastic:changeme@localhost:5601/api/entity_store/engines/host/init
   */
-  public async init(entityType: EntityType): Promise<InitEntityStoreResponse> {
+  public async init(
+    entityType: EntityType,
+    { indexPattern = '', filter = '' }: InitEntityStoreRequestBody
+  ): Promise<InitEntityStoreResponse> {
     const definition = getEntityDefinition(entityType);
 
     this.options.logger.debug(`Initializing entity store for ${entityType}`);
 
-    const savedObj = await this.engineClient.init(entityType, definition);
+    const savedObj = await this.engineClient.init(entityType, definition, filter);
     await this.options.entityClient.createEntityDefinition({
-      definition,
+      definition: {
+        ...definition,
+        filter,
+        indexPatterns: [...definition.indexPatterns, ...indexPattern.split(',')],
+      },
     });
     const updatedObj = await this.engineClient.update(savedObj.id, 'started');
 

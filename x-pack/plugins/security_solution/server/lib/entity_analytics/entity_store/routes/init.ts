@@ -11,7 +11,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import type { InitEntityStoreResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
-import { InitEntityStoreRequestParams } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
+import {
+  InitEntityStoreRequestBody,
+  InitEntityStoreRequestParams,
+} from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 import { API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
@@ -32,7 +35,7 @@ export const initEntityEngineRoute = (
           request: {
             query: undefined,
             params: buildRouteValidationWithZod(InitEntityStoreRequestParams),
-            body: undefined,
+            body: buildRouteValidationWithZod(InitEntityStoreRequestBody),
           },
         },
       },
@@ -45,7 +48,7 @@ export const initEntityEngineRoute = (
 
           const body: InitEntityStoreResponse = await secSol
             .getEntityStoreDataClient()
-            .init(request.params.entityType);
+            .init(request.params.entityType, request.body);
 
           return response.ok({ body });
         } catch (e) {

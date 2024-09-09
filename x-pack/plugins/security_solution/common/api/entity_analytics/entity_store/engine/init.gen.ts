@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { EntityType, EngineDescriptor } from '../common.gen';
+import { EntityType, IndexPattern, EngineDescriptor } from '../common.gen';
 
 export type InitEntityStoreRequestParams = z.infer<typeof InitEntityStoreRequestParams>;
 export const InitEntityStoreRequestParams = z.object({
@@ -26,6 +26,13 @@ export const InitEntityStoreRequestParams = z.object({
   entityType: EntityType,
 });
 export type InitEntityStoreRequestParamsInput = z.input<typeof InitEntityStoreRequestParams>;
+
+export type InitEntityStoreRequestBody = z.infer<typeof InitEntityStoreRequestBody>;
+export const InitEntityStoreRequestBody = z.object({
+  indexPattern: IndexPattern.optional(),
+  filter: z.string().optional(),
+});
+export type InitEntityStoreRequestBodyInput = z.input<typeof InitEntityStoreRequestBody>;
 
 export type InitEntityStoreResponse = z.infer<typeof InitEntityStoreResponse>;
 export const InitEntityStoreResponse = EngineDescriptor;

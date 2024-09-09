@@ -253,6 +253,7 @@ import type {
 } from './entity_analytics/entity_store/engine/get.gen';
 import type {
   InitEntityStoreRequestParamsInput,
+  InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
 } from './entity_analytics/entity_store/engine/init.gen';
 import type { ListEntityStoreEnginesResponse } from './entity_analytics/entity_store/engine/list.gen';
@@ -1384,6 +1385,7 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2056,6 +2058,7 @@ export interface ImportTimelinesProps {
 }
 export interface InitEntityStoreProps {
   params: InitEntityStoreRequestParamsInput;
+  body: InitEntityStoreRequestBodyInput;
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;

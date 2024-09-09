@@ -22,7 +22,7 @@ import { getByEntityTypeQuery } from '../utils/utils';
 export class EngineDescriptorClient {
   constructor(private readonly soClient: SavedObjectsClientContract) {}
 
-  async init(entityType: EntityType, definition: EntityDefinition) {
+  async init(entityType: EntityType, definition: EntityDefinition, filter: string) {
     const engineDescriptor = await this.get(entityType);
 
     if (engineDescriptor.total > 0)
@@ -34,7 +34,7 @@ export class EngineDescriptorClient {
         status: 'installing',
         type: entityType,
         indexPattern: definition.indexPatterns.join(','),
-        filter: '', // TODO: pipe in the filter from the request params
+        filter,
       },
       { id: definition.id }
     );
