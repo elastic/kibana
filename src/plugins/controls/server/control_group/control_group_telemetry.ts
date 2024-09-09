@@ -9,7 +9,6 @@
 
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
-import { SerializableRecord } from '@kbn/utility-types';
 import {
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
@@ -109,9 +108,10 @@ const reportControlTypes = (
   return controlTypeStats;
 };
 
-export const controlGroupTelemetry: PersistableStateService<
-  SerializableRecord & ControlGroupSerializedState
->['telemetry'] = (state, stats): ControlGroupTelemetry => {
+export const controlGroupTelemetry: PersistableStateService['telemetry'] = (
+  state,
+  stats
+): ControlGroupTelemetry => {
   const controlGroupStats = initializeControlGroupTelemetry(stats);
   const controlGroupState = {
     ...getDefaultControlGroupState(),
