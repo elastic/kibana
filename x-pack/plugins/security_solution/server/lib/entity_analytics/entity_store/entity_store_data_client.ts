@@ -65,6 +65,7 @@ export class EntityStoreDataClient {
     const definition = getEntityDefinition(entityType);
 
     const savedObj = await this.engineClient.get(entityType).then(ensureEngineExists(entityType));
+    await this.options.entityClient.startEntityDefinition(definition);
 
     if (savedObj.attributes.status !== 'stopped') {
       throw new Error(
@@ -83,6 +84,7 @@ export class EntityStoreDataClient {
     const definition = getEntityDefinition(entityType);
 
     const savedObj = await this.engineClient.get(entityType).then(ensureEngineExists(entityType));
+    await this.options.entityClient.stopEntityDefinition(definition);
 
     if (savedObj.attributes.status !== 'started') {
       throw new Error(
