@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile, getService }) {
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');

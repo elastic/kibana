@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const { dashboard, maps } = getPageObjects(['dashboard', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -21,13 +22,13 @@ export default function ({ getPageObjects, getService }) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
       await dashboardAddPanel.addEmbeddable('document example', 'map');
 
-      await PageObjects.maps.setView(0.0, 0.0, 10);
-      await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
-      await PageObjects.dashboard.loadSavedDashboard(DASHBOARD_NAME);
+      await maps.setView(0.0, 0.0, 10);
+      await dashboard.saveDashboard(DASHBOARD_NAME);
+      await dashboard.loadSavedDashboard(DASHBOARD_NAME);
     });
 
     after(async () => {
@@ -35,7 +36,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should render map with center and zoom from embeddable state', async () => {
-      const { lat, lon, zoom } = await PageObjects.maps.getView();
+      const { lat, lon, zoom } = await maps.getView();
       expect(Math.round(lat)).to.equal(0);
       expect(Math.round(lon)).to.equal(0);
       expect(Math.round(zoom)).to.equal(10);
