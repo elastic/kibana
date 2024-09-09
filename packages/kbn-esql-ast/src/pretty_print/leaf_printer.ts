@@ -19,15 +19,8 @@ const regexUnquotedIdPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;
 export const LeafPrinter = {
   source: (node: ESQLSource) => node.name,
 
-  /**
-   * @todo: Add support for: (1) escaped characters, (2) nested fields.
-   *
-   * See: https://github.com/elastic/kibana/issues/189913
-   */
   column: (node: ESQLColumn) => {
-    // In the future "column" nodes will have a "parts" field that will be used
-    // specify the parts of the column name.
-    const parts: string[] = [node.text];
+    const parts: string[] = node.parts;
 
     let formatted = '';
 
