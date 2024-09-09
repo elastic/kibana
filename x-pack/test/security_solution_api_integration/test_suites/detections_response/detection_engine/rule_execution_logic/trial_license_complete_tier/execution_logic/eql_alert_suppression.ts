@@ -54,6 +54,8 @@ const getSequenceQuery = (id: string) =>
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
+
   const es = getService('es');
   const log = getService('log');
   const {
@@ -76,8 +78,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteAllAlerts(supertest, log, es);
+      await deleteAllAlerts(supertest, log, es, [
+        '.preview.alerts-security.alerts-*',
+        '.alerts-security.alerts-*',
+      ]);
       await deleteAllRules(supertest, log);
+      await esDeleteAllIndices('.preview.alerts*');
     });
 
     describe('non-sequence queries', () => {
@@ -1788,7 +1794,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('sequence queries', () => {
-      it.skip('only suppresses alerts within the rule execution', async () => {
+      it('only suppresses alerts within the rule execution', async () => {
         const id = uuidv4();
         const timestamp = '2020-10-28T06:45:00.000Z';
         const laterTimestamp = '2020-10-28T06:50:00.000Z';
@@ -1808,7 +1814,7 @@ export default ({ getService }: FtrProviderContext) => {
           doc1,
           doc1WithLaterTimestamp,
           { ...doc1, '@timestamp': timestamp1 },
-          // { ...doc1WithLaterTimestamp, '@timestamp': laterTimestamp2 },
+          { ...doc1WithLaterTimestamp, '@timestamp': laterTimestamp2 },
         ]);
 
         const rule: EqlRuleCreateProps = {
@@ -1833,8 +1839,8 @@ export default ({ getService }: FtrProviderContext) => {
           previewId,
           sort: [ALERT_ORIGINAL_TIME],
         });
-        // we expect three alerts, two building block and
-        // one sequence alert, let's confirm that
+        // we expect one alert and two suppressed alerts
+        // and two building block alerts, let's confirm that
         expect(previewAlerts.length).toEqual(3);
         const [sequenceAlert, buildingBlockAlerts] = partition(
           previewAlerts,
@@ -1842,7 +1848,6 @@ export default ({ getService }: FtrProviderContext) => {
         );
         expect(buildingBlockAlerts.length).toEqual(2);
         expect(sequenceAlert.length).toEqual(1);
-        console.error(JSON.stringify(sequenceAlert));
 
         expect(sequenceAlert[0]?._source).toEqual({
           ...sequenceAlert[0]?._source,
@@ -1854,45 +1859,10 @@ export default ({ getService }: FtrProviderContext) => {
           ],
           [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
           [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
-          [ALERT_ORIGINAL_TIME]: timestamp,
-          [ALERT_SUPPRESSION_START]: timestamp,
-          [ALERT_SUPPRESSION_END]: laterTimestamp, // suppression ends with later timestamp
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          [ALERT_SUPPRESSION_START]: laterTimestamp,
+          [ALERT_SUPPRESSION_END]: laterTimestamp2,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
         });
-      });
-      it('logs a warning if suppression is configured', async () => {
-        const id = uuidv4();
-        await indexGeneratedSourceDocuments({
-          docsCount: 10,
-          seed: () => ({ id }),
-        });
-
-        const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForAlertTesting(['ecs_compliant']),
-          query: getSequenceQuery(id),
-          alert_suppression: {
-            group_by: ['agent.name'],
-            duration: {
-              value: 300,
-              unit: 'm',
-            },
-            missing_fields_strategy: 'suppress',
-          },
-          from: 'now-35m',
-          interval: '30m',
-        };
-
-        const { logs } = await previewRule({
-          supertest,
-          rule,
-          invocationCount: 1,
-        });
-
-        const [{ warnings }] = logs;
-
-        expect(warnings).toContain(
-          'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
-        );
       });
     });
   });
