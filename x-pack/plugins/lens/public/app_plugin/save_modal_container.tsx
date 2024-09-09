@@ -132,12 +132,13 @@ export function SaveModalContainer({
       ? savedObjectsTagging.ui.getTagIdsFromReferences(persistedDoc.references)
       : [];
 
-  const runLensSave = (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
+  const runLensSave = async (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
     if (runSave) {
       // inside lens, we use the function that's passed to it
-      runSave(saveProps, options);
-    } else if (attributeService && lastKnownDoc) {
-      runSaveLensVisualization(
+      return runSave(saveProps, options);
+    }
+    if (attributeService && lastKnownDoc) {
+      await runSaveLensVisualization(
         {
           ...lensServices,
           lastKnownDoc,
@@ -146,16 +147,14 @@ export function SaveModalContainer({
           redirectToOrigin,
           originatingApp,
           getOriginatingPath,
-          getIsByValueMode: () => false,
           onAppLeave: () => {},
           ...lensServices,
         },
         saveProps,
         options
-      ).then(() => {
-        onSave?.(saveProps);
-        onClose();
-      });
+      );
+      onSave?.(saveProps);
+      onClose();
     }
   };
 
@@ -219,10 +218,9 @@ const getDocToSave = (
   return docToSave;
 };
 
-type SaveVisualizationProps = Simplify<
+export type SaveVisualizationProps = Simplify<
   {
     lastKnownDoc?: LensDocument;
-    getIsByValueMode: () => boolean;
     persistedDoc?: LensDocument;
     originatingApp?: string;
     getOriginatingPath?: (dashboardId: string) => string;
@@ -259,7 +257,6 @@ export const runSaveLensVisualization = async (
     stateTransfer,
     attributeService,
     savedObjectsTagging,
-    getIsByValueMode,
     redirectToOrigin,
     onAppLeave,
     redirectTo,
@@ -291,41 +288,29 @@ export const runSaveLensVisualization = async (
 
   const docToSave = getDocToSave(lastKnownDoc, saveProps, references);
 
-  // Required to serialize filters in by value mode until
-  // https://github.com/elastic/kibana/issues/77588 is fixed
-  if (getIsByValueMode()) {
-    docToSave.state.filters.forEach((filter) => {
-      if (typeof filter.meta.value === 'function') {
-        delete filter.meta.value;
-      }
-    });
-  }
-
   const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
   const originalSavedObjectId = originalInput?.savedObjectId;
   if (options.saveToLibrary) {
-    try {
-      await checkForDuplicateTitle(
-        {
-          id: originalSavedObjectId,
-          title: docToSave.title,
-          displayName: i18n.translate('xpack.lens.app.saveModalType', {
-            defaultMessage: 'Lens visualization',
-          }),
-          lastSavedTitle: lastKnownDoc.title,
-          copyOnSave: saveProps.newCopyOnSave,
-          isTitleDuplicateConfirmed: saveProps.isTitleDuplicateConfirmed,
-        },
-        saveProps.onTitleDuplicate,
-        {
-          client: savedObjectStore,
-          ...startServices,
-        }
-      );
-    } catch (e) {
-      // ignore duplicate title failure, user notified in save modal
-      throw e;
-    }
+    // this is a lower level call that the Lens attribute service one
+    // @TODO: check if it's worth to replace it witht he attribute service one
+    await checkForDuplicateTitle(
+      {
+        id: originalSavedObjectId,
+        title: docToSave.title,
+        displayName: i18n.translate('xpack.lens.app.saveModalType', {
+          defaultMessage: 'Lens visualization',
+        }),
+        lastSavedTitle: lastKnownDoc.title,
+        copyOnSave: saveProps.newCopyOnSave,
+        isTitleDuplicateConfirmed: saveProps.isTitleDuplicateConfirmed,
+      },
+      saveProps.onTitleDuplicate,
+      {
+        client: savedObjectStore,
+        ...startServices,
+      }
+    );
+    // ignore duplicate title failure, user notified in save modal
   }
   try {
     // wrap the doc into a serializable state
@@ -335,13 +320,14 @@ export const runSaveLensVisualization = async (
 
     let savedObjectId: string | undefined;
     try {
-      savedObjectId = newDoc.attributes
-        ? await attributeService.saveToLibrary(
-            newDoc.attributes,
-            newDoc.attributes.references || [],
-            newDoc.savedObjectId
-          )
-        : undefined;
+      savedObjectId =
+        newDoc.attributes && options.saveToLibrary
+          ? await attributeService.saveToLibrary(
+              newDoc.attributes,
+              newDoc.attributes.references || [],
+              newDoc.savedObjectId
+            )
+          : undefined;
     } catch (error) {
       notifications.toasts.addDanger({
         title: i18n.translate('xpack.lens.app.saveVisualization.errorNotificationText', {
@@ -366,13 +352,17 @@ export const runSaveLensVisualization = async (
       });
     }
 
-    if (shouldNavigateBackToOrigin && savedObjectId) {
+    if (shouldNavigateBackToOrigin) {
       redirectToOrigin({
         state: newDoc.attributes,
         isCopied: saveProps.newCopyOnSave,
       });
       return;
     }
+    // should we make it more robust here and better check the context of the saving
+    // or keep the responsability of the consumer of the function to provide the right set
+    // of args here in case the user is within a by value chart AND want's to save it in the library
+    // without redirect?
     if (saveProps.dashboardId) {
       redirectToDashboard({
         embeddableInput: newDoc,

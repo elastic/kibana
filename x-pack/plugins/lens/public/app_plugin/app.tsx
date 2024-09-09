@@ -15,7 +15,7 @@ import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
-import { AddUserMessages, EditorFrameInstance, UserMessagesGetter } from '../types';
+import { AddUserMessages, EditorFrameInstance, Simplify, UserMessagesGetter } from '../types';
 import { LensDocument } from '../persistence/saved_object_store';
 
 import {
@@ -49,14 +49,16 @@ import {
   useShortUrlService,
 } from './app_helpers';
 
-export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
-  returnToOrigin: boolean;
-  dashboardId?: string | null;
-  onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
-  newDescription?: string;
-  newTags?: string[];
-  panelTimeRange?: TimeRange;
-};
+export type SaveProps = Simplify<
+  Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
+    returnToOrigin: boolean;
+    dashboardId?: string | null;
+    onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
+    newDescription?: string;
+    newTags?: string[];
+    panelTimeRange?: TimeRange;
+  }
+>;
 
 export function App({
   history,
@@ -308,7 +310,6 @@ export function App({
         const newState = await runSaveLensVisualization(
           {
             lastKnownDoc,
-            getIsByValueMode,
             savedObjectsTagging,
             initialInput,
             redirectToOrigin,
@@ -339,7 +340,6 @@ export function App({
       activeVisualization,
       dispatch,
       lastKnownDoc,
-      getIsByValueMode,
       savedObjectsTagging,
       initialInput,
       redirectToOrigin,
@@ -398,7 +398,6 @@ export function App({
       }),
     [dataViews, uiActions, http, notifications, uiSettings, initialContext, dispatch]
   );
-
 
   const shortUrlService = useShortUrlService(locator, share);
 

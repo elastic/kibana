@@ -59,6 +59,18 @@ export const exactMatchDoc = {
   },
 };
 
+export function makeAttributeService(doc: LensDocument): LensAttributesService {
+  const attributeServiceMock = {
+    loadFromLibrary: jest.fn().mockResolvedValue(exactMatchDoc),
+    saveToLibrary: jest.fn().mockResolvedValue(
+      doc.savedObjectId,
+    ),
+    checkForDuplicateTitle: jest.fn(),
+  };
+
+  return attributeServiceMock;
+}
+
 export function makeDefaultServices(
   sessionIdSubject = new Subject<string>(),
   sessionId: string | undefined = undefined,
@@ -101,23 +113,13 @@ export function makeDefaultServices(
       return <div className="topNavMenu" />;
     });
 
-  function makeAttributeService(): LensAttributesService {
-    const attributeServiceMock = {
-      loadFromLibrary: jest.fn().mockResolvedValue(exactMatchDoc),
-      saveToLibrary: jest.fn().mockResolvedValue({
-        savedObjectId: (doc as LensDocument).savedObjectId,
-      }),
-      checkForDuplicateTitle: jest.fn(),
-    };
-
-    return attributeServiceMock;
-  }
+  
 
   return {
     ...startMock,
     chrome: core.chrome,
     navigation: navigationStartMock,
-    attributeService: makeAttributeService(),
+    attributeService: makeAttributeService(doc),
     inspector: {
       getInspectorAdapters: getLensInspectorService(inspectorPluginMock.createStartContract())
         .getInspectorAdapters,
