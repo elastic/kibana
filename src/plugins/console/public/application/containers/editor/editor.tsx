@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, memo, useEffect, useState } from 'react';
+import React, { useRef, useCallback, memo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
 import {
   EuiProgress,
@@ -30,10 +30,11 @@ import {
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
 import {
-  useEditorReadContext,
+  useEditorActionContext,
   useServicesContext,
   useRequestReadContext,
   useRequestActionContext,
+  useEditorReadContext,
 } from '../../contexts';
 import type { SenseEditor } from '../../models';
 import { MonacoEditor, MonacoEditorOutput } from './monaco';
@@ -59,6 +60,7 @@ export const Editor = memo(
     inputEditorValue,
     setInputEditorValue,
   }: Props) => {
+    const editorValueRef = useRef<TextObject | null>(null);
     const { euiTheme } = useEuiTheme();
     const {
       services: { storage, objectStorageClient },
@@ -72,6 +74,7 @@ export const Editor = memo(
     } = useRequestReadContext();
 
     const dispatch = useRequestActionContext();
+    const dispatchEditor = useEditorActionContext();
 
     const [fetchingMappings, setFetchingMappings] = useState(false);
 
@@ -98,10 +101,20 @@ export const Editor = memo(
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     const debouncedUpdateLocalStorageValue = useCallback(
       debounce((textObject: TextObject) => {
+        editorValueRef.current = textObject;
         objectStorageClient.text.update(textObject);
       }, DEBOUNCE_DELAY),
       []
     );
+
+    useEffect(() => {
+      return () => {
+        dispatchEditor({
+          type: 'setCurrentTextObject',
+          payload: editorValueRef.current!,
+        });
+      };
+    }, []);
 
     // Always keep the localstorage in sync with the value in the editor
     // to avoid losing the text object when the user navigates away from the shell

@@ -91,12 +91,10 @@ export function Main({ isEmbeddable = false }: MainProps) {
 
   const { done, error, retry } = useDataInit();
 
+  // Clean up request output when switching tabs
   useEffect(() => {
-    // Clean up request output when switching tabs
     requestDispatch({ type: 'cleanRequest', payload: undefined });
-    // When switching tabs, restore the editor content to the last saved state
-    retry();
-  }, [currentView, requestDispatch, retry]);
+  }, [currentView, requestDispatch]);
 
   const { currentTextObject } = useEditorReadContext();
   const [inputEditorValue, setInputEditorValue] = useState<string>(currentTextObject?.text ?? '');
