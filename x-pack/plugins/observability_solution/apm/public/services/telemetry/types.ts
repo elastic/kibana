@@ -35,7 +35,7 @@ export interface EntityInventoryAddDataParams {
 }
 
 export interface EmptyStateClickParams {
-  view: 'add_apm_cta';
+  view: Extract<EntityInventoryAddDataParams['view'], 'add_apm_cta'>;
 }
 
 export type TelemetryEventParams =
