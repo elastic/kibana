@@ -14,10 +14,10 @@ import { renderWrapper } from '../../test/mock_server/mock_server_test_provider'
 import { Configurations } from './configurations';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
-import { findingsNavigation } from '../../common/navigation/constants';
+import { findingsNavigation } from '@kbn/cloud-security-posture';
 import userEvent from '@testing-library/user-event';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { CspClientPluginStartDeps } from '../../types';
+import { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import * as statusHandlers from '../../../server/routes/status/status.handlers.mock';
 import {
   bsearchFindingsHandler,
@@ -44,13 +44,44 @@ describe('<Findings />', () => {
     server.use(rulesGetStatesHandler);
   });
 
-  it('renders integrations installation prompt if integration is not installed', async () => {
+  it('renders integrations installation prompt if integration is not installed and there are no findings', async () => {
     server.use(statusHandlers.notInstalledHandler);
     renderFindingsPage();
 
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText(/add cspm integration/i)).toBeInTheDocument());
     expect(screen.getByText(/add kspm integration/i)).toBeInTheDocument();
+  });
+
+  it("renders the 'latest misconfigurations findings' DataTable component when the CSPM/KSPM integration status is not installed but there are findings", async () => {
+    const finding1 = generateCspFinding('0003', 'failed');
+    const finding2 = generateCspFinding('0004', 'passed');
+
+    server.use(statusHandlers.notInstalledHasMisconfigurationsFindingsHandler);
+    server.use(bsearchFindingsHandler([finding1, finding2]));
+    renderFindingsPage();
+
+    // Loading while checking the status API and fetching the findings
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+    await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
+
+    const fieldsToCheck = [
+      finding1.resource.name,
+      finding1.resource.id,
+      finding1.rule.benchmark.rule_number as string,
+      finding1.rule.name,
+      finding1.rule.section,
+      finding2.resource.name,
+      finding2.resource.id,
+      finding2.rule.benchmark.rule_number as string,
+      finding2.rule.name,
+      finding2.rule.section,
+    ];
+
+    fieldsToCheck.forEach((fieldValue) => {
+      expect(screen.getByText(fieldValue)).toBeInTheDocument();
+    });
   });
 
   it("renders the 'latest findings' DataTable component when the CSPM/KSPM integration status is 'indexed' grouped by 'none'", async () => {

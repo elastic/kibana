@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import {
   parseErrors,
@@ -249,8 +251,36 @@ describe('helpers', function () {
       };
       const indices = await getIndicesList(updatedDataViewsMock);
       expect(indices).toStrictEqual([
-        { name: '.system1', hidden: true },
-        { name: 'logs', hidden: false },
+        { name: '.system1', hidden: true, type: 'Index' },
+        { name: 'logs', hidden: false, type: 'Index' },
+      ]);
+    });
+
+    it('should type correctly the aliases', async function () {
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const updatedDataViewsMock = {
+        ...dataViewsMock,
+        getIndices: jest.fn().mockResolvedValue([
+          {
+            name: 'alias1',
+            title: 'system1',
+            tags: [
+              {
+                name: 'Alias',
+                type: 'alias',
+              },
+            ],
+          },
+          {
+            name: 'logs',
+            title: 'logs',
+          },
+        ]),
+      };
+      const indices = await getIndicesList(updatedDataViewsMock);
+      expect(indices).toStrictEqual([
+        { name: 'alias1', hidden: false, type: 'Alias' },
+        { name: 'logs', hidden: false, type: 'Index' },
       ]);
     });
   });
@@ -283,7 +313,7 @@ describe('helpers', function () {
         ]),
       };
       const indices = await getRemoteIndicesList(updatedDataViewsMock);
-      expect(indices).toStrictEqual([{ name: 'remote:logs', hidden: false }]);
+      expect(indices).toStrictEqual([{ name: 'remote:logs', hidden: false, type: 'Index' }]);
     });
   });
 });

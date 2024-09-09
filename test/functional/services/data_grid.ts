@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { chunk } from 'lodash';
@@ -27,6 +28,7 @@ export class DataGridService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
 
   async getDataGridTableData(): Promise<TabbedGridData> {
     const table = await this.find.byCssSelector('.euiDataGrid');
@@ -80,6 +82,20 @@ export class DataGridService extends FtrService {
     return $('.euiDataGridHeaderCell__content')
       .toArray()
       .map((cell) => $(cell).text());
+  }
+
+  public getHeaderElement(field: string) {
+    return this.testSubjects.find(`dataGridHeaderCell-${field}`);
+  }
+
+  public async resizeColumn(field: string, delta: number) {
+    const header = await this.getHeaderElement(field);
+    const originalWidth = (await header.getSize()).width;
+    const resizer = await header.findByCssSelector(
+      this.testSubjects.getCssSelector('dataGridColumnResizer')
+    );
+    await this.browser.dragAndDrop({ location: resizer }, { location: { x: delta, y: 0 } });
+    return { originalWidth, newWidth: (await header.getSize()).width };
   }
 
   private getCellElementSelector(rowIndex: number = 0, columnIndex: number = 0) {
@@ -465,6 +481,16 @@ export class DataGridService extends FtrService {
     await this.testSubjects.click('gridEditFieldButton');
   }
 
+  public async resetColumnWidthExists(field: string) {
+    await this.openColMenuByField(field);
+    return await this.testSubjects.exists('unifiedDataTableResetColumnWidth');
+  }
+
+  public async clickResetColumnWidth(field: string) {
+    await this.openColMenuByField(field);
+    await this.testSubjects.click('unifiedDataTableResetColumnWidth');
+  }
+
   public async clickGridSettings() {
     await this.testSubjects.click('dataGridDisplaySelectorButton');
   }
@@ -508,6 +534,18 @@ export class DataGridService extends FtrService {
     const buttonGroup = await this.testSubjects.find(
       'unifiedDataTableHeaderRowHeightSettings_rowHeightButtonGroup'
     );
+    const option = await buttonGroup.findByCssSelector(`[data-text="${newValue}"]`);
+    await option.click();
+  }
+
+  public async getCurrentDensityValue() {
+    const buttonGroup = await this.testSubjects.find('densityButtonGroup');
+    const selectedButton = await buttonGroup.findByCssSelector('[aria-pressed=true]');
+    return selectedButton.getVisibleText();
+  }
+
+  public async changeDensityValue(newValue: string) {
+    const buttonGroup = await this.testSubjects.find('densityButtonGroup');
     const option = await buttonGroup.findByCssSelector(`[data-text="${newValue}"]`);
     await option.click();
   }
@@ -565,6 +603,24 @@ export class DataGridService extends FtrService {
   public async clickFieldActionInFlyout(fieldName: string, actionName: string): Promise<void> {
     await this.showFieldCellActionInFlyout(fieldName, actionName);
     await this.testSubjects.click(`${actionName}-${fieldName}`);
+  }
+
+  public async isFieldPinnedInFlyout(fieldName: string): Promise<boolean> {
+    return !(
+      await this.testSubjects.getAttribute(`unifiedDocViewer_pinControl_${fieldName}`, 'class')
+    )?.includes('kbnDocViewer__fieldsGrid__pinAction');
+  }
+
+  public async togglePinActionInFlyout(fieldName: string): Promise<void> {
+    await this.testSubjects.moveMouseTo(`unifiedDocViewer_pinControl_${fieldName}`);
+    const isPinned = await this.isFieldPinnedInFlyout(fieldName);
+    await this.retry.waitFor('pin action to appear', async () => {
+      return this.testSubjects.exists(`unifiedDocViewer_pinControlButton_${fieldName}`);
+    });
+    await this.testSubjects.click(`unifiedDocViewer_pinControlButton_${fieldName}`);
+    await this.retry.waitFor('pin action to toggle', async () => {
+      return (await this.isFieldPinnedInFlyout(fieldName)) !== isPinned;
+    });
   }
 
   public async expandFieldNameCellInFlyout(fieldName: string): Promise<void> {

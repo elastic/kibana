@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import {
   ampersandRegex,
   digitRegex,
@@ -19,18 +21,25 @@ import {
 /*
  * This function parses a line with the method and url.
  * The url is parsed into path and params, each parsed into tokens.
- * Returns method, urlPathTokens and urlParamsTokens which are arrays of strings.
+ * Returns method, url, urlPathTokens and urlParamsTokens which are arrays of strings.
  */
-export const parseLine = (line: string): ParsedLineTokens => {
-  // try to parse into method and url (split on whitespace)
-  const parts = line.split(whitespacesRegex);
+export const parseLine = (line: string, parseUrlIntoTokens: boolean = true): ParsedLineTokens => {
+  line = line.trim();
+  const firstWhitespaceIndex = line.indexOf(' ');
+  if (firstWhitespaceIndex < 0) {
+    // there is no url, only method
+    return { method: line, url: '', urlPathTokens: [], urlParamsTokens: [] };
+  }
   // 1st part is the method
-  const method = parts[0].toUpperCase();
+  const method = line.slice(0, firstWhitespaceIndex).trim().toUpperCase();
   // 2nd part is the url
-  const url = parts[1];
-  // try to parse into url path and url params (split on question mark)
-  const { urlPathTokens, urlParamsTokens } = parseUrl(url);
-  return { method, urlPathTokens, urlParamsTokens };
+  const url = removeTrailingWhitespaces(line.slice(firstWhitespaceIndex).trim());
+  if (parseUrlIntoTokens) {
+    // try to parse into url path and url params (split on question mark)
+    const { urlPathTokens, urlParamsTokens } = parseUrl(url);
+    return { method, url, urlPathTokens, urlParamsTokens };
+  }
+  return { method, url, urlPathTokens: [], urlParamsTokens: [] };
 };
 
 /*
@@ -444,6 +453,7 @@ export const containsUrlParams = (lineContent: string): boolean => {
  */
 interface ParsedLineTokens {
   method: string;
+  url: string;
   urlPathTokens: string[];
   urlParamsTokens: string[][];
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pick } from 'lodash';
@@ -66,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickQuickSave();
     });
 
-    describe('Applies query settings to controls', async () => {
+    describe('Applies query settings to controls', () => {
       it('Malformed query throws an error', async () => {
         await queryBar.setQuery('animal.keyword : "dog" error');
         await queryBar.submitQuery(); // quicker than clicking the submit button, but hides the time picker
@@ -111,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await timePicker.setDefaultDataRange();
       });
 
-      describe('dashboard filters', async () => {
+      describe('dashboard filters', () => {
         before(async () => {
           await filterBar.addFilter({
             field: 'sound.keyword',
@@ -167,7 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Selections made in control apply to dashboard', async () => {
+    describe('Selections made in control apply to dashboard', () => {
       it('Shows available options in options list', async () => {
         await queryBar.setQuery('');
         await queryBar.submitQuery();
@@ -259,8 +260,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clearUnsavedChanges();
       });
 
-      describe('discarding changes', async () => {
-        describe('changes can be discarded', async () => {
+      describe('discarding changes', () => {
+        describe('changes can be discarded', () => {
           let selections = '';
 
           beforeEach(async () => {
@@ -292,7 +293,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Test data view runtime field', async () => {
+    describe('Test data view runtime field', () => {
       const FIELD_NAME = 'testRuntimeField';
       const FIELD_VALUES = {
         G:
@@ -360,7 +361,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Test exists query', async () => {
+    describe('Test exists query', () => {
       const newDocuments: Array<{ index: string; id: string }> = [];
 
       const addDocument = async (index: string, document: string) => {

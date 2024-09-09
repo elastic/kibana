@@ -25,13 +25,29 @@ import {
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
+  ALERT_RULE_CATEGORY,
+  ALERT_START,
+  ALERT_END,
+  ALERT_RULE_TYPE_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ALERT_GROUP,
 } from '@kbn/rule-data-utils';
 
+import { v4 as uuidv4 } from 'uuid';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import { CreateInvestigationResponse } from '@kbn/investigation-shared';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { Group } from '@kbn/observability-alerting-rule-utils';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
 import { paths } from '../../../../common/locators/paths';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
+import { useCreateInvestigation } from '../hooks/use_create_investigation';
+import { useFetchInvestigationsByAlert } from '../hooks/use_fetch_investigations_by_alert';
+import { useAddInvestigationItem } from '../hooks/use_add_investigation_item';
+import { AlertParams } from '../../../components/custom_threshold/types';
+import { generateInvestigationItem } from '../../../utils/investigation_item_helper';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
@@ -52,10 +68,16 @@ export function HeaderActions({
     },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
     http,
+    application: { navigateToApp },
+    investigate: investigatePlugin,
   } = useKibana().services;
 
   const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
+  });
+
+  const { data: investigations } = useFetchInvestigationsByAlert({
+    alertId: alert?.fields[ALERT_UUID] ?? '',
   });
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -109,9 +131,95 @@ export function HeaderActions({
     setSnoozeModalOpen(true);
   };
 
+  const { mutateAsync: createInvestigation } = useCreateInvestigation();
+  const { mutateAsync: addInvestigationItem } = useAddInvestigationItem();
+
+  const alertStart = alert?.fields[ALERT_START];
+  const alertEnd = alert?.fields[ALERT_END];
+
+  const addChartsToInvestigation = async (investigationDetails: CreateInvestigationResponse) => {
+    if (
+      rule &&
+      alert &&
+      alert.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID
+    ) {
+      const ruleParams = rule.params as RuleTypeParams & AlertParams;
+
+      for (let index = 0; index < ruleParams.criteria.length; index++) {
+        const criterion = ruleParams.criteria[index];
+        const item = generateInvestigationItem(
+          criterion,
+          ruleParams.searchConfiguration,
+          alert.fields[ALERT_RULE_TYPE_ID],
+          ruleParams.groupBy,
+          alert.fields[ALERT_GROUP] as Group[]
+        );
+
+        if (item) {
+          await addInvestigationItem({ investigationId: investigationDetails.id, item });
+        }
+      }
+    }
+  };
+
+  const createOrOpenInvestigation = async () => {
+    if (!alert) return;
+
+    if (!investigations || investigations.results.length === 0) {
+      const paddedAlertTimeRange = getPaddedAlertTimeRange(alertStart!, alertEnd);
+
+      const investigationResponse = await createInvestigation({
+        investigation: {
+          id: uuidv4(),
+          title: `Investigate ${alert.fields[ALERT_RULE_CATEGORY]} breached`,
+          params: {
+            timeRange: {
+              from: new Date(paddedAlertTimeRange.from).getTime(),
+              to: new Date(paddedAlertTimeRange.to).getTime(),
+            },
+          },
+          origin: {
+            type: 'alert',
+            id: alert.fields[ALERT_UUID],
+          },
+        },
+      });
+
+      await addChartsToInvestigation(investigationResponse);
+
+      navigateToApp('investigate', { path: `/${investigationResponse.id}`, replace: false });
+    } else {
+      navigateToApp('investigate', {
+        path: `/${investigations.results[0].id}`,
+        replace: false,
+      });
+    }
+  };
+
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+        {Boolean(investigatePlugin) &&
+          alert?.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() => {
+                  createOrOpenInvestigation();
+                }}
+                fill
+                data-test-subj="investigate-alert-button"
+              >
+                <EuiText size="s">
+                  {i18n.translate('xpack.observability.alertDetails.investigateAlert', {
+                    defaultMessage:
+                      !investigations || investigations.results.length === 0
+                        ? 'Start investigation'
+                        : 'Ongoing investigation',
+                  })}
+                </EuiText>
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         <EuiFlexItem grow={false}>
           <EuiButton
             fill

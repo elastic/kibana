@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
@@ -73,7 +75,7 @@ describe('TryInConsoleButton', () => {
     const wrapper = render(<TryInConsoleButton {...defaultProps(props)} />);
 
     expect(wrapper.getByTestId('tryInConsoleButton')).toBeTruthy();
-    expect(wrapper.getByRole('button')).toHaveTextContent('Try in Console');
+    expect(wrapper.getByRole('button')).toHaveTextContent('Run in Console');
     expect(mockLocatorUseUrl).toHaveBeenCalledWith(
       {
         loadFrom: 'data:text/plain,OIUQKgBA9A+gzgFwIYLkA',
@@ -87,7 +89,7 @@ describe('TryInConsoleButton', () => {
     const wrapper = render(<TryInConsoleButton {...defaultProps(props)} />);
 
     expect(wrapper.getByTestId('tryInConsoleLink')).toBeTruthy();
-    expect(wrapper.getByRole('button')).toHaveTextContent('Try in Console');
+    expect(wrapper.getByRole('button')).toHaveTextContent('Run in Console');
   });
   it('renders null if dev tools are unavailable', async () => {
     const props: Partial<TryInConsoleButtonProps> = {
@@ -153,7 +155,7 @@ describe('TryInConsoleButton', () => {
     const props: Partial<TryInConsoleButtonProps> = { request: 'GET /_stats' };
     render(<TryInConsoleButton {...defaultProps(props)} />);
 
-    fireEvent.click(screen.getByText('Try in Console'));
+    fireEvent.click(screen.getByText('Run in Console'));
 
     expect(windowOpenSpy).toHaveBeenCalledTimes(1);
     expect(windowOpenSpy).toHaveBeenCalledWith('/app/test/dev_tools', '_blank', 'noreferrer');
@@ -161,7 +163,7 @@ describe('TryInConsoleButton', () => {
   it('can open in new tab without data', async () => {
     render(<TryInConsoleButton {...defaultProps({})} />);
 
-    fireEvent.click(screen.getByText('Try in Console'));
+    fireEvent.click(screen.getByText('Run in Console'));
 
     expect(mockLocatorUseUrl).toHaveBeenCalledWith({}, undefined, [undefined]);
     expect(windowOpenSpy).toHaveBeenCalledTimes(1);
@@ -175,7 +177,7 @@ describe('TryInConsoleButton', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('Try in Console'));
+    fireEvent.click(screen.getByText('Run in Console'));
 
     expect(windowOpenSpy).toHaveBeenCalledTimes(0);
     expect(mockConsole.openEmbeddedConsole).toHaveBeenCalledTimes(1);
@@ -185,7 +187,7 @@ describe('TryInConsoleButton', () => {
     mockConsole.isEmbeddedConsoleAvailable.mockReturnValue(false);
     render(<TryInConsoleButton {...defaultProps({ consolePlugin: mockConsole })} />);
 
-    fireEvent.click(screen.getByText('Try in Console'));
+    fireEvent.click(screen.getByText('Run in Console'));
 
     expect(windowOpenSpy).toHaveBeenCalledTimes(1);
     expect(mockConsole.openEmbeddedConsole).toHaveBeenCalledTimes(0);

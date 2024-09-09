@@ -1,23 +1,57 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import type {
-  RequestHandlerContext,
-  Logger,
-  RouteConfigOptions,
-  RouteMethod,
   KibanaRequest,
   KibanaResponseFactory,
+  Logger,
+  RequestHandlerContext,
+  RouteConfigOptions,
+  RouteMethod,
 } from '@kbn/core/server';
+import { z } from '@kbn/zod';
 import * as t from 'io-ts';
 import { RequiredKeys } from 'utility-types';
+
+type PathMaybeOptional<T extends { path: Record<string, any> }> = RequiredKeys<
+  T['path']
+> extends never
+  ? { path?: T['path'] }
+  : { path: T['path'] };
+
+type QueryMaybeOptional<T extends { query: Record<string, any> }> = RequiredKeys<
+  T['query']
+> extends never
+  ? { query?: T['query'] }
+  : { query: T['query'] };
+
+type BodyMaybeOptional<T extends { body: Record<string, any> }> = RequiredKeys<
+  T['body']
+> extends never
+  ? { body?: T['body'] }
+  : { body: T['body'] };
+
+type ParamsMaybeOptional<
+  TPath extends Record<string, any>,
+  TQuery extends Record<string, any>,
+  TBody extends Record<string, any>
+> = PathMaybeOptional<{ path: TPath }> &
+  QueryMaybeOptional<{ query: TQuery }> &
+  BodyMaybeOptional<{ body: TBody }>;
+
+type ZodMaybeOptional<T extends { path: any; query: any; body: any }> = ParamsMaybeOptional<
+  T['path'],
+  T['query'],
+  T['body']
+>;
 
 type MaybeOptional<T extends { params: Record<string, any> }> = RequiredKeys<
   T['params']
@@ -30,13 +64,21 @@ type WithoutIncompatibleMethods<T extends t.Any> = Omit<T, 'encode' | 'asEncoder
   asEncoder: () => t.Encoder<any, any>;
 };
 
-export type RouteParamsRT = WithoutIncompatibleMethods<
+export type ZodParamsObject = z.ZodObject<{
+  path?: any;
+  query?: any;
+  body?: any;
+}>;
+
+export type IoTsParamsObject = WithoutIncompatibleMethods<
   t.Type<{
     path?: any;
     query?: any;
     body?: any;
   }>
 >;
+
+export type RouteParamsRT = IoTsParamsObject | ZodParamsObject;
 
 export interface RouteState {
   [endpoint: string]: ServerRoute<any, any, any, any, any>;
@@ -82,12 +124,20 @@ type ClientRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: t.OutputOf<TRouteParamsRT>;
       }>
+    : TRouteParamsRT extends z.Schema
+    ? MaybeOptional<{
+        params: ZodMaybeOptional<z.input<TRouteParamsRT>>;
+      }>
     : {};
 
 type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
   TRouteParamsRT extends t.Mixed
     ? MaybeOptional<{
         params: t.TypeOf<TRouteParamsRT>;
+      }>
+    : TRouteParamsRT extends z.Schema
+    ? MaybeOptional<{
+        params: ZodMaybeOptional<z.output<TRouteParamsRT>>;
       }>
     : {};
 
@@ -145,7 +195,7 @@ type MaybeOptionalArgs<T extends Record<string, any>> = RequiredKeys<T> extends 
 
 export type RouteRepositoryClient<
   TServerRouteRepository extends ServerRouteRepository,
-  TAdditionalClientOptions extends Record<string, any>
+  TAdditionalClientOptions extends Record<string, any> = DefaultClientOptions
 > = <TEndpoint extends Extract<keyof TServerRouteRepository, string>>(
   endpoint: TEndpoint,
   ...args: MaybeOptionalArgs<

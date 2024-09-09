@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import {
   ControlGroupInput,
   CONTROL_GROUP_TYPE,
@@ -178,6 +180,7 @@ export const initializeDashboard = async ({
       query: queryService,
       search: { session },
     },
+    dashboardContentInsights,
   } = pluginServices.getServices();
   const {
     queryString,
@@ -633,6 +636,14 @@ export const initializeDashboard = async ({
         creationOptions?.searchSessionSettings
       );
     });
+  }
+
+  if (loadDashboardReturn.dashboardId && !incomingEmbeddable) {
+    // We count a new view every time a user opens a dashboard, both in view or edit mode
+    // We don't count views when a user is editing a dashboard and is returning from an editor after saving
+    // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling
+    // TODO: this should be revisited by making embeddable transfer support canceling logic https://github.com/elastic/kibana/issues/190485
+    dashboardContentInsights.trackDashboardView(loadDashboardReturn.dashboardId);
   }
 
   return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };

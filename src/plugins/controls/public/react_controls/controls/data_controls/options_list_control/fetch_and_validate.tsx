@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -11,12 +12,15 @@ import {
   combineLatest,
   debounceTime,
   Observable,
+  of,
+  startWith,
   switchMap,
   tap,
   withLatestFrom,
 } from 'rxjs';
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
+import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { OptionsListSuccessResponse } from '../../../../../common/options_list/types';
 import { isValidSearch } from '../../../../../common/options_list/is_valid_search';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
@@ -52,11 +56,18 @@ export function fetchAndValidate$({
     api.field$,
     api.controlFetch$,
     api.parentApi.allowExpensiveQueries$,
+    api.parentApi.ignoreParentSettings$,
     api.debouncedSearchString,
     stateManager.sort,
     stateManager.searchTechnique,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
     api.loadMoreSubject.pipe(debounceTime(100)), // debounce load more so "loading" state briefly shows
+    apiPublishesReload(api.parentApi)
+      ? api.parentApi.reload$.pipe(
+          tap(() => requestCache.clearCache()),
+          startWith(undefined)
+        )
+      : of(undefined),
   ]).pipe(
     tap(() => {
       // abort any in progress requests
@@ -77,6 +88,7 @@ export function fetchAndValidate$({
           field,
           controlFetchContext,
           allowExpensiveQueries,
+          ignoreParentSettings,
           searchString,
           sort,
           searchTechnique,
@@ -107,6 +119,7 @@ export function fetchAndValidate$({
           field: field.toSpec(),
           size: requestSize,
           allowExpensiveQueries,
+          ignoreValidations: ignoreParentSettings?.ignoreValidations,
           ...controlFetchContext,
         };
 

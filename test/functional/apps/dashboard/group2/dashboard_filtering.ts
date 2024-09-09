@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -268,7 +269,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.waitForRenderComplete();
         await pieChart.expectPieSliceCount(5);
 
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await queryBar.setQuery('weightLbs:>50');
         await queryBar.submitQuery();
@@ -290,7 +290,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Nested visualization filter pills filters data as expected', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
@@ -305,7 +304,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Removing filter pills and query unfiters data as expected', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();

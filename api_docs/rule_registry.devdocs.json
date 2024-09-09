@@ -399,7 +399,9 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              " = never>({ aggs, featureIds, index, query, search_after: searchAfter, size, sort, track_total_hits: trackTotalHits, _source, runtimeMappings, }: { aggs?: object | undefined; featureIds?: string[] | undefined; index?: string | undefined; query?: object | undefined; search_after?: (string | number)[] | undefined; size?: number | undefined; sort?: ",
+              " = never, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>({ aggs, featureIds, index, query, search_after: searchAfter, size, sort, track_total_hits: trackTotalHits, _source, runtimeMappings, }: { aggs?: object | undefined; featureIds?: string[] | undefined; index?: string | undefined; query?: object | undefined; search_after?: (string | number)[] | undefined; size?: number | undefined; sort?: ",
               "SortOptions",
               "[] | undefined; track_total_hits?: number | boolean | undefined; _source?: false | string[] | undefined; runtimeMappings?: ",
               "MappingRuntimeFields",
@@ -413,9 +415,7 @@
                 "section": "def-common.MultiField",
                 "text": "MultiField"
               },
-              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>>, Record<string, ",
-              "AggregationsAggregate",
-              ">>>"
+              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>>, TAggregations>>"
             ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
@@ -603,9 +603,9 @@
                 "section": "def-common.MultiField",
                 "text": "MultiField"
               },
-              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>>, Record<string, ",
-              "AggregationsAggregate",
-              ">>>"
+              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>>, { groupByFields: ",
+              "AggregationsMultiBucketAggregateBase",
+              "<{ key: string; }>; }>>"
             ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
@@ -1946,17 +1946,17 @@
           "<Params, ",
           {
             "pluginId": "@kbn/alerting-state-types",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnAlertingStateTypesPluginApi",
-            "section": "def-common.WrappedLifecycleRuleState",
+            "section": "def-server.WrappedLifecycleRuleState",
             "text": "WrappedLifecycleRuleState"
           },
           "<State>, InstanceState, InstanceContext, ActionGroupIds, never>) => Promise<{ state: ",
           {
             "pluginId": "@kbn/alerting-state-types",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnAlertingStateTypesPluginApi",
-            "section": "def-common.WrappedLifecycleRuleState",
+            "section": "def-server.WrappedLifecycleRuleState",
             "text": "WrappedLifecycleRuleState"
           },
           "<State>; }>"
@@ -2221,7 +2221,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<\"default\">[]; schemas?: { params?: { type: \"zod\"; schema: Zod.ZodObject<Zod.ZodRawShape, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }> | Zod.ZodIntersection<Zod.ZodTypeAny, Zod.ZodTypeAny>; } | { type: \"config-schema\"; schema: ",
+          "<\"default\">[]; schemas?: { params?: { type: \"zod\"; schema: any; } | { type: \"config-schema\"; schema: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -3667,7 +3667,7 @@
             "label": "alertWithPersistence",
             "description": [],
             "signature": [
-              "<T>(alerts: { _id: string; _source: T; }[], refresh: boolean | \"wait_for\", maxAlerts?: number | undefined, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined) => Promise<",
+              "<T>(alerts: { _id: string; _source: T; }[], refresh: boolean | \"wait_for\", maxAlerts?: number | undefined, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined) => Promise<",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
@@ -3733,20 +3733,6 @@
                 "description": [],
                 "signature": [
                   "((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined"
-                ],
-                "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "ruleRegistry",
-                "id": "def-server.PersistenceServices.alertWithPersistence.$5",
-                "type": "Object",
-                "tags": [],
-                "label": "currentTimeOverride",
-                "description": [],
-                "signature": [
-                  "Date | undefined"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
@@ -4431,7 +4417,7 @@
         "label": "PersistenceAlertService",
         "description": [],
         "signature": [
-          "<T>(alerts: { _id: string; _source: T; }[], refresh: boolean | \"wait_for\", maxAlerts?: number | undefined, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined) => Promise<",
+          "<T>(alerts: { _id: string; _source: T; }[], refresh: boolean | \"wait_for\", maxAlerts?: number | undefined, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined) => Promise<",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -4497,20 +4483,6 @@
             "description": [],
             "signature": [
               "((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined"
-            ],
-            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.PersistenceAlertService.$5",
-            "type": "Object",
-            "tags": [],
-            "label": "currentTimeOverride",
-            "description": [],
-            "signature": [
-              "Date | undefined"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,

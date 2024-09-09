@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -129,8 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('data-shared-item title should update a saved search when using a custom panel title', async () => {
       await PageObjects.dashboard.switchToEditMode();
       const CUSTOM_SEARCH_TITLE = 'ima custom title for a search!';
-      const el = await dashboardPanelActions.getPanelHeading('Rendering Test: saved search');
-      await dashboardPanelActions.customizePanel(el);
+      await dashboardPanelActions.customizePanelByTitle('Rendering Test: saved search');
       await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutOpen();
       await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_SEARCH_TITLE);
       await dashboardCustomizePanel.clickSaveButton();

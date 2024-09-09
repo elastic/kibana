@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
@@ -105,13 +106,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('4');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-      dashboardControls.validateRange('placeholder', controlIds[1], '100', '1200');
+      await dashboardControls.validateRange('placeholder', controlIds[1], '100', '1200');
 
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('5');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
 
-      dashboardControls.validateRange('placeholder', controlIds[3], '0', '19979');
+      await dashboardControls.validateRange('placeholder', controlIds[3], '0', '19979');
     });
 
     it('ignores controls on other controls and panels using a data view without the control field by default', async () => {
@@ -120,13 +121,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListPopoverSelectOption('Kibana Airlines');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-      dashboardControls.validateRange('placeholder', controlIds[1], '100', '1196');
+      await dashboardControls.validateRange('placeholder', controlIds[1], '100', '1196');
 
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('5');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
 
-      dashboardControls.validateRange('placeholder', controlIds[3], '0', '19979');
+      await dashboardControls.validateRange('placeholder', controlIds[3], '0', '19979');
 
       const logstashSavedSearchPanel = await testSubjects.find('embeddedSavedSearchDocTable');
       expect(
@@ -154,13 +155,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('4');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-      dashboardControls.validateRange('placeholder', controlIds[1], '100', '1200');
+      await dashboardControls.validateRange('placeholder', controlIds[1], '100', '1200');
 
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('0');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
 
-      dashboardControls.validateRange('placeholder', controlIds[3], '0', '0');
+      await dashboardControls.validateRange('placeholder', controlIds[3], '0', '0');
     });
 
     it('applies global filters on controls using a data view without the filter field', async () => {
@@ -169,13 +170,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListPopoverSelectOption('Kibana Airlines');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-      dashboardControls.validateRange('placeholder', controlIds[1], '100', '1196');
+      await dashboardControls.validateRange('placeholder', controlIds[1], '100', '1196');
 
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('0');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
 
-      dashboardControls.validateRange('placeholder', controlIds[3], '0', '0');
+      await dashboardControls.validateRange('placeholder', controlIds[3], '0', '0');
 
       const logstashSavedSearchPanel = await testSubjects.find('embeddedSavedSearchDocTable');
       expect(

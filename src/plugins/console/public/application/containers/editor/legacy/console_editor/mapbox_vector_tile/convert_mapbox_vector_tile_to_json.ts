@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { VectorTile, VectorTileLayer, VectorTileFeature } from '@mapbox/vector-tile';
 
 interface MapboxVectorTileJson {
@@ -16,7 +18,7 @@ export function convertMapboxVectorTileToJson(response: VectorTile) {
   const output: MapboxVectorTileJson = {};
 
   for (const property in data) {
-    if (data.hasOwnProperty(property)) {
+    if (Object.hasOwn(data, property)) {
       const propertyObject: VectorTileLayer = data[property];
       const featuresArray = [];
 

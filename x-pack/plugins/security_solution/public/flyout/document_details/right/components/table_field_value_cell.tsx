@@ -8,17 +8,20 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import { getFieldFormat } from '../../../../common/components/event_details/get_field_format';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { getFieldFormat } from '../utils/get_field_format';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { OverflowField } from '../../../../common/components/tables/helpers';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { MESSAGE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from './test_ids';
+import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
 
 export interface FieldValueCellProps {
   /**
    * Value used to create a unique identifier in children components
    */
-  contextId: string;
+  scopeId: string;
   /**
    * Datq retrieved from the row
    */
@@ -46,13 +49,14 @@ export interface FieldValueCellProps {
  */
 export const TableFieldValueCell = memo(
   ({
-    contextId,
+    scopeId,
     data,
     eventId,
     fieldFromBrowserField,
     getLinkValue,
     values,
   }: FieldValueCellProps) => {
+    const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
     if (values == null) {
       return null;
     }
@@ -78,9 +82,16 @@ export const TableFieldValueCell = memo(
             <EuiFlexItem grow={false} key={`${i}-${value}`}>
               {data.field === MESSAGE_FIELD_NAME ? (
                 <OverflowField value={value} />
+              ) : isPreviewEnabled && hasPreview(data.field) ? (
+                <PreviewLink
+                  field={data.field}
+                  value={value}
+                  scopeId={scopeId}
+                  data-test-subj={`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-${i}`}
+                />
               ) : (
                 <FormattedFieldValue
-                  contextId={`${contextId}-${eventId}-${data.field}-${i}-${value}`}
+                  contextId={`${scopeId}-${eventId}-${data.field}-${i}-${value}`}
                   eventId={eventId}
                   fieldFormat={getFieldFormat(data)}
                   fieldName={data.field}

@@ -6,12 +6,12 @@
  */
 import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
+import { findingsNavigation } from '@kbn/cloud-security-posture';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
+import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
 import { CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX } from '../../../common/constants';
 import { NoVulnerabilitiesStates } from '../../components/no_vulnerabilities_states';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
-import { findingsNavigation } from '../../common/navigation/constants';
-import { useDataView } from '../../common/api/use_data_view';
 import { LatestVulnerabilitiesContainer } from './latest_vulnerabilities_container';
 import { DataViewContext } from '../../common/contexts/data_view_context';
 

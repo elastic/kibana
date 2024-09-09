@@ -24,9 +24,13 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/entities-schema",
     "@kbn/es-query",
-    "@kbn/zod-helpers",
     "@kbn/security-plugin",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/logging-mocks",
+    "@kbn/licensing-plugin",
+    "@kbn/server-route-repository-client",
+    "@kbn/server-route-repository",
+    "@kbn/zod",
+    "@kbn/zod-helpers",
   ]
 }

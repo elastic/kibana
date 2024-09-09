@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect } from 'react';
@@ -23,14 +24,12 @@ import {
   PublishesDataViews,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { ControlStyle, ParentIgnoreSettings } from '../..';
 import {
   ControlGroupChainingSystem,
-  ControlWidth,
   CONTROL_GROUP_TYPE,
-  DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_STYLE,
-  DEFAULT_CONTROL_WIDTH,
 } from '../../../common';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
@@ -63,8 +62,6 @@ export const getControlGroupEmbeddableFactory = (services: {
     ) => {
       const {
         initialChildControlState,
-        defaultControlGrow,
-        defaultControlWidth,
         labelPosition: initialLabelPosition,
         chainingSystem,
         autoApplySelections,
@@ -72,7 +69,13 @@ export const getControlGroupEmbeddableFactory = (services: {
       } = initialRuntimeState;
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
-      const controlsManager = initControlsManager(initialChildControlState);
+      const parentDataViewId = apiPublishesDataViews(parentApi)
+        ? parentApi.dataViews.value?.[0]?.id
+        : undefined;
+      const controlsManager = initControlsManager(
+        initialChildControlState,
+        parentDataViewId ?? (await services.dataViews.getDefaultId())
+      );
       const selectionsManager = initSelectionsManager({
         ...controlsManager.api,
         autoApplySelections$,
@@ -81,12 +84,6 @@ export const getControlGroupEmbeddableFactory = (services: {
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
       const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
         ignoreParentSettings
-      );
-      const grow = new BehaviorSubject<boolean | undefined>(
-        defaultControlGrow === undefined ? DEFAULT_CONTROL_GROW : defaultControlGrow
-      );
-      const width = new BehaviorSubject<ControlWidth | undefined>(
-        defaultControlWidth ?? DEFAULT_CONTROL_WIDTH
       );
       const labelPosition$ = new BehaviorSubject<ControlStyle>( // TODO: Rename `ControlStyle`
         initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
@@ -168,12 +165,9 @@ export const getControlGroupEmbeddableFactory = (services: {
             controlInputTransform: (state) => state,
           };
           openDataControlEditor({
-            initialState: {
-              grow: api.grow.getValue(),
-              width: api.width.getValue(),
-            },
+            initialState: controlsManager.getNewControlState(),
             onSave: ({ type: controlType, state: initialState }) => {
-              api.addNewPanel({
+              controlsManager.api.addNewPanel({
                 panelType: controlType,
                 initialState: controlInputTransform!(
                   initialState as Partial<ControlGroupSerializedState>,
@@ -198,13 +192,12 @@ export const getControlGroupEmbeddableFactory = (services: {
             references,
           };
         },
-        grow,
-        width,
         dataViews,
         labelPosition: labelPosition$,
         saveNotification$: apiHasSaveNotification(parentApi)
           ? parentApi.saveNotification$
           : undefined,
+        reload$: apiPublishesReload(parentApi) ? parentApi.reload$ : undefined,
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */

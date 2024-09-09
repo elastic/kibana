@@ -1,32 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { monaco, ParsedRequest } from '@kbn/monaco';
+import { parse } from 'hjson';
 import { constructUrl } from '../../../../../lib/es';
-import { MetricsTracker } from '../../../../../types';
+import type { MetricsTracker } from '../../../../../types';
 import type { DevToolsVariable } from '../../../../components';
-import type { EditorRequest } from '../types';
-import { urlVariableTemplateRegex, dataVariableTemplateRegex } from './constants';
-import { removeTrailingWhitespaces } from './tokens_utils';
-import { AdjustedParsedRequest } from '../types';
-
-/*
- * This function stringifies and normalizes the parsed request:
- * - the method is converted to upper case
- * - any trailing comments are removed from the url
- * - the request body is stringified from an object using JSON.stringify
- */
-export const stringifyRequest = (parsedRequest: ParsedRequest): EditorRequest => {
-  const url = parsedRequest.url ? removeTrailingWhitespaces(parsedRequest.url) : '';
-  const method = parsedRequest.method?.toUpperCase() ?? '';
-  const data = parsedRequest.data?.map((parsedData) => JSON.stringify(parsedData, null, 2));
-  return { url, method, data: data ?? [] };
-};
+import type { EditorRequest, AdjustedParsedRequest } from '../types';
+import {
+  urlVariableTemplateRegex,
+  dataVariableTemplateRegex,
+  startsWithMethodRegex,
+} from './constants';
+import { parseLine } from './tokens_utils';
 
 /*
  * This function replaces any variables with its values stored in localStorage.
@@ -52,9 +44,13 @@ export const getCurlRequest = (
 ): string => {
   const curlUrl = constructUrl(elasticsearchBaseUrl, url);
   let curlRequest = `curl -X${method} "${curlUrl}" -H "kbn-xsrf: reporting"`;
-  if (data.length > 0) {
+  if (data && data.length) {
+    const joinedData = data.join('\n');
+
     curlRequest += ` -H "Content-Type: application/json" -d'\n`;
-    curlRequest += data.join('\n');
+
+    // We escape single quoted strings that are wrapped in single quoted strings
+    curlRequest += joinedData.replace(/'/g, "'\\''");
     curlRequest += "'";
   }
   return curlRequest;
@@ -88,25 +84,42 @@ export const getRequestStartLineNumber = (
  * If there is no end offset (the parser was not able to parse this request completely),
  * then the last non-empty line is returned or the line before the next request.
  */
-export const getRequestEndLineNumber = (
-  parsedRequest: ParsedRequest,
-  model: monaco.editor.ITextModel,
-  index: number,
-  parsedRequests: ParsedRequest[]
-): number => {
+export const getRequestEndLineNumber = ({
+  parsedRequest,
+  nextRequest,
+  model,
+  startLineNumber,
+}: {
+  parsedRequest: ParsedRequest;
+  nextRequest?: ParsedRequest;
+  model: monaco.editor.ITextModel;
+  startLineNumber: number;
+}): number => {
   let endLineNumber: number;
   if (parsedRequest.endOffset) {
     // if the parser set an end offset for this request, then find the line number for it
     endLineNumber = model.getPositionAt(parsedRequest.endOffset).lineNumber;
   } else {
     // if no end offset, try to find the line before the next request starts
-    const nextRequest = parsedRequests.at(index + 1);
     if (nextRequest) {
       const nextRequestStartLine = model.getPositionAt(nextRequest.startOffset).lineNumber;
-      endLineNumber = nextRequestStartLine - 1;
+      endLineNumber =
+        nextRequestStartLine > startLineNumber ? nextRequestStartLine - 1 : startLineNumber;
     } else {
-      // if there is no next request, take the last line of the model
-      endLineNumber = model.getLineCount();
+      // if there is no next request, find the end of the text or the line that starts with a method
+      let nextLineNumber = model.getPositionAt(parsedRequest.startOffset).lineNumber + 1;
+      let nextLineContent: string;
+      while (nextLineNumber <= model.getLineCount()) {
+        nextLineContent = model.getLineContent(nextLineNumber).trim();
+        if (nextLineContent.match(startsWithMethodRegex)) {
+          // found a line that starts with a method, stop iterating
+          break;
+        }
+        nextLineNumber++;
+      }
+      // nextLineNumber is now either the line with a method or 1 line after the end of the text
+      // set the end line for this request to the line before nextLineNumber
+      endLineNumber = nextLineNumber > startLineNumber ? nextLineNumber - 1 : startLineNumber;
     }
   }
   // if the end line is empty, go up to find the first non-empty line
@@ -116,44 +129,6 @@ export const getRequestEndLineNumber = (
     lineContent = model.getLineContent(endLineNumber).trim();
   }
   return endLineNumber;
-};
-
-const isJsonString = (str: string) => {
-  try {
-    JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-  return true;
-};
-
-/*
- * Internal helpers
- */
-const replaceVariables = (
-  text: string,
-  variables: DevToolsVariable[],
-  isDataVariable: boolean
-): string => {
-  const variableRegex = isDataVariable ? dataVariableTemplateRegex : urlVariableTemplateRegex;
-  if (variableRegex.test(text)) {
-    text = text.replaceAll(variableRegex, (match, key) => {
-      const variable = variables.find(({ name }) => name === key);
-      const value = variable?.value;
-
-      if (isDataVariable && value) {
-        // If the variable value is an object, add it as it is. Otherwise, surround it with quotes.
-        return isJsonString(value) ? value : `"${value}"`;
-      }
-
-      return value ?? match;
-    });
-  }
-  return text;
-};
-
-const containsComments = (text: string) => {
-  return text.indexOf('//') >= 0 || text.indexOf('/*') >= 0;
 };
 
 /**
@@ -184,19 +159,19 @@ export const getAutoIndentedRequests = (
     ) {
       // Start of a request
       const requestLines = allTextLines.slice(request.startLineNumber - 1, request.endLineNumber);
-
-      if (requestLines.some((line) => containsComments(line))) {
-        // If request has comments, add it as it is - without formatting
-        // TODO: Format requests with comments
-        formattedTextLines.push(...requestLines);
+      const firstLine = cleanUpWhitespaces(requestLines[0]);
+      formattedTextLines.push(firstLine);
+      const dataLines = requestLines.slice(1);
+      if (dataLines.some((line) => containsComments(line))) {
+        // If data has comments, add it as it is - without formatting
+        // TODO: Format requests with comments https://github.com/elastic/kibana/issues/182138
+        formattedTextLines.push(...dataLines);
       } else {
-        // If no comments, add stringified parsed request
-        const stringifiedRequest = stringifyRequest(request);
-        const firstLine = stringifiedRequest.method + ' ' + stringifiedRequest.url;
-        formattedTextLines.push(firstLine);
-
-        if (stringifiedRequest.data && stringifiedRequest.data.length > 0) {
-          formattedTextLines.push(...stringifiedRequest.data);
+        // If no comments, indent data
+        if (requestLines.length > 1) {
+          const dataString = dataLines.join('\n');
+          const dataJsons = splitDataIntoJsonObjects(dataString);
+          formattedTextLines.push(...dataJsons.map(indentData));
         }
       }
 
@@ -205,10 +180,116 @@ export const getAutoIndentedRequests = (
     } else {
       // Current line is a comment or whitespaces
       // Trim white spaces and add it to the formatted text
-      formattedTextLines.push(selectedTextLines[currentLineIndex].trim());
+      formattedTextLines.push(cleanUpWhitespaces(selectedTextLines[currentLineIndex]));
       currentLineIndex++;
     }
   }
 
   return formattedTextLines.join('\n');
+};
+
+/*
+ * This function extracts a normalized method and url from the editor and
+ * the "raw" text of the request body without any changes to it. The only normalization
+ * for request body is to split several json objects into an array of strings.
+ */
+export const getRequestFromEditor = (
+  model: monaco.editor.ITextModel,
+  startLineNumber: number,
+  endLineNumber: number
+): EditorRequest | null => {
+  const methodUrlLine = model.getLineContent(startLineNumber).trim();
+  if (!methodUrlLine) {
+    return null;
+  }
+  const { method, url } = parseLine(methodUrlLine, false);
+  if (!method || !url) {
+    return null;
+  }
+  const upperCaseMethod = method.toUpperCase();
+
+  if (endLineNumber <= startLineNumber) {
+    return { method: upperCaseMethod, url, data: [] };
+  }
+  const dataString = model
+    .getValueInRange({
+      startLineNumber: startLineNumber + 1,
+      startColumn: 1,
+      endLineNumber,
+      endColumn: model.getLineMaxColumn(endLineNumber),
+    })
+    .trim();
+  const data = splitDataIntoJsonObjects(dataString);
+
+  return { method: upperCaseMethod, url, data };
+};
+
+export const containsComments = (text: string) => {
+  return text.indexOf('//') >= 0 || text.indexOf('/*') >= 0;
+};
+
+export const indentData = (dataString: string): string => {
+  try {
+    const parsedData = parse(dataString);
+
+    return JSON.stringify(parsedData, null, 2);
+  } catch (e) {
+    return dataString;
+  }
+};
+
+// ---------------------------------- Internal helpers ----------------------------------
+
+const isJsonString = (str: string) => {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+};
+
+const replaceVariables = (
+  text: string,
+  variables: DevToolsVariable[],
+  isDataVariable: boolean
+): string => {
+  const variableRegex = isDataVariable ? dataVariableTemplateRegex : urlVariableTemplateRegex;
+  if (variableRegex.test(text)) {
+    text = text.replaceAll(variableRegex, (match, key) => {
+      const variable = variables.find(({ name }) => name === key);
+      const value = variable?.value;
+
+      if (isDataVariable && value) {
+        // If the variable value is an object, add it as it is. Otherwise, surround it with quotes.
+        return isJsonString(value) ? value : `"${value}"`;
+      }
+
+      return value ?? match;
+    });
+  }
+  return text;
+};
+
+const splitDataIntoJsonObjects = (dataString: string): string[] => {
+  const jsonSplitRegex = /}\s*{/;
+  if (dataString.match(jsonSplitRegex)) {
+    return dataString.split(jsonSplitRegex).map((part, index, parts) => {
+      let restoredBracketsString = part;
+      // add an opening bracket to all parts except the 1st
+      if (index > 0) {
+        restoredBracketsString = `{${restoredBracketsString}`;
+      }
+      // add a closing bracket to all parts except the last
+      if (index < parts.length - 1) {
+        restoredBracketsString = `${restoredBracketsString}}`;
+      }
+      return restoredBracketsString;
+    });
+  }
+  return [dataString];
+};
+
+const cleanUpWhitespaces = (line: string): string => {
+  return line.trim().replaceAll(/\s+/g, ' ');
 };

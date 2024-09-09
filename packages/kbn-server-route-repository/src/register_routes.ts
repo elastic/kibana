@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { errors } from '@elastic/elasticsearch';
 import { isBoom } from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
@@ -12,15 +14,17 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server
 import { isKibanaResponse } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
-import * as t from 'io-ts';
-import { merge, pick } from 'lodash';
 import {
   ServerRoute,
   ServerRouteCreateOptions,
+  ZodParamsObject,
   parseEndpoint,
 } from '@kbn/server-route-repository-utils';
-import { decodeRequestParams } from './decode_request_params';
-import { routeValidationObject } from './route_validation_object';
+import { isZod } from '@kbn/zod';
+import { merge } from 'lodash';
+import { passThroughValidationObject, noParamsValidationObject } from './validation_objects';
+import { validateAndDecodeParams } from './validate_and_decode_params';
+import { makeZodValidationObject } from './make_zod_validation_object';
 
 const CLIENT_CLOSED_REQUEST = {
   statusCode: 499,
@@ -55,12 +59,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       response: KibanaResponseFactory
     ) => {
       try {
-        const runtimeType = params || t.strict({});
-
-        const validatedParams = decodeRequestParams(
-          pick(request, 'params', 'body', 'query'),
-          runtimeType
-        );
+        const validatedParams = validateAndDecodeParams(request, params);
 
         const { aborted, result } = await Promise.race([
           handler({
@@ -122,12 +121,21 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
     logger.debug(`Registering endpoint ${endpoint}`);
 
+    let validationObject;
+    if (params === undefined) {
+      validationObject = noParamsValidationObject;
+    } else if (isZod(params)) {
+      validationObject = makeZodValidationObject(params as ZodParamsObject);
+    } else {
+      validationObject = passThroughValidationObject;
+    }
+
     if (!version) {
       router[method](
         {
           path: pathname,
           options,
-          validate: routeValidationObject,
+          validate: validationObject,
         },
         wrappedHandler
       );
@@ -140,7 +148,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         {
           version,
           validate: {
-            request: routeValidationObject,
+            request: validationObject,
           },
         },
         wrappedHandler
