@@ -189,7 +189,7 @@ xpack.alerting.rules.run.ruleTypeOverrides:
   - id: siem.eqlRule
     timeout: 5m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
-xpack.alerting.rules.maxScheduledPerMinute: 400
+xpack.alerting.rules.maxScheduledPerMinute: 100000
 xpack.actions.run.maxAttempts: 10
 xpack.actions.queued.max: 10000
 
