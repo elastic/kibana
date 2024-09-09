@@ -173,7 +173,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Changes the specified dimension to the specified operation and (optinally) field.
+     * Changes the specified dimension to the specified operation and optionally the field.
      *
      * @param opts.dimension - the selector of the dimension being changed
      * @param opts.operation - the desired operation ID for the dimension
@@ -838,9 +838,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return testSubjects.exists('lnsVisualOptionsButton');
     },
     async openVisualOptions() {
+      if (await testSubjects.exists('lnsVisualOptionsPopover_title', { timeout: 50 })) {
+        return;
+      }
       await retry.try(async () => {
         await testSubjects.click('lnsVisualOptionsButton');
-        await testSubjects.exists('lnsVisualOptionsButton');
+        await testSubjects.exists('lnsVisualOptionsPopover_title');
+      });
+    },
+    async openTextOptions() {
+      if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
+        return;
+      }
+      await retry.try(async () => {
+        await testSubjects.click('lnsTextOptionsButton');
+        await testSubjects.exists('lnsTextOptionsPopover_title');
       });
     },
     async retrySetValue(
@@ -885,7 +897,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Uses the Lens visualization switcher to switch visualizations.
      *
      * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
-     * lnsDatatable or bar_stacked
+     * lnsDatatable or bar
      */
     async switchToVisualization(subVisualizationId: string, searchTerm?: string, layerIndex = 0) {
       await this.openChartSwitchPopover(layerIndex);
@@ -933,6 +945,58 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
+    async getDonutHoleSize() {
+      await this.openVisualOptions();
+      const comboboxOptions = await comboBox.getComboBoxSelectedOptions('lnsEmptySizeRatioOption');
+      return comboboxOptions[0];
+    },
+
+    async setDonutHoleSize(value: string) {
+      await retry.waitFor('visual options toolbar is open', async () => {
+        await this.openVisualOptions();
+        return await testSubjects.exists('lnsEmptySizeRatioOption');
+      });
+      await comboBox.set('lnsEmptySizeRatioOption', value);
+    },
+
+    async setGaugeShape(value: string) {
+      await retry.waitFor('visual options toolbar is open', async () => {
+        await this.openVisualOptions();
+        return await testSubjects.exists('lnsToolbarGaugeAngleType');
+      });
+      await comboBox.set('lnsToolbarGaugeAngleType > comboBoxInput', value);
+    },
+
+    async getSelectedBarOrientationSetting() {
+      await retry.waitFor('visual options are displayed', async () => {
+        await this.openVisualOptions();
+        return await testSubjects.exists('lns_barOrientation');
+      });
+      const orientationButtons = await find.allByCssSelector(
+        `[data-test-subj^="lns_barOrientation_"]`
+      );
+      for (const button of orientationButtons) {
+        const ariaPressed = await button.getAttribute('aria-pressed');
+        const isSelected = ariaPressed === 'true';
+        if (isSelected) {
+          return button?.getVisibleText();
+        }
+      }
+    },
+
+    async getGaugeOrientationSetting() {
+      const orientationButtons = await find.allByCssSelector(
+        `[data-test-subj^="lns_gaugeOrientation_"]`
+      );
+      for (const button of orientationButtons) {
+        const ariaPressed = await button.getAttribute('aria-pressed');
+        const isSelected = ariaPressed === 'true';
+        if (isSelected) {
+          return button?.getVisibleText();
+        }
+      }
+    },
+
     /** Counts the visible warnings in the config panel */
     async getWorkspaceErrorCount() {
       const workspaceErrorsExists = await testSubjects.exists('lnsWorkspaceErrors');
@@ -967,7 +1031,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Checks a specific subvisualization in the chart switcher for a "data loss" indicator
      *
      * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
-     * lnsDatatable or bar_stacked
+     * lnsDatatable or bar
      */
     async hasChartSwitchWarning(subVisualizationId: string, searchTerm?: string) {
       await this.openChartSwitchPopover();
@@ -1001,7 +1065,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async createLayer(
       layerType: 'data' | 'referenceLine' | 'annotations' = 'data',
       annotationFromLibraryTitle?: string,
-      seriesType = 'bar_stacked'
+      seriesType = 'bar'
     ) {
       await testSubjects.click('lnsLayerAddButton');
       const layerCount = await this.getLayerCount();
@@ -1129,8 +1193,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return el.getVisibleText();
     },
 
-    async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
-      const el = await this.getDatatableCell(rowIndex, colIndex);
+    async getStylesFromCell(el: WebElementWrapper) {
       const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
@@ -1139,6 +1202,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         }
         return memo;
       }, {});
+    },
+
+    async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
+      const el = await this.getDatatableCell(rowIndex, colIndex);
+      return this.getStylesFromCell(el);
     },
 
     async getDatatableCellSpanStyle(rowIndex = 0, colIndex = 0) {
@@ -1171,6 +1239,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
       return await find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-visible-row-index="${rowIndex}"]`
+      );
+    },
+
+    async getDatatableCellsByColumn(colIndex = 0) {
+      return await find.allByCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"]`
       );
     },
 
@@ -1240,10 +1314,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async setPalette(paletteId: string, isLegacy: boolean) {
       await testSubjects.click('lns_colorEditing_trigger');
+      // This action needs to be slowed WAY down, otherwise it will not correctly set the palette
+      await PageObjects.common.sleep(200);
       await testSubjects.setEuiSwitch(
         'lns_colorMappingOrLegacyPalette_switch',
         isLegacy ? 'uncheck' : 'check'
       );
+
+      await PageObjects.common.sleep(200);
+
       if (isLegacy) {
         await testSubjects.click('lns-palettePicker');
         await find.clickByCssSelector(`#${paletteId}`);
@@ -1251,6 +1330,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click('kbnColoring_ColorMapping_PalettePicker');
         await testSubjects.click(`kbnColoring_ColorMapping_Palette-${paletteId}`);
       }
+      await PageObjects.common.sleep(200);
+
       await this.closePaletteEditor();
     },
 
@@ -1378,6 +1459,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           await this.getMetricElementIfExists('.echSingleMetricSparkline', tile, 500)
         ),
       };
+    },
+
+    async hoverOverDimensionButton(index = 0) {
+      const dimensionButton = (await testSubjects.findAll('lns-dimensionTrigger'))[index];
+      await dimensionButton.moveMouseTo();
     },
 
     async getMetricVisualizationData() {
@@ -1676,7 +1762,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     hasEmptySizeRatioButtonGroup() {
-      return testSubjects.exists('lnsEmptySizeRatioButtonGroup');
+      return testSubjects.exists('lnsEmptySizeRatioOption');
     },
 
     settingsMenuOpen() {

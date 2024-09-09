@@ -56,9 +56,11 @@ const defaultContext: SyntheticsRefreshContext = {
 
 export const SyntheticsRefreshContext = createContext(defaultContext);
 
-export const SyntheticsRefreshContextProvider: FC<{
-  reload$?: Subject<boolean>;
-}> = ({ children, reload$ }) => {
+export const SyntheticsRefreshContextProvider: FC<
+  React.PropsWithChildren<{
+    reload$?: Subject<boolean>;
+  }>
+> = ({ children, reload$ }) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
   const [refreshInterval, setRefreshInterval] = useLocalStorage<number>(

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SuggestionRawDefinition } from './types';
+import type { ItemKind, SuggestionRawDefinition } from './types';
 import { builtinFunctions } from '../definitions/builtin';
 import { getAllCommands } from '../shared/helpers';
 import {
@@ -143,4 +144,16 @@ export const listCompleteItem: SuggestionRawDefinition = {
   }),
   sortText: 'A',
   command: TRIGGER_SUGGESTION_COMMAND,
+};
+
+export const allStarConstant: SuggestionRawDefinition = {
+  label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.allStarConstantDoc', {
+    defaultMessage: 'All (*)',
+  }),
+  text: '*',
+  kind: 'Constant' as ItemKind,
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.allStarConstantDoc', {
+    defaultMessage: 'All (*)',
+  }),
+  sortText: '1',
 };
