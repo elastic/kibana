@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { EuiAutoRefreshButton, OnRefreshChangeProps } from '@elastic/eui';
-import { SyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
+import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 
 export const AutoRefreshButton = () => {
   const { refreshInterval, setRefreshInterval, refreshPaused, setRefreshPaused } =
-    useContext(SyntheticsRefreshContext);
+    useSyntheticsRefreshContext();
 
   const onRefreshChange = (newProps: OnRefreshChangeProps) => {
     setRefreshPaused(newProps.isPaused);

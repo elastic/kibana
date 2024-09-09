@@ -94,8 +94,8 @@ export const SyntheticsRefreshContextProvider: FC<
     return {
       lastRefresh,
       refreshApp,
-      refreshInterval: refreshInterval || AUTOREFRESH_INTERVAL_SECONDS,
-      refreshPaused: refreshPaused || AUTOREFRESH_IS_PAUSED,
+      refreshInterval: refreshInterval ?? AUTOREFRESH_INTERVAL_SECONDS,
+      refreshPaused: refreshPaused ?? AUTOREFRESH_IS_PAUSED,
       setRefreshInterval,
       setRefreshPaused,
     };
