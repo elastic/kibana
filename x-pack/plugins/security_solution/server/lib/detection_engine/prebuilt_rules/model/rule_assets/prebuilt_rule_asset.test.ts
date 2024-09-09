@@ -60,17 +60,6 @@ describe('Prebuilt rule asset schema', () => {
         expect(result.data).toEqual(getPrebuiltRuleMock());
       }
     );
-
-    test('ignores the type specific response_actions field since it`s an omitted field', () => {
-      const payload: Partial<PrebuiltRuleAsset> & Record<string, unknown> = {
-        ...getPrebuiltRuleMock(),
-        response_actions: [{ action_type_id: `.osquery`, params: {} }],
-      };
-
-      const result = PrebuiltRuleAsset.safeParse(payload);
-      expectParseSuccess(result);
-      expect(result.data).toEqual(getPrebuiltRuleMock());
-    });
   });
 
   test('[rule_id] does not validate', () => {

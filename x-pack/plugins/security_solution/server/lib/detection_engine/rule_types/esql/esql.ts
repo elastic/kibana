@@ -231,14 +231,12 @@ export const esqlExecutor = async ({
         result.createdSignalsCount &&
         scheduleNotificationResponseActionsService
       ) {
-        console.log('123');
         scheduleNotificationResponseActionsService({
           signals: result.createdSignals,
           responseActions: completeRule.ruleParams.responseActions,
         });
       }
 
-      console.log('234');
       // no more results will be found
       if (response.values.length < size) {
         ruleExecutionLogger.debug(

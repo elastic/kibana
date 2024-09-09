@@ -30,27 +30,6 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
   'outcome',
 ]);
 
-/**
- * Aditionally remove fields which are part only of the optional fields in the rule types that make up
- * the TypeSpecificCreateProps discriminatedUnion, by using a Zod transformation which extracts out the
- * necessary fields in the rules types where they exist. Fields to extract:
- *  - response_actions: from Query and SavedQuery rules
- */
-const TypeSpecificFields = TypeSpecificCreateProps.transform((val) => {
-  switch (val.type) {
-    case 'query': {
-      const { response_actions: _, ...rest } = val;
-      return rest;
-    }
-    case 'saved_query': {
-      const { response_actions: _, ...rest } = val;
-      return rest;
-    }
-    default:
-      return val;
-  }
-});
-
 function zodMaskFor<T>() {
   return function <U extends keyof T>(props: U[]): Record<U, true> {
     type PropObject = Record<string, boolean>;
@@ -76,7 +55,7 @@ function zodMaskFor<T>() {
  */
 export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
 export const PrebuiltRuleAsset = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET)
-  .and(TypeSpecificFields)
+  .and(TypeSpecificCreateProps)
   .and(
     z.object({
       rule_id: RuleSignatureId,

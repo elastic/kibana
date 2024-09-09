@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { inputConsoleCommand, submitCommand } from './response_console';
@@ -69,13 +71,13 @@ export const fillUpNewRule = (name = 'Test', description = 'Test') => {
   cy.getByTestSubj('about-continue').click();
   cy.getByTestSubj('schedule-continue').click();
 };
-export const fillUpNewEsqlRule = (name = 'Test', description = 'Test') => {
+export const fillUpNewEsqlRule = (name = 'Test', description = 'Test', query: string) => {
   loadPage('app/security/rules/management');
   cy.getByTestSubj('create-new-rule').click();
   cy.getByTestSubj('stepDefineRule').within(() => {
     cy.getByTestSubj('esqlRuleType').click();
     cy.getByTestSubj('globalQueryBar').first().click();
-    cy.getByTestSubj('kibanaCodeEditor').type('FROM * METADATA _index, _id {backspace}{enter}');
+    cy.getByTestSubj('kibanaCodeEditor').type(query);
   });
   cy.getByTestSubj('define-continue').click();
   cy.getByTestSubj('detectionEngineStepAboutRuleName').within(() => {

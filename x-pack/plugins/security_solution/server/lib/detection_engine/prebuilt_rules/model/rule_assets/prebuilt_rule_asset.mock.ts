@@ -18,6 +18,7 @@ export const getPrebuiltRuleMock = (rewrites?: Partial<PrebuiltRuleAsset>): Preb
     language: 'kuery',
     rule_id: 'rule-1',
     version: 1,
+    response_actions: [{ action_type_id: `.osquery`, params: {} }],
     ...rewrites,
   } as PrebuiltRuleAsset);
 
