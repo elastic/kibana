@@ -446,7 +446,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     };
     if (isQueryLoading || isLoading) {
       validateQuery();
-    } else {
       addQueriesToCache({
         queryString: code,
         timeZone,
