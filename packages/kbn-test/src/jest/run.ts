@@ -145,6 +145,11 @@ export function runJest(configName = 'jest.config.js') {
     process.env.NODE_ENV = 'test';
   }
 
+  if (!process.env.REACT_VERSION) {
+    // Default to React 18 for Jest tests
+    process.env.REACT_VERSION = '18';
+  }
+
   run().then(() => {
     // Success means that tests finished, doesn't mean they passed.
     reportTime(runStartTime, 'total', {
