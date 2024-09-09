@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Fragment, useCallback, useMemo, useState, FC } from 'react';
@@ -40,6 +41,7 @@ import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
+import { useProfileAccessor } from '../../context_awareness';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -159,6 +161,12 @@ export function ContextAppContent({
     [grid, setAppState]
   );
 
+  const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
+  const cellRenderers = useMemo(() => {
+    const getCellRenderers = getCellRenderersAccessor(() => ({}));
+    return getCellRenderers();
+  }, [getCellRenderersAccessor]);
+
   return (
     <Fragment>
       <WrapperWithPadding>
@@ -222,6 +230,7 @@ export function ContextAppContent({
               configHeaderRowHeight={3}
               settings={grid}
               onResize={onResize}
+              externalCustomRenderers={cellRenderers}
             />
           </CellActionsProvider>
         </div>
@@ -241,7 +250,7 @@ export function ContextAppContent({
   );
 }
 
-const WrapperWithPadding: FC = ({ children }) => {
+const WrapperWithPadding: FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const padding = useEuiPaddingSize('s');
 
   return (

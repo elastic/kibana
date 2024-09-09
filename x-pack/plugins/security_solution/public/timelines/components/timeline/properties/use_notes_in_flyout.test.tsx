@@ -86,7 +86,7 @@ const refetchMock = jest.fn();
 
 const renderTestHook = () => {
   return renderHook(
-    (props?: Partial<UseNotesInFlyoutArgs>) =>
+    (props: React.PropsWithChildren<Partial<UseNotesInFlyoutArgs>>) =>
       useNotesInFlyout({
         eventIdToNoteIds: mockEventIdToNoteIds,
         timelineId: TimelineId.test,
