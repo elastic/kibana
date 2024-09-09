@@ -25,6 +25,7 @@ export async function getAgentAndPolicyCountForOutput(output: Output) {
     kuery: agentPolicyKuery,
     page: 1,
     perPage: SO_SEARCH_LIMIT,
+    noAgentCount: true,
   });
 
   if (agentPolicies.error) {
