@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { defineAuthzExampleRoutes } from './authz_examples';
 import { definePrivilegesRoutes } from './privileges';
 import { resetSessionPageRoutes } from './reset_session_page';
 import { defineRolesRoutes } from './roles';
@@ -13,7 +12,6 @@ import { defineShareSavedObjectPermissionRoutes } from './spaces';
 import type { RouteDefinitionParams } from '..';
 
 export function defineAuthorizationRoutes(params: RouteDefinitionParams) {
-  defineAuthzExampleRoutes(params);
   // The reset session endpoint is registered with httpResources and should remain public in serverless
   resetSessionPageRoutes(params);
 
