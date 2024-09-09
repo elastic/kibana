@@ -85,6 +85,35 @@ describe('transformHitToAlert', () => {
     expect(alert['kibana.alert.original_event.action.keyword']).toBeUndefined();
   });
 
+  it('should only copy ECS compatible array elements from event subfields to kibana.alert.original_event', () => {
+    const doc = {
+      _index: 'testindex',
+      _id: 'myId',
+      _source: {
+        'event.action': ['process', { objectSubfield: 'test' }],
+      },
+    };
+    const completeRule = getCompleteRuleMock(getEsqlRuleParams());
+
+    const alert = transformHitToAlert({
+      spaceId: SPACE_ID,
+      completeRule,
+      doc,
+      mergeStrategy: 'missingFields',
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
+      buildReasonMessage: buildReasonMessageStub,
+      indicesToQuery: [],
+      alertTimestampOverride: undefined,
+      ruleExecutionLogger,
+      alertUuid,
+      publicBaseUrl,
+    });
+
+    expect(alert['kibana.alert.original_event.action']).toEqual(['process']);
+  });
+
   it('builds an alert as expected without original_event if event does not exist', () => {
     const doc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     const completeRule = getCompleteRuleMock(getQueryRuleParams());
@@ -97,7 +126,7 @@ describe('transformHitToAlert', () => {
       ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage: buildReasonMessageStub,
-      indicesToQuery: [],
+      indicesToQuery: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       alertTimestampOverride: undefined,
       ruleExecutionLogger,
       alertUuid,
@@ -121,7 +150,7 @@ describe('transformHitToAlert', () => {
         },
       ],
       [ALERT_ORIGINAL_TIME]: '2020-04-20T21:27:45.000Z',
-      [ALERT_REASON]: 'alert reasonable reason',
+      [ALERT_REASON]: undefined,
       [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
       [ALERT_WORKFLOW_STATUS]: 'open',
       [ALERT_BUILDING_BLOCK_TYPE]: 'default',
@@ -266,6 +295,10 @@ describe('transformHitToAlert', () => {
       [ALERT_UUID]: alertUuid,
       [ALERT_WORKFLOW_TAGS]: [],
       [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
+      someKey: 'someValue',
+      source: {
+        ip: '127.0.0.1',
+      },
     };
     expect(alert).toEqual(expected);
   });

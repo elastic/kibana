@@ -176,6 +176,24 @@ describe('traverseDoc', () => {
         },
       ]);
     });
+
+    it('should entirely strip objects that end up empty in arrays', () => {
+      const { result, removed } = traverseDoc({
+        agent: [{ name: { conflict: 'agent-1' } }, { name: 'test' }],
+        message: 'test message',
+      });
+
+      expect(result).toEqual({
+        agent: [{ name: 'test' }],
+        message: 'test message',
+      });
+      expect(removed).toEqual([
+        {
+          key: 'agent.name',
+          value: { conflict: 'agent-1' },
+        },
+      ]);
+    });
   });
 
   describe('dot notation', () => {
@@ -429,7 +447,7 @@ describe('traverseDoc', () => {
         },
       });
 
-      expect(result).toEqual({ client: {} });
+      expect(result).toEqual({});
       expect(removed).toEqual([
         {
           key: 'client.bytes',
@@ -445,7 +463,7 @@ describe('traverseDoc', () => {
         },
       });
 
-      expect(result).toEqual({ client: {} });
+      expect(result).toEqual({});
       expect(removed).toEqual([
         {
           key: 'client.bytes',
@@ -476,7 +494,7 @@ describe('traverseDoc', () => {
         },
       });
 
-      expect(result).toEqual({ host: {} });
+      expect(result).toEqual({});
       expect(removed).toEqual([
         {
           key: 'host.cpu.usage',

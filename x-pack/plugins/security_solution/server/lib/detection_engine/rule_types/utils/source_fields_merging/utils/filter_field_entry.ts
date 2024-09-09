@@ -26,7 +26,7 @@ import { isEqlBug77152 } from './is_eql_bug_77152';
  */
 export const filterFieldEntry = (
   fieldEntry: [string, FieldsType],
-  fieldEntries: Array<[string, FieldsType]>,
+  fieldsKeys: string[],
   ignoreFields: Record<string, boolean>,
   ignoreFieldRegexes: string[]
 ): boolean => {
@@ -36,7 +36,7 @@ export const filterFieldEntry = (
     !isEqlBug77152(fieldsKey) &&
     !isIgnored(fieldsKey, ignoreFields, ignoreFieldRegexes) &&
     !isInvalidKey(fieldsKey) &&
-    !isMultiField(fieldsKey, fieldEntries) &&
+    !isMultiField(fieldsKey, fieldsKeys) &&
     !isTypeObject(fieldsValue)
   );
 };

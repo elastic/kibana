@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SignalSource } from '../../../types';
 import { filterFieldEntry } from '../utils/filter_field_entry';
 import type { FieldsType, MergeStrategyFunction } from '../types';
 import { recursiveUnboxingFields } from '../utils/recursive_unboxing_fields';
@@ -13,7 +12,6 @@ import { isTypeObject } from '../utils/is_type_object';
 import { isNestedObject } from '../utils/is_nested_object';
 import { robustGet, robustSet } from '../utils/robust_field_access';
 import { robustIsPathValid } from '../utils/is_path_valid';
-import type { SearchTypes } from '../../../../../../../common/detection_engine/types';
 
 /**
  * Merges only missing sections of "doc._source" with its "doc.fields" on a "best effort" basis. See ../README.md for more information
@@ -31,22 +29,20 @@ export const mergeMissingFieldsWithSource: MergeStrategyFunction = ({
 }) => {
   const source = doc._source ?? {};
   const fields = doc.fields ?? {};
-  const fieldEntries = Object.entries(fields);
+  const fieldKeys = Object.keys(fields);
 
-  fieldEntries.forEach((fieldEntry: [string, FieldsType]) => {
-    const [fieldsKeyAsString, fieldsValue] = fieldEntry;
-    const valueInMergedDocument = robustGet({ key: fieldsKeyAsString, document: source });
-    if (
-      !hasEarlyReturnConditions({
-        fieldsValue,
-        key: fieldsKeyAsString,
-        valueInMergedDocument,
-        merged: source,
-      }) &&
-      filterFieldEntry(fieldEntry, fieldEntries, ignoreFields, ignoreFieldsRegexes)
-    ) {
-      const valueToMerge = recursiveUnboxingFields(fieldsValue, valueInMergedDocument);
-      return robustSet({ document: source, key: fieldsKeyAsString, valueToSet: valueToMerge });
+  fieldKeys.forEach((fieldKey) => {
+    const valueInMergedDocument = robustGet({ key: fieldKey, document: source });
+    if (valueInMergedDocument == null && robustIsPathValid(fieldKey, source)) {
+      const fieldsValue = fields[fieldKey];
+
+      if (
+        !hasEarlyReturnConditions(fieldsValue) &&
+        filterFieldEntry([fieldKey, fieldsValue], fieldKeys, ignoreFields, ignoreFieldsRegexes)
+      ) {
+        const valueToMerge = recursiveUnboxingFields(fieldsValue, valueInMergedDocument);
+        return robustSet({ document: source, key: fieldKey, valueToSet: valueToMerge });
+      }
     }
   });
 
@@ -67,22 +63,6 @@ export const mergeMissingFieldsWithSource: MergeStrategyFunction = ({
  * @param merged The merge document which is what we are testing conditions against
  * @returns true if we should return early, otherwise false
  */
-const hasEarlyReturnConditions = ({
-  fieldsValue,
-  key,
-  merged,
-  valueInMergedDocument,
-}: {
-  fieldsValue: FieldsType;
-  key: string;
-  merged: SignalSource;
-  valueInMergedDocument: SearchTypes;
-}) => {
-  return (
-    fieldsValue.length === 0 ||
-    valueInMergedDocument !== undefined ||
-    !robustIsPathValid(key, merged) ||
-    isNestedObject(fieldsValue) ||
-    isTypeObject(fieldsValue)
-  );
+const hasEarlyReturnConditions = (fieldsValue: FieldsType) => {
+  return fieldsValue.length === 0 || isNestedObject(fieldsValue) || isTypeObject(fieldsValue);
 };

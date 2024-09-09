@@ -34,18 +34,18 @@ export const mergeAllFieldsWithSource: MergeStrategyFunction = ({
 }) => {
   const source = doc._source ?? {};
   const fields = doc.fields ?? {};
-  const fieldEntries = Object.entries(fields);
+  const fieldsKeys = Object.keys(fields);
 
-  fieldEntries.forEach((fieldEntry: [string, FieldsType]) => {
-    const [fieldsKey, fieldsValue] = fieldEntry;
+  fieldsKeys.forEach((fieldsKey) => {
     const valueInMergedDocument = robustGet({ key: fieldsKey, document: source });
+    const fieldsValue = fields[fieldsKey];
     if (
       !hasEarlyReturnConditions({
         fieldsValue,
         fieldsKey,
         merged: source,
       }) &&
-      filterFieldEntry(fieldEntry, fieldEntries, ignoreFields, ignoreFieldsRegexes)
+      filterFieldEntry([fieldsKey, fieldsValue], fieldsKeys, ignoreFields, ignoreFieldsRegexes)
     ) {
       if (valueInMergedDocument === undefined) {
         const valueToMerge = recursiveUnboxingFields(fieldsValue, valueInMergedDocument);

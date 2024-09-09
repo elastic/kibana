@@ -1026,8 +1026,22 @@ describe('searchAfterAndBulkCreate', () => {
     expect(mockEnrichment).toHaveBeenCalledWith(
       expect.objectContaining([
         expect.objectContaining({
-          ...sampleDocWithSortId(),
           _id: expect.any(String),
+          _index: 'myFakeSignalIndex',
+          _score: 100,
+          _source: expect.objectContaining({
+            destination: { ip: '127.0.0.1' },
+            someKey: 'someValue',
+            source: { ip: '127.0.0.1' },
+          }),
+          _version: 1,
+          fields: {
+            '@timestamp': ['2020-04-20T21:27:45+0000'],
+            'destination.ip': ['127.0.0.1'],
+            someKey: ['someValue'],
+            'source.ip': ['127.0.0.1'],
+          },
+          sort: ['1234567891111', '2233447556677'],
         }),
       ])
     );

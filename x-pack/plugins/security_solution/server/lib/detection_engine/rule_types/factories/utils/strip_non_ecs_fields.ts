@@ -8,7 +8,7 @@
 import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
-import { isPlainObject, isArray, set, unset } from 'lodash';
+import { isPlainObject, isArray, set } from 'lodash';
 
 import type { SearchTypes } from '../../../../../../common/detection_engine/types';
 import { isValidIpType } from './ecs_types_validators/is_valid_ip_type';
@@ -186,14 +186,17 @@ const internalTraverseDoc = <T extends SourceFieldRecord>({
   removed: Array<{ key: string; value: SearchTypes }>;
   fieldsToAdd: Array<{ key: string; value: SearchTypes }>;
 }) => {
-  Object.entries(document).forEach(([key, value]) => {
+  Object.keys(document).forEach((key) => {
+    // Using Object.keys and fetching the value for each key separately performs better in profiling than using Object.entries
+    const value = document[key];
     const fullPathArray = [...path, key];
     const fullPath = fullPathArray.join('.');
     // Insert checks that don't care about the value - only depend on the key - up here
     let deleted = false;
     if (topLevel) {
+      const firstKeyString = key.split('.')[0];
       bannedFields.forEach((bannedField) => {
-        if (key.split('.')[0] === bannedField) {
+        if (firstKeyString === bannedField) {
           delete document[key];
           deleted = true;
           removed.push({ key: fullPath, value });
@@ -208,10 +211,12 @@ const internalTraverseDoc = <T extends SourceFieldRecord>({
         if (newValue.length > 0) {
           set(document, key, newValue);
         } else {
-          unset(document, key);
+          delete document[key];
+          deleted = true;
         }
       } else if (!computeIsEcsCompliant(value, fullPath)) {
         delete document[key];
+        deleted = true;
         removed.push({ key: fullPath, value });
       } else if (isSearchTypesRecord(value)) {
         internalTraverseDoc({
@@ -221,21 +226,27 @@ const internalTraverseDoc = <T extends SourceFieldRecord>({
           removed,
           fieldsToAdd,
         });
+        if (Object.keys(value).length === 0) {
+          delete document[key];
+          deleted = true;
+        }
       }
     }
 
     // We're keeping the field, but maybe we want to copy it to a different field as well
-    if (fullPath.split('.')[0] === 'event' && topLevel) {
+    if (!deleted && fullPath.split('.')[0] === 'event' && topLevel) {
+      // The value might have changed above when we `set` after traversing an array
+      const valueRefetch = document[key];
       const newKey = `${ALERT_ORIGINAL_EVENT}${fullPath.replace('event', '')}`;
-      if (isPlainObject(value)) {
-        const flattenedObject = flattenWithPrefix(newKey, value);
+      if (isPlainObject(valueRefetch)) {
+        const flattenedObject = flattenWithPrefix(newKey, valueRefetch);
         for (const [k, v] of Object.entries(flattenedObject)) {
           fieldsToAdd.push({ key: k, value: v });
         }
       } else {
         fieldsToAdd.push({
           key: `${ALERT_ORIGINAL_EVENT}${fullPath.replace('event', '')}`,
-          value,
+          value: valueRefetch,
         });
       }
     }
@@ -269,7 +280,7 @@ const traverseArray = ({
       return false;
     } else if (isSearchTypesRecord(value)) {
       internalTraverseDoc({ document: value, path, topLevel: false, removed, fieldsToAdd });
-      return true;
+      return Object.keys(value).length > 0;
     } else {
       return true;
     }

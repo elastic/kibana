@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
 import type { SearchTypes } from '../../../../../../../common/detection_engine/types';
@@ -27,7 +26,7 @@ export const robustGet = ({
   key: string;
   document: Record<string, unknown>;
 }): SearchTypes => {
-  const fastPathValue = get(document, key);
+  const fastPathValue = document[key];
   if (fastPathValue != null) {
     return fastPathValue;
   }
