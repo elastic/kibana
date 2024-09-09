@@ -169,7 +169,7 @@ Object {
                   "discontinuedFoo": Object {
                     "deprecated": true,
                     "description": "discontinued foo",
-                    "discontinued": "versionOrDate",
+                    "discontinued": "foo discontinued version or date",
                     "type": "string",
                   },
                   "foo": Object {
@@ -607,7 +607,7 @@ OK response oas-test-version-2",
                   "discontinuedFoo": Object {
                     "deprecated": true,
                     "description": "discontinued foo",
-                    "discontinued": "versionOrDate",
+                    "discontinued": "foo discontinued version or date",
                     "type": "string",
                   },
                   "foo": Object {
