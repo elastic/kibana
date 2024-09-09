@@ -60,19 +60,19 @@ describe('Event Filters', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('should be able to modify after deleting value with {backspace}', () => {
-      cy.getByTestSubj(CONDITION_VALUE).type(' {backspace} and co{enter}');
+      cy.getByTestSubj(CONDITION_VALUE).type(' {backspace}.lnk{enter}');
       cy.getByTestSubj(SUBMIT_BUTTON).click();
 
       cy.getByTestSubj('EventFiltersListPage-flyout').should('not.exist');
-      cy.contains('mr agent and co');
+      cy.contains('notepad.exe.lnk');
     });
 
     it('should be able to modify without using {backspace}', () => {
-      cy.getByTestSubj(CONDITION_VALUE).type(' and co{enter}');
+      cy.getByTestSubj(CONDITION_VALUE).type('.lnk{enter}');
       cy.getByTestSubj(SUBMIT_BUTTON).click();
 
       cy.getByTestSubj('EventFiltersListPage-flyout').should('not.exist');
-      cy.contains('mr agent and co');
+      cy.contains('notepad.exe.lnk');
     });
 
     it('should show suggestions when filter value is cleared', () => {
