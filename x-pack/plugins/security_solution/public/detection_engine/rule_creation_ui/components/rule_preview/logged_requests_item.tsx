@@ -27,10 +27,12 @@ const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs>> = ({
   duration,
   requests,
 }) => {
-  const paddingLeft = useEuiPaddingSize('l');
+  const paddingLarge = useEuiPaddingSize('l');
+  const paddingSmall = useEuiPaddingSize('s');
   return (
     <OptimizedAccordion
       data-test-subj="preview-logged-requests-item-accordion"
+      borders="horizontal"
       buttonContent={
         <>
           {startedAt ? (
@@ -47,14 +49,16 @@ const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs>> = ({
       }
       id={`ruleExecution-${startedAt}`}
       css={css`
-        padding-left: ${paddingLeft};
+        margin-left: ${paddingLarge};
+        padding-bottom: ${paddingLarge};
+        padding-top: ${paddingSmall};
       `}
     >
       {(requests ?? []).map((request, key) => (
         <EuiFlexItem
           key={key}
           css={css`
-            padding-left: ${paddingLeft};
+            padding-left: ${paddingLarge};
           `}
         >
           <EuiSpacer size="l" />

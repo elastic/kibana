@@ -21,7 +21,6 @@ const LoggedRequestsComponent: FC<{ logs: RulePreviewLogs[] }> = ({ logs }) => {
         {logs.map((log) => (
           <React.Fragment key={log.startedAt}>
             <LoggedRequestsItem {...log} />
-            <EuiSpacer size="s" />
           </React.Fragment>
         ))}
       </>
