@@ -9794,6 +9794,15 @@
             "description": "Non-default value of setting."
           }
         },
+        "search:search_excluded_data_tiers": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Non-default value of setting."
+            }
+          }
+        },
         "courier:maxConcurrentShardRequests": {
           "type": "long",
           "_meta": {
