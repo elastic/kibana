@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/inventory-plugin",
-  "owner": "@elastic/obs-ux-infra-services",
+  "owner": "@elastic/obs-ux-infra_services-team",
   "plugin": {
     "id": "inventory",
     "server": true,
