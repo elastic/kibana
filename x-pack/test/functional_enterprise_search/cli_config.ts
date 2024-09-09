@@ -6,6 +6,8 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 import { EnterpriseSearchCypressCliTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -16,6 +18,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
+
+    services: {
+      ...commonFunctionalServices,
+      ...commonFunctionalUIServices,
+    },
+
     // default to the xpack functional config
     ...baseConfig.getAll(),
 
