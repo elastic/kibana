@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  BulkIndexByScrollFailure,
-  DeleteByQueryResponse,
-} from '@elastic/elasticsearch/lib/api/types';
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
 
 // Number of times to retry when conflicts occur
@@ -21,47 +18,29 @@ const RETRY_DELAY = 200;
  * Retry an Elasticsearch deleteByQuery operation if it runs into 409 Conflicts,
  * up to a maximum number of attempts.
  */
-export async function retryIfDeleteByQueryConflicts<T>(
+export async function retryIfDeleteByQueryConflicts(
   logger: ToolingLog,
   name: string,
   operation: () => Promise<DeleteByQueryResponse>,
   retries: number = RETRY_ATTEMPTS,
   retryDelay: number = RETRY_DELAY
 ): Promise<DeleteByQueryResponse> {
-  const failures: BulkIndexByScrollFailure[] = [];
-  const operationResult = await operation();
+  for (let retriesLeft = retries; retriesLeft > 0; retriesLeft--) {
+    const operationResult = await operation();
 
-  if (!operationResult.failures || operationResult.failures?.length === 0) {
-    logger.info(`${name} finished successfully`);
-    return operationResult;
-  }
-
-  for (const failure of operationResult.failures) {
-    if (failure.status === 409) {
-      // if no retries left, throw it
-      if (retries <= 0) {
-        logger.error(`${name} conflict, exceeded retries`);
-        throw new Error(`${name} conflict, exceeded retries`);
-      }
-
-      // Otherwise, delay a bit before retrying
-      logger.debug(`${name} conflict, retrying ...`);
-      await waitBeforeNextRetry(retryDelay);
-      return await retryIfDeleteByQueryConflicts(logger, name, operation, retries - 1);
+    if (!operationResult.failures || operationResult.failures?.length === 0) {
+      logger.info(`${name} finished successfully`);
+      return operationResult;
     }
 
-    failures.push(failure);
+    const failureCause = operationResult.failures.map((failure) => failure.cause).join(', ');
+
+    logger.warning(`Unable to delete by query ${name} caused by ${failureCause}, retrying ...`);
+
+    await waitBeforeNextRetry(retryDelay);
   }
 
-  if (failures.length > 0) {
-    throw new Error(
-      `Unable to delete by query ${name} caused by ${failures
-        .map((failure) => failure.cause)
-        .join(', ')}`
-    );
-  }
-
-  return operationResult;
+  throw new Error(`${name} failed, exceeded retries`);
 }
 
 async function waitBeforeNextRetry(retryDelay: number): Promise<void> {
