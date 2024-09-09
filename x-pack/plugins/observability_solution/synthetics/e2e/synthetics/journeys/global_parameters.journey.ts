@@ -15,7 +15,7 @@ const journeySkip =
   () =>
     journey(...params);
 // See details: https://github.com/elastic/kibana/issues/191961
-journeySkip(`GlobalParameters`, async ({ page, params }) => {
+journey(`GlobalParameters`, async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   before(async () => {
@@ -64,7 +64,7 @@ journeySkip(`GlobalParameters`, async ({ page, params }) => {
     await page.click('[placeholder="Search..."]');
     await page.fill('[placeholder="Search..."]', 'username');
     await page.click('text=username');
-    await page.click('[aria-label="Clear input"]');
+    await page.click('[aria-label="Clear search input"]');
     await page.click('[placeholder="Search..."]');
     await page.fill('[placeholder="Search..."]', 'website');
     await page.click('text=website username');
@@ -74,7 +74,7 @@ journeySkip(`GlobalParameters`, async ({ page, params }) => {
     await page.fill('[placeholder="Search..."]', 'extra');
     await page.keyboard.press('Enter');
     await page.click('text=No items found');
-    await page.click('[aria-label="Clear input"]');
+    await page.click('[aria-label="Clear search input"]');
   });
 
   step('Click text=Delete ParameterEdit Parameter >> :nth-match(button, 2)', async () => {
@@ -91,7 +91,7 @@ journeySkip(`GlobalParameters`, async ({ page, params }) => {
     await page.click('text=staging');
     await page.click('button:has-text("Tags")');
     await page.click('[aria-label="Tags"] >> text=staging');
-    await page.click('[aria-label="Clear input"]');
+    await page.click('[aria-label="Clear search input"]');
   });
   step('Click text=Delete ParameterEdit Parameter >> button', async () => {
     await page.click('text=Delete ParameterEdit Parameter >> button');
