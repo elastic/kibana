@@ -407,6 +407,18 @@ export const monitoringSchema = schema.object(
                 })
               )
             ),
+            gap_range: schema.maybe(
+              schema.nullable(
+                schema.object({
+                  from: schema.string({
+                    meta: { description: 'Start of the gap range.' },
+                  }),
+                  to: schema.string({
+                    meta: { description: 'End of the gap range.' },
+                  }),
+                })
+              )
+            ),
           }),
         }),
       },
