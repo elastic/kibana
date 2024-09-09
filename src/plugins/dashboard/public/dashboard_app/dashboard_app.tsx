@@ -23,6 +23,7 @@ import {
 import {
   loadAndRemoveDashboardState,
   startSyncingDashboardUrlState,
+  startSyncingExpandedPanelState,
 } from './url/sync_dashboard_url_state';
 import {
   getSessionURLObservable,
@@ -122,9 +123,8 @@ export function DashboardApp({
   useEffect(() => {
     return () => {
       search.session.clear();
-      dashboardAPI?.expandedPanelId.unsubscribe();
     };
-  }, [dashboardAPI?.expandedPanelId, search.session]);
+  }, [search.session]);
 
   /**
    * Validate saved object load outcome
@@ -193,20 +193,8 @@ export function DashboardApp({
 
   useMemo(() => {
     if (!dashboardAPI) return;
-    dashboardAPI?.expandedPanelId.subscribe(() => {
-      const expandedPanel = dashboardAPI.expandedPanelId.value;
-      if (expandedPanel) {
-        return history.replace({
-          pathname: `${createDashboardEditUrl(dashboardAPI.savedObjectId.value)}/${expandedPanel}`,
-          search: history.location.search,
-        });
-      } else {
-        return history.replace({
-          pathname: createDashboardEditUrl(dashboardAPI.savedObjectId.value),
-          search: history.location.search,
-        });
-      }
-    });
+    const { stopWatchingExpandedPanel } = startSyncingExpandedPanelState({ dashboardAPI, history });
+    return () => stopWatchingExpandedPanel();
   }, [dashboardAPI, history]);
 
   /**

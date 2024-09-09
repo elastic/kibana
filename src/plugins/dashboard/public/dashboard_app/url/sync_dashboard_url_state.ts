@@ -9,6 +9,7 @@
 import _ from 'lodash';
 import { debounceTime } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
+import { History } from 'history';
 
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
@@ -22,7 +23,7 @@ import {
 import { DashboardAPI } from '../../dashboard_container';
 import { pluginServices } from '../../services/plugin_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
-import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
+import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../dashboard_constants';
 import { SavedDashboardPanel } from '../../../common/content_management';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management/lib/load_dashboard_state';
 
@@ -104,4 +105,30 @@ export const startSyncingDashboardUrlState = ({
 
   const stopWatchingAppStateInUrl = () => appStateSubscription.unsubscribe();
   return { stopWatchingAppStateInUrl };
+};
+
+export const startSyncingExpandedPanelState = ({
+  dashboardAPI,
+  history,
+}: {
+  dashboardAPI: DashboardAPI;
+  history: History;
+}) => {
+  const expandedPanelSubscription = dashboardAPI?.expandedPanelId.subscribe(() => {
+    const expandedPanel = dashboardAPI.expandedPanelId.value;
+
+    if (expandedPanel) {
+      history.replace({
+        ...history.location,
+        pathname: `${createDashboardEditUrl(dashboardAPI.savedObjectId.value)}/${expandedPanel}`,
+      });
+    } else {
+      history.replace({
+        ...history.location,
+        pathname: createDashboardEditUrl(dashboardAPI.savedObjectId.value),
+      });
+    }
+  });
+  const stopWatchingExpandedPanel = () => expandedPanelSubscription.unsubscribe();
+  return { stopWatchingExpandedPanel };
 };
