@@ -22,7 +22,7 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-unsupported-ftrs-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
-      branch_configuration: main 8.15 7.17
+      branch_configuration: main 8.x 8.15 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/on_merge_unsupported_ftrs.yml
