@@ -22,11 +22,6 @@ export function InvestigationListPage() {
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
   const [isCreateFormFlyoutVisible, setCreateFormFlyoutVisible] = useState<boolean>(false);
 
-  let createFormFlyout;
-  if (isCreateFormFlyoutVisible) {
-    createFormFlyout = <InvestigationEditForm onClose={() => setCreateFormFlyoutVisible(false)} />;
-  }
-
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -54,7 +49,9 @@ export function InvestigationListPage() {
       }}
     >
       <InvestigationList />
-      {createFormFlyout}
+      {isCreateFormFlyoutVisible && (
+        <InvestigationEditForm onClose={() => setCreateFormFlyoutVisible(false)} />
+      )}
     </ObservabilityPageTemplate>
   );
 }

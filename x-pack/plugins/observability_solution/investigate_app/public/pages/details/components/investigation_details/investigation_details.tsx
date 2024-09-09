@@ -35,16 +35,6 @@ export function InvestigationDetails({ user }: Props) {
   const { investigation } = useInvestigation();
   const [isEditFormFlyoutVisible, setEditFormFlyoutVisible] = useState<boolean>(false);
 
-  let editFormFlyout;
-  if (isEditFormFlyoutVisible && investigation) {
-    editFormFlyout = (
-      <InvestigationEditForm
-        investigationId={investigation.id}
-        onClose={() => setEditFormFlyoutVisible(false)}
-      />
-    );
-  }
-
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -89,7 +79,12 @@ export function InvestigationDetails({ user }: Props) {
           <InvestigationNotes user={user} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {editFormFlyout}
+      {isEditFormFlyoutVisible && investigation && (
+        <InvestigationEditForm
+          investigationId={investigation.id}
+          onClose={() => setEditFormFlyoutVisible(false)}
+        />
+      )}
     </ObservabilityPageTemplate>
   );
 }
