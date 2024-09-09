@@ -8,7 +8,6 @@
  */
 import { addQueriesToCache, getCachedQueries } from './history_local_storage';
 
-
 describe('history local storage', function () {
   const mockGetItem = jest.fn();
   const mockSetItem = jest.fn();
