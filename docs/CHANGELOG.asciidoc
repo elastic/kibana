@@ -2341,7 +2341,7 @@ The function `addProcessorDefinition` is removed from the Console plugin start c
 ====
 *Details* +
 The API endpoint for downloading a CSV file from a saved search in the Dashboard application has changed to reflect the fact that this is an internal API. The previous API path of
-`/api/reporting/v1/generate/immediate/csv_searchsource` has been changed to `/internal/reporting/generate/immediate/csv_searchsource`. For more information, refer to ({kibana-pull}162288[#162288]).
+`/api/reporting/v1/generate/immediate/csv_searchsource` has been changed to `/internal/reporting/generate/immediate/csv_searchsource`. For more information, refer to {kibana-pull}162288[#162288].
 ====
 
 [float]
