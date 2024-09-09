@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as React from 'react';
@@ -41,7 +42,7 @@ const defaultOpts: ConnectionDetailsOpts = {
   },
 };
 
-export const StoriesProvider: React.FC<Partial<ConnectionDetailsOpts>> = ({
+export const StoriesProvider: React.FC<React.PropsWithChildren<Partial<ConnectionDetailsOpts>>> = ({
   children,
   ...rest
 }) => {
@@ -52,7 +53,9 @@ export const StoriesProvider: React.FC<Partial<ConnectionDetailsOpts>> = ({
   );
 };
 
-export const StoriesProviderKeyCreationError: React.FC = ({ children }) => {
+export const StoriesProviderKeyCreationError: React.FC<React.PropsWithChildren<{}>> = ({
+  children,
+}) => {
   const opts: ConnectionDetailsOpts = {
     ...defaultOpts,
     apiKeys: {
@@ -67,7 +70,9 @@ export const StoriesProviderKeyCreationError: React.FC = ({ children }) => {
   return <ConnectionDetailsOptsProvider {...opts}>{children}</ConnectionDetailsOptsProvider>;
 };
 
-export const StoriesProviderNoKeyPermissions: React.FC = ({ children }) => {
+export const StoriesProviderNoKeyPermissions: React.FC<React.PropsWithChildren<{}>> = ({
+  children,
+}) => {
   const opts: ConnectionDetailsOpts = {
     ...defaultOpts,
     apiKeys: {
