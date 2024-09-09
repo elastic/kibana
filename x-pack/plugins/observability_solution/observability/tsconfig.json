@@ -114,7 +114,8 @@
     "@kbn/investigation-shared",
     "@kbn/grouping",
     "@kbn/alerts-grouping",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/logs-shared-plugin",
   ],
   "exclude": [
     "target/**/*"
