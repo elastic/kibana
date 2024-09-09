@@ -11,6 +11,12 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useAssistantContext } from '../../assistant_context';
 import { getUniquePromptContextId } from '../../assistant_context/helpers';
 import type { PromptContext } from '../prompt_context/types';
+import { useConversation } from '../use_conversation';
+import { getDefaultConnector, mergeBaseWithPersistedConversations } from '../helpers';
+import { getGenAiConfig } from '../../connectorland/helpers';
+import { useLoadConnectors } from '../../connectorland/use_load_connectors';
+import { FetchConversationsResponse, useFetchCurrentUserConversations } from '../api';
+import { Conversation } from '../../assistant_context/types';
 
 interface UseAssistantOverlay {
   showAssistantOverlay: (show: boolean, silent?: boolean) => void;
@@ -76,6 +82,26 @@ export const useAssistantOverlay = (
    */
   replacements?: Replacements | null
 ): UseAssistantOverlay => {
+  const { http } = useAssistantContext();
+  const { data: connectors } = useLoadConnectors({
+    http,
+  });
+
+  const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+  const apiConfig = useMemo(() => getGenAiConfig(defaultConnector), [defaultConnector]);
+
+  const { createConversation } = useConversation();
+
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
+      mergeBaseWithPersistedConversations({}, conversationsData),
+    []
+  );
+  const { data: conversations, isLoading } = useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+    isAssistantEnabled,
+  });
   // memoize the props so that we can use them in the effect below:
   const _category: PromptContext['category'] = useMemo(() => category, [category]);
   const _description: PromptContext['description'] = useMemo(() => description, [description]);
@@ -104,16 +130,64 @@ export const useAssistantOverlay = (
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   // silent:boolean doesn't show the toast notification if the conversation is not found
   const showAssistantOverlay = useCallback(
-    async (showOverlay: boolean) => {
+    // shouldCreateConversation should only be passed for
+    // non-default conversations that may need to be initialized
+    async (showOverlay: boolean, shouldCreateConversation: boolean = false) => {
       if (promptContextId != null) {
+        if (shouldCreateConversation) {
+          console.log('test 2', conversations);
+          let conversation;
+          if (!isLoading) {
+            console.log('test 4');
+            conversation = conversationTitle
+              ? Object.values(conversations).find((conv) => conv.title === conversationTitle)
+              : undefined;
+          }
+          console.log('condtions:', {
+            full: isAssistantEnabled && !conversation && defaultConnector && !isLoading,
+            isAssistantEnabled,
+            conversationMissing: !conversation,
+            defaultConnector,
+            isLoading,
+          });
+
+          if (isAssistantEnabled && !conversation && defaultConnector && !isLoading) {
+            try {
+              console.log('test 3');
+              await createConversation({
+                apiConfig: {
+                  ...apiConfig,
+                  actionTypeId: defaultConnector?.actionTypeId,
+                  connectorId: defaultConnector?.id,
+                },
+                category: 'assistant',
+                title: conversationTitle ?? '',
+              });
+            } catch (e) {
+              /* empty */
+            }
+          }
+        }
+        console.log('test 1', assistantContextShowOverlay);
         assistantContextShowOverlay({
           showOverlay,
           promptContextId,
           conversationTitle: conversationTitle ?? undefined,
         });
+        console.log('test 1b');
       }
     },
-    [assistantContextShowOverlay, conversationTitle, promptContextId]
+    [
+      apiConfig,
+      assistantContextShowOverlay,
+      conversationTitle,
+      conversations,
+      createConversation,
+      defaultConnector,
+      isAssistantEnabled,
+      isLoading,
+      promptContextId,
+    ]
   );
 
   useEffect(() => {
