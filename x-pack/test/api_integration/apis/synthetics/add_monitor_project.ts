@@ -214,7 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
             namespace: 'default',
             origin: 'project',
             original_space: 'default',
-            playwright_options: { headless: true, chromiumSandbox: false },
+            playwright_options: '{"headless":true,"chromiumSandbox":false}',
             playwright_text_assertion: '',
             project_id: project,
             params: '',
@@ -243,7 +243,6 @@ export default function ({ getService }: FtrProviderContext) {
             urls: '',
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
-            retest_on_failure: true,
             max_attempts: 2,
             updated_at: decryptedCreatedMonitor.rawBody.updated_at,
             created_at: decryptedCreatedMonitor.rawBody.created_at,
@@ -372,10 +371,10 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'text',
               value: '',
             },
-            params: {
+            params: JSON.stringify({
               testLocal1: 'testLocalParamsValue',
               testGlobalParam2: 'testGlobalParamOverwrite',
-            },
+            }),
             'check.request.headers': {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
@@ -435,7 +434,6 @@ export default function ({ getService }: FtrProviderContext) {
             mode: 'any',
             ipv6: true,
             ipv4: true,
-            retest_on_failure: true,
             max_attempts: 2,
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
@@ -497,7 +495,7 @@ export default function ({ getService }: FtrProviderContext) {
             }
           );
 
-          expect(decryptedCreatedMonitor.body).to.eql({
+          expect(decryptedCreatedMonitor).to.eql({
             __ui: {
               is_tls_enabled: isTLSEnabled,
             },
@@ -558,8 +556,6 @@ export default function ({ getService }: FtrProviderContext) {
             ipv6: true,
             ipv4: true,
             params: '',
-            url: 'http://localhost:9200',
-            retest_on_failure: true,
             max_attempts: 2,
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
@@ -612,12 +608,15 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          const decryptedCreatedMonitor = await monitorTestService.getMonitor(
-            createdMonitorsResponse.body.monitors[0].config_id
+          const { rawBody: decryptedCreatedMonitor } = await monitorTestService.getMonitor(
+            createdMonitorsResponse.body.monitors[0].config_id,
+            {
+              ui: true,
+            }
           );
 
-          expect(decryptedCreatedMonitor.body).to.eql({
-            config_id: decryptedCreatedMonitor.body.config_id,
+          expect(decryptedCreatedMonitor).to.eql({
+            config_id: decryptedCreatedMonitor.config_id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             enabled: true,
             alert: {
@@ -677,6 +676,8 @@ export default function ({ getService }: FtrProviderContext) {
             ipv6: true,
             params: '',
             max_attempts: 2,
+            updated_at: decryptedCreatedMonitor.updated_at,
+            created_at: decryptedCreatedMonitor.created_at,
           });
         }
       } finally {

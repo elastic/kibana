@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
-import { transformPublicKeys } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/formatters/saved_object_to_monitor';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
 
@@ -254,7 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const { body: result } = await addMonitorAPI(monitor);
 
-        expect(transformPublicKeys(result)).eql(
+        expect(result).eql(
           omitMonitorKeys({
             ...defaultFields,
             ...monitor,

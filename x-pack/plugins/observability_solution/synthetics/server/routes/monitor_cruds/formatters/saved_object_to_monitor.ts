@@ -38,18 +38,24 @@ export const transformPublicKeys = (result: Result, ui?: boolean) => {
   if (ui) {
     return result;
   }
-  const formattedResult = {
+  let formattedResult = {
     ...result,
     [ConfigKey.PARAMS]: formatParams(result),
-    [ConfigKey.PLAYWRIGHT_OPTIONS]: formatPWOptions(result),
     retest_on_failure: (result[ConfigKey.MAX_ATTEMPTS] ?? 1) > 1,
-    url: result[ConfigKey.URLS] ? result[ConfigKey.URLS] : undefined,
-    inline_script: result[ConfigKey.SOURCE_INLINE] ? result[ConfigKey.SOURCE_INLINE] : undefined,
-    host: result[ConfigKey.HOSTS] ? result[ConfigKey.HOSTS] : undefined,
-    ssl: formatNestedFields(result, 'ssl'),
-    response: formatNestedFields(result, 'response'),
-    check: formatNestedFields(result, 'check'),
+    ...(result[ConfigKey.HOSTS] && { host: result[ConfigKey.HOSTS] }),
+    ...(result[ConfigKey.URLS] && { url: result[ConfigKey.URLS] }),
   };
+  if (formattedResult[ConfigKey.MONITOR_TYPE] === 'browser') {
+    formattedResult = {
+      ...formattedResult,
+      ...(result[ConfigKey.SOURCE_INLINE] && { inline_script: result[ConfigKey.SOURCE_INLINE] }),
+      [ConfigKey.PLAYWRIGHT_OPTIONS]: formatPWOptions(result),
+    };
+  } else {
+    formattedResult.ssl = formatNestedFields(formattedResult, 'ssl');
+    formattedResult.response = formatNestedFields(formattedResult, 'response');
+    formattedResult.check = formatNestedFields(formattedResult, 'check');
+  }
   const res = omit(formattedResult, keysToOmit) as Result;
 
   return omitBy(
@@ -99,6 +105,7 @@ const formatParams = (config: MonitorFields) => {
       return {};
     }
   }
+  return {};
 };
 
 const formatPWOptions = (config: MonitorFields) => {
@@ -112,6 +119,7 @@ const formatPWOptions = (config: MonitorFields) => {
       return {};
     }
   }
+  return {};
 };
 
 // combine same nested fields into same object

@@ -213,20 +213,22 @@ export default function ({ getService }: FtrProviderContext) {
 
         const apiResponse = await monitorTestService.getMonitor(id1, { ui: true });
 
-        expect(apiResponse.body).eql({
-          ...omitMonitorKeys({
-            ...monitors[0],
-            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-            revision: 1,
-            locations: [LOCAL_LOCATION],
-            name: 'Test HTTP Monitor 045',
-          }),
-          hosts: '192.33.22.111:3333',
-          hash: '',
-          journey_id: '',
-          max_attempts: 2,
-        });
+        expect(apiResponse.body).eql(
+          omit(
+            {
+              ...monitors[0],
+              form_monitor_type: 'icmp',
+              revision: 1,
+              locations: [LOCAL_LOCATION],
+              name: 'Test HTTP Monitor 045',
+              hosts: '192.33.22.111:3333',
+              hash: '',
+              journey_id: '',
+              max_attempts: 2,
+            },
+            ['config_id', 'id', 'form_monitor_type']
+          )
+        );
       });
 
       it('returns 404 if monitor id is not found', async () => {

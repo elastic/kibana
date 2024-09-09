@@ -133,6 +133,7 @@ describe('mergeSourceMonitor', () => {
         'request.method': 'GET',
         'response.status': ['404'],
       },
+      params: {},
     });
   });
 
