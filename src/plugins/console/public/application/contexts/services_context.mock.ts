@@ -47,7 +47,6 @@ export const serviceContextMock = {
       docLinkVersion: 'NA',
       docLinks: docLinksServiceMock.createStartContract().links,
       config: {
-        isMonacoEnabled: false,
         isDevMode: false,
       },
     };

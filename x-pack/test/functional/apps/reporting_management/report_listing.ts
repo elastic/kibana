@@ -167,7 +167,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.waitUntilUrlIncludes('dev_tools#/console');
 
       await retry.try(async () => {
-        const actualRequest = await pageObjects.console.getRequest();
+        const actualRequest = await pageObjects.console.getEditorText();
         expect(actualRequest.trim()).to.contain(
           '# These are the queries used when exporting data for\n# the CSV report'
         );

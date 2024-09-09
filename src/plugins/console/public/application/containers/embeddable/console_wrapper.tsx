@@ -117,7 +117,7 @@ interface ConsoleWrapperProps
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, usageCollection, onKeyDown, isMonacoEnabled, isDevMode, isOpen } = props;
+  const { core, usageCollection, onKeyDown, isDevMode, isOpen } = props;
 
   useEffect(() => {
     if (dependencies === null && isOpen) {
@@ -168,7 +168,6 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             autocompleteInfo,
           },
           config: {
-            isMonacoEnabled,
             isDevMode,
           },
         }}

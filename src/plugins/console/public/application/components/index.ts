@@ -11,8 +11,6 @@ export { SomethingWentWrongCallout } from './something_went_wrong_callout';
 export type { TopNavMenuItem } from './top_nav_menu';
 export { TopNavMenu } from './top_nav_menu';
 export { ConsoleMenu } from './console_menu';
-export { WelcomePanel } from './welcome_panel';
-export { HelpPanel } from './help_panel';
 export { EditorContentSpinner } from './editor_content_spinner';
 export { OutputPanelEmptyState } from './output_panel_empty_state';
 export { HelpPopover } from './help_popover';

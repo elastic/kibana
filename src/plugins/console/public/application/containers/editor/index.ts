@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { autoIndent, getDocumentation } from './legacy';
 export { Editor } from './editor';

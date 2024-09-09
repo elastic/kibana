@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MonacoEditorActionsProvider } from '../../containers/editor/monaco/monaco_editor_actions_provider';
+import { MonacoEditorActionsProvider } from '../../containers/editor/monaco_editor_actions_provider';
 import { SenseEditor } from '../../models/sense_editor';
 
 export class EditorRegistry {

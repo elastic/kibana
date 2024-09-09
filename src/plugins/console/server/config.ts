@@ -31,7 +31,6 @@ const schemaLatest = schema.object(
         defaultValue: 'stack',
       }),
     }),
-    dev: schema.object({ enableMonaco: schema.boolean({ defaultValue: true }) }),
   },
   { defaultValue: undefined }
 );
@@ -40,7 +39,6 @@ const configLatest: PluginConfigDescriptor<ConsoleConfig> = {
   exposeToBrowser: {
     ui: true,
     autocompleteDefinitions: true,
-    dev: true,
   },
   schema: schemaLatest,
   deprecations: () => [],
