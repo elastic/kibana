@@ -92,6 +92,7 @@ import {
   getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
+import { useCustomBrowserCopyForGrid } from '../hooks/use_custom_browser_copy';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const THEME_DEFAULT = { darkMode: false };
@@ -482,6 +483,8 @@ export const UnifiedDataTable = ({
   dataGridDensityState,
   onUpdateDataGridDensity,
 }: UnifiedDataTableProps) => {
+  useCustomBrowserCopyForGrid();
+
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
   const { darkMode } = useObservable(services.theme?.theme$ ?? of(THEME_DEFAULT), THEME_DEFAULT);

@@ -21,6 +21,7 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import classnames from 'classnames';
 import { getInnerColumns } from '../utils/columns';
@@ -75,10 +76,16 @@ export function SourceDocument({
             <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
               {fieldDisplayName}
             </EuiDescriptionListTitle>
+            <EuiScreenReaderOnly>
+              <p>{': '}</p>
+            </EuiScreenReaderOnly>
             <EuiDescriptionListDescription
               className="unifiedDataTable__descriptionListDescription"
               dangerouslySetInnerHTML={{ __html: value }}
             />
+            <EuiScreenReaderOnly>
+              <p>{', '}</p>
+            </EuiScreenReaderOnly>
           </Fragment>
         );
       })}
