@@ -68,7 +68,7 @@ export interface DataControlServices {
   dataViews: DataViewsPublicPluginStart;
 }
 
-export interface DataControlField {
+interface DataControlField {
   field: DataViewField;
   compatibleControlTypes: string[];
 }

@@ -12,15 +12,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
-import {
-  getCompatibleSearchTechniques,
+import type {
+  OptionsListControlState,
   OptionsListSearchTechnique,
-} from '../../../../../../common/options_list/suggestions_searching';
+} from '../../../../../../common/options_list';
+import { getCompatibleSearchTechniques } from '../../../../../../common/options_list/suggestions_searching';
 import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';
 import { CustomOptionsComponentProps } from '../../types';
 import { DEFAULT_SEARCH_TECHNIQUE } from '../constants';
 import { OptionsListStrings } from '../options_list_strings';
-import { OptionsListControlState } from '../types';
 
 const selectionOptions = [
   {

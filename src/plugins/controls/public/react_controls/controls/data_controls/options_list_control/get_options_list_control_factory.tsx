@@ -25,7 +25,7 @@ import type {
 } from '../../../../../common/options_list';
 import { getSelectionAsFieldType, isValidSearch } from '../../../../../common/options_list';
 import { initializeDataControl } from '../initialize_data_control';
-import { DataControlFactory, DataControlServices } from '../types';
+import type { DataControlFactory, DataControlServices } from '../types';
 import { OptionsListControl } from './components/options_list_control';
 import { OptionsListEditorOptions } from './components/options_list_editor_options';
 import {
@@ -37,7 +37,7 @@ import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
 import { initializeOptionsListSelections } from './options_list_control_selections';
 import { OptionsListStrings } from './options_list_strings';
-import { OptionsListControlApi } from './types';
+import type { OptionsListControlApi } from './types';
 
 export const getOptionsListControlFactory = (
   services: DataControlServices

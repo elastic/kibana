@@ -9,11 +9,9 @@
 
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
+import { ControlGroupSerializedState } from '../../common/control_group/types';
 import {
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-} from '../../common/control_group/types';
-import {
+  SerializableControlGroupState,
   controlGroupSerializedStateToSerializableRuntimeState,
   getDefaultControlGroupState,
 } from './control_group_persistence';
@@ -53,7 +51,7 @@ export const initializeControlGroupTelemetry = (
 
 const reportChainingSystemInUse = (
   chainingSystemsStats: ControlGroupTelemetry['chaining_system'],
-  chainingSystem: ControlGroupRuntimeState['chainingSystem']
+  chainingSystem: SerializableControlGroupState['chainingSystem']
 ): ControlGroupTelemetry['chaining_system'] => {
   if (!chainingSystem) return chainingSystemsStats;
   if (Boolean(chainingSystemsStats[chainingSystem])) {
@@ -66,7 +64,7 @@ const reportChainingSystemInUse = (
 
 const reportLabelPositionsInUse = (
   labelPositionStats: ControlGroupTelemetry['label_position'],
-  labelPosition: ControlGroupRuntimeState['labelPosition']
+  labelPosition: SerializableControlGroupState['labelPosition']
 ): ControlGroupTelemetry['label_position'] => {
   if (!labelPosition) return labelPositionStats;
   if (Boolean(labelPositionStats[labelPosition])) {
@@ -79,7 +77,7 @@ const reportLabelPositionsInUse = (
 
 const reportIgnoreSettingsInUse = (
   settingsStats: ControlGroupTelemetry['ignore_settings'],
-  settings: ControlGroupRuntimeState['ignoreParentSettings']
+  settings: SerializableControlGroupState['ignoreParentSettings']
 ): ControlGroupTelemetry['ignore_settings'] => {
   if (!settings) return settingsStats;
   for (const [settingKey, settingValue] of Object.entries(settings)) {
@@ -94,7 +92,7 @@ const reportIgnoreSettingsInUse = (
 
 const reportControlTypes = (
   controlTypeStats: ControlGroupTelemetry['by_type'],
-  panels: ControlGroupRuntimeState['initialChildControlState']
+  panels: SerializableControlGroupState['panels']
 ): ControlGroupTelemetry['by_type'] => {
   for (const { type } of Object.values(panels)) {
     const currentTypeCount = controlTypeStats[type]?.total ?? 0;

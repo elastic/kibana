@@ -27,24 +27,12 @@ import {
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { ControlStyle, ParentIgnoreSettings } from '../../../../common';
-import { ControlStateManager } from '../../controls/types';
+import type { ControlStyle, ParentIgnoreSettings } from '../../../../common';
+import { CONTROL_LAYOUT_OPTIONS } from '../../controls/data_controls/editor_constants';
+import type { ControlStateManager } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlGroupApi, ControlGroupEditorState } from '../types';
+import type { ControlGroupApi, ControlGroupEditorState } from '../types';
 import { ControlSettingTooltipLabel } from './control_setting_tooltip_label';
-
-const CONTROL_LAYOUT_OPTIONS = [
-  {
-    id: `oneLine`,
-    'data-test-subj': 'control-editor-layout-oneLine',
-    label: ControlGroupStrings.management.labelPosition.getInlineTitle(),
-  },
-  {
-    id: `twoLine`,
-    'data-test-subj': 'control-editor-layout-twoLine',
-    label: ControlGroupStrings.management.labelPosition.getAboveTitle(),
-  },
-];
 
 interface Props {
   onCancel: () => void;

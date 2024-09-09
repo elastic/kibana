@@ -12,9 +12,9 @@ import { BehaviorSubject } from 'rxjs';
 import { StateComparators } from '@kbn/presentation-publishing';
 
 import { CONTROL_GROUP_TYPE } from '../../../../common';
-import { ControlFetchContext } from '../../control_group/control_fetch/control_fetch';
-import { ControlGroupApi } from '../../control_group/types';
-import { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../types';
+import type { ControlFetchContext } from '../../control_group/control_fetch/control_fetch';
+import type { ControlGroupApi } from '../../control_group/types';
+import type { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../types';
 
 export const getMockedControlGroupApi = (
   dashboardApi?: unknown,
