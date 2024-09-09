@@ -83,7 +83,7 @@ export class JobsListViewUI extends Component {
 
     this.mlJobService = mlJobServiceFactory(
       toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
-      props.kibana.services.mlServices.mlApiServices
+      props.kibana.services.mlServices.mlApi
     );
   }
 
@@ -147,7 +147,7 @@ export class JobsListViewUI extends Component {
       }
 
       this.setState({ itemIdToExpandedRowMap }, () => {
-        loadFullJob(this.props.kibana.services.mlServices.mlApiServices, jobId)
+        loadFullJob(this.props.kibana.services.mlServices.mlApi, jobId)
           .then((job) => {
             const fullJobsList = { ...this.state.fullJobsList };
             if (this.props.showNodeInfo === false) {
@@ -324,11 +324,11 @@ export class JobsListViewUI extends Component {
       this.setState({ loading: true });
     }
 
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
     try {
       let jobsAwaitingNodeCount = 0;
-      const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
+      const jobs = await mlApi.jobs.jobsSummary(expandedJobsIds);
       const fullJobsList = {};
       const jobsSummaryList = jobs.map((job) => {
         if (job.fullJob !== undefined) {
@@ -387,8 +387,8 @@ export class JobsListViewUI extends Component {
       return;
     }
 
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
-    const { jobs } = await ml.jobs.blockingJobTasks();
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
+    const { jobs } = await mlApi.jobs.blockingJobTasks();
     const blockingJobIds = jobs.map((j) => Object.keys(j)[0]).sort();
     const taskListHasChanged = blockingJobIds.join() !== this.state.blockingJobIds.join();
 

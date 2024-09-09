@@ -9,23 +9,18 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiTitle } fro
 import { css } from '@emotion/css';
 import { TextBasedLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
-import { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
-import { Item } from '@kbn/investigation-shared';
 import React from 'react';
 import { AddFromLibraryButton } from '../add_from_library_button';
+import { useInvestigation } from '../../contexts/investigation_context';
 import { EsqlWidgetPreview } from './esql_widget_preview';
-
-type Props = {
-  onItemAdd: (item: Item) => void;
-} & GlobalWidgetParameters;
 
 const emptyPreview = css`
   padding: 36px 0px 36px 0px;
 `;
 
-export function AddInvestigationItem({ onItemAdd: onItemAdd, timeRange }: Props) {
+export function AddInvestigationItem() {
+  const { addItem, globalParams } = useInvestigation();
   const [isOpen, setIsOpen] = React.useState(false);
-
   const [query, setQuery] = React.useState({ esql: '' });
   const [submittedQuery, setSubmittedQuery] = React.useState({ esql: '' });
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
@@ -96,7 +91,7 @@ export function AddInvestigationItem({ onItemAdd: onItemAdd, timeRange }: Props)
                 <AddFromLibraryButton
                   onItemAdd={async (item) => {
                     resetState();
-                    await onItemAdd(item);
+                    await addItem(item);
                   }}
                 />
               </EuiFlexItem>
@@ -123,10 +118,10 @@ export function AddInvestigationItem({ onItemAdd: onItemAdd, timeRange }: Props)
             ) : (
               <EsqlWidgetPreview
                 esqlQuery={submittedQuery.esql}
-                timeRange={timeRange}
+                timeRange={globalParams.timeRange}
                 onItemAdd={async (item) => {
                   resetState();
-                  await onItemAdd(item);
+                  await addItem(item);
                 }}
               />
             )}

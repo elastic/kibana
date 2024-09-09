@@ -35,7 +35,7 @@ import {
   DEFAULT_RARE_BUCKET_SPAN,
 } from '../../../../../../common/constants/new_job';
 import type { MlJobService } from '../../../../services/job_service';
-import type { MlApiServices } from '../../../../services/ml_api_service';
+import type { MlApi } from '../../../../services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 
 import { getRichDetectors } from './util/general';
@@ -65,14 +65,14 @@ export class CategorizationJobCreator extends JobCreator {
   private _ccsVersionFailure: boolean = false;
 
   constructor(
-    mlApiServices: MlApiServices,
+    mlApi: MlApi,
     mlJobService: MlJobService,
     newJobCapsService: NewJobCapsService,
     indexPattern: DataView,
     savedSearch: SavedSearch | null,
     query: object
   ) {
-    super(mlApiServices, mlJobService, newJobCapsService, indexPattern, savedSearch, query);
+    super(mlApi, mlJobService, newJobCapsService, indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
     this._examplesLoader = new CategorizationExamplesLoader(this, indexPattern, query);
 
