@@ -9,13 +9,15 @@ import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Filter } from '@kbn/es-query';
 import {
-  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
   SECURITY_DEFAULT_DATA_VIEW_ID,
-} from '../../../common/constants';
-import { findingsNavigation } from '../navigation/constants';
-import { encodeQuery } from '../navigation/query_utils';
-import { useKibana } from './use_kibana';
-import { useDataView } from '../api/use_data_view';
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+} from '@kbn/cloud-security-posture-common';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { findingsNavigation } from '../../constants/navigation';
+import { useDataView } from './use_data_view';
+import { CspClientPluginStartDeps } from '../..';
+import { encodeQuery } from '../utils/query_utils';
 
 interface NegatedValue {
   value: string | number;
@@ -54,7 +56,7 @@ const createFilter = (key: string, filterValue: FilterValue, dataViewId: string)
 };
 const useNavigate = (pathname: string, dataViewId = SECURITY_DEFAULT_DATA_VIEW_ID) => {
   const history = useHistory();
-  const { services } = useKibana();
+  const { services } = useKibana<CoreStart & CspClientPluginStartDeps>();
 
   return useCallback(
     (filterParams: NavFilter = {}, groupBy?: string[]) => {
