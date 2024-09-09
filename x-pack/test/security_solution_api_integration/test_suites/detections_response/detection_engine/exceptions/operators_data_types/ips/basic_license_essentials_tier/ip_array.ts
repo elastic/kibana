@@ -65,6 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
           ['127.0.0.1', '127.0.0.2', '127.0.0.3', '127.0.0.4'],
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
           ['127.0.0.8', '127.0.0.9', '127.0.0.10'],
+          undefined,
         ]);
       });
 
@@ -87,6 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(ips).to.eql([
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
           ['127.0.0.8', '127.0.0.9', '127.0.0.10'],
+          undefined,
         ]);
       });
 
@@ -114,7 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 2, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const ips = alertsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips).to.eql([['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
+        expect(ips).to.eql([['127.0.0.8', '127.0.0.9', '127.0.0.10'], undefined]);
       });
 
       it('should filter 3 ips if all 3 are set as exceptions', async () => {
@@ -171,6 +173,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(ips).to.eql([
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
           ['127.0.0.8', '127.0.0.9', '127.0.0.10'],
+          undefined,
         ]);
       });
 
@@ -190,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 2, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const ips = alertsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips).to.eql([['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
+        expect(ips).to.eql([['127.0.0.8', '127.0.0.9', '127.0.0.10'], undefined]);
       });
     });
 
@@ -304,6 +307,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(ips).to.eql([
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
           ['127.0.0.8', '127.0.0.9', '127.0.0.10'],
+          undefined,
         ]);
       });
 
@@ -323,7 +327,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 2, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const ips = alertsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips).to.eql([['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
+        expect(ips).to.eql([['127.0.0.8', '127.0.0.9', '127.0.0.10'], undefined]);
       });
 
       it('should filter 3 ips if all 3 are set as exceptions', async () => {
@@ -456,6 +460,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(ips).to.eql([
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
           ['127.0.0.8', '127.0.0.9', '127.0.0.10'],
+          undefined,
         ]);
       });
 
@@ -479,7 +484,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 2, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const ips = alertsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips).to.eql([['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
+        expect(ips).to.eql([['127.0.0.8', '127.0.0.9', '127.0.0.10'], undefined]);
       });
 
       it('will return 1 result if we have a list that includes all ips', async () => {
@@ -546,7 +551,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 2, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const ips = alertsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips).to.eql([['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
+        expect(ips).to.eql([['127.0.0.8', '127.0.0.9', '127.0.0.10'], undefined]);
       });
 
       it('will return 2 results if we have a list which contains the range syntax of "127.0.0.1-127.0.0.7', async () => {
@@ -577,7 +582,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 2, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const ips = alertsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips).to.eql([['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
+        expect(ips).to.eql([['127.0.0.8', '127.0.0.9', '127.0.0.10'], undefined]);
       });
     });
 

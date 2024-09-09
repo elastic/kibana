@@ -158,12 +158,12 @@ export default ({ getService }: FtrProviderContext) => {
         ecs: {
           version: '1.0.0-beta2',
         },
-        ...flattenWithPrefix('event', {
+        event: {
           action: 'changed-audit-configuration',
           category: 'configuration',
           module: 'auditd',
-          kind: 'signal',
-        }),
+        },
+        'event.kind': 'signal',
         host: {
           architecture: 'x86_64',
           containerized: false,

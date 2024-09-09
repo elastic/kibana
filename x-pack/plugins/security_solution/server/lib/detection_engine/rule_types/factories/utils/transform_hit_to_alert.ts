@@ -8,6 +8,7 @@
 import { merge } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { requiredOptional } from '@kbn/zod-helpers';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 
 import type { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
@@ -23,11 +24,10 @@ import { buildRiskScoreFromMapping } from '../../utils/mappings/build_risk_score
 import type { BaseFieldsLatest } from '../../../../../../common/api/detection_engine/model/alerts';
 import { traverseDoc } from './strip_non_ecs_fields';
 import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
+import { robustSet } from '../../utils/source_fields_merging/utils/robust_field_access';
 
-const isSourceDoc = (
-  hit: SignalSourceHit
-): hit is BaseHit<{ '@timestamp': string; _source: SignalSource }> => {
-  return hit._source != null;
+const isSourceDoc = (hit: SignalSourceHit): hit is BaseHit<SignalSource> => {
+  return hit._source != null && hit._id != null;
 };
 
 export interface TransformHitToAlertProps {
@@ -73,46 +73,33 @@ export const transformHitToAlert = ({
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields, ignoreFieldsRegexes });
   const thresholdResult = mergedDoc._source?.threshold_result;
 
-  const {
-    result: validatedSource,
-    removed: removedSourceFields,
-    fieldsToAdd,
-  } = traverseDoc(mergedDoc._source ?? {});
-
-  if (removedSourceFields.length) {
-    ruleExecutionLogger?.debug(
-      'Following fields were removed from alert source as ECS non-compliant:',
-      JSON.stringify(removedSourceFields)
-    );
-  }
-
-  const overrides = applyOverrides
-    ? {
-        nameOverride: buildRuleNameFromMapping({
-          eventSource: mergedDoc._source ?? {},
-          ruleName: completeRule.ruleConfig.name,
-          ruleNameMapping: completeRule.ruleParams.ruleNameOverride,
-        }).ruleName,
-        severityOverride: buildSeverityFromMapping({
-          eventSource: mergedDoc._source ?? {},
-          severity: completeRule.ruleParams.severity,
-          severityMapping: completeRule.ruleParams.severityMapping,
-        }).severity,
-        riskScoreOverride: buildRiskScoreFromMapping({
-          eventSource: mergedDoc._source ?? {},
-          riskScore: completeRule.ruleParams.riskScore,
-          riskScoreMapping: requiredOptional(completeRule.ruleParams.riskScoreMapping),
-        }).riskScore,
-      }
-    : undefined;
-
-  const reason = buildReasonMessage({
-    name: overrides?.nameOverride ?? completeRule.ruleConfig.name,
-    severity: overrides?.severityOverride ?? completeRule.ruleParams.severity,
-    mergedDoc,
-  });
-
   if (isSourceDoc(mergedDoc)) {
+    const overrides = applyOverrides
+      ? {
+          nameOverride: buildRuleNameFromMapping({
+            eventSource: mergedDoc._source ?? {},
+            ruleName: completeRule.ruleConfig.name,
+            ruleNameMapping: completeRule.ruleParams.ruleNameOverride,
+          }).ruleName,
+          severityOverride: buildSeverityFromMapping({
+            eventSource: mergedDoc._source ?? {},
+            severity: completeRule.ruleParams.severity,
+            severityMapping: completeRule.ruleParams.severityMapping,
+          }).severity,
+          riskScoreOverride: buildRiskScoreFromMapping({
+            eventSource: mergedDoc._source ?? {},
+            riskScore: completeRule.ruleParams.riskScore,
+            riskScoreMapping: requiredOptional(completeRule.ruleParams.riskScoreMapping),
+          }).riskScore,
+        }
+      : undefined;
+
+    const reason = buildReasonMessage({
+      name: overrides?.nameOverride ?? completeRule.ruleConfig.name,
+      severity: overrides?.severityOverride ?? completeRule.ruleParams.severity,
+      mergedDoc,
+    });
+
     const alertFields = buildAlertFields({
       docs: [mergedDoc],
       completeRule,
@@ -124,6 +111,22 @@ export const transformHitToAlert = ({
       alertTimestampOverride,
       overrides,
     });
+
+    const {
+      result: validatedSource,
+      removed: removedSourceFields,
+      fieldsToAdd,
+    } = traverseDoc(mergedDoc._source);
+
+    robustSet({ key: EVENT_KIND, document: validatedSource, valueToSet: undefined });
+
+    if (removedSourceFields.length) {
+      ruleExecutionLogger?.debug(
+        'Following fields were removed from alert source as ECS non-compliant:',
+        JSON.stringify(removedSourceFields)
+      );
+    }
+
     merge(validatedSource, alertFields);
     if (thresholdResult != null && isThresholdResult(thresholdResult)) {
       validatedSource[ALERT_THRESHOLD_RESULT] = thresholdResult;

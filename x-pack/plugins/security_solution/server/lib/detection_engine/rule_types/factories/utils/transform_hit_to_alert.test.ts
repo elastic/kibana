@@ -49,6 +49,7 @@ import {
   getQueryRuleParams,
 } from '../../../rule_schema/mocks';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
+import { get } from 'lodash';
 
 const SPACE_ID = 'space';
 const publicBaseUrl = 'testKibanaBasePath.com';
@@ -83,6 +84,68 @@ describe('transformHitToAlert', () => {
 
     expect(alert['kibana.alert.original_event.action']).toEqual('process');
     expect(alert['kibana.alert.original_event.action.keyword']).toBeUndefined();
+  });
+
+  it('should unset an existing event.kind field in nested notation', () => {
+    const doc = {
+      _index: 'testindex',
+      _id: 'myId',
+      _source: {
+        event: {
+          kind: 'test-value',
+        },
+      },
+    };
+    const completeRule = getCompleteRuleMock(getEsqlRuleParams());
+
+    const alert = transformHitToAlert({
+      spaceId: SPACE_ID,
+      completeRule,
+      doc,
+      mergeStrategy: 'missingFields',
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
+      buildReasonMessage: buildReasonMessageStub,
+      indicesToQuery: [],
+      alertTimestampOverride: undefined,
+      ruleExecutionLogger,
+      alertUuid,
+      publicBaseUrl,
+    });
+
+    expect(get(alert.event, 'kind')).toEqual(undefined);
+    expect(alert['event.kind']).toEqual('signal');
+  });
+
+  it('should replace an existing event.kind in dot notation', () => {
+    const doc = {
+      _index: 'testindex',
+      _id: 'myId',
+      _source: {
+        'event.kind': 'test-value',
+      },
+    };
+    const completeRule = getCompleteRuleMock(getEsqlRuleParams());
+
+    const alert = transformHitToAlert({
+      spaceId: SPACE_ID,
+      completeRule,
+      doc,
+      mergeStrategy: 'missingFields',
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
+      buildReasonMessage: buildReasonMessageStub,
+      indicesToQuery: [],
+      alertTimestampOverride: undefined,
+      ruleExecutionLogger,
+      alertUuid,
+      publicBaseUrl,
+    });
+
+    expect(get(alert.event, 'kind')).toEqual(undefined);
+    expect(alert['event.kind']).toEqual('signal');
   });
 
   it('should only copy ECS compatible array elements from event subfields to kibana.alert.original_event', () => {
