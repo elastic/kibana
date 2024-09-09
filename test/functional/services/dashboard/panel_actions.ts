@@ -46,6 +46,7 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async findContextMenu(parent?: WebElementWrapper) {
+    this.log.debug('findContextMenu');
     return parent
       ? await parent.findByTestSubject(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ)
       : await this.testSubjects.find(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
@@ -99,6 +100,34 @@ export class DashboardPanelActionsService extends FtrService {
     await this.testSubjects.existOrFail(testSubject);
     await this.testSubjects.click(testSubject);
   }
+  async hasContextMenuMoreItem() {
+    this.log.debug('hasContextMenuMoreItem');
+    return await this.testSubjects.exists('embeddablePanelMore-mainMenu', { timeout: 500 });
+  }
+
+  async clickContextMenuMoreItem() {
+    this.log.debug('clickContextMenuMoreItem');
+    await this.expectContextMenuToBeOpen();
+    if (await this.hasContextMenuMoreItem()) {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('embeddablePanelMore-mainMenu');
+    }
+  }
+
+  async openContextMenuMorePanel(parent?: WebElementWrapper) {
+    this.log.debug('openContextMenuMorePanel');
+    await this.openContextMenu(parent);
+    await this.clickContextMenuMoreItem();
+  }
+
+  async clickContextMenuItem(testSubject: string, parent?: WebElementWrapper) {
+    this.log.debug(`clickContextMenuItem(${testSubject})`);
+    await this.openContextMenu(parent);
+    const exists = await this.testSubjects.exists(testSubject, { timeout: 500 });
+    if (!exists) {
+      await this.clickContextMenuMoreItem();
+    }
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(testSubject, { timeout: 500 });
+  }
 
   async clickPanelActionByTitle(testSubject: string, title = '') {
     this.log.debug(`openContextMenuByTitle(${testSubject},${title})`);
@@ -110,10 +139,12 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug('navigateToEditorFromFlyout');
     await this.clickPanelAction(INLINE_EDIT_PANEL_DATA_TEST_SUBJ, parent);
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.click(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
     const isConfirmModalVisible = await this.testSubjects.exists('confirmModalConfirmButton');
     if (isConfirmModalVisible) {
-      await this.testSubjects.click('confirmModalConfirmButton', 20000);
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmModalConfirmButton', {
+        timeout: 20000,
+      });
     }
   }
 
@@ -169,18 +200,13 @@ export class DashboardPanelActionsService extends FtrService {
     await this.removePanel(header);
   }
 
-  async customizePanel(parent?: WebElementWrapper) {
-    this.log.debug('customizePanel');
-    await this.clickPanelAction(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, parent);
-  }
-
-  async customizePanelByTitle(title = '') {
-    this.log.debug('customizePanel');
+  async customizePanel(title = '') {
+    this.log.debug(`customizePanel(${title})`);
     const header = await this.getPanelHoverActions(title);
-    await this.clickPanelAction(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, header);
+    await this.clickContextMenuItem(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, header);
   }
 
-  async clonePanelByTitle(title = '') {
+  async clonePanel(title = '') {
     this.log.debug(`clonePanel(${title})`);
     const header = await this.getPanelHoverActions(title);
     await this.clickPanelAction(CLONE_PANEL_DATA_TEST_SUBJ, header);
@@ -224,77 +250,44 @@ export class DashboardPanelActionsService extends FtrService {
     await this.clickPanelAction(OPEN_INSPECTOR_TEST_SUBJ, parent);
   }
 
-  async legacyUnlinkFromLibrary(parent?: WebElementWrapper) {
-    this.log.debug('legacyUnlinkFromLibrary');
-    await this.clickPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, parent);
-  }
-
-  async legacyUnlinkFromLibraryByTitle(title = '') {
-    this.log.debug(`legacyUnlinkFromLibraryByTitle(${title}`);
+  async legacyUnlinkFromLibrary(title = '') {
+    this.log.debug(`legacyUnlinkFromLibrary(${title}`);
     const header = await this.getPanelHoverActions(title);
-    await this.legacyUnlinkFromLibrary(header);
-    await this.expectMissingPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
-    await this.expectExistsPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
+    await this.clickContextMenuItem(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, header);
+    await this.testSubjects.existOrFail('unlinkPanelSuccess');
+    await this.expectNotLinkedToLibrary(title, true);
   }
 
-  async unlinkFromLibrary(parent?: WebElementWrapper) {
-    this.log.debug('unlinkFromLibrary');
-    await this.clickPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, parent);
-    await this.testSubjects.waitForDeleted(
-      'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
-    );
-  }
-
-  async unlinkFromLibraryByTitle(title = '') {
-    this.log.debug(`unlinkFromLibraryByTitle(${title})`);
+  async unlinkFromLibrary(title = '') {
+    this.log.debug(`unlinkFromLibrary(${title})`);
     const header = await this.getPanelHoverActions(title);
-    await this.unlinkFromLibrary(header);
-    await this.expectMissingPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
-    await this.expectExistsPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
+    await this.clickContextMenuItem(UNLINK_FROM_LIBRARY_TEST_SUBJ, header);
+    await this.testSubjects.existOrFail('unlinkPanelSuccess');
+    await this.expectNotLinkedToLibrary(title);
   }
 
-  async legacySaveToLibrary(newTitle = '', parent?: WebElementWrapper) {
-    this.log.debug(`legacySaveToLibrary(${newTitle})`);
-    await this.clickPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, parent);
-    await this.testSubjects.setValue('savedObjectTitle', newTitle, {
-      clearWithKeyboard: true,
-    });
-    await this.testSubjects.click('confirmSaveSavedObjectButton');
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
-      );
-    });
-  }
-
-  async legacySaveToLibraryByTitle(newTitle = '', oldTitle = '') {
-    this.log.debug(`legacySaveToLibraryByTitle(${newTitle},${oldTitle})`);
+  async legacySaveToLibrary(newTitle = '', oldTitle = '') {
+    this.log.debug(`legacySaveToLibrary(${newTitle},${oldTitle})`);
     const header = await this.getPanelHoverActions(oldTitle);
-    await this.legacySaveToLibrary(newTitle, header);
-    await this.expectMissingPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, newTitle);
-    await this.expectExistsPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, newTitle);
-  }
-
-  async saveToLibrary(newTitle = '', parent?: WebElementWrapper) {
-    this.log.debug('saveToLibrary');
-    await this.clickPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, parent);
+    await this.clickContextMenuItem(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, header);
     await this.testSubjects.setValue('savedObjectTitle', newTitle, {
       clearWithKeyboard: true,
     });
-    await this.testSubjects.click('confirmSaveSavedObjectButton');
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
-      );
-    });
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
+    await this.testSubjects.existOrFail('addPanelToLibrarySuccess');
+    await this.expectLinkedToLibrary(newTitle, true);
   }
 
-  async saveToLibraryByTitle(newTitle = '', oldTitle = '') {
+  async saveToLibrary(newTitle = '', oldTitle = '') {
     this.log.debug(`saveToLibraryByTitle(${newTitle},${oldTitle})`);
     const header = await this.getPanelHoverActions(oldTitle);
-    await this.saveToLibrary(newTitle, header);
-    await this.expectMissingPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, newTitle);
-    await this.expectExistsPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, newTitle);
+    await this.clickContextMenuItem(SAVE_TO_LIBRARY_TEST_SUBJ, header);
+    await this.testSubjects.setValue('savedObjectTitle', newTitle, {
+      clearWithKeyboard: true,
+    });
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
+    await this.testSubjects.existOrFail('addPanelToLibrarySuccess');
+    await this.expectLinkedToLibrary(newTitle);
   }
 
   async expectExistsPanelAction(testSubject: string, title = '') {
@@ -412,7 +405,7 @@ export class DashboardPanelActionsService extends FtrService {
         throw new Error('Convert to Lens option not found');
       }
 
-      await this.testSubjects.click(CONVERT_TO_LENS_TEST_SUBJ);
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(CONVERT_TO_LENS_TEST_SUBJ);
     });
   }
 
@@ -420,5 +413,27 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug(`convertToLens(${title})`);
     const header = await this.getPanelHoverActions(title);
     return await this.convertToLens(header);
+  }
+
+  public async expectLinkedToLibrary(title = '', legacy?: boolean) {
+    this.log.debug(`expectLinkedToLibrary(${title})`);
+    if (legacy) {
+      await this.expectExistsPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+    } else {
+      await this.expectExistsPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+    }
+    await this.expectMissingPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
+    await this.expectMissingPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
+  }
+
+  public async expectNotLinkedToLibrary(title = '', legacy?: boolean) {
+    this.log.debug(`expectNotLinkedToLibrary(${title})`);
+    if (legacy) {
+      await this.expectExistsPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
+    } else {
+      await this.expectExistsPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
+    }
+    await this.expectMissingPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+    await this.expectMissingPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
   }
 }
