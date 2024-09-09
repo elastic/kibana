@@ -128,7 +128,7 @@ export function registerErrorCountRuleType({
       >
     ) => {
       const { params: ruleParams, services, spaceId, startedAt, getTimeRange } = options;
-      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
+      const { alertsClient, savedObjectsClient, scopedClusterClient, uiSettingsClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
@@ -187,6 +187,7 @@ export function registerErrorCountRuleType({
 
       const response = await alertingEsClient({
         scopedClusterClient,
+        uiSettingsClient,
         params: searchParams,
       });
 

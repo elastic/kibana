@@ -11,6 +11,7 @@ export {
   cancelEsRequestOnAbort,
   getDebugBody,
   getDebugTitle,
+  getExcludedDataTiersFilter,
 } from './lib/helpers';
 
 export { withApmSpan } from './utils/with_apm_span';

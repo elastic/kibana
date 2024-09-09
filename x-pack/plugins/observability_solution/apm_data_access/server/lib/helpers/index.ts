@@ -21,3 +21,5 @@ export {
 } from './create_es_client/call_async_with_debug';
 
 export { cancelEsRequestOnAbort } from './create_es_client/cancel_es_request_on_abort';
+
+export { getExcludedDataTiersFilter } from './tier_filter';

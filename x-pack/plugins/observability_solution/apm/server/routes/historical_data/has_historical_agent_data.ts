@@ -6,6 +6,7 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { IndexLifeCycleDataTier } from '@kbn/observability-shared-plugin/common';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function hasHistoricalAgentData(apmEventClient: APMEventClient) {
@@ -23,8 +24,10 @@ export async function hasHistoricalAgentData(apmEventClient: APMEventClient) {
   return hasDataUnbounded;
 }
 
-type DataTier = 'data_hot' | 'data_warm' | 'data_cold' | 'data_frozen';
-async function hasDataRequest(apmEventClient: APMEventClient, dataTiers?: DataTier[]) {
+async function hasDataRequest(
+  apmEventClient: APMEventClient,
+  dataTiers?: IndexLifeCycleDataTier[]
+) {
   const query = dataTiers ? { terms: { _tier: dataTiers } } : undefined;
 
   const params = {

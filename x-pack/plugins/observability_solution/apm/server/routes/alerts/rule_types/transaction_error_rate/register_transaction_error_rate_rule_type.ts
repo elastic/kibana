@@ -138,7 +138,7 @@ export function registerTransactionErrorRateRuleType({
       >
     ) => {
       const { services, spaceId, params: ruleParams, startedAt, getTimeRange } = options;
-      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
+      const { alertsClient, savedObjectsClient, scopedClusterClient, uiSettingsClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
@@ -223,6 +223,7 @@ export function registerTransactionErrorRateRuleType({
 
       const response = await alertingEsClient({
         scopedClusterClient,
+        uiSettingsClient,
         params: searchParams,
       });
 

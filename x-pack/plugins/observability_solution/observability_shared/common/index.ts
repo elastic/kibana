@@ -144,6 +144,11 @@ export {
 export { type Color, colorTransformer } from './color_palette';
 export { ObservabilityTriggerId } from './trigger_ids';
 export { getInspectResponse } from './utils/get_inspect_response';
+export {
+  type IndexLifeCycleDataTier,
+  indexLifeCyclePhaseToDataTier,
+  IndexLifecyclePhaseSelectOption,
+} from './ilm_types';
 
 export const LOGS_ONBOARDING_FEEDBACK_LINK = 'https://ela.st/logs-onboarding-feedback';
 export const LOGS_EXPLORER_FEEDBACK_LINK = 'https://ela.st/explorer-feedback';
