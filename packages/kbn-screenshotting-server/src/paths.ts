@@ -46,10 +46,10 @@ export class ChromiumArchivePaths {
       platform: 'darwin',
       architecture: 'x64',
       archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: 'fa8004f3c8c5574c089c901e48429d1b01720bf3dd25e05ac56c41d0ab470c10',
-      binaryChecksum: '56f25cb6881e5c2b1aac0d8e87630517d1af8effdc9319d35f872add048df1ca',
+      archiveChecksum: '0a3d18efd00b3406f66139a673616b4b2b4b00323776678cb82295996f5a6733',
+      binaryChecksum: '8bcdaa973ee11110f6b70eaac2418fda3bb64446cf37f964fce331cdc8907a20',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
-      revision: 1300317, // 1300313 is not available for Mac_x64
+      revision: 1331485, // 1331488 is not available for Mac_x64
       location: 'common',
       archivePath: 'Mac',
       isPreInstalled: false,
@@ -58,10 +58,10 @@ export class ChromiumArchivePaths {
       platform: 'darwin',
       architecture: 'arm64',
       archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: 'bea49fd3ccd6aaccd7cdc4df38306f002a2934aaa2c044f3b5a3272b31ec77ca',
-      binaryChecksum: '4c55d9e47deb1179c377c9785afdcdb5f3d3f351bff62b414d43e32ff195bd55',
+      archiveChecksum: '426eddf16acb88b9446a91de53cc4364c7d487414248f33e30f68cf488cea0c0',
+      binaryChecksum: '827931739bfdd2b6790a81d5ade8886c159cd051581d79b84d1ede447293e9cf',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
-      revision: 1300314, // 1300313 is not available for Mac_Arm
+      revision: 1331488,
       location: 'common',
       archivePath: 'Mac_Arm',
       isPreInstalled: false,
@@ -92,10 +92,10 @@ export class ChromiumArchivePaths {
       platform: 'win32',
       architecture: 'x64',
       archiveFilename: 'chrome-win.zip',
-      archiveChecksum: '27a2ed1473cefc6f48ff5665faa1fbcc69ef5be47ee21777a60e87c8379fdd93',
-      binaryChecksum: 'd603401a5e6f8bd734b329876e4221a4d24a1999f14df6e32eeb5e6a72520d96',
+      archiveChecksum: 'fa62be702f55f37e455bab4291c59ceb40e81e1922d30cf9453a4ee176b909bc',
+      binaryChecksum: '1345e66583bad1a1f16885f381d1173de8bf931487da9ba155e1b58bf23b2c66',
       binaryRelativePath: path.join('chrome-win', 'chrome.exe'),
-      revision: 1300320, // 1300313 is not available for win32
+      revision: 1331487, // 1331488 is not available for win32
       location: 'common',
       archivePath: 'Win',
       isPreInstalled: true,
