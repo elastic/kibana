@@ -132,7 +132,7 @@ export function InvestigationList() {
       })}
       items={investigations}
       pagination={pagination}
-      rowHeader="firstName"
+      rowHeader="title"
       columns={columns}
       onChange={onTableChange}
     />
