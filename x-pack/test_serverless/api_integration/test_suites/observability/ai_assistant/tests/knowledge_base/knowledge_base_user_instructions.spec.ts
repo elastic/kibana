@@ -76,7 +76,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           { roleAuthc: johnRoleAuthc, username: 'john', isPublic: false },
         ].map(async ({ roleAuthc, username, isPublic }) => {
           const visibility = isPublic ? 'Public' : 'Private';
-          console.log('******create instruction for', username, roleAuthc);
           await observabilityAIAssistantAPIClient
             .slsUser({
               endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
