@@ -152,13 +152,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
-<<<<<<< HEAD
-      await discover.chooseLensSuggestion('donut');
+      await discover.chooseLensSuggestion('pie');
       await header.waitUntilLoadingHasFinished();
-=======
-      await PageObjects.discover.chooseLensSuggestion('pie');
-      await PageObjects.header.waitUntilLoadingHasFinished();
->>>>>>> 2ace62cd45f14481fa49c1112840340be2f53db1
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });
 
