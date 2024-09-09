@@ -13,17 +13,16 @@ import {
 } from '@kbn/embeddable-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { OptionsListEmbeddableInput } from './types';
+import { DefaultDataControlState } from '../../common';
 
-type OptionsListInputWithType = Partial<OptionsListEmbeddableInput> & { type: string };
 const dataViewReferenceName = 'optionsListDataView';
 
 export const createOptionsListInject = (): EmbeddablePersistableStateService['inject'] => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
-    const workingState = { ...state } as EmbeddableStateWithType | OptionsListInputWithType;
+    const workingState = { ...state } as EmbeddableStateWithType;
     references.forEach((reference) => {
       if (reference.name === dataViewReferenceName) {
-        (workingState as OptionsListInputWithType).dataViewId = reference.id;
+        (workingState as Partial<DefaultDataControlState>).dataViewId = reference.id;
       }
     });
     return workingState as EmbeddableStateWithType;
@@ -32,14 +31,14 @@ export const createOptionsListInject = (): EmbeddablePersistableStateService['in
 
 export const createOptionsListExtract = (): EmbeddablePersistableStateService['extract'] => {
   return (state: EmbeddableStateWithType) => {
-    const workingState = { ...state } as EmbeddableStateWithType | OptionsListInputWithType;
+    const workingState = { ...state } as EmbeddableStateWithType;
     const references: SavedObjectReference[] = [];
 
     if ('dataViewId' in workingState) {
       references.push({
         name: dataViewReferenceName,
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
-        id: workingState.dataViewId!,
+        id: (workingState as Partial<DefaultDataControlState>).dataViewId!,
       });
       delete workingState.dataViewId;
     }

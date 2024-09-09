@@ -10,11 +10,12 @@
 import { BehaviorSubject } from 'rxjs';
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
-import {
+import type {
   OptionsListControlState,
+  OptionsListDisplaySettings,
+  OptionsListSelection,
   OptionsListSuggestions,
-} from '../../../../../common/options_list/types';
-import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
+} from '../../../../../common/options_list';
 import { DataControlApi } from '../types';
 
 export type OptionsListControlApi = DataControlApi;
