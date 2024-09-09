@@ -34,17 +34,10 @@ export async function runAgent({
 }: RunAgentParams): Promise<Partial<AgentState>> {
   logger.debug(() => `${NodeType.AGENT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
-  //   const knowledgeHistory = await dataClients?.kbDataClient?.getKnowledgeBaseDocumentEntries({
-  //     kbResource: 'user',
-  //     required: true,
-  //     query: '',
-  //   });
-
   const agentOutcome = await agentRunnable.withConfig({ tags: [AGENT_NODE_TAG] }).invoke(
     {
       ...state,
       chat_history: state.messages, // TODO: Message de-dupe with ...state spread
-      // knowledge_history: knowledgeHistory?.length ? knowledgeHistory : NO_HISTORY,
     },
     config
   );

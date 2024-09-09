@@ -45,6 +45,7 @@ interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   getIsKBSetupInProgress: () => boolean;
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (isInProgress: boolean) => void;
+  v2KnowledgeBaseEnabled: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -53,6 +54,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
   public get isSetupInProgress() {
     return this.options.getIsKBSetupInProgress();
+  }
+
+  public get isV2KnowledgeBaseEnabled() {
+    return this.options.v2KnowledgeBaseEnabled;
   }
 
   /**
@@ -263,18 +268,30 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     }
-    // @ts-ignore
     const { errors, docs_created: docsCreated } = await writer.bulk({
-      documentsToCreate: documents.map((doc) =>
-        transformToCreateSchema(changedAt, this.spaceId, authenticatedUser, {
+      documentsToCreate: documents.map((doc) => {
+        // v1 schema has metadata nested in a `metadata` object, and kbResource vs kb_resource
+        const body = this.options.v2KnowledgeBaseEnabled
+          ? {
+              kb_resource: doc.metadata.kbResource ?? 'unknown',
+              required: doc.metadata.required ?? false,
+              source: doc.metadata.source ?? 'unknown',
+            }
+          : {
+              metadata: {
+                kbResource: doc.metadata.kbResource ?? 'unknown',
+                required: doc.metadata.required ?? false,
+                source: doc.metadata.source ?? 'unknown',
+              },
+            };
+        // @ts-ignore Transform only explicitly supports v2 schema, but technically still supports v1
+        return transformToCreateSchema(changedAt, this.spaceId, authenticatedUser, {
           type: DocumentEntryType.value,
           name: 'unknown',
-          kbResource: doc.metadata.kbResource ?? 'unknown',
-          required: doc.metadata.required ?? false,
-          source: doc.metadata.source ?? 'unknown',
           text: doc.pageContent,
-        })
-      ),
+          ...body,
+        });
+      }),
       authenticatedUser,
     });
     const created =
@@ -322,6 +339,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       query,
       required,
       user,
+      v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
     });
 
     try {
@@ -331,17 +349,20 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         query: vectorSearchQuery,
       });
 
-      const results = result.hits.hits.map(
-        (hit) =>
-          new Document({
-            pageContent: hit?._source?.text ?? '',
-            metadata: {
+      const results = result.hits.hits.map((hit) => {
+        const metadata = this.options.v2KnowledgeBaseEnabled
+          ? {
               source: hit?._source?.source,
               required: hit?._source?.required,
               kbResource: hit?._source?.kb_resource,
-            },
-          })
-      );
+            }
+          : // @ts-ignore v1 schema has metadata nested in a `metadata` object and kbResource vs kb_resource
+            hit?._source?.metadata ?? {};
+        return new Document({
+          pageContent: hit?._source?.text ?? '',
+          metadata,
+        });
+      });
 
       this.options.logger.debug(
         () =>
@@ -377,7 +398,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     }
-
     this.options.logger.debug(
       () => `Creating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`
     );
@@ -410,33 +430,38 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       );
     }
 
-    const elserId = await this.options.getElserId();
-    const userFilter = getKBUserFilter(user);
-    const results = await this.findDocuments<EsIndexEntry>({
-      // Note: This is a magic number to set some upward bound as to not blow the context with too
-      // many registered tools. As discussed in review, this will initially be mitigated by caps on
-      // the IndexEntries field lengths, context trimming at the graph layer (before compilation),
-      // and eventually some sort of tool discovery sub-graph or generic retriever to scale tool usage.
-      perPage: 23,
-      page: 1,
-      sortField: 'created_at',
-      sortOrder: 'asc',
-      filter: `${userFilter}${` AND type:index`}`, // TODO: Support global tools (no user filter), and filter by space as well
-    });
-    this.options.logger.debug(
-      `kbDataClient.getAssistantTools() - results:\n${JSON.stringify(results, null, 2)}`
-    );
-
-    if (results) {
-      const entries = transformESSearchToKnowledgeBaseEntry(results.data) as IndexEntry[];
-      return entries.map((indexEntry) => {
-        return getStructuredToolForIndexEntry({
-          indexEntry,
-          esClient,
-          logger: this.options.logger,
-          elserId,
-        });
+    try {
+      const elserId = await this.options.getElserId();
+      const userFilter = getKBUserFilter(user);
+      const results = await this.findDocuments<EsIndexEntry>({
+        // Note: This is a magic number to set some upward bound as to not blow the context with too
+        // many registered tools. As discussed in review, this will initially be mitigated by caps on
+        // the IndexEntries field lengths, context trimming at the graph layer (before compilation),
+        // and eventually some sort of tool discovery sub-graph or generic retriever to scale tool usage.
+        perPage: 23,
+        page: 1,
+        sortField: 'created_at',
+        sortOrder: 'asc',
+        filter: `${userFilter}${` AND type:index`}`, // TODO: Support global tools (no user filter), and filter by space as well
       });
+      this.options.logger.debug(
+        `kbDataClient.getAssistantTools() - results:\n${JSON.stringify(results, null, 2)}`
+      );
+
+      if (results) {
+        const entries = transformESSearchToKnowledgeBaseEntry(results.data) as IndexEntry[];
+        return entries.map((indexEntry) => {
+          return getStructuredToolForIndexEntry({
+            indexEntry,
+            esClient,
+            logger: this.options.logger,
+            elserId,
+          });
+        });
+      }
+    } catch (e) {
+      this.options.logger.error(`kbDataClient.getAssistantTools() - Failed to fetch IndexEntries`);
+      return [];
     }
 
     return [];

@@ -64,7 +64,9 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
             return checkResponse;
           }
 
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient(
+            true
+          );
           const currentUser = ctx.elasticAssistant.getCurrentUser();
           const userFilter = getKBUserFilter(currentUser);
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';

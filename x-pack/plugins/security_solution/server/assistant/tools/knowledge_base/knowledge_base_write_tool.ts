@@ -56,17 +56,23 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
           () => `KnowledgeBaseWriteToolParams:input\n ${JSON.stringify(input, null, 2)}`
         );
 
-        const knowledgeBaseEntry: KnowledgeBaseEntryCreateProps = {
-          name: input.name,
-          kbResource: 'user',
-          source: 'conversation',
-          required: input.required,
-          text: input.query,
-          type: DocumentEntryType.value,
-        };
+        // Backwards compatibility with v1 schema -- createKnowledgeBaseEntry() technically supports both for now
+        const knowledgeBaseEntry: KnowledgeBaseEntryCreateProps =
+          kbDataClient.isV2KnowledgeBaseEnabled
+            ? {
+                name: input.name,
+                kbResource: 'user',
+                source: 'conversation',
+                required: input.required,
+                text: input.query,
+                type: DocumentEntryType.value,
+              }
+            : ({
+                metadata: { kbResource: 'user', source: 'conversation', required: input.required },
+                text: input.query,
+              } as unknown as KnowledgeBaseEntryCreateProps);
 
         logger.debug(() => `knowledgeBaseEntry\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`);
-
         const resp = await kbDataClient.createKnowledgeBaseEntry({ knowledgeBaseEntry });
 
         if (resp == null) {

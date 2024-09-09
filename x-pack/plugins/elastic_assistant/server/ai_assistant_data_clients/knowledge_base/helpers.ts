@@ -30,6 +30,7 @@ export const isModelAlreadyExistsError = (error: Error) => {
  * @param query - The search query provided by the user
  * @param required - Whether to only include required entries
  * @param user - The authenticated user
+ * @param v2KnowledgeBaseEnabled whether the new v2 KB is enabled
  * @returns
  */
 export const getKBVectorSearchQuery = ({
@@ -39,6 +40,7 @@ export const getKBVectorSearchQuery = ({
   query,
   required,
   user,
+  v2KnowledgeBaseEnabled = false,
 }: {
   filter?: QueryDslQueryContainer | undefined;
   kbResource?: string | undefined;
@@ -46,12 +48,15 @@ export const getKBVectorSearchQuery = ({
   query: string;
   required?: boolean | undefined;
   user: AuthenticatedUser;
+  v2KnowledgeBaseEnabled: boolean;
 }): QueryDslQueryContainer => {
+  const kbResourceKey = v2KnowledgeBaseEnabled ? 'kb_resource' : 'metadata.kbResource';
+  const requiredKey = v2KnowledgeBaseEnabled ? 'required' : 'metadata.required';
   const resourceFilter = kbResource
     ? [
         {
           term: {
-            kb_resource: kbResource,
+            [kbResourceKey]: kbResource,
           },
         },
       ]
@@ -60,7 +65,7 @@ export const getKBVectorSearchQuery = ({
     ? [
         {
           term: {
-            required,
+            [requiredKey]: required,
           },
         },
       ]

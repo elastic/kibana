@@ -127,7 +127,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   );
 
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
-  if (isEnabledKnowledgeBase) {
+  if (isEnabledKnowledgeBase && dataClients?.kbDataClient?.isV2KnowledgeBaseEnabled) {
     const kbTools = await dataClients?.kbDataClient?.getAssistantTools({
       assistantToolParams,
       esClient,

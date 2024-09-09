@@ -179,7 +179,6 @@ components:
         - type
         - kbResource
         - source
-        - required
         - text
 
     DocumentEntryOptionalFields:

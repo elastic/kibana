@@ -58,8 +58,12 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
             return checkResponse;
           }
 
+          // Check mappings and upgrade if necessary -- this route only supports v2 KB, so always `true`
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient(
+            true
+          );
+
           logger.debug(() => `Creating KB Entry:\n${JSON.stringify(request.body)}`);
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
           const createResponse = await kbDataClient?.createKnowledgeBaseEntry({
             knowledgeBaseEntry: request.body,
           });
