@@ -78,7 +78,7 @@ export const PageHeader: FC = () => {
   });
 
   const updateTimeState: FullTimeRangeSelectorProps['callback'] = useCallback(
-    (update) => {
+    (update: any) => {
       setGlobalState({
         time: {
           from: moment(update.start.epoch).toISOString(),

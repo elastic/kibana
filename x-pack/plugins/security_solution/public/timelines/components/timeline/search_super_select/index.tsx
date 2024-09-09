@@ -57,7 +57,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     setIsPopoverOpen((isOpen) => !isOpen);
   }, []);
 
-  const handleKeyboardOpen: EuiFieldTextProps['onKeyDown'] = useCallback((event) => {
+  const handleKeyboardOpen = useCallback<NonNullable<EuiFieldTextProps['onKeyDown']>>((event) => {
     if (event.key === keys.ENTER) {
       setIsPopoverOpen(true);
     }

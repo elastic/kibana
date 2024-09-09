@@ -241,7 +241,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
   };
 
   const detectorIndexChangeHandler: EuiSelectProps['onChange'] = useCallback(
-    (e) => {
+    (e: any) => {
       const id = e.target.value;
       if (id !== undefined) {
         appStateHandler(APP_STATE_ACTION.SET_DETECTOR_INDEX, +id);

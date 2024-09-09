@@ -121,7 +121,7 @@ function verifyTextAndTitle(
   expect(text).toEqual(expectedText);
 }
 
-function getNodeText(node: ReactNode) {
+function getNodeText(node: ReactNode | MountPoint) {
   const rendered = render(node as ReactElement);
   return rendered.text();
 }

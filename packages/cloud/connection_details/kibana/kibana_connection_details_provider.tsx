@@ -138,9 +138,9 @@ export interface KibanaConnectionDetailsProviderProps {
   };
 }
 
-export const KibanaConnectionDetailsProvider: React.FC<KibanaConnectionDetailsProviderProps> = (
-  props
-) => {
+export const KibanaConnectionDetailsProvider: React.FC<
+  React.PropsWithChildren<KibanaConnectionDetailsProviderProps>
+> = (props) => {
   const opts = useAsyncMemo(
     () => createOpts(props),
     [props.onNavigation, props.options, props.start]

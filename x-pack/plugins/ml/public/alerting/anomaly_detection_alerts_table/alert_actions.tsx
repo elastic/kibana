@@ -124,7 +124,7 @@ export function AlertActions(props: AlertActionsProps) {
         ]
       : []),
     DefaultAlertActions,
-  ];
+  ] as React.ReactElement[];
 
   const actionsToolTip =
     actionsMenuItems.length <= 0

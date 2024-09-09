@@ -246,7 +246,7 @@ export const EsQueryExpression: React.FC<
         fullWidth
         // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.esQuery.length > 0}
-        error={errors.esQuery}
+        error={errors.esQuery as string[]}
         helpText={
           <EuiLink href={docLinks.links.query.queryDsl} target="_blank">
             <FormattedMessage

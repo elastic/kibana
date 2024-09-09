@@ -290,16 +290,19 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     // Registers custom component that is going to be render on fleet section
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialFleetInstructions',
+      // @ts-ignore - error with @types/react18
       () => import('./tutorial/tutorial_fleet_instructions')
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgent',
+      // @ts-ignore - error with @types/react18
       () => import('./tutorial/config_agent')
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgentRumScript',
+      // @ts-ignore - error with @types/react18
       () => import('./tutorial/config_agent/rum_script')
     );
 

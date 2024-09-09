@@ -12,7 +12,7 @@ import { Datatable } from '@kbn/expressions-plugin/common';
 import { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ComponentType, ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { getLegendAction } from './legend_action';
@@ -180,7 +180,7 @@ const sampleLayer: DataLayerConfig = {
 
 describe('getLegendAction', function () {
   let wrapperProps: LegendActionProps;
-  const Component: ComponentType<LegendActionProps> = getLegendAction(
+  const Component: React.ComponentType<LegendActionProps> = getLegendAction(
     [sampleLayer],
     jest.fn(),
     [legendCellValueActions],

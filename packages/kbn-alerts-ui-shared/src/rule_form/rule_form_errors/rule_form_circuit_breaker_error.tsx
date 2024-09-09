@@ -14,7 +14,7 @@ import {
   CIRCUIT_BREAKER_SEE_FULL_ERROR_TEXT,
 } from '../translations';
 
-export const RuleFormCircuitBreakerError: FC<{}> = ({ children }) => {
+export const RuleFormCircuitBreakerError: FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   const onToggleShowDetails = useCallback(() => {

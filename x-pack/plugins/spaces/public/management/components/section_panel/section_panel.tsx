@@ -16,7 +16,7 @@ interface Props {
   dataTestSubj?: string;
 }
 
-export class SectionPanel extends Component<Props, {}> {
+export class SectionPanel extends Component<React.PropsWithChildren<Props>, {}> {
   public render() {
     return (
       <EuiPanel hasShadow={false} hasBorder={true} data-test-subj={this.props.dataTestSubj}>

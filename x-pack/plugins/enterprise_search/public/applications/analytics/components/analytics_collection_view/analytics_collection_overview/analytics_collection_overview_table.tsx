@@ -171,6 +171,7 @@ const tableSettings: {
   },
   [ExploreTables.Clicked]: {
     columns: [
+      // @ts-ignore - render broken with @types/react18, can't assign () => JSX.Element to ReactNode, might be a legit runtime bug
       {
         field: ExploreTableColumns.page,
         name: i18n.translate(
@@ -206,6 +207,7 @@ const tableSettings: {
   },
   [ExploreTables.Referrers]: {
     columns: [
+      // @ts-ignore - render broken with @types/react18, can't assign () => JSX.Element to ReactNode, might be a legit runtime bug
       {
         field: ExploreTableColumns.page,
         name: i18n.translate(
@@ -241,6 +243,7 @@ const tableSettings: {
   },
   [ExploreTables.Locations]: {
     columns: [
+      // @ts-ignore - render broken with @types/react18, can't assign () => JSX.Element to ReactNode, might be a legit runtime bug
       {
         field: ExploreTableColumns.location,
         name: i18n.translate(

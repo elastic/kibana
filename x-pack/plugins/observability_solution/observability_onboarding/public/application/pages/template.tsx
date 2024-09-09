@@ -15,7 +15,10 @@ interface TemplateProps {
   customHeader?: React.ReactNode;
 }
 
-export const PageTemplate: React.FC<TemplateProps> = ({ children, customHeader }) => {
+export const PageTemplate: React.FC<React.PropsWithChildren<TemplateProps>> = ({
+  children,
+  customHeader,
+}) => {
   return (
     <EuiPageTemplate
       css={css`

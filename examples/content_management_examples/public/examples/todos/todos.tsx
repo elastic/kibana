@@ -80,7 +80,7 @@ export const Todos = () => {
     deleteTodoMutation.isLoading ||
     updateTodoMutation.isLoading;
 
-  if (isError) return <p>Error: {error}</p>;
+  if (isError) return <p>Error: {error as string}</p>;
 
   return (
     <>

@@ -127,6 +127,7 @@ function Waterfall(props: WaterfallProps) {
       {({ registerChild }) => (
         <AutoSizer disableHeight>
           {({ width }) => (
+            // @ts-ignore - "ref" error with @types/react18
             <div data-test-subj="waterfall" ref={registerChild}>
               <List
                 ref={listRef}

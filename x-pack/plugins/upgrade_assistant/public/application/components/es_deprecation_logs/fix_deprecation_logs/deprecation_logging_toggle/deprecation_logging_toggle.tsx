@@ -73,7 +73,7 @@ const ErrorDetailsLink = ({ error }: { error: ResponseError }) => {
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiText style={{ width: 300 }}>
-        <p>{error.message}</p>
+        <p>{error.message as string}</p>
       </EuiText>
     </EuiPopover>
   );

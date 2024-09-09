@@ -3430,7 +3430,7 @@ describe('IndexPattern Data Source', () => {
         return onlyWarnings.map(({ longMessage }) =>
           isFragment(longMessage)
             ? (longMessage as ReactElement).props.children[0].props.id
-            : (longMessage as ReactElement).props.id
+            : (longMessage as unknown as ReactElement).props.id
         );
       };
 

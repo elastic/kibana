@@ -17,9 +17,9 @@ describe('useCapabilities', () => {
   it('should return capabilities', async () => {
     const coreStart = coreMock.createStart();
 
-    const { result } = renderHook(useCapabilities, {
-      wrapper: ({ children }) => (
-        <KibanaContextProvider services={coreStart}>{children}</KibanaContextProvider>
+    const { result } = renderHook(() => useCapabilities(), {
+      wrapper: (d: React.PropsWithChildren<{}>) => (
+        <KibanaContextProvider services={coreStart}>{d.children}</KibanaContextProvider>
       ),
     });
 
@@ -35,9 +35,9 @@ describe('useCapabilities', () => {
       },
     };
 
-    const { result } = renderHook(useCapabilities, {
-      initialProps: 'users',
-      wrapper: ({ children }) => (
+    const { result } = renderHook(({ featureId }) => useCapabilities(featureId), {
+      initialProps: { featureId: 'users' },
+      wrapper: ({ children }: React.PropsWithChildren<{ featureId: string }>) => (
         <KibanaContextProvider services={coreStart}>{children}</KibanaContextProvider>
       ),
     });

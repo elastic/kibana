@@ -107,7 +107,7 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
         inputTargetValue={incident.description ?? undefined}
         errors={errors['pushToServiceParam.incident.description'] as string[]}
       />
-      <EuiFormRow fullWidth error={errors.severity} label={translations.SEVERITY_LABEL}>
+      <EuiFormRow fullWidth error={errors.severity as string} label={translations.SEVERITY_LABEL}>
         <EuiSelect
           fullWidth
           data-test-subj="severitySelectInput"
@@ -119,7 +119,7 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
           }}
         />
       </EuiFormRow>
-      <EuiFormRow fullWidth error={errors.tlp} label={translations.TLP_LABEL}>
+      <EuiFormRow fullWidth error={errors.tlp as string} label={translations.TLP_LABEL}>
         <EuiSelect
           fullWidth
           value={tlp}

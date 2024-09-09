@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper } from 'enzyme';
+import { mount, ReactWrapper, ComponentType } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -49,7 +49,9 @@ function mountWith({
   }> = ({ children }) => {
     return <I18nProvider>{children}</I18nProvider>;
   };
-  const component = mount(<DashboardListingEmptyPrompt {...props} />, { wrappingComponent });
+  const component = mount(<DashboardListingEmptyPrompt {...props} />, {
+    wrappingComponent: wrappingComponent as ComponentType<{}>,
+  });
   return { component, props };
 }
 

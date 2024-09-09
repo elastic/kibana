@@ -249,7 +249,6 @@ export function SloItemActions({
             {i18n.translate('xpack.slo.item.actions.delete', { defaultMessage: 'Delete' })}
             {showRemoteLinkIcon}
           </EuiContextMenuItem>,
-          ,
           <EuiContextMenuItem
             key="reset"
             icon="refresh"

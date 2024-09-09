@@ -73,7 +73,7 @@ export const ArgumentFileSelector = memo<
     setIsPopoverOpen(false);
   }, [setIsPopoverOpen]);
 
-  const handleFileSelection: EuiFilePickerProps['onChange'] = useCallback(
+  const handleFileSelection = useCallback<NonNullable<EuiFilePickerProps['onChange']>>(
     (selectedFiles) => {
       // Get only the first file selected
       const file = selectedFiles?.item(0);

@@ -41,6 +41,7 @@ export const LogLevelBadge = ({
         data-test-subj={`${dataTestSubj}-unknown`}
         css={badgeCss}
       >
+        {/* @ts-ignore - type {} is not assignable to type React.ReactNode */}
         {logLevel}
       </EuiBadge>
     );
@@ -53,6 +54,7 @@ export const LogLevelBadge = ({
       data-test-subj={`${dataTestSubj}-${coalescedValue}`}
       css={badgeCss}
     >
+      {/* @ts-ignore - type {} is not assignable to type React.ReactNode */}
       {logLevel}
     </EuiBadge>
   );

@@ -142,7 +142,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
         data-test-subj="systemIndicesStatusErrorCallout"
       >
         <p>
-          {migrationStatus.error.statusCode} - {migrationStatus.error.message}
+          {migrationStatus.error.statusCode} - {migrationStatus.error.message as string}
         </p>
         <EuiButton
           color="danger"

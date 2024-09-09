@@ -32,7 +32,10 @@ export const DefaultToDataNodesNotice: FunctionComponent<{ phase: PhaseWithAlloc
         )}
       </p>
 
-      {nodeAllocationMigrationGuidance}
+      {
+        // @ts-ignore - TODO broken types with @types/react18, seems like a legit runtime bug
+        nodeAllocationMigrationGuidance
+      }
     </EuiCallOut>
   );
 };

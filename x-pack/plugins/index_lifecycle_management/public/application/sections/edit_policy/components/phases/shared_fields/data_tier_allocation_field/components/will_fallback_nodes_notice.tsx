@@ -41,7 +41,12 @@ export const WillUseFallbackTierUsingNodeAttributesNotice: FunctionComponent<Pro
         )}
       </p>
 
-      <p>{nodeAllocationMigrationGuidance}</p>
+      <p>
+        {
+          // @ts-ignore - TODO broken types with @types/react18, seems like a legit runtime bug
+          nodeAllocationMigrationGuidance
+        }
+      </p>
     </EuiCallOut>
   );
 };

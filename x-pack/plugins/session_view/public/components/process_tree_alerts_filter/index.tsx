@@ -127,6 +127,7 @@ export const ProcessTreeAlertsFilter = ({
                 defaultMessage="{count, plural, one {Showing <bold>#</bold> alert} other {Showing <bold>#</bold> alerts}}"
                 values={{
                   count: totalAlertsCount,
+                  // @ts-ignore - error with @types/react@18, might be a legit runtime issue
                   bold: (str: string) => <strong>{str}</strong>,
                 }}
               />

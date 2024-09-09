@@ -24,7 +24,7 @@ const field = new DataViewField({
   readFromDocValues: true,
 });
 
-const renderFieldName = (fldName: {} | null | undefined) => {
+const renderFieldName = (fldName: React.ReactNode) => {
   return (
     <EuiFlexGroup
       alignItems="center"

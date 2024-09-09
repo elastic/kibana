@@ -32,7 +32,8 @@ export const sortOptions: EuiSelectOption[] = [
 export const SortActivity = React.memo<FilterActivityProps>(
   ({ sortOrder, onOrderChange, isLoading = false }) => {
     const onChange: EuiSelectProps['onChange'] = useCallback(
-      (e) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (e: any) => {
         onOrderChange(e.target.value);
       },
       [onOrderChange]

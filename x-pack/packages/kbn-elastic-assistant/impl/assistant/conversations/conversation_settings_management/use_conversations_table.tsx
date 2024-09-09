@@ -38,7 +38,9 @@ export const useConversationsTable = () => {
   const getActions = useInlineActions<ConversationTableItem>();
   const getColumns = useCallback(
     ({
+      // @ts-ignore
       onDeleteActionClicked,
+      // @ts-ignore
       onEditActionClicked,
     }: {
       onDeleteActionClicked: (conversation: ConversationTableItem) => void;

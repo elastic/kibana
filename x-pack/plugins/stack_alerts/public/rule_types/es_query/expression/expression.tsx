@@ -74,7 +74,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
         data-test-subj="esQueryAlertExpressionError"
         title={
           ['index', 'searchType', 'timeField'].includes(errorParam)
-            ? errors[errorParam]
+            ? (errors[errorParam] as string)
             : expressionGenericErrorMessage
         }
       />

@@ -74,7 +74,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
   }, []);
 
   const handleOnExportCodeBlock = useCallback(
-    (codeBlock) => {
+    (codeBlock: string) => {
       const queryField = getFields().queryBar;
       const queryBar = queryField.value as DefineStepRule['queryBar'];
 

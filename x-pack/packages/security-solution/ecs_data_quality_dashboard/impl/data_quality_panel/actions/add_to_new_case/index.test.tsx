@@ -64,7 +64,7 @@ describe('AddToNewCaseAction', () => {
 
   describe('when clicking on add to new case link', () => {
     it('should open create case flyout with header content and provided markdown', () => {
-      let headerContent: React.ReactNode = null;
+      let headerContent: HTMLElement | null = null;
       const openCreateCaseFlyout = jest.fn(({ headerContent: _headerContent }) => {
         headerContent = render(_headerContent).container;
       });

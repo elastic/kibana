@@ -78,7 +78,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     <EuiSelect
       data-test-subj="infraMetricsExplorerAggregationPickerSelect"
       aria-label={placeholder}
-      placeholder={placeholder}
+      aria-placeholder={placeholder}
       fullWidth
       value={options.aggregation}
       options={METRIC_EXPLORER_AGGREGATIONS_WITHOUT_CUSTOM.map((k) => ({

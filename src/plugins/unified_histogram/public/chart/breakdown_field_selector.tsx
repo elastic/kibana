@@ -72,7 +72,7 @@ export const BreakdownFieldSelector = ({
   }, [dataView, breakdown.field]);
 
   const onChange: ToolbarSelectorProps['onChange'] = useCallback(
-    (chosenOption) => {
+    (chosenOption: any) => {
       const field = chosenOption?.value
         ? dataView.fields.find((currentField) => currentField.name === chosenOption.value)
         : undefined;

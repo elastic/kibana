@@ -12,7 +12,7 @@ import { ShapeDrawer, ShapeRef, ShapeDrawerComponentProps } from '../reusable';
 import { getShape } from './shapes';
 
 export const ProgressDrawerComponent = React.forwardRef(
-  (props: ShapeDrawerComponentProps, ref: Ref<ShapeRef>) => (
+  (props: React.PropsWithChildren<ShapeDrawerComponentProps>, ref: Ref<ShapeRef>) => (
     <ShapeDrawer {...props} ref={ref} getShape={getShape} />
   )
 );

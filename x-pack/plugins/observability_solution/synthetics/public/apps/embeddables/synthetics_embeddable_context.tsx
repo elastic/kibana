@@ -16,10 +16,12 @@ import { SyntheticsEmbeddableStateContextProvider } from '../synthetics/contexts
 import { getSyntheticsAppProps } from '../synthetics/render_app';
 import { SyntheticsSettingsContextProvider } from '../synthetics/contexts';
 
-export const SyntheticsEmbeddableContext: React.FC<{
-  reload$: Subject<boolean>;
-  reduxStore?: Store;
-}> = ({ reload$, children, reduxStore }) => {
+export const SyntheticsEmbeddableContext: React.FC<
+  React.PropsWithChildren<{
+    reload$: Subject<boolean>;
+    reduxStore?: Store;
+  }>
+> = ({ reload$, children, reduxStore }) => {
   const props = getSyntheticsAppProps();
 
   return (
