@@ -102,7 +102,7 @@ describe('step select agent policy', () => {
     } as any);
 
     render();
-
+    await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
     await act(async () => {
       const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
       expect((select as any)?.value).toEqual('');
@@ -120,7 +120,7 @@ describe('step select agent policy', () => {
     render();
     await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
     await act(async () => {
-      expect(updateAgentPoliciesMock).toBeCalled();
+      expect(updateAgentPoliciesMock).toBeCalledTimes(1);
       expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
     });
   });
