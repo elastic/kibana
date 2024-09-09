@@ -19,7 +19,7 @@ import { truncate, unit } from '../../../../../utils/style';
 import { ApmRoutes } from '../../../../routing/apm_route_config';
 import { PopoverTooltip } from '../../../popover_tooltip';
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
-import { OTHER_SERVICE_NAME, MaxGroupsMessage } from '../max_groups_message';
+import { MaxGroupsMessage, OTHER_SERVICE_NAME } from '../max_groups_message';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
@@ -34,7 +34,7 @@ interface ServiceLinkProps {
   serviceOverflowCount?: number;
 }
 export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps) {
-  const { link } = useApmRouter();
+  const apmRouter = useApmRouter();
 
   const serviceLink = isMobileAgentName(agentName)
     ? '/mobile-services/{serviceName}/overview'
@@ -74,14 +74,14 @@ export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps)
       content={
         <StyledLink
           data-test-subj={`serviceLink_${agentName}`}
-          href={link(serviceLink, {
+          href={apmRouter.link(serviceLink, {
             path: { serviceName },
             query,
           })}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <AgentIcon agentName={agentName} size="l" />
+              <AgentIcon agentName={agentName} size="l" role="presentation" />
             </EuiFlexItem>
             <EuiFlexItem className="eui-textTruncate">
               <span className="eui-textTruncate">{serviceName}</span>

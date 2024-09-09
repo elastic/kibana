@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
@@ -119,6 +120,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
         await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
       });
+
+      it('can sort numeric options lists suggestions', async () => {
+        await dashboardControls.editExistingControl(controlId);
+        await dashboardControls.controlsEditorSetfield('weightLbs');
+        await dashboardControls.controlEditorSave();
+
+        await dashboardControls.optionsListOpenPopover(controlId);
+        await dashboardControls.optionsListPopoverSetSort({ by: '_key', direction: 'asc' });
+        const sortedSuggestions = Object.keys(
+          (await dashboardControls.optionsListPopoverGetAvailableOptions()).suggestions
+        ).map((key) => parseInt(key, 10));
+        for (let i = 0; i < sortedSuggestions.length - 1; i++) {
+          expect(sortedSuggestions[i]).to.be.lessThan(sortedSuggestions[i + 1]);
+        }
+
+        // revert to the old field name to keep state consistent for other tests
+        await dashboardControls.editExistingControl(controlId);
+        await dashboardControls.controlsEditorSetfield('sound.keyword');
+        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
+        await dashboardControls.controlEditorSave();
+      });
     });
 
     describe('searching', () => {
@@ -194,6 +216,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
         await dashboardControls.controlEditorSave();
         await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      });
+
+      it('can search numeric options list', async () => {
+        await dashboardControls.editExistingControl(controlId);
+        await dashboardControls.controlsEditorSetfield('weightLbs');
+        await dashboardControls.controlEditorSave();
+
+        await dashboardControls.optionsListOpenPopover(controlId);
+        await dashboardControls.optionsListPopoverSearchForOption('4');
+        expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(0);
+        await dashboardControls.optionsListPopoverSearchForOption('45'); // only supports exact match
+        expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
       });
     });
   });

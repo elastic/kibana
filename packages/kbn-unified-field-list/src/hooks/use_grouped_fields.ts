@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { groupBy } from 'lodash';
@@ -20,6 +21,7 @@ import {
   type OverrideFieldGroupDetails,
   FieldsGroupNames,
   ExistenceFetchStatus,
+  AdditionalFieldGroups,
 } from '../types';
 import { useExistingFieldsReader } from './use_existing_fields';
 import {
@@ -43,9 +45,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
   getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
-  additionalFieldGroups?: {
-    smartFields?: FieldsGroup<T>['fields'];
-  };
+  additionalFieldGroups?: AdditionalFieldGroups<T>;
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -250,7 +250,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         defaultNoFieldsMessage: i18n.translate(
           'unifiedFieldList.useGroupedFields.noAvailableDataLabel',
           {
-            defaultMessage: `There are no available fields that contain data.`,
+            defaultMessage: `No available fields containing data.`,
           }
         ),
       },

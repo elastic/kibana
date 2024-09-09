@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -30,6 +31,7 @@ import {
   VerticalAlignment,
   XYChartSeriesIdentifier,
   Tooltip,
+  LegendValue,
 } from '@elastic/charts';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
@@ -58,7 +60,7 @@ import { XYChart, XYChartRenderProps } from './xy_chart';
 import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
-import { LegendSize, XYLegendValue } from '@kbn/visualizations-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 import type { LayerCellValueActions } from '../types';
 
 const onClickValue = jest.fn();
@@ -731,10 +733,10 @@ describe('XYChart component', () => {
     });
   });
 
-  test('disabled legend extra by default', () => {
+  test('disabled legend values by default', () => {
     const { args } = sampleArgs();
     const component = shallow(<XYChart {...defaultProps} args={args} />);
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([]);
   });
 
   test('ignores legend extra for ordinal chart', () => {
@@ -744,11 +746,11 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
-          legend: { ...args.legend, legendStats: [XYLegendValue.CurrentAndLastValue] },
+          legend: { ...args.legend, legendStats: [LegendValue.CurrentAndLastValue] },
         }}
       />
     );
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([]);
   });
 
   test('shows legend extra for histogram chart', () => {
@@ -760,13 +762,15 @@ describe('XYChart component', () => {
           ...args,
           legend: {
             ...args.legend,
-            legendStats: [XYLegendValue.CurrentAndLastValue],
+            legendStats: [LegendValue.CurrentAndLastValue],
           },
           layers: [dateHistogramLayer],
         }}
       />
     );
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(true);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([
+      LegendValue.CurrentAndLastValue,
+    ]);
   });
 
   test('applies the mark size ratio', () => {

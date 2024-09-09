@@ -7,26 +7,18 @@
 
 import React, { createContext } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import type { CoreStart, HttpSetup } from '@kbn/core/public';
-import type { StartDependencies } from '../plugin';
 
-export interface ContextValue extends StartDependencies {
-  application: CoreStart['application'];
-  http: HttpSetup;
-  notifications: CoreStart['notifications'];
-  docLinks: CoreStart['docLinks'];
+export interface AppContextValue {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  uiSettings: CoreStart['uiSettings'];
-  settings: CoreStart['settings'];
 }
 
-export const AppContext = createContext<ContextValue>(null as any);
+export const AppContext = createContext<AppContextValue>(null as any);
 
 export const AppContextProvider = ({
   children,
   value,
 }: {
-  value: ContextValue;
+  value: AppContextValue;
   children: React.ReactNode;
 }) => {
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -27,7 +27,7 @@ export const LegacyUrlConflictCallOut = React.memo<LegacyUrlConflictCallOutProps
           <EuiSpacer />
           {spacesApi.ui.components.getLegacyUrlConflict({
             objectNoun: i18nTranslate.translate(
-              'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
+              'xpack.securitySolution.sections.ruleDetails.redirectObjectNoun',
               {
                 defaultMessage: 'rule',
               }

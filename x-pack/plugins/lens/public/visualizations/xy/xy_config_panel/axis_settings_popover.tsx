@@ -17,11 +17,11 @@ import {
   EuiIconAxisRight,
   EuiIconAxisTop,
 } from '@kbn/chart-icons';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { isHorizontalChart } from '../state_helpers';
 import {
   ToolbarPopover,
-  AxisTitleSettings,
+  ToolbarTitleSettings,
   AxisBoundsControl,
   AxisTicksSettings,
 } from '../../../shared_components';
@@ -51,7 +51,7 @@ export interface AxisSettingsPopoverProps {
    */
   updateTitleState: (
     title: { title?: string; visible: boolean },
-    axis: AxesSettingsConfigKeys
+    settingId: AxesSettingsConfigKeys
   ) => void;
   /**
    * Determines if the popover is Disabled
@@ -84,7 +84,7 @@ export interface AxisSettingsPopoverProps {
   /**
    * Determines if the title visibility switch is on and the input text is disabled
    */
-  isAxisTitleVisible: boolean;
+  isTitleVisible: boolean;
   /**
    * Set endzone visibility
    */
@@ -224,7 +224,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   isDisabled,
   areTickLabelsVisible,
   areGridlinesVisible,
-  isAxisTitleVisible,
+  isTitleVisible,
   orientation,
   setOrientation,
   setEndzoneVisibility,
@@ -245,7 +245,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   const config = popoverConfig(axis, isHorizontal);
 
   const onExtentChange = useCallback(
-    (newExtent) => {
+    (newExtent: AxisExtentConfig | undefined) => {
       if (setExtent && newExtent && !isEqual(newExtent, extent)) {
         const { errorMsg } = validateExtent(hasBarOrAreaOnAxis, newExtent, scale);
         if (axis === 'x' || newExtent.mode !== 'custom' || !errorMsg) {
@@ -272,11 +272,11 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
       buttonDataTestSubj={config.buttonDataTestSubj}
       panelClassName="lnsVisToolbarAxis__popover"
     >
-      <AxisTitleSettings
-        axis={axis}
-        axisTitle={axisTitle}
-        updateTitleState={updateTitleState}
-        isAxisTitleVisible={isAxisTitleVisible}
+      <ToolbarTitleSettings
+        settingId={axis}
+        title={axisTitle}
+        updateTitleState={(title) => updateTitleState(title, axis)}
+        isTitleVisible={isTitleVisible}
       />
       <EuiFormRow
         display="columnCompressedSwitch"

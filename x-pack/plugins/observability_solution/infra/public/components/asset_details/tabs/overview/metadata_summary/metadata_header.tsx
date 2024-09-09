@@ -21,8 +21,20 @@ const columnTitles = {
   hostOsVersion: i18n.translate('xpack.infra.assetDetails.overview.metadataHostOsVersionHeading', {
     defaultMessage: 'Host OS version',
   }),
+  hostName: i18n.translate('xpack.infra.assetDetails.overview.metadataHostNameHeading', {
+    defaultMessage: 'Host name',
+  }),
   cloudProvider: i18n.translate('xpack.infra.assetDetails.overview.metadataCloudProviderHeading', {
     defaultMessage: 'Cloud provider',
+  }),
+  cloudInstanceId: i18n.translate(
+    'xpack.infra.assetDetails.overview.metadataCloudInstanceIdHeading',
+    {
+      defaultMessage: 'Cloud instance ID',
+    }
+  ),
+  cloudImageId: i18n.translate('xpack.infra.assetDetails.overview.metadataCloudImageIdHeading', {
+    defaultMessage: 'Cloud image ID',
   }),
   operatingSystem: i18n.translate(
     'xpack.infra.assetDetails.overview.metadataOperatingSystemHeading',
@@ -30,6 +42,18 @@ const columnTitles = {
       defaultMessage: 'Operating system',
     }
   ),
+  containerId: i18n.translate('xpack.infra.assetDetails.overview.metadataContainerIdHeading', {
+    defaultMessage: 'Container ID',
+  }),
+  containerImageName: i18n.translate(
+    'xpack.infra.assetDetails.overview.metadataContainerImageNameHeading',
+    {
+      defaultMessage: 'Container image name',
+    }
+  ),
+  runtime: i18n.translate('xpack.infra.assetDetails.overview.metadataRuntimeHeading', {
+    defaultMessage: 'Runtime',
+  }),
 };
 
 type MetadataFields = 'hostIp' | 'hostOsVersion';

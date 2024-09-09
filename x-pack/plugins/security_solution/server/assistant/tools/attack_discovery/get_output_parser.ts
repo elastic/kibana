@@ -6,7 +6,7 @@
  */
 
 import { StructuredOutputParser } from 'langchain/output_parsers';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export const SYNTAX = '{{ field.name fieldValue1 fieldValue2 fieldValueN }}';
 const GOOD_SYNTAX_EXAMPLES =
@@ -47,7 +47,7 @@ export const getOutputParser = () =>
           detailsMarkdown: z
             .string()
             .describe(
-              `A detailed insight with markdown that always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`
+              `A detailed insight with markdown, where each markdown bullet contains a description of what happened that reads like a story of the attack as it played out and always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`
             ),
           entitySummaryMarkdown: z
             .string()

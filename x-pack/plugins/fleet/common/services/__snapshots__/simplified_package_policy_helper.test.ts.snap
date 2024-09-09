@@ -228,12 +228,16 @@ Object {
   ],
   "name": "nginx-1",
   "namespace": "default",
+  "output_id": "output123",
   "package": Object {
     "name": "nginx",
     "title": "Nginx",
     "version": "1.5.0",
   },
   "policy_id": "policy123",
+  "policy_ids": Array [
+    "policy123",
+  ],
   "vars": undefined,
 }
 `;

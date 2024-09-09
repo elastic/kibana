@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
@@ -26,7 +27,7 @@ import { ControlTimesliceOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';
 import { ControlsDataService } from '../../services/data/types';
 import { ControlsSettingsService } from '../../services/settings/types';
-import { ControlOutput, IClearableControl } from '../../types';
+import { CanClearSelections, ControlOutput } from '../../types';
 import { TimeSlider, TimeSliderPrepend } from '../components';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { getIsAnchored, getRoundedTimeRangeBounds } from '../time_slider_selectors';
@@ -57,7 +58,7 @@ type TimeSliderReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class TimeSliderControlEmbeddable
   extends Embeddable<TimeSliderControlEmbeddableInput, ControlOutput>
-  implements IClearableControl
+  implements CanClearSelections
 {
   public readonly type = TIME_SLIDER_CONTROL;
   public deferEmbeddedLoad = true;

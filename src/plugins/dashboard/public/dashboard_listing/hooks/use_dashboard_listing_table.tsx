@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
@@ -42,7 +43,9 @@ const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUse
     type: 'dashboard',
     id: hit.id,
     updatedAt: hit.updatedAt!,
+    createdAt: hit.createdAt,
     createdBy: hit.createdBy,
+    updatedBy: hit.updatedBy,
     references: hit.references,
     managed: hit.managed,
     attributes: {
@@ -98,6 +101,7 @@ export const useDashboardListingTable = ({
       checkForDuplicateDashboardTitle,
     },
     notifications: { toasts },
+    dashboardRecentlyAccessed,
   } = pluginServices.getServices();
 
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
@@ -299,6 +303,7 @@ export const useDashboardListingTable = ({
       title,
       urlStateEnabled,
       createdByEnabled: true,
+      recentlyAccessed: dashboardRecentlyAccessed,
     }),
     [
       contentEditorValidators,
@@ -321,6 +326,7 @@ export const useDashboardListingTable = ({
       title,
       updateItemMeta,
       urlStateEnabled,
+      dashboardRecentlyAccessed,
     ]
   );
 

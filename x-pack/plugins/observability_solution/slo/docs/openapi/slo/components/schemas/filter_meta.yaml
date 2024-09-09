@@ -25,3 +25,5 @@ properties:
     type: object
   value:
     type: string
+  field:
+    type: string

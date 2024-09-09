@@ -7,10 +7,9 @@ exports[`should enable sort order select when sort field provided 1`] = `
       size="xs"
     >
       <h5>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Tooltip fields"
           id="xpack.maps.esSearch.tooltipsTitle"
-          values={Object {}}
         />
       </h5>
     </EuiTitle>
@@ -31,10 +30,9 @@ exports[`should enable sort order select when sort field provided 1`] = `
       size="xs"
     >
       <h5>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Sorting"
           id="xpack.maps.esSearch.sortTitle"
-          values={Object {}}
         />
       </h5>
     </EuiTitle>
@@ -42,12 +40,8 @@ exports[`should enable sort order select when sort field provided 1`] = `
       size="m"
     />
     <EuiFormRow
-      describedByIds={Array []}
       display="columnCompressed"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label="Field"
-      labelType="label"
     >
       <SingleFieldSelect
         compressed={true}
@@ -57,12 +51,8 @@ exports[`should enable sort order select when sort field provided 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
       display="columnCompressed"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label="Order"
-      labelType="label"
     >
       <EuiSelect
         compressed={true}
@@ -111,10 +101,9 @@ exports[`should render update source editor 1`] = `
       size="xs"
     >
       <h5>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Tooltip fields"
           id="xpack.maps.esSearch.tooltipsTitle"
-          values={Object {}}
         />
       </h5>
     </EuiTitle>
@@ -135,10 +124,9 @@ exports[`should render update source editor 1`] = `
       size="xs"
     >
       <h5>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Sorting"
           id="xpack.maps.esSearch.sortTitle"
-          values={Object {}}
         />
       </h5>
     </EuiTitle>
@@ -146,12 +134,8 @@ exports[`should render update source editor 1`] = `
       size="m"
     />
     <EuiFormRow
-      describedByIds={Array []}
       display="columnCompressed"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label="Field"
-      labelType="label"
     >
       <SingleFieldSelect
         compressed={true}
@@ -160,12 +144,8 @@ exports[`should render update source editor 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
       display="columnCompressed"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label="Order"
-      labelType="label"
     >
       <EuiSelect
         compressed={true}

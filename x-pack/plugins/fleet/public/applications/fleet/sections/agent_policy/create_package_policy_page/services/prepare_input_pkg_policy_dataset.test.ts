@@ -20,6 +20,7 @@ const customLogsPackagePolicyWithDataset = (
   description: '',
   namespace: 'default',
   policy_id: '05034740-9285-11ed-87a3-4ff599bc9864',
+  policy_ids: ['05034740-9285-11ed-87a3-4ff599bc9864'],
   enabled: true,
   inputs: [
     {

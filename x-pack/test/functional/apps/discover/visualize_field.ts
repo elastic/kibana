@@ -29,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const elasticChart = getService('elasticChart');
   const monacoEditor = getService('monacoEditor');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   const defaultSettings = {
     enableESQL: true,
@@ -152,7 +153,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
-      await PageObjects.discover.chooseLensSuggestion('donut');
+      await PageObjects.discover.chooseLensSuggestion('pie');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });
@@ -167,7 +168,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
       expect(await PageObjects.lens.canRemoveDimension('lnsXY_xDimensionPanel')).to.equal(true);
@@ -190,7 +190,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -209,7 +208,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -228,7 +226,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -236,8 +233,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('embeddablePanelHeading-TextBasedChart');
       await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('embeddablePanelToggleMenuIcon');
-      await testSubjects.click('embeddablePanelAction-ACTION_CONFIGURE_IN_LENS');
+      await dashboardPanelActions.clickInlineEdit();
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.canRemoveDimension('lnsXY_xDimensionPanel')).to.equal(true);
       await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
@@ -257,7 +253,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await monacoEditor.setCodeEditorValue('from logstash-* | limit 10');
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('TextBasedLangEditor-expand');
       // save the visualization
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -266,8 +261,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       // open the inline editing flyout
-      await testSubjects.click('embeddablePanelToggleMenuIcon');
-      await testSubjects.click('embeddablePanelAction-ACTION_CONFIGURE_IN_LENS');
+      await dashboardPanelActions.clickInlineEdit();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // change the query
@@ -294,9 +288,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         keepOpen: true,
       });
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
-      // click donut from suggestions
+      // click pie from suggestions
       await testSubjects.click('lensSuggestionsPanelToggleButton');
-      await testSubjects.click('lnsSuggestion-donut');
+      await testSubjects.click('lnsSuggestion-pie');
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });
 
@@ -308,7 +302,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
       let title = await testSubjects.getAttribute('savedObjectTitle', 'value');

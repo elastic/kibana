@@ -612,6 +612,7 @@ describe('Textbased Data Source', () => {
             "longMessage": "error 1",
             "severity": "error",
             "shortMessage": "error 1",
+            "uniqueId": "text_based_lang_error",
           },
           Object {
             "displayLocations": Array [
@@ -626,6 +627,7 @@ describe('Textbased Data Source', () => {
             "longMessage": "error 2",
             "severity": "error",
             "shortMessage": "error 2",
+            "uniqueId": "text_based_lang_error",
           },
         ]
       `);
@@ -744,6 +746,9 @@ describe('Textbased Data Source', () => {
               "arguments": Object {
                 "idMap": Array [
                   "{\\"Test 1\\":[{\\"id\\":\\"a\\",\\"label\\":\\"Test 1\\"}],\\"Test 2\\":[{\\"id\\":\\"b\\",\\"label\\":\\"Test 2\\"}]}",
+                ],
+                "isTextBased": Array [
+                  true,
                 ],
               },
               "function": "lens_map_to_columns",

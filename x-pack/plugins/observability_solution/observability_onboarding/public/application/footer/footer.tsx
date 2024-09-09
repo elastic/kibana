@@ -60,6 +60,10 @@ export const Footer: FunctionComponent = () => {
         'xpack.observability_onboarding.experimentalOnboardingFlow.exploreForumFlexItemLinkLabel',
         { defaultMessage: 'Discuss forum' }
       ),
+      linkARIALabel: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.exploreForumFlexItemLinkARIALabel',
+        { defaultMessage: 'Open Elastic Discuss forum' }
+      ),
       link: URL_FORUM,
     },
     {
@@ -77,6 +81,10 @@ export const Footer: FunctionComponent = () => {
       linkLabel: i18n.translate(
         'xpack.observability_onboarding.experimentalOnboardingFlow.browseDocumentationFlexItemLinkLabel',
         { defaultMessage: 'Learn more' }
+      ),
+      linkARIALabel: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.browseDocumentationFlexItemLinkARIALabel',
+        { defaultMessage: 'Learn more about all Elastic features' }
       ),
       link: docLinks.links.observability.guide,
     },
@@ -101,9 +109,9 @@ export const Footer: FunctionComponent = () => {
   ];
 
   return (
-    <EuiFlexGroup justifyContent="center" gutterSize="xl">
+    <EuiFlexGroup gutterSize="xl" justifyContent="center" alignItems="center">
       {sections.map((section, index) => (
-        <EuiFlexItem key={index}>
+        <EuiFlexItem key={index} grow={false}>
           <EuiAvatar size="l" name="" imageUrl={section.iconUrl} color="subdued" />
           <EuiSpacer size="m" />
           <EuiText size="s">
@@ -118,6 +126,7 @@ export const Footer: FunctionComponent = () => {
             <p>
               <EuiLink
                 data-test-subj="observabilityOnboardingFooterLearnMoreLink"
+                aria-label={section.linkARIALabel}
                 href={section.link}
                 target="_blank"
                 external

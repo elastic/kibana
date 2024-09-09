@@ -17,12 +17,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
   describe('navigation', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
-    });
-
-    after(async () => {
-      await svlCommonPage.forceLogout();
     });
 
     it('navigate observability sidenav & breadcrumbs', async () => {
@@ -33,7 +29,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectExists();
 
       // check side nav links
-      await svlCommonNavigation.sidenav.expectSectionOpen('observability_project_nav');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observabilityOnboarding',
       });

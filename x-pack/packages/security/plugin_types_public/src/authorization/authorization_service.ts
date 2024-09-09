@@ -5,11 +5,24 @@
  * 2.0.
  */
 
+import type { RolesAPIClient } from '../roles';
+import type { PrivilegesAPIClientPublicContract } from '../privileges';
+
 export interface AuthorizationServiceSetup {
   /**
    * Determines if role management is enabled.
    */
   isRoleManagementEnabled: () => boolean | undefined;
+
+  /**
+   * A set of methods to work with Kibana user roles.
+   */
+  roles: RolesAPIClient;
+
+  /**
+   * A set of methods to work with Kibana role privileges
+   */
+  privileges: PrivilegesAPIClientPublicContract;
 }
 
 /**

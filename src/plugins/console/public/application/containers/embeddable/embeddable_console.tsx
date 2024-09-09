@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useReducer, useEffect, useState } from 'react';
@@ -38,7 +39,8 @@ import { EmbeddedConsoleResizeButton, getCurrentConsoleMaxSize } from './console
 const KBN_BODY_CONSOLE_CLASS = 'kbnBody--hasEmbeddableConsole';
 
 const landmarkHeading = i18n.translate('console.embeddableConsole.landmarkHeading', {
-  defaultMessage: 'Developer console',
+  defaultMessage:
+    "Developer console. Press Enter to start editing. When you're done, press Escape to stop editing.",
 });
 
 const ConsoleWrapper = dynamic(async () => ({
@@ -69,6 +71,7 @@ export const EmbeddableConsole = ({
   setDispatch,
   alternateView,
   isMonacoEnabled,
+  isDevMode,
   getConsoleHeight,
   setConsoleHeight,
 }: EmbeddableConsoleDependencies) => {
@@ -197,6 +200,7 @@ export const EmbeddableConsole = ({
               usageCollection={usageCollection}
               onKeyDown={onKeyDown}
               isMonacoEnabled={isMonacoEnabled}
+              isDevMode={isDevMode}
             />
           ) : null}
           {showAlternateView ? (

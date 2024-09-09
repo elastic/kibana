@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ISearchSource } from '@kbn/data-plugin/public';
@@ -56,11 +57,7 @@ export function updateVolatileSearchSource(
 
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
-    const fields: Record<string, string> = { field: '*' };
-
-    fields.include_unmapped = 'true';
-
-    searchSource.setField('fields', [fields]);
+    searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
   } else {
     searchSource.removeField('fields');
   }

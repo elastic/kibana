@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
 import { startCase } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { getEcsAllowedValueDescription } from '../utils/event_utils';
 import { getFieldArray } from '../../shared/utils';
 import {
@@ -30,7 +30,7 @@ export interface EventKindDescriptionProps {
  * Shows the ecs description of the event kind, and a list of event categories
  */
 export const EventKindDescription: React.FC<EventKindDescriptionProps> = ({ eventKind }) => {
-  const { getFieldsData } = useRightPanelContext();
+  const { getFieldsData } = useDocumentDetailsContext();
   const eventCategories = useMemo(
     () => getFieldArray(getFieldsData('event.category')),
     [getFieldsData]

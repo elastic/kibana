@@ -46,7 +46,7 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
   ): Promise<IKibanaResponse> {
     const pattern = req.body.pattern;
     const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-    logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
+    logger.debug(() => `route ${path} request: ${JSON.stringify(req.body)}`);
 
     if (pattern.trim() === '') {
       return res.ok({ body: { indices: [] } });

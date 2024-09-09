@@ -66,6 +66,12 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_CONTENT =
 
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER =
   getDataTestSubjectSelector('securitySolutionFlyoutInsightsEntitiesTitleLink');
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HOST_OVERVIEW_LINK = getDataTestSubjectSelector(
+  'securitySolutionFlyoutInsightsEntitiesHostOverviewLink'
+);
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_USER_OVERVIEW_LINK = getDataTestSubjectSelector(
+  'securitySolutionFlyoutInsightsEntitiesUserOverviewLink'
+);
 
 /* Insights Threat Intelligence */
 
@@ -104,6 +110,8 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_HEADER 
   getDataTestSubjectSelector('securitySolutionFlyoutVisualizationsHeader');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_CONTENT =
   getDataTestSubjectSelector('securitySolutionFlyoutVisualizationsContent');
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_TITLE_LINK =
+  getDataTestSubjectSelector('securitySolutionFlyoutAnalyzerPreviewTitleLink');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_CONTAINER =
   getDataTestSubjectSelector('securitySolutionFlyoutAnalyzerPreviewContent');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTAINER =

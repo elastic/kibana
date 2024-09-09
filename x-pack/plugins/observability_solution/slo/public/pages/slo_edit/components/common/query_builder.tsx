@@ -9,14 +9,15 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { ReactNode, useState } from 'react';
 import { FieldPath } from 'react-hook-form';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { RunTimeFieldUsed } from './runtime_field_used';
 import { QuerySearchBar } from './query_search_bar';
 import { QueryDocumentsFlyout } from './query_documents_flyout';
-import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { CreateSLOForm } from '../../types';
 
 export interface SearchBarProps {
   dataTestSubj: string;
-  indexPatternString: string | undefined;
+  dataView?: DataView;
   label: string;
   name: FieldPath<CreateSLOForm>;
   placeholder: string;
@@ -25,10 +26,7 @@ export interface SearchBarProps {
 }
 
 export function QueryBuilder(props: SearchBarProps) {
-  const { indexPatternString, name } = props;
-  const { dataView } = useCreateDataView({
-    indexPatternString,
-  });
+  const { dataView, name } = props;
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [range, setRange] = useState({ from: 'now-15m', to: 'now' });
@@ -67,6 +65,7 @@ export function QueryBuilder(props: SearchBarProps) {
           searchBarProps={props}
         />
       )}
+      <RunTimeFieldUsed dataView={dataView} name={name} />
     </>
   );
 }

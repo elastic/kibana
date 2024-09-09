@@ -8,7 +8,7 @@
 import { sortBy } from 'lodash';
 
 import type { SignificantItemGroup } from '@kbn/ml-agg-utils';
-import type { GroupTableItem, GroupTableItemGroup } from '@kbn/aiops-components';
+import type { GroupTableItem, GroupTableItemGroup } from '@kbn/aiops-log-rate-analysis/state';
 
 export function getGroupTableItems(
   significantItemsGroups: SignificantItemGroup[]

@@ -1,6 +1,5 @@
 type: boolean
 description: >
   Indicates whether it is a preconfigured connector.
-  If true, the `config` and `is_missing_secrets` properties are omitted from the response. 
-examples:
-  - false
+  If true, the `config` and `is_missing_secrets` properties are omitted from the response.
+example: false

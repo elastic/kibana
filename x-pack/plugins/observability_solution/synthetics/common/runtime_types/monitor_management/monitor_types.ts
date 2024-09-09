@@ -40,7 +40,7 @@ const ScheduleCodec = t.interface({
 
 // TLSFields
 export const TLSFieldsCodec = t.partial({
-  [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: t.string,
+  [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: t.union([t.string, t.array(t.string)]),
   [ConfigKey.TLS_CERTIFICATE]: t.string,
   [ConfigKey.TLS_VERIFICATION_MODE]: VerificationModeCodec,
   [ConfigKey.TLS_VERSION]: t.array(TLSVersionCodec),
@@ -129,12 +129,14 @@ export const TCPAdvancedCodec = t.intersection([
 export type TCPAdvancedFields = t.TypeOf<typeof TCPAdvancedCodec>;
 
 // TCPFields
+// All fields for TCP monitor, excluding sensitive fields
 export const EncryptedTCPFieldsCodec = t.intersection([
   TCPSimpleFieldsCodec,
   TCPAdvancedFieldsCodec,
   TLSFieldsCodec,
 ]);
 
+// All fields for TCP monitor, including sensitive fields
 export const TCPFieldsCodec = t.intersection([
   EncryptedTCPFieldsCodec,
   TCPSensitiveAdvancedFieldsCodec,
@@ -218,12 +220,14 @@ export const HTTPAdvancedCodec = t.intersection([
 ]);
 
 // HTTPFields
+// All fields for HTTP monitor, excluding sensitive fields
 export const EncryptedHTTPFieldsCodec = t.intersection([
   HTTPSimpleFieldsCodec,
   HTTPAdvancedFieldsCodec,
   TLSFieldsCodec,
 ]);
 
+// All fields for HTTP monitor, including sensitive fields
 export const HTTPFieldsCodec = t.intersection([
   EncryptedHTTPFieldsCodec,
   HTTPSensitiveAdvancedFieldsCodec,
@@ -291,12 +295,14 @@ export const BrowserAdvancedFieldsCodec = t.intersection([
   BrowserSensitiveAdvancedFieldsCodec,
 ]);
 
+// All fields for Browser monitor, excluding sensitive fields
 export const EncryptedBrowserFieldsCodec = t.intersection([
   EncryptedBrowserSimpleFieldsCodec,
   EncryptedBrowserAdvancedFieldsCodec,
   TLSFieldsCodec,
 ]);
 
+// All fields for Browser monitor, including sensitive fields
 export const BrowserFieldsCodec = t.intersection([
   BrowserSimpleFieldsCodec,
   BrowserAdvancedFieldsCodec,
@@ -311,7 +317,7 @@ export const MonitorFieldsCodec = t.intersection([
   BrowserFieldsCodec,
 ]);
 
-// Monitor, represents one of (Icmp | Tcp | Http | Browser)
+// Monitor, represents one of (Icmp | Tcp | Http | Browser) decrypted
 export const SyntheticsMonitorCodec = t.union([
   HTTPFieldsCodec,
   TCPFieldsCodec,
@@ -319,6 +325,7 @@ export const SyntheticsMonitorCodec = t.union([
   BrowserFieldsCodec,
 ]);
 
+// Monitor, represents one of (Icmp | Tcp | Http | Browser) encrypted
 export const EncryptedSyntheticsMonitorCodec = t.union([
   EncryptedHTTPFieldsCodec,
   EncryptedTCPFieldsCodec,
@@ -388,6 +395,7 @@ export const MonitorOverviewItemCodec = t.intersection([
     schedule: t.string,
   }),
   t.partial({
+    status: t.string,
     projectId: t.string,
   }),
 ]);
@@ -424,7 +432,7 @@ export type MonitorDefaults = t.TypeOf<typeof MonitorDefaultsCodec>;
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
 export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
 export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;
-export type Secret = typeof secretKeys[number];
+export type Secret = (typeof secretKeys)[number];
 export type SyntheticsMonitorWithSecrets = Omit<
   t.TypeOf<typeof SyntheticsMonitorWithSecretsCodec>,
   Secret

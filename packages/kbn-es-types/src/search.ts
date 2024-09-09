@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ValuesType, UnionToIntersection } from 'utility-types';
@@ -673,7 +674,7 @@ export interface ESQLColumn {
 
 export type ESQLRow = unknown[];
 
-export interface ESQLSearchReponse {
+export interface ESQLSearchResponse {
   columns: ESQLColumn[];
   // In case of ?drop_null_columns in the query, then
   // all_columns will have available and empty fields
@@ -688,8 +689,8 @@ export interface ESQLSearchParams {
   // https://github.com/elastic/elasticsearch/pull/102767
   // time_zone?: string;
   query: string;
-  version: string;
   filter?: unknown;
   locale?: string;
   dropNullColumns?: boolean;
+  params?: Array<Record<string, string | undefined>>;
 }

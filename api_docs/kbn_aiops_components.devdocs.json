@@ -76,31 +76,26 @@
       },
       {
         "parentPluginId": "@kbn/aiops-components",
-        "id": "def-common.DocumentCountChartWithAutoAnalysisStart",
+        "id": "def-common.DocumentCountChartRedux",
         "type": "Function",
         "tags": [],
-        "label": "DocumentCountChartWithAutoAnalysisStart",
+        "label": "DocumentCountChartRedux",
         "description": [
-          "\nFunctional component that renders a `DocumentCountChart` with additional properties\nmanaged by the log rate analysis state. It leverages the `useLogRateAnalysisStateContext`\nto acquire state variables like `initialAnalysisStart` and functions such as\n`setAutoRunAnalysis`. These values are then passed as props to the `DocumentCountChart`.\n"
+          "\nFunctional component that renders a `DocumentCountChart` with additional properties\nmanaged by the log rate analysis state. It leverages the `LogRateAnalysisReduxProvider`\nto acquire state variables like `initialAnalysisStart` and functions such as\n`setAutoRunAnalysis`. These values are then passed as props to the `DocumentCountChart`.\nThis wrapper component is necessary since the `DocumentCountChart` component is\nalso used for log pattern analysis which doesn't use redux.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
-          {
-            "pluginId": "@kbn/aiops-components",
-            "scope": "common",
-            "docId": "kibKbnAiopsComponentsPluginApi",
-            "section": "def-common.DocumentCountChartProps",
-            "text": "DocumentCountChartProps"
-          },
-          ">) => JSX.Element"
+          "React.FunctionComponent<DocumentCountChartReduxProps>"
         ],
-        "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+        "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart_redux.tsx",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [
+          "The DocumentCountChart component enhanced with automatic analysis start capabilities."
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.DocumentCountChartWithAutoAnalysisStart.$1",
+            "id": "def-common.DocumentCountChartRedux.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -108,24 +103,26 @@
               "- The properties passed to the DocumentCountChart component."
             ],
             "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "@kbn/aiops-components",
-                "scope": "common",
-                "docId": "kibKbnAiopsComponentsPluginApi",
-                "section": "def-common.DocumentCountChartProps",
-                "text": "DocumentCountChartProps"
-              },
-              ">"
+              "P & { children?: React.ReactNode; }"
             ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.DocumentCountChartRedux.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
-        ],
-        "returnComment": [
-          "The DocumentCountChart component enhanced with automatic analysis start capabilities."
         ],
         "initialIsOpen": false
       },
@@ -209,51 +206,12 @@
       },
       {
         "parentPluginId": "@kbn/aiops-components",
-        "id": "def-common.LogRateAnalysisStateProvider",
-        "type": "Function",
-        "tags": [],
-        "label": "LogRateAnalysisStateProvider",
-        "description": [
-          "\nContext provider component that manages and provides global state for Log Rate Analysis.\nThis provider handles several pieces of state important for controlling and displaying\nlog rate analysis data, such as the control of automatic analysis runs, and the management\nof both pinned and selected significant items and groups.\n\nThe state includes mechanisms for setting initial analysis parameters, toggling analysis,\nand managing the current selection and pinned state of significant items and groups.\n"
-        ],
-        "signature": [
-          "(props: React.PropsWithChildren<React.PropsWithChildren<LogRateAnalysisStateProviderProps>>) => JSX.Element"
-        ],
-        "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/log_rate_analysis_state_provider.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.LogRateAnalysisStateProvider.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [
-              "- Props object containing initial settings for the analysis,\nincluding children components to be wrapped by the Provider."
-            ],
-            "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<LogRateAnalysisStateProviderProps>>"
-            ],
-            "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/log_rate_analysis_state_provider.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "A context provider wrapping children with access to log rate analysis state."
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/aiops-components",
         "id": "def-common.ProgressControls",
         "type": "Function",
         "tags": [],
         "label": "ProgressControls",
         "description": [
-          "\nProgressControls React Component\nComponent with ability to Run & cancel analysis\nby default uses `Baseline` and `Deviation` for the badge name\n"
+          "\nProgressControls React Component\nComponent with ability to run & cancel analysis\nby default uses `Baseline` and `Deviation` for the badge name\n"
         ],
         "signature": [
           "(props: React.PropsWithChildren<React.PropsWithChildren<ProgressControlProps>>) => JSX.Element"
@@ -282,29 +240,6 @@
         ],
         "returnComment": [
           "The ProgressControls component."
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/aiops-components",
-        "id": "def-common.useLogRateAnalysisStateContext",
-        "type": "Function",
-        "tags": [
-          "throws"
-        ],
-        "label": "useLogRateAnalysisStateContext",
-        "description": [
-          "\nCustom hook for accessing the state of log rate analysis from the LogRateAnalysisStateContext.\nThis hook must be used within a component that is a descendant of the LogRateAnalysisStateContext provider.\n"
-        ],
-        "signature": [
-          "() => LogRateAnalysisState"
-        ],
-        "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/log_rate_analysis_state_provider.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [
-          "The current state of the log rate analysis."
         ],
         "initialIsOpen": false
       }
@@ -427,9 +362,9 @@
               "; uiSettings: ",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               "; }"
@@ -448,14 +383,7 @@
               "Optional callback for handling brush selection updates"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/aiops-components",
-                "scope": "common",
-                "docId": "kibKbnAiopsComponentsPluginApi",
-                "section": "def-common.BrushSelectionUpdateHandler",
-                "text": "BrushSelectionUpdateHandler"
-              },
-              " | undefined"
+              "BrushSelectionUpdateHandler | undefined"
             ],
             "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
@@ -606,10 +534,10 @@
           },
           {
             "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.DocumentCountChartProps.setAutoRunAnalysis",
+            "id": "def-common.DocumentCountChartProps.setAutoRunAnalysisFn",
             "type": "Function",
             "tags": [],
-            "label": "setAutoRunAnalysis",
+            "label": "setAutoRunAnalysisFn",
             "description": [
               "Callback to set the autoRunAnalysis flag"
             ],
@@ -780,387 +708,10 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/aiops-components",
-        "id": "def-common.GroupTableItem",
-        "type": "Interface",
-        "tags": [],
-        "label": "GroupTableItem",
-        "description": [
-          "\nRepresents a single item in the group table."
-        ],
-        "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.GroupTableItem.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [
-              "Unique identifier for the group table item."
-            ],
-            "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.GroupTableItem.docCount",
-            "type": "number",
-            "tags": [],
-            "label": "docCount",
-            "description": [
-              "Document count associated with the item."
-            ],
-            "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.GroupTableItem.pValue",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "pValue",
-            "description": [
-              "Statistical p-value indicating the significance of the item, nullable."
-            ],
-            "signature": [
-              "number | null"
-            ],
-            "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.GroupTableItem.uniqueItemsCount",
-            "type": "number",
-            "tags": [],
-            "label": "uniqueItemsCount",
-            "description": [
-              "Count of unique items within the group."
-            ],
-            "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.GroupTableItem.groupItemsSortedByUniqueness",
-            "type": "Array",
-            "tags": [],
-            "label": "groupItemsSortedByUniqueness",
-            "description": [
-              "Array of items within the group, sorted by uniqueness."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/aiops-components",
-                "scope": "common",
-                "docId": "kibKbnAiopsComponentsPluginApi",
-                "section": "def-common.GroupTableItemGroup",
-                "text": "GroupTableItemGroup"
-              },
-              "[]"
-            ],
-            "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.GroupTableItem.histogram",
-            "type": "Array",
-            "tags": [],
-            "label": "histogram",
-            "description": [
-              "Histogram data for the significant item."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/ml-agg-utils",
-                "scope": "common",
-                "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.SignificantItemHistogramItem",
-                "text": "SignificantItemHistogramItem"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/aiops-components",
-        "id": "def-common.BrushSelectionUpdateHandler",
-        "type": "Type",
-        "tags": [],
-        "label": "BrushSelectionUpdateHandler",
-        "description": [
-          "\nCallback function which gets called when the brush selection has changed\n"
-        ],
-        "signature": [
-          "(windowParameters: ",
-          {
-            "pluginId": "@kbn/aiops-log-rate-analysis",
-            "scope": "common",
-            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
-            "section": "def-common.WindowParameters",
-            "text": "WindowParameters"
-          },
-          ", force: boolean, logRateAnalysisType: ",
-          {
-            "pluginId": "@kbn/aiops-log-rate-analysis",
-            "scope": "common",
-            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
-            "section": "def-common.LogRateAnalysisType",
-            "text": "LogRateAnalysisType"
-          },
-          ") => void"
-        ],
-        "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.BrushSelectionUpdateHandler.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "windowParameters",
-            "description": [
-              "Baseline and deviation time ranges."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/aiops-log-rate-analysis",
-                "scope": "common",
-                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
-                "section": "def-common.WindowParameters",
-                "text": "WindowParameters"
-              }
-            ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.BrushSelectionUpdateHandler.$2",
-            "type": "boolean",
-            "tags": [],
-            "label": "force",
-            "description": [
-              "Force update"
-            ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.BrushSelectionUpdateHandler.$3",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "logRateAnalysisType",
-            "description": [
-              "`spike` or `dip` based on median log rate bucket size"
-            ],
-            "signature": [
-              "\"spike\" | \"dip\""
-            ],
-            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/aiops-components",
-        "id": "def-common.GroupTableItemGroup",
-        "type": "Type",
-        "tags": [],
-        "label": "GroupTableItemGroup",
-        "description": [
-          "\nType for defining attributes picked from\nSignificantItemGroupItem used in the grouped table."
-        ],
-        "signature": [
-          "{ key: string; type: ",
-          {
-            "pluginId": "@kbn/ml-agg-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantItemType",
-            "text": "SignificantItemType"
-          },
-          "; fieldName: string; fieldValue: string | number; docCount: number; pValue: number | null; duplicate?: number | undefined; }"
-        ],
-        "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/aiops-components",
-        "id": "def-common.TableItemAction",
-        "type": "Type",
-        "tags": [],
-        "label": "TableItemAction",
-        "description": [
-          "\nType for action columns in a table that involves SignificantItem or GroupTableItem."
-        ],
-        "signature": [
-          "(",
-          "DisambiguateSet",
-          "<",
-          "DefaultItemEmptyButtonAction",
-          "<",
-          {
-            "pluginId": "@kbn/ml-agg-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantItem",
-            "text": "SignificantItem"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/aiops-components",
-            "scope": "common",
-            "docId": "kibKbnAiopsComponentsPluginApi",
-            "section": "def-common.GroupTableItem",
-            "text": "GroupTableItem"
-          },
-          ">, ",
-          "DefaultItemIconButtonAction",
-          "<",
-          {
-            "pluginId": "@kbn/ml-agg-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantItem",
-            "text": "SignificantItem"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/aiops-components",
-            "scope": "common",
-            "docId": "kibKbnAiopsComponentsPluginApi",
-            "section": "def-common.GroupTableItem",
-            "text": "GroupTableItem"
-          },
-          ">> & ",
-          "DefaultItemIconButtonAction",
-          "<",
-          {
-            "pluginId": "@kbn/ml-agg-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantItem",
-            "text": "SignificantItem"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/aiops-components",
-            "scope": "common",
-            "docId": "kibKbnAiopsComponentsPluginApi",
-            "section": "def-common.GroupTableItem",
-            "text": "GroupTableItem"
-          },
-          ">) | (",
-          "DisambiguateSet",
-          "<",
-          "DefaultItemIconButtonAction",
-          "<",
-          {
-            "pluginId": "@kbn/ml-agg-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantItem",
-            "text": "SignificantItem"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/aiops-components",
-            "scope": "common",
-            "docId": "kibKbnAiopsComponentsPluginApi",
-            "section": "def-common.GroupTableItem",
-            "text": "GroupTableItem"
-          },
-          ">, ",
-          "DefaultItemEmptyButtonAction",
-          "<",
-          {
-            "pluginId": "@kbn/ml-agg-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantItem",
-            "text": "SignificantItem"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/aiops-components",
-            "scope": "common",
-            "docId": "kibKbnAiopsComponentsPluginApi",
-            "section": "def-common.GroupTableItem",
-            "text": "GroupTableItem"
-          },
-          ">> & ",
-          "DefaultItemEmptyButtonAction",
-          "<",
-          {
-            "pluginId": "@kbn/ml-agg-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantItem",
-            "text": "SignificantItem"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/aiops-components",
-            "scope": "common",
-            "docId": "kibKbnAiopsComponentsPluginApi",
-            "section": "def-common.GroupTableItem",
-            "text": "GroupTableItem"
-          },
-          ">) | ",
-          "CustomItemAction",
-          "<",
-          {
-            "pluginId": "@kbn/ml-agg-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantItem",
-            "text": "SignificantItem"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/aiops-components",
-            "scope": "common",
-            "docId": "kibKbnAiopsComponentsPluginApi",
-            "section": "def-common.GroupTableItem",
-            "text": "GroupTableItem"
-          },
-          ">"
-        ],
-        "path": "x-pack/packages/ml/aiops_components/src/log_rate_analysis_state_provider/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }

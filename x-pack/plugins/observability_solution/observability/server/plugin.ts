@@ -20,7 +20,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { LogsExplorerLocatorParams, LOGS_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -36,6 +36,7 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId } from '../common';
 import {
@@ -59,7 +60,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   alerting: PluginSetupContract;
-  features: FeaturesSetup;
+  features: FeaturesPluginSetup;
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
@@ -71,6 +72,7 @@ interface PluginSetup {
 interface PluginStart {
   alerting: PluginStartContract;
   spaces?: SpacesPluginStart;
+  dataViews: DataViewsServerPluginStart;
 }
 
 const o11yRuleTypes = [
@@ -97,6 +99,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
+
     const logsExplorerLocator =
       plugins.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
 
@@ -294,6 +297,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             ...plugins,
             core,
           },
+          dataViews: pluginStart.dataViews,
           spaces: pluginStart.spaces,
           ruleDataService,
           assistant: {

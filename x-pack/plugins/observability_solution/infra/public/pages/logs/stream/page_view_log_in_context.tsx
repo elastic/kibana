@@ -20,7 +20,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntry } from '@kbn/logs-shared-plugin/common';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';
-import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
+import { useViewportDimensions } from '../../../hooks/use_viewport_dimensions';
 
 const MODAL_MARGIN = 25;
 

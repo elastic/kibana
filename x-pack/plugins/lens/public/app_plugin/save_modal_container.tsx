@@ -349,7 +349,7 @@ export const runSaveLensVisualization = async (
 
     notifications.toasts.addSuccess(
       i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
-        defaultMessage: `Saved '{visTitle}'`,
+        defaultMessage: `Saved ''{visTitle}''`,
         values: {
           visTitle: docToSave.title,
         },

@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { Failure } from '../failure';
 import { EmptyPrompt } from '../empty_prompt';
 import { showEmptyPrompt, showNoAlertsPrompt, showWelcomePrompt } from '../helpers';
 import { NoAlerts } from '../no_alerts';
@@ -18,6 +19,7 @@ interface Props {
   alertsCount: number;
   attackDiscoveriesCount: number;
   connectorId: string | undefined;
+  failureReason: string | null;
   isLoading: boolean;
   onGenerate: () => Promise<void>;
 }
@@ -28,14 +30,17 @@ const EmptyStatesComponent: React.FC<Props> = ({
   alertsCount,
   attackDiscoveriesCount,
   connectorId,
+  failureReason,
   isLoading,
   onGenerate,
 }) => {
   if (showWelcomePrompt({ aiConnectorsCount, isLoading })) {
     return <Welcome />;
+  } else if (!isLoading && failureReason != null) {
+    return <Failure failureReason={failureReason} />;
   } else if (showNoAlertsPrompt({ alertsContextCount, isLoading })) {
     return <NoAlerts />;
-  } else if (showEmptyPrompt({ attackDiscoveriesCount, isLoading })) {
+  } else if (showEmptyPrompt({ aiConnectorsCount, attackDiscoveriesCount, isLoading })) {
     return (
       <EmptyPrompt
         alertsCount={alertsCount}

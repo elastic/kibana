@@ -14,15 +14,14 @@ import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
 import { getDatasetQualityTableColumns } from '../components/dataset_quality/table/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
 import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';
+import { SortDirection } from '../../common/types';
 
-export type Direction = 'asc' | 'desc';
-export type SortField = keyof DataStreamStat;
+export type DatasetTableSortField = keyof DataStreamStat;
 
 const sortingOverrides: Partial<{
-  [key in SortField]: SortField | ((item: DataStreamStat) => Primitive);
+  [key in DatasetTableSortField]: DatasetTableSortField | ((item: DataStreamStat) => Primitive);
 }> = {
   ['title']: 'name',
   ['size']: DataStreamStat.calculateFilteredSize,
@@ -30,16 +29,30 @@ const sortingOverrides: Partial<{
 
 export const useDatasetQualityTable = () => {
   const {
-    services: { fieldFormats },
+    services: {
+      fieldFormats,
+      share: { url },
+    },
   } = useKibanaContextForPlugin();
 
   const { service } = useDatasetQualityContext();
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
+
   const isSizeStatsAvailable = useSelector(service, (state) => state.context.isSizeStatsAvailable);
+  const canUserMonitorDataset = useSelector(
+    service,
+    (state) => state.context.datasetUserPrivileges.canMonitor
+  );
+  const canUserMonitorAnyDataStream = useSelector(
+    service,
+    (state) =>
+      !state.context.dataStreamStats ||
+      state.context.datasets.some((s) => s.userPrivileges?.canMonitor)
+  );
 
   const {
-    inactive: showInactiveDatasets,
+    inactive,
     fullNames: showFullDatasetNames,
     timeRange,
     integrations,
@@ -47,21 +60,20 @@ export const useDatasetQualityTable = () => {
     qualities,
     query,
   } = useSelector(service, (state) => state.context.filters);
-
-  const flyout = useSelector(service, (state) => state.context.flyout);
+  const showInactiveDatasets = inactive || !canUserMonitorDataset;
 
   const loading = useSelector(
     service,
     (state) =>
-      state.matches('datasets.fetching') ||
+      state.matches('stats.datasets.fetching') ||
       state.matches('integrations.fetching') ||
-      state.matches('degradedDocs.fetching')
+      state.matches('stats.degradedDocs.fetching')
   );
   const loadingDataStreamStats = useSelector(service, (state) =>
-    state.matches('datasets.fetching')
+    state.matches('stats.datasets.fetching')
   );
   const loadingDegradedStats = useSelector(service, (state) =>
-    state.matches('degradedDocs.fetching')
+    state.matches('stats.degradedDocs.fetching')
   );
 
   const datasets = useSelector(service, (state) => state.context.datasets);
@@ -76,33 +88,6 @@ export const useDatasetQualityTable = () => {
     [service]
   );
 
-  const closeFlyout = useCallback(() => service.send({ type: 'CLOSE_FLYOUT' }), [service]);
-  const openFlyout = useCallback(
-    (selectedDataset: FlyoutDataset) => {
-      if (flyout?.dataset?.rawName === selectedDataset.rawName) {
-        service.send({
-          type: 'CLOSE_FLYOUT',
-        });
-
-        return;
-      }
-
-      if (!flyout?.insightsTimeRange) {
-        service.send({
-          type: 'OPEN_FLYOUT',
-          dataset: selectedDataset,
-        });
-        return;
-      }
-
-      service.send({
-        type: 'SELECT_NEW_DATASET',
-        dataset: selectedDataset,
-      });
-    },
-    [flyout?.dataset?.rawName, flyout?.insightsTimeRange, service]
-  );
-
   const isActive = useCallback(
     (lastActivity: number) => isActiveDataset({ lastActivity, timeRange }),
     [timeRange]
@@ -112,23 +97,27 @@ export const useDatasetQualityTable = () => {
     () =>
       getDatasetQualityTableColumns({
         fieldFormats,
-        selectedDataset: flyout?.dataset,
-        openFlyout,
+        canUserMonitorDataset,
+        canUserMonitorAnyDataStream,
         loadingDataStreamStats,
         loadingDegradedStats,
         showFullDatasetNames,
         isSizeStatsAvailable,
         isActiveDataset: isActive,
+        timeRange,
+        urlService: url,
       }),
     [
       fieldFormats,
-      flyout?.dataset,
-      openFlyout,
+      canUserMonitorDataset,
+      canUserMonitorAnyDataStream,
       loadingDataStreamStats,
       loadingDegradedStats,
       showFullDatasetNames,
       isSizeStatsAvailable,
       isActive,
+      timeRange,
+      url,
     ]
   );
 
@@ -167,11 +156,11 @@ export const useDatasetQualityTable = () => {
   const onTableChange = useCallback(
     (options: {
       page: { index: number; size: number };
-      sort?: { field: SortField; direction: Direction };
+      sort?: { field: DatasetTableSortField; direction: SortDirection };
     }) => {
       service.send({
         type: 'UPDATE_TABLE_CRITERIA',
-        criteria: {
+        dataset_criteria: {
           page: options.page.index,
           rowsPerPage: options.page.size,
           sort: {
@@ -216,10 +205,10 @@ export const useDatasetQualityTable = () => {
     columns,
     loading,
     resultsCount,
-    closeFlyout,
-    selectedDataset: flyout?.dataset,
     showInactiveDatasets,
     showFullDatasetNames,
+    canUserMonitorDataset,
+    canUserMonitorAnyDataStream,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
     isSizeStatsAvailable,

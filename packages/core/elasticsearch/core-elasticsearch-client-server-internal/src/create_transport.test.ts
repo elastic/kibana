@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { transportConstructorMock, transportRequestMock } from './create_transport.test.mocks';
@@ -261,6 +262,79 @@ describe('createTransport', () => {
               hello: 'dolly',
               shared: 'from-options',
             },
+          })
+        );
+      });
+    });
+
+    describe('maxResponseSize options', () => {
+      it('does not set values when not provided in the options', async () => {
+        const transportClass = createTransportClass();
+        const transport = new transportClass(baseConstructorParams);
+        const requestParams = { method: 'GET', path: '/' };
+
+        await transport.request(requestParams, {});
+
+        expect(transportRequestMock).toHaveBeenCalledTimes(1);
+        expect(transportRequestMock).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.not.objectContaining({
+            maxResponseSize: expect.any(Number),
+            maxCompressedResponseSize: expect.any(Number),
+          })
+        );
+      });
+
+      it('uses `maxResponseSize` from the options when provided and when `maxCompressedResponseSize` is not', async () => {
+        const transportClass = createTransportClass();
+        const transport = new transportClass(baseConstructorParams);
+        const requestParams = { method: 'GET', path: '/' };
+
+        await transport.request(requestParams, { maxResponseSize: 234 });
+
+        expect(transportRequestMock).toHaveBeenCalledTimes(1);
+        expect(transportRequestMock).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.objectContaining({
+            maxResponseSize: 234,
+            maxCompressedResponseSize: 234,
+          })
+        );
+      });
+
+      it('uses `maxCompressedResponseSize` from the options when provided and when `maxResponseSize` is not', async () => {
+        const transportClass = createTransportClass();
+        const transport = new transportClass(baseConstructorParams);
+        const requestParams = { method: 'GET', path: '/' };
+
+        await transport.request(requestParams, { maxCompressedResponseSize: 272 });
+
+        expect(transportRequestMock).toHaveBeenCalledTimes(1);
+        expect(transportRequestMock).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.objectContaining({
+            maxResponseSize: 272,
+            maxCompressedResponseSize: 272,
+          })
+        );
+      });
+
+      it('uses individual values when both `maxResponseSize` and `maxCompressedResponseSize` are defined', async () => {
+        const transportClass = createTransportClass();
+        const transport = new transportClass(baseConstructorParams);
+        const requestParams = { method: 'GET', path: '/' };
+
+        await transport.request(requestParams, {
+          maxResponseSize: 512,
+          maxCompressedResponseSize: 272,
+        });
+
+        expect(transportRequestMock).toHaveBeenCalledTimes(1);
+        expect(transportRequestMock).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.objectContaining({
+            maxResponseSize: 512,
+            maxCompressedResponseSize: 272,
           })
         );
       });

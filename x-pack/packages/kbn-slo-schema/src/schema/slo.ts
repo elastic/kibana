@@ -29,6 +29,7 @@ const objectiveSchema = t.intersection([
 const settingsSchema = t.type({
   syncDelay: durationType,
   frequency: durationType,
+  preventInitialBackfill: t.boolean,
 });
 
 const groupBySchema = allOrAnyStringOrArray;

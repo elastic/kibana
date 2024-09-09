@@ -11,7 +11,7 @@ exports[`delete modal content render 1`] = `
     size="m"
   />
   <div>
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="You'll permanently delete {count, number} {count, plural, one {data view} other {data views}
 }."
       id="indexPatternManagement.dataViewTable.deleteConfirmSummary"
@@ -81,7 +81,7 @@ exports[`delete modal content render 2`] = `
     size="m"
   />
   <div>
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="You'll permanently delete {count, number} {count, plural, one {data view} other {data views}
 }."
       id="indexPatternManagement.dataViewTable.deleteConfirmSummary"
@@ -143,7 +143,7 @@ exports[`delete modal content render 3`] = `
     size="m"
   />
   <div>
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="You'll permanently delete {count, number} {count, plural, one {data view} other {data views}
 }."
       id="indexPatternManagement.dataViewTable.deleteConfirmSummary"
@@ -211,7 +211,7 @@ exports[`delete modal content render 4`] = `
     size="m"
   />
   <div>
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="You'll permanently delete {count, number} {count, plural, one {data view} other {data views}
 }."
       id="indexPatternManagement.dataViewTable.deleteConfirmSummary"

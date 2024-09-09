@@ -39,6 +39,7 @@ import {
   requiredValidator,
 } from '../../../common/util/validators';
 import type { ModelItem } from './models_list';
+import { useEnabledFeatures } from '../contexts/ml';
 
 interface DeploymentSetupProps {
   config: ThreadingParams;
@@ -373,6 +374,8 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
   initialParams,
   modelAndDeploymentIds,
 }) => {
+  const { showNodeInfo } = useEnabledFeatures();
+
   const isUpdate = !!initialParams;
 
   const { total_ml_processors: totalMlProcessors } = getNewJobLimits();
@@ -441,18 +444,22 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiCallOut
-          size={'s'}
-          title={
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.maxNumOfProcessorsWarning"
-              defaultMessage="The product of the number of allocations and threads per allocation should be less than the total number of processors on your ML nodes."
+        {showNodeInfo ? (
+          <>
+            <EuiCallOut
+              size={'s'}
+              title={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.maxNumOfProcessorsWarning"
+                  defaultMessage="The product of the number of allocations and threads per allocation should be less than the total number of processors on your ML nodes."
+                />
+              }
+              iconType="iInCircle"
+              color={'primary'}
             />
-          }
-          iconType="iInCircle"
-          color={'primary'}
-        />
-        <EuiSpacer size={'m'} />
+            <EuiSpacer size={'m'} />
+          </>
+        ) : null}
 
         <DeploymentSetup
           config={config}

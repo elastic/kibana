@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Fs from 'fs';
@@ -11,7 +12,6 @@ import Path from 'path';
 import expect from '@kbn/expect';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import uniqBy from 'lodash/uniqBy';
 import { groupBy, mapValues } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -127,7 +127,6 @@ export default function ({ getService }: FtrProviderContext) {
         path: '/_query',
         body: {
           query,
-          version: ESQL_LATEST_VERSION,
         },
       });
       return { resp, error: undefined };
@@ -139,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('error messages', () => {
     const config = readSetupFromESQLPackage();
     const { queryToErrors, indexes, policies } = parseConfig(config);
+
     const missmatches: Array<{ query: string; error: string }> = [];
     // Swap these for DEBUG/further investigation on ES bugs
     const stringVariants = ['text', 'keyword'] as const;
@@ -154,6 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       for (const policy of policies) {
         log.info(`deleting policy "${policy}"...`);
+        // TODO: Maybe `policy` -> `policy.name`?
         await es.enrich.deletePolicy({ name: policy }, { ignore: [404] });
       }
     }
@@ -183,11 +184,23 @@ export default function ({ getService }: FtrProviderContext) {
 
             for (const index of indexes) {
               // setup all indexes, mappings and policies here
-              log.info(`creating a index "${index}" with mapping...`);
+              log.info(
+                `creating a index "${index}" with mapping...\n${JSON.stringify(config.fields)}`
+              );
+              const fieldsExcludingCounterType = config.fields.filter(
+                // ES|QL supports counter_integer, counter_long, counter_double, date_period, etc.
+                // but they are not types suitable for Elasticsearch indices
+                (c: { type: string }) =>
+                  !c.type.startsWith('counter_') &&
+                  c.type !== 'date_period' &&
+                  c.type !== 'time_duration' &&
+                  c.type !== 'null' &&
+                  c.type !== 'time_literal'
+              );
               await es.indices.create(
                 createIndexRequest(
                   index,
-                  /unsupported/.test(index) ? config.unsupported_field : config.fields,
+                  /unsupported/.test(index) ? config.unsupported_field : fieldsExcludingCounterType,
                   stringFieldType,
                   numberFieldType
                 ),

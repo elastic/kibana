@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './field_list_sidebar.scss';
@@ -28,7 +29,8 @@ import { FIELDS_LIMIT_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-u
 import { FieldList } from '../../components/field_list';
 import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
-import { FieldsGroupNames, type ButtonAddFieldVariant, FieldsGroup } from '../../types';
+import { FieldsGroupNames } from '../../types';
+import type { ButtonAddFieldVariant, AdditionalFieldGroups } from '../../types';
 import { GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
 import { SidebarToggleButton, type SidebarToggleButtonProps } from './sidebar_toggle_button';
@@ -77,9 +79,7 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
   /**
    * Prop to pass additional field groups to the field list
    */
-  additionalFieldGroups?: {
-    smartFields?: FieldsGroup<DataViewField>['fields'];
-  };
+  additionalFieldGroups?: AdditionalFieldGroups<DataViewField>;
 };
 
 interface UnifiedFieldListSidebarInternalProps {

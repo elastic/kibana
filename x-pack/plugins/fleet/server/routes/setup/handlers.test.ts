@@ -14,6 +14,7 @@ import { RegistryError } from '../../errors';
 import {
   createAppContextStartContractMock,
   createPackagePolicyServiceMock,
+  createUninstallTokenServiceMock,
   xpackMocks,
 } from '../../mocks';
 import { agentServiceMock } from '../../services/agents/agent_service.mock';
@@ -45,6 +46,10 @@ describe('FleetSetupHandler', () => {
     context = {
       ...xpackMocks.createRequestHandlerContext(),
       fleet: {
+        uninstallTokenService: {
+          asCurrentUser: createUninstallTokenServiceMock(),
+        },
+        getAllSpaces: jest.fn(),
         agentClient: {
           asCurrentUser: agentServiceMock.createClient(),
           asInternalUser: agentServiceMock.createClient(),
@@ -129,6 +134,10 @@ describe('FleetStatusHandler', () => {
     context = {
       ...xpackMocks.createRequestHandlerContext(),
       fleet: {
+        uninstallTokenService: {
+          asCurrentUser: createUninstallTokenServiceMock(),
+        },
+        getAllSpaces: jest.fn(),
         agentClient: {
           asCurrentUser: agentServiceMock.createClient(),
           asInternalUser: agentServiceMock.createClient(),
@@ -172,6 +181,7 @@ describe('FleetStatusHandler', () => {
     const expectedBody = {
       isReady: true,
       is_secrets_storage_enabled: false,
+      is_space_awareness_enabled: false,
       missing_optional_features: [],
       missing_requirements: [],
     };
@@ -193,6 +203,7 @@ describe('FleetStatusHandler', () => {
     const expectedBody = {
       isReady: false,
       is_secrets_storage_enabled: false,
+      is_space_awareness_enabled: false,
       missing_optional_features: [],
       missing_requirements: ['api_keys', 'fleet_server'],
     };
@@ -221,6 +232,7 @@ describe('FleetStatusHandler', () => {
     const expectedBody = {
       isReady: true,
       is_secrets_storage_enabled: false,
+      is_space_awareness_enabled: false,
       missing_optional_features: [],
       missing_requirements: [],
     };

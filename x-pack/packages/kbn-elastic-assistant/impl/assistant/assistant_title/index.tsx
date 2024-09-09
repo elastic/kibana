@@ -5,24 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInlineEditTitle,
-  EuiLink,
-  EuiModalHeaderTitle,
-  EuiPopover,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiInlineEditTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
-import * as i18n from '../translations';
+import { DataStreamApis } from '../use_data_stream_apis';
 import type { Conversation } from '../../..';
-import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 import { AssistantAvatar } from '../assistant_avatar/assistant_avatar';
 import { useConversation } from '../use_conversation';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
@@ -34,60 +21,12 @@ import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 export const AssistantTitle: React.FC<{
   isDisabled?: boolean;
   title?: string;
-  docLinks: Omit<DocLinksStart, 'links'>;
   selectedConversation: Conversation | undefined;
-  isFlyoutMode: boolean;
-  onChange: (updatedConversation: Conversation) => void;
-  refetchConversationsState: () => Promise<void>;
-}> = ({
-  isDisabled = false,
-  title,
-  docLinks,
-  selectedConversation,
-  isFlyoutMode,
-  onChange,
-  refetchConversationsState,
-}) => {
+  refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
+}> = ({ title, selectedConversation, refetchCurrentUserConversations, isDisabled = false }) => {
   const [newTitle, setNewTitle] = useState(title);
   const [newTitleError, setNewTitleError] = useState(false);
   const { updateConversationTitle } = useConversation();
-
-  const selectedConnectorId = selectedConversation?.apiConfig?.connectorId;
-
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
-  const url = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/security-assistant.html`;
-
-  const documentationLink = useMemo(
-    () => (
-      <EuiLink
-        aria-label={i18n.TOOLTIP_ARIA_LABEL}
-        data-test-subj="externalDocumentationLink"
-        external
-        href={url}
-        target="_blank"
-      >
-        {i18n.DOCUMENTATION}
-      </EuiLink>
-    ),
-    [url]
-  );
-
-  const content = useMemo(
-    () => (
-      <FormattedMessage
-        defaultMessage="Responses from AI systems may not always be entirely accurate. For more information on the assistant feature and its usage, please reference the {documentationLink}."
-        id="xpack.elasticAssistant.assistant.technicalPreview.tooltipContent"
-        values={{
-          documentationLink,
-        }}
-      />
-    ),
-    [documentationLink]
-  );
-
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen: boolean) => !isOpen), []);
-  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const handleUpdateTitle = useCallback(
     async (updatedTitle: string) => {
@@ -98,10 +37,10 @@ export const AssistantTitle: React.FC<{
           conversationId: selectedConversation.id,
           updatedTitle,
         });
-        await refetchConversationsState();
+        await refetchCurrentUserConversations();
       }
     },
-    [refetchConversationsState, selectedConversation, updateConversationTitle]
+    [refetchCurrentUserConversations, selectedConversation, updateConversationTitle]
   );
 
   useEffect(() => {
@@ -109,108 +48,34 @@ export const AssistantTitle: React.FC<{
     setNewTitle(title);
   }, [title]);
 
-  if (isFlyoutMode) {
-    return (
-      <EuiFlexGroup gutterSize="m" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <AssistantAvatar data-test-subj="titleIcon" size={isFlyoutMode ? 's' : 'm'} />
-        </EuiFlexItem>
-        <EuiFlexItem
-          css={css`
-            overflow: hidden;
-          `}
-        >
-          <EuiInlineEditTitle
-            heading="h2"
-            inputAriaLabel="Edit text inline"
-            value={newTitle ?? NEW_CHAT}
-            size="xs"
-            isInvalid={!!newTitleError}
-            isReadOnly={selectedConversation?.isDefault}
-            onChange={(e) => setNewTitle(e.currentTarget.nodeValue || '')}
-            onCancel={() => setNewTitle(title)}
-            onSave={handleUpdateTitle}
-            editModeProps={{
-              formRowProps: {
-                fullWidth: true,
-              },
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   return (
-    <EuiModalHeaderTitle>
-      <EuiFlexGroup gutterSize="m" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <AssistantAvatar data-test-subj="titleIcon" size={isFlyoutMode ? 's' : 'm'} />
-        </EuiFlexItem>
-        <EuiFlexItem
-          css={css`
-            overflow: hidden;
-          `}
-        >
-          <EuiFlexGroup
-            direction={isFlyoutMode ? 'row' : 'column'}
-            gutterSize="none"
-            justifyContent={isFlyoutMode ? 'spaceBetween' : 'center'}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size={'s'}>
-                    <h3>{title}</h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    css={
-                      isFlyoutMode &&
-                      css`
-                        display: inline-flex;
-                      `
-                    }
-                    button={
-                      <EuiButtonIcon
-                        aria-label={i18n.TOOLTIP_ARIA_LABEL}
-                        data-test-subj="tooltipIcon"
-                        iconType="iInCircle"
-                        onClick={onButtonClick}
-                      />
-                    }
-                    isOpen={isPopoverOpen}
-                    closePopover={closePopover}
-                    anchorPosition="rightUp"
-                  >
-                    <EuiText
-                      data-test-subj="tooltipContent"
-                      grow={false}
-                      css={{ maxWidth: '400px' }}
-                    >
-                      <EuiText size={'s'}>
-                        <p>{content}</p>
-                      </EuiText>
-                    </EuiText>
-                  </EuiPopover>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {!isFlyoutMode && (
-              <EuiFlexItem grow={false}>
-                <ConnectorSelectorInline
-                  isDisabled={isDisabled || selectedConversation === undefined}
-                  selectedConnectorId={selectedConnectorId}
-                  selectedConversation={selectedConversation}
-                  isFlyoutMode={isFlyoutMode}
-                  onConnectorSelected={onChange}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiModalHeaderTitle>
+    <EuiFlexGroup gutterSize="m" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <AssistantAvatar data-test-subj="titleIcon" size={'s'} />
+      </EuiFlexItem>
+      <EuiFlexItem
+        css={css`
+          overflow: hidden;
+        `}
+      >
+        <EuiInlineEditTitle
+          data-test-subj="conversationTitle"
+          heading="h2"
+          inputAriaLabel="Edit text inline"
+          value={newTitle ?? NEW_CHAT}
+          size="xs"
+          isInvalid={!!newTitleError}
+          isReadOnly={isDisabled || selectedConversation?.isDefault}
+          onChange={(e) => setNewTitle(e.currentTarget.nodeValue || '')}
+          onCancel={() => setNewTitle(title)}
+          onSave={handleUpdateTitle}
+          editModeProps={{
+            formRowProps: {
+              fullWidth: true,
+            },
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

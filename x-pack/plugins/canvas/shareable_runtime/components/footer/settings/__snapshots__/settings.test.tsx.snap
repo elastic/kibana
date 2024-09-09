@@ -210,34 +210,32 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                   <button
                     aria-checked="false"
                     aria-labelledby="generated-id"
-                    class="euiSwitch__button"
+                    class="euiSwitch__button emotion-euiSwitch__button"
                     id="cycle"
                     name="cycle"
                     role="switch"
                     type="button"
                   >
                     <span
-                      class="euiSwitch__body"
+                      class="euiSwitch__body emotion-euiSwitch__body-off"
                     >
                       <span
-                        class="euiSwitch__thumb"
-                      />
-                      <span
-                        class="euiSwitch__track"
+                        class="euiSwitch__icons emotion-euiSwitch__icons-off-enabled"
                       >
                         <span
-                          class="euiSwitch__icon"
-                          data-euiicon-type="cross"
+                          data-euiicon-type="check"
                         />
                         <span
-                          class="euiSwitch__icon euiSwitch__icon--checked"
-                          data-euiicon-type="check"
+                          data-euiicon-type="cross"
                         />
                       </span>
                     </span>
+                    <span
+                      class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+                    />
                   </button>
                   <span
-                    class="euiSwitch__label"
+                    class="euiSwitch__label emotion-euiSwitch__label"
                     id="generated-id"
                   >
                     Cycle Slides
@@ -254,14 +252,14 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <div
-                        class="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
+                        class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
                         id="generated-id-row"
                       >
                         <div
                           class="euiFormRow__labelWrapper"
                         >
                           <label
-                            class="euiFormLabel euiFormRow__label"
+                            class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
                             for="generated-id"
                             id="generated-id-label"
                           >
@@ -272,14 +270,14 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                           class="euiFormRow__fieldWrapper"
                         >
                           <div
-                            class="euiFormControlLayout euiFormControlLayout--compressed"
+                            class="euiFormControlLayout emotion-euiFormControlLayout-compressed"
                           >
                             <div
-                              class="euiFormControlLayout__childrenWrapper"
+                              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
                             >
                               <input
                                 aria-describedby="generated-id-help-0"
-                                class="euiFieldText euiFieldText--compressed"
+                                class="euiFieldText emotion-euiFieldText-compressed"
                                 id="generated-id"
                                 type="text"
                                 value="5s"
@@ -287,7 +285,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                             </div>
                           </div>
                           <div
-                            class="euiFormHelpText euiFormRow__text"
+                            class="euiFormHelpText euiFormRow__text emotion-euiFormHelpText"
                             id="generated-id-help-0"
                           >
                             Use shorthand notation, like 30s, 10m, or 1h
@@ -299,9 +297,12 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                       class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
                       <div
-                        class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
+                        class="euiFormRow euiFormRow--hasEmptyLabelSpace emotion-euiFormRow"
                         id="generated-id-row"
                       >
+                        <div
+                          class="euiSpacer euiSpacer--m euiFormRow__labelWrapper emotion-euiSpacer-m"
+                        />
                         <div
                           class="euiFormRow__fieldWrapper"
                         >
@@ -541,7 +542,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
                 style="padding: 16px;"
               >
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow emotion-euiFormRow"
                   id="generated-id-row"
                 >
                   <div
@@ -554,7 +555,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
                         aria-checked="false"
                         aria-describedby="generated-id-help-0"
                         aria-labelledby="generated-id"
-                        class="euiSwitch__button"
+                        class="euiSwitch__button emotion-euiSwitch__button"
                         data-test-subj="hideToolbarSwitch"
                         id="generated-id"
                         name="toolbarHide"
@@ -562,34 +563,32 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
                         type="button"
                       >
                         <span
-                          class="euiSwitch__body"
+                          class="euiSwitch__body emotion-euiSwitch__body-off"
                         >
                           <span
-                            class="euiSwitch__thumb"
-                          />
-                          <span
-                            class="euiSwitch__track"
+                            class="euiSwitch__icons emotion-euiSwitch__icons-off-enabled"
                           >
                             <span
-                              class="euiSwitch__icon"
-                              data-euiicon-type="cross"
+                              data-euiicon-type="check"
                             />
                             <span
-                              class="euiSwitch__icon euiSwitch__icon--checked"
-                              data-euiicon-type="check"
+                              data-euiicon-type="cross"
                             />
                           </span>
                         </span>
+                        <span
+                          class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+                        />
                       </button>
                       <span
-                        class="euiSwitch__label"
+                        class="euiSwitch__label emotion-euiSwitch__label"
                         id="generated-id"
                       >
                         Hide Toolbar
                       </span>
                     </div>
                     <div
-                      class="euiFormHelpText euiFormRow__text"
+                      class="euiFormHelpText euiFormRow__text emotion-euiFormHelpText"
                       id="generated-id-help-0"
                     >
                       Hide the toolbar when the mouse is not within the Canvas?
@@ -717,7 +716,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
                 style="padding: 16px;"
               >
                 <div
-                  class="euiFormRow"
+                  class="euiFormRow emotion-euiFormRow"
                   id="generated-id-row"
                 >
                   <div
@@ -730,7 +729,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
                         aria-checked="true"
                         aria-describedby="generated-id-help-0"
                         aria-labelledby="generated-id"
-                        class="euiSwitch__button"
+                        class="euiSwitch__button emotion-euiSwitch__button"
                         data-test-subj="hideToolbarSwitch"
                         id="generated-id"
                         name="toolbarHide"
@@ -738,34 +737,32 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
                         type="button"
                       >
                         <span
-                          class="euiSwitch__body"
+                          class="euiSwitch__body emotion-euiSwitch__body-on"
                         >
                           <span
-                            class="euiSwitch__thumb"
-                          />
-                          <span
-                            class="euiSwitch__track"
+                            class="euiSwitch__icons emotion-euiSwitch__icons-on-enabled"
                           >
                             <span
-                              class="euiSwitch__icon"
-                              data-euiicon-type="cross"
+                              data-euiicon-type="check"
                             />
                             <span
-                              class="euiSwitch__icon euiSwitch__icon--checked"
-                              data-euiicon-type="check"
+                              data-euiicon-type="cross"
                             />
                           </span>
                         </span>
+                        <span
+                          class="euiSwitch__thumb emotion-euiSwitch__thumb-on"
+                        />
                       </button>
                       <span
-                        class="euiSwitch__label"
+                        class="euiSwitch__label emotion-euiSwitch__label"
                         id="generated-id"
                       >
                         Hide Toolbar
                       </span>
                     </div>
                     <div
-                      class="euiFormHelpText euiFormRow__text"
+                      class="euiFormHelpText euiFormRow__text emotion-euiFormHelpText"
                       id="generated-id-help-0"
                     >
                       Hide the toolbar when the mouse is not within the Canvas?

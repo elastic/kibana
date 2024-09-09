@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, ZodFirstPartyTypeKind } from 'zod';
+import { z, ZodFirstPartyTypeKind } from '@kbn/zod';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
@@ -35,7 +35,8 @@ export const SettingsFieldWrapper: React.FC<{
   settingsConfig: SettingsConfig;
   typeName: keyof typeof ZodFirstPartyTypeKind;
   renderItem: Function;
-}> = ({ settingsConfig, typeName, renderItem }) => {
+  disabled?: boolean;
+}> = ({ settingsConfig, typeName, renderItem, disabled }) => {
   const [error, setError] = useState('');
   const agentPolicyFormContext = useAgentPolicyFormContext();
 
@@ -88,7 +89,7 @@ export const SettingsFieldWrapper: React.FC<{
         </>
       }
     >
-      <EuiFormRow fullWidth key={fieldKey} error={error} isInvalid={!!error}>
+      <EuiFormRow isDisabled={disabled} fullWidth key={fieldKey} error={error} isInvalid={!!error}>
         {renderItem({ fieldValue, handleChange, isInvalid: !!error, fieldKey, coercedSchema })}
       </EuiFormRow>
     </EuiDescribedFormGroup>

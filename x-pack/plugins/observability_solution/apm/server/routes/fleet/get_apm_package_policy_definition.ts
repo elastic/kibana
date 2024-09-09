@@ -36,7 +36,7 @@ export async function getApmPackagePolicyDefinition({
     name: 'Elastic APM',
     namespace: 'default',
     enabled: true,
-    policy_id: POLICY_ELASTIC_AGENT_ON_CLOUD,
+    policy_ids: [POLICY_ELASTIC_AGENT_ON_CLOUD],
     inputs: [
       {
         type: 'apm',
@@ -99,7 +99,7 @@ function ensureValidMultiText(textMultiValue: string[] | undefined) {
 
 function escapeInvalidYamlString(yamlString: string) {
   try {
-    yaml.load(yamlString);
+    yaml.safeLoad(yamlString);
   } catch (error) {
     if (error instanceof yaml.YAMLException) {
       return `"${yamlString}"`;

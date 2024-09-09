@@ -8,7 +8,7 @@
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
-import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics';
 import type { InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
 import { MAX_SPACES_COUNT, RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { removeLegacyTransforms, getLegacyTransforms } from '../utils/transforms';
@@ -17,15 +17,22 @@ import {
   getConfiguration,
   initSavedObjects,
   getEnabledRiskEngineAmount,
+  deleteSavedObjects,
 } from './utils/saved_object_configuration';
 import { bulkDeleteSavedObjects } from '../../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import { removeRiskScoringTask, startRiskScoringTask } from '../risk_score/tasks';
 import { RiskEngineAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
+import { getRiskScoringTaskStatus, scheduleNow } from '../risk_score/tasks/risk_scoring_task';
 
 interface InitOpts {
   namespace: string;
+  taskManager: TaskManagerStartContract;
+  riskScoreDataClient: RiskScoreDataClient;
+}
+
+interface TearDownParams {
   taskManager: TaskManagerStartContract;
   riskScoreDataClient: RiskScoreDataClient;
 }
@@ -103,10 +110,21 @@ export class RiskEngineDataClient {
       savedObjectsClient: this.options.soClient,
     });
 
-  public async getStatus({ namespace }: { namespace: string }) {
+  public async getStatus({
+    namespace,
+    taskManager,
+  }: {
+    namespace: string;
+    taskManager?: TaskManagerStartContract;
+  }) {
     const riskEngineStatus = await this.getCurrentStatus();
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
     const isMaxAmountOfRiskEnginesReached = await this.getIsMaxAmountOfRiskEnginesReached();
+
+    const taskStatus =
+      riskEngineStatus === 'ENABLED' && taskManager
+        ? await getRiskScoringTaskStatus({ namespace, taskManager })
+        : undefined;
 
     this.options.auditLogger?.log({
       message: 'User checked if the risk engine is enabled',
@@ -118,7 +136,12 @@ export class RiskEngineDataClient {
       },
     });
 
-    return { riskEngineStatus, legacyRiskEngineStatus, isMaxAmountOfRiskEnginesReached };
+    return {
+      riskEngineStatus,
+      legacyRiskEngineStatus,
+      isMaxAmountOfRiskEnginesReached,
+      taskStatus,
+    };
   }
 
   public async enableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
@@ -191,6 +214,55 @@ export class RiskEngineDataClient {
         enabled: false,
       },
     });
+  }
+
+  public async scheduleNow({ taskManager }: { taskManager: TaskManagerStartContract }) {
+    const riskEngineStatus = await this.getCurrentStatus();
+
+    if (riskEngineStatus !== 'ENABLED') {
+      throw new Error(
+        `The risk engine must be enable to schedule a run. Current status: ${riskEngineStatus}`
+      );
+    }
+
+    this.options.auditLogger?.log({
+      message: 'User scheduled a risk engine run',
+      event: {
+        action: RiskEngineAuditActions.RISK_ENGINE_SCHEDULE_NOW,
+        category: AUDIT_CATEGORY.DATABASE,
+        type: AUDIT_TYPE.ACCESS,
+        outcome: AUDIT_OUTCOME.SUCCESS,
+      },
+    });
+
+    return scheduleNow({
+      taskManager,
+      namespace: this.options.namespace,
+      logger: this.options.logger,
+    });
+  }
+
+  /**
+   * Delete all risk engine resources.
+   *
+   * It returns an array of errors that occurred during the deletion.
+   *
+   * WARNING: It will remove all data.
+   */
+  public async tearDown({ taskManager, riskScoreDataClient }: TearDownParams) {
+    const errors: Error[] = [];
+    const addError = (e: Error) => errors.push(e);
+
+    await removeRiskScoringTask({
+      namespace: this.options.namespace,
+      taskManager,
+      logger: this.options.logger,
+    }).catch(addError);
+
+    await deleteSavedObjects({ savedObjectsClient: this.options.soClient }).catch(addError);
+    const riskScoreErrors = await riskScoreDataClient.tearDown();
+
+    return errors.concat(riskScoreErrors);
   }
 
   public async disableLegacyRiskEngine({ namespace }: { namespace: string }) {

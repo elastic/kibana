@@ -36,6 +36,10 @@ describe('Description', () => {
     appMockRender = createAppMockRenderer();
   });
 
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('renders description correctly', async () => {
     appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 

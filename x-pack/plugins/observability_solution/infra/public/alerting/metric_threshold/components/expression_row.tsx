@@ -21,30 +21,20 @@ import React, { PropsWithChildren, useCallback, useMemo, useState } from 'react'
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   AggregationType,
-  builtInComparators,
   IErrorObject,
   OfExpression,
   ThresholdExpression,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import useToggle from 'react-use/lib/useToggle';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import { Aggregators } from '../../../../common/alerting/metrics';
 import { useMetricsDataViewContext } from '../../../containers/metrics_source';
-import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
 import { AGGREGATION_TYPES, MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION } from '../i18n_strings';
-
-const customComparators = {
-  ...builtInComparators,
-  [Comparator.OUTSIDE_RANGE]: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.outsideRangeLabel', {
-      defaultMessage: 'Is not between',
-    }),
-    value: Comparator.OUTSIDE_RANGE,
-    requiredValues: 2,
-  },
-};
 
 interface ExpressionRowProps {
   expressionId: number;
@@ -81,7 +71,7 @@ export const ExpressionRow = ({
   const {
     aggType = AGGREGATION_TYPES.MAX,
     metric,
-    comparator = Comparator.GT,
+    comparator = COMPARATORS.GREATER_THAN,
     threshold = [],
     warningThreshold = [],
     warningComparator,
@@ -115,26 +105,26 @@ export const ExpressionRow = ({
 
   const updateComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, comparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, comparator: c as COMPARATORS });
     },
     [expressionId, expression, setRuleParams]
   );
 
   const updateWarningComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, warningComparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, warningComparator: c as COMPARATORS });
     },
     [expressionId, expression, setRuleParams]
   );
 
   const convertThreshold = useCallback(
-    (enteredThreshold) =>
+    (enteredThreshold: any) =>
       isMetricPct ? enteredThreshold.map((v: number) => pctToDecimal(v)) : enteredThreshold,
     [isMetricPct]
   );
 
   const updateThreshold = useCallback(
-    (enteredThreshold) => {
+    (enteredThreshold: any) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.threshold.join()) {
         setRuleParams(expressionId, { ...expression, threshold: t });
@@ -144,7 +134,7 @@ export const ExpressionRow = ({
   );
 
   const updateWarningThreshold = useCallback(
-    (enteredThreshold) => {
+    (enteredThreshold: any) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.warningThreshold?.join()) {
         setRuleParams(expressionId, { ...expression, warningThreshold: t });
@@ -175,7 +165,7 @@ export const ExpressionRow = ({
   ]);
 
   const handleCustomMetricChange = useCallback(
-    (exp) => {
+    (exp: any) => {
       setRuleParams(expressionId, exp);
     },
     [expressionId, setRuleParams]
@@ -373,14 +363,18 @@ const ThresholdElement: React.FC<{
     if (isMetricPct) return threshold.map((v) => decimalToPct(v));
     return threshold;
   }, [threshold, isMetricPct]);
-
+  const thresholdComparator = useCallback(() => {
+    if (!comparator) return COMPARATORS.GREATER_THAN;
+    // Check if the rule had the legacy OUTSIDE_RANGE inside its params.
+    // Then, change it on-the-fly to NOT_BETWEEN
+    return convertToBuiltInComparators(comparator);
+  }, [comparator]);
   return (
     <>
       <StyledExpression>
         <ThresholdExpression
-          thresholdComparator={comparator || Comparator.GT}
+          thresholdComparator={thresholdComparator()}
           threshold={displayedThreshold}
-          customComparators={customComparators}
           onChangeSelectedThresholdComparator={updateComparator}
           onChangeSelectedThreshold={updateThreshold}
           errors={errors}

@@ -529,10 +529,11 @@ export function getQueryBodyWithAuthFilter(
     dslFilterQuery = queryFilter ? toElasticsearchQuery(queryFilter) : undefined;
   } catch (err) {
     logger.debug(
-      `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
-        message: err.message,
-        statusCode: err.statusCode,
-      })}`
+      () =>
+        `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
+          message: err.message,
+          statusCode: err.statusCode,
+        })}`
     );
     throw err;
   }
@@ -691,10 +692,11 @@ export function getQueryBody(
     dslFilterQuery = filterKueryNode ? toElasticsearchQuery(filterKueryNode) : undefined;
   } catch (err) {
     logger.debug(
-      `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
-        message: err.message,
-        statusCode: err.statusCode,
-      })}`
+      () =>
+        `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
+          message: err.message,
+          statusCode: err.statusCode,
+        })}`
     );
     throw err;
   }

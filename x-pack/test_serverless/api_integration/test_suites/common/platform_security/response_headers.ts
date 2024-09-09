@@ -8,24 +8,34 @@
 import expect from 'expect';
 import cspParser from 'content-security-policy-parser';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertest');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
 
   describe('security/response_headers', function () {
     const baseCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'`;
     const defaultCOOP = 'same-origin';
     const defaultPermissionsPolicy =
-      'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()';
+      'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=();report-to=violations-endpoint';
     const defaultStrictTransportSecurity = 'max-age=31536000; includeSubDomains';
     const defaultReferrerPolicy = 'strict-origin-when-cross-origin';
     const defaultXContentTypeOptions = 'nosniff';
     const defaultXFrameOptions = 'SAMEORIGIN';
 
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
+    });
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
     it('API endpoint response contains default security headers', async () => {
-      const { header } = await supertest
+      const { header } = await supertestWithoutAuth
         .get(`/internal/security/me`)
+        .set(roleAuthc.apiKeyHeader)
         .set(svlCommonApi.getInternalRequestHeader())
         .expect(200);
 
@@ -40,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('redirect endpoint response contains default security headers', async () => {
-      const { header } = await supertest
+      const { header } = await supertestWithoutAuth
         .get(`/logout`)
         .set(svlCommonApi.getInternalRequestHeader())
         .expect(200);

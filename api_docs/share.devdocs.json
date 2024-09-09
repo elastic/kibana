@@ -1066,9 +1066,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.IToasts",
+                "section": "def-public.IToasts",
                 "text": "IToasts"
               }
             ],
@@ -1310,6 +1310,20 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ShowShareMenuOptions.publicAPIEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "publicAPIEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1345,7 +1359,7 @@
         "signature": [
           "{ readonly new_version: Readonly<{} & { enabled: boolean; }>; }"
         ],
-        "path": "src/plugins/share/common/config.ts",
+        "path": "src/plugins/share/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

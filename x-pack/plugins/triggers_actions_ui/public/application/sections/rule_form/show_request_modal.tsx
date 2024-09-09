@@ -18,19 +18,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import {
+  transformUpdateRuleBody as rewriteUpdateBodyRequest,
+  UPDATE_FIELDS_WITH_ACTIONS,
+} from '@kbn/alerts-ui-shared/src/common/apis/update_rule';
+import { transformCreateRuleBody as rewriteCreateBodyRequest } from '@kbn/alerts-ui-shared/src/common/apis/create_rule';
 import * as i18n from '../translations';
 import { RuleUpdates } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
-import { rewriteBodyRequest as rewriteCreateBodyRequest } from '../../lib/rule_api/create';
-import {
-  rewriteBodyRequest as rewriteUpdateBodyRequest,
-  UPDATE_FIELDS,
-} from '../../lib/rule_api/update';
 
 const stringify = (rule: RuleUpdates, edit: boolean): string => {
   try {
     const request = edit
-      ? rewriteUpdateBodyRequest(pick(rule, UPDATE_FIELDS))
+      ? rewriteUpdateBodyRequest(pick(rule, UPDATE_FIELDS_WITH_ACTIONS))
       : rewriteCreateBodyRequest(rule);
     return JSON.stringify(request, null, 2);
   } catch {

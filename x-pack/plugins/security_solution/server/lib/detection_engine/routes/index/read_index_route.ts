@@ -8,6 +8,7 @@
 import { transformError, getBootstrapIndexExists } from '@kbn/securitysolution-es-utils';
 import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import type { IKibanaResponse } from '@kbn/core/server';
+import type { ReadAlertsIndexResponse } from '../../../../../common/api/detection_engine/index_management';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 
@@ -16,7 +17,6 @@ import { fieldAliasesOutdated } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
 import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
-import type { ReadIndexResponse } from '../../../../../common/api/detection_engine';
 
 export const readIndexRoute = (
   router: SecuritySolutionPluginRouter,
@@ -35,7 +35,7 @@ export const readIndexRoute = (
         version: '2023-10-31',
         validate: false,
       },
-      async (context, _, response): Promise<IKibanaResponse<ReadIndexResponse>> => {
+      async (context, _, response): Promise<IKibanaResponse<ReadAlertsIndexResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {

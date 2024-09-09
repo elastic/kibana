@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { set } from '@kbn/safer-lodash-set';
@@ -33,6 +34,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
   public error: SavedObjectType<T>['error'];
   public references: SavedObjectType<T>['references'];
   public updatedAt: SavedObjectType<T>['updated_at'];
+  public updatedBy: SavedObjectType<T>['updated_by'];
   public createdAt: SavedObjectType<T>['created_at'];
   public createdBy: SavedObjectType<T>['created_by'];
   public namespaces: SavedObjectType<T>['namespaces'];
@@ -52,6 +54,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
       managed,
       namespaces,
       updated_at: updatedAt,
+      updated_by: updatedBy,
       created_at: createdAt,
       created_by: createdBy,
     }: SavedObjectType<T>
@@ -69,6 +72,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
+    this.updatedBy = updatedBy;
     if (error) {
       this.error = error;
     }

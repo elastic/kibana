@@ -42,6 +42,16 @@ describe('WelcomeHeaderComponent', () => {
     expect(titleElement).toBeInTheDocument();
   });
 
+  it('should render username when fullName is an empty string', () => {
+    const fullName = '';
+    const username = 'jd';
+    mockUseCurrentUser.mockReturnValue({ fullName, username });
+
+    const { getByText } = render(<WelcomeHeader />);
+    const titleElement = getByText(`Hi ${username}!`);
+    expect(titleElement).toBeInTheDocument();
+  });
+
   it('should render username when fullName is not provided', () => {
     const username = 'jd';
     mockUseCurrentUser.mockReturnValue({ username });

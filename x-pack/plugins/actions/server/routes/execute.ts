@@ -15,7 +15,9 @@ import { asHttpRequestExecutionSource } from '../lib/action_execution_source';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 const paramSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: { description: 'An identifier for the connector.' },
+  }),
 });
 
 const bodySchema = schema.object({
@@ -41,11 +43,21 @@ export const executeActionRoute = (
       path: `${BASE_ACTION_API_PATH}/connector/{id}/_execute`,
       options: {
         access: 'public',
-        description: `Run a connector`,
+        summary: `Run a connector`,
+        description:
+          'You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.',
+        tags: ['oas-tag:connectors'],
       },
       validate: {
-        body: bodySchema,
-        params: paramSchema,
+        request: {
+          body: bodySchema,
+          params: paramSchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

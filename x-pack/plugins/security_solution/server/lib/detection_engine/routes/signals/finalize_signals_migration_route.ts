@@ -7,11 +7,10 @@
 
 import { transformError, BadRequestError } from '@kbn/securitysolution-es-utils';
 import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { FinalizeAlertsMigrationRequestBody } from '../../../../../common/api/detection_engine/signals_migration';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import type { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
-import { finalizeSignalsMigrationSchema } from '../../../../../common/api/detection_engine/signals_migration';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { isMigrationFailed, isMigrationPending } from '../../migrations/helpers';
 import { signalsMigrationService } from '../../migrations/migration_service';
 import { buildSiemResponse } from '../utils';
@@ -20,8 +19,7 @@ import { getMigrationSavedObjectsById } from '../../migrations/get_migration_sav
 
 export const finalizeSignalsMigrationRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataService: RuleDataPluginService,
-  security: SetupPlugins['security']
+  ruleDataService: RuleDataPluginService
 ) => {
   router.versioned
     .post({
@@ -34,7 +32,9 @@ export const finalizeSignalsMigrationRoute = (
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: buildRouteValidation(finalizeSignalsMigrationSchema) } },
+        validate: {
+          request: { body: buildRouteValidationWithZod(FinalizeAlertsMigrationRequestBody) },
+        },
       },
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
@@ -51,7 +51,7 @@ export const finalizeSignalsMigrationRoute = (
           if (!appClient) {
             return siemResponse.error({ statusCode: 404 });
           }
-          const user = await security?.authc.getCurrentUser(request);
+          const user = core.security.authc.getCurrentUser();
           const migrationService = signalsMigrationService({
             esClient,
             soClient,

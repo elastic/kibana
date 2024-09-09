@@ -29,6 +29,7 @@ const policyDoc: SavedObject<PackagePolicy> = {
     },
     id: 'endpoint',
     policy_id: '',
+    policy_ids: [''],
     enabled: true,
     namespace: '',
     revision: 0,

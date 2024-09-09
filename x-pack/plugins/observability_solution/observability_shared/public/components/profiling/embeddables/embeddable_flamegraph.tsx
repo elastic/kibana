@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import React from 'react';
-import { ProfilingEmbeddable } from './profiling_embeddable';
+import { css } from '@emotion/react';
+import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import { EMBEDDABLE_FLAMEGRAPH } from '.';
+import { getProfilingComponent } from '../helpers/component_registry';
 
 interface Props {
   data?: BaseFlameGraph;
@@ -16,6 +17,20 @@ interface Props {
   height?: string;
 }
 
-export function EmbeddableFlamegraph(props: Props) {
-  return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_FLAMEGRAPH} />;
+export function EmbeddableFlamegraph({ height, ...props }: Props) {
+  const EmbeddableFlamegraphComponent = getProfilingComponent<Props>(EMBEDDABLE_FLAMEGRAPH);
+  return (
+    <div
+      css={css`
+        width: 100%;
+        height: ${height};
+        display: flex;
+        flex: 1 1 100%;
+        z-index: 1;
+        min-height: 0;
+      `}
+    >
+      {EmbeddableFlamegraphComponent && <EmbeddableFlamegraphComponent {...props} />}
+    </div>
+  );
 }

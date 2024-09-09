@@ -109,12 +109,14 @@ export const getAvailableVersions = async ({
   // fetch from the live API more than `TIME_BETWEEN_FETCHES` milliseconds.
   const apiVersions = await fetchAgentVersionsFromApi();
 
-  // Coerce each version to a semver object and compare to our `MINIMUM_SUPPORTED_VERSION` - we
+  // Take each version and compare to our `MINIMUM_SUPPORTED_VERSION` - we
   // only want support versions in the final result. We'll also sort by newest version first.
-  availableVersions = uniq([...availableVersions, ...apiVersions])
-    .map((item: any) => semverCoerce(item)?.version || '')
-    .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
-    .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
+  availableVersions = uniq(
+    [...availableVersions, ...apiVersions]
+      .map((item: any) => (item.includes('+build') ? item : semverCoerce(item)?.version || ''))
+      .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
+      .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1))
+  );
 
   // if api versions are empty (air gapped or API not available), we add current kibana version, as the build file might not contain the latest released version
   if (

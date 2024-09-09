@@ -416,35 +416,6 @@
             "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/index.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityLogsExplorer",
-            "id": "def-common.ObservabilityLogsExplorerLocators.datasetQualityLocator",
-            "type": "Object",
-            "tags": [],
-            "label": "datasetQualityLocator",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.LocatorPublic",
-                "text": "LocatorPublic"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/deeplinks-observability",
-                "scope": "common",
-                "docId": "kibKbnDeeplinksObservabilityPluginApi",
-                "section": "def-common.DatasetQualityLocatorParams",
-                "text": "DatasetQualityLocatorParams"
-              },
-              ">"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -452,21 +423,6 @@
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "observabilityLogsExplorer",
-        "id": "def-common.OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY",
-        "description": [],
-        "signature": [
-          "\"pageState\""
-        ],
-        "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/url_schema/common.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "observabilityLogsExplorer",
         "id": "def-common.OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY",

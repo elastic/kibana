@@ -59,7 +59,7 @@ import {
   getAgentUploadsHandler,
   getAgentUploadFileHandler,
   deleteAgentUploadFileHandler,
-  postAgentsReassignHandler,
+  postAgentReassignHandler,
   postRetrieveAgentsByActionsHandler,
 } from './handlers';
 import {
@@ -271,7 +271,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         version: API_VERSIONS.public.v1,
         validate: { request: PostAgentReassignRequestSchema },
       },
-      postAgentsReassignHandler
+      postAgentReassignHandler
     );
 
   router.versioned
@@ -338,7 +338,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .delete({
       path: AGENT_API_ROUTES.DELETE_UPLOAD_FILE_PATTERN,
       fleetAuthz: {
-        fleet: { readAgents: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(

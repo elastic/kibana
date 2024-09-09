@@ -1,157 +1,269 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepEqual from 'fast-deep-equal';
-import React, { createContext } from 'react';
-import { unmountComponentAtNode } from 'react-dom';
-import { distinctUntilChanged, skip, Subject, Subscription, switchMap } from 'rxjs';
+import React, { createContext, useMemo } from 'react';
+import { cloneDeep } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
+import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
-import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import { PanelIncompatibleError, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
-  AttributeService,
-  Embeddable,
-  ReferenceOrValueEmbeddable,
-  SavedObjectEmbeddableInput,
-} from '@kbn/embeddable-plugin/public';
+  initializeTitles,
+  useBatchedOptionalPublishingSubjects,
+} from '@kbn/presentation-publishing';
 
-import { CONTENT_ID } from '../../common';
-import { LinksAttributes } from '../../common/content_management';
-import { LinksComponent } from '../components/links_component';
-import { LinksByReferenceInput, LinksByValueInput, LinksInput, LinksOutput } from './types';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 
-export const LinksContext = createContext<LinksEmbeddable | null>(null);
+import {
+  CONTENT_ID,
+  DASHBOARD_LINK_TYPE,
+  LinksLayoutType,
+  LINKS_HORIZONTAL_LAYOUT,
+  LINKS_VERTICAL_LAYOUT,
+} from '../../common/content_management';
+import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
+import { ExternalLinkComponent } from '../components/external_link/external_link_component';
+import {
+  LinksApi,
+  LinksByReferenceSerializedState,
+  LinksByValueSerializedState,
+  LinksParentApi,
+  LinksRuntimeState,
+  LinksSerializedState,
+  ResolvedLink,
+} from '../types';
+import { DISPLAY_NAME } from '../../common';
+import { injectReferences } from '../../common/persistable_state';
 
-export interface LinksConfig {
-  editable: boolean;
-}
+import '../components/links_component.scss';
+import { checkForDuplicateTitle, linksClient } from '../content_management';
+import { resolveLinks } from '../lib/resolve_links';
+import {
+  deserializeLinksSavedObject,
+  linksSerializeStateIsByReference,
+} from '../lib/deserialize_from_library';
+import { serializeLinksAttributes } from '../lib/serialize_attributes';
+import { isParentApiCompatible } from '../actions/compatibility_check';
 
-export class LinksEmbeddable
-  extends Embeddable<LinksInput, LinksOutput>
-  implements ReferenceOrValueEmbeddable<LinksByValueInput, LinksByReferenceInput>
-{
-  public readonly type = CONTENT_ID;
-  deferEmbeddableLoad = true;
+export const LinksContext = createContext<LinksApi | null>(null);
 
-  private domNode?: HTMLElement;
-  private isDestroyed?: boolean;
-  private subscriptions: Subscription = new Subscription();
+export const getLinksEmbeddableFactory = () => {
+  const linksEmbeddableFactory: ReactEmbeddableFactory<
+    LinksSerializedState,
+    LinksRuntimeState,
+    LinksApi
+  > = {
+    type: CONTENT_ID,
+    deserializeState: async (serializedState) => {
+      // Clone the state to avoid an object not extensible error when injecting references
+      const state = cloneDeep(serializedState.rawState);
+      const { title, description, hidePanelTitles } = serializedState.rawState;
 
-  public attributes?: LinksAttributes;
-  public attributes$ = new Subject<LinksAttributes>();
+      if (linksSerializeStateIsByReference(state)) {
+        const linksSavedObject = await linksClient.get(state.savedObjectId);
+        const runtimeState = await deserializeLinksSavedObject(linksSavedObject.item);
+        return {
+          ...runtimeState,
+          title,
+          description,
+          hidePanelTitles,
+        };
+      }
 
-  constructor(
-    config: LinksConfig,
-    initialInput: LinksInput,
-    private attributeService: AttributeService<LinksAttributes>,
-    parent?: DashboardContainer
-  ) {
-    super(
-      initialInput,
-      {
-        editable: config.editable,
-        editableWithExplicitInput: true,
-      },
-      parent
-    );
+      const { attributes: attributesWithInjectedIds } = injectReferences({
+        attributes: state.attributes,
+        references: serializedState.references ?? [],
+      });
 
-    this.initializeSavedLinks()
-      .then(() => this.setInitializationFinished())
-      .catch((e: Error) => this.onFatalError(e));
+      const resolvedLinks = await resolveLinks(attributesWithInjectedIds.links ?? []);
 
-    // By-value panels should update the links attributes when input changes
-    this.subscriptions.add(
-      this.getInput$()
-        .pipe(
-          distinctUntilChanged(deepEqual),
-          skip(1),
-          switchMap(async () => await this.initializeSavedLinks())
-        )
-        .subscribe()
-    );
+      return {
+        title,
+        description,
+        hidePanelTitles,
+        links: resolvedLinks,
+        layout: attributesWithInjectedIds.layout,
+        defaultPanelTitle: attributesWithInjectedIds.title,
+        defaultPanelDescription: attributesWithInjectedIds.description,
+      };
+    },
+    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+      const error$ = new BehaviorSubject<Error | undefined>(state.error);
+      if (!isParentApiCompatible(parentApi)) error$.next(new PanelIncompatibleError());
 
-    // Keep attributes in sync with subject value so it can be used in output
-    this.subscriptions.add(
-      this.attributes$.pipe(distinctUntilChanged(deepEqual)).subscribe((attributes) => {
-        this.attributes = attributes;
-      })
-    );
-  }
+      const links$ = new BehaviorSubject<ResolvedLink[] | undefined>(state.links);
+      const layout$ = new BehaviorSubject<LinksLayoutType | undefined>(state.layout);
+      const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.defaultPanelTitle);
+      const defaultPanelDescription = new BehaviorSubject<string | undefined>(
+        state.defaultPanelDescription
+      );
+      const savedObjectId$ = new BehaviorSubject(state.savedObjectId);
+      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
 
-  private async initializeSavedLinks() {
-    const { attributes } = await this.attributeService.unwrapAttributes(this.getInput());
-    this.attributes$.next(attributes);
-    await this.initializeOutput();
-  }
+      const api = buildApi(
+        {
+          ...titlesApi,
+          blockingError: error$,
+          defaultPanelTitle,
+          defaultPanelDescription,
+          isEditingEnabled: () => Boolean(error$.value === undefined),
+          libraryId$: savedObjectId$,
+          getTypeDisplayName: () => DISPLAY_NAME,
+          getByValueRuntimeSnapshot: () => {
+            const snapshot = api.snapshotRuntimeState();
+            delete snapshot.savedObjectId;
+            return snapshot;
+          },
+          serializeState: async (): Promise<SerializedPanelState<LinksSerializedState>> => {
+            if (savedObjectId$.value !== undefined) {
+              const linksByReferenceState: LinksByReferenceSerializedState = {
+                savedObjectId: savedObjectId$.value,
+                ...serializeTitles(),
+              };
+              return { rawState: linksByReferenceState, references: [] };
+            }
+            const runtimeState = api.snapshotRuntimeState();
+            const { attributes, references } = serializeLinksAttributes(runtimeState);
+            const linksByValueState: LinksByValueSerializedState = {
+              attributes,
+              ...serializeTitles(),
+            };
+            return { rawState: linksByValueState, references };
+          },
+          saveToLibrary: async (newTitle: string) => {
+            defaultPanelTitle.next(newTitle);
+            const runtimeState = api.snapshotRuntimeState();
+            const { attributes, references } = serializeLinksAttributes(runtimeState);
+            const {
+              item: { id },
+            } = await linksClient.create({
+              data: {
+                ...attributes,
+                title: newTitle,
+              },
+              options: { references },
+            });
+            savedObjectId$.next(id);
+            return id;
+          },
+          checkForDuplicateTitle: async (
+            newTitle: string,
+            isTitleDuplicateConfirmed: boolean,
+            onTitleDuplicate: () => void
+          ) => {
+            await checkForDuplicateTitle({
+              title: newTitle,
+              copyOnSave: false,
+              lastSavedTitle: '',
+              isTitleDuplicateConfirmed,
+              onTitleDuplicate,
+            });
+          },
+          unlinkFromLibrary: () => {
+            savedObjectId$.next(undefined);
+          },
+          onEdit: async () => {
+            const { openEditorFlyout } = await import('../editor/open_editor_flyout');
+            const newState = await openEditorFlyout({
+              initialState: api.snapshotRuntimeState(),
+              parentDashboard: parentApi,
+            });
 
-  private async initializeOutput() {
-    const { title, description } = this.getInput();
-    this.updateOutput({
-      defaultTitle: this.attributes?.title,
-      defaultDescription: this.attributes?.description,
-      title: title ?? this.attributes?.title,
-      description: description ?? this.attributes?.description,
-    });
-  }
+            if (newState) {
+              links$.next(newState.links);
+              layout$.next(newState.layout);
+              defaultPanelTitle.next(newState.defaultPanelTitle);
+              defaultPanelDescription.next(newState.defaultPanelDescription);
+              savedObjectId$.next(newState.savedObjectId);
+            }
+          },
+        },
+        {
+          ...titleComparators,
+          links: [
+            links$,
+            (nextLinks?: ResolvedLink[]) => links$.next(nextLinks ?? []),
+            (a, b) => Boolean(savedObjectId$.value) || fastIsEqual(a, b), // Editing attributes in a by-reference panel should not trigger unsaved changes.
+          ],
+          layout: [
+            layout$,
+            (nextLayout?: LinksLayoutType) => layout$.next(nextLayout ?? LINKS_VERTICAL_LAYOUT),
+            (a, b) => Boolean(savedObjectId$.value) || a === b,
+          ],
+          error: [error$, (nextError?: Error) => error$.next(nextError)],
+          defaultPanelDescription: [
+            defaultPanelDescription,
+            (nextDescription?: string) => defaultPanelDescription.next(nextDescription),
+          ],
+          defaultPanelTitle: [
+            defaultPanelTitle,
+            (nextTitle?: string) => defaultPanelTitle.next(nextTitle),
+          ],
+          savedObjectId: [savedObjectId$, (val) => savedObjectId$.next(val)],
+        }
+      );
 
-  public onRender() {
-    this.renderComplete.dispatchComplete();
-  }
+      const Component = () => {
+        const [links, layout] = useBatchedOptionalPublishingSubjects(links$, layout$);
 
-  public onLoading() {
-    this.renderComplete.dispatchInProgress();
-  }
-
-  public inputIsRefType(
-    input: LinksByValueInput | LinksByReferenceInput
-  ): input is LinksByReferenceInput {
-    return this.attributeService.inputIsRefType(input);
-  }
-
-  public async getInputAsRefType(): Promise<SavedObjectEmbeddableInput> {
-    return this.attributeService.getInputAsRefType(this.getExplicitInput(), {
-      showSaveModal: true,
-      saveModalTitle: this.getTitle(),
-    });
-  }
-
-  public async getInputAsValueType(): Promise<LinksByValueInput> {
-    return this.attributeService.getInputAsValueType(this.getExplicitInput());
-  }
-
-  public async reload() {
-    if (this.isDestroyed) return;
-    // By-reference embeddable panels are reloaded when changed, so update the attributes
-    this.initializeSavedLinks();
-    if (this.domNode) {
-      this.render(this.domNode);
-    }
-  }
-
-  public destroy() {
-    this.isDestroyed = true;
-    super.destroy();
-    this.subscriptions.unsubscribe();
-    if (this.domNode) {
-      unmountComponentAtNode(this.domNode);
-    }
-  }
-
-  public render(domNode: HTMLElement) {
-    this.domNode = domNode;
-    if (this.isDestroyed) return;
-    super.render(domNode);
-
-    this.domNode.setAttribute('data-shared-item', '');
-
-    return (
-      <LinksContext.Provider value={this}>
-        <LinksComponent />
-      </LinksContext.Provider>
-    );
-  }
-}
+        const linkItems: { [id: string]: { id: string; content: JSX.Element } } = useMemo(() => {
+          if (!links) return {};
+          return links.reduce((prev, currentLink) => {
+            return {
+              ...prev,
+              [currentLink.id]: {
+                id: currentLink.id,
+                content:
+                  currentLink.type === DASHBOARD_LINK_TYPE ? (
+                    <DashboardLinkComponent
+                      key={currentLink.id}
+                      link={currentLink}
+                      layout={layout ?? LINKS_VERTICAL_LAYOUT}
+                      parentApi={parentApi as LinksParentApi}
+                    />
+                  ) : (
+                    <ExternalLinkComponent
+                      key={currentLink.id}
+                      link={currentLink}
+                      layout={layout ?? LINKS_VERTICAL_LAYOUT}
+                    />
+                  ),
+              },
+            };
+          }, {});
+        }, [links, layout]);
+        return (
+          <EuiPanel
+            className={`linksComponent ${
+              layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'
+            }`}
+            paddingSize="xs"
+            data-shared-item
+            data-rendering-count={1}
+            data-test-subj="links--component"
+          >
+            <EuiListGroup
+              maxWidth={false}
+              className={`${layout ?? LINKS_VERTICAL_LAYOUT}LayoutWrapper`}
+              data-test-subj="links--component--listGroup"
+            >
+              {links?.map((link) => linkItems[link.id].content)}
+            </EuiListGroup>
+          </EuiPanel>
+        );
+      };
+      return {
+        api,
+        Component,
+      };
+    },
+  };
+  return linksEmbeddableFactory;
+};

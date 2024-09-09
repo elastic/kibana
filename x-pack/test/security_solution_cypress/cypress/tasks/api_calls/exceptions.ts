@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateEndpointListItemResponse } from '@kbn/lists-plugin/common/api';
+import { CreateEndpointListItemResponse } from '@kbn/securitysolution-endpoint-exceptions-common/api';
 import type {
   ExceptionListSchema,
   ExceptionListItemSchema,
@@ -47,7 +47,7 @@ export const createExceptionList = (
 
 export const createExceptionListItem = (
   exceptionListId: string,
-  exceptionListItem?: ExceptionListItem
+  exceptionListItem?: Partial<ExceptionListItem>
 ) =>
   rootRequest<ExceptionListItemSchema>({
     method: 'POST',
@@ -127,4 +127,28 @@ export const deleteExceptionLists = () => {
 
 export const deleteEndpointExceptionList = () => {
   deleteExceptionList('endpoint_list', 'agnostic');
+};
+
+export const linkRulesToExceptionList = (
+  ruleId: string,
+  exceptionList: {
+    id: string;
+    listId: string;
+  }
+) => {
+  rootRequest({
+    method: 'PATCH',
+    url: `/api/detection_engine/rules`,
+    body: {
+      exceptions_list: [
+        {
+          id: exceptionList.id,
+          list_id: exceptionList.listId,
+          namespace_type: 'single',
+          type: 'detection',
+        },
+      ],
+      rule_id: ruleId,
+    },
+  });
 };

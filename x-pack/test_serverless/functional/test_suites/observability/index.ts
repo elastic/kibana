@@ -9,10 +9,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless observability UI', function () {
+    this.tags(['esGate']);
+
     loadTestFile(require.resolve('./landing_page'));
     loadTestFile(require.resolve('./navigation'));
     loadTestFile(require.resolve('./observability_logs_explorer'));
     loadTestFile(require.resolve('./dataset_quality'));
+    loadTestFile(require.resolve('./onboarding'));
     loadTestFile(require.resolve('./rules/rules_list'));
     loadTestFile(require.resolve('./cases'));
     loadTestFile(require.resolve('./advanced_settings'));

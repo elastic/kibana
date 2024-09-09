@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import apm from 'elastic-apm-node';
@@ -256,7 +257,7 @@ export class Server {
     const environmentSetup = this.environment.setup();
 
     // Configuration could have changed after preboot.
-    await ensureValidConfiguration(this.configService);
+    await this.ensureValidConfiguration();
 
     const { uiPlugins, pluginPaths, pluginTree } = this.discoveredPlugins!.standard;
     const contextServiceSetup = this.context.setup({
@@ -450,6 +451,8 @@ export class Server {
       userProfile: userProfileStart,
     };
 
+    this.coreApp.start(this.coreStart);
+
     await this.plugins.start(this.coreStart);
 
     await this.http.start();
@@ -469,6 +472,7 @@ export class Server {
   public async stop() {
     this.log.debug('stopping server');
 
+    this.coreApp.stop();
     await this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();
@@ -484,6 +488,27 @@ export class Server {
     this.deprecations.stop();
     this.security.stop();
     this.userProfile.stop();
+  }
+
+  private async ensureValidConfiguration() {
+    try {
+      await ensureValidConfiguration(this.configService);
+    } catch (validationError) {
+      if (this.env.packageInfo.buildFlavor !== 'serverless') {
+        throw validationError;
+      }
+      // When running on serverless, we may allow unknown keys, but stripping them from the final config object.
+      this.configService.setGlobalStripUnknownKeys(true);
+      await ensureValidConfiguration(this.configService, {
+        logDeprecations: true,
+        stripUnknownKeys: true,
+      });
+      this.log
+        .get('config-validation')
+        .error(
+          `Strict config validation failed! Extra unknown keys removed in Serverless-compatible mode. Original error: ${validationError}`
+        );
+    }
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {

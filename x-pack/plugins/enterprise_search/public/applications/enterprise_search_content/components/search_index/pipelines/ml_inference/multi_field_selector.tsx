@@ -273,7 +273,7 @@ export const SelectedFieldMappings: React.FC<SelectedFieldMappingsProps> = ({ is
                   i18n.translate(
                     'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions.deleteMapping.caption',
                     {
-                      defaultMessage: `Delete mapping '{sourceField}' - '{targetField}'`,
+                      defaultMessage: `Delete mapping ''{sourceField}'' - ''{targetField}''`,
                       values: {
                         sourceField: fieldMapping.sourceField,
                         targetField: fieldMapping.targetField,

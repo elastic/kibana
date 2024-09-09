@@ -33,6 +33,7 @@
     "optionalPlugins": [
       "cloud",
       "customIntegrations",
+      "embeddableEnhanced",
       "home",
       "savedObjectsTagging",
       "charts",
@@ -48,7 +49,7 @@
       "usageCollection",
       "unifiedSearch",
       "fieldFormats",
-      "textBasedLanguages",
+      "esql",
       "savedObjects",
     ],
     "extraPublicDirs": [

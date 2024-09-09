@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ApplicationStart, IBasePath } from '@kbn/core/public';
@@ -153,13 +154,11 @@ export class Table extends PureComponent<TableProps, TableState> {
 
       if (updatedAt.diff(moment(), 'days') > -7) {
         return (
-          <FormattedRelative value={new Date(dateTime).getTime()}>
-            {(formattedDate: string) => (
-              <EuiToolTip content={updatedAt.format('LL LT')}>
-                <span>{formattedDate}</span>
-              </EuiToolTip>
-            )}
-          </FormattedRelative>
+          <EuiToolTip content={updatedAt.format('LL LT')}>
+            <span>
+              <FormattedRelative value={new Date(dateTime).getTime()} />
+            </span>
+          </EuiToolTip>
         );
       }
       return (
@@ -470,7 +469,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           ]}
         />
         {queryParseError}
-        <EuiSpacer size="s" />
+        <EuiSpacer />
         {exceededResultCount && (
           <>
             <EuiText color="subdued" size="s" data-test-subj="savedObjectsTableTooManyResultsLabel">

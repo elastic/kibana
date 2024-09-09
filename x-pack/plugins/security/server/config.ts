@@ -314,6 +314,11 @@ export const ConfigSchema = schema.object({
       roleMappingManagementEnabled: schema.boolean({ defaultValue: true }),
     }),
   }),
+  experimental: schema.object({
+    fipsMode: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
+  }),
 });
 
 export function createConfig(
@@ -330,6 +335,9 @@ export function createConfig(
 
     encryptionKey = crypto.randomBytes(16).toString('hex');
   }
+
+  const hashedEncryptionKey = crypto.createHash('sha3-256').update(encryptionKey).digest('base64');
+  logger.info(`Hashed 'xpack.security.encryptionKey' for this instance: ${hashedEncryptionKey}`);
 
   let secureCookies = config.secureCookies;
 

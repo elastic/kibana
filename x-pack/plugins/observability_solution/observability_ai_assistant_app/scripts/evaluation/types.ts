@@ -6,7 +6,10 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  type Message,
+  ChatCompletionErrorEvent,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import { KibanaClient } from './kibana_client';
 import { SynthtraceEsClients } from './setup_synthtrace';
 
@@ -19,6 +22,7 @@ export interface ScenarioOptions {
 
 export interface EvaluationResult {
   name: string;
+  category: string;
   conversationId?: string;
   messages: Array<Message['message']>;
   passed: boolean;
@@ -27,6 +31,7 @@ export interface EvaluationResult {
     reasoning: string;
     score: number;
   }>;
+  errors: ChatCompletionErrorEvent[];
 }
 
 export type EvaluationFunction = (options: ScenarioOptions) => Promise<EvaluationResult>;

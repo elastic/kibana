@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "_eZE7mwBOpWiDweStB_c",
-    "index": "unmapped-7.12.0-2021.03.10-000001",
+    "index": "auditbeat-unmapped-7.12.0-2021.03.10-000001",
     "source": {
       "@timestamp":"2021-02-22T21:00:49.337Z",
       "mydestination":{

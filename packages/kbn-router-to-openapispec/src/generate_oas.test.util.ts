@@ -1,71 +1,51 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import type { ZodType } from '@kbn/zod';
+import { schema, Type } from '@kbn/config-schema';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
+import { createLargeSchema } from './oas_converter/kbn_config_schema/lib.test.util';
 
-/** Intended to cover a wide set of schema configurations */
-export const testSchema = schema.object({
-  string: schema.string({ maxLength: 10, minLength: 1 }),
-  maybeNumber: schema.maybe(schema.number({ max: 1000, min: 1 })),
-  booleanDefault: schema.boolean({
-    defaultValue: true,
-    meta: {
-      description: 'defaults to to true',
-    },
-  }),
-  ipType: schema.ip({ versions: ['ipv4'] }),
-  literalType: schema.literal('literallythis'),
-  neverType: schema.never(),
-  map: schema.mapOf(schema.string(), schema.string()),
-  record: schema.recordOf(schema.string(), schema.string()),
-  union: schema.oneOf([
-    schema.string({ maxLength: 1, meta: { description: 'Union string' } }),
-    schema.number({ min: 0, meta: { description: 'Union number' } }),
-  ]),
-  uri: schema.uri({
-    scheme: ['prototest'],
-    defaultValue: () => 'prototest://something',
-  }),
-  any: schema.any({ meta: { description: 'any type' } }),
-});
+type RoutesMeta = ReturnType<Router['getRoutes']>[number];
+type VersionedRoutesMeta = ReturnType<CoreVersionedRouter['getRoutes']>[number];
+type RuntimeSchema = Type<unknown> | ZodType<unknown>;
 
-type RouterMeta = ReturnType<Router['getRoutes']>[number];
-type VersionedRouterMeta = ReturnType<CoreVersionedRouter['getRoutes']>[number];
-
-export const createRouter = (args: { routes: RouterMeta[] }) => {
+export const createRouter = (args: { routes: RoutesMeta[] }) => {
   return {
     getRoutes: () => args.routes,
   } as unknown as Router;
 };
-export const createVersionedRouter = (args: { routes: VersionedRouterMeta[] }) => {
+export const createVersionedRouter = (args: { routes: VersionedRoutesMeta[] }) => {
   return {
     getRoutes: () => args.routes,
   } as unknown as CoreVersionedRouter;
 };
 
-const getRouterDefaults = () => ({
+export const getRouterDefaults = (bodySchema?: RuntimeSchema) => ({
   isVersioned: false,
-  path: '/foo/{id}',
+  path: '/foo/{id}/{path*}',
   method: 'get',
   options: {
-    tags: ['foo'],
-    description: 'route',
+    tags: ['foo', 'oas-tag:bar'],
+    summary: 'route summary',
+    description: 'route description',
   },
   validationSchemas: {
     request: {
       params: schema.object({
         id: schema.string({ maxLength: 36, meta: { description: 'id' } }),
+        path: schema.string({ maxLength: 36, meta: { description: 'path' } }),
       }),
       query: schema.object({
         page: schema.number({ max: 999, min: 1, defaultValue: 1, meta: { description: 'page' } }),
       }),
-      body: testSchema,
+      body: bodySchema ?? createLargeSchema(),
     },
     response: {
       200: {
@@ -77,12 +57,16 @@ const getRouterDefaults = () => ({
   handler: jest.fn(),
 });
 
-const getVersionedRouterDefaults = () => ({
+export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
   method: 'get',
   path: '/bar',
   options: {
-    description: 'versioned route',
+    summary: 'versioned route',
     access: 'public',
+    deprecated: true,
+    options: {
+      tags: ['ignore-me', 'oas-tag:versioned'],
+    },
   },
   handlers: [
     {
@@ -90,15 +74,18 @@ const getVersionedRouterDefaults = () => ({
       options: {
         validate: {
           request: {
-            body: schema.object({
-              foo: schema.string(),
-              deprecatedFoo: schema.maybe(
-                schema.string({ meta: { description: 'deprecated foo', deprecated: true } })
-              ),
-            }),
+            body:
+              bodySchema ??
+              schema.object({
+                foo: schema.string(),
+                deprecatedFoo: schema.maybe(
+                  schema.string({ meta: { description: 'deprecated foo', deprecated: true } })
+                ),
+              }),
           },
           response: {
             [200]: {
+              description: 'OK response oas-test-version-1',
               body: () =>
                 schema.object(
                   { fooResponseWithDescription: schema.string() },
@@ -117,6 +104,7 @@ const getVersionedRouterDefaults = () => ({
           request: { body: schema.object({ foo: schema.string() }) },
           response: {
             [200]: {
+              description: 'OK response oas-test-version-2',
               body: () => schema.stream({ meta: { description: 'stream response' } }),
               bodyContentType: 'application/octet-stream',
             },
@@ -129,25 +117,32 @@ const getVersionedRouterDefaults = () => ({
   ],
 });
 
+interface CreatTestRouterArgs {
+  routers?: { [routerId: string]: { routes: Array<Partial<RoutesMeta>> } };
+  versionedRouters?: {
+    [routerId: string]: { routes: Array<Partial<VersionedRoutesMeta>> };
+  };
+  bodySchema?: RuntimeSchema;
+}
+
 export const createTestRouters = (
-  {
-    routers = [],
-    versionedRouters = [],
-  }: {
-    routers?: Array<Array<Partial<RouterMeta>>>;
-    versionedRouters?: Array<Array<Partial<VersionedRouterMeta>>>;
-  } = { routers: [[{}]], versionedRouters: [[{}]] }
+  { routers = {}, versionedRouters = {}, bodySchema }: CreatTestRouterArgs = {
+    routers: { testRouter: { routes: [{}] } },
+    versionedRouters: { testVersionedRouter: { routes: [{}] } },
+  }
 ): [routers: Router[], versionedRouters: CoreVersionedRouter[]] => {
   return [
     [
-      ...routers.map((rs) =>
-        createRouter({ routes: rs.map((r) => Object.assign(getRouterDefaults(), r)) })
+      ...Object.values(routers).map((rs) =>
+        createRouter({
+          routes: rs.routes.map((r) => Object.assign(getRouterDefaults(bodySchema), r)),
+        })
       ),
     ],
     [
-      ...versionedRouters.map((rs) =>
+      ...Object.values(versionedRouters).map((rs) =>
         createVersionedRouter({
-          routes: rs.map((r) => Object.assign(getVersionedRouterDefaults(), r)),
+          routes: rs.routes.map((r) => Object.assign(getVersionedRouterDefaults(bodySchema), r)),
         })
       ),
     ],

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -35,7 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('hides other panels', async () => {
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
       await retry.try(async () => {
         const panelCount = await PageObjects.dashboard.getPanelCount();
@@ -46,9 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('shows other panels after being minimized', async () => {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       // Panels are all minimized on a fresh open of a dashboard, so we need to re-expand in order to then minimize.
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
 
       // Add a retry to fix https://github.com/elastic/kibana/issues/14574.  Perhaps the recent changes to this

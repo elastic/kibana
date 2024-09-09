@@ -60,7 +60,7 @@ export function InsightBase({
   return (
     <EuiPanel hasBorder hasShadow={false}>
       <EuiAccordion
-        id="obsAiAssistantInsight"
+        id="obsAiAssistantInsightContainer"
         arrowProps={{ css: { alignSelf: 'flex-start' } }}
         buttonContent={
           <EuiFlexGroup wrap responsive={false} gutterSize="m" data-test-subj={dataTestSubj}>

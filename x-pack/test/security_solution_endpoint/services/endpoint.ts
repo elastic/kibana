@@ -7,18 +7,17 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { errors } from '@elastic/elasticsearch';
-import { Client } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
-  metadataCurrentIndexPattern,
-  metadataTransformPrefix,
+  HOST_METADATA_GET_ROUTE,
   METADATA_CURRENT_TRANSFORM_V2,
+  METADATA_DATASTREAM,
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
   METADATA_UNITED_TRANSFORM_V2,
-  HOST_METADATA_GET_ROUTE,
-  METADATA_DATASTREAM,
+  metadataCurrentIndexPattern,
+  metadataTransformPrefix,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   deleteIndexedHostsAndAlerts,
@@ -38,20 +37,33 @@ import { merge } from 'lodash';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
 import seedrandom from 'seedrandom';
+import { fetchFleetLatestAvailableAgentVersion } from '@kbn/security-solution-plugin/common/endpoint/utils/fetch_fleet_version';
+import { KbnClient } from '@kbn/test';
+import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
 import { FtrService } from '../../functional/ftr_provider_context';
 
 // Document Generator override that uses a custom Endpoint Metadata generator and sets the
 // `agent.version` to the current version
-const CurrentKibanaVersionDocGenerator = class extends EndpointDocGenerator {
-  constructor(seedValue: string | seedrandom.prng) {
-    const MetadataGenerator = class extends EndpointMetadataGenerator {
-      protected randomVersion(): string {
-        return kibanaPackageJson.version;
-      }
-    };
 
-    super(seedValue, MetadataGenerator);
+const createDocGeneratorClass = async (kbnClient: KbnClient, isServerless: boolean) => {
+  let version = kibanaPackageJson.version;
+  if (isServerless) {
+    version = await fetchFleetLatestAvailableAgentVersion(kbnClient);
   }
+  // TS doesn't like the `version` let being used in the class definition
+  const capturedVersion = version;
+
+  return class extends EndpointDocGenerator {
+    constructor(seedValue: string | seedrandom.prng) {
+      const MetadataGenerator = class extends EndpointMetadataGenerator {
+        protected randomVersion(): string {
+          return capturedVersion;
+        }
+      };
+
+      super(seedValue, MetadataGenerator);
+    }
+  };
 };
 
 export class EndpointTestResources extends FtrService {
@@ -62,7 +74,7 @@ export class EndpointTestResources extends FtrService {
   private readonly supertest = this.ctx.getService('supertest');
   private readonly log = this.ctx.getService('log');
 
-  private async stopTransform(transformId: string) {
+  async stopTransform(transformId: string) {
     const stopRequest = {
       transform_id: `${transformId}*`,
       force: true,
@@ -72,7 +84,7 @@ export class EndpointTestResources extends FtrService {
     return this.esClient.transform.stopTransform(stopRequest);
   }
 
-  private async startTransform(transformId: string) {
+  async startTransform(transformId: string) {
     const transformsResponse = await this.esClient.transform.getTransformStats({
       transform_id: `${transformId}*`,
     });
@@ -93,7 +105,7 @@ export class EndpointTestResources extends FtrService {
    * @param [options.numHostDocs=1] Number of Document to be loaded per Endpoint Host (Endpoint hosts index uses a append-only index)
    * @param [options.alertsPerHost=1] Number of Alerts and Events to be loaded per Endpoint Host
    * @param [options.enableFleetIntegration=true] When set to `true`, Fleet data will also be loaded (ex. Integration Policies, Agent Policies, "fake" Agents)
-   * @param [options.generatorSeed='seed`] The seed to be used by the data generator. Important in order to ensure the same data is generated on very run.
+   * @param [options.generatorSeed='seed'] The seed to be used by the data generator. Important in order to ensure the same data is generated on very run.
    * @param [options.waitUntilTransformed=true] If set to `true`, the data loading process will wait until the endpoint hosts metadata is processed by the transform
    * @param [options.waitTimeout=120000] If waitUntilTransformed=true, number of ms to wait until timeout
    * @param [options.customIndexFn] If provided, will use this function to generate and index data instead
@@ -140,6 +152,12 @@ export class EndpointTestResources extends FtrService {
       await this.stopTransform(unitedTransformName);
     }
 
+    const isServerless = await isServerlessKibanaFlavor(this.kbnClient);
+    const CurrentKibanaVersionDocGenerator = await createDocGeneratorClass(
+      this.kbnClient,
+      isServerless
+    );
+
     // load data into the system
     const indexedData = customIndexFn
       ? await customIndexFn()
@@ -157,6 +175,7 @@ export class EndpointTestResources extends FtrService {
           enableFleetIntegration,
           undefined,
           CurrentKibanaVersionDocGenerator,
+          undefined,
           undefined,
           undefined,
           undefined,
@@ -307,15 +326,13 @@ export class EndpointTestResources extends FtrService {
    * @param endpointAgentId
    */
   async fetchEndpointMetadata(endpointAgentId: string): Promise<HostInfo> {
-    const metadata = this.supertest
+    return this.supertest
       .get(HOST_METADATA_GET_ROUTE.replace('{id}', endpointAgentId))
       .set('kbn-xsrf', 'true')
       .set('Elastic-Api-Version', '2023-10-31')
       .send()
       .expect(200)
       .then((response) => response.body as HostInfo);
-
-    return metadata;
   }
 
   /**

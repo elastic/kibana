@@ -44,7 +44,7 @@ export const getConversationById = async ({
   try {
     const response = await http.fetch(`${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${id}`, {
       method: 'GET',
-      version: API_VERSIONS.internal.v1,
+      version: API_VERSIONS.public.v1,
       signal,
     });
 
@@ -84,7 +84,7 @@ export const getUserConversations = async ({
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
       {
         method: 'GET',
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         signal,
       }
     );
@@ -125,7 +125,7 @@ export const createConversation = async ({
   try {
     const response = await http.post(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL, {
       body: JSON.stringify(conversation),
-      version: API_VERSIONS.internal.v1,
+      version: API_VERSIONS.public.v1,
       signal,
     });
 
@@ -168,7 +168,7 @@ export const deleteConversation = async ({
   try {
     const response = await http.fetch(`${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${id}`, {
       method: 'DELETE',
-      version: API_VERSIONS.internal.v1,
+      version: API_VERSIONS.public.v1,
       signal,
     });
 
@@ -237,7 +237,7 @@ export const updateConversation = async ({
         headers: {
           'Content-Type': 'application/json',
         },
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         signal,
       }
     );

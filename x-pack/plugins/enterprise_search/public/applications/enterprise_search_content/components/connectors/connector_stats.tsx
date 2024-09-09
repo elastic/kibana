@@ -213,6 +213,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               <EuiBadge
                 onClick={() => {}}
                 onClickAriaLabel={getSyncJobErrorsLabel(errorCount, isCrawler)}
+                color={errorCount > 0 ? 'danger' : 'default'}
               >
                 {getSyncJobErrorsLabel(errorCount, isCrawler)}
               </EuiBadge>

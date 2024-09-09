@@ -70,6 +70,8 @@ export function InstallElasticAgent() {
     if (!hasAlreadySavedFlow(getState())) {
       return callApi('GET /internal/observability_onboarding/logs/setup/privileges');
     }
+    // FIXME: Dario could not find a reasonable fix for getState()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { data: setup } = useFetcher((callApi) => {
@@ -102,6 +104,8 @@ export function InstallElasticAgent() {
         });
       }
     },
+    // FIXME: Dario could not find a reasonable fix for getState()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [monitoringRole?.hasPrivileges]
   );
 
@@ -130,9 +134,13 @@ export function InstallElasticAgent() {
         },
       });
     }
+    // FIXME: Dario could not find a reasonable fix for getState()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { apiKeyEncoded, onboardingId } = installShipperSetup ?? getState();
+
+  const succesfullySavedOnboardingState = saveOnboardingStateDataStatus === FETCH_STATUS.SUCCESS;
 
   const { data: yamlConfig = '', status: yamlConfigStatus } = useFetcher(
     (callApi) => {
@@ -143,7 +151,9 @@ export function InstallElasticAgent() {
         });
       }
     },
-    [apiKeyEncoded, onboardingId, saveOnboardingStateDataStatus === FETCH_STATUS.SUCCESS]
+    // FIXME: Dario could not find a reasonable fix for succesfullySavedOnboardingState
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [apiKeyEncoded, onboardingId, succesfullySavedOnboardingState]
   );
 
   useEffect(() => {

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useGrouping } from '@kbn/securitysolution-grouping';
-import { ParsedGroupingAggregation } from '@kbn/securitysolution-grouping/src';
+import { useGrouping } from '@kbn/grouping';
+import { ParsedGroupingAggregation } from '@kbn/grouping/src';
 import { Filter } from '@kbn/es-query';
 import React from 'react';
 import { css } from '@emotion/react';
@@ -77,13 +77,6 @@ export const CloudSecurityGrouping = ({
       data-test-subj={CSP_GROUPING}
       css={css`
         position: relative;
-        && [data-test-subj='group-stats'] > .euiFlexItem:last-child {
-          display: none;
-        }
-        && [data-test-subj='group-stats'] > .euiFlexItem:not(:first-child) > span {
-          border-right: none;
-          margin-right: 0;
-        }
       `}
     >
       {groupSelectorComponent && (

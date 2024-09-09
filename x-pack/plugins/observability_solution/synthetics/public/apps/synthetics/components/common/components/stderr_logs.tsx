@@ -86,7 +86,7 @@ export const StdErrorLogs = ({
           }
         : undefined,
     });
-  }, [checkGroup, timestamp]);
+  }, [checkGroup, timestamp, discover, exploratoryView]);
 
   const search = {
     box: {
@@ -129,6 +129,7 @@ export const StdErrorLogs = ({
 
       <EuiInMemoryTable
         items={items}
+        rowHeader="@timestamp"
         columns={columns}
         tableLayout="auto"
         loading={loading}

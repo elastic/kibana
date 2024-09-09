@@ -3,7 +3,12 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../typings/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../typings/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/core-plugins-server",
@@ -41,7 +46,19 @@
     "@kbn/deeplinks-analytics",
     "@kbn/core-elasticsearch-server",
     "@kbn/ui-actions-plugin",
-    "@kbn/metrics-data-access-plugin"
+    "@kbn/metrics-data-access-plugin",
+    "@kbn/calculate-auto",
+    "@kbn/discover-plugin",
+    "@kbn/shared-ux-prompt-no-data-views-types",
+    "@kbn/ebt-tools",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/server-route-repository-utils",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/rison"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

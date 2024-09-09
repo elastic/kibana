@@ -29,7 +29,12 @@ export function fromRemoteSummaryDocumentToSloDefinition(
       timesliceTarget: summaryDoc.slo.objective.timesliceTarget ?? undefined,
       timesliceWindow: summaryDoc.slo.objective.timesliceWindow ?? undefined,
     },
-    settings: { syncDelay: '1m', frequency: '1m' },
+    settings: {
+      syncDelay: '1m',
+      frequency: '1m',
+      // added in 8.15.0
+      preventInitialBackfill: false,
+    },
     revision: summaryDoc.slo.revision,
     enabled: true,
     tags: summaryDoc.slo.tags,

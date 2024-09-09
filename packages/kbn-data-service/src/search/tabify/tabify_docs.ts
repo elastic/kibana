@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -36,7 +37,9 @@ interface TabifyDocsOptions {
 
 // This is an overwrite of the SearchHit type to add the ignored_field_values.
 // Can be removed once the estypes.SearchHit knows about ignored_field_values
-type Hit<T = unknown> = estypes.SearchHit<T> & { ignored_field_values?: Record<string, unknown[]> };
+type Hit<T = unknown> = Partial<estypes.SearchHit<T>> & {
+  ignored_field_values?: Record<string, unknown[]>;
+};
 
 function flattenAccum(
   flat: Record<string, any>,
@@ -46,7 +49,7 @@ function flattenAccum(
   params?: TabifyDocsOptions
 ) {
   for (const k in obj) {
-    if (!obj.hasOwnProperty(k)) {
+    if (!Object.hasOwn(obj, k)) {
       continue;
     }
     const val = obj[k];
@@ -112,7 +115,7 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
     // merged, since we would otherwise duplicate values, since ignore_field_values and _source
     // contain the same values.
     for (const fieldName in hit.ignored_field_values) {
-      if (!hit.ignored_field_values.hasOwnProperty(fieldName)) {
+      if (!Object.hasOwn(hit.ignored_field_values, fieldName)) {
         continue;
       }
       const fieldValue = hit.ignored_field_values[fieldName];
@@ -137,7 +140,7 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
       const isExcludedMetaField =
         EXCLUDED_META_FIELDS.includes(fieldName) || fieldName.charAt(0) !== '_';
       if (!isExcludedMetaField) {
-        flat[fieldName] = hit[fieldName as keyof estypes.SearchHit];
+        flat[fieldName] = hit[fieldName as keyof Hit];
       }
     }
   }

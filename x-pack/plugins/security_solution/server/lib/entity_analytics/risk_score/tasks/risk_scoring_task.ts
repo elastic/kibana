@@ -12,6 +12,7 @@ import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  TaskStatus,
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
@@ -132,6 +133,29 @@ export const registerRiskScoringTask = ({
       }),
     },
   });
+};
+
+export interface RiskScoringTaskStatus {
+  status: TaskStatus;
+  runAt: string; // next schedule run
+  startedAt: string | undefined; // only available if task is running
+}
+
+export const getRiskScoringTaskStatus = async ({
+  namespace,
+  taskManager,
+}: {
+  namespace: string;
+  taskManager: TaskManagerStartContract;
+}): Promise<RiskScoringTaskStatus> => {
+  const taskId = getTaskId(namespace);
+  const task = await taskManager.get(taskId);
+
+  return {
+    status: task.status,
+    runAt: task.runAt.toISOString(),
+    startedAt: task.startedAt?.toISOString(),
+  };
 };
 
 export const startRiskScoringTask = async ({
@@ -310,20 +334,45 @@ export const runTask = async ({
     };
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
 
-    await riskScoreService.scheduleLatestTransformNow();
-
     if (isCancelled()) {
       log('task was cancelled');
       telemetry.reportEvent(RISK_SCORE_EXECUTION_CANCELLATION_EVENT.eventType, telemetryEvent);
     }
 
+    if (scoresWritten > 0) {
+      log('refreshing risk score index and scheduling transform');
+      await riskScoreService.refreshRiskScoreIndex();
+      await riskScoreService.scheduleLatestTransformNow();
+    }
+
     log('task run completed');
     log(JSON.stringify({ ...telemetryEvent, runs }));
+
     return {
       state: updatedState,
     };
   } catch (e) {
     telemetry.reportEvent(RISK_SCORE_EXECUTION_ERROR_EVENT.eventType, {});
+    throw e;
+  }
+};
+export const scheduleNow = async ({
+  logger,
+  namespace,
+  taskManager,
+}: {
+  logger: Logger;
+  namespace: string;
+  taskManager: TaskManagerStartContract;
+}) => {
+  const taskId = getTaskId(namespace);
+  const log = logFactory(logger, taskId);
+
+  log('attempting to schedule task to run now');
+  try {
+    await taskManager.runSoon(taskId);
+  } catch (e) {
+    logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
     throw e;
   }
 };

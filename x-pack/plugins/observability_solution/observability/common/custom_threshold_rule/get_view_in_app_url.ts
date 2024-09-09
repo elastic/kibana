@@ -10,8 +10,9 @@ import type { TimeRange } from '@kbn/es-query';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { getGroupFilters } from './helpers/get_group';
-import { Group, SearchConfigurationWithExtractedReferenceType } from './types';
+import { SearchConfigurationWithExtractedReferenceType } from './types';
 import type { CustomThresholdExpressionMetric } from './types';
+import { Group } from '../typings';
 
 export interface GetViewInAppUrlArgs {
   searchConfiguration?: SearchConfigurationWithExtractedReferenceType;

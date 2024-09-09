@@ -7,14 +7,13 @@
 
 import { GetBulkAssetsResponse } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
-  const server = dockerServers.get('registry');
+  const fleetAndAgents = getService('fleetAndAgents');
+
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
 
@@ -28,17 +27,20 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('Bulk get assets', async () => {
+  describe('Bulk get assets', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
-    describe('installs all assets when installing a package for the first time', async () => {
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
+
+    describe('installs all assets when installing a package for the first time', () => {
       before(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);
       });
 

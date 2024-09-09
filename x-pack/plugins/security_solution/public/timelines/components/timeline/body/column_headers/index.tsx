@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import type { DraggableChildrenFn } from '@hello-pangea/dnd';
+import type { DraggableChildrenFn, DroppableProps } from '@hello-pangea/dnd';
 import { Droppable } from '@hello-pangea/dnd';
 
 import { useDispatch } from 'react-redux';
@@ -31,7 +31,7 @@ import {
 import type { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import type { FieldEditorActions } from '../../../fields_browser';
 import { useFieldBrowserOptions } from '../../../fields_browser';
 
@@ -162,7 +162,7 @@ export const ColumnHeadersComponent = ({
     [columnHeaders, timelineId, draggingIndex, sort, tabType]
   );
 
-  const DroppableContent = useCallback(
+  const DroppableContent = useCallback<DroppableProps['children']>(
     (dropProvided, snapshot) => (
       <>
         <EventsThGroupData

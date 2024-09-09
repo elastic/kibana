@@ -73,6 +73,7 @@ export {
   policyHasAPMIntegration,
   policyHasEndpointSecurity,
   policyHasSyntheticsIntegration,
+  getInheritedNamespace,
 } from './agent_policies_helpers';
 
 export {

@@ -81,6 +81,10 @@
           "label": "Saved objects"
         },
         {
+          "id": "kibDevDocsEncryptedSavedObjectsIntro",
+          "label": "Encrypted Saved objects"
+        },
+        {
           "id": "kibDevDocsPersistableStateIntro"
         },
         {
@@ -115,7 +119,8 @@
       "label": "Tutorials",
       "items": [
         {
-          "id": "kibDevTutorialAddingCustomPerformanceMetrics"
+          "id": "kibDevTutorialAddingCustomPerformanceMetrics",
+          "label": "Adding Performance Metrics"
         },
         {
           "id": "kibDevTutorialSetupWindowsDevWSL"
@@ -133,6 +138,9 @@
         {
           "id": "kibDevTutorialVersioningInterfaces",
           "label": "Versioning interfaces"
+        },
+        {
+          "id": "kibDevTutorialGeneratingOASForHTTPAPIs"
         },
         {
           "id": "kibDevTutorialSubmitPullRequest"

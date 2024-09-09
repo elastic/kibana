@@ -10,7 +10,13 @@ import moment from 'moment';
 import { isNumber, random, range } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
-import { Config, EventsPerCycle, EventsPerCycleTransitionDefRT, ParsedSchedule } from '../types';
+import {
+  Config,
+  Doc,
+  EventsPerCycle,
+  EventsPerCycleTransitionDefRT,
+  ParsedSchedule,
+} from '../types';
 import { generateEvents } from '../data_sources';
 import { createQueue } from './queue';
 import { wait } from './wait';
@@ -69,6 +75,7 @@ export async function createEvents(
   const interval = schedule.interval ?? config.indexing.interval;
   const calculateEventsPerCycle = createEventsPerCycleFn(schedule, eventsPerCycle, logger);
   const totalEvents = calculateEventsPerCycle(currentTimestamp);
+  const endTs = end === false ? moment() : end;
 
   if (totalEvents > 0) {
     let epc = schedule.randomness
@@ -86,34 +93,35 @@ export async function createEvents(
 
     // When --align-events-to-interval is set, we will index all the events on the same
     // timestamp. Otherwise they will be distributed across the interval randomly.
+    let events: Doc[];
+    const eventTimestamp = currentTimestamp
+      .clone()
+      .subtract(config.indexing.artificialIndexDelay + interval);
     if (config.indexing.alignEventsToInterval) {
-      range(epc)
+      events = range(epc)
         .map((i) => {
           const generateEvent = generateEvents[config.indexing.dataset] || generateEvents.fake_logs;
-          return generateEvent(config, schedule, i, currentTimestamp);
+          return generateEvent(config, schedule, i, eventTimestamp);
         })
-        .flat()
-        .forEach((event) => queue.push(event));
+        .flat();
     } else {
-      range(epc)
+      events = range(epc)
         .map(() =>
-          moment(random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval - 1))
+          moment(random(eventTimestamp.valueOf(), eventTimestamp.valueOf() + interval - 1))
         )
         .sort()
         .map((ts, i) => {
           const generateEvent = generateEvents[config.indexing.dataset] || generateEvents.fake_logs;
           return generateEvent(config, schedule, i, ts);
         })
-        .flat()
-        .forEach((event) => queue.push(event));
+        .flat();
     }
-
+    await queue.push(events);
     await queue.drain();
   } else {
     logger.info({ took: 0, latency: 0, indexed: 0 }, 'Indexing 0 documents.');
   }
 
-  const endTs = end === false ? moment() : end;
   if (currentTimestamp.isBefore(endTs)) {
     return createEvents(
       config,

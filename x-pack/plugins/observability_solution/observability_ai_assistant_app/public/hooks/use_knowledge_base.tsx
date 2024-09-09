@@ -39,11 +39,14 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   } = useKibana().services;
   const service = useObservabilityAIAssistantAppService();
 
-  const status = useAbortableAsync(({ signal }) => {
-    return service.callApi('GET /internal/observability_ai_assistant/kb/status', {
-      signal,
-    });
-  }, []);
+  const status = useAbortableAsync(
+    ({ signal }) => {
+      return service.callApi('GET /internal/observability_ai_assistant/kb/status', {
+        signal,
+      });
+    },
+    [service]
+  );
 
   const [isInstalling, setIsInstalling] = useState(false);
 

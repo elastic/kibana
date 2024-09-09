@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
@@ -26,6 +27,7 @@ import type {
   VersionedRouter,
   RouteRegistrar,
 } from '@kbn/core-http-server';
+import { isZod } from '@kbn/zod';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
@@ -35,6 +37,7 @@ import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { Method } from './versioned_router/types';
 import { prepareRouteConfigValidation } from './util';
+import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
 
 export type ContextEnhancer<
   P,
@@ -72,9 +75,9 @@ function routeSchemasFromRouteConfig<P, Q, B>(
   if (route.validate !== false) {
     const validation = getRequestValidation(route.validate);
     Object.entries(validation).forEach(([key, schema]) => {
-      if (!(isConfigSchema(schema) || typeof schema === 'function')) {
+      if (!(isConfigSchema(schema) || isZod(schema) || typeof schema === 'function')) {
         throw new Error(
-          `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
+          `Expected a valid validation logic declared with '@kbn/config-schema' package, '@kbn/zod' package or a RouteValidationFunction at key: [${key}].`
         );
       }
     });
@@ -265,6 +268,14 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
+      if (kibanaRequest.protocol === 'http2' && kibanaResponse.options.headers) {
+        kibanaResponse.options.headers = stripIllegalHttp2Headers({
+          headers: kibanaResponse.options.headers,
+          isDev: this.options.isDev ?? false,
+          logger: this.log,
+          requestContext: `${request.route.method} ${request.route.path}`,
+        });
+      }
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (error) {
       // capture error

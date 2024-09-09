@@ -1,12 +1,12 @@
-# Dataset Quality
+# Data Set Quality
 
-In order to make ongoing maintenance of log collection easy we want to introduce the concept of dataset quality, where users can easily get an overview on the datasets they have with information such as integration, size, last activity, among others.
+In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others.
 
 ## Development
 
 ### Unit Tests
 
-Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. The following command runs all Dataset quality unit tests:
+Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. The following command runs all Data Set Quality unit tests:
 
 ```
 yarn jest --config x-pack/plugins/observability_solution/dataset_quality/jest.config.js
@@ -47,9 +47,24 @@ Once the tests finish, the instances will be terminated.
 node x-pack/plugins/observability_solution/dataset_quality/scripts/api --server
 
 # run tests
-node x-pack/plugins/observability_solution/dataset_quality/scripts/api --runner --grep-files=error_group_list
+node x-pack/plugins/observability_solution/dataset_quality/scripts/api --runner --grep-files=data_stream_settings.spec.ts
 ```
 
+### Using dockerized package registry
+
+For tests using package registry we have enabled a configuration that uses a dockerized lite version to execute the tests in the CI, this will reduce the flakyness of them when calling the real endpoint.
+
+To be able to run this version locally you must have a docker daemon running in your systema and set `FLEET_PACKAGE_REGISTRY_PORT` env var. In order to set this variable execute
+
+```
+export set FLEET_PACKAGE_REGISTRY_PORT=12345
+```
+
+To unset the variable, and run the tests against the real endpoint again, execute
+
+```
+unset FLEET_PACKAGE_REGISTRY_PORT 
+```
 
 ### Functional Tests
 

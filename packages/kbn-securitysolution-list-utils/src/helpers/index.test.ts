@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMappingConflictsInfo, fieldSupportsMatches } from '.';
+import { getMappingConflictsInfo, fieldSupportsMatches, hasWrongOperatorWithWildcard } from '.';
 
 describe('Helpers', () => {
   describe('getMappingConflictsInfo', () => {
@@ -179,6 +180,85 @@ describe('Helpers', () => {
       expect(
         fieldSupportsMatches({ name: 'field', type: 'conflict', esTypes: ['bool', 'unmapped'] })
       ).toBeFalsy();
+    });
+  });
+  describe('hasWrongOperatorWithWildcard', () => {
+    test('it returns true if there is at least one exception entry with a wildcard and the wrong operator', () => {
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'withwildcard*', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBeTruthy();
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'withwildcard?', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBeTruthy();
+    });
+
+    test('it returns true if there are entries joined with an OR that have a wildcard and the wrong operator', () => {
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'withwildcard?', field: '', operator: 'included' }],
+          },
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'withwildcard?*', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBeTruthy();
+    });
+
+    test('it returns false if there are no exception entries with a wildcard and the wrong operator', () => {
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              { type: 'match', value: 'nowildcard', field: '', operator: 'excluded' },
+              { type: 'wildcard', value: 'withwildcard*?', field: '', operator: 'included' },
+            ],
+          },
+        ])
+      ).toBeFalsy();
+    });
+
+    test('it returns true if there are nested entries with a wildcard and the wrong operator', () => {
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              { type: 'match', value: 'nowildcard', field: '', operator: 'excluded' },
+              {
+                field: '',
+                type: 'nested',
+                entries: [{ type: 'match', value: 'wildcard?', field: '', operator: 'excluded' }],
+              },
+            ],
+          },
+        ])
+      ).toBeTruthy();
     });
   });
 });

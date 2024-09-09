@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { notFound } from '@hapi/boom';
@@ -18,7 +19,7 @@ import {
   SavedObjectsFindOptions,
   ElasticsearchClient,
 } from '@kbn/core/server';
-import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { AuthenticatedUser } from '@kbn/core/server';
 import { defer } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import { debounce } from 'lodash';
@@ -32,7 +33,7 @@ import {
 } from '../../../common';
 import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
-import { ConfigSchema, SearchSessionsConfigSchema } from '../../../config';
+import { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
 import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {
@@ -43,10 +44,8 @@ export interface SearchSessionStatusDependencies extends SearchSessionDependenci
   internalElasticsearchClient: ElasticsearchClient;
 }
 
-interface SetupDependencies {
-  security?: SecurityPluginSetup;
-}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface SetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface StartDependencies {}
 
@@ -68,7 +67,6 @@ interface TrackIdQueueEntry {
 
 export class SearchSessionService implements ISearchSessionService {
   private sessionConfig: SearchSessionsConfigSchema;
-  private security?: SecurityPluginSetup;
   private setupCompleted = false;
 
   constructor(
@@ -80,8 +78,6 @@ export class SearchSessionService implements ISearchSessionService {
   }
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
-    this.security = deps.security;
-
     this.setupCompleted = true;
   }
 
@@ -405,7 +401,7 @@ export class SearchSessionService implements ISearchSessionService {
 
     const session = await this.get(deps, user, sessionId);
     const requestHash = createRequestHash(searchRequest.params);
-    if (!session.attributes.idMapping.hasOwnProperty(requestHash)) {
+    if (!Object.hasOwn(session.attributes.idMapping, requestHash)) {
       this.logger.error(`SearchSessionService: getId | ${sessionId} | ${requestHash} not found`);
       this.logger.debug(
         `SearchSessionService: getId not found search with params: ${JSON.stringify(
@@ -419,9 +415,9 @@ export class SearchSessionService implements ISearchSessionService {
     return session.attributes.idMapping[requestHash].id;
   };
 
-  public asScopedProvider = ({ savedObjects, elasticsearch }: CoreStart) => {
+  public asScopedProvider = ({ security, savedObjects, elasticsearch }: CoreStart) => {
     return (request: KibanaRequest) => {
-      const user = this.security?.authc.getCurrentUser(request) ?? null;
+      const user = security.authc.getCurrentUser(request) ?? null;
       const savedObjectsClient = savedObjects.getScopedClient(request, {
         includedHiddenTypes: [SEARCH_SESSION_TYPE],
       });

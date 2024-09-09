@@ -8,7 +8,7 @@
 import type { EuiDraggable, EuiDragDropContext } from '@elastic/eui';
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -49,22 +49,19 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
-import { ITelemetryClient } from './services/telemetry';
-import type { InfraLocators } from '../common/locators';
+import { TelemetryServiceStart } from './services/telemetry';
 
-// Our own setup and start contract values
-export interface InfraClientSetupExports {
-  locators: InfraLocators;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface InfraClientSetupExports {}
 
 export interface InfraClientStartExports {
   inventoryViews: InventoryViewsServiceStart;
   metricsExplorerViews?: MetricsExplorerViewsServiceStart;
-  telemetry: ITelemetryClient;
-  locators: InfraLocators;
+  telemetry: TelemetryServiceStart;
 }
 
 export interface InfraClientSetupDeps {
@@ -95,6 +92,7 @@ export interface InfraClientStartDeps {
   embeddable?: EmbeddableStart;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
+  logsDataAccess: LogsDataAccessPluginStart;
   ml?: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
@@ -108,7 +106,6 @@ export interface InfraClientStartDeps {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
-  telemetry?: ITelemetryClient;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -125,12 +122,7 @@ export type InfraClientPluginClass = PluginClass<
 export type InfraClientStartServicesAccessor = InfraClientCoreSetup['getStartServices'];
 export type InfraClientStartServices = UnwrapPromise<ReturnType<InfraClientStartServicesAccessor>>;
 
-export interface InfraHttpError extends IHttpFetchError {
-  readonly body?: {
-    statusCode: number;
-    message?: string;
-  };
-}
+export type InfraHttpError = IHttpFetchError<ResponseErrorBody>;
 
 export interface ExecutionTimeRange {
   gte: number;

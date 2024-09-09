@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTokensObject } from '@elastic/eui';
 
 interface EuiValues {
@@ -86,6 +85,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       }),
     'euiBasicTable.noItemsMessage': i18n.translate('core.euiBasicTable.noItemsMessage', {
       defaultMessage: 'No items found',
+    }),
+    'euiBasicTable.deselectRows': i18n.translate('core.euiBasicTable.deselectRows', {
+      defaultMessage: 'Deselect rows',
     }),
     'euiBottomBar.customScreenReaderAnnouncement': ({ landmarkHeading }: EuiValues) =>
       i18n.translate('core.euiBottomBar.customScreenReaderAnnouncement', {
@@ -244,13 +246,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnActions.hideColumn': i18n.translate('core.euiColumnActions.hideColumn', {
       defaultMessage: 'Hide column',
     }),
-    'euiColumnActions.sort': ({ schemaLabel }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiColumnActions.sort"
-        defaultMessage="Sort {schemaLabel}"
-        values={{ schemaLabel }}
-      />
-    ),
+    'euiColumnActions.sort': ({ schemaLabel }: EuiValues) =>
+      i18n.translate('core.euiColumnActions.sort', {
+        defaultMessage: 'Sort {schemaLabel}',
+        values: { schemaLabel },
+      }),
     'euiColumnActions.moveLeft': i18n.translate('core.euiColumnActions.moveLeft', {
       defaultMessage: 'Move left',
     }),
@@ -340,20 +340,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: "You've selected all available options",
       }
     ),
-    'euiComboBoxOptionsList.alreadyAdded': ({ label }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiComboBoxOptionsList.alreadyAdded"
-        defaultMessage="{label} has already been added"
-        values={{ label }}
-      />
-    ),
-    'euiComboBoxOptionsList.createCustomOption': ({ searchValue }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiComboBoxOptionsList.createCustomOption"
-        defaultMessage="Add {searchValue} as a custom option"
-        values={{ searchValue }}
-      />
-    ),
+    'euiComboBoxOptionsList.alreadyAdded': ({ label }: EuiValues) =>
+      i18n.translate('core.euiComboBoxOptionsList.alreadyAdded', {
+        defaultMessage: '{label} has already been added',
+        values: { label },
+      }),
+    'euiComboBoxOptionsList.createCustomOption': ({ searchValue }: EuiValues) =>
+      i18n.translate('core.euiComboBoxOptionsList.createCustomOption', {
+        defaultMessage: 'Add {searchValue} as a custom option',
+        values: { searchValue },
+      }),
     'euiComboBoxOptionsList.loadingOptions': i18n.translate(
       'core.euiComboBoxOptionsList.loadingOptions',
       {
@@ -367,20 +363,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: "There aren't any options available",
       }
     ),
-    'euiComboBoxOptionsList.noMatchingOptions': ({ searchValue }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiComboBoxOptionsList.noMatchingOptions"
-        defaultMessage="{searchValue} doesn't match any options"
-        values={{ searchValue }}
-      />
-    ),
-    'euiComboBoxOptionsList.delimiterMessage': ({ delimiter }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiComboBoxOptionsList.delimiterMessage"
-        defaultMessage="Add each item separated by {delimiter}"
-        values={{ delimiter }}
-      />
-    ),
+    'euiComboBoxOptionsList.noMatchingOptions': ({ searchValue }: EuiValues) =>
+      i18n.translate('core.euiComboBoxOptionsList.noMatchingOptions', {
+        defaultMessage: "{searchValue} doesn't match any options",
+        values: { searchValue },
+      }),
+    'euiComboBoxOptionsList.delimiterMessage': ({ delimiter }: EuiValues) =>
+      i18n.translate('core.euiComboBoxOptionsList.delimiterMessage', {
+        defaultMessage: 'Add each item separated by {delimiter}',
+        values: { delimiter },
+      }),
     'euiComboBoxPill.removeSelection': ({ children }: EuiValues) =>
       i18n.translate('core.euiComboBoxPill.removeSelection', {
         defaultMessage: 'Remove {children} from selection in this group',
@@ -734,9 +726,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFieldPassword.maskPassword': i18n.translate('core.euiFieldPassword.maskPassword', {
       defaultMessage: 'Mask password',
     }),
-    'euiFilePicker.clearSelectedFiles': i18n.translate('core.euiFilePicker.clearSelectedFiles', {
-      defaultMessage: 'Clear selected files',
-    }),
+    'euiFieldSearch.clearSearchButtonLabel': i18n.translate(
+      'core.euiFieldSearch.clearSearchButtonLabel',
+      { defaultMessage: 'Clear search input' }
+    ),
+    'euiFilePicker.removeSelectedAriaLabel': i18n.translate(
+      'core.euiFilePicker.removeSelectedAriaLabel',
+      {
+        defaultMessage: 'Remove selected files',
+      }
+    ),
     'euiFilePicker.filesSelected': ({ fileCount }: EuiValues) =>
       i18n.translate('core.euiFilePicker.filesSelected', {
         defaultMessage: '{fileCount} files selected',
@@ -953,13 +952,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Error',
       description: 'Error boundary for uncaught exceptions when rendering part of the application',
     }),
-    'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiPagination.pageOfTotalCompressed"
-        defaultMessage="{page} of {total}"
-        values={{ page, total }}
-      />
-    ),
+    'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) =>
+      i18n.translate('core.euiPagination.pageOfTotalCompressed', {
+        defaultMessage: '{page} of {total}',
+        values: { page, total },
+      }),
     'euiPagination.firstRangeAriaLabel': ({ lastPage }: EuiValues) =>
       i18n.translate('core.euiPagination.firstRangeAriaLabel', {
         defaultMessage: 'Skipping pages 2 to {lastPage}',
@@ -1320,9 +1317,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Currently set to {timeTense} {timeValue} {timeUnit}.',
         values: { timeTense, timeValue, timeUnit },
       }),
-    'euiQuickSelect.legendText': i18n.translate('core.euiQuickSelect.legendText', {
-      defaultMessage: 'Quick select a time range',
-    }),
     'euiQuickSelect.nextLabel': i18n.translate('core.euiQuickSelect.nextLabel', {
       defaultMessage: 'Next time window',
     }),
@@ -1347,8 +1341,20 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiRecentlyUsed.legend': i18n.translate('core.euiRecentlyUsed.legend', {
       defaultMessage: 'Recently used date ranges',
     }),
-    'euiRefreshInterval.legend': i18n.translate('core.euiRefreshInterval.legend', {
+    'euiRefreshInterval.toggleLabel': i18n.translate('core.euiRefreshInterval.toggleLabel', {
       defaultMessage: 'Refresh every',
+    }),
+    'euiRefreshInterval.toggleAriaLabel': i18n.translate(
+      'core.euiRefreshInterval.toggleAriaLabel',
+      {
+        defaultMessage: 'Toggle refresh',
+      }
+    ),
+    'euiRefreshInterval.valueAriaLabel': i18n.translate('core.euiRefreshInterval.valueAriaLabel', {
+      defaultMessage: 'Refresh interval value',
+    }),
+    'euiRefreshInterval.unitsAriaLabel': i18n.translate('core.euiRefreshInterval.unitsAriaLabel', {
+      defaultMessage: 'Refresh interval units',
     }),
     'euiRefreshInterval.fullDescriptionOff': ({ optionValue, optionText }: EuiValues) =>
       i18n.translate('core.euiRefreshInterval.fullDescriptionOff', {
@@ -1394,13 +1400,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiDatePopoverContent.nowTabButtonEnd',
       { defaultMessage: 'Set end date and time to now' }
     ),
-    'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiAbsoluteTab.dateFormatError"
-        defaultMessage="Allowed formats: {dateFormat}, ISO 8601, RFC 2822, or Unix timestamp."
-        values={{ dateFormat }}
-      />
-    ),
+    'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) =>
+      i18n.translate('core.euiAbsoluteTab.dateFormatError', {
+        defaultMessage: 'Allowed formats: {dateFormat}, ISO 8601, RFC 2822, or Unix timestamp.',
+        values: { dateFormat },
+      }),
     'euiRelativeTab.fullDescription': ({ unit }: EuiValues) =>
       i18n.translate('core.euiRelativeTab.fullDescription', {
         defaultMessage: 'The unit is changeable. Currently set to {unit}.',
@@ -1470,13 +1474,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiSelectable.noAvailableOptions': i18n.translate('core.euiSelectable.noAvailableOptions', {
       defaultMessage: 'No options available',
     }),
-    'euiSelectable.noMatchingOptions': ({ searchValue }: EuiValues) => (
-      <FormattedMessage
-        id="core.euiSelectable.noMatchingOptions"
-        defaultMessage="{searchValue} doesn't match any options"
-        values={{ searchValue }}
-      />
-    ),
+    'euiSelectable.noMatchingOptions': ({ searchValue }: EuiValues) =>
+      i18n.translate('core.euiSelectable.noMatchingOptions', {
+        defaultMessage: "{searchValue} doesn't match any options",
+        values: { searchValue },
+      }),
     'euiSelectable.screenReaderInstructions': i18n.translate(
       'core.euiSelectable.screenReaderInstructions',
       {

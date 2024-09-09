@@ -14,8 +14,8 @@ import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import styled from '@emotion/styled';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import type { KqlMode } from '../../../store/model';
@@ -121,7 +121,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const savedQueryServices = useSavedQueryServices();
 
     const applyKqlFilterQuery = useCallback(
-      (expression: string, kind) =>
+      (expression: string, kind: KueryFilterQueryKind) =>
         dispatch(
           timelineActions.applyKqlFilterQuery({
             id: timelineId,

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { debounce } from 'lodash';
@@ -63,7 +64,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
           setValue(`${initialTextValue}\n\n${data}`);
         } else {
           toasts.addWarning(
-            i18n.translate('console.loadFromDataUnrecognizedUrlErrorMessage', {
+            i18n.translate('console.monaco.loadFromDataUnrecognizedUrlErrorMessage', {
               defaultMessage:
                 'Only URLs with the Elastic domain (www.elastic.co) can be loaded in Console.',
             })
@@ -79,7 +80,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
         // Show a toast if we have a failure
         if (data === null || data === '') {
           toasts.addWarning(
-            i18n.translate('console.loadFromDataUriErrorMessage', {
+            i18n.translate('console.monaco.loadFromDataUriErrorMessage', {
               defaultMessage: 'Unable to load data from the load_from query parameter in the URL',
             })
           );

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
+import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
@@ -19,12 +21,15 @@ export async function __kbnBootstrap__() {
     detail: LOAD_BOOTSTRAP_START,
   });
 
-  const injectedMetadata = JSON.parse(
+  const injectedMetadata: InjectedMetadata = JSON.parse(
     document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
   );
 
   let i18nError: Error | undefined;
-  const apmSystem = new ApmSystem(injectedMetadata.vars.apmConfig, injectedMetadata.basePath);
+  const apmSystem = new ApmSystem(
+    injectedMetadata.apmConfig ?? undefined,
+    injectedMetadata.basePath
+  );
 
   await Promise.all([
     // eslint-disable-next-line no-console

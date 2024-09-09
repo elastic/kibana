@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GenericBuckets } from '@kbn/securitysolution-grouping/src';
+import type { GenericBuckets } from '@kbn/grouping/src';
 // Elasticsearch returns `null` when a sub-aggregation cannot be computed
 type NumberOrNull = number | null;
 export interface AlertsGroupingAggregation {

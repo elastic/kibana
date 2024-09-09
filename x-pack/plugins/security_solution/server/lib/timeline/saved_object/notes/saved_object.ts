@@ -30,6 +30,8 @@ import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { noteFieldsMigrator } from './field_migrator';
 
+export const MAX_UNASSOCIATED_NOTES = 1000;
+
 export const deleteNotesByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
     type: noteSavedObjectType,
@@ -49,14 +51,19 @@ export const deleteNotesByTimelineId = async (request: FrameworkRequest, timelin
 
 export const deleteNote = async ({
   request,
-  noteId,
+  noteIds,
 }: {
   request: FrameworkRequest;
-  noteId: string;
+  noteIds: string[];
 }) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
-
-  await savedObjectsClient.delete(noteSavedObjectType, noteId);
+  const noteObjects = noteIds.map((id) => {
+    return {
+      id,
+      type: noteSavedObjectType,
+    };
+  });
+  await savedObjectsClient.bulkDelete(noteObjects);
 };
 
 export const getNote = async (request: FrameworkRequest, noteId: string): Promise<Note> => {
@@ -83,7 +90,7 @@ export const persistNote = async ({
 }: {
   request: FrameworkRequest;
   noteId: string | null;
-  note: BareNote;
+  note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
 }): Promise<ResponseNote> => {
   try {
@@ -116,7 +123,7 @@ export const persistNote = async ({
   }
 };
 
-const createNote = async ({
+export const createNote = async ({
   request,
   noteId,
   note,
@@ -124,7 +131,7 @@ const createNote = async ({
 }: {
   request: FrameworkRequest;
   noteId: string | null;
-  note: BareNote;
+  note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
 }) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
@@ -136,7 +143,25 @@ const createNote = async ({
     noteFieldsMigrator.extractFieldsToReferences<BareNoteWithoutExternalRefs>({
       data: noteWithCreator,
     });
-
+  if (references.length === 1 && references[0].id === '') {
+    // Limit unassociated events to 1000
+    const notesCount = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>({
+      type: noteSavedObjectType,
+      hasReference: { type: timelineSavedObjectType, id: '' },
+    });
+    if (notesCount.total >= MAX_UNASSOCIATED_NOTES) {
+      return {
+        code: 403,
+        message: `Cannot create more than ${MAX_UNASSOCIATED_NOTES} notes without associating them to a timeline`,
+        note: {
+          ...note,
+          noteId: uuidv1(),
+          version: '',
+          timelineId: '',
+        },
+      };
+    }
+  }
   const noteAttributes: SavedObjectNoteWithoutExternalRefs = {
     eventId: migratedAttributes.eventId,
     note: migratedAttributes.note,
@@ -166,7 +191,7 @@ const createNote = async ({
   };
 };
 
-const updateNote = async ({
+export const updateNote = async ({
   request,
   noteId,
   note,
@@ -174,7 +199,7 @@ const updateNote = async ({
 }: {
   request: FrameworkRequest;
   noteId: string;
-  note: BareNote;
+  note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
 }) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
@@ -233,7 +258,10 @@ const getSavedNote = async (request: FrameworkRequest, NoteId: string) => {
   return convertSavedObjectToSavedNote(populatedNote);
 };
 
-const getAllSavedNote = async (request: FrameworkRequest, options: SavedObjectsFindOptions) => {
+export const getAllSavedNote = async (
+  request: FrameworkRequest,
+  options: SavedObjectsFindOptions
+) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const savedObjects = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>(options);
 
@@ -247,14 +275,14 @@ const getAllSavedNote = async (request: FrameworkRequest, options: SavedObjectsF
   };
 };
 
-export const convertSavedObjectToSavedNote = (savedObject: unknown): Note =>
-  pipe(
+export const convertSavedObjectToSavedNote = (savedObject: unknown): Note => {
+  return pipe(
     SavedObjectNoteRuntimeType.decode(savedObject),
     map((savedNote) => {
       return {
         noteId: savedNote.id,
         version: savedNote.version,
-        timelineId: savedNote.attributes.timelineId,
+        timelineId: savedNote.attributes.timelineId ?? '',
         eventId: savedNote.attributes.eventId,
         note: savedNote.attributes.note,
         created: savedNote.attributes.created,
@@ -267,10 +295,11 @@ export const convertSavedObjectToSavedNote = (savedObject: unknown): Note =>
       throw new Error(failure(errors).join('\n'));
     }, identity)
   );
+};
 
 export const pickSavedNote = (
   noteId: string | null,
-  savedNote: BareNote,
+  savedNote: BareNote | BareNoteWithoutExternalRefs,
   userInfo: AuthenticatedUser | null
 ) => {
   if (noteId == null) {

@@ -1,13 +1,14 @@
 openapi: 3.0.0
 info:
   title: Create Conversation API endpoint
-  version: '1'
+  version: '2023-10-31'
 paths:
-  /internal/elastic_assistant/conversations:
+  /api/security_ai_assistant/current_user/conversations:
     post:
-      operationId: CreateConversation
       x-codegen-enabled: true
-      description: Create a conversation
+      x-labels: [ess, serverless]
+      operationId: CreateConversation
+      description: Create a new Security AI Assistant conversation.
       summary: Create a conversation
       tags:
         - Conversation API
@@ -38,12 +39,13 @@ paths:
                   message:
                     type: string
 
-  /internal/elastic_assistant/conversations/{id}:
+  /api/security_ai_assistant/current_user/conversations/{id}:
     get:
-      operationId: ReadConversation
       x-codegen-enabled: true
-      description: Read a single conversation
-      summary: Read a single conversation
+      x-labels: [ess, serverless]
+      operationId: ReadConversation
+      description: Get the details of an existing conversation using the conversation ID.
+      summary: Get a conversation
       tags:
         - Conversations API
       parameters:
@@ -74,9 +76,10 @@ paths:
                   message:
                     type: string
     put:
-      operationId: UpdateConversation
       x-codegen-enabled: true
-      description: Update a single conversation
+      x-labels: [ess, serverless]
+      operationId: UpdateConversation
+      description: Update an existing conversation using the conversation ID.
       summary: Update a conversation
       tags:
         - Conversation API
@@ -114,10 +117,11 @@ paths:
                   message:
                     type: string
     delete:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
       operationId: DeleteConversation
-      x-codegen-enabled: true
-      description: Deletes a single conversation using the `id` field.
-      summary: Deletes a single conversation using the `id` field.
+      description: Delete an existing conversation using the conversation ID.
+      summary: Delete a conversation
       tags:
         - Conversation API
       parameters:
@@ -127,48 +131,6 @@ paths:
           description: The conversation's `id` value.
           schema:
             $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
-      responses:
-        200:
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
-        400:
-          description: Generic Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  statusCode:
-                    type: number
-                  error:
-                    type: string
-                  message:
-                    type: string
-
-  /internal/elastic_assistant/conversations/{id}/messages:
-    post:
-      operationId: AppendConversationMessage
-      x-codegen-enabled: true
-      description: Append a message to the conversation
-      summary: Append a message to the conversation
-      tags:
-        - Conversation API
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: The conversation's `id` value.
-          schema:
-            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: './common_attributes.schema.yaml#/components/schemas/ConversationMessageCreateProps'
       responses:
         200:
           description: Indicates a successful call.

@@ -8,21 +8,32 @@
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
-  getDataStreamsSettingsResponseRt,
+  DegradedFieldValues,
+  degradedFieldValuesRt,
+  getDataStreamDegradedFieldsResponseRt,
   getDataStreamsDetailsResponseRt,
+  getDataStreamsSettingsResponseRt,
+  getIntegrationsResponseRt,
+  IntegrationDashboardsResponse,
   integrationDashboardsRT,
+  IntegrationResponse,
 } from '../../../common/api_types';
 import {
-  GetDataStreamsStatsError,
-  GetDataStreamSettingsParams,
-  GetDataStreamSettingsResponse,
+  DataStreamDetails,
+  DataStreamSettings,
+  DegradedFieldResponse,
+  GetDataStreamDegradedFieldsParams,
+  GetDataStreamDegradedFieldValuesPathParams,
   GetDataStreamDetailsParams,
   GetDataStreamDetailsResponse,
+  GetDataStreamSettingsParams,
+  GetDataStreamSettingsResponse,
   GetIntegrationDashboardsParams,
-  GetIntegrationDashboardsResponse,
 } from '../../../common/data_streams_stats';
-import { DataStreamDetails, DataStreamSettings } from '../../../common/data_streams_stats';
 import { IDataStreamDetailsClient } from './types';
+import { Integration } from '../../../common/data_streams_stats/integration';
+import { GetDataStreamIntegrationParams } from '../../../common/data_stream_details/types';
+import { DatasetQualityError } from '../../../common/errors';
 
 export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   constructor(private readonly http: HttpStart) {}
@@ -33,13 +44,13 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
         `/internal/dataset_quality/data_streams/${dataStream}/settings`
       )
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch data stream settings": ${error}`);
+        throw new DatasetQualityError(`Failed to fetch data stream settings": ${error}`, error);
       });
 
     const dataStreamSettings = decodeOrThrow(
       getDataStreamsSettingsResponseRt,
       (message: string) =>
-        new GetDataStreamsStatsError(`Failed to decode data stream settings response: ${message}"`)
+        new DatasetQualityError(`Failed to decode data stream settings response: ${message}"`)
     )(response);
 
     return dataStreamSettings as DataStreamSettings;
@@ -54,35 +65,106 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
         }
       )
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch data stream details": ${error}`);
+        throw new DatasetQualityError(`Failed to fetch data stream details": ${error}`, error);
       });
 
     const dataStreamDetails = decodeOrThrow(
       getDataStreamsDetailsResponseRt,
       (message: string) =>
-        new GetDataStreamsStatsError(`Failed to decode data stream details response: ${message}"`)
+        new DatasetQualityError(`Failed to decode data stream details response: ${message}"`)
     )(response);
 
     return dataStreamDetails as DataStreamDetails;
   }
 
+  public async getDataStreamDegradedFields({
+    dataStream,
+    start,
+    end,
+  }: GetDataStreamDegradedFieldsParams) {
+    const response = await this.http
+      .get<DegradedFieldResponse>(
+        `/internal/dataset_quality/data_streams/${dataStream}/degraded_fields`,
+        {
+          query: { start, end },
+        }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(
+          `Failed to fetch data stream degraded fields": ${error}`,
+          error
+        );
+      });
+
+    return decodeOrThrow(
+      getDataStreamDegradedFieldsResponseRt,
+      (message: string) =>
+        new DatasetQualityError(
+          `Failed to decode data stream degraded fields response: ${message}"`
+        )
+    )(response);
+  }
+
+  public async getDataStreamDegradedFieldValues({
+    dataStream,
+    degradedField,
+  }: GetDataStreamDegradedFieldValuesPathParams): Promise<DegradedFieldValues> {
+    const response = await this.http
+      .get<DegradedFieldValues>(
+        `/internal/dataset_quality/data_streams/${dataStream}/degraded_field/${degradedField}/values`
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(
+          `Failed to fetch data stream degraded field Value": ${error}`,
+          error
+        );
+      });
+
+    return decodeOrThrow(
+      degradedFieldValuesRt,
+      (message: string) =>
+        new DatasetQualityError(
+          `Failed to decode data stream degraded field values response: ${message}"`
+        )
+    )(response);
+  }
+
   public async getIntegrationDashboards({ integration }: GetIntegrationDashboardsParams) {
     const response = await this.http
-      .get<GetIntegrationDashboardsResponse>(
+      .get<IntegrationDashboardsResponse>(
         `/internal/dataset_quality/integrations/${integration}/dashboards`
       )
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch integration dashboards": ${error}`);
+        throw new DatasetQualityError(`Failed to fetch integration dashboards": ${error}`, error);
       });
 
-    const integrationDashboards = decodeOrThrow(
+    const { dashboards } = decodeOrThrow(
       integrationDashboardsRT,
       (message: string) =>
-        new GetDataStreamsStatsError(
-          `Failed to decode integration dashboards response: ${message}"`
-        )
+        new DatasetQualityError(`Failed to decode integration dashboards response: ${message}"`)
     )(response);
 
-    return integrationDashboards;
+    return dashboards;
+  }
+
+  public async getDataStreamIntegration(
+    params: GetDataStreamIntegrationParams
+  ): Promise<Integration | undefined> {
+    const { integrationName } = params;
+    const response = await this.http
+      .get<IntegrationResponse>('/internal/dataset_quality/integrations')
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to fetch integrations: ${error}`, error);
+      });
+
+    const { integrations } = decodeOrThrow(
+      getIntegrationsResponseRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode integrations response: ${message}`)
+    )(response);
+
+    const integration = integrations.find((i) => i.name === integrationName);
+
+    if (integration) return Integration.create(integration);
   }
 }

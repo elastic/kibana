@@ -9,6 +9,7 @@ import { memoize } from 'lodash';
 
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
+import type { BuildFlavor } from '@kbn/config';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
@@ -28,6 +29,8 @@ import type { EndpointAppContextService } from './endpoint/endpoint_app_context_
 import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
+import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
+import { buildMlAuthz } from './lib/machine_learning/authz';
 
 export interface IRequestContextFactory {
   create(
@@ -45,6 +48,7 @@ interface ConstructorOptions {
   ruleMonitoringService: IRuleMonitoringService;
   kibanaVersion: string;
   kibanaBranch: string;
+  buildFlavor: BuildFlavor;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -63,9 +67,11 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const { lists, ruleRegistry, security } = plugins;
 
-    const [, startPlugins] = await core.getStartServices();
-    const frameworkRequest = await buildFrameworkRequest(context, security, request);
+    const [_, startPlugins] = await core.getStartServices();
+    const frameworkRequest = await buildFrameworkRequest(context, request);
     const coreContext = await context.core;
+    const licensing = await context.licensing;
+    const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
 
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
@@ -75,6 +81,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       config,
       kibanaVersion: options.kibanaVersion,
       kibanaBranch: options.kibanaBranch,
+      buildFlavor: options.buildFlavor,
     });
 
     const getAuditLogger = () => security?.audit.asScoped(request);
@@ -111,6 +118,22 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
+      getDetectionRulesClient: memoize(() => {
+        const mlAuthz = buildMlAuthz({
+          license: licensing.license,
+          ml: plugins.ml,
+          request,
+          savedObjectsClient: coreContext.savedObjects.client,
+        });
+
+        return createDetectionRulesClient({
+          actionsClient,
+          rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
+          savedObjectsClient: coreContext.savedObjects.client,
+          mlAuthz,
+        });
+      }),
+
       getDetectionEngineHealthClient: memoize(() =>
         ruleMonitoringService.createDetectionEngineHealthClient({
           rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
@@ -131,7 +154,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           return null;
         }
 
-        const username = security?.authc.getCurrentUser(request)?.username || 'elastic';
+        const username = coreContext.security.authc.getCurrentUser()?.username || 'elastic';
         return lists.getExceptionListClient(coreContext.savedObjects.client, username);
       },
 

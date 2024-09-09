@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
@@ -83,7 +84,7 @@ describe('getSharingData', () => {
         "fields": Array [
           Object {
             "field": "*",
-            "include_unmapped": "true",
+            "include_unmapped": true,
           },
         ],
         "index": "the-data-view-id",
@@ -154,13 +155,13 @@ describe('getSharingData', () => {
       services
     );
     expect(getSearchSource({}).fields).toStrictEqual([
-      { field: 'cool-timefield', include_unmapped: 'true' },
-      { field: 'cool-field-1', include_unmapped: 'true' },
-      { field: 'cool-field-2', include_unmapped: 'true' },
-      { field: 'cool-field-3', include_unmapped: 'true' },
-      { field: 'cool-field-4', include_unmapped: 'true' },
-      { field: 'cool-field-5', include_unmapped: 'true' },
-      { field: 'cool-field-6', include_unmapped: 'true' },
+      { field: 'cool-timefield', include_unmapped: true },
+      { field: 'cool-field-1', include_unmapped: true },
+      { field: 'cool-field-2', include_unmapped: true },
+      { field: 'cool-field-3', include_unmapped: true },
+      { field: 'cool-field-4', include_unmapped: true },
+      { field: 'cool-field-5', include_unmapped: true },
+      { field: 'cool-field-6', include_unmapped: true },
     ]);
   });
 
@@ -190,9 +191,9 @@ describe('getSharingData', () => {
       services
     );
     expect(getSearchSource({}).fields).toStrictEqual([
-      { field: 'cool-timefield', include_unmapped: 'true' },
-      { field: 'cool-field-1', include_unmapped: 'true' },
-      { field: 'cool-field-2.*', include_unmapped: 'true' },
+      { field: 'cool-timefield', include_unmapped: true },
+      { field: 'cool-field-1', include_unmapped: true },
+      { field: 'cool-field-2.*', include_unmapped: true },
     ]);
   });
 

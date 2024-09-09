@@ -109,7 +109,7 @@ function validateActionTypeConfig(
       i18n.translate('xpack.stackConnectors.torq.torqConfigurationErrorNoHostname', {
         defaultMessage: 'error configuring send to Torq action: unable to parse url: {err}',
         values: {
-          err,
+          err: err.toString(),
         },
       })
     );
@@ -146,6 +146,7 @@ export async function executor(
   const { webhookIntegrationUrl } = execOptions.config;
   const { body: data } = execOptions.params;
   const configurationUtilities = execOptions.configurationUtilities;
+  const connectorUsageCollector = execOptions.connectorUsageCollector;
 
   const secrets: ActionTypeSecretsType = execOptions.secrets;
   const token = secrets.token;
@@ -171,6 +172,7 @@ export async function executor(
       configurationUtilities,
       logger: execOptions.logger,
       validateStatus: (status: number) => status >= 200 && status < 300,
+      connectorUsageCollector,
     })
   );
 

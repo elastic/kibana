@@ -7,6 +7,7 @@
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import {
+  UptimeConnectorFeatureId,
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
@@ -37,7 +38,11 @@ export const getConnectorType = (): SlackApiConnectorType => {
     id: SLACK_API_CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
     name: SLACK_CONNECTOR_NAME,
-    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+    supportedFeatureIds: [
+      UptimeConnectorFeatureId,
+      AlertingConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
       config: { schema: SlackApiConfigSchema },
       secrets: {
@@ -102,6 +107,7 @@ const slackApiExecutor = async ({
   secrets,
   configurationUtilities,
   logger,
+  connectorUsageCollector,
 }: SlackApiExecutorOptions): Promise<ActionTypeExecutorResult<unknown>> => {
   const subAction = params.subAction;
 
@@ -123,7 +129,8 @@ const slackApiExecutor = async ({
       secrets,
     },
     logger,
-    configurationUtilities
+    configurationUtilities,
+    connectorUsageCollector
   );
 
   if (subAction === 'validChannelId') {

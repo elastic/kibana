@@ -12,6 +12,9 @@ import { Message, MessageRole } from '../../../../common';
 import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
 import { hideTokenCountEvents } from './hide_token_count_events';
 import { ChatEvent, TokenCountEvent } from '../../../../common/conversation_complete';
+import { LangTracer } from '../instrumentation/lang_tracer';
+
+export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
 
 type ChatFunctionWithoutConnectorAndTokenCount = (
   name: string,
@@ -22,15 +25,15 @@ type ChatFunctionWithoutConnectorAndTokenCount = (
 ) => Observable<ChatEvent>;
 
 export function getGeneratedTitle({
-  responseLanguage,
   messages,
   chat,
   logger,
+  tracer,
 }: {
-  responseLanguage?: string;
   messages: Message[];
   chat: ChatFunctionWithoutConnectorAndTokenCount;
   logger: Pick<Logger, 'debug' | 'error'>;
+  tracer: LangTracer;
 }): Observable<string | TokenCountEvent> {
   return hideTokenCountEvents((hide) =>
     chat('generate_title', {
@@ -39,7 +42,7 @@ export function getGeneratedTitle({
           '@timestamp': new Date().toString(),
           message: {
             role: MessageRole.System,
-            content: `You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Please create the title in ${responseLanguage}.`,
+            content: `You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.`,
           },
         },
         {
@@ -56,7 +59,7 @@ export function getGeneratedTitle({
       ],
       functions: [
         {
-          name: 'title_conversation',
+          name: TITLE_CONVERSATION_FUNCTION_NAME,
           description:
             'Use this function to title the conversation. Do not wrap the title in quotes',
           parameters: {
@@ -70,7 +73,8 @@ export function getGeneratedTitle({
           },
         },
       ],
-      functionCall: 'title_conversation',
+      functionCall: TITLE_CONVERSATION_FUNCTION_NAME,
+      tracer,
     }).pipe(
       hide(),
       concatenateChatCompletionChunks(),

@@ -36,8 +36,8 @@ export const getSingleMetricViewerEmbeddableFactory = (
 ) => {
   const factory: ReactEmbeddableFactory<
     SingleMetricViewerEmbeddableState,
-    SingleMetricViewerEmbeddableApi,
-    SingleMetricViewerRuntimeState
+    SingleMetricViewerRuntimeState,
+    SingleMetricViewerEmbeddableApi
   > = {
     type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
     deserializeState: (state) => state.rawState,
@@ -74,13 +74,13 @@ export const getSingleMetricViewerEmbeddableFactory = (
               const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
                 './single_metric_viewer_setup_flyout'
               );
-              const [coreStart, { data, share }, { mlApiServices }] = services;
+              const [coreStart, { data, share }, { mlApi }] = services;
               const result = await resolveEmbeddableSingleMetricViewerUserInput(
                 coreStart,
                 parentApi,
                 uuid,
                 { data, share },
-                mlApiServices,
+                mlApi,
                 {
                   ...serializeTitles(),
                   ...serializeSingleMetricViewerState(),
@@ -157,6 +157,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
           return (
             <SingleMetricViewerComponent
+              shouldShowForecastButton={true}
               bounds={bounds}
               functionDescription={functionDescription}
               lastRefresh={lastRefresh}
@@ -164,7 +165,9 @@ export const getSingleMetricViewerEmbeddableFactory = (
               selectedDetectorIndex={singleMetricViewerData?.selectedDetectorIndex}
               selectedEntities={singleMetricViewerData?.selectedEntities}
               selectedJobId={singleMetricViewerData?.jobIds[0]}
+              forecastId={singleMetricViewerData?.forecastId}
               uuid={api.uuid}
+              onForecastIdChange={api.updateForecastId}
               onRenderComplete={() => {
                 dataLoading.next(false);
               }}

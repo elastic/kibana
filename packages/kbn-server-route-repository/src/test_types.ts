@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import { kibanaResponseFactory } from '@kbn/core/server';
+import { EndpointOf, ReturnOf, RouteRepositoryClient } from '@kbn/server-route-repository-utils';
 import { createServerRouteFactory } from './create_server_route_factory';
 import { decodeRequestParams } from './decode_request_params';
-import { EndpointOf, ReturnOf, RouteRepositoryClient } from './typings';
 
 function assertType<TShape = never>(value: TShape) {
   return value;
@@ -39,12 +42,37 @@ createServerRouteFactory<{}, {}>()({
   },
 });
 
+createServerRouteFactory<{}, {}>()({
+  endpoint: 'GET /internal/endpoint_with_params',
+  params: z.object({
+    path: z.object({
+      serviceName: z.string(),
+    }),
+  }),
+  handler: async (resources) => {
+    assertType<{ params: { path: { serviceName: string } } }>(resources);
+  },
+});
+
 // Resources should be passed to the request handler.
 createServerRouteFactory<{ context: { getSpaceId: () => string } }, {}>()({
   endpoint: 'GET /internal/endpoint_with_params',
   params: t.type({
     path: t.type({
       serviceName: t.string,
+    }),
+  }),
+  handler: async ({ context }) => {
+    const spaceId = context.getSpaceId();
+    assertType<string>(spaceId);
+  },
+});
+
+createServerRouteFactory<{ context: { getSpaceId: () => string } }, {}>()({
+  endpoint: 'GET /internal/endpoint_with_params',
+  params: z.object({
+    path: z.object({
+      serviceName: z.string(),
     }),
   }),
   handler: async ({ context }) => {
@@ -126,6 +154,36 @@ const repository = {
     },
   }),
   ...createServerRoute({
+    endpoint: 'GET /internal/endpoint_with_params_zod',
+    params: z.object({
+      path: z.object({
+        serviceName: z.string(),
+      }),
+    }),
+    handler: async () => {
+      return {
+        yesParamsForMe: true,
+      };
+    },
+  }),
+  ...createServerRoute({
+    endpoint: 'GET /internal/endpoint_with_optional_params_zod',
+    params: z
+      .object({
+        path: z
+          .object({
+            serviceName: z.string(),
+          })
+          .partial(),
+      })
+      .partial(),
+    handler: async () => {
+      return {
+        someParamsForMe: true,
+      };
+    },
+  }),
+  ...createServerRoute({
     endpoint: 'GET /internal/endpoint_returning_result',
     handler: async () => {
       return {
@@ -153,6 +211,10 @@ assertType<Array<EndpointOf<TestRepository>>>([
   'GET /internal/endpoint_with_params',
   'GET /internal/endpoint_without_params',
   'GET /internal/endpoint_with_optional_params',
+  'GET /internal/endpoint_with_params_zod',
+  'GET /internal/endpoint_with_optional_params_zod',
+  'GET /internal/endpoint_returning_result',
+  'GET /internal/endpoint_returning_kibana_response',
 ]);
 
 // @ts-expect-error Type '"this_endpoint_does_not_exist"' is not assignable to type '"endpoint_without_params" | "endpoint_with_params" | "endpoint_with_optional_params"'
@@ -208,8 +270,20 @@ client('GET /internal/endpoint_with_params', {
   timeout: 1,
 });
 
+client('GET /internal/endpoint_with_params_zod', {
+  params: {
+    // @ts-expect-error property 'serviceName' is missing in type '{}'
+    path: {},
+  },
+  timeout: 1,
+});
+
 // Params are optional if the codec has no required keys
 client('GET /internal/endpoint_with_optional_params', {
+  timeout: 1,
+});
+
+client('GET /internal/endpoint_with_optional_params_zod', {
   timeout: 1,
 });
 
@@ -222,8 +296,34 @@ client('GET /internal/endpoint_with_optional_params', {
   },
 });
 
+client('GET /internal/endpoint_with_optional_params_zod', {
+  timeout: 1,
+  params: {
+    // @ts-expect-error Object literal may only specify known properties, and 'path' does not exist in type
+    path: '',
+  },
+});
+
 // The return type is correctly inferred
 client('GET /internal/endpoint_with_params', {
+  params: {
+    path: {
+      serviceName: '',
+    },
+  },
+  timeout: 1,
+}).then((res) => {
+  assertType<{
+    noParamsForMe: boolean;
+    // @ts-expect-error Property 'noParamsForMe' is missing in type
+  }>(res);
+
+  assertType<{
+    yesParamsForMe: boolean;
+  }>(res);
+});
+
+client('GET /internal/endpoint_with_params_zod', {
   params: {
     path: {
       serviceName: '',
@@ -261,7 +361,7 @@ client('GET /internal/endpoint_returning_kibana_response', {
 assertType<{ path: { serviceName: string } }>(
   decodeRequestParams(
     {
-      params: {
+      path: {
         serviceName: 'serviceName',
       },
       body: undefined,
@@ -275,7 +375,7 @@ assertType<{ path: { serviceName: boolean } }>(
   // @ts-expect-error The types of 'path.serviceName' are incompatible between these types.
   decodeRequestParams(
     {
-      params: {
+      path: {
         serviceName: 'serviceName',
       },
       body: undefined,

@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { LandingPageComponent } from '.';
 
-jest.mock('../../containers/sourcerer', () => ({
+jest.mock('../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
 }));
 jest.mock('./onboarding');

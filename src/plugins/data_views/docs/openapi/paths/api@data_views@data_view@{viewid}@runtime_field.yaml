@@ -1,0 +1,95 @@
+post:
+  summary: Create a runtime field
+  operationId: createRuntimeFieldDefault
+  tags:
+    - data views
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/view_id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - name
+            - runtimeField
+          properties:
+            name:
+              type: string
+              description: |
+                The name for a runtime field.
+            runtimeField:
+              type: object
+              description: |
+                The runtime field definition object.
+        examples:
+          createRuntimeFieldRequest:
+            $ref: '../components/examples/create_runtime_field_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object    
+
+put:
+  summary: Create or update a runtime field
+  operationId: createUpdateRuntimeFieldDefault
+  tags:
+    - data views
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - name: viewId
+      in: path
+      description: |
+        The ID of the data view fields you want to update.
+      required: true
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - name
+            - runtimeField
+          properties:
+            name:
+              type: string
+              description: |
+                The name for a runtime field.
+            runtimeField:
+              type: object
+              description: |
+                The runtime field definition object.
+        examples:
+          updateRuntimeFieldRequest:
+            $ref: '../components/examples/create_runtime_field_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data_view:
+                type: object
+              fields:
+                type: array
+                items:
+                  type: object
+          # examples:
+          #   createRuntimeFieldResponse:
+          #     $ref: '../components/examples/create_runtime_field_response.yaml'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

@@ -16,28 +16,40 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ProfilingStatus } from '@kbn/profiling-utils';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { Flamegraph } from './flamegraph';
 import { Functions } from './functions';
-import { useProfilingStatusData } from '../../hooks/use_profiling_status_data';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
-import { ContentTabIds } from '../../types';
 import { ErrorPrompt } from './error_prompt';
 import { Threads } from './threads';
 import { DescriptionCallout } from './description_callout';
 import { Popover } from '../common/popover';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useProfilingKuery } from '../../hooks/use_profiling_kuery';
+import { useRequestObservable } from '../../hooks/use_request_observable';
 
 export function Profiling() {
-  const { activeTabId } = useTabSwitcherContext();
+  const { isActiveTab } = useTabSwitcherContext();
   const { dateRange, setDateRange } = useDatePickerContext();
   const { fullKuery, customKuery, setCustomKuery } = useProfilingKuery();
-  const { error, loading, response } = useProfilingStatusData({
-    isActive: activeTabId === ContentTabIds.PROFILING,
-  });
+  const { request$ } = useRequestObservable<ProfilingStatus>();
+
+  const { data, status, error } = useFetcher(
+    async (callApi) => {
+      return callApi<ProfilingStatus>(`/api/infra/profiling/status`, {
+        method: 'GET',
+      });
+    },
+    [],
+    {
+      requestObservable$: request$,
+      autoFetch: isActiveTab('profiling'),
+    }
+  );
 
   const onSearchSubmit = useCallback(
-    ({ dateRange: range, query }) => {
+    ({ dateRange: range, query }: any) => {
       setDateRange(range);
       setCustomKuery(query);
     },
@@ -144,7 +156,7 @@ export function Profiling() {
     },
   ];
 
-  if (loading) {
+  if (isPending(status) && !data) {
     return (
       <div
         css={css`
@@ -157,13 +169,13 @@ export function Profiling() {
     );
   }
 
-  if (error !== null) {
+  if (error) {
     return <ErrorPrompt />;
   }
 
   return (
     <>
-      {response?.has_setup === false ? (
+      {data?.has_setup === false ? (
         <ProfilingEmptyState />
       ) : (
         <>

@@ -59,6 +59,23 @@ const defaultConfig = {
 export const getTourAnchor = (step: number, tourId: SecurityStepId) =>
   `tourStepAnchor-${tourId}-${step}`;
 
+export const hiddenWhenLeftExpandableFlyoutExpanded: Record<string, AlertsCasesTourSteps[]> = {
+  [SecurityStepId.alertsCases]: [
+    AlertsCasesTourSteps.pointToAlertName,
+    AlertsCasesTourSteps.expandEvent,
+  ],
+};
+
+export const hiddenWhenCaseFlyoutExpanded: Record<string, AlertsCasesTourSteps[]> = {
+  [SecurityStepId.alertsCases]: [
+    AlertsCasesTourSteps.pointToAlertName,
+    AlertsCasesTourSteps.expandEvent,
+    AlertsCasesTourSteps.reviewAlertDetailsFlyout,
+    AlertsCasesTourSteps.addAlertToCase,
+    AlertsCasesTourSteps.viewCase,
+  ],
+};
+
 const alertsCasesConfig: StepConfig[] = [
   {
     ...defaultConfig,

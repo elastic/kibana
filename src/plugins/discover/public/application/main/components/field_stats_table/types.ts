@@ -1,18 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { type UiCounterMetricType } from '@kbn/analytics';
-import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { Filter, Query, AggregateQuery, TimeRange } from '@kbn/es-query';
+import type {
+  PublishesBlockingError,
+  PublishesDataLoading,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { type BehaviorSubject } from 'rxjs';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
 export interface RandomSamplingOption {
@@ -115,7 +121,9 @@ interface FieldStatisticsTableEmbeddableComponentApi {
 
 export type FieldStatisticsTableEmbeddableApi =
   DefaultEmbeddableApi<FieldStatisticsTableEmbeddableState> &
-    FieldStatisticsTableEmbeddableComponentApi;
+    FieldStatisticsTableEmbeddableComponentApi &
+    PublishesDataLoading &
+    PublishesBlockingError;
 
 export interface FieldStatisticsTableProps {
   /**
@@ -164,4 +172,16 @@ export interface FieldStatisticsTableProps {
    * Search session id to save to or restore from
    */
   searchSessionId?: string;
+  /**
+   * Additional field groups (e.g. Smart Fields)
+   */
+  additionalFieldGroups?: AdditionalFieldGroups;
+  /**
+   * If table should query using ES|QL
+   */
+  isEsqlMode?: boolean;
+  /**
+   * Time range
+   */
+  timeRange?: TimeRange;
 }

@@ -15,7 +15,7 @@ import {
 import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import * as t from 'io-ts';
-import { mergeWith, uniq } from 'lodash';
+import { isEmpty, mergeWith, uniq } from 'lodash';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
 import { offsetRt } from '../../../common/comparison_rt';
@@ -78,6 +78,9 @@ import {
   ServiceTransactionTypesResponse,
 } from './get_service_transaction_types';
 import { getThroughput, ServiceThroughputResponse } from './get_throughput';
+import { getServiceEntitySummary } from '../entities/services/get_service_entity_summary';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { createEntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -294,17 +297,39 @@ const serviceAgentRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ServiceAgentResponse> => {
-    const apmEventClient = await getApmEventClient(resources);
+    const { context, request } = resources;
+    const coreContext = await context.core;
+
+    const [apmEventClient, entitiesESClient] = await Promise.all([
+      getApmEventClient(resources),
+      createEntitiesESClient({
+        request,
+        esClient: coreContext.elasticsearch.client.asCurrentUser,
+      }),
+    ]);
     const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
-    return getServiceAgent({
-      serviceName,
-      apmEventClient,
-      start,
-      end,
-    });
+    const [apmServiceAgent, serviceEntitySummary] = await Promise.all([
+      getServiceAgent({
+        serviceName,
+        apmEventClient,
+        start,
+        end,
+      }),
+      getServiceEntitySummary({
+        end,
+        start,
+        serviceName,
+        entitiesESClient,
+        environment: ENVIRONMENT_ALL.value,
+      }),
+    ]);
+
+    return isEmpty(apmServiceAgent)
+      ? { agentName: serviceEntitySummary?.agentName }
+      : apmServiceAgent;
   },
 });
 
@@ -372,7 +397,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, rangeRt]),
   }),
-  options: { tags: ['access:apm'] },
+  options: { tags: ['access:apm', 'oas-tag:APM annotations'] },
   handler: async (resources): Promise<ServiceAnnotationResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, plugins, context, request, logger, config } = resources;
@@ -416,7 +441,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
 const serviceAnnotationsCreateRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/services/{serviceName}/annotation 2023-10-31',
   options: {
-    tags: ['access:apm', 'access:apm_write'],
+    tags: ['access:apm', 'access:apm_write', 'oas-tag:APM annotations'],
   },
   params: t.type({
     path: t.type({
@@ -761,8 +786,17 @@ export const serviceDependenciesRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   async handler(resources): Promise<{ serviceDependencies: ServiceDependenciesResponse }> {
-    const apmEventClient = await getApmEventClient(resources);
-    const { params } = resources;
+    const {
+      params,
+      request,
+      plugins: { security },
+    } = resources;
+
+    const [apmEventClient, randomSampler] = await Promise.all([
+      getApmEventClient(resources),
+      getRandomSampler({ security, request, probability: 1 }),
+    ]);
+
     const { serviceName } = params.path;
     const { environment, numBuckets, start, end, offset } = params.query;
 
@@ -775,6 +809,7 @@ export const serviceDependenciesRoute = createApmServerRoute({
         environment,
         numBuckets,
         offset,
+        randomSampler,
       }),
     };
   },
@@ -796,8 +831,17 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
   ): Promise<{
     breakdown: ServiceDependenciesBreakdownResponse;
   }> => {
-    const apmEventClient = await getApmEventClient(resources);
-    const { params } = resources;
+    const {
+      params,
+      request,
+      plugins: { security },
+    } = resources;
+
+    const [apmEventClient, randomSampler] = await Promise.all([
+      getApmEventClient(resources),
+      getRandomSampler({ security, request, probability: 1 }),
+    ]);
+
     const { serviceName } = params.path;
     const { environment, start, end, kuery } = params.query;
 
@@ -808,6 +852,7 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
       serviceName,
       environment,
       kuery,
+      randomSampler,
     });
 
     return {

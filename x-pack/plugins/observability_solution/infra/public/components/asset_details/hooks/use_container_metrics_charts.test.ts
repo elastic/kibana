@@ -21,6 +21,10 @@ const getContainerChartsExpectedOrder = (metric: ContainerMetricTypes): string[]
       return ['cpuUsage'];
     case 'memory':
       return ['memoryUsage'];
+    case 'network':
+      return ['networkRxTx'];
+    case 'disk':
+      return ['diskIOReadWrite'];
     default:
       return [];
   }

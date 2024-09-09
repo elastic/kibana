@@ -118,7 +118,7 @@ export const MonitorSummary = () => {
       />
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" wrap={true}>
-        <EuiFlexItem css={isFlyoutOpen ? { minWidth: 260 } : undefined}>
+        <EuiFlexItem css={isFlyoutOpen ? { minWidth: 260, maxWidth: 500 } : { maxWidth: 500 }}>
           <LastTestRun />
         </EuiFlexItem>
         <EuiFlexItem css={{ minWidth: 260 }}>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import rison from '@kbn/rison';
 import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
@@ -13,21 +14,38 @@ import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/serve
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { createLifecycleRuleExecutorMock } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_rule_executor_mock';
-import {
-  Aggregators,
-  Comparator,
-  InventoryMetricConditions,
-} from '../../../../common/alerting/metrics';
-
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Aggregators, InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { createInventoryMetricThresholdExecutor } from './inventory_metric_threshold_executor';
 import { ConditionResult } from './evaluate_condition';
-import { InfraBackendLibs } from '../../infra_types';
+import { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import { infraPluginMock } from '../../../mocks';
 import { logsSharedPluginMock } from '@kbn/logs-shared-plugin/server/mocks';
+import { createLogSourcesServiceMock } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/log_sources_service.mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import {
+  AssetDetailsLocator,
+  AssetDetailsLocatorParams,
+  InventoryLocator,
+  InventoryLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 
 jest.mock('./evaluate_condition', () => ({ evaluateCondition: jest.fn() }));
+
+const mockAssetDetailsLocator = {
+  getRedirectUrl: jest
+    .fn()
+    .mockImplementation(
+      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
+        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
+    ),
+} as unknown as jest.Mocked<AssetDetailsLocator>;
+
+const mockInventoryLocator = {
+  getRedirectUrl: jest.fn().mockImplementation(({}: InventoryLocatorParams) => `/inventory-mock`),
+} as unknown as jest.Mocked<InventoryLocator>;
 
 interface AlertTestInstance {
   actionGroup: string;
@@ -119,7 +137,16 @@ const mockLibs = {
   },
   getStartServices: () => [
     null,
-    { logsShared: logsSharedPluginMock.createStartContract() },
+    {
+      logsShared: logsSharedPluginMock.createStartContract(),
+      logsDataAccess: {
+        services: {
+          logSourcesServiceFactory: {
+            getLogSourcesService: () => createLogSourcesServiceMock(),
+          },
+        },
+      },
+    },
     infraPluginMock.createStartContract(),
   ],
   configuration: createMockStaticConfiguration({}),
@@ -129,6 +156,11 @@ const mockLibs = {
   basePath: {
     publicBaseUrl: 'http://localhost:5601',
     prepend: (path: string) => path,
+  },
+  plugins: {
+    share: {
+      setup: sharePluginMock.createSetupContract(),
+    },
   },
   logger,
 } as unknown as InfraBackendLibs;
@@ -170,7 +202,12 @@ function clearInstances() {
   alerts.clear();
 }
 
-const executor = createInventoryMetricThresholdExecutor(mockLibs);
+const mockLocators = {
+  assetDetailsLocator: mockAssetDetailsLocator,
+  inventoryLocator: mockInventoryLocator,
+} as unknown as InfraLocators;
+
+const executor = createInventoryMetricThresholdExecutor(mockLibs, mockLocators);
 
 const baseCriterion = {
   aggType: Aggregators.AVERAGE,
@@ -178,7 +215,7 @@ const baseCriterion = {
   timeSize: 1,
   timeUnit: 'm',
   threshold: [0],
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
 } as InventoryMetricConditions;
 
 describe('The inventory threshold alert type', () => {
@@ -187,7 +224,7 @@ describe('The inventory threshold alert type', () => {
 
     setup();
 
-    const execute = (comparator: Comparator, threshold: number[], options?: any) =>
+    const execute = (comparator: COMPARATORS, threshold: number[], options?: any) =>
       executor({
         ...mockOptions,
         services,
@@ -215,7 +252,7 @@ describe('The inventory threshold alert type', () => {
     test('throws error when alertsClient is null', async () => {
       try {
         services.alertsClient = null;
-        await execute(Comparator.GT, [0.75]);
+        await execute(COMPARATORS.GREATER_THAN, [0.75]);
       } catch (e) {
         expect(e).toMatchInlineSnapshot(
           '[Error: Expected alertsClient not to be null! There may have been an issue installing alert resources.]'
@@ -232,7 +269,7 @@ describe('The inventory threshold alert type', () => {
           timeSize: 1,
           timeUnit: 'm',
           threshold: [0.75],
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           shouldFire: true,
           shouldWarn: false,
           currentValue: 1.0,
@@ -248,7 +285,7 @@ describe('The inventory threshold alert type', () => {
           timeSize: 1,
           timeUnit: 'm',
           threshold: [0.75],
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           shouldFire: true,
           shouldWarn: false,
           currentValue: 1.0,
@@ -259,7 +296,7 @@ describe('The inventory threshold alert type', () => {
           },
         },
       });
-      await execute(Comparator.GT, [0.75]);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       expect(mostRecentAction(instanceIdA).tags).toStrictEqual([
         'host-01_tag1',
         'host-01_tag2',
@@ -282,7 +319,7 @@ describe('The inventory threshold alert type', () => {
           timeSize: 1,
           timeUnit: 'm',
           threshold: [0.75],
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           shouldFire: true,
           shouldWarn: false,
           currentValue: 1.0,
@@ -298,7 +335,7 @@ describe('The inventory threshold alert type', () => {
           timeSize: 1,
           timeUnit: 'm',
           threshold: [0.75],
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           shouldFire: true,
           shouldWarn: false,
           currentValue: 1.0,
@@ -309,7 +346,7 @@ describe('The inventory threshold alert type', () => {
           },
         },
       });
-      await execute(Comparator.GT, [0.75]);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       expect(mostRecentAction(instanceIdA).tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
       expect(mostRecentAction(instanceIdB).tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
     });
@@ -329,7 +366,7 @@ describe('The inventory threshold alert type', () => {
           timeSize: 1,
           timeUnit: 'm',
           threshold: [0.75],
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           shouldFire: true,
           shouldWarn: false,
           currentValue: 1.0,
@@ -340,7 +377,7 @@ describe('The inventory threshold alert type', () => {
           },
         },
       });
-      await execute(Comparator.GT, [0.75], options);
+      await execute(COMPARATORS.GREATER_THAN, [0.75], options);
       expect(evaluateConditionFn).toHaveBeenCalledWith(
         expect.objectContaining({
           executionTimestamp: mockedEndDate,

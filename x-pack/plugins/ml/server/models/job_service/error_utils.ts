@@ -47,7 +47,7 @@ export function fillResultsWithTimeouts(
             reason: i18n.translate(
               'xpack.ml.models.jobService.requestToActionTimedOutErrorMessage',
               {
-                defaultMessage: `Request to {action} '{id}' timed out.{extra}`,
+                defaultMessage: `Request to {action} ''{id}'' timed out.{extra}`,
                 values: {
                   id,
                   action,

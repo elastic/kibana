@@ -26,6 +26,8 @@ export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
 
 export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]';
 
+export const MANUAL_RULE_RUN_ACTION_BTN = '[data-test-subj="manualRuleRunAction"]';
+
 export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
 export const CONFIRM_DUPLICATE_RULE = '[data-test-subj="confirmModalConfirmButton"]';
 
@@ -35,6 +37,9 @@ export const DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION =
   '[data-test-subj="withExceptionsExcludeExpiredExceptions"] label';
 
 export const DUPLICATE_WITHOUT_EXCEPTIONS_OPTION = '[data-test-subj="withoutExceptions"] label';
+
+export const CONFIRM_MANUAL_RULE_RUN_WARNING_BTN =
+  '[data-test-subj="bulkActionConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
 
 export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
@@ -124,6 +129,8 @@ export const MODAL_ERROR_BODY = '[data-test-subj="errorModalBody"]';
 export const MODAL_CONFIRMATION_CANCEL_BTN = '[data-test-subj="confirmModalCancelButton"]';
 
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
+
+export const RULE_DETAILS_MANUAL_RULE_RUN_BTN = '[data-test-subj="rules-details-manual-rule-run"]';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 

@@ -22,6 +22,7 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/core-metrics-server",
+    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*",

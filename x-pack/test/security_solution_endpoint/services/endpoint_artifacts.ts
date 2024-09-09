@@ -10,7 +10,12 @@ import type {
   CreateExceptionListSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_ARTIFACT_LISTS,
+  ENDPOINT_ARTIFACT_LIST_IDS,
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
+} from '@kbn/securitysolution-list-constants';
 import { Response } from 'superagent';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/trusted_apps/constants';
@@ -19,10 +24,8 @@ import { EVENT_FILTER_LIST_DEFINITION } from '@kbn/security-solution-plugin/publ
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/host_isolation_exceptions/constants';
 import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/blocklist/constants';
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
-
 import { FtrService } from '../../functional/ftr_provider_context';
-import { InternalManifestSchemaResponseType } from '../apps/integrations/mocks';
-import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations_feature_flag/mocks';
+import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations/mocks';
 
 export interface ArtifactTestData {
   artifact: ExceptionListItemSchema;
@@ -124,17 +127,24 @@ export class EndpointArtifactsTestResources extends FtrService {
     return this.createExceptionItem(blocklist);
   }
 
-  async getArtifacts() {
-    const {
-      hits: { hits: manifestResults },
-    } = await this.esClient.search({
-      index: '.kibana*',
-      query: { bool: { filter: [{ term: { type: ManifestConstants.SAVED_OBJECT_TYPE } }] } },
-      size: 1,
-    });
-
-    const manifestResult = manifestResults[0] as InternalManifestSchemaResponseType;
-    return manifestResult._source['endpoint:user-artifact-manifest'].artifacts;
+  async createArtifact(
+    listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): Promise<ArtifactTestData | undefined> {
+    switch (listId) {
+      case ENDPOINT_ARTIFACT_LISTS.trustedApps.id: {
+        return this.createTrustedApp(overrides);
+      }
+      case ENDPOINT_ARTIFACT_LISTS.eventFilters.id: {
+        return this.createEventFilter(overrides);
+      }
+      case ENDPOINT_ARTIFACT_LISTS.blocklists.id: {
+        return this.createBlocklist(overrides);
+      }
+      case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id: {
+        return this.createHostIsolationException(overrides);
+      }
+    }
   }
 
   async getArtifactsFromUnifiedManifestSO(): Promise<

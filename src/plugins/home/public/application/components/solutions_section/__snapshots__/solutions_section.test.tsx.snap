@@ -16,10 +16,9 @@ exports[`SolutionsSection renders a single solution 1`] = `
     <h2
       id="homSolutions__title"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Pick your solution"
         id="home.solutionsSection.sectionTitle"
-        values={Object {}}
       />
     </h2>
   </EuiScreenReaderOnly>
@@ -60,10 +59,9 @@ exports[`SolutionsSection renders multiple solutions 1`] = `
     <h2
       id="homSolutions__title"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Pick your solution"
         id="home.solutionsSection.sectionTitle"
-        values={Object {}}
       />
     </h2>
   </EuiScreenReaderOnly>

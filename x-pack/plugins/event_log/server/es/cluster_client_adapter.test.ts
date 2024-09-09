@@ -23,7 +23,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression } from '@kbn/es-query';
 import { getEsNames } from './names';
 
-type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
+type MockedLogger = ReturnType<(typeof loggingSystemMock)['createLogger']>;
 
 let logger: MockedLogger;
 let clusterClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;

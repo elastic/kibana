@@ -36,6 +36,9 @@ export function esIndexRoute(server: MonitoringCore) {
       params: validateParams,
       body: validateBody,
     },
+    options: {
+      access: 'internal',
+    },
     handler: async (req) => {
       try {
         const config = server.config;

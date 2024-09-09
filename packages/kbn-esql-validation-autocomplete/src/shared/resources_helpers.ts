@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ESQLAst } from '@kbn/esql-ast';
@@ -18,7 +19,7 @@ export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string
 export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
   const cacheFields = new Map<string, ESQLRealField>();
   const getFields = async () => {
-    if (!cacheFields.size) {
+    if (!cacheFields.size && queryText) {
       const fieldsOfType = await resourceRetriever?.getFieldsFor?.({ query: queryText });
       for (const field of fieldsOfType || []) {
         cacheFields.set(field.name, field);
@@ -26,18 +27,17 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
     }
   };
   return {
-    getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
+    getFieldsByType: async (
+      expectedType: string | string[] = 'any',
+      ignored: string[] = []
+    ): Promise<ESQLRealField[]> => {
       const types = Array.isArray(expectedType) ? expectedType : [expectedType];
       await getFields();
       return (
-        Array.from(cacheFields.values())
-          ?.filter(({ name, type }) => {
-            const ts = Array.isArray(type) ? type : [type];
-            return (
-              !ignored.includes(name) && ts.some((t) => types[0] === 'any' || types.includes(t))
-            );
-          })
-          .map(({ name }) => name) || []
+        Array.from(cacheFields.values())?.filter(({ name, type }) => {
+          const ts = Array.isArray(type) ? type : [type];
+          return !ignored.includes(name) && ts.some((t) => types[0] === 'any' || types.includes(t));
+        }) || []
       );
     },
     getFieldsMap: async () => {

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { appendToESQLQuery, appendWhereClauseToESQLQuery } from './append_to_query';
 
 describe('appendToQuery', () => {
@@ -31,7 +33,7 @@ describe('appendToQuery', () => {
         appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '+', 'string')
       ).toBe(
         `from logstash-* // meow
-| where \`dest\`=="tada!"`
+| WHERE \`dest\`=="tada!"`
       );
     });
     it('appends a filter out where clause in an existing query', () => {
@@ -39,7 +41,7 @@ describe('appendToQuery', () => {
         appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '-', 'string')
       ).toBe(
         `from logstash-* // meow
-| where \`dest\`!="tada!"`
+| WHERE \`dest\`!="tada!"`
       );
     });
 
@@ -48,14 +50,14 @@ describe('appendToQuery', () => {
         appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '-', 'ip')
       ).toBe(
         `from logstash-* // meow
-| where \`dest\`::string!="tada!"`
+| WHERE \`dest\`::string!="tada!"`
       );
     });
 
     it('appends a where clause in an existing query with casting to string when the type is not given', () => {
       expect(appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '-')).toBe(
         `from logstash-* // meow
-| where \`dest\`::string!="tada!"`
+| WHERE \`dest\`::string!="tada!"`
       );
     });
 
@@ -70,7 +72,7 @@ describe('appendToQuery', () => {
         )
       ).toBe(
         `from logstash-* // meow
-| where \`dest\` is not null`
+| WHERE \`dest\` is not null`
       );
     });
 
@@ -85,7 +87,7 @@ describe('appendToQuery', () => {
         )
       ).toBe(
         `from logstash-* // meow
-| where \`dest\` is null`
+| WHERE \`dest\` is null`
       );
     });
 
@@ -100,7 +102,7 @@ describe('appendToQuery', () => {
         )
       ).toBe(
         `from logstash-* | where country == "GR"
-and \`dest\`=="Crete"`
+AND \`dest\`=="Crete"`
       );
     });
 

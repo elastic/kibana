@@ -21,7 +21,7 @@ import {
   apmLabsButton,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
-  apmEnableMultiSignal,
+  entityCentricExperience,
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
@@ -238,10 +238,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: true,
     description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage: '{betaLabel} Enable the Hosts view in the Infrastructure app.',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-      },
+      defaultMessage: 'Enable the Hosts view in the Infrastructure app.',
     }),
     schema: schema.boolean(),
   },
@@ -250,7 +247,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.enableInfrastructureContainerAssetView', {
       defaultMessage: 'Container view',
     }),
-    value: false,
+    value: true,
     description: i18n.translate(
       'xpack.observability.enableInfrastructureContainerAssetViewDescription',
       {
@@ -342,20 +339,19 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
   },
-  [apmEnableMultiSignal]: {
+  [entityCentricExperience]: {
     category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableMultiSignal', {
-      defaultMessage: 'Multi signal APM',
+    name: i18n.translate('xpack.observability.entityCentricExperience', {
+      defaultMessage: 'Entity-centric experience',
     }),
-    description: i18n.translate('xpack.observability.apmEnableMultiSignalDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the multi-signal feature in APM, which allows you to monitor services from logs and traces.',
+    description: i18n.translate('xpack.observability.entityCentricExperienceDescription', {
+      defaultMessage: '{technicalPreviewLabel} Promote entity-centric experience to users.',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
       },
     }),
     schema: schema.boolean(),
-    value: false,
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
   },
@@ -533,23 +529,18 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 1.7,
     description: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingDescription', {
-      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the {uptimeLink} survey
-      </br></br>
+      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the <a>Uptime Institute</a> survey
+      
       You can also use the PUE that corresponds with your cloud provider:
-      <ul style="list-style-type: none;margin-left: 4px;">
+      '<ul style="list-style-type: none;margin-left: 4px;">
         <li><strong>AWS:</strong> 1.135</li>
         <li><strong>GCP:</strong> 1.1</li>
         <li><strong>Azure:</strong> 1.185</li>
-      </ul>
+      </ul>'
       `,
       values: {
-        uptimeLink:
-          '<a href="https://ela.st/uptimeinstitute" target="_blank" rel="noopener noreferrer">' +
-          i18n.translate(
-            'xpack.observability.profilingDatacenterPUEUiSettingDescription.uptimeLink',
-            { defaultMessage: 'Uptime Institute' }
-          ) +
-          '</a>',
+        a: (chunks) =>
+          `<a href="https://ela.st/uptimeinstitute" target="_blank" rel="noopener noreferrer">${chunks}</a>`,
       },
     }),
     schema: schema.number({ min: 0 }),

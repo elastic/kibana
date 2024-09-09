@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs';
@@ -18,6 +19,7 @@ import { promisify } from 'util';
 import { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import treeKill from 'tree-kill';
+import { MOCK_IDP_REALM_NAME, ensureSAMLRoleMapping } from '@kbn/mock-idp-utils';
 import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
 import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
 import {
@@ -312,7 +314,7 @@ export class Cluster {
    */
   private exec(installPath: string, opts: EsClusterExecOptions) {
     const {
-      skipNativeRealmSetup = false,
+      skipSecuritySetup = false,
       reportTime = () => {},
       startTime,
       skipReadyCheck,
@@ -437,8 +439,8 @@ export class Cluster {
         });
       }
 
-      // once the cluster is ready setup the native realm
-      if (!skipNativeRealmSetup) {
+      // once the cluster is ready setup the realm
+      if (!skipSecuritySetup) {
         const nativeRealm = new NativeRealm({
           log: this.log,
           elasticPassword: options.password,
@@ -446,8 +448,12 @@ export class Cluster {
         });
 
         await nativeRealm.setPasswords(options);
-      }
 
+        const samlRealmConfigPrefix = `authc.realms.saml.${MOCK_IDP_REALM_NAME}.`;
+        if (args.some((arg) => arg.includes(samlRealmConfigPrefix))) {
+          await ensureSAMLRoleMapping(client);
+        }
+      }
       this.log.success('kbn/es setup complete');
     });
 

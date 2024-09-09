@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { DebugState } from '@elastic/charts';
@@ -68,7 +69,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   private async toggleYesNoSwitch(testSubj: string, value: boolean) {
     const option = await this.testSubjects.find(`${testSubj}-${value ? 'yes' : 'no'}`);
-    (await option.findByCssSelector('label')).click();
+    await (await option.findByCssSelector('label')).click();
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -353,7 +354,7 @@ export class VisualBuilderPageObject extends FtrService {
   public async getRhythmChartLegendValue(nth = 0) {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = (
-      await this.find.allByCssSelector(`.echLegendItem .echLegendItem__extra`, 20000)
+      await this.find.allByCssSelector(`.echLegendItem .echLegendItem__legendValue`, 20000)
     )[nth];
     await metricValue.moveMouseTo();
     return await metricValue.getVisibleText();
@@ -577,7 +578,7 @@ export class VisualBuilderPageObject extends FtrService {
 
     if (useKibanaIndices === false) {
       const el = await this.testSubjects.find(metricsIndexPatternInput);
-      el.focus();
+      await el.focus();
       await el.clearValue();
       if (value) {
         await el.type(value, { charByChar: true });
@@ -824,7 +825,7 @@ export class VisualBuilderPageObject extends FtrService {
       .toArray()
       .map((li) => {
         const label = $(li).find('.echLegendItem__label').text();
-        const value = $(li).find('.echLegendItem__extra').text();
+        const value = $(li).find('.echLegendItem__legendValue').text();
 
         return `${label}: ${value}`;
       });

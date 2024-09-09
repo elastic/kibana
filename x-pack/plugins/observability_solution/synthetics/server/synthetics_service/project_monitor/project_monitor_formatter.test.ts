@@ -104,7 +104,7 @@ describe('ProjectMonitorFormatter', () => {
 
   const serverMock: SyntheticsServerSetup = {
     logger,
-    uptimeEsClient: mockEsClient,
+    syntheticsEsClient: mockEsClient,
     authSavedObjectsClient: soClient,
     config: {
       service: {
@@ -189,6 +189,40 @@ describe('ProjectMonitorFormatter', () => {
           id: 'check if title is present 10 0',
           payload: testMonitors[0],
           reason: 'Failed to create or update monitor',
+        },
+      ],
+      updatedMonitors: [],
+    });
+  });
+  it('should return invalid schedule error', async () => {
+    const invalidMonitor = {
+      ...testMonitors[0],
+      schedule: '3m',
+    };
+    const pushMonitorFormatter = new ProjectMonitorFormatter({
+      projectId: 'test-project',
+      spaceId: 'default',
+      routeContext,
+      encryptedSavedObjectsClient,
+      monitors: [invalidMonitor],
+    });
+
+    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+
+    await pushMonitorFormatter.configureAllProjectMonitors();
+
+    expect({
+      createdMonitors: pushMonitorFormatter.createdMonitors,
+      updatedMonitors: pushMonitorFormatter.updatedMonitors,
+      failedMonitors: pushMonitorFormatter.failedMonitors,
+    }).toStrictEqual({
+      createdMonitors: [],
+      failedMonitors: [
+        {
+          details: 'Invalid value "3m" supplied to "schedule"',
+          id: 'check if title is present 10 0',
+          payload: invalidMonitor,
+          reason: "Couldn't save or update monitor because of an invalid configuration.",
         },
       ],
       updatedMonitors: [],

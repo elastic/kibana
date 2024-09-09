@@ -86,12 +86,13 @@ export {
 } from './application/components';
 
 export {
-  AlertProvidedActionVariables,
   hasMustacheTokens,
   templateActionVariable,
   updateActionConnector,
   executeAction,
 } from './application/lib';
+
+export { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/action_variables';
 
 export type { ActionGroupWithCondition } from './application/sections';
 
@@ -102,7 +103,7 @@ export function plugin(context: PluginInitializerContext) {
 }
 
 export { useKibana } from './common';
-export type { AggregationType, Comparator, ValidNormalizedTypes } from './common';
+export type { AggregationType, ValidNormalizedTypes } from './common';
 
 export {
   WhenExpression,
@@ -119,7 +120,6 @@ export {
   getTimeFieldOptions,
   getTimeOptions,
   GroupByExpression,
-  COMPARATORS,
   connectorDeprecatedMessage,
   deprecatedMessage,
 } from './common';

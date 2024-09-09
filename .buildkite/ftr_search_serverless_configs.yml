@@ -1,0 +1,22 @@
+disabled:
+  # Base config files, only necessary to inform config finding script
+
+defaultQueue: 'n2-4-spot'
+enabled:
+  - x-pack/test_serverless/api_integration/test_suites/search/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/search/config.feature_flags.ts
+  - x-pack/test_serverless/api_integration/test_suites/search/common_configs/config.group1.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.saved_objects_management.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.context_awareness.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group1.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group2.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group3.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group4.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group5.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group6.ts
+  # serverless config files that run deployment-agnostic tests
+  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/search.serverless.config.ts

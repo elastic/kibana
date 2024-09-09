@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/react';
@@ -40,9 +42,22 @@ jest.mock('./discover_main_app', () => {
   };
 });
 
+let mockRootProfileLoading = false;
+
+jest.mock('../../context_awareness', () => {
+  const originalModule = jest.requireActual('../../context_awareness');
+  return {
+    ...originalModule,
+    useRootProfile: () => ({
+      rootProfileLoading: mockRootProfileLoading,
+    }),
+  };
+});
+
 describe('DiscoverMainRoute', () => {
   beforeEach(() => {
     mockCustomizationService = createCustomizationService();
+    mockRootProfileLoading = false;
   });
 
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
@@ -91,6 +106,20 @@ describe('DiscoverMainRoute', () => {
       expect(component.find(DiscoverMainApp).exists()).toBe(false);
     });
     mockCustomizationService = createCustomizationService();
+    await waitFor(() => {
+      component.setProps({}).update();
+      expect(component.find(DiscoverMainApp).exists()).toBe(true);
+    });
+  });
+
+  test('renders LoadingIndicator while root profile is loading', async () => {
+    mockRootProfileLoading = true;
+    const component = mountComponent(true, true);
+    await waitFor(() => {
+      component.update();
+      expect(component.find(DiscoverMainApp).exists()).toBe(false);
+    });
+    mockRootProfileLoading = false;
     await waitFor(() => {
       component.setProps({}).update();
       expect(component.find(DiscoverMainApp).exists()).toBe(true);

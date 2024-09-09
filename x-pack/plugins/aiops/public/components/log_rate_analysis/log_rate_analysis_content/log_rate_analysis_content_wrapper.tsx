@@ -18,15 +18,17 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { LogRateAnalysisStateProvider } from '@kbn/aiops-components';
+import { LogRateAnalysisReduxProvider } from '@kbn/aiops-log-rate-analysis/state';
 
 import { timeSeriesDataViewWarning } from '../../../application/utils/time_series_dataview_check';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 
-import { LogRateAnalysisContent } from './log_rate_analysis_content';
 import type { LogRateAnalysisResultsData } from '../log_rate_analysis_results';
+
+import { LogRateAnalysisDocumentCountChartData } from './log_rate_analysis_document_count_chart_data';
+import { LogRateAnalysisContent } from './log_rate_analysis_content';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -36,8 +38,6 @@ const localStorage = new Storage(window.localStorage);
 export interface LogRateAnalysisContentWrapperProps {
   /** The data view to analyze. */
   dataView: DataView;
-  /** Option to make main histogram sticky */
-  stickyHistogram?: boolean;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
   /** Timestamp for start of initial analysis */
@@ -67,7 +67,6 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   initialAnalysisStart,
   timeRange,
   esSearchQuery,
-  stickyHistogram,
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
@@ -92,13 +91,15 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch: null }}>
-          <LogRateAnalysisStateProvider initialAnalysisStart={initialAnalysisStart}>
+          <LogRateAnalysisReduxProvider initialAnalysisStart={initialAnalysisStart}>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <LogRateAnalysisContent
+                <LogRateAnalysisDocumentCountChartData
                   timeRange={timeRange}
                   esSearchQuery={esSearchQuery}
-                  stickyHistogram={stickyHistogram}
+                />
+                <LogRateAnalysisContent
+                  esSearchQuery={esSearchQuery}
                   barColorOverride={barColorOverride}
                   barHighlightColorOverride={barHighlightColorOverride}
                   onAnalysisCompleted={onAnalysisCompleted}
@@ -106,7 +107,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
                 />
               </DatePickerContextProvider>
             </StorageContextProvider>
-          </LogRateAnalysisStateProvider>
+          </LogRateAnalysisReduxProvider>
         </DataSourceContext.Provider>
       </UrlStateProvider>
     </AiopsAppContext.Provider>

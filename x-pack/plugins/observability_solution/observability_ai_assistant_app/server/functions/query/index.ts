@@ -5,74 +5,32 @@
  * 2.0.
  */
 
-import Fs from 'fs';
-import { keyBy, mapValues, once, pick } from 'lodash';
-import pLimit from 'p-limit';
-import Path from 'path';
-import { lastValueFrom, startWith } from 'rxjs';
-import { promisify } from 'util';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
-import { FunctionVisibility, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-plugin/common';
+import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import {
-  VisualizeESQLUserIntention,
-  VISUALIZE_ESQL_USER_INTENTIONS,
-} from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
-import {
-  concatenateChatCompletionChunks,
-  ConcatenatedMessage,
-} from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
-import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
+  FunctionVisibility,
+  MessageAddEvent,
+  MessageRole,
+  StreamingChatResponseEventType,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
-import { ESQLSearchReponse } from '@kbn/es-types';
+import { map } from 'rxjs';
+import { v4 } from 'uuid';
 import type { FunctionRegistrationParameters } from '..';
-import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
-import { validateEsqlQuery } from './validate_esql_query';
+import { runAndValidateEsqlQuery } from './validate_esql_query';
+import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
 
-const readFile = promisify(Fs.readFile);
-const readdir = promisify(Fs.readdir);
+export const QUERY_FUNCTION_NAME = 'query';
+export const EXECUTE_QUERY_NAME = 'execute_query';
 
-const loadSystemMessage = once(async () => {
-  const data = await readFile(Path.join(__dirname, './system_message.txt'));
-  return data.toString('utf-8');
-});
-
-const loadEsqlDocs = once(async () => {
-  const dir = Path.join(__dirname, './esql_docs');
-  const files = (await readdir(dir)).filter((file) => Path.extname(file) === '.txt');
-
-  if (!files.length) {
-    return {};
-  }
-
-  const limiter = pLimit(10);
-  return keyBy(
-    await Promise.all(
-      files.map((file) =>
-        limiter(async () => {
-          const data = (await readFile(Path.join(dir, file))).toString('utf-8');
-          const filename = Path.basename(file, '.txt');
-
-          const keyword = filename
-            .replace('esql-', '')
-            .replace('agg-', '')
-            .replaceAll('-', '_')
-            .toUpperCase();
-
-          return {
-            keyword: keyword === 'STATS_BY' ? 'STATS' : keyword,
-            data,
-          };
-        })
-      )
-    ),
-    'keyword'
-  );
-});
-
-export function registerQueryFunction({ functions, resources }: FunctionRegistrationParameters) {
+export function registerQueryFunction({
+  functions,
+  resources,
+  pluginsStart,
+}: FunctionRegistrationParameters) {
   functions.registerInstruction(({ availableFunctionNames }) =>
-    availableFunctionNames.includes('query')
-      ? `You MUST use the "query" function when the user wants to:
+    availableFunctionNames.includes(QUERY_FUNCTION_NAME)
+      ? `You MUST use the "${QUERY_FUNCTION_NAME}" function when the user wants to:
   - visualize data
   - run any arbitrary query
   - breakdown or filter ES|QL queries that are displayed on the current page
@@ -80,22 +38,31 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
   - asks general questions about ES|QL
 
   DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
-  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "query" function for this.
+  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "${QUERY_FUNCTION_NAME}" function for this.
 
-  Even if the "context" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,
+  If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.
+
+  Even if the "${QUERY_FUNCTION_NAME}" function was used before that, follow it up with the "${QUERY_FUNCTION_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${QUERY_FUNCTION_NAME}" function,
   even if it has been called before.
 
   When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
-  If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
+  If the "${EXECUTE_QUERY_NAME}" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
       : undefined
   );
 
   functions.registerFunction(
     {
-      name: 'execute_query',
-      visibility: FunctionVisibility.UserOnly,
-      description:
-        'Display the results of an ES|QL query. ONLY use this if the "query" function has been used before or if the user or screen context has provided a query you can use.',
+      name: EXECUTE_QUERY_NAME,
+      visibility: FunctionVisibility.Internal,
+      description: `Execute a generated ES|QL query on behalf of the user. The results
+        will be returned to you.
+
+        You must use this function if the user is asking for the result of a query,
+        such as a metric or list of things, but does not want to visualize it in
+        a table or chart. You do NOT need to ask permission to execute the query
+        after generating it, use the "${EXECUTE_QUERY_NAME}" function directly instead.
+        
+        Do not use when the user just asks for an example.`,
       parameters: {
         type: 'object',
         properties: {
@@ -108,7 +75,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
     },
     async ({ arguments: { query } }) => {
       const client = (await resources.context.core).elasticsearch.client.asCurrentUser;
-      const { error, errorMessages } = await validateEsqlQuery({
+      const { error, errorMessages, rows, columns } = await runAndValidateEsqlQuery({
         query,
         client,
       });
@@ -122,327 +89,95 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
           },
         };
       }
-      const response = (await client.transport.request({
-        method: 'POST',
-        path: '_query',
-        body: {
-          query,
-          version: ESQL_LATEST_VERSION,
-        },
-      })) as ESQLSearchReponse;
 
       return {
-        content: response,
+        content: {
+          columns,
+          rows,
+        },
       };
     }
   );
   functions.registerFunction(
     {
-      name: 'query',
-      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. Make sure you call one of the get_dataset functions first if you need index or field names. This function takes no input.`,
+      name: QUERY_FUNCTION_NAME,
+      description: `This function generates, executes and/or visualizes a query
+      based on the user's request. It also explains how ES|QL works and how to
+      convert queries from one language to another. Make sure you call one of
+      the get_dataset functions first if you need index or field names. This
+      function takes no input.`,
       visibility: FunctionVisibility.AssistantOnly,
     },
-    async ({ messages, chat }, signal) => {
-      const [systemMessage, esqlDocs] = await Promise.all([loadSystemMessage(), loadEsqlDocs()]);
+    async ({ messages, connectorId }, signal) => {
+      const esqlFunctions = functions
+        .getFunctions()
+        .filter(
+          (fn) =>
+            fn.definition.name === EXECUTE_QUERY_NAME || fn.definition.name === 'visualize_query'
+        )
+        .map((fn) => fn.definition);
 
-      const withEsqlSystemMessage = (message?: string) => [
-        {
-          '@timestamp': new Date().toISOString(),
-          message: { role: MessageRole.System, content: `${systemMessage}\n${message ?? ''}` },
-        },
-        ...messages.slice(1),
-      ];
+      const actions = functions.getActions();
 
-      const source$ = (
-        await chat('classify_esql', {
-          messages: withEsqlSystemMessage().concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.User,
-              content: `Use the classify_esql function to classify the user's request
-              in the user message before this.
-              and get more information about specific functions and commands
-              you think are candidates for answering the question.
-              
-              Examples for functions and commands:
-              Do you need to group data? Request \`STATS\`.
-              Extract data? Request \`DISSECT\` AND \`GROK\`.
-              Convert a column based on a set of conditionals? Request \`EVAL\` and \`CASE\`.
-
-              ONLY use ${VisualizeESQLUserIntention.executeAndReturnResults} if you are absolutely sure
-              it is executable. If one of the get_dataset_info functions were not called before, OR if
-              one of the get_dataset_info functions returned no data, opt for an explanation only and
-              mention that there is no data for these indices. You can still use
-              ${VisualizeESQLUserIntention.generateQueryOnly} and generate an example ES|QL query.
-
-              For determining the intention of the user, the following options are available:
-
-              ${VisualizeESQLUserIntention.generateQueryOnly}: the user only wants to generate the query,
-              but not run it, or they ask a general question about ES|QL.
-
-              ${VisualizeESQLUserIntention.executeAndReturnResults}: the user wants to execute the query,
-              and have the assistant return/analyze/summarize the results. they don't need a
-              visualization.
-
-              ${VisualizeESQLUserIntention.visualizeAuto}: The user wants to visualize the data from the
-              query, but wants us to pick the best visualization type, or their preferred
-              visualization is unclear.
-
-              These intentions will display a specific visualization:
-              ${VisualizeESQLUserIntention.visualizeBar}
-              ${VisualizeESQLUserIntention.visualizeDonut}
-              ${VisualizeESQLUserIntention.visualizeHeatmap}
-              ${VisualizeESQLUserIntention.visualizeLine}
-              ${VisualizeESQLUserIntention.visualizeArea}
-              ${VisualizeESQLUserIntention.visualizeTable}
-              ${VisualizeESQLUserIntention.visualizeTagcloud}
-              ${VisualizeESQLUserIntention.visualizeTreemap}
-              ${VisualizeESQLUserIntention.visualizeWaffle}
-              ${VisualizeESQLUserIntention.visualizeXy}
-
-              Some examples:
-
-              "I want a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
-              "... Just show me the query" => ${VisualizeESQLUserIntention.generateQueryOnly}
-              "Create a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
-              
-              "Show me the avg of x" => ${VisualizeESQLUserIntention.executeAndReturnResults}
-              "Show me the results of y" => ${VisualizeESQLUserIntention.executeAndReturnResults}
-              "Display the sum of z" => ${VisualizeESQLUserIntention.executeAndReturnResults}
-
-              "Show me the avg of x over time" => ${VisualizeESQLUserIntention.visualizeAuto}
-              "I want a bar chart of ... " => ${VisualizeESQLUserIntention.visualizeBar}
-              "I want to see a heat map of ..." => ${VisualizeESQLUserIntention.visualizeHeatmap}
-              `,
-            },
-          }),
-          signal,
-          functions: [
-            {
-              name: 'classify_esql',
-              description: `Use this function to determine:
-              - what ES|QL functions and commands are candidates for answering the user's question
-              - whether the user has requested a query, and if so, it they want it to be executed, or just shown.
-
-              All parameters are required. Make sure the functions and commands you request are available in the
-              system message.
-              `,
-              parameters: {
-                type: 'object',
-                properties: {
-                  guides: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                      enum: ['API', 'KIBANA', 'CROSS_CLUSTER'],
-                    },
-                    description: 'A list of guides',
-                  },
-                  commands: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                    },
-                    description: 'A list of processing or source commands',
-                  },
-                  functions: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                    },
-                    description: 'A list of functions.',
-                  },
-                  intention: {
-                    type: 'string',
-                    description: `What the user\'s intention is.`,
-                    enum: VISUALIZE_ESQL_USER_INTENTIONS,
-                  },
-                },
-                required: ['commands', 'functions', 'intention'],
-              },
-            },
-          ],
-          functionCall: 'classify_esql',
-        })
-      ).pipe(concatenateChatCompletionChunks());
-
-      const response = await lastValueFrom(source$);
-
-      if (!response.message.function_call.arguments) {
-        throw new Error('LLM did not call classify_esql function');
-      }
-
-      const args = JSON.parse(response.message.function_call.arguments) as {
-        guides?: string[];
-        commands?: string[];
-        functions?: string[];
-        intention: VisualizeESQLUserIntention;
-      };
-
-      const keywords = [
-        ...(args.commands ?? []),
-        ...(args.functions ?? []),
-        ...(args.guides ?? []),
-        'SYNTAX',
-        'OVERVIEW',
-      ].map((keyword) => keyword.toUpperCase());
-
-      const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
-
-      let userIntentionMessage: string;
-
-      switch (args.intention) {
-        case VisualizeESQLUserIntention.executeAndReturnResults:
-          userIntentionMessage = `When you generate a query, it will automatically be executed and its results returned to you. The user does not need to do anything for this.`;
-          break;
-
-        case VisualizeESQLUserIntention.generateQueryOnly:
-          userIntentionMessage = `Any generated query will not be executed automatically, the user needs to do this themselves.`;
-          break;
-
-        default:
-          userIntentionMessage = `The generated query will automatically be visualized to the user, displayed below your message. The user does not need to do anything for this.`;
-          break;
-      }
-
-      const esqlResponse$ = await chat('answer_esql_question', {
-        messages: [
-          ...withEsqlSystemMessage(),
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.Assistant,
-              content: '',
-              function_call: {
-                name: 'get_esql_info',
-                arguments: JSON.stringify(args),
-                trigger: MessageRole.Assistant as const,
-              },
-            },
-          },
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.User,
-              name: 'get_esql_info',
-              content: JSON.stringify({
-                documentation: messagesToInclude,
-              }),
-            },
-          },
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.User,
-              content: `Answer the user's question that was previously asked using the attached documentation.
-
-                Format any ES|QL query as follows:
-                \`\`\`esql
-                <query>
-                \`\`\`
-
-                Respond in plain text. Do not attempt to use a function.
-  
-                Prefer to use commands and functions for which you have requested documentation.
-  
-                ${
-                  args.intention !== VisualizeESQLUserIntention.generateQueryOnly
-                    ? `DO NOT UNDER ANY CIRCUMSTANCES generate more than a single query.
-                    If multiple queries are needed, do it as a follow-up step. Make this clear to the user. For example:
-                    
-                    Human: plot both yesterday's and today's data.
-                    
-                    Assistant: Here's how you can plot yesterday's data:
-                    \`\`\`esql
-                    <query>
-                    \`\`\`
-  
-                    Let's see that first. We'll look at today's data next.
-  
-                    Human: <response from yesterday's data>
-  
-                    Assistant: Let's look at today's data:
-  
-                    \`\`\`esql
-                    <query>
-                    \`\`\`
-                    `
-                    : ''
-                }
-  
-                ${userIntentionMessage}
-  
-                DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
-                as mentioned in the system message and documentation. When converting queries from one language
-                to ES|QL, make sure that the functions are available and documented in ES|QL.
-                E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
-                
-                `,
-            },
-          },
-        ],
-        signal,
-        functions: functions.getActions(),
+      const events$ = naturalLanguageToEsql({
+        client: pluginsStart.inference.getClient({ request: resources.request }),
+        connectorId,
+        messages: convertMessagesForInference(
+          // remove system message and query function request
+          messages.filter((message) => message.message.role !== MessageRole.System).slice(0, -1)
+        ),
+        logger: resources.logger,
+        tools: Object.fromEntries(
+          actions
+            .concat(esqlFunctions)
+            .map((fn) => [fn.name, { description: fn.description, schema: fn.parameters }])
+        ),
       });
 
-      return esqlResponse$.pipe(
-        emitWithConcatenatedMessage(async (msg) => {
-          if (msg.message.function_call.name) {
-            return msg;
+      const chatMessageId = v4();
+
+      return events$.pipe(
+        map((event) => {
+          if (isOutputEvent(event)) {
+            return createFunctionResponseMessage({
+              content: {},
+              name: QUERY_FUNCTION_NAME,
+              data: event.output,
+            });
           }
-          const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger)
-            .match(/```esql([\s\S]*?)```/)?.[1]
-            ?.trim();
-
-          let functionCall: ConcatenatedMessage['message']['function_call'] | undefined;
-
-          if (
-            !args.intention ||
-            !esqlQuery ||
-            args.intention === VisualizeESQLUserIntention.generateQueryOnly
-          ) {
-            functionCall = undefined;
-          } else if (args.intention === VisualizeESQLUserIntention.executeAndReturnResults) {
-            functionCall = {
-              name: 'execute_query',
-              arguments: JSON.stringify({ query: esqlQuery }),
-              trigger: MessageRole.Assistant as const,
-            };
-          } else {
-            functionCall = {
-              name: 'visualize_query',
-              arguments: JSON.stringify({ query: esqlQuery, intention: args.intention }),
-              trigger: MessageRole.Assistant as const,
+          if (isChatCompletionChunkEvent(event)) {
+            return {
+              id: chatMessageId,
+              type: StreamingChatResponseEventType.ChatCompletionChunk,
+              message: {
+                content: event.content,
+              },
             };
           }
 
-          return {
-            ...msg,
+          const fnCall = event.toolCalls[0]
+            ? {
+                name: event.toolCalls[0].function.name,
+                arguments: JSON.stringify(event.toolCalls[0].function.arguments),
+                trigger: MessageRole.Assistant as const,
+              }
+            : undefined;
+
+          const messageAddEvent: MessageAddEvent = {
+            type: StreamingChatResponseEventType.MessageAdd,
+            id: chatMessageId,
             message: {
-              ...msg.message,
-              content: correctCommonEsqlMistakes(msg.message.content, resources.logger),
-              ...(functionCall
-                ? {
-                    function_call: functionCall,
-                  }
-                : {}),
-            },
-          };
-        }),
-        startWith(
-          createFunctionResponseMessage({
-            name: 'query',
-            content: {},
-            data: {
-              // add the included docs for debugging
-              documentation: {
-                intention: args.intention,
-                keywords,
-                files: messagesToInclude,
+              '@timestamp': new Date().toISOString(),
+              message: {
+                content: event.content,
+                role: MessageRole.Assistant,
+                function_call: fnCall,
               },
             },
-          })
-        )
+          };
+
+          return messageAddEvent;
+        })
       );
     }
   );

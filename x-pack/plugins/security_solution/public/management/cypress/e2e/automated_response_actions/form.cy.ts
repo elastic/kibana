@@ -22,7 +22,7 @@ export const RESPONSE_ACTIONS_ERRORS = 'response-actions-error';
 describe(
   'Form',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

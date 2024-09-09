@@ -16,7 +16,7 @@ import type {
   PartialMetricsSourceConfigurationProperties,
 } from '../../../common/metrics_sources';
 
-import { useTrackedPromise } from '../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../hooks/use_tracked_promise';
 import { MissingHttpClientException } from './source_errors';
 import { useSourceNotifier } from './notifications';
 import { MetricsDataViewProvider } from './metrics_view';
@@ -45,7 +45,7 @@ export const useSourceFetcher = ({ sourceId }: { sourceId: string }) => {
             method: 'GET',
           }
         );
-        telemetry?.reportPerformanceMetricEvent(
+        telemetry.reportPerformanceMetricEvent(
           'infra_source_load',
           performance.now() - start,
           {},

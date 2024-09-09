@@ -8,7 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import type { ListWithKuery } from '@kbn/fleet-plugin/server/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { filter, map, mapKeys, uniq } from 'lodash';
+import { filter, flatMap, mapKeys, uniq } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/server/types';
 import { satisfies } from 'semver';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
@@ -66,7 +66,7 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
           satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
         );
-        const agentPolicyIds = uniq(map(supportedPackagePolicyIds, 'policy_id'));
+        const agentPolicyIds = uniq(flatMap(supportedPackagePolicyIds, 'policy_ids'));
 
         const agentPolicies = await agentPolicyService?.getByIds(
           internalSavedObjectsClient,

@@ -8,17 +8,17 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useCreateTimeline } from './use_create_timeline';
 import type { TimeRange } from '../../common/store/inputs/model';
-import { TimelineType } from '../../../common/api/timeline';
+import { RowRendererCount, TimelineTypeEnum } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { timelineActions } from '../store';
 import { inputsActions } from '../../common/store/inputs';
-import { sourcererActions } from '../../common/store/sourcerer';
+import { sourcererActions } from '../../sourcerer/store';
 import { appActions } from '../../common/store/app';
-import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../sourcerer/store/model';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { TestProviders, mockGlobalState } from '../../common/mock';
+import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
 
 jest.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../common/containers/use_global_time', () => {
@@ -41,7 +41,8 @@ describe('useCreateTimeline', () => {
 
   it('should return a function', () => {
     const hookResult = renderHook(
-      () => useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default }),
+      () =>
+        useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -57,7 +58,8 @@ describe('useCreateTimeline', () => {
     const addNotes = jest.spyOn(appActions, 'addNotes');
 
     const hookResult = renderHook(
-      () => useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default }),
+      () =>
+        useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -67,8 +69,8 @@ describe('useCreateTimeline', () => {
 
     await hookResult.result.current();
     expect(createTimeline.mock.calls[0][0].id).toEqual(TimelineId.test);
-    expect(createTimeline.mock.calls[0][0].timelineType).toEqual(TimelineType.default);
-    expect(createTimeline.mock.calls[0][0].columns).toEqual(defaultHeaders);
+    expect(createTimeline.mock.calls[0][0].timelineType).toEqual(TimelineTypeEnum.default);
+    expect(createTimeline.mock.calls[0][0].columns).toEqual(defaultUdtHeaders);
     expect(createTimeline.mock.calls[0][0].dataViewId).toEqual(
       mockGlobalState.sourcerer.defaultDataView.id
     );
@@ -79,6 +81,7 @@ describe('useCreateTimeline', () => {
     );
     expect(createTimeline.mock.calls[0][0].show).toEqual(true);
     expect(createTimeline.mock.calls[0][0].updated).toEqual(undefined);
+    expect(createTimeline.mock.calls[0][0].excludedRowRendererIds).toHaveLength(RowRendererCount);
     expect(setSelectedDataView.mock.calls[0][0].id).toEqual(SourcererScopeName.timeline);
     expect(setSelectedDataView.mock.calls[0][0].selectedDataViewId).toEqual(
       mockGlobalState.sourcerer.defaultDataView.id
@@ -98,7 +101,7 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({
           timelineId: TimelineId.test,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
           onClick,
         }),
       {
@@ -117,7 +120,8 @@ describe('useCreateTimeline', () => {
     const setAbsoluteRangeDatePicker = jest.spyOn(inputsActions, 'setAbsoluteRangeDatePicker');
 
     const hookResult = renderHook(
-      () => useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default }),
+      () =>
+        useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -137,7 +141,8 @@ describe('useCreateTimeline', () => {
     const setRelativeRangeDatePicker = jest.spyOn(inputsActions, 'setRelativeRangeDatePicker');
 
     const hookResult = renderHook(
-      () => useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default }),
+      () =>
+        useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }

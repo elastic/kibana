@@ -25,6 +25,7 @@ import {
   checkInvestigationFieldSoValue,
   createLegacyRuleAction,
   createRuleThroughAlertingEndpoint,
+  getCustomQueryRuleParams,
   getLegacyActionSO,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
@@ -74,7 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await securitySolutionApi
-        .performBulkAction({
+        .performRulesBulkAction({
           body: { query: '', action: BulkActionTypeEnum.delete },
           query: {},
         })
@@ -116,7 +117,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await securitySolutionApi
-        .performBulkAction({
+        .performRulesBulkAction({
           body: { query: '', action: BulkActionTypeEnum.enable },
           query: {},
         })
@@ -176,7 +177,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await securitySolutionApi
-        .performBulkAction({
+        .performRulesBulkAction({
           body: { query: '', action: BulkActionTypeEnum.disable },
           query: {},
         })
@@ -236,7 +237,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       const { body } = await securitySolutionApi
-        .performBulkAction({
+        .performRulesBulkAction({
           body: {
             query: '',
             action: BulkActionTypeEnum.duplicate,
@@ -276,13 +277,33 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    it('should set rule_source to "internal" when duplicating a rule', async () => {
+      await createRule(supertest, log, getCustomQueryRuleParams());
+
+      const { body } = await securitySolutionApi
+        .performRulesBulkAction({
+          body: {
+            query: '',
+            action: BulkActionTypeEnum.duplicate,
+            duplicate: { include_exceptions: false, include_expired_exceptions: false },
+          },
+          query: {},
+        })
+        .expect(200);
+
+      // Check that the duplicated rule is returned with the correct rule_source
+      expect(body.attributes.results.created[0].rule_source).to.eql({
+        type: 'internal',
+      });
+    });
+
     describe('edit action', () => {
       describe('index patterns actions', () => {
         it('should return error if index patterns action is applied to ES|QL rule', async () => {
           const esqlRule = await createRule(supertest, log, getCreateEsqlRulesSchemaMock());
 
           const { body } = await securitySolutionApi
-            .performBulkAction({
+            .performRulesBulkAction({
               body: {
                 ids: [esqlRule.id],
                 action: BulkActionTypeEnum.edit,
@@ -336,7 +357,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ruleToDuplicate.id
         );
 
-        const { body: setTagsBody } = await securitySolutionApi.performBulkAction({
+        const { body: setTagsBody } = await securitySolutionApi.performRulesBulkAction({
           body: {
             query: '',
             action: BulkActionTypeEnum.edit,
@@ -419,7 +440,7 @@ export default ({ getService }: FtrProviderContext): void => {
             );
 
             const { body } = await securitySolutionApi
-              .performBulkAction({
+              .performRulesBulkAction({
                 body: {
                   ids: [createdRule.id],
                   action: BulkActionTypeEnum.edit,
@@ -495,7 +516,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should export rules with legacy investigation_fields and transform legacy field in response', async () => {
         const { body } = await securitySolutionApi
-          .performBulkAction({
+          .performRulesBulkAction({
             body: { query: '', action: BulkActionTypeEnum.export },
             query: {},
           })
@@ -564,7 +585,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should delete rules with investigation fields and transform legacy field in response', async () => {
         const { body } = await securitySolutionApi
-          .performBulkAction({
+          .performRulesBulkAction({
             body: { query: '', action: BulkActionTypeEnum.delete },
             query: {},
           })
@@ -605,7 +626,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should enable rules with legacy investigation fields and transform legacy field in response', async () => {
         const { body } = await securitySolutionApi
-          .performBulkAction({
+          .performRulesBulkAction({
             body: { query: '', action: BulkActionTypeEnum.enable },
             query: {},
           })
@@ -676,7 +697,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should disable rules with legacy investigation fields and transform legacy field in response', async () => {
         const { body } = await securitySolutionApi
-          .performBulkAction({ body: { query: '', action: BulkActionTypeEnum.disable }, query: {} })
+          .performRulesBulkAction({
+            body: { query: '', action: BulkActionTypeEnum.disable },
+            query: {},
+          })
           .expect(200);
 
         expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
@@ -747,7 +771,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should duplicate rules with legacy investigation fields and transform field in response', async () => {
         const { body } = await securitySolutionApi
-          .performBulkAction({
+          .performRulesBulkAction({
             body: {
               query: '',
               action: BulkActionTypeEnum.duplicate,
@@ -866,7 +890,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should edit rules with legacy investigation fields', async () => {
-        const { body } = await securitySolutionApi.performBulkAction({
+        const { body } = await securitySolutionApi.performRulesBulkAction({
           body: {
             query: '',
             action: BulkActionTypeEnum.edit,

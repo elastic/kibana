@@ -38,14 +38,13 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('detection_rule'));
+      const mdc = { task_id: taskId, task_execution_period: taskExecutionPeriod };
+      const log = newTelemetryLogger(logger.get('detection_rule'), mdc);
       const usageCollector = sender.getTelemetryUsageCluster();
       const usageLabelPrefix: string[] = ['security_telemetry', 'detection-rules'];
       const trace = taskMetricsService.start(taskType);
 
-      log.l(
-        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
-      );
+      log.l('Running telemetry task');
 
       try {
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
@@ -61,7 +60,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         const { body: prebuiltRules } = await receiver.fetchDetectionRules();
 
         if (!prebuiltRules) {
-          log.l('no prebuilt rules found');
+          log.debug('no prebuilt rules found');
           await taskMetricsService.end(trace);
           return 0;
         }
@@ -103,7 +102,9 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
           licenseInfo,
           LIST_DETECTION_RULE_EXCEPTION
         );
-        log.l(`Detection rule exception json length ${detectionRuleExceptionsJson.length}`);
+        log.l('Detection rule exception json length', {
+          length: detectionRuleExceptionsJson.length,
+        });
 
         usageCollector?.incrementCounter({
           counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -120,9 +121,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         }
         await taskMetricsService.end(trace);
 
-        log.l(
-          `Task: ${taskId} executed.  Processed ${detectionRuleExceptionsJson.length} exceptions`
-        );
+        log.l('Task executed', { length: detectionRuleExceptionsJson.length });
 
         return detectionRuleExceptionsJson.length;
       } catch (err) {

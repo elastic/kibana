@@ -29,12 +29,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { useImportKnowledgeBaseEntries } from '../../hooks/use_import_knowledge_base_entries';
-import { useAppContext } from '../../hooks/use_app_context';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void }) {
   const {
     notifications: { toasts },
-  } = useAppContext();
+  } = useKibana().services;
 
   const { mutateAsync, isLoading } = useImportKnowledgeBaseEntries();
 

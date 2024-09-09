@@ -34,11 +34,13 @@ export function createAddChangePointChartAction(
         id: 'ml',
         getDisplayName: () =>
           i18n.translate('xpack.aiops.navMenu.mlAppNameText', {
-            defaultMessage: 'Machine Learning',
+            defaultMessage: 'Machine Learning and Analytics',
           }),
         getIconType: () => 'machineLearningApp',
       },
     ],
+    order: 10,
+    getIconType: () => 'changePointDetection',
     getDisplayName: () =>
       i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
         defaultMessage: 'Change point detection',

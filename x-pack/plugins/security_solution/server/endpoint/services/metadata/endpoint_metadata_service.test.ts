@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { uniq } from 'lodash';
 import type { EndpointMetadataServiceTestContextMock } from './mocks';
 import { createEndpointMetadataServiceTestContextMock } from './mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -21,6 +21,8 @@ import {
 import type { HostMetadata } from '../../../../common/endpoint/types';
 import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server/services';
+import { createAppContextStartContractMock as fleetCreateAppContextStartContractMock } from '@kbn/fleet-plugin/server/mocks';
+import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
@@ -38,6 +40,11 @@ describe('EndpointMetadataService', () => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
     soClient = savedObjectsClientMock.create();
     soClient.find = jest.fn().mockResolvedValue({ saved_objects: [] });
+    fleetAppContextService.start(
+      fleetCreateAppContextStartContractMock({}, false, {
+        withoutSpaceExtensions: soClient,
+      })
+    );
   });
 
   describe('#findHostMetadataForFleetAgents()', () => {
@@ -125,11 +132,11 @@ describe('EndpointMetadataService', () => {
       const packagePolicies = [
         Object.assign(endpointDocGenerator.generatePolicyPackagePolicy(), {
           id: 'test-package-policy-id',
-          policy_id: policyId,
+          policy_ids: [policyId],
           revision: 1,
         }),
       ];
-      const packagePolicyIds = packagePolicies.map((policy) => policy.policy_id);
+      const packagePolicyIds = uniq(packagePolicies.flatMap((policy) => policy.policy_ids));
       const agentPolicies = [
         Object.assign(endpointDocGenerator.generateAgentPolicy(), {
           id: policyId,

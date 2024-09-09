@@ -7,11 +7,11 @@
 
 import React, { useState } from 'react';
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiTitle,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -37,15 +37,17 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
       sloInstanceId: selectedSlo?.sloInstanceId,
     });
   return (
-    <EuiModal onClose={onCancel} style={{ minWidth: 550 }}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
-            defaultMessage: 'SLO configuration',
-          })}
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
+    <EuiFlyout onClose={onCancel} style={{ minWidth: 550 }}>
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h2>
+            {i18n.translate('xpack.slo.errorBudgetEmbeddable.config.sloSelector.headerTitle', {
+              defaultMessage: 'Error budget burn down configuration',
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
         <EuiFlexGroup>
           <EuiFlexItem grow>
             <SloSelector
@@ -60,27 +62,29 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
-          <FormattedMessage
-            id="xpack.slo.sloEmbeddable.config.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
+            <FormattedMessage
+              id="xpack.slo.sloEmbeddable.config.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
 
-        <EuiButton
-          data-test-subj="sloConfirmButton"
-          isDisabled={!selectedSlo || hasError}
-          onClick={onConfirmClick}
-          fill
-        >
-          <FormattedMessage
-            id="xpack.slo.embeddableSlo.config.confirmButtonLabel"
-            defaultMessage="Confirm configurations"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+          <EuiButton
+            data-test-subj="sloConfirmButton"
+            isDisabled={!selectedSlo || hasError}
+            onClick={onConfirmClick}
+            fill
+          >
+            <FormattedMessage
+              id="xpack.slo.embeddableSlo.config.confirmButtonLabel"
+              defaultMessage="Confirm configurations"
+            />
+          </EuiButton>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 }

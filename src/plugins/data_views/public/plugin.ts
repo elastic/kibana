@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 import { getIndexPatternLoad } from './expressions';
 import type { ClientConfigType } from '../common/types';
 import {
@@ -16,7 +16,6 @@ import {
   DataViewsPublicPluginStart,
   DataViewsPublicSetupDependencies,
   DataViewsPublicStartDependencies,
-  UserIdGetter,
 } from './types';
 
 import { DataViewsApiClient } from '.';
@@ -43,9 +42,11 @@ export class DataViewsPublicPlugin
 {
   private readonly hasData = new HasData();
   private rollupsEnabled: boolean = false;
-  private userIdGetter: UserIdGetter = async () => undefined;
+  private readonly callResolveCluster: boolean;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.callResolveCluster = initializerContext.env.packageInfo.buildFlavor === 'traditional';
+  }
 
   public setup(
     core: CoreSetup<DataViewsPublicStartDependencies, DataViewsPublicPluginStart>,
@@ -61,18 +62,6 @@ export class DataViewsPublicPlugin
       name: i18n.translate('dataViews.contentManagementType', {
         defaultMessage: 'Data view',
       }),
-    });
-
-    core.plugins.onStart<{ security: SecurityPluginStart }>('security').then(({ security }) => {
-      if (security.found) {
-        const getUserId = async function getUserId(): Promise<string | undefined> {
-          const currentUser = await security.contract.authc.getCurrentUser();
-          return currentUser?.profile_uid;
-        };
-        this.userIdGetter = getUserId;
-      } else {
-        throw new Error('Security plugin is not available, but is required for Data Views plugin');
-      }
     });
 
     return {
@@ -98,10 +87,13 @@ export class DataViewsPublicPlugin
     const config = this.initializerContext.config.get<ClientConfigType>();
 
     return new DataViewsServicePublic({
-      hasData: this.hasData.start(core),
+      hasData: this.hasData.start(core, this.callResolveCluster),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
-      apiClient: new DataViewsApiClient(http, () => this.userIdGetter()),
+      apiClient: new DataViewsApiClient(http, async () => {
+        const currentUser = await core.security.authc.getCurrentUser();
+        return currentUser?.profile_uid;
+      }),
       fieldFormats,
       http,
       onNotification: (toastInputFields, key) => {

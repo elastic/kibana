@@ -7,12 +7,15 @@
 
 export interface PostHealthCheckRequest {
   body: {
-    host: string;
+    id: string;
+    /** @deprecated use id field instead */
+    host?: string;
   };
 }
 
 export interface PostHealthCheckResponse {
-  name: string;
-  host: string;
+  host_id: string;
+  // deprecated
+  host?: string;
   status: string;
 }

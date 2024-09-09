@@ -14,13 +14,16 @@ import {
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function casesWebhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
+  const retry = getService('retry');
   const config = {
     createCommentJson: '{"body":{{{case.comment}}}}',
     createCommentMethod: 'post',
@@ -202,7 +205,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type connector: both user and password must be specified',
+                'error validating action type connector: must specify a secrets configuration',
             });
           });
       });
@@ -397,6 +400,23 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           expect(proxyHaveBeenCalled).to.equal(true);
           const { pushedDate, ...dataWithoutTime } = body.data;
           body.data = dataWithoutTime;
+
+          const events: IValidatedEvent[] = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: 'default',
+              type: 'action',
+              id: simulatedActionId,
+              provider: 'actions',
+              actions: new Map([
+                ['execute-start', { equal: 1 }],
+                ['execute', { equal: 1 }],
+              ]),
+            });
+          });
+
+          const executeEvent = events[1];
+          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(125);
 
           expect(body).to.eql({
             status: 'ok',

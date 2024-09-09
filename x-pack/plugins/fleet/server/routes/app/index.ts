@@ -8,16 +8,17 @@
 import type { RequestHandler, RouteValidationResultFactory } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import type { FleetAuthzRouter } from '../../services/security';
-
 import { APP_API_ROUTES } from '../../constants';
 import { API_VERSIONS } from '../../../common/constants';
-
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
 import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
 import type { FleetRequestHandler, GenerateServiceTokenRequestSchema } from '../../types';
 import { CheckPermissionsRequestSchema } from '../../types';
+import { enableSpaceAwarenessMigration } from '../../services/spaces/enable_space_awareness';
+import { type FleetConfigType } from '../../config';
 
 export const getCheckPermissionsHandler: FleetRequestHandler<
   unknown,
@@ -28,6 +29,7 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
     error: 'MISSING_SECURITY',
   };
 
+  const isServerless = appContextService.getCloud()?.isServerlessEnabled;
   const isSubfeaturePrivilegesEnabled =
     appContextService.getExperimentalFeatures().subfeaturePrivileges ?? false;
 
@@ -47,7 +49,9 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
           error: 'MISSING_PRIVILEGES',
         } as CheckPermissionsResponse,
       });
-    } else if (request.query.fleetServerSetup) {
+    }
+    // check the manage_service_account cluster privilege only on stateful
+    else if (request.query.fleetServerSetup && !isServerless) {
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
         body: { cluster: ['manage_service_account'] },
@@ -74,8 +78,8 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
         } as CheckPermissionsResponse,
       });
     }
-    // check the manage_service_account cluster privilege
-    else if (request.query.fleetServerSetup) {
+    // check the manage_service_account cluster privilege only on stateful
+    else if (request.query.fleetServerSetup && !isServerless) {
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
         body: { cluster: ['manage_service_account'] },
@@ -92,6 +96,23 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
     }
 
     return response.ok({ body: { success: true } as CheckPermissionsResponse });
+  }
+};
+
+export const postEnableSpaceAwarenessHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  try {
+    await enableSpaceAwarenessMigration();
+
+    return response.ok({
+      body: {},
+    });
+  } catch (e) {
+    const error = new GenerateServiceTokenError(e);
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -130,6 +151,35 @@ export const generateServiceTokenHandler: RequestHandler<
   }
 };
 
+export const getAgentPoliciesSpacesHandler: FleetRequestHandler<
+  null,
+  null,
+  TypeOf<typeof GenerateServiceTokenRequestSchema.body>
+> = async (context, request, response) => {
+  try {
+    const spaces = await (await context.fleet).getAllSpaces();
+    const security = appContextService.getSecurity();
+    const spaceIds = spaces.map(({ id }) => id);
+    const res = await security.authz.checkPrivilegesWithRequest(request).atSpaces(spaceIds, {
+      kibana: [security.authz.actions.api.get(`fleet-agent-policies-all`)],
+    });
+
+    const authorizedSpaces = spaces.filter(
+      (space) =>
+        res.privileges.kibana.find((privilege) => privilege.resource === space.id)?.authorized ??
+        false
+    );
+
+    return response.ok({
+      body: {
+        items: authorizedSpaces,
+      },
+    });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
 const serviceTokenBodyValidation = (data: any, validationResult: RouteValidationResultFactory) => {
   const { ok } = validationResult;
   if (!data) {
@@ -139,7 +189,26 @@ const serviceTokenBodyValidation = (data: any, validationResult: RouteValidation
   return ok({ remote });
 };
 
-export const registerRoutes = (router: FleetAuthzRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+
+  if (experimentalFeatures.useSpaceAwareness) {
+    router.versioned
+      .post({
+        path: '/internal/fleet/enable_space_awareness',
+        access: 'internal',
+        fleetAuthz: {
+          fleet: { all: true },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.internal.v1,
+          validate: {},
+        },
+        postEnableSpaceAwarenessHandler
+      );
+  }
   router.versioned
     .get({
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
@@ -153,11 +222,28 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     );
 
   router.versioned
+    .get({
+      path: APP_API_ROUTES.AGENT_POLICIES_SPACES,
+      access: 'internal',
+      fleetAuthz: {
+        fleet: { allAgentPolicies: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {},
+      },
+      getAgentPoliciesSpacesHandler
+    );
+
+  router.versioned
     .post({
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      description: `Create a service token`,
     })
     .addVersion(
       {
@@ -175,6 +261,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      description: `Create a service token`,
     })
     .addVersion(
       {

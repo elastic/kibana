@@ -466,4 +466,45 @@ describe('AgentUpgradeAgentModal', () => {
       expect(el).toBeDisabled();
     });
   });
+
+  it('should enable restart upgrade if single agent stuck updating', async () => {
+    const { utils } = renderAgentUpgradeAgentModal({
+      agents: [
+        { status: 'updating', upgrade_started_at: '2022-11-21T12:27:24Z', id: 'agent1' },
+      ] as any,
+      agentCount: 1,
+      isUpdating: true,
+    });
+
+    const el = utils.getByTestId('confirmModalTitleText');
+    expect(el.textContent).toEqual('Restart upgrade');
+
+    const btn = utils.getByTestId('confirmModalConfirmButton');
+    await waitFor(() => {
+      expect(btn).toBeEnabled();
+    });
+  });
+
+  it('should enable restart upgrade if single agent failed upgrade', async () => {
+    const { utils } = renderAgentUpgradeAgentModal({
+      agents: [
+        {
+          status: 'updating',
+          upgrade_details: { state: 'UPG_FAILED' },
+          id: 'agent1',
+          active: true,
+        },
+      ] as any,
+      agentCount: 1,
+      isUpdating: true,
+    });
+
+    const el = utils.getByTestId('confirmModalTitleText');
+    expect(el.textContent).toEqual('Restart upgrade');
+
+    const btn = utils.getByTestId('confirmModalConfirmButton');
+    await waitFor(() => {
+      expect(btn).toBeEnabled();
+    });
+  });
 });

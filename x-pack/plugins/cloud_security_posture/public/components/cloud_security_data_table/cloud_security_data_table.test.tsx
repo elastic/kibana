@@ -46,22 +46,39 @@ const mockCloudPostureDataTable = {
   getRowsFromPages: jest.fn(),
 } as any;
 
+const mockRows = [
+  {
+    id: '1',
+    raw: {
+      field1: 'Label 1',
+      field2: 'Label 2',
+    },
+    flattened: {
+      field1: 'Label 1',
+      field2: 'Label 2',
+    },
+  },
+] as any;
+
 const renderDataTable = (props: Partial<CloudSecurityDataTableProps> = {}) => {
   const defaultProps: CloudSecurityDataTableProps = {
     isLoading: false,
     defaultColumns: mockDefaultColumns,
-    rows: [],
+    rows: props.rows || mockRows,
     total: 0,
     flyoutComponent: () => <></>,
     cloudPostureDataTable: mockCloudPostureDataTable,
     loadMore: jest.fn(),
+    createRuleFn: jest.fn(),
     title: 'Test Table',
   };
+
+  const propsWithDefaults = { ...defaultProps, ...props };
 
   return render(
     <TestProvider>
       <DataViewContext.Provider value={{ dataView: mockDataView }}>
-        <CloudSecurityDataTable {...defaultProps} {...props} />
+        <CloudSecurityDataTable {...propsWithDefaults} />
       </DataViewContext.Provider>
     </TestProvider>
   );
@@ -69,36 +86,47 @@ const renderDataTable = (props: Partial<CloudSecurityDataTableProps> = {}) => {
 
 describe('CloudSecurityDataTable', () => {
   it('renders loading state', () => {
-    const { getByTestId } = renderDataTable({ isLoading: true });
+    const { getByTestId } = renderDataTable({ isLoading: true, rows: [] });
     expect(getByTestId('unifiedDataTableLoading')).toBeInTheDocument();
   });
 
   it('renders empty state when no rows are present', () => {
-    const { getByTestId } = renderDataTable();
+    const { getByTestId } = renderDataTable({ rows: [] });
     expect(getByTestId('csp:empty-state')).toBeInTheDocument();
   });
 
   it('renders data table with rows', async () => {
-    const mockRows = [
-      {
-        id: '1',
-        raw: {
-          field1: 'Label 1',
-          field2: 'Label 2',
-        },
-        flattened: {
-          field1: 'Label 1',
-          field2: 'Label 2',
-        },
-      },
-    ] as any;
     const { getByTestId, getByText } = renderDataTable({
-      rows: mockRows,
       total: mockRows.length,
     });
 
     expect(getByTestId('discoverDocTable')).toBeInTheDocument();
     expect(getByText('Label 1')).toBeInTheDocument();
     expect(getByText('Label 2')).toBeInTheDocument();
+  });
+
+  it('renders data table with actions button', async () => {
+    const { getByRole } = renderDataTable({
+      rows: mockRows,
+      total: mockRows.length,
+    });
+
+    const showActions = getByRole('button', {
+      name: 'More actions',
+    });
+
+    expect(showActions).toBeInTheDocument();
+  });
+
+  it('renders data table without actions button', async () => {
+    const { queryByRole } = renderDataTable({
+      createRuleFn: undefined,
+      rows: mockRows,
+      total: mockRows.length,
+    });
+    const showActions = queryByRole('button', {
+      name: 'More actions',
+    });
+    expect(showActions).toBeNull();
   });
 });

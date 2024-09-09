@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
@@ -41,7 +42,11 @@ import { DashboardVisualizationsService } from './visualizations/types';
 import { DashboardServerlessService } from './serverless/types';
 import { NoDataPageService } from './no_data_page/types';
 import { DashboardUiActionsService } from './ui_actions/types';
+import { ObservabilityAIAssistantService } from './observability_ai_assistant/types';
 import { DashboardUserProfileService } from './user_profile/types';
+import { DashboardRecentlyAccessedService } from './dashboard_recently_accessed/types';
+import { DashboardContentInsightsService } from './dashboard_content_insights/types';
+import { DashboardFavoritesService } from './dashboard_favorites/types';
 
 export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardStartDependencies> & {
   initContext: PluginInitializerContext; // need a custom type so that initContext is a required parameter for initializerContext
@@ -79,5 +84,9 @@ export interface DashboardServices {
   serverless: DashboardServerlessService; // TODO: make this optional in follow up
   noDataPage: NoDataPageService;
   uiActions: DashboardUiActionsService;
+  observabilityAIAssistant: ObservabilityAIAssistantService; // TODO: make this optional in follow up
   userProfile: DashboardUserProfileService;
+  dashboardRecentlyAccessed: DashboardRecentlyAccessedService;
+  dashboardContentInsights: DashboardContentInsightsService;
+  dashboardFavorites: DashboardFavoritesService;
 }

@@ -1,13 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { useCallback, useContext, useMemo } from 'react';
+import {
+  UserProfilesProvider,
+  useUserProfilesServices,
+} from '@kbn/content-management-user-profiles';
 
 import type { EuiComboBoxProps } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -130,11 +135,19 @@ export const ContentEditorKibanaProvider: FC<
     return Comp;
   }, [savedObjectsTagging?.ui.components.TagList]);
 
+  const userProfilesServices = useUserProfilesServices();
+
   const openFlyout = useCallback(
     (node: ReactNode, options: OverlayFlyoutOpenOptions) => {
-      return coreOpenFlyout(toMountPoint(node, startServices), options);
+      return coreOpenFlyout(
+        toMountPoint(
+          <UserProfilesProvider {...userProfilesServices}>{node}</UserProfilesProvider>,
+          startServices
+        ),
+        options
+      );
     },
-    [coreOpenFlyout, startServices]
+    [coreOpenFlyout, startServices, userProfilesServices]
   );
 
   return (

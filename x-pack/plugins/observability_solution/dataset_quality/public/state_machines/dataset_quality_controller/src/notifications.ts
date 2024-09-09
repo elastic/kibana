@@ -11,25 +11,7 @@ import { i18n } from '@kbn/i18n';
 export const fetchDatasetStatsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchDatasetStatsFailed', {
-      defaultMessage: "We couldn't get your datasets.",
-    }),
-    text: error.message,
-  });
-};
-
-export const fetchDatasetDetailsFailedNotifier = (toasts: IToasts, error: Error) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.fetchDatasetDetailsFailed', {
-      defaultMessage: "We couldn't get your dataset details.",
-    }),
-    text: error.message,
-  });
-};
-
-export const fetchDatasetSettingsFailedNotifier = (toasts: IToasts, error: Error) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.fetchDatasetSettingsFailed', {
-      defaultMessage: "Dataset settings couldn't be loaded.",
+      defaultMessage: "We couldn't get your data sets.",
     }),
     text: error.message,
   });
@@ -44,24 +26,6 @@ export const fetchDegradedStatsFailedNotifier = (toasts: IToasts, error: Error) 
   });
 };
 
-export const fetchNonAggregatableDatasetsFailedNotifier = (toasts: IToasts, error: Error) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.fetchNonAggregatableDatasetsFailed', {
-      defaultMessage: "We couldn't get non aggregatable datasets information.",
-    }),
-    text: error.message,
-  });
-};
-
-export const fetchIntegrationDashboardsFailedNotifier = (toasts: IToasts, error: Error) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.fetchIntegrationDashboardsFailed', {
-      defaultMessage: "We couldn't get your integration dashboards.",
-    }),
-    text: error.message,
-  });
-};
-
 export const fetchIntegrationsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchIntegrationsFailed', {
@@ -70,10 +34,3 @@ export const fetchIntegrationsFailedNotifier = (toasts: IToasts, error: Error) =
     text: error.message,
   });
 };
-
-export const noDatasetSelected = i18n.translate(
-  'xpack.datasetQuality.fetchDatasetDetailsFailed.noDatasetSelected',
-  {
-    defaultMessage: 'No dataset have been selected',
-  }
-);

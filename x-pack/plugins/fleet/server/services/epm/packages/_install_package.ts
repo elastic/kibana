@@ -10,11 +10,8 @@ import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
-  ISavedObjectsImporter,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-
-import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import type { PackageInstallContext } from '../../../../common/types';
@@ -23,7 +20,7 @@ import { getNormalizedDataStreams } from '../../../../common/services';
 import {
   MAX_TIME_COMPLETE_INSTALL,
   ASSETS_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 import { PACKAGES_SAVED_OBJECT_TYPE, FLEET_INSTALL_FORMAT_VERSION } from '../../../constants';
@@ -60,9 +57,6 @@ import { installIndexTemplatesAndPipelines } from './install_index_template_pipe
 // only the more explicit `installPackage*` functions should be used
 export async function _installPackage({
   savedObjectsClient,
-  savedObjectsImporter,
-  savedObjectTagAssignmentService,
-  savedObjectTagClient,
   esClient,
   logger,
   installedPkg,
@@ -77,9 +71,6 @@ export async function _installPackage({
   skipDataStreamRollover,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
-  savedObjectTagAssignmentService: IAssignmentService;
-  savedObjectTagClient: ITagsClient;
   esClient: ElasticsearchClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;
@@ -103,7 +94,9 @@ export async function _installPackage({
       const hasExceededTimeout =
         Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
         MAX_TIME_COMPLETE_INSTALL;
-      logger.debug(`Package install - Install status ${installedPkg.attributes.install_status}`);
+      logger.debug(
+        `Package install - Install status ${pkgName}-${pkgVersion}: ${installedPkg.attributes.install_status}`
+      );
 
       // if the installation is currently running, don't try to install
       // instead, only return already installed assets
@@ -142,7 +135,7 @@ export async function _installPackage({
         });
       }
     } else {
-      logger.debug(`Package install - Create installation`);
+      logger.debug(`Package install - Create installation ${pkgName}-${pkgVersion}`);
       await createInstallation({
         savedObjectsClient,
         packageInfo,
@@ -155,9 +148,6 @@ export async function _installPackage({
     const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
       installKibanaAssetsAndReferences({
         savedObjectsClient,
-        savedObjectsImporter,
-        savedObjectTagAssignmentService,
-        savedObjectTagClient,
         pkgName,
         pkgTitle,
         packageInstallContext,
@@ -371,7 +361,7 @@ export async function _installPackage({
         const policyIdsToUpgrade = await packagePolicyService.listIds(savedObjectsClient, {
           page: 1,
           perPage: SO_SEARCH_LIMIT,
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+          kuery: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
         });
         logger.debug(
           `Package install - Package is flagged with keep_policies_up_to_date, upgrading its associated package policies ${policyIdsToUpgrade}`

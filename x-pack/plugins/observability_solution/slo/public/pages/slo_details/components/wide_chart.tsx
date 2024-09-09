@@ -14,8 +14,6 @@ import {
   Position,
   ScaleType,
   Settings,
-  Tooltip,
-  TooltipType,
 } from '@elastic/charts';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -24,6 +22,8 @@ import moment from 'moment';
 import React, { useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { useAnnotations } from '@kbn/observability-plugin/public';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { getBrushTimeBounds } from '../../../utils/slo/duration';
 import { TimeBounds } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
@@ -38,10 +38,11 @@ export interface Props {
   chart: ChartType;
   state: State;
   isLoading: boolean;
+  slo: SLOWithSummaryResponse;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function WideChart({ chart, data, id, isLoading, state, onBrushed }: Props) {
+export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }: Props) {
   const { charts, uiSettings } = useKibana().services;
   const baseTheme = charts.theme.useChartsBaseTheme();
   const { euiTheme } = useEuiTheme();
@@ -50,6 +51,15 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed }: Prop
 
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
+
+  const { ObservabilityAnnotations, annotations, onAnnotationClick, wrapOnBrushEnd } =
+    useAnnotations({
+      slo,
+      domain: {
+        min: 'now-30d',
+        max: 'now',
+      },
+    });
 
   const chartRef = useRef(null);
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
@@ -61,9 +71,12 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed }: Prop
   }
 
   return (
-    <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
-      <Tooltip type={TooltipType.VerticalCursor} />
+    <Chart size={{ height: 200, width: '100%' }} ref={chartRef}>
+      <ObservabilityAnnotations annotations={annotations} />
       <Settings
+        theme={{
+          chartMargins: { top: 30 },
+        }}
         baseTheme={baseTheme}
         showLegend={false}
         noResults={
@@ -83,9 +96,10 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed }: Prop
         pointerUpdateDebounce={0}
         pointerUpdateTrigger={'x'}
         locale={i18n.getLocale()}
-        onBrushEnd={(brushArea) => {
+        onBrushEnd={wrapOnBrushEnd((brushArea) => {
           onBrushed?.(getBrushTimeBounds(brushArea));
-        }}
+        })}
+        onAnnotationClick={onAnnotationClick}
       />
       <Axis
         id="bottom"

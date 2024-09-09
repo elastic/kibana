@@ -1,0 +1,225 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TableActions getFieldCellActions should render correctly for undefined functions 1`] = `
+Array [
+  <ToggleColumn
+    Component={[Function]}
+    row={
+      Object {
+        "action": Object {
+          "flattenedField": "flattenedField",
+          "onFilter": [MockFunction],
+          "onToggleColumn": [MockFunction],
+        },
+        "field": Object {
+          "displayName": "message",
+          "field": "message",
+          "fieldMapping": Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customDescription": undefined,
+            "customLabel": undefined,
+            "defaultFormatter": undefined,
+            "esTypes": undefined,
+            "lang": undefined,
+            "name": "message",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "keyword",
+          },
+          "fieldType": "keyword",
+          "onTogglePinned": [MockFunction],
+          "pinned": true,
+          "scripted": false,
+        },
+        "value": Object {
+          "formattedValue": "test",
+          "ignored": undefined,
+        },
+      }
+    }
+  />,
+]
+`;
+
+exports[`TableActions getFieldCellActions should render correctly for undefined functions 2`] = `Array []`;
+
+exports[`TableActions getFieldCellActions should render the panels correctly for defined onFilter function 1`] = `
+Array [
+  <FilterExist
+    Component={[Function]}
+    row={
+      Object {
+        "action": Object {
+          "flattenedField": "flattenedField",
+          "onFilter": [MockFunction],
+          "onToggleColumn": [MockFunction],
+        },
+        "field": Object {
+          "displayName": "message",
+          "field": "message",
+          "fieldMapping": Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customDescription": undefined,
+            "customLabel": undefined,
+            "defaultFormatter": undefined,
+            "esTypes": undefined,
+            "lang": undefined,
+            "name": "message",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "keyword",
+          },
+          "fieldType": "keyword",
+          "onTogglePinned": [MockFunction],
+          "pinned": true,
+          "scripted": false,
+        },
+        "value": Object {
+          "formattedValue": "test",
+          "ignored": undefined,
+        },
+      }
+    }
+  />,
+  <ToggleColumn
+    Component={[Function]}
+    row={
+      Object {
+        "action": Object {
+          "flattenedField": "flattenedField",
+          "onFilter": [MockFunction],
+          "onToggleColumn": [MockFunction],
+        },
+        "field": Object {
+          "displayName": "message",
+          "field": "message",
+          "fieldMapping": Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customDescription": undefined,
+            "customLabel": undefined,
+            "defaultFormatter": undefined,
+            "esTypes": undefined,
+            "lang": undefined,
+            "name": "message",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "keyword",
+          },
+          "fieldType": "keyword",
+          "onTogglePinned": [MockFunction],
+          "pinned": true,
+          "scripted": false,
+        },
+        "value": Object {
+          "formattedValue": "test",
+          "ignored": undefined,
+        },
+      }
+    }
+  />,
+]
+`;
+
+exports[`TableActions getFieldValueCellActions should render correctly for undefined functions 1`] = `Array []`;
+
+exports[`TableActions getFieldValueCellActions should render the panels correctly for defined onFilter function 1`] = `
+Array [
+  <FilterIn
+    Component={[Function]}
+    row={
+      Object {
+        "action": Object {
+          "flattenedField": "flattenedField",
+          "onFilter": [MockFunction],
+          "onToggleColumn": [MockFunction],
+        },
+        "field": Object {
+          "displayName": "message",
+          "field": "message",
+          "fieldMapping": Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customDescription": undefined,
+            "customLabel": undefined,
+            "defaultFormatter": undefined,
+            "esTypes": undefined,
+            "lang": undefined,
+            "name": "message",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "keyword",
+          },
+          "fieldType": "keyword",
+          "onTogglePinned": [MockFunction],
+          "pinned": true,
+          "scripted": false,
+        },
+        "value": Object {
+          "formattedValue": "test",
+          "ignored": undefined,
+        },
+      }
+    }
+  />,
+  <FilterOut
+    Component={[Function]}
+    row={
+      Object {
+        "action": Object {
+          "flattenedField": "flattenedField",
+          "onFilter": [MockFunction],
+          "onToggleColumn": [MockFunction],
+        },
+        "field": Object {
+          "displayName": "message",
+          "field": "message",
+          "fieldMapping": Object {
+            "aggregatable": true,
+            "conflictDescriptions": undefined,
+            "count": 0,
+            "customDescription": undefined,
+            "customLabel": undefined,
+            "defaultFormatter": undefined,
+            "esTypes": undefined,
+            "lang": undefined,
+            "name": "message",
+            "readFromDocValues": false,
+            "script": undefined,
+            "scripted": false,
+            "searchable": true,
+            "subType": undefined,
+            "type": "keyword",
+          },
+          "fieldType": "keyword",
+          "onTogglePinned": [MockFunction],
+          "pinned": true,
+          "scripted": false,
+        },
+        "value": Object {
+          "formattedValue": "test",
+          "ignored": undefined,
+        },
+      }
+    }
+  />,
+]
+`;

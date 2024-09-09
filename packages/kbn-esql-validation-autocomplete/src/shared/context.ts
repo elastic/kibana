@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -20,10 +21,10 @@ import { EDITOR_MARKER } from './constants';
 import {
   isOptionItem,
   isColumnItem,
-  getLastCharFromTrimmed,
   getFunctionDefinition,
   isSourceItem,
   isSettingItem,
+  pipePrecedesCurrentWord,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
@@ -152,6 +153,10 @@ function isBuiltinFunction(node: ESQLFunction) {
 export function getAstContext(queryString: string, ast: ESQLAst, offset: number) {
   const { command, option, setting, node } = findAstPosition(ast, offset);
   if (node) {
+    if (node.type === 'literal' && node.literalType === 'string') {
+      // command ... "<here>"
+      return { type: 'value' as const, command, node, option, setting };
+    }
     if (node.type === 'function') {
       if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
         // command ... a in ( <here> )
@@ -172,12 +177,12 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
       return { type: 'setting' as const, command, node, option, setting };
     }
   }
-  if (!command || (queryString.length <= offset && getLastCharFromTrimmed(queryString) === '|')) {
+  if (!command || (queryString.length <= offset && pipePrecedesCurrentWord(queryString))) {
     //   // ... | <here>
     return { type: 'newCommand' as const, command: undefined, node, option, setting };
   }
 
-  if (command && command.args.length) {
+  if (command && isOptionItem(command.args[command.args.length - 1])) {
     if (option) {
       return { type: 'option' as const, command, node, option, setting };
     }

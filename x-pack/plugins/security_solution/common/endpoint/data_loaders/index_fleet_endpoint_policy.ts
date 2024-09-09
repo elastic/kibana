@@ -93,7 +93,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       name: policyName,
       // skip_ensure_installed: true,
       description: 'Protect the worlds data',
-      policy_id: agentPolicy.data.item.id,
+      policy_ids: [agentPolicy.data.item.id],
       enabled: true,
       inputs: [
         {

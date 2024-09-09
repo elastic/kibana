@@ -22,7 +22,7 @@ import { hostsUrl } from '../../../urls/navigation';
 import { kqlSearch } from '../../../tasks/security_header';
 import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
-describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
+describe('risk tab', { tags: ['@ess'] }, () => {
   describe('with legacy risk score', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
@@ -70,7 +70,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('with new risk score', () => {
+  describe('with new risk score', { tags: ['@serverless'] }, () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
     });

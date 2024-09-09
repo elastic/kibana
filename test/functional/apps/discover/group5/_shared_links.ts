@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -50,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
     }
 
-    describe('shared links with state in query', async () => {
+    describe('shared links with state in query', () => {
       let teardown: () => Promise<void>;
       before(async function () {
         teardown = await setup({ storeStateInSessionStorage: false });
@@ -61,11 +62,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('permalink', function () {
-        it('should allow for copying the snapshot URL as a short URL', async function () {
-          const re = new RegExp(baseUrl + '/app/r/s/.+$');
+        it('should allow for copying the snapshot URL', async function () {
+          const re = new RegExp(baseUrl + '/app/r.+$');
           await retry.try(async () => {
             const actualUrl = await PageObjects.share.getSharedUrl();
-            expect(actualUrl).to.match(re);
+            expect(actualUrl).match(re);
           });
         });
 
@@ -94,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('shared links with state in sessionStorage', async () => {
+    describe('shared links with state in sessionStorage', () => {
       let teardown: () => Promise<void>;
       before(async function () {
         teardown = await setup({ storeStateInSessionStorage: true });
@@ -104,12 +105,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await teardown();
       });
 
-      it('should allow for copying the snapshot URL as a short URL and should open it', async function () {
-        const re = new RegExp(baseUrl + '/app/r/s/.+$');
+      it('should allow for copying the snapshot URL and should open it', async function () {
+        const re = new RegExp(baseUrl + '/app/r.*$');
         let actualUrl: string = '';
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).to.match(re);
+          expect(actualUrl).match(re);
         });
 
         const actualTime = await PageObjects.timePicker.getTimeConfig();

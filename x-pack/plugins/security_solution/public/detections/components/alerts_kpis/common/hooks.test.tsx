@@ -7,19 +7,19 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import type { BrowserField } from '@kbn/timelines-plugin/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import type { GetAggregatableFields, UseInspectButtonParams } from './hooks';
 import { getAggregatableFields, useInspectButton, useStackByFields } from './hooks';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { TestProviders } from '../../../../common/mock';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
-jest.mock('../../../../common/containers/sourcerer', () => ({
+jest.mock('../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn(),
   getScopeFromPath: jest.fn(),
 }));
@@ -57,7 +57,7 @@ describe('getAggregatableFields', () => {
 
       expect(
         getAggregatableFields(
-          { [field]: mockBrowserFields?.destination?.fields?.[field] as Partial<BrowserField> },
+          { [field]: mockBrowserFields?.destination?.fields?.[field] as Partial<FieldSpec> },
           useLensCompatibleFields
         )
       ).toHaveLength(1);

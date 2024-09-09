@@ -27,6 +27,7 @@ describe('Delete rule route', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.detectionRulesClient.deleteRule.mockResolvedValue();
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
 
     deleteRuleRoute(server.router);
@@ -68,7 +69,7 @@ describe('Delete rule route', () => {
     });
 
     test('catches error if deletion throws error', async () => {
-      clients.rulesClient.delete.mockImplementation(async () => {
+      clients.detectionRulesClient.deleteRule.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(

@@ -10,7 +10,7 @@ import { EuiTextColor, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 
 import { get } from 'lodash';
-import { NumericField, useFormData } from '../../../../../../shared_imports';
+import { NumericField, ToggleField, useFormData } from '../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { UseField, useGlobalFields } from '../../../form';
@@ -105,6 +105,15 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
                   />
                 ) : null,
               },
+            }}
+          />
+          <EuiSpacer />
+          <UseField
+            path={`phases.${phase}.actions.shrink.allow_write_after_shrink`}
+            key={`phases.${phase}.actions.shrink.allow_write_after_shrink`}
+            component={ToggleField}
+            euiFieldProps={{
+              'data-test-subj': `${phase}-allowWriteAfterShrink`,
             }}
           />
         </>

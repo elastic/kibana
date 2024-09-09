@@ -109,7 +109,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   } = useKibana().services;
 
   const getFleetAppUrl = useCallback(
-    (agentId) =>
+    (agentId: any) =>
       getUrlForApp('fleet', {
         path: pagePathGetters.agent_details({ agentId })[1],
       }),
@@ -118,7 +118,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
-    (pageSize) =>
+    (pageSize: any) =>
       setPagination((currentPagination) => ({
         ...currentPagination,
         pageSize,
@@ -127,7 +127,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [setPagination]
   );
   const onChangePage = useCallback(
-    (pageIndex) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
+    (pageIndex: any) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
     [setPagination]
   );
 
@@ -342,7 +342,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             };
             const eventId = data[visibleRowIndex]?._id;
 
-            return <AddToTimelineButton field="_id" value={eventId} isIcon={true} />;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            return <AddToTimelineButton field="_id" value={eventId!} isIcon={true} />;
           },
         },
       ];

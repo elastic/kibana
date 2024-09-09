@@ -12,19 +12,20 @@ import {
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import {
   ADD_SLO_OVERVIEW_ACTION_ID,
   SLO_OVERVIEW_EMBEDDABLE_ID,
 } from '../embeddable/slo/overview/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
-import { COMMON_SLO_GROUPING } from '../embeddable/slo/common/constants';
 
 export function createOverviewPanelAction(
   getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_SLO_OVERVIEW_ACTION_ID,
-    grouping: COMMON_SLO_GROUPING,
+    grouping: COMMON_OBSERVABILITY_GROUPING,
+    order: 20,
     getIconType: () => 'visGauge',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);

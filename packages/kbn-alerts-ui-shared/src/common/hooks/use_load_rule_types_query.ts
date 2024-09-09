@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { keyBy } from 'lodash';
@@ -20,16 +21,20 @@ import { RuleTypeIndexWithDescriptions, RuleTypeWithDescription } from '../types
 export interface UseRuleTypesProps {
   http: HttpStart;
   toasts: ToastsStart;
-  filteredRuleTypes: string[];
+  filteredRuleTypes?: string[];
   registeredRuleTypes?: Array<{ id: string; description: string }>;
   enabled?: boolean;
 }
 
-const getFilteredIndex = (
-  data: Array<RuleType<string, string>>,
-  filteredRuleTypes: string[],
-  registeredRuleTypes: UseRuleTypesProps['registeredRuleTypes']
-) => {
+const getFilteredIndex = ({
+  data,
+  filteredRuleTypes,
+  registeredRuleTypes,
+}: {
+  data: Array<RuleType<string, string>>;
+  filteredRuleTypes?: string[];
+  registeredRuleTypes: UseRuleTypesProps['registeredRuleTypes'];
+}) => {
   const index: RuleTypeIndexWithDescriptions = new Map();
   const registeredRuleTypesDictionary = registeredRuleTypes ? keyBy(registeredRuleTypes, 'id') : {};
   for (const ruleType of data) {
@@ -88,7 +93,7 @@ export const useLoadRuleTypesQuery = ({
   const filteredIndex = useMemo(
     () =>
       data
-        ? getFilteredIndex(data, filteredRuleTypes, registeredRuleTypes)
+        ? getFilteredIndex({ data, filteredRuleTypes, registeredRuleTypes })
         : new Map<string, RuleTypeWithDescription>(),
     [data, filteredRuleTypes, registeredRuleTypes]
   );
@@ -104,7 +109,7 @@ export const useLoadRuleTypesQuery = ({
 
   return {
     ruleTypesState: {
-      initialLoad: isLoading || isInitialLoading,
+      isInitialLoad: isInitialLoading,
       isLoading: isLoading || isFetching,
       data: filteredIndex,
       error,

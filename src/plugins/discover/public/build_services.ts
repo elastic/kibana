@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { History } from 'history';
-
-import {
+import type {
   Capabilities,
   ChromeStart,
   CoreStart,
@@ -24,28 +24,26 @@ import {
   AppMountParameters,
   ScopedHistory,
 } from '@kbn/core/public';
-import {
+import type {
   FilterManager,
   TimefilterContract,
   DataViewsContract,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { UiCounterMetricType } from '@kbn/analytics';
+import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { UiCounterMetricType } from '@kbn/analytics';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-
-import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-
+import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -59,10 +57,12 @@ import { memoize, noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
-import { DiscoverStartPlugins } from './plugin';
-import { DiscoverContextAppLocator } from './application/context/services/locator';
-import { DiscoverSingleDocLocator } from './application/doc/locator';
-import { DiscoverAppLocator } from '../common';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { DiscoverStartPlugins } from './types';
+import type { DiscoverContextAppLocator } from './application/context/services/locator';
+import type { DiscoverSingleDocLocator } from './application/doc/locator';
+import type { DiscoverAppLocator } from '../common';
+import type { ProfilesManager } from './context_awareness';
 
 /**
  * Location state of internal Discover history instance
@@ -129,6 +129,8 @@ export interface DiscoverServices {
   contentClient: ContentClient;
   noDataPage?: NoDataPagePluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  profilesManager: ProfilesManager;
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 export const buildServices = memoize(
@@ -142,6 +144,7 @@ export const buildServices = memoize(
     history,
     scopedHistory,
     urlTracker,
+    profilesManager,
     setHeaderActionMenu = noop,
   }: {
     core: CoreStart;
@@ -153,6 +156,7 @@ export const buildServices = memoize(
     history: History<HistoryLocationState>;
     scopedHistory?: ScopedHistory;
     urlTracker: UrlTracker;
+    profilesManager: ProfilesManager;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }): DiscoverServices => {
     const { usageCollection } = plugins;
@@ -212,6 +216,8 @@ export const buildServices = memoize(
       contentClient: plugins.contentManagement.client,
       noDataPage: plugins.noDataPage,
       observabilityAIAssistant: plugins.observabilityAIAssistant,
+      profilesManager,
+      fieldsMetadata: plugins.fieldsMetadata,
     };
   }
 );

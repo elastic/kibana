@@ -6,28 +6,14 @@
  */
 
 import React from 'react';
-import {
-  EuiAccordion,
-  EuiDescribedFormGroup,
-  EuiForm,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiForm } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 
 import type { NewAgentPolicy, AgentPolicy } from '../../../types';
 
-import { AgentPolicyAdvancedOptionsContent } from './agent_policy_advanced_fields';
 import { AgentPolicyGeneralFields } from './agent_policy_general_fields';
 import { AgentPolicyFormSystemMonitoringCheckbox } from './agent_policy_system_monitoring_field';
 import type { ValidationResults } from './agent_policy_validation';
-
-const StyledEuiAccordion = styled(EuiAccordion)`
-  .ingest-active-button {
-    color: ${(props) => props.theme.eui.euiColorPrimary};
-  }
-`;
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -47,6 +33,7 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
   return (
     <EuiForm>
       <EuiDescribedFormGroup
+        fullWidth
         title={
           <h3>
             <FormattedMessage
@@ -79,27 +66,6 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
           updateSysMonitoring={updateSysMonitoring}
         />
       </EuiDescribedFormGroup>
-      <>
-        <EuiHorizontalRule />
-        <EuiSpacer size="xs" />
-        <StyledEuiAccordion
-          id="advancedOptions"
-          buttonContent={
-            <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.advancedOptionsToggleLabel"
-              defaultMessage="Advanced options"
-            />
-          }
-          buttonClassName="ingest-active-button"
-        >
-          <EuiSpacer size="l" />
-          <AgentPolicyAdvancedOptionsContent
-            agentPolicy={agentPolicy}
-            updateAgentPolicy={updateAgentPolicy}
-            validation={validation}
-          />
-        </StyledEuiAccordion>
-      </>
     </EuiForm>
   );
 };

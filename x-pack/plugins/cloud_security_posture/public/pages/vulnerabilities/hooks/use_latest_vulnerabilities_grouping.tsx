@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getGroupingQuery } from '@kbn/securitysolution-grouping';
+import { getGroupingQuery } from '@kbn/grouping';
 import {
   GroupingAggregation,
   GroupPanelRenderer,
-  GroupStatsRenderer,
+  GetGroupStats,
   isNoneGroup,
   NamedAggregation,
   parseGroupingQuery,
-} from '@kbn/securitysolution-grouping/src';
+} from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import {
@@ -109,13 +109,13 @@ export const isVulnerabilitiesRootGroupingAggregation = (
  */
 export const useLatestVulnerabilitiesGrouping = ({
   groupPanelRenderer,
-  groupStatsRenderer,
+  getGroupStats,
   groupingLevel = 0,
   groupFilters = [],
   selectedGroup,
 }: {
   groupPanelRenderer?: GroupPanelRenderer<VulnerabilitiesGroupingAggregation>;
-  groupStatsRenderer?: GroupStatsRenderer<VulnerabilitiesGroupingAggregation>;
+  getGroupStats?: GetGroupStats<VulnerabilitiesGroupingAggregation>;
   groupingLevel?: number;
   groupFilters?: Filter[];
   selectedGroup?: string;
@@ -129,6 +129,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     query,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     uniqueValue,
     isNoneSelected,
@@ -143,7 +144,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     getDefaultQuery,
     unit: VULNERABILITIES_UNIT,
     groupPanelRenderer,
-    groupStatsRenderer,
+    getGroupStats,
     groupingLocalStorageKey: LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
     groupingLevel,
     groupsUnit: VULNERABILITIES_GROUPS_UNIT,
@@ -194,6 +195,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     selectedGroup,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     isGroupSelected: !isNoneSelected,
     isGroupLoading: !data,

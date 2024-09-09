@@ -18,40 +18,31 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
+import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
+export { updateGlobalNavigation } from './services/update_global_navigation';
 import {
-  type AssetDetailsFlyoutLocator,
   AssetDetailsFlyoutLocatorDefinition,
-} from './locators/infra/asset_details_flyout_locator';
-import {
-  type AssetDetailsLocator,
   AssetDetailsLocatorDefinition,
-} from './locators/infra/asset_details_locator';
-import { type HostsLocator, HostsLocatorDefinition } from './locators/infra/hosts_locator';
-import {
-  type InventoryLocator,
+  HostsLocatorDefinition,
   InventoryLocatorDefinition,
-} from './locators/infra/inventory_locator';
-import {
-  type FlamegraphLocator,
+  MetricsExplorerLocatorDefinition,
   FlamegraphLocatorDefinition,
-} from './locators/profiling/flamegraph_locator';
-import {
-  type StacktracesLocator,
   StacktracesLocatorDefinition,
-} from './locators/profiling/stacktraces_locator';
-import {
-  type TopNFunctionsLocator,
   TopNFunctionsLocatorDefinition,
-} from './locators/profiling/topn_functions_locator';
-import {
-  type ServiceOverviewLocator,
   ServiceOverviewLocatorDefinition,
-} from './locators/apm/service_overview_locator';
-import { updateGlobalNavigation } from './services/update_global_navigation';
-import {
-  type TransactionDetailsByNameLocator,
   TransactionDetailsByNameLocatorDefinition,
-} from './locators/apm/transaction_details_by_name_locator';
+  type AssetDetailsFlyoutLocator,
+  type AssetDetailsLocator,
+  type InventoryLocator,
+  type HostsLocator,
+  type FlamegraphLocator,
+  type StacktracesLocator,
+  type TopNFunctionsLocator,
+  type ServiceOverviewLocator,
+  type TransactionDetailsByNameLocator,
+  type MetricsExplorerLocator,
+} from '../common';
+import { updateGlobalNavigation } from './services/update_global_navigation';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -74,6 +65,7 @@ interface ObservabilitySharedLocators {
     assetDetailsFlyoutLocator: AssetDetailsFlyoutLocator;
     hostsLocator: HostsLocator;
     inventoryLocator: InventoryLocator;
+    metricsExplorerLocator: MetricsExplorerLocator;
   };
   profiling: {
     flamegraphLocator: FlamegraphLocator;
@@ -102,6 +94,7 @@ export class ObservabilitySharedPlugin implements Plugin {
     });
 
     return {
+      registerProfilingComponent,
       locators: this.createLocators(pluginsSetup.share.url),
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
@@ -143,6 +136,7 @@ export class ObservabilitySharedPlugin implements Plugin {
         ),
         hostsLocator: urlService.locators.create(new HostsLocatorDefinition()),
         inventoryLocator: urlService.locators.create(new InventoryLocatorDefinition()),
+        metricsExplorerLocator: urlService.locators.create(new MetricsExplorerLocatorDefinition()),
       },
       profiling: {
         flamegraphLocator: urlService.locators.create(new FlamegraphLocatorDefinition()),

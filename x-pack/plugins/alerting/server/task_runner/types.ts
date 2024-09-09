@@ -83,9 +83,8 @@ export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
 }
 
-// / ExecutionHandler
-
-export interface ExecutionHandlerOptions<
+// ActionScheduler
+export interface ActionSchedulerOptions<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
   RuleState extends RuleTypeState,

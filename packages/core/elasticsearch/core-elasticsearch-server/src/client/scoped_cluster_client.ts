@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ElasticsearchClient } from './client';
@@ -22,6 +23,17 @@ export interface IScopedClusterClient {
    * on behalf of the internal Kibana user.
    */
   readonly asInternalUser: ElasticsearchClient;
+
+  /**
+   * A {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster
+   * with the internal Kibana user as primary auth and the current user as secondary auth
+   * (using the `es-secondary-authorization` header).
+   *
+   * Note that only a subset of Elasticsearch APIs support secondary authentication, and that only those endpoints
+   * should be called with this client.
+   */
+  readonly asSecondaryAuthUser: ElasticsearchClient;
+
   /**
    * A {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster
    * on behalf of the user that initiated the request to the Kibana server.

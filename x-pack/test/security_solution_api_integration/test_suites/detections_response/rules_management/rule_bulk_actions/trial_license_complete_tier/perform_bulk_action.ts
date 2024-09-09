@@ -9,6 +9,7 @@ import expect from 'expect';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
+  MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
 import {
@@ -18,8 +19,9 @@ import {
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import { WebhookAuthType } from '@kbn/stack-connectors-plugin/common/webhook/constants';
+import { AuthType } from '@kbn/stack-connectors-plugin/common/auth/constants';
 import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import moment from 'moment';
 import {
   binaryToString,
   getSimpleMlRule,
@@ -32,12 +34,7 @@ import {
   removeServerGeneratedProperties,
   updateUsername,
 } from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
+import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -48,9 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   const postBulkAction = () =>
     supertest
@@ -90,14 +85,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('@ess @serverless @skipInServerless perform_bulk_action', () => {
     beforeEach(async () => {
-      await createAlertsIndex(supertest, log);
+      await deleteAllRules(supertest, log);
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     afterEach(async () => {
-      await deleteAllAlerts(supertest, log, es);
-      await deleteAllRules(supertest, log);
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     it('should export rules', async () => {
@@ -152,7 +145,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await securitySolutionApi.createRule({ body: mockRule });
 
       const { body } = await securitySolutionApi
-        .performBulkAction({
+        .performRulesBulkAction({
           query: {},
           body: {
             action: BulkActionTypeEnum.export,
@@ -190,7 +183,7 @@ export default ({ getService }: FtrProviderContext): void => {
         attributes: {
           actionTypeId: '.webhook',
           config: {
-            authType: WebhookAuthType.Basic,
+            authType: AuthType.Basic,
             hasAuth: true,
             method: 'post',
             url: 'http://localhost',
@@ -218,7 +211,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const [ruleJson, connectorsJson, exportDetailsJson] = body.toString().split(/\n/);
 
       const rule = removeServerGeneratedProperties(JSON.parse(ruleJson));
-      const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+      const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
       expect(rule).toEqual({
         ...expectedRule,
@@ -1165,7 +1158,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createRule(supertest, log, getSimpleRule(ruleId));
 
           const { body: bulkEditResponse } = await securitySolutionApi
-            .performBulkAction({
+            .performRulesBulkAction({
               query: {},
               body: {
                 query: '',
@@ -1208,7 +1201,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const { body: bulkEditResponse } = await securitySolutionApi
-            .performBulkAction({
+            .performRulesBulkAction({
               query: {},
               body: {
                 query: '',
@@ -1251,7 +1244,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const { body: bulkEditResponse } = await securitySolutionApi
-            .performBulkAction({
+            .performRulesBulkAction({
               query: {},
               body: {
                 query: '',
@@ -1327,7 +1320,7 @@ export default ({ getService }: FtrProviderContext): void => {
               });
 
               const { body: bulkEditResponse } = await securitySolutionApi
-                .performBulkAction({
+                .performRulesBulkAction({
                   query: {},
                   body: {
                     query: '',
@@ -2399,6 +2392,379 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(body.attributes.results.updated[0].from).toEqual(
             `now-${(intervalMinutes + lookbackMinutes) * 60}s`
           );
+        });
+      });
+    });
+
+    // skipped on MKI since feature flags are not supported there
+    describe('@skipInServerlessMKI manual rule run action', () => {
+      it('should return all existing and enabled rules as succeeded', async () => {
+        const intervalInMinutes = 25;
+        const interval = `${intervalInMinutes}m`;
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            enabled: true,
+            interval,
+          })
+        );
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-2',
+            enabled: true,
+            interval,
+          })
+        );
+
+        const endDate = moment();
+        const startDate = endDate.clone().subtract(1, 'h');
+
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: {},
+            body: {
+              query: '',
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: {
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+              },
+            },
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).toEqual({
+          failed: 0,
+          skipped: 0,
+          succeeded: 2,
+          total: 2,
+        });
+        expect(body.attributes.errors).toBeUndefined();
+      });
+
+      it('should return 400 error when start date > end date', async () => {
+        const intervalInMinutes = 25;
+        const interval = `${intervalInMinutes}m`;
+        const createdRule1 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            enabled: true,
+            interval,
+          })
+        );
+        const createdRule2 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-2',
+            enabled: true,
+            interval,
+          })
+        );
+
+        const endDate = moment();
+        const startDate = endDate.clone().subtract(1, 'h');
+
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: {},
+            body: {
+              ids: [createdRule1.id, createdRule2.id],
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: {
+                start_date: endDate.toISOString(),
+                end_date: startDate.toISOString(),
+              },
+            },
+          })
+          .expect(400);
+
+        expect(body.message).toContain('[0]: Backfill end must be greater than backfill start');
+      });
+
+      it('should return 400 error when start date = end date', async () => {
+        const intervalInMinutes = 25;
+        const interval = `${intervalInMinutes}m`;
+        const createdRule1 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            enabled: true,
+            interval,
+          })
+        );
+        const createdRule2 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-2',
+            enabled: true,
+            interval,
+          })
+        );
+
+        const endDate = moment().subtract(1, 'h');
+        const startDate = endDate.clone();
+
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: {},
+            body: {
+              ids: [createdRule1.id, createdRule2.id],
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: {
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+              },
+            },
+          })
+          .expect(400);
+
+        expect(body.message).toContain('[0]: Backfill end must be greater than backfill start');
+      });
+
+      it('should return 400 error when start date is in the future', async () => {
+        const intervalInMinutes = 25;
+        const interval = `${intervalInMinutes}m`;
+        const createdRule1 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            enabled: true,
+            interval,
+          })
+        );
+        const createdRule2 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-2',
+            enabled: true,
+            interval,
+          })
+        );
+
+        const startDate = moment().add(1, 'd');
+
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: {},
+            body: {
+              ids: [createdRule1.id, createdRule2.id],
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: { start_date: startDate.toISOString() },
+            },
+          })
+          .expect(400);
+
+        expect(body.message).toContain('[0]: Backfill cannot be scheduled for the future');
+      });
+
+      it('should return 400 error when end date is in the future', async () => {
+        const intervalInMinutes = 25;
+        const interval = `${intervalInMinutes}m`;
+        const createdRule1 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            enabled: true,
+            interval,
+          })
+        );
+        const createdRule2 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-2',
+            enabled: true,
+            interval,
+          })
+        );
+
+        const endDate = moment().add(1, 'd');
+        const startDate = moment().subtract(1, 'd');
+
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: {},
+            body: {
+              ids: [createdRule1.id, createdRule2.id],
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: {
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+              },
+            },
+          })
+          .expect(400);
+
+        expect(body.message).toContain('[0]: Backfill cannot be scheduled for the future');
+      });
+
+      it('should return 400 error when start date is far in the past', async () => {
+        const intervalInMinutes = 25;
+        const interval = `${intervalInMinutes}m`;
+        const createdRule1 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            enabled: true,
+            interval,
+          })
+        );
+        const createdRule2 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-2',
+            enabled: true,
+            interval,
+          })
+        );
+
+        const endDate = moment();
+        const startDate = moment().subtract(MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS + 1, 'd');
+
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: {},
+            body: {
+              ids: [createdRule1.id, createdRule2.id],
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: {
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+              },
+            },
+          })
+          .expect(400);
+
+        expect(body.message).toContain(
+          `[0]: Backfill cannot look back more than ${MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS} days`
+        );
+      });
+
+      it('should return 500 error if some rules do not exist', async () => {
+        const intervalInMinutes = 25;
+        const interval = `${intervalInMinutes}m`;
+        const createdRule1 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            enabled: true,
+            interval,
+          })
+        );
+
+        const endDate = moment();
+        const startDate = endDate.clone().subtract(1, 'h');
+
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: {},
+            body: {
+              ids: [createdRule1.id, 'rule-2'],
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: {
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+              },
+            },
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).toEqual({
+          failed: 1,
+          skipped: 0,
+          succeeded: 1,
+          total: 2,
+        });
+
+        expect(body.attributes.errors).toHaveLength(1);
+        expect(body.attributes.errors[0]).toEqual({
+          message: 'Rule not found',
+          status_code: 500,
+          rules: [
+            {
+              id: 'rule-2',
+            },
+          ],
+        });
+      });
+
+      it('should return 500 error if some rules are disabled', async () => {
+        const intervalInMinutes = 25;
+        const interval = `${intervalInMinutes}m`;
+        const createdRule1 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            enabled: false,
+            interval,
+          })
+        );
+        const createdRule2 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-2',
+            enabled: true,
+            interval,
+          })
+        );
+
+        const endDate = moment();
+        const startDate = endDate.clone().subtract(1, 'h');
+
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: {},
+            body: {
+              ids: [createdRule1.id, createdRule2.id],
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: {
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+              },
+            },
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).toEqual({
+          failed: 1,
+          skipped: 0,
+          succeeded: 1,
+          total: 2,
+        });
+
+        expect(body.attributes.errors).toHaveLength(1);
+        expect(body.attributes.errors).toEqual(
+          expect.arrayContaining([
+            {
+              message: 'Cannot schedule manual rule run for a disabled rule',
+              status_code: 500,
+              err_code: 'MANUAL_RULE_RUN_DISABLED_RULE',
+              rules: [{ id: createdRule1.id, name: createdRule1.name }],
+            },
+          ])
+        );
+        expect(body.attributes.results).toEqual({
+          updated: [expect.objectContaining(createdRule2)],
+          created: [],
+          deleted: [],
+          skipped: [],
         });
       });
     });

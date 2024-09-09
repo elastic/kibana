@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -20,10 +21,11 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { memoize } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { GRID_STYLE } from '../../constants';
+import { DATA_GRID_STYLE_DEFAULT } from '../../constants';
 import { ComparisonControls } from './comparison_controls';
 import { renderComparisonToolbar } from './comparison_toolbar';
 import { useComparisonCellValue } from './hooks/use_comparison_cell_value';
@@ -41,19 +43,20 @@ export interface CompareDocumentsProps {
   dataView: DataView;
   isPlainRecord: boolean;
   selectedFieldNames: string[];
-  selectedDocs: string[];
+  selectedDocIds: string[];
   schemaDetectors: EuiDataGridSchemaDetector[];
   forceShowAllFields: boolean;
   showFullScreenButton?: boolean;
   fieldFormats: FieldFormatsStart;
   getDocById: (id: string) => DataTableRecord | undefined;
-  setSelectedDocs: (selectedDocs: string[]) => void;
+  replaceSelectedDocs: (docIds: string[]) => void;
   setIsCompareActive: (isCompareActive: boolean) => void;
+  additionalFieldGroups?: AdditionalFieldGroups;
 }
 
 const COMPARISON_ROW_HEIGHT: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
 const COMPARISON_IN_MEMORY: EuiDataGridInMemory = { level: 'sorting' };
-const COMPARISON_GRID_STYLE: EuiDataGridStyle = { ...GRID_STYLE, stripes: undefined };
+const COMPARISON_GRID_STYLE: EuiDataGridStyle = { ...DATA_GRID_STYLE_DEFAULT, stripes: undefined };
 
 const getStorageKey = (consumer: string, key: string) => `${consumer}:dataGridComparison${key}`;
 
@@ -66,13 +69,14 @@ const CompareDocuments = ({
   dataView,
   isPlainRecord,
   selectedFieldNames,
-  selectedDocs,
+  additionalFieldGroups,
+  selectedDocIds,
   schemaDetectors,
   forceShowAllFields,
   showFullScreenButton,
   fieldFormats,
   getDocById,
-  setSelectedDocs,
+  replaceSelectedDocs,
   setIsCompareActive,
 }: CompareDocumentsProps) => {
   // Memoize getDocById to ensure we don't lose access to the comparison docs if, for example,
@@ -100,7 +104,8 @@ const CompareDocuments = ({
   const { comparisonFields, totalFields } = useComparisonFields({
     dataView,
     selectedFieldNames,
-    selectedDocs,
+    additionalFieldGroups,
+    selectedDocIds,
     showAllFields: Boolean(forceShowAllFields || showAllFields),
     showMatchingValues: Boolean(showMatchingValues),
     getDocById: memoizedGetDocById,
@@ -109,25 +114,25 @@ const CompareDocuments = ({
     wrapper,
     isPlainRecord,
     fieldColumnId,
-    selectedDocs,
+    selectedDocIds,
     getDocById: memoizedGetDocById,
-    setSelectedDocs,
+    replaceSelectedDocs,
   });
   const comparisonColumnVisibility = useMemo<EuiDataGridColumnVisibility>(
     () => ({
       visibleColumns: comparisonColumns.map(({ id: columnId }) => columnId),
       setVisibleColumns: (visibleColumns) => {
         const [_fieldColumnId, ...newSelectedDocs] = visibleColumns;
-        setSelectedDocs(newSelectedDocs);
+        replaceSelectedDocs(newSelectedDocs);
       },
     }),
-    [comparisonColumns, setSelectedDocs]
+    [comparisonColumns, replaceSelectedDocs]
   );
   const additionalControls = useMemo(
     () => (
       <ComparisonControls
         isPlainRecord={isPlainRecord}
-        selectedDocs={selectedDocs}
+        selectedDocIds={selectedDocIds}
         showDiff={showDiff}
         diffMode={diffMode}
         showDiffDecorations={showDiffDecorations}
@@ -146,7 +151,7 @@ const CompareDocuments = ({
       diffMode,
       forceShowAllFields,
       isPlainRecord,
-      selectedDocs,
+      selectedDocIds,
       setDiffMode,
       setIsCompareActive,
       setShowAllFields,
@@ -180,10 +185,11 @@ const CompareDocuments = ({
     dataView,
     comparisonFields,
     fieldColumnId,
-    selectedDocs,
+    selectedDocIds,
     diffMode: showDiff ? diffMode : undefined,
     fieldFormats,
     getDocById: memoizedGetDocById,
+    additionalFieldGroups,
   });
   const comparisonCss = useComparisonCss({
     diffMode: showDiff ? diffMode : undefined,

@@ -15,7 +15,10 @@ import {
   ALERT_RISK_SCORE,
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import type {
+  AssetCriticalityRecord,
+  RiskScoresPreviewResponse,
+} from '../../../../common/api/entity_analytics';
 import type {
   AfterKeys,
   EntityRiskScoreRecord,
@@ -28,20 +31,15 @@ import {
   RiskWeightTypes,
 } from '../../../../common/entity_analytics/risk_engine';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
-import {
-  applyCriticalityToScore,
-  getCriticalityModifier,
-  normalize,
-} from '../asset_criticality/helpers';
+import { applyCriticalityToScore, getCriticalityModifier } from '../asset_criticality/helpers';
 import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
 import type {
   CalculateRiskScoreAggregations,
   CalculateScoresParams,
   RiskScoreBucket,
 } from '../types';
-import { RISK_SCORING_SUM_MAX, RISK_SCORING_SUM_VALUE } from './constants';
+import { RIEMANN_ZETA_VALUE, RIEMANN_ZETA_S_VALUE } from './constants';
 import { getPainlessScripts, type PainlessScripts } from './painless';
 
 const formatForResponse = ({
@@ -82,10 +80,7 @@ const formatForResponse = ({
     calculated_level: calculatedLevel,
     calculated_score: riskDetails.value.score,
     calculated_score_norm: normalizedScoreWithCriticality,
-    category_1_score: normalize({
-      number: riskDetails.value.category_1_score,
-      max: RISK_SCORING_SUM_MAX,
-    }),
+    category_1_score: riskDetails.value.category_1_score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
     category_1_count: riskDetails.value.category_1_count,
     notes: riskDetails.value.notes,
     inputs: riskDetails.value.risk_inputs.map((riskInput) => ({
@@ -150,8 +145,8 @@ const buildIdentifierTypeAggregation = ({
               map_script: scriptedMetricPainless.map,
               combine_script: scriptedMetricPainless.combine,
               params: {
-                p: RISK_SCORING_SUM_VALUE,
-                risk_cap: RISK_SCORING_SUM_MAX,
+                p: RIEMANN_ZETA_S_VALUE,
+                risk_cap: RIEMANN_ZETA_VALUE,
                 global_identifier_type_weight: globalIdentifierTypeWeight || 1,
               },
               reduce_script: scriptedMetricPainless.reduce,
@@ -251,6 +246,7 @@ export const calculateRiskScores = async ({
       size: 0,
       _source: false,
       index,
+      ignore_unavailable: true,
       runtime_mappings: runtimeMappings,
       query: {
         function_score: {

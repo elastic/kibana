@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { shallow, mount } from 'enzyme';
-import { EuiComboBox, EuiSwitchEvent, EuiSwitch, EuiFieldText } from '@elastic/eui';
-import { IncludeExcludeRow } from './include_exclude_options';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { IncludeExcludeRow, IncludeExcludeRowProps } from './include_exclude_options';
 
 const tableRows = [
   {
@@ -21,193 +20,136 @@ const tableRows = [
     '2': 'test',
   },
 ];
+const onUpdateSpy = jest.fn();
 
 describe('IncludeExcludeComponent', () => {
-  it('should render 2 EuiComboBox component correctly', () => {
-    const instance = shallow(
+  const renderIncludeExcludeRow = (propsOverrides?: Partial<IncludeExcludeRowProps>) => {
+    const rtlRender = render(
       <IncludeExcludeRow
         include={[]}
         exclude={[]}
-        updateParams={jest.fn()}
+        updateParams={onUpdateSpy}
         columnId="1"
         isNumberField={false}
         includeIsRegex={false}
         excludeIsRegex={false}
+        {...propsOverrides}
       />
     );
-
-    expect(instance.find(EuiComboBox).length).toEqual(2);
+    return rtlRender;
+  };
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  it('should render 2 EuiComboBox component correctly', () => {
+    renderIncludeExcludeRow();
+    expect(screen.getAllByRole('combobox').length).toEqual(2);
   });
 
   it('should run updateParams function on update', () => {
-    const onUpdateSpy = jest.fn();
-    const instance = shallow(
-      <IncludeExcludeRow
-        include={undefined}
-        exclude={undefined}
-        updateParams={onUpdateSpy}
-        isNumberField={false}
-        columnId="1"
-        tableRows={tableRows}
-        includeIsRegex={false}
-        excludeIsRegex={false}
-      />
-    );
-    act(() => {
-      instance.find(EuiComboBox).first().prop('onChange')!([{ label: 'ABC' }]);
+    renderIncludeExcludeRow({
+      include: undefined,
+      exclude: undefined,
+      tableRows,
     });
-    expect(
-      instance.find('[data-test-subj="lens-include-terms-combobox"]').prop('selectedOptions')
-    ).toEqual([{ label: 'ABC' }]);
-    expect(onUpdateSpy.mock.calls.length).toBe(1);
+    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    fireEvent.click(screen.getByRole('option', { name: 'ABC' }));
+    expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('ABC');
+    expect(onUpdateSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should run updateParams function onCreateOption', () => {
-    const onUpdateSpy = jest.fn();
-    const instance = shallow(
-      <IncludeExcludeRow
-        include={undefined}
-        exclude={undefined}
-        updateParams={onUpdateSpy}
-        isNumberField={false}
-        columnId="1"
-        tableRows={tableRows}
-        includeIsRegex={false}
-        excludeIsRegex={false}
-      />
-    );
-    act(() => {
-      instance.find(EuiComboBox).first().prop('onCreateOption')!('test.*', [{ label: 'ABC' }]);
+    renderIncludeExcludeRow({
+      include: undefined,
+      exclude: undefined,
+      tableRows,
     });
-    expect(
-      instance.find('[data-test-subj="lens-include-terms-combobox"]').prop('selectedOptions')
-    ).toEqual([{ label: 'test.*' }]);
-    expect(onUpdateSpy.mock.calls.length).toBe(1);
+    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test.*{Enter}');
+    expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('test.*');
+    expect(onUpdateSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should initialize the selected options correctly if include prop is given', () => {
-    const onUpdateSpy = jest.fn();
-    const instance = shallow(
-      <IncludeExcludeRow
-        include={['FEF']}
-        exclude={undefined}
-        updateParams={onUpdateSpy}
-        isNumberField={false}
-        columnId="1"
-        tableRows={tableRows}
-        includeIsRegex={false}
-        excludeIsRegex={false}
-      />
-    );
-    expect(
-      instance.find('[data-test-subj="lens-include-terms-combobox"]').prop('selectedOptions')
-    ).toEqual([{ label: 'FEF' }]);
+    renderIncludeExcludeRow({
+      include: ['FEF'],
+      exclude: undefined,
+      tableRows,
+    });
+    expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('FEF');
   });
 
   it('should initialize the selected options correctly if exclude prop is given', () => {
-    const onUpdateSpy = jest.fn();
-    const instance = shallow(
-      <IncludeExcludeRow
-        include={['FEF']}
-        exclude={['ABC']}
-        updateParams={onUpdateSpy}
-        isNumberField={false}
-        columnId="1"
-        tableRows={tableRows}
-        includeIsRegex={false}
-        excludeIsRegex={false}
-      />
-    );
-    expect(
-      instance.find('[data-test-subj="lens-exclude-terms-combobox"]').prop('selectedOptions')
-    ).toEqual([{ label: 'ABC' }]);
+    renderIncludeExcludeRow({
+      include: ['FEF'],
+      exclude: ['ABC'],
+      tableRows,
+    });
+    expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('FEF');
+    expect(screen.getByTestId('lens-exclude-terms-combobox')).toHaveTextContent('ABC');
   });
 
   it('should initialize the options correctly', () => {
-    const onUpdateSpy = jest.fn();
-    const instance = mount(
-      <IncludeExcludeRow
-        include={undefined}
-        exclude={undefined}
-        updateParams={onUpdateSpy}
-        isNumberField={false}
-        columnId="1"
-        tableRows={tableRows}
-        includeIsRegex={false}
-        excludeIsRegex={false}
-      />
-    );
-    expect(
-      instance.find('[data-test-subj="lens-include-terms-combobox"]').first().prop('options')
-    ).toEqual([{ label: 'ABC' }, { label: 'FEF' }]);
+    renderIncludeExcludeRow({
+      include: undefined,
+      exclude: undefined,
+      tableRows,
+    });
+    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+      'ABC',
+      'FEF',
+    ]);
   });
 
   it('should display an input text if pattern is selected', () => {
-    const onUpdateSpy = jest.fn();
-    const instance = mount(
-      <IncludeExcludeRow
-        include={['test.*']}
-        exclude={undefined}
-        updateParams={onUpdateSpy}
-        isNumberField={false}
-        columnId="1"
-        tableRows={tableRows}
-        includeIsRegex={true}
-        excludeIsRegex={false}
-      />
-    );
-    act(() => {
-      instance.find(EuiSwitch).first().prop('onChange')({
-        target: { checked: true },
-      } as EuiSwitchEvent);
+    renderIncludeExcludeRow({
+      include: ['test.*'],
+      exclude: undefined,
+      includeIsRegex: true,
+      tableRows,
     });
-    expect(instance.find(EuiFieldText).length).toBe(1);
+    expect(
+      screen.getByRole('textbox', { name: 'Enter a regex to filter values' })
+    ).toBeInTheDocument();
   });
 
   it('should run updateParams on the input text if pattern is selected', () => {
-    const onUpdateSpy = jest.fn();
-    const instance = mount(
-      <IncludeExcludeRow
-        include={['test.*']}
-        exclude={undefined}
-        updateParams={onUpdateSpy}
-        isNumberField={false}
-        columnId="1"
-        tableRows={tableRows}
-        includeIsRegex={true}
-        excludeIsRegex={false}
-      />
-    );
-    act(() => {
-      instance.find(EuiSwitch).first().prop('onChange')({
-        target: { checked: true },
-      } as EuiSwitchEvent);
+    renderIncludeExcludeRow({
+      include: ['test.*'],
+      exclude: undefined,
+      includeIsRegex: false,
+      tableRows,
     });
-    expect(
-      instance.find('[data-test-subj="lens-include-terms-regex-input"]').first().prop('value')
-    ).toEqual('test.*');
-    expect(onUpdateSpy.mock.calls.length).toBe(1);
+    userEvent.click(screen.getByTestId('lens-include-terms-regex-switch'));
+    expect(onUpdateSpy).toHaveBeenCalledWith('include', [], 'includeIsRegex', true);
   });
 
   it('should run as multi selection if normal string is given', () => {
-    const onUpdateSpy = jest.fn();
-    const instance = shallow(
-      <IncludeExcludeRow
-        include={undefined}
-        exclude={undefined}
-        updateParams={onUpdateSpy}
-        isNumberField={false}
-        columnId="1"
-        tableRows={tableRows}
-        includeIsRegex={false}
-        excludeIsRegex={false}
-      />
-    );
-    act(() => {
-      instance.find(EuiComboBox).first().prop('onCreateOption')!('test', [{ label: 'ABC' }]);
+    renderIncludeExcludeRow({
+      include: undefined,
+      exclude: undefined,
+      isNumberField: false,
+      tableRows,
     });
-    expect(
-      instance.find('[data-test-subj="lens-include-terms-combobox"]').prop('singleSelection')
-    ).toBe(false);
+    const typedValues = ['test.*', 'ABC'];
+    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    userEvent.type(
+      screen.getByRole('combobox', { name: 'Include values' }),
+      `${typedValues[0]}{Enter}`
+    );
+
+    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    userEvent.type(
+      screen.getByRole('combobox', { name: 'Include values' }),
+      `${typedValues[1]}{Enter}`
+    );
+
+    within(screen.getByTestId('lens-include-terms-combobox'))
+      .getAllByTestId('euiComboBoxPill')
+      .map((pill, i) => {
+        expect(pill).toHaveTextContent(typedValues[i]);
+      });
+    expect(onUpdateSpy).toHaveBeenCalledTimes(2);
   });
 });

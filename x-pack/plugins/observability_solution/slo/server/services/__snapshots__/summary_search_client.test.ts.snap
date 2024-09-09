@@ -1,6 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-
 exports[`Summary Search Client returns the summary documents without duplicate temporary summary documents 1`] = `
 Array [
   Object {
@@ -47,6 +46,9 @@ Object {
           "isEstimated": false,
           "remaining": 1,
         },
+        "fiveMinuteBurnRate": 0,
+        "oneDayBurnRate": 0,
+        "oneHourBurnRate": 0,
         "sliValue": -1,
         "status": "NO_DATA",
         "summaryUpdatedAt": null,
@@ -63,6 +65,9 @@ Object {
           "isEstimated": false,
           "remaining": 1,
         },
+        "fiveMinuteBurnRate": 0,
+        "oneDayBurnRate": 0,
+        "oneHourBurnRate": 0,
         "sliValue": -1,
         "status": "NO_DATA",
         "summaryUpdatedAt": null,
@@ -79,6 +84,9 @@ Object {
           "isEstimated": false,
           "remaining": 1,
         },
+        "fiveMinuteBurnRate": 0,
+        "oneDayBurnRate": 0,
+        "oneHourBurnRate": 0,
         "sliValue": -1,
         "status": "NO_DATA",
         "summaryUpdatedAt": null,
@@ -95,6 +103,9 @@ Object {
           "isEstimated": false,
           "remaining": 1,
         },
+        "fiveMinuteBurnRate": 0,
+        "oneDayBurnRate": 0,
+        "oneHourBurnRate": 0,
         "sliValue": -1,
         "status": "NO_DATA",
         "summaryUpdatedAt": null,
@@ -111,6 +122,9 @@ Object {
           "isEstimated": false,
           "remaining": 1,
         },
+        "fiveMinuteBurnRate": 0,
+        "oneDayBurnRate": 0,
+        "oneHourBurnRate": 0,
         "sliValue": -1,
         "status": "NO_DATA",
         "summaryUpdatedAt": null,

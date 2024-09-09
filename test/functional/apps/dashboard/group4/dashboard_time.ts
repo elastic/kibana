@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -33,7 +34,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.addVisualizations([
           PageObjects.dashboard.getTestVisualizationNames()[0],
         ]);
-        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
+        await PageObjects.dashboard.saveDashboard(dashboardName, {
+          storeTimeWithDashboard: false,
+          saveAsNew: true,
+        });
       });
 
       it('Does not set the time picker on open', async () => {
@@ -51,7 +55,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('is saved with time', async function () {
         await PageObjects.dashboard.switchToEditMode();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+        await PageObjects.dashboard.saveDashboard(dashboardName, {
+          storeTimeWithDashboard: true,
+          saveAsNew: false,
+        });
       });
 
       it('sets time on open', async function () {

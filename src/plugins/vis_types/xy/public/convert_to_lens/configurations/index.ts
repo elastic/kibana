@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position, ScaleType as ECScaleType } from '@elastic/charts';
+import { LegendValue, Position, ScaleType as ECScaleType } from '@elastic/charts';
 import {
   SeriesTypes,
   Column,
@@ -15,7 +16,6 @@ import {
   XYReferenceLineLayerConfig,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { Layer } from '..';
 import { ChartType } from '../../../common';
 import {
@@ -237,7 +237,7 @@ export const getConfiguration = (
       maxLines: vis.params.maxLegendLines ?? vis.type.visConfig.defaults.maxLegendLines,
       showSingleSeries: true,
       legendStats: Boolean(vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show)
-        ? [XYLegendValue.CurrentAndLastValue]
+        ? [LegendValue.CurrentAndLastValue]
         : undefined,
     },
     fittingFunction: fittingFunction

@@ -23,10 +23,9 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
               onClick={[MockFunction]}
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Delete item"
                 id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
-                values={Object {}}
               />
             </EuiButton>,
           ]
@@ -60,10 +59,9 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
               onClick={[MockFunction]}
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Delete item"
                 id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
-                values={Object {}}
               />
             </EuiButton>,
           ]

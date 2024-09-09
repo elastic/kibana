@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/esql",
+  "owner": "@elastic/kibana-esql",
+  "plugin": {
+    "id": "esql",
+    "server": true,
+    "browser": true,
+    "optionalPlugins": [
+      "indexManagement",
+      "fieldsMetadata"
+    ],
+    "requiredPlugins": [
+      "data",
+      "expressions",
+      "dataViews",
+      "uiActions",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+    ]
+  }
+}

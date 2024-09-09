@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ReactNode } from 'react';
@@ -36,25 +37,23 @@ export type ControlFactory<T extends ControlInput = ControlInput> = EmbeddableFa
   ControlEmbeddable
 >;
 
-export type ControlEmbeddable<
+export interface ControlEmbeddable<
   TControlEmbeddableInput extends ControlInput = ControlInput,
   TControlEmbeddableOutput extends ControlOutput = ControlOutput
-> = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> & {
+> extends IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> {
   isChained?: () => boolean;
   renderPrepend?: () => ReactNode | undefined;
   selectionsToFilters?: (
     input: Partial<TControlEmbeddableInput>
   ) => Promise<ControlGroupFilterOutput>;
-};
+}
 
-export interface IClearableControl<
-  TClearableControlEmbeddableInput extends ControlInput = ControlInput
-> extends ControlEmbeddable {
+export interface CanClearSelections {
   clearSelections: () => void;
 }
 
-export const isClearableControl = (control: ControlEmbeddable): control is IClearableControl => {
-  return Boolean((control as IClearableControl).clearSelections);
+export const isClearableControl = (control: unknown): control is CanClearSelections => {
+  return typeof (control as CanClearSelections).clearSelections === 'function';
 };
 
 /**

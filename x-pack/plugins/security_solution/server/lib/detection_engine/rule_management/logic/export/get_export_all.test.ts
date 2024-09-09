@@ -100,6 +100,9 @@ describe('getExportAll', () => {
       from: 'now-6m',
       id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       immutable: false,
+      rule_source: {
+        type: 'internal',
+      },
       index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       interval: '5m',
       rule_id: 'rule-1',
@@ -280,6 +283,9 @@ describe('getExportAll', () => {
       from: 'now-6m',
       id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       immutable: false,
+      rule_source: {
+        type: 'internal',
+      },
       index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       interval: '5m',
       rule_id: 'rule-1',

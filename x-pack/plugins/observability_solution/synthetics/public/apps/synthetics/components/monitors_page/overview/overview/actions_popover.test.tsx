@@ -109,7 +109,7 @@ describe('ActionsPopover', () => {
     jest
       .spyOn(editMonitorLocatorModule, 'useEditMonitorLocator')
       .mockReturnValue('/a/test/edit/url');
-    const { getByRole } = render(
+    const { getByTestId } = render(
       <ActionsPopover
         position="relative"
         isPopoverOpen={true}
@@ -119,14 +119,33 @@ describe('ActionsPopover', () => {
       />
     );
 
-    expect(getByRole('link')?.getAttribute('href')).toBe('/a/test/edit/url');
+    expect(getByTestId('editMonitorLink')?.getAttribute('href')).toBe('/a/test/edit/url');
+  });
+
+  it('contains link to clone monitor', async () => {
+    jest
+      .spyOn(editMonitorLocatorModule, 'useEditMonitorLocator')
+      .mockReturnValue('/a/test/edit/url');
+    const { getByTestId } = render(
+      <ActionsPopover
+        position="relative"
+        isPopoverOpen={true}
+        setIsPopoverOpen={jest.fn()}
+        monitor={testMonitor}
+        locationId={testMonitor.location.id}
+      />
+    );
+
+    expect(getByTestId('cloneMonitorLink')?.getAttribute('href')).toBe(
+      'synthetics/add-monitor?cloneId=1lkjelre'
+    );
   });
 
   it('contains link to detail page', async () => {
     jest
       .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
       .mockReturnValue('/a/test/detail/url');
-    const { getByRole } = render(
+    const { getByTestId } = render(
       <ActionsPopover
         position="relative"
         isPopoverOpen={true}
@@ -135,7 +154,9 @@ describe('ActionsPopover', () => {
         locationId={testMonitor.location.id}
       />
     );
-    expect(getByRole('link')?.getAttribute('href')).toBe('/a/test/detail/url');
+    expect(getByTestId('actionsPopoverGoToMonitor')?.getAttribute('href')).toBe(
+      '/a/test/detail/url'
+    );
   });
 
   it('sets the enabled state', async () => {

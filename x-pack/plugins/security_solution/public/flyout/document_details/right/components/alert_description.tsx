@@ -14,15 +14,22 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useRightPanelContext } from '../context';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import {
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
   ALERT_DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
-import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
-import { type PreviewPanelProps, RulePreviewPanel } from '../../preview';
+import { DocumentDetailsRuleOverviewPanelKey } from '../../shared/constants/panel_keys';
+
+export const RULE_OVERVIEW_BANNER = {
+  title: i18n.translate('xpack.securitySolution.flyout.right.about.description.rulePreviewTitle', {
+    defaultMessage: 'Preview rule details',
+  }),
+  backgroundColor: 'warning',
+  textColor: 'warning',
+};
 
 /**
  * Displays the rule description of a signal document.
@@ -30,28 +37,19 @@ import { type PreviewPanelProps, RulePreviewPanel } from '../../preview';
 export const AlertDescription: FC = () => {
   const { telemetry } = useKibana().services;
   const { dataFormattedForFieldBrowser, scopeId, eventId, indexName, isPreview } =
-    useRightPanelContext();
+    useDocumentDetailsContext();
   const { isAlert, ruleDescription, ruleName, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const openRulePreview = useCallback(() => {
-    const PreviewPanelRulePreview: PreviewPanelProps['path'] = { tab: RulePreviewPanel };
     openPreviewPanel({
-      id: DocumentDetailsPreviewPanelKey,
-      path: PreviewPanelRulePreview,
+      id: DocumentDetailsRuleOverviewPanelKey,
       params: {
         id: eventId,
         indexName,
         scopeId,
-        banner: {
-          title: i18n.translate(
-            'xpack.securitySolution.flyout.right.about.description.rulePreviewTitle',
-            { defaultMessage: 'Preview rule details' }
-          ),
-          backgroundColor: 'warning',
-          textColor: 'warning',
-        },
+        banner: RULE_OVERVIEW_BANNER,
         ruleId,
       },
     });

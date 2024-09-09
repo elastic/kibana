@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
@@ -11,8 +12,7 @@ import type { Observable } from 'rxjs';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 import { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup, createTopNav } from './top_nav_menu';
@@ -47,21 +47,13 @@ export interface NavigationPublicStart {
 
 export interface NavigationPublicSetupDependencies {
   cloud?: CloudSetup;
-  security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 
 export interface NavigationPublicStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   cloud?: CloudStart;
-  security?: SecurityPluginStart;
-  cloudExperiments?: CloudExperimentsPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export type SolutionType = 'es' | 'oblt' | 'security' | 'analytics';
-
-export interface ConfigSchema {
-  solutionNavigation: {
-    enabled: boolean;
-    defaultSolution: SolutionType;
-  };
-}

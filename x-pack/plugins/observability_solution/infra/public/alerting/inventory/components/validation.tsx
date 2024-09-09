@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
-  Comparator,
   FilterQuery,
   InventoryMetricConditions,
   QUERY_INVALID,
@@ -91,7 +91,7 @@ export function validateMetricThreshold({
       // The Threshold component returns an empty array with a length ([empty]) because it's using delete newThreshold[i].
       // We need to use [...c.threshold] to convert it to an array with an undefined value ([undefined]) so we can test each element.
       const { comparator, threshold, type } = props as {
-        comparator?: Comparator;
+        comparator?: COMPARATORS;
         threshold?: number[];
         type: 'critical' | 'warning';
       };
@@ -108,7 +108,7 @@ export function validateMetricThreshold({
         });
       }
 
-      if (comparator === Comparator.BETWEEN && (!threshold || threshold.length < 2)) {
+      if (comparator === COMPARATORS.BETWEEN && (!threshold || threshold.length < 2)) {
         errors[id][type].threshold1.push(
           i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdRequired', {
             defaultMessage: 'Threshold is required.',

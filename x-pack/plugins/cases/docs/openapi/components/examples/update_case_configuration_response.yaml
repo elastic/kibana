@@ -6,18 +6,19 @@ value:
       label: my-text-field
       required: true
       type: text
+      defaultValue: A new default value.
     - key: fcc6840d-eb14-42df-8aaf-232201a705ec
       label: my-toggle
       required: false
       type: toggle
   owner: cases
-  created_at: 2023-10-01T17:07:17.767Z
+  created_at: 2024-07-01T17:07:17.767Z
   created_by:
     username: elastic
-    email: null,
+    email: null
     full_name: null
     profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-  updated_at: 2023-10-19T00:52:42.401Z
+  updated_at: 2024-07-19T00:52:42.401Z
   updated_by:
     username: elastic
     full_name: null
@@ -35,9 +36,13 @@ value:
     - source: description
       target: description
       action_type: overwrite
+    - source: tags
+      target: labels
+      action_type: overwrite
     - source: comments
       target: comments
       action_type: append
-  version: zEzNSw1XQ==
+  version: WzI2LDNd
   error: null
   id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+  templates: []

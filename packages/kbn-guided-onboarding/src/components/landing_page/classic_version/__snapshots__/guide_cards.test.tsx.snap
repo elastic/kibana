@@ -23,7 +23,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
               "order": 1,
               "solution": "search",
               "telemetryId": "onboarding--search--database",
-              "title": <FormattedMessage
+              "title": <Memo(MemoizedFormattedMessage)
                 defaultMessage="Search across databases {lineBreak} and business systems"
                 id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
                 values={
@@ -107,7 +107,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
               "order": 10,
               "solution": "search",
               "telemetryId": "onboarding--search--application",
-              "title": <FormattedMessage
+              "title": <Memo(MemoizedFormattedMessage)
                 defaultMessage="Build an application on {lineBreak} top of Elasticsearch"
                 id="guidedOnboardingPackage.gettingStarted.cards.appSearch.title"
                 values={
@@ -201,7 +201,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
               "order": 5,
               "solution": "observability",
               "telemetryId": "onboarding--observability--apm",
-              "title": <FormattedMessage
+              "title": <Memo(MemoizedFormattedMessage)
                 defaultMessage="Monitor my application {lineBreak} performance (APM / tracing)"
                 id="guidedOnboardingPackage.gettingStarted.cards.apmObservability.title"
                 values={
@@ -347,7 +347,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
               "order": 3,
               "solution": "security",
               "telemetryId": "onboarding--security--siem",
-              "title": <FormattedMessage
+              "title": <Memo(MemoizedFormattedMessage)
                 defaultMessage="Detect threats in my {lineBreak} data with SIEM"
                 id="guidedOnboardingPackage.gettingStarted.cards.siemSecurity.title"
                 values={
@@ -382,7 +382,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
               "order": 6,
               "solution": "security",
               "telemetryId": "onboarding--security--hosts",
-              "title": <FormattedMessage
+              "title": <Memo(MemoizedFormattedMessage)
                 defaultMessage="Secure my hosts with {lineBreak} endpoint security"
                 id="guidedOnboardingPackage.gettingStarted.cards.hostsSecurity.title"
                 values={
@@ -417,7 +417,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
               "order": 9,
               "solution": "security",
               "telemetryId": "onboarding--security--cloud",
-              "title": <FormattedMessage
+              "title": <Memo(MemoizedFormattedMessage)
                 defaultMessage="Secure my cloud assets with cloud {lineBreak} security posture management (CSPM)"
                 id="guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title"
                 values={

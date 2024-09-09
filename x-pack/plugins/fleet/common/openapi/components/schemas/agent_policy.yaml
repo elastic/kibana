@@ -78,6 +78,15 @@ properties:
   supports_agentless:
     type: boolean
     description: Indicates whether the agent policy supports agentless integrations. Only allowed in a serverless environment.
+  global_data_tags:
+    type: array
+    items:
+      type: object
+      additionalProperties:
+        oneOf:
+          - type: string
+          - type: number
+      description: User defined data tags that are added to all of the inputs. The values can be strings or numbers.
 required:
   - id
   - status

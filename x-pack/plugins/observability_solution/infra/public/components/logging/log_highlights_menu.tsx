@@ -20,7 +20,7 @@ import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useVisibilityState } from '../../utils/use_visibility_state';
+import { useVisibilityState } from '../../hooks/use_visibility_state';
 
 interface LogHighlightsMenuProps {
   onChange: (highlightTerms: string[]) => void;
@@ -68,7 +68,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
     [debouncedOnChange]
   );
   const changeHighlightTerm = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setHighlightTerm(value);
     },

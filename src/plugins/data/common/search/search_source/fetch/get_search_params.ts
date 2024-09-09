@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { UI_SETTINGS } from '../../../constants';
 import { GetConfigFn } from '../../../types';
@@ -37,12 +39,15 @@ export function getSearchParamsFromRequest(
   const searchParams = getSearchParams(getConfig);
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { track_total_hits, ...body } = searchRequest.body;
+  const dataView = typeof searchRequest.index !== 'string' ? searchRequest.index : undefined;
+  const index = dataView?.title ?? `${searchRequest.index}`;
 
   return {
-    index: searchRequest.index.title || searchRequest.index,
+    index,
     body,
+    // @ts-ignore
     track_total_hits,
-    ...(searchRequest.index?.allowHidden && { expand_wildcards: 'all' }),
+    ...(dataView?.getAllowHidden() && { expand_wildcards: 'all' }),
     ...searchParams,
   };
 }

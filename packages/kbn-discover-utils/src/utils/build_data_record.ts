@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -32,12 +33,20 @@ export function buildDataTableRecord(
 
 /**
  * Helper to build multiple DataTableRecords at once, saved a bit of testing code lines
- * @param docs Array of documents returned from Elasticsearch
+ * @param records Array of documents returned from Elasticsearch
  * @param dataView this current data view
  */
-export function buildDataTableRecordList(
-  docs: EsHitRecord[],
-  dataView?: DataView
-): DataTableRecord[] {
-  return docs.map((doc) => buildDataTableRecord(doc, dataView));
+export function buildDataTableRecordList<T extends DataTableRecord = DataTableRecord>({
+  records,
+  dataView,
+  processRecord,
+}: {
+  records: EsHitRecord[];
+  dataView?: DataView;
+  processRecord?: (record: DataTableRecord) => T;
+}): DataTableRecord[] {
+  return records.map((doc) => {
+    const record = buildDataTableRecord(doc, dataView);
+    return processRecord ? processRecord(record) : record;
+  });
 }

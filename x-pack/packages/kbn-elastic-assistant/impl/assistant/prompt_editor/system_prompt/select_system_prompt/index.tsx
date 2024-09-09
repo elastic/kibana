@@ -18,76 +18,87 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  PromptResponse,
+  PromptTypeEnum,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { QueryObserverResult } from '@tanstack/react-query';
 import { Conversation } from '../../../../..';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
-import type { Prompt } from '../../../types';
 import { useAssistantContext } from '../../../../assistant_context';
 import { useConversation } from '../../../use_conversation';
-import { SYSTEM_PROMPTS_TAB } from '../../../settings/assistant_settings';
 import { TEST_IDS } from '../../../constants';
 import { PROMPT_CONTEXT_SELECTOR_PREFIX } from '../../../quick_prompts/prompt_context_selector/translations';
+import { SYSTEM_PROMPTS_TAB } from '../../../settings/const';
 
 export interface Props {
-  allSystemPrompts: Prompt[];
+  allPrompts: PromptResponse[];
   compressed?: boolean;
   conversation?: Conversation;
-  selectedPrompt: Prompt | undefined;
+  selectedPrompt: PromptResponse | undefined;
   clearSelectedSystemPrompt?: () => void;
   isClearable?: boolean;
-  isEditing?: boolean;
+  isCleared?: boolean;
   isDisabled?: boolean;
   isOpen?: boolean;
   isSettingsModalVisible: boolean;
-  setIsEditing?: React.Dispatch<React.SetStateAction<boolean>>;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  showTitles?: boolean;
   onSystemPromptSelectionChange?: (promptId: string | undefined) => void;
-  isFlyoutMode: boolean;
+  onSelectedConversationChange?: (result: Conversation) => void;
+  setConversationSettings?: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
+  setConversationsSettingsBulkActions?: React.Dispatch<Record<string, Conversation>>;
+  refetchConversations?: () => Promise<QueryObserverResult<Record<string, Conversation>, unknown>>;
 }
 
 const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';
 
 const SelectSystemPromptComponent: React.FC<Props> = ({
-  allSystemPrompts,
+  allPrompts,
   compressed = false,
   conversation,
   selectedPrompt,
   clearSelectedSystemPrompt,
   isClearable = false,
-  isEditing = false,
+  isCleared = false,
   isDisabled = false,
   isOpen = false,
+  refetchConversations,
   isSettingsModalVisible,
   onSystemPromptSelectionChange,
-  setIsEditing,
   setIsSettingsModalVisible,
-  showTitles = false,
-  isFlyoutMode = false,
+  onSelectedConversationChange,
+  setConversationSettings,
+  setConversationsSettingsBulkActions,
 }) => {
   const { setSelectedSettingsTab } = useAssistantContext();
   const { setApiConfig } = useConversation();
 
-  const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
-  const [valueOfSelected, setValueOfSelected] = useState<string | undefined>(
-    selectedPrompt?.id ?? allSystemPrompts?.[0]?.id
+  const allSystemPrompts = useMemo(
+    () => allPrompts.filter((p) => p.promptType === PromptTypeEnum.system),
+    [allPrompts]
   );
+
+  const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
   const handleOnBlur = useCallback(() => setIsOpenLocal(false), []);
+  const valueOfSelected = useMemo(() => selectedPrompt?.id, [selectedPrompt?.id]);
 
   // Write the selected system prompt to the conversation config
   const setSelectedSystemPrompt = useCallback(
-    (prompt: Prompt | undefined) => {
+    async (promptId?: string) => {
       if (conversation && conversation.apiConfig) {
-        setApiConfig({
+        const result = await setApiConfig({
           conversation,
           apiConfig: {
             ...conversation.apiConfig,
-            defaultSystemPromptId: prompt?.id,
+            defaultSystemPromptId: promptId,
           },
         });
+        await refetchConversations?.();
+        return result;
       }
     },
-    [conversation, setApiConfig]
+    [conversation, refetchConversations, setApiConfig]
   );
 
   const addNewSystemPrompt = useMemo(() => {
@@ -112,12 +123,12 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
 
   // SuperSelect State/Actions
   const options = useMemo(
-    () => getOptions({ prompts: allSystemPrompts, showTitles, isFlyoutMode }),
-    [allSystemPrompts, showTitles, isFlyoutMode]
+    () => getOptions({ prompts: allSystemPrompts, isCleared }),
+    [allSystemPrompts, isCleared]
   );
 
   const onChange = useCallback(
-    (selectedSystemPromptId) => {
+    async (selectedSystemPromptId: string) => {
       if (selectedSystemPromptId === ADD_NEW_SYSTEM_PROMPT) {
         setIsSettingsModalVisible(true);
         setSelectedSettingsTab(SYSTEM_PROMPTS_TAB);
@@ -126,16 +137,31 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
       // Note: if callback is provided, this component does not persist. Extract to separate component
       if (onSystemPromptSelectionChange != null) {
         onSystemPromptSelectionChange(selectedSystemPromptId);
-      } else {
-        setSelectedSystemPrompt(allSystemPrompts.find((sp) => sp.id === selectedSystemPromptId));
       }
-      setValueOfSelected(selectedSystemPromptId);
-      setIsEditing?.(false);
+      const result = await setSelectedSystemPrompt(selectedSystemPromptId);
+      if (result) {
+        setConversationSettings?.((prev: Record<string, Conversation>) => {
+          const newConversationsSettings = Object.entries(prev).reduce<
+            Record<string, Conversation>
+          >((acc, [key, convo]) => {
+            if (result.title === convo.title) {
+              acc[result.id] = result;
+            } else {
+              acc[key] = convo;
+            }
+            return acc;
+          }, {});
+          return newConversationsSettings;
+        });
+        onSelectedConversationChange?.(result);
+        setConversationsSettingsBulkActions?.({});
+      }
     },
     [
-      allSystemPrompts,
+      onSelectedConversationChange,
       onSystemPromptSelectionChange,
-      setIsEditing,
+      setConversationSettings,
+      setConversationsSettingsBulkActions,
       setIsSettingsModalVisible,
       setSelectedSettingsTab,
       setSelectedSystemPrompt,
@@ -143,16 +169,8 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   );
 
   const clearSystemPrompt = useCallback(() => {
-    setSelectedSystemPrompt(undefined);
-    setIsEditing?.(false);
     clearSelectedSystemPrompt?.();
-    setValueOfSelected(undefined);
-  }, [clearSelectedSystemPrompt, setIsEditing, setSelectedSystemPrompt]);
-
-  const onShowSelectSystemPrompt = useCallback(() => {
-    setIsEditing?.(true);
-    setIsOpenLocal(true);
-  }, [setIsEditing]);
+  }, [clearSelectedSystemPrompt]);
 
   return (
     <EuiFlexGroup
@@ -168,94 +186,73 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
           max-width: 100%;
         `}
       >
-        {isEditing && (
-          <EuiFormRow
+        <EuiFormRow
+          css={css`
+            min-width: 100%;
+          `}
+        >
+          <EuiSuperSelect
+            // Limits popover z-index to prevent it from getting too high and covering tooltips.
+            // If the z-index is not defined, when a popover is opened, it sets the target z-index + 2000
+            popoverProps={{ zIndex: euiThemeVars.euiZLevel8 }}
+            compressed={compressed}
+            data-test-subj={TEST_IDS.PROMPT_SUPERSELECT}
+            fullWidth
+            hasDividers
+            itemLayoutAlign="top"
+            disabled={isDisabled}
+            isOpen={isOpenLocal && !isSettingsModalVisible}
+            onChange={onChange}
+            onBlur={handleOnBlur}
+            options={[...options, addNewSystemPrompt]}
+            placeholder={i18n.SELECT_A_SYSTEM_PROMPT}
+            valueOfSelected={valueOfSelected}
+            prepend={!isSettingsModalVisible ? PROMPT_CONTEXT_SELECTOR_PREFIX : undefined}
             css={css`
-              min-width: 100%;
+              padding-right: 56px !important;
             `}
-          >
-            <EuiSuperSelect
-              // Limits popover z-index to prevent it from getting too high and covering tooltips.
-              // If the z-index is not defined, when a popover is opened, it sets the target z-index + 2000
-              popoverProps={{ zIndex: euiThemeVars.euiZLevel8 }}
-              compressed={compressed}
-              data-test-subj={TEST_IDS.PROMPT_SUPERSELECT}
-              fullWidth
-              hasDividers
-              itemLayoutAlign="top"
-              disabled={isDisabled}
-              isOpen={isOpenLocal && !isSettingsModalVisible}
-              onChange={onChange}
-              onBlur={handleOnBlur}
-              options={[...options, addNewSystemPrompt]}
-              placeholder={i18n.SELECT_A_SYSTEM_PROMPT}
-              valueOfSelected={valueOfSelected}
-              prepend={
-                isFlyoutMode && !isSettingsModalVisible ? PROMPT_CONTEXT_SELECTOR_PREFIX : undefined
-              }
-              css={
-                isFlyoutMode &&
-                css`
-                  padding-right: 56px !important;
-                `
-              }
-            />
-          </EuiFormRow>
-        )}
+          />
+        </EuiFormRow>
       </EuiFlexItem>
 
       <EuiFlexItem
         grow={false}
-        css={
-          isFlyoutMode
-            ? css`
-                position: absolute;
-                right: 36px;
-              `
-            : undefined
-        }
+        css={css`
+          position: absolute;
+          right: 36px;
+        `}
       >
-        {isEditing && isClearable && selectedPrompt && (
+        {isClearable && selectedPrompt && (
           <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT}>
             <EuiButtonIcon
               aria-label={i18n.CLEAR_SYSTEM_PROMPT}
               data-test-subj="clearSystemPrompt"
               iconType="cross"
               onClick={clearSystemPrompt}
-              css={
-                isFlyoutMode
-                  ? // mimic EuiComboBox clear button
-                    css`
-                      inline-size: 16px;
-                      block-size: 16px;
-                      border-radius: 16px;
-                      background: ${euiThemeVars.euiColorMediumShade};
+              // mimic EuiComboBox clear button
+              css={css`
+                inline-size: 16px;
+                block-size: 16px;
+                border-radius: 16px;
+                background: ${isCleared
+                  ? euiThemeVars.euiColorLightShade
+                  : euiThemeVars.euiColorMediumShade};
 
-                      :hover:not(:disabled) {
-                        background: ${euiThemeVars.euiColorMediumShade};
-                        transform: none;
-                      }
+                :hover:not(:disabled) {
+                  background: ${isCleared
+                    ? euiThemeVars.euiColorLightShade
+                    : euiThemeVars.euiColorMediumShade};
+                  transform: none;
+                }
 
-                      > svg {
-                        width: 8px;
-                        height: 8px;
-                        stroke-width: 2px;
-                        fill: #fff;
-                        stroke: #fff;
-                      }
-                    `
-                  : undefined
-              }
-            />
-          </EuiToolTip>
-        )}
-        {!isEditing && (
-          <EuiToolTip content={i18n.ADD_SYSTEM_PROMPT_TOOLTIP}>
-            <EuiButtonIcon
-              aria-label={i18n.ADD_SYSTEM_PROMPT_TOOLTIP}
-              data-test-subj="addSystemPrompt"
-              iconType="plus"
-              onClick={onShowSelectSystemPrompt}
+                > svg {
+                  width: 8px;
+                  height: 8px;
+                  stroke-width: 2px;
+                  fill: #fff;
+                  stroke: #fff;
+                }
+              `}
             />
           </EuiToolTip>
         )}

@@ -187,7 +187,7 @@ function DetailedFlyoutHeader({
           configId={configId}
           selectedLocation={selectedLocation}
           onChange={useCallback(
-            (id, label) => {
+            (id: any, label: any) => {
               if (currentLocation !== label) setCurrentLocation(label, id);
             },
             [currentLocation, setCurrentLocation]
@@ -255,7 +255,13 @@ export function MonitorDetailFlyout(props: Props) {
     error,
     status,
     loading,
-  } = useFetcher(() => fetchSyntheticsMonitor({ monitorId: configId }), [configId, upsertSuccess]);
+  } = useFetcher(
+    () => fetchSyntheticsMonitor({ monitorId: configId }),
+    // FIXME: Dario thinks there is a better way to do this but
+    // he's getting tired and maybe the Synthetics folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [configId, upsertSuccess]
+  );
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 

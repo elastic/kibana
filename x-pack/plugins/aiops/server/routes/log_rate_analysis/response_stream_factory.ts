@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Headers, KibanaRequestEvents } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 
-import { type AiopsLogRateAnalysisApiAction } from '@kbn/aiops-log-rate-analysis/api/actions';
+import { type AiopsLogRateAnalysisApiAction } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 
 import type {
   AiopsLogRateAnalysisSchema,
@@ -39,7 +39,7 @@ import { streamPushPingWithTimeoutFactory } from './response_stream_utils/stream
  */
 export interface ResponseStreamOptions<T extends ApiVersion> {
   version: T;
-  client: ElasticsearchClient;
+  esClient: ElasticsearchClient;
   requestBody: AiopsLogRateAnalysisSchema<T>;
   events: KibanaRequestEvents;
   headers: Headers;

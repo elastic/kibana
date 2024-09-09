@@ -16,7 +16,16 @@ describe(
   {
     tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
-      ftrConfig: { productTypes: [{ product_line: 'security', product_tier: 'complete' }] },
+      ftrConfig: {
+        productTypes: [{ product_line: 'security', product_tier: 'complete' }],
+        // This is not needed for this test, but it's a good example of
+        // how to enable experimental features in the Cypress tests.
+        // kbnServerArgs: [
+        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+        //     'featureFlagName',
+        //   ])}`,
+        // ],
+      },
     },
   },
   () => {

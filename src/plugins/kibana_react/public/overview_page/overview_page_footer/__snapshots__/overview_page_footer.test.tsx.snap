@@ -19,10 +19,9 @@ exports[`OverviewPageFooter render 1`] = `
           onClick={[Function]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Make this my landing page"
             id="kibana-react.pageFooter.makeDefaultRouteLink"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </div>

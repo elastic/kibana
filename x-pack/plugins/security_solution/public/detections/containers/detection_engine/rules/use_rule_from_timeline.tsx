@@ -13,15 +13,15 @@ import type { EqlOptionsSelected } from '@kbn/timelines-plugin/common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { TimelineModel } from '../../../..';
 import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
-import { sourcererActions } from '../../../../common/store/sourcerer';
+import { sourcererActions } from '../../../../sourcerer/store';
 import { useQueryTimelineById } from '../../../../timelines/components/open_timeline/helpers';
 import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
 import { buildGlobalQuery } from '../../../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../../../timelines/components/timeline/query_bar';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 export const RULE_FROM_TIMELINE_URL_PARAM = 'createRuleFromTimeline';
 export const RULE_FROM_EQL_URL_PARAM = 'createRuleFromEql';
@@ -31,7 +31,7 @@ export interface RuleFromTimeline {
   onOpenTimeline: (timeline: TimelineModel) => void;
 }
 
-type SetRuleQuery = ({
+export type SetRuleQuery = ({
   index,
   queryBar,
   eqlOptions,
@@ -48,8 +48,8 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     SourcererScopeName.timeline
   );
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const isEql = useRef(false);
@@ -200,11 +200,11 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
         queryTimelineById({
           timelineId,
           onOpenTimeline,
-          unifiedComponentsInTimelineEnabled,
+          unifiedComponentsInTimelineDisabled,
         });
       }
     },
-    [onOpenTimeline, queryTimelineById, selectedTimeline, unifiedComponentsInTimelineEnabled]
+    [onOpenTimeline, queryTimelineById, selectedTimeline, unifiedComponentsInTimelineDisabled]
   );
 
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);

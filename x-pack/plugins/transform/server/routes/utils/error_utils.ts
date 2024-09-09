@@ -11,12 +11,9 @@ import { i18n } from '@kbn/i18n';
 
 import type { ResponseError, CustomHttpResponseOptions } from '@kbn/core/server';
 
-import type {
-  CommonResponseStatusSchema,
-  TransformIdsSchema,
-} from '../../../common/api_schemas/common';
-import type { DeleteTransformsResponseSchema } from '../../../common/api_schemas/delete_transforms';
-import type { ResetTransformsResponseSchema } from '../../../common/api_schemas/reset_transforms';
+import type { CommonResponseStatusSchema, TransformIdsSchema } from '../api_schemas/common';
+import type { DeleteTransformsResponseSchema } from '../api_schemas/delete_transforms';
+import type { ResetTransformsResponseSchema } from '../api_schemas/reset_transforms';
 
 const REQUEST_TIMEOUT = 'RequestTimeout';
 
@@ -49,7 +46,7 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
   const reason = i18n.translate(
     'xpack.transform.models.transformService.requestToActionTimedOutErrorMessage',
     {
-      defaultMessage: `Request to {action} '{id}' timed out. {extra}`,
+      defaultMessage: `Request to {action} ''{id}'' timed out. {extra}`,
       values: {
         id,
         action,

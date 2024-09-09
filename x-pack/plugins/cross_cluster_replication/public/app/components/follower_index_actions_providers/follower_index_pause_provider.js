@@ -55,7 +55,7 @@ class FollowerIndexPauseProviderUi extends PureComponent {
       ? i18n.translate(
           'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseSingleTitle',
           {
-            defaultMessage: `Pause replication to follower index '{name}'?`,
+            defaultMessage: `Pause replication to follower index ''{name}''?`,
             values: { name: indices[0].name },
           }
         )
@@ -107,7 +107,6 @@ class FollowerIndexPauseProviderUi extends PureComponent {
             )}
           </p>
         )}
-
         {!isSingle && (
           <Fragment>
             <p>

@@ -30,7 +30,7 @@ export const createCrowdstrikeAgentDetailsMock = (
 ): CrowdstrikeGetAgentsResponse['resources'][number] => {
   return merge(
     {
-      device_id: '0eec3717b2eb472195bbb3964c05cfd3',
+      device_id: '5f4ed7ec2690431f8fa79213268779cb',
       cid: '234567890',
       agent_load_flags: '0',
       agent_local_time: '2024-03-18T22:21:00.173Z',
@@ -141,7 +141,7 @@ export const createCrowdstrikeGetAgentOnlineStatusDetailsMock: (
   return merge(
     {
       state: 'online',
-      id: 'ae86ad7402404048ac9b8d94db8f7ba2',
+      id: '5f4ed7ec2690431f8fa79213268779cb',
     },
     overrides
   );

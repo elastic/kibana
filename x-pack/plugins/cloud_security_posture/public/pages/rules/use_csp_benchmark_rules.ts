@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
-} from '../../../common/types/latest';
+} from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { useKibana } from '../../common/hooks/use_kibana';
 
 import {
@@ -20,7 +20,6 @@ export type RulesQuery = Pick<
   FindCspBenchmarkRuleRequest,
   'section' | 'search' | 'page' | 'perPage' | 'ruleNumber' | 'sortField' | 'sortOrder'
 >;
-export type RulesQueryResult = ReturnType<typeof useFindCspBenchmarkRule>;
 
 export const useFindCspBenchmarkRule = (
   { search, page, perPage, section, ruleNumber, sortField, sortOrder }: RulesQuery,

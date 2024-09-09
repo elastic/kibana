@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { render, screen } from '@testing-library/react';
@@ -20,7 +21,7 @@ const renderComparisonControls = ({
   isPlainRecord?: ComparisonControlsProps['isPlainRecord'];
   forceShowAllFields?: ComparisonControlsProps['forceShowAllFields'];
 } = {}) => {
-  const selectedDocs = ['0', '1', '2'];
+  const selectedDocIds = ['0', '1', '2'];
   const Wrapper = () => {
     const [showDiff, setShowDiff] = useState(true);
     const [diffMode, setDiffMode] = useState<DocumentDiffMode>('basic');
@@ -34,7 +35,7 @@ const renderComparisonControls = ({
         <IntlProvider locale="en">
           <ComparisonControls
             isPlainRecord={isPlainRecord}
-            selectedDocs={selectedDocs}
+            selectedDocIds={selectedDocIds}
             showDiff={showDiff}
             diffMode={diffMode}
             showDiffDecorations={showDiffDecorations}
@@ -67,7 +68,7 @@ const renderComparisonControls = ({
   return {
     getComparisonCountDisplay: () =>
       screen.getByText(
-        `Comparing ${selectedDocs.length} ${isPlainRecord ? 'results' : 'documents'}`
+        `Comparing ${selectedDocIds.length} ${isPlainRecord ? 'results' : 'documents'}`
       ),
     getComparisonSettingsButton,
     clickComparisonSettingsButton: () => userEvent.click(getComparisonSettingsButton()),

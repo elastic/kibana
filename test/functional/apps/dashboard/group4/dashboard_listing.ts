@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -15,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const listingTable = getService('listingTable');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const testSubjects = getService('testSubjects');
 
   describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
@@ -164,7 +166,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('stays on listing page if title matches two dashboards', async function () {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.saveDashboard('two words', { needsConfirm: true });
+        await PageObjects.dashboard.saveDashboard('two words', {
+          saveAsNew: true,
+          needsConfirm: true,
+        });
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl + '&title=two%20words';
@@ -229,6 +234,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const newPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(newPanelCount).to.equal(originalPanelCount);
+      });
+    });
+
+    describe('insights', () => {
+      const DASHBOARD_NAME = 'Insights Dashboard';
+
+      before(async () => {
+        await PageObjects.dashboard.navigateToApp();
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME, {
+          saveAsNew: true,
+          waitDialogIsClosed: false,
+          exitFromEditMode: false,
+        });
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+      });
+
+      it('shows the insights panel and counts the views', async () => {
+        await listingTable.searchForItemWithName(DASHBOARD_NAME);
+
+        async function getViewsCount() {
+          await listingTable.inspectVisualization();
+          const totalViewsStats = await testSubjects.find('views-stats-total-views');
+          const viewsStr = await (
+            await totalViewsStats.findByCssSelector('.euiStat__title')
+          ).getVisibleText();
+          await listingTable.closeInspector();
+          return Number(viewsStr);
+        }
+
+        const views1 = await getViewsCount();
+        expect(views1).to.be(1);
+
+        await listingTable.clickItemLink('dashboard', DASHBOARD_NAME);
+        await PageObjects.dashboard.waitForRenderComplete();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        const views2 = await getViewsCount();
+        expect(views2).to.be(2);
       });
     });
   });

@@ -108,14 +108,12 @@ export interface ProcessAndLogAlertsOpts {
   shouldLogAlerts: boolean;
   ruleRunMetricsStore: RuleRunMetricsStore;
   flappingSettings: RulesSettingsFlappingProperties;
-  notifyOnActionGroupChange: boolean;
   maintenanceWindowIds: string[];
   alertDelay: number;
 }
 
 export interface ProcessAlertsOpts {
   flappingSettings: RulesSettingsFlappingProperties;
-  notifyOnActionGroupChange: boolean;
   maintenanceWindowIds: string[];
   alertDelay: number;
   ruleRunMetricsStore: RuleRunMetricsStore;

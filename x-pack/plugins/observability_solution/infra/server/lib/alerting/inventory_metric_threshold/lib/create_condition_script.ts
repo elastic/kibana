@@ -5,16 +5,16 @@
  * 2.0.
  */
 import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { Comparator } from '../../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertMetricValue } from './convert_metric_value';
 
 export const createConditionScript = (
   conditionThresholds: number[],
-  comparator: Comparator,
+  comparator: COMPARATORS,
   metric: SnapshotMetricType
 ) => {
   const threshold = conditionThresholds.map((n) => convertMetricValue(metric, n));
-  if (comparator === Comparator.BETWEEN && threshold.length === 2) {
+  if (comparator === COMPARATORS.BETWEEN && threshold.length === 2) {
     return {
       source: `params.value > params.threshold0 && params.value < params.threshold1 ? 1 : 0`,
       params: {
@@ -23,9 +23,10 @@ export const createConditionScript = (
       },
     };
   }
-  if (comparator === Comparator.OUTSIDE_RANGE && threshold.length === 2) {
+
+  if (comparator === COMPARATORS.NOT_BETWEEN && threshold.length === 2) {
     return {
-      // OUTSIDE_RANGE/NOT BETWEEN is the opposite of BETWEEN. Use the BETWEEN condition and switch the 1 and 0
+      // NOT BETWEEN is the opposite of BETWEEN. Use the BETWEEN condition and switch the 1 and 0
       source: `params.value > params.threshold0 && params.value < params.threshold1 ? 0 : 1`,
       params: {
         threshold0: threshold[0],

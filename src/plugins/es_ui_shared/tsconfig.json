@@ -24,6 +24,8 @@
     "@kbn/storybook",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-application-common",
   ],
   "exclude": [
     "target/**/*",

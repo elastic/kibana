@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const esVersion = getService('esVersion');
 
   describe('Builtin ES Privileges', () => {
     describe('GET /internal/security/esPrivileges/builtin', () => {
@@ -24,7 +25,15 @@ export default function ({ getService }: FtrProviderContext) {
             const sampleOfExpectedIndexPrivileges = ['create', 'index', 'delete'];
 
             const payload = response.body;
-            expect(Object.keys(payload).sort()).to.eql(['cluster', 'index', 'remote_cluster']);
+
+            // The `remote_cluster` built-in privilege was introduced in 8.15.0, but these tests are also run for
+            // earlier stack versions (e.g., compatibility tests) where `remote_cluster` isn't available. We can get
+            // rid of logic once we release 9.0 and switch compatibility test from 7.x branch to 8.x.
+            expect(Object.keys(payload).sort()).to.eql(
+              esVersion.matchRange('>=8.15.0')
+                ? ['cluster', 'index', 'remote_cluster']
+                : ['cluster', 'index']
+            );
 
             sampleOfExpectedClusterPrivileges.forEach((privilege) =>
               expect(payload.cluster).to.contain(privilege)

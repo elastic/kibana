@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -18,6 +19,7 @@ import {
 } from '@kbn/unified-histogram-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
+import { VIEW_MODE } from '../../../../common/constants';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
@@ -400,6 +402,16 @@ function getSavedSearchFieldForComparison(
       visContext.attributes.title = 'same';
     }
     return visContext;
+  }
+
+  if (fieldName === 'breakdownField') {
+    return savedSearch.breakdownField || ''; // ignore the difference between an empty string and undefined
+  }
+
+  if (fieldName === 'viewMode') {
+    // By default, viewMode: undefined is equivalent to documents view
+    // So they should be treated as same
+    return savedSearch.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   }
 
   return savedSearch[fieldName];

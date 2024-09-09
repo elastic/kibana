@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { readdirSync, readFileSync } from 'fs';
@@ -11,7 +12,7 @@ import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
-import { FunctionDefinition, supportedFieldTypes } from '../src/definitions/types';
+import { FunctionDefinition } from '../src/definitions/types';
 
 const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
@@ -25,10 +26,12 @@ const aliasTable: Record<string, string[]> = {
 const aliases = new Set(Object.values(aliasTable).flat());
 
 const evalSupportedCommandsAndOptions = {
-  supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
 };
 
+// coalesce can be removed when a test is added for version type
+// (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
 const excludedFunctions = new Set(['bucket', 'case']);
 
 const extraFunctions: FunctionDefinition[] = [
@@ -54,42 +57,12 @@ const extraFunctions: FunctionDefinition[] = [
   },
 ];
 
-const elasticsearchToKibanaType = (elasticsearchType: string) => {
-  if (
-    [
-      'double',
-      'unsigned_long',
-      'long',
-      'integer',
-      'counter_integer',
-      'counter_long',
-      'counter_double',
-    ].includes(elasticsearchType)
-  ) {
-    return 'number';
-  }
-
-  if (['text', 'keyword'].includes(elasticsearchType)) {
-    return 'string';
-  }
-
-  if (['datetime', 'time_duration'].includes(elasticsearchType)) {
-    return 'date';
-  }
-
-  if (elasticsearchType === 'date_period') {
-    return 'time_literal'; // TODO - consider aligning with Elasticsearch
-  }
-
-  return elasticsearchType;
-};
-
 const validateLogFunctions = `(fnDef: ESQLFunction) => {
   const messages = [];
   // do not really care here about the base and field
   // just need to check both values are not negative
   for (const arg of fnDef.args) {
-    if (isLiteralItem(arg) && arg.value < 0) {
+    if (isLiteralItem(arg) && Number(arg.value) < 0) {
       messages.push({
         type: 'warning' as const,
         code: 'logOfNegativeValue',
@@ -172,6 +145,39 @@ const dateDiffOptions = [
   'ns',
 ];
 
+const dateExtractOptions = [
+  'ALIGNED_DAY_OF_WEEK_IN_MONTH',
+  'ALIGNED_DAY_OF_WEEK_IN_YEAR',
+  'ALIGNED_WEEK_OF_MONTH',
+  'ALIGNED_WEEK_OF_YEAR',
+  'AMPM_OF_DAY',
+  'CLOCK_HOUR_OF_AMPM',
+  'CLOCK_HOUR_OF_DAY',
+  'DAY_OF_MONTH',
+  'DAY_OF_WEEK',
+  'DAY_OF_YEAR',
+  'EPOCH_DAY',
+  'ERA',
+  'HOUR_OF_AMPM',
+  'HOUR_OF_DAY',
+  'INSTANT_SECONDS',
+  'MICRO_OF_DAY',
+  'MICRO_OF_SECOND',
+  'MILLI_OF_DAY',
+  'MILLI_OF_SECOND',
+  'MINUTE_OF_DAY',
+  'MINUTE_OF_HOUR',
+  'MONTH_OF_YEAR',
+  'NANO_OF_DAY',
+  'NANO_OF_SECOND',
+  'OFFSET_SECONDS',
+  'PROLEPTIC_MONTH',
+  'SECOND_OF_DAY',
+  'SECOND_OF_MINUTE',
+  'YEAR',
+  'YEAR_OF_ERA',
+];
+
 /**
  * Enrichments for function definitions
  *
@@ -195,8 +201,7 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
   date_extract: {
     signatures: [
       {
-        // override the first param as type chrono_literal
-        params: [{ type: 'chrono_literal' }],
+        params: [{ literalOptions: dateExtractOptions }],
       },
     ],
   },
@@ -209,58 +214,13 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
     ],
   },
   mv_sort: {
-    signatures: new Array(6).fill({
+    signatures: new Array(9).fill({
       params: [{}, { literalOptions: ['asc', 'desc'] }],
     }),
   },
-  // can be removed when https://github.com/elastic/elasticsearch/issues/108982 is complete
-  coalesce: {
-    signatures: supportedFieldTypes
-      .map<FunctionDefinition['signatures']>((type) => [
-        {
-          params: [
-            {
-              name: 'first',
-              type,
-              optional: false,
-            },
-          ],
-          returnType: type,
-          minParams: 1,
-        },
-        {
-          params: [
-            {
-              name: 'first',
-              type,
-              optional: false,
-            },
-            {
-              name: 'rest',
-              type: 'boolean',
-              optional: true,
-            },
-          ],
-          returnType: type,
-          minParams: 1,
-        },
-      ])
-      .flat(),
-  },
-  // can be removed when https://github.com/elastic/elasticsearch/issues/108982 is complete
-  mv_dedupe: {
-    signatures: supportedFieldTypes.map<FunctionDefinition['signatures'][number]>((type) => ({
-      params: [
-        {
-          name: 'field',
-          type,
-          optional: false,
-        },
-      ],
-      returnType: type,
-    })),
-  },
 };
+
+const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
 
 /**
  * Builds a function definition object from a row of the "meta functions" table
@@ -282,10 +242,10 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
         ...signature,
         params: signature.params.map((param: any) => ({
           ...param,
-          type: elasticsearchToKibanaType(param.type),
+          type: convertDateTime(param.type),
           description: undefined,
         })),
-        returnType: elasticsearchToKibanaType(signature.returnType),
+        returnType: convertDateTime(signature.returnType),
         variadic: undefined, // we don't support variadic property
         minParams: signature.variadic
           ? signature.params.filter((param: any) => !param.optional).length
@@ -304,21 +264,54 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
 }
 
 function printGeneratedFunctionsFile(functionDefinitions: FunctionDefinition[]) {
+  /**
+   * Deals with asciidoc internal cross-references in the function descriptions
+   *
+   * Examples:
+   * <<esql-mv_max>> -> `MV_MAX`
+   * <<esql-st_intersects,ST_INTERSECTS>> -> `ST_INTERSECTS`
+   * <<esql-multivalued-fields, multivalued fields>> -> multivalued fields
+   */
+  const removeAsciiDocInternalCrossReferences = (
+    asciidocString: string,
+    functionNames: string[]
+  ) => {
+    const internalCrossReferenceRegex = /<<(.+?)(,.+?)?>>/g;
+
+    const extractPossibleFunctionName = (id: string) => id.replace('esql-', '');
+
+    return asciidocString.replace(internalCrossReferenceRegex, (_match, anchorId, linkText) => {
+      const ret = linkText ? linkText.slice(1) : anchorId;
+
+      const matchingFunction = functionNames.find(
+        (name) =>
+          extractPossibleFunctionName(ret) === name.toLowerCase() ||
+          extractPossibleFunctionName(ret) === name.toUpperCase()
+      );
+      return matchingFunction ? `\`${matchingFunction.toUpperCase()}\`` : ret;
+    });
+  };
+
   const removeInlineAsciiDocLinks = (asciidocString: string) => {
     const inlineLinkRegex = /\{.+?\}\/.+?\[(.+?)\]/g;
+
     return asciidocString.replace(inlineLinkRegex, '$1');
   };
 
   const getDefinitionName = (name: string) => _.camelCase(`${name}Definition`);
 
-  const printFunctionDefinition = (functionDefinition: FunctionDefinition) => {
+  const printFunctionDefinition = (
+    functionDefinition: FunctionDefinition,
+    functionNames: string[]
+  ) => {
     const { type, name, description, alias, signatures } = functionDefinition;
 
-    return `const ${getDefinitionName(name)}: FunctionDefinition = {
+    return `// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+    const ${getDefinitionName(name)}: FunctionDefinition = {
     type: '${type}',
     name: '${name}',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
-      removeInlineAsciiDocLinks(description)
+      removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
     )} }),
     alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
     signatures: ${JSON.stringify(signatures, null, 2)},
@@ -329,8 +322,24 @@ function printGeneratedFunctionsFile(functionDefinitions: FunctionDefinition[]) 
 }`;
   };
 
-  const fileHeader = `// NOTE: This file is generated by the generate_function_definitions.js script
-// Do not edit it manually
+  const fileHeader = `/**
+ * __AUTOGENERATED FILE. DO NOT EDIT THIS FILE DIRECTLY.__
+ *
+ * @note This file is generated by the \`generate_function_definitions.ts\`
+ * script. Do not edit it manually.
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
 
 import type { ESQLFunction } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
@@ -340,7 +349,14 @@ import type { FunctionDefinition } from './types';
 
 `;
 
-  const functionDefinitionsString = functionDefinitions.map(printFunctionDefinition).join('\n\n');
+  const functionDefinitionsString = functionDefinitions
+    .map((def) =>
+      printFunctionDefinition(
+        def,
+        functionDefinitions.map(({ name }) => name)
+      )
+    )
+    .join('\n\n');
 
   const fileContents = `${fileHeader}${functionDefinitionsString}
   export const evalFunctionDefinitions = [${functionDefinitions
@@ -354,7 +370,6 @@ import type { FunctionDefinition } from './types';
   const pathToElasticsearch = process.argv[2];
 
   const ESFunctionDefinitionsDirectory = join(
-    __dirname,
     pathToElasticsearch,
     'docs/reference/esql/functions/kibana/definition'
   );
@@ -365,9 +380,12 @@ import type { FunctionDefinition } from './types';
   );
 
   const evalFunctionDefinitions: FunctionDefinition[] = [];
-  // const aggFunctionDefinitions = [];
   for (const ESDefinition of ESFunctionDefinitions) {
-    if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
+    if (
+      aliases.has(ESDefinition.name) ||
+      excludedFunctions.has(ESDefinition.name) ||
+      ESDefinition.type !== 'eval'
+    ) {
       continue;
     }
 

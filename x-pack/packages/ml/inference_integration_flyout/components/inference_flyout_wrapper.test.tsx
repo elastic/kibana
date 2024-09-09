@@ -7,7 +7,8 @@
 import React from 'react';
 import type { InferenceFlyoutProps } from './inference_flyout_wrapper';
 import { InferenceFlyoutWrapper } from './inference_flyout_wrapper';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
+import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
 import '@testing-library/jest-dom';
 export const DEFAULT_VALUES: InferenceFlyoutProps = {
   errorCallout: undefined,

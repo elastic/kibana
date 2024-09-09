@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CustomFormats } from '@formatjs/intl';
+export type Formats = CustomFormats;
 /**
  * Default format options used for "en" locale.
  * These are used when constructing the internal Intl.NumberFormat
@@ -17,7 +20,7 @@
  * described in `options` section of [DateTimeFormat constructor].
  * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat}
  */
-export const formats: Formats = {
+export const defaultEnFormats: CustomFormats = {
   number: {
     currency: {
       style: 'currency',
@@ -74,68 +77,22 @@ export const formats: Formats = {
   },
   relative: {
     years: {
-      units: 'year',
+      style: 'long',
     },
     months: {
-      units: 'month',
+      style: 'long',
     },
     days: {
-      units: 'day',
+      style: 'long',
     },
     hours: {
-      units: 'hour',
+      style: 'long',
     },
     minutes: {
-      units: 'minute',
+      style: 'long',
     },
     seconds: {
-      units: 'second',
+      style: 'long',
     },
   },
 };
-
-interface NumberFormatOptions<TStyle extends string> extends Intl.NumberFormatOptions {
-  style?: TStyle;
-  localeMatcher?: 'lookup' | 'best fit';
-  currencyDisplay?: 'symbol' | 'code' | 'name';
-}
-
-export interface Formats {
-  number?: Partial<{
-    [key: string]: NumberFormatOptions<'currency' | 'percent' | 'decimal'>;
-    currency: NumberFormatOptions<'currency'>;
-    percent: NumberFormatOptions<'percent'>;
-  }>;
-  date?: Partial<{
-    [key: string]: DateTimeFormatOptions;
-    short: DateTimeFormatOptions;
-    medium: DateTimeFormatOptions;
-    long: DateTimeFormatOptions;
-    full: DateTimeFormatOptions;
-  }>;
-  time?: Partial<{
-    [key: string]: DateTimeFormatOptions;
-    short: DateTimeFormatOptions;
-    medium: DateTimeFormatOptions;
-    long: DateTimeFormatOptions;
-    full: DateTimeFormatOptions;
-  }>;
-  relative?: Partial<{
-    [key: string]: {
-      style?: 'numeric' | 'best fit';
-      units: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second';
-    };
-  }>;
-}
-
-interface DateTimeFormatOptions extends Intl.DateTimeFormatOptions {
-  weekday?: 'narrow' | 'short' | 'long';
-  era?: 'narrow' | 'short' | 'long';
-  year?: 'numeric' | '2-digit';
-  month?: 'numeric' | '2-digit' | 'narrow' | 'short' | 'long';
-  day?: 'numeric' | '2-digit';
-  hour?: 'numeric' | '2-digit';
-  minute?: 'numeric' | '2-digit';
-  second?: 'numeric' | '2-digit';
-  timeZoneName?: 'short' | 'long';
-}

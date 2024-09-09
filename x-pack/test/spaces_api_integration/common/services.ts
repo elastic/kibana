@@ -10,5 +10,5 @@ import { services as apiIntegrationServices } from '../../api_integration/servic
 
 export const services = {
   ...commonServices,
-  supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
+  usageAPI: apiIntegrationServices.usageAPI,
 };

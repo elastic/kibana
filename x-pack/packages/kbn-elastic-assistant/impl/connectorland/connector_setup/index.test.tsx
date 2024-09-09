@@ -6,19 +6,15 @@
  */
 
 import React from 'react';
-import { useConnectorSetup } from '.';
-import { act, renderHook } from '@testing-library/react-hooks';
 import { fireEvent, render } from '@testing-library/react';
 import { welcomeConvo } from '../../mock/conversation';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { EuiCommentList } from '@elastic/eui';
+import { ConnectorSetup } from '.';
 
-const onSetupComplete = jest.fn();
 const onConversationUpdate = jest.fn();
 
 const defaultProps = {
   conversation: welcomeConvo,
-  onSetupComplete,
   onConversationUpdate,
 };
 const newConnector = { actionTypeId: '.gen-ai', name: 'cool name' };
@@ -50,121 +46,40 @@ jest.mock('../../assistant/use_conversation', () => ({
 }));
 
 jest.spyOn(global, 'clearTimeout');
-describe('useConnectorSetup', () => {
+describe('ConnectorSetup', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('should render comments and prompts', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
-      await waitForNextUpdate();
-      expect(
-        result.current.comments.map((c) => ({ username: c.username, timestamp: c.timestamp }))
-      ).toEqual([
-        {
-          username: 'You',
-          timestamp: `at: ${new Date('2024-03-18T18:59:18.174Z').toLocaleString()}`,
-        },
-        {
-          username: 'Assistant',
-          timestamp: `at: ${new Date('2024-03-19T18:59:18.174Z').toLocaleString()}`,
-        },
-      ]);
-
-      expect(result.current.prompt.props['data-test-subj']).toEqual('prompt');
+  it('should render action type selector', async () => {
+    const { getByTestId } = render(<ConnectorSetup {...defaultProps} />, {
+      wrapper: TestProviders,
     });
+
+    expect(getByTestId('modal-mock')).toBeInTheDocument();
   });
-  it('should set api config for each conversation when new connector is saved', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
-      await waitForNextUpdate();
-      const { getByTestId, queryByTestId, rerender } = render(result.current.prompt, {
-        wrapper: TestProviders,
-      });
-      expect(getByTestId('connectorButton')).toBeInTheDocument();
-      expect(queryByTestId('skip-setup-button')).not.toBeInTheDocument();
-      fireEvent.click(getByTestId('connectorButton'));
 
-      rerender(result.current.prompt);
-      fireEvent.click(getByTestId('modal-mock'));
-      expect(setApiConfig).toHaveBeenCalledTimes(1);
+  it('should set api config for each conversation when new connector is saved', async () => {
+    const { getByTestId } = render(<ConnectorSetup {...defaultProps} />, {
+      wrapper: TestProviders,
     });
+
+    fireEvent.click(getByTestId('modal-mock'));
+    expect(setApiConfig).toHaveBeenCalledTimes(1);
   });
 
   it('should NOT set the api config for each conversation when a new connector is saved and updateConversationsOnSaveConnector is false', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () =>
-          useConnectorSetup({
-            ...defaultProps,
-            updateConversationsOnSaveConnector: false, // <-- don't update the conversations
-          }),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      const { getByTestId, queryByTestId, rerender } = render(result.current.prompt, {
+    const { getByTestId } = render(
+      <ConnectorSetup
+        {...defaultProps}
+        updateConversationsOnSaveConnector={false} // <-- don't update the conversations
+      />,
+      {
         wrapper: TestProviders,
-      });
-      expect(getByTestId('connectorButton')).toBeInTheDocument();
-      expect(queryByTestId('skip-setup-button')).not.toBeInTheDocument();
-      fireEvent.click(getByTestId('connectorButton'));
+      }
+    );
 
-      rerender(result.current.prompt);
-      fireEvent.click(getByTestId('modal-mock'));
+    fireEvent.click(getByTestId('modal-mock'));
 
-      expect(setApiConfig).not.toHaveBeenCalled();
-    });
-  });
-
-  it('should show skip button if message has presentation data', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () =>
-          useConnectorSetup({
-            ...defaultProps,
-            conversation: {
-              ...defaultProps.conversation,
-              messages: [
-                {
-                  ...defaultProps.conversation.messages[0],
-                  presentation: {
-                    delay: 0,
-                    stream: false,
-                  },
-                },
-              ],
-            },
-          }),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      const { getByTestId, queryByTestId } = render(result.current.prompt, {
-        wrapper: TestProviders,
-      });
-      expect(getByTestId('skip-setup-button')).toBeInTheDocument();
-      expect(queryByTestId('connectorButton')).not.toBeInTheDocument();
-    });
-  });
-  it('should call onSetupComplete and setConversations when onHandleMessageStreamingComplete', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
-      await waitForNextUpdate();
-      render(<EuiCommentList comments={result.current.comments} />, {
-        wrapper: TestProviders,
-      });
-
-      expect(clearTimeout).toHaveBeenCalled();
-      expect(onSetupComplete).toHaveBeenCalled();
-    });
+    expect(setApiConfig).not.toHaveBeenCalled();
   });
 });

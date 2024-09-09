@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -43,6 +44,16 @@ const hits: UserContentCommonSchema[] = [
     },
     createdBy: 'u_2',
     references: [],
+  },
+  {
+    id: 'item-4',
+    type: 'dashboard',
+    updatedAt: '2020-01-01T00:00:00Z',
+    attributes: {
+      title: 'Item 4',
+    },
+    references: [],
+    managed: true,
   },
 ];
 
@@ -135,5 +146,6 @@ describe('created_by column', () => {
 
     expect(await screen.findByTestId(/userAvatarTip-user1/)).toBeVisible();
     expect(await screen.findByTestId(/userAvatarTip-user2/)).toBeVisible();
+    expect(await screen.findByTestId(/managedAvatarTip/)).toBeVisible();
   });
 });

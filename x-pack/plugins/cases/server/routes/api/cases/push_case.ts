@@ -16,6 +16,11 @@ import type { caseDomainV1 } from '../../../../common/types/domain';
 export const pushCaseRoute: CaseRoute = createCasesRoute({
   method: 'post',
   path: CASE_PUSH_URL,
+  routerOptions: {
+    access: 'public',
+    summary: `Push a case to an external service`,
+    tags: ['oas-tag:cases'],
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;

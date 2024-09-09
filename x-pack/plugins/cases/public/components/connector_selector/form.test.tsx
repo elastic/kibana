@@ -6,48 +6,94 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { UseField, Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { screen } from '@testing-library/react';
 import { ConnectorSelector } from './form';
-import { connectorsMock } from '../../containers/mock';
-import { getFormMock } from '../__mock__/form';
 import { useKibana } from '../../common/lib/kibana';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FormTestComponent } from '../../common/test_utils';
+import { connectorsMock } from '../../containers/mock';
 
-jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form');
 jest.mock('../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useFormMock = useForm as jest.Mock;
 
 describe('ConnectorSelector', () => {
-  const formHookMock = getFormMock({ connectorId: connectorsMock[0].id });
+  const handleChange = jest.fn();
+  const defaultProps = {
+    connectors: [],
+    handleChange,
+    dataTestSubj: 'connectors',
+    disabled: false,
+    idAria: 'connectors',
+    isLoading: false,
+  };
+
+  let appMock: AppMockRenderer;
 
   beforeEach(() => {
-    useFormMock.mockImplementation(() => ({ form: formHookMock }));
+    appMock = createAppMockRenderer();
+    jest.clearAllMocks();
+  });
+
+  beforeEach(() => {
     useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
       actionTypeTitle: 'test',
       iconClass: 'logoSecurity',
     });
   });
 
-  it('it should render', async () => {
-    const wrapper = mount(
-      <Form form={formHookMock as unknown as FormHook}>
+  afterEach(async () => {
+    await appMock.clearQueryCache();
+  });
+
+  it('should render', async () => {
+    appMock.render(
+      <FormTestComponent>
         <UseField
           path="connectorId"
           component={ConnectorSelector}
           componentProps={{
-            connectors: connectorsMock,
-            dataTestSubj: 'caseConnectors',
-            disabled: false,
-            idAria: 'caseConnectors',
-            isLoading: false,
+            ...defaultProps,
           }}
         />
-      </Form>
+      </FormTestComponent>
     );
 
-    expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
+    expect(await screen.findByTestId(defaultProps.dataTestSubj));
+  });
+
+  it('should set the selected connector to none if the connector is not available', async () => {
+    appMock.render(
+      <FormTestComponent formDefaultValue={{ connectorId: 'foo' }}>
+        <UseField
+          path="connectorId"
+          component={ConnectorSelector}
+          componentProps={{
+            ...defaultProps,
+          }}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByText('No connector selected'));
+  });
+
+  it('should set the selected connector correctly', async () => {
+    appMock.render(
+      <FormTestComponent formDefaultValue={{ connectorId: connectorsMock[0].id }}>
+        <UseField
+          path="connectorId"
+          component={ConnectorSelector}
+          componentProps={{
+            ...defaultProps,
+            connectors: connectorsMock,
+          }}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByText(connectorsMock[0].name));
   });
 });

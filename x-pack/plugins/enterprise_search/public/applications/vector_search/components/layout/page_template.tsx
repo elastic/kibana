@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { VECTOR_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { SEARCH_PRODUCT_NAME } from '../../../../../common/constants';
 import { SetVectorSearchChrome } from '../../../shared/kibana_chrome';
 import {
   EnterpriseSearchPageTemplateWrapper,
@@ -26,7 +26,7 @@ export const EnterpriseSearchVectorSearchPageTemplate: React.FC<PageTemplateProp
     {...pageTemplateProps}
     solutionNav={{
       items: useEnterpriseSearchNav(),
-      name: VECTOR_SEARCH_PLUGIN.NAME,
+      name: SEARCH_PRODUCT_NAME,
     }}
     setPageChrome={pageChrome && <SetVectorSearchChrome trail={pageChrome} />}
   >

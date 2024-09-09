@@ -6,7 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { validateOtherFieldsKeys, validateOtherFieldsLength } from './validators';
+import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
+import { validateRecordMaxKeys } from '../lib/validators';
+import { validateOtherFieldsKeys } from './validators';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
@@ -49,7 +51,12 @@ const incidentSchemaObject = {
       }),
       schema.any(),
       {
-        validate: (value) => validateOtherFieldsLength(value),
+        validate: (value) =>
+          validateRecordMaxKeys({
+            record: value,
+            maxNumberOfFields: MAX_OTHER_FIELDS_LENGTH,
+            fieldName: 'otherFields',
+          }),
       }
     )
   ),

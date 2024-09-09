@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiBadge, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
@@ -35,14 +36,14 @@ import {
 const bookSerializedStateIsByReference = (
   state?: BookSerializedState
 ): state is BookByReferenceSerializedState => {
-  return Boolean(state && (state as BookByReferenceSerializedState).savedBookId !== undefined);
+  return Boolean(state && (state as BookByReferenceSerializedState).savedBookId);
 };
 
 export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
   const savedBookEmbeddableFactory: ReactEmbeddableFactory<
     BookSerializedState,
-    BookApi,
-    BookRuntimeState
+    BookRuntimeState,
+    BookApi
   > = {
     type: SAVED_BOOK_ID,
     deserializeState: async (serializedState) => {
@@ -86,7 +87,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
               defaultMessage: 'book',
             }),
           serializeState: async () => {
-            if (savedBookId$.value === undefined) {
+            if (!Boolean(savedBookId$.value)) {
               // if this book is currently by value, we serialize the entire state.
               const bookByValueState: BookByValueSerializedState = {
                 attributes: serializeBookAttributes(bookAttributesManager),
@@ -97,7 +98,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
 
             // if this book is currently by reference, we serialize the reference and write to the external store.
             const bookByReferenceState: BookByReferenceSerializedState = {
-              savedBookId: savedBookId$.value,
+              savedBookId: savedBookId$.value!,
               ...serializeTitles(),
             };
 
@@ -122,6 +123,11 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           checkForDuplicateTitle: async (title) => {},
           unlinkFromLibrary: () => {
             savedBookId$.next(undefined);
+          },
+          getByValueRuntimeSnapshot: () => {
+            const snapshot = api.snapshotRuntimeState();
+            delete snapshot.savedBookId;
+            return snapshot;
           },
         },
         {

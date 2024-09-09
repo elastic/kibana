@@ -25,10 +25,18 @@ export const getConnectorRoute = (
       path: `${BASE_ACTION_API_PATH}/connector/{id}`,
       options: {
         access: 'public',
-        description: `Get connector information`,
+        summary: `Get connector information`,
+        tags: ['oas-tag:connectors'],
       },
       validate: {
-        params: getConnectorParamsSchemaV1,
+        request: {
+          params: getConnectorParamsSchemaV1,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

@@ -22,12 +22,15 @@ export const populatePackagePolicyAssignedAgentsCount = async (
   packagePolicies: PackagePolicy[]
 ): Promise<void> => {
   const agentPolicyIds = Array.from(
-    new Set<string>(packagePolicies.map((policy) => policy.policy_id))
+    new Set<string>(packagePolicies.flatMap((policy) => policy.policy_ids))
   );
 
   const agentPolicyAgentCounts = await getAgentCountForAgentPolicies(esClient, agentPolicyIds);
 
   for (const packagePolicy of packagePolicies) {
-    packagePolicy.agents = agentPolicyAgentCounts[packagePolicy.policy_id] ?? 0;
+    packagePolicy.agents = packagePolicy.policy_ids.reduce((acc, curr) => {
+      acc += agentPolicyAgentCounts[curr] ?? 0;
+      return acc;
+    }, 0);
   }
 };

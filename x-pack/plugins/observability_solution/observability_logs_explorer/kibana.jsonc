@@ -20,7 +20,8 @@
       "slo",
       "share",
       "kibanaUtils",
-      "datasetQuality"
+      "dataQuality",
+      "logsDataAccess"
     ],
     "optionalPlugins": [
       "serverless",
@@ -36,7 +37,7 @@
       "triggersActionsUi"
     ],
     "extraPublicDirs": [
-      "common",
+      "common"
     ]
   }
 }

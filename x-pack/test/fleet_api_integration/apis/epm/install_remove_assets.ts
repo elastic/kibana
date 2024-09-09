@@ -11,8 +11,7 @@ import { sortBy } from 'lodash';
 import { AssetReference } from '@kbn/fleet-plugin/common/types';
 import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 function checkErrorWithResponseDataOrThrow(err: any) {
   if (!err?.response?.data) {
@@ -24,9 +23,8 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
-  const server = dockerServers.get('registry');
   const es: Client = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const logsTemplateName = `logs-${pkgName}.test_logs`;
@@ -42,17 +40,17 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('installs and uninstalls all assets', async () => {
+  describe('installs and uninstalls all assets', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
-    describe('installs all assets when installing a package for the first time', async () => {
+    describe('installs all assets when installing a package for the first time', () => {
       before(async () => {
-        if (!server.enabled) return;
+        await fleetAndAgents.setup();
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);
       });
       expectAssetsInstalled({
@@ -65,16 +63,17 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('uninstalls all assets when uninstalling a package', async () => {
+    describe('uninstalls all assets when uninstalling a package', () => {
       // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
       // and then we'll test that not artifacts are left behind.
-      before(() => {
-        if (!server.enabled) return;
-        return installPackage(pkgName, pkgVersion);
-      });
-      before(() => {
-        if (!server.enabled) return;
-        return uninstallPackage(pkgName, pkgVersion);
+      before(async () => {
+        if (isDockerRegistryEnabledOrSkipped(providerContext)) {
+          await installPackage(pkgName, pkgVersion);
+        }
+
+        if (isDockerRegistryEnabledOrSkipped(providerContext)) {
+          await uninstallPackage(pkgName, pkgVersion);
+        }
       });
 
       it('should have uninstalled the index templates', async function () {
@@ -296,15 +295,15 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('reinstalls all assets', async () => {
+    describe('reinstalls all assets', () => {
       before(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);
         // reinstall
         await installPackage(pkgName, pkgVersion);
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);
       });
       expectAssetsInstalled({

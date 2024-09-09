@@ -9,7 +9,7 @@ import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { FETCH_STATUS, TagsList } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEnablement } from '../../../../hooks';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
@@ -21,7 +21,6 @@ import {
   CANNOT_PERFORM_ACTION_SYNTHETICS,
   NoPermissionsTooltip,
 } from '../../../common/components/permissions';
-import { TagsBadges } from '../../../common/components/tag_badges';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
 import * as labels from './labels';
 import { MonitorDetailsLink } from './monitor_details_link';
@@ -46,9 +45,10 @@ export function useMonitorListColumns({
 }: {
   loading: boolean;
   overviewStatus: OverviewStatusState | null;
-  setMonitorPendingDeletion: (config: EncryptedSyntheticsSavedMonitor) => void;
+  setMonitorPendingDeletion: (configs: string[]) => void;
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
+  const { http } = useKibana().services;
   const canEditSynthetics = useCanEditSynthetics();
 
   const { isServiceAllowed } = useEnablement();
@@ -102,7 +102,7 @@ export function useMonitorListColumns({
       sortable: true,
       render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
         <MonitorTypeBadge
-          monitor={monitor}
+          monitorType={monitor[ConfigKey.MONITOR_TYPE]}
           ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
           onClick={() => {
             history.push({
@@ -145,7 +145,7 @@ export function useMonitorListColumns({
         defaultMessage: 'Tags',
       }),
       render: (tags: string[]) => (
-        <TagsBadges
+        <TagsList
           tags={tags}
           onClick={(tag) => {
             history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
@@ -183,7 +183,16 @@ export function useMonitorListColumns({
               canEditSynthetics={canEditSynthetics}
               canUsePublicLocations={isPublicLocationsAllowed(fields)}
             >
-              {labels.EDIT_LABEL}
+              <span
+                aria-label={i18n.translate('xpack.synthetics.management.monitorList.editLabel', {
+                  defaultMessage: 'Edit monitor {monitorName}',
+                  values: {
+                    monitorName: fields[ConfigKey.NAME],
+                  },
+                })}
+              >
+                {labels.EDIT_LABEL}
+              </span>
             </NoPermissionsTooltip>
           ),
           description: labels.EDIT_LABEL,
@@ -194,10 +203,40 @@ export function useMonitorListColumns({
             !isActionLoading(fields) &&
             isPublicLocationsAllowed(fields) &&
             isServiceAllowed,
-          onClick: (fields) => {
-            history.push({
-              pathname: `/edit-monitor/${fields[ConfigKey.CONFIG_ID]}`,
-            });
+          href: (fields) => {
+            return http?.basePath.prepend(`edit-monitor/${fields[ConfigKey.CONFIG_ID]}`)!;
+          },
+        },
+        {
+          'data-test-subj': 'syntheticsMonitorCopyAction',
+          isPrimary: false,
+          name: (fields) => (
+            <NoPermissionsTooltip
+              canEditSynthetics={canEditSynthetics}
+              canUsePublicLocations={isPublicLocationsAllowed(fields)}
+            >
+              <span
+                aria-label={i18n.translate('xpack.synthetics.management.monitorList.cloneLabel', {
+                  defaultMessage: 'Clone monitor {monitorName}',
+                  values: {
+                    monitorName: fields[ConfigKey.NAME],
+                  },
+                })}
+              >
+                {labels.CLONE_LABEL}
+              </span>
+            </NoPermissionsTooltip>
+          ),
+          description: labels.CLONE_LABEL,
+          icon: 'copy' as const,
+          type: 'icon' as const,
+          enabled: (fields) =>
+            canEditSynthetics &&
+            !isActionLoading(fields) &&
+            isPublicLocationsAllowed(fields) &&
+            isServiceAllowed,
+          href: (fields) => {
+            return http?.basePath.prepend(`add-monitor?cloneId=${fields[ConfigKey.CONFIG_ID]}`)!;
           },
         },
         {
@@ -208,7 +247,16 @@ export function useMonitorListColumns({
               canEditSynthetics={canEditSynthetics}
               canUsePublicLocations={isPublicLocationsAllowed(fields)}
             >
-              {labels.DELETE_LABEL}
+              <span
+                aria-label={i18n.translate('xpack.synthetics.management.monitorList.deleteLabel', {
+                  defaultMessage: 'Delete monitor {monitorName}',
+                  values: {
+                    monitorName: fields[ConfigKey.NAME],
+                  },
+                })}
+              >
+                {labels.DELETE_LABEL}
+              </span>
             </NoPermissionsTooltip>
           ),
           description: labels.DELETE_LABEL,
@@ -218,15 +266,30 @@ export function useMonitorListColumns({
           enabled: (fields) =>
             canEditSynthetics && !isActionLoading(fields) && isPublicLocationsAllowed(fields),
           onClick: (fields) => {
-            setMonitorPendingDeletion(fields);
+            setMonitorPendingDeletion([fields[ConfigKey.CONFIG_ID]]);
           },
         },
         {
           description: labels.DISABLE_STATUS_ALERT,
-          name: (fields) =>
-            isStatusEnabled(fields[ConfigKey.ALERT_CONFIG])
-              ? labels.DISABLE_STATUS_ALERT
-              : labels.ENABLE_STATUS_ALERT,
+          name: (fields) => (
+            <span
+              aria-label={
+                isStatusEnabled(fields[ConfigKey.ALERT_CONFIG])
+                  ? i18n.translate('xpack.synthetics.management.monitorList.disableAlert', {
+                      defaultMessage: 'Disable alert for {monitorName}',
+                      values: { monitorName: fields[ConfigKey.NAME] },
+                    })
+                  : i18n.translate('xpack.synthetics.management.monitorList.enableAlert', {
+                      defaultMessage: 'Enable alert for {monitorName}',
+                      values: { monitorName: fields[ConfigKey.NAME] },
+                    })
+              }
+            >
+              {isStatusEnabled(fields[ConfigKey.ALERT_CONFIG])
+                ? labels.DISABLE_STATUS_ALERT
+                : labels.ENABLE_STATUS_ALERT}
+            </span>
+          ),
           icon: (fields) =>
             isStatusEnabled(fields[ConfigKey.ALERT_CONFIG]) ? 'bellSlash' : 'bell',
           type: 'icon' as const,
@@ -246,14 +309,6 @@ export function useMonitorListColumns({
             });
           },
         },
-        /*
-      TODO: Implement duplication functionality
-      const duplicateMenuItem = (
-        <EuiContextMenuItem key="xpack.synthetics.duplicateMonitor" icon="copy" onClick={closePopover}>
-          {labels.DUPLICATE_LABEL}
-        </EuiContextMenuItem>
-      );
-      */
       ],
     },
   ];

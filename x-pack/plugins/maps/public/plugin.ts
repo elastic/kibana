@@ -25,6 +25,7 @@ import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizatio
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
@@ -35,7 +36,6 @@ import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LensPublicSetup } from '@kbn/lens-plugin/public';
@@ -68,12 +68,11 @@ import {
   MapsStartApi,
   suggestEMSTermJoinConfig,
 } from './api';
-import { MapsXPackConfig, MapsConfigType } from '../config';
-import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
+import type { MapsXPackConfig, MapsConfigType } from '../server/config';
 import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent/action';
 import { synchronizeMovementAction } from './trigger_actions/synchronize_movement/action';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
-import { APP_NAME, APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { APP_NAME, APP_ICON_SOLUTION, APP_ID } from '../common/constants';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import {
@@ -81,15 +80,15 @@ import {
   setMapAppConfig,
   setSpaceId,
   setStartServices,
+  untilPluginStartServicesReady,
 } from './kibana_services';
 import { MapInspectorView } from './inspector/map_adapter/map_inspector_view';
 import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_tile_inspector_view';
 
 import { PassiveMapLazy, setupLensChoroplethChart } from './lens';
-import { CONTENT_ID, LATEST_VERSION, MapAttributes } from '../common/content_management';
-import { savedObjectToEmbeddableAttributes } from './map_attribute_service';
-import { MapByValueInput } from './embeddable';
-import { MapComponentLazy } from './embeddable/map_component_lazy';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { setupMapEmbeddable } from './react_embeddable/setup_map_embeddable';
+import { MapRendererLazy } from './react_embeddable/map_renderer_lazy';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -112,6 +111,7 @@ export interface MapsPluginStartDependencies {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   embeddable: EmbeddableStart;
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   fieldFormats: FieldFormatsStart;
   fileUpload: FileUploadPluginStart;
   inspector: InspectorStartContract;
@@ -122,7 +122,6 @@ export interface MapsPluginStartDependencies {
   visualizations: VisualizationsStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
-  security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
   contentManagement: ContentManagementPublicStart;
@@ -194,7 +193,6 @@ export class MapsPlugin
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
     plugins.visualizations.registerAlias(getMapsVisTypeAlias());
-    plugins.embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
 
     core.application.register({
       id: APP_ID,
@@ -204,14 +202,18 @@ export class MapsPlugin
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
-        const [coreStart, { savedObjectsTagging, spaces }] = await core.getStartServices();
+        const [, startServices, { renderApp }] = await Promise.all([
+          untilPluginStartServicesReady(),
+          core.getStartServices(),
+          import('./render_app'),
+        ]);
+        const [coreStart, { savedObjectsTagging, spaces }] = startServices;
         const UsageTracker =
           plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
         const activeSpace = await spaces?.getActiveSpace();
         if (activeSpace) {
           setSpaceId(activeSpace.id);
         }
-        const { renderApp } = await import('./render_app');
         return renderApp(params, { coreStart, AppUsageTracker: UsageTracker, savedObjectsTagging });
       },
     });
@@ -224,18 +226,7 @@ export class MapsPlugin
       name: APP_NAME,
     });
 
-    plugins.embeddable.registerSavedObjectToPanelMethod<MapAttributes, MapByValueInput>(
-      CONTENT_ID,
-      (savedObject) => {
-        if (!savedObject.managed) {
-          return { savedObjectId: savedObject.id };
-        }
-
-        return {
-          attributes: savedObjectToEmbeddableAttributes(savedObject),
-        };
-      }
-    );
+    setupMapEmbeddable(plugins.embeddable);
 
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
 
@@ -273,7 +264,7 @@ export class MapsPlugin
     return {
       createLayerDescriptors,
       suggestEMSTermJoinConfig,
-      Map: MapComponentLazy,
+      Map: MapRendererLazy,
       PassiveMap: PassiveMapLazy,
     };
   }

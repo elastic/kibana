@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { RootSchema } from '@kbn/analytics-client';
-import { EventTypeOpts } from '@kbn/core/public';
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, EventTypeOpts, RootSchema } from '@kbn/core/server';
 import { EventType, FieldType } from '@kbn/reporting-server';
 
 const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {

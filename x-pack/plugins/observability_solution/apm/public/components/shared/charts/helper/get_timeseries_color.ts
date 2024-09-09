@@ -18,6 +18,8 @@ export enum ChartType {
   SESSIONS,
   HTTP_REQUESTS,
   ERROR_OCCURRENCES,
+  LOG_ERROR_RATE,
+  LOG_RATE,
 }
 
 const palette = euiPaletteColorBlind({ rotations: 2 });
@@ -63,6 +65,14 @@ const timeSeriesColorMap: Record<
     previousPeriodColor: palette[12],
   },
   [ChartType.ERROR_OCCURRENCES]: {
+    currentPeriodColor: palette[3],
+    previousPeriodColor: palette[13],
+  },
+  [ChartType.LOG_RATE]: {
+    currentPeriodColor: palette[6],
+    previousPeriodColor: palette[16],
+  },
+  [ChartType.LOG_ERROR_RATE]: {
     currentPeriodColor: palette[3],
     previousPeriodColor: palette[13],
   },

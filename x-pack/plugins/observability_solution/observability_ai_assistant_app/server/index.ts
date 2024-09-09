@@ -8,6 +8,8 @@
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { ObservabilityAIAssistantAppConfig } from './config';
 
+export { CHANGES_FUNCTION_NAME } from './functions/changes';
+export { QUERY_FUNCTION_NAME } from './functions/query';
 import { config as configSchema } from './config';
 export type {
   ObservabilityAIAssistantAppServerStart,

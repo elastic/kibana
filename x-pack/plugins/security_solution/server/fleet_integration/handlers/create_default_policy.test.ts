@@ -14,6 +14,7 @@ import { createDefaultPolicy } from './create_default_policy';
 import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
 import { policyFactory } from '../../../common/endpoint/models/policy_config';
+import * as PolicyConfigHelpers from '../../../common/endpoint/models/policy_config_helpers';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type {
   AnyPolicyCreateConfig,
@@ -237,6 +238,21 @@ describe('Create Default Policy tests ', () => {
           ransomware: { mode: 'off' },
         },
       });
+    });
+
+    it('should set meta.billable', async () => {
+      const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
+      const config = createEndpointConfig({ preset: 'DataCollection' });
+
+      isBillablePolicySpy.mockReturnValue(false);
+      let policy = await createDefaultPolicyCallback(config);
+      expect(policy.meta.billable).toBe(false);
+
+      isBillablePolicySpy.mockReturnValue(true);
+      policy = await createDefaultPolicyCallback(config);
+      expect(policy.meta.billable).toBe(true);
+
+      isBillablePolicySpy.mockRestore();
     });
   });
 

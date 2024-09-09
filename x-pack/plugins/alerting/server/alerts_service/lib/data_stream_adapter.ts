@@ -10,6 +10,7 @@ import {
   CreateConcreteWriteIndexOpts,
   ConcreteIndexInfo,
   updateIndexMappings,
+  setConcreteWriteIndex,
 } from './create_concrete_write_index';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
@@ -151,9 +152,10 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
     );
 
     logger.debug(
-      `Found ${concreteIndices.length} concrete indices for ${
-        indexPatterns.name
-      } - ${JSON.stringify(concreteIndices)}`
+      () =>
+        `Found ${concreteIndices.length} concrete indices for ${
+          indexPatterns.name
+        } - ${JSON.stringify(concreteIndices)}`
     );
   } catch (error) {
     // 404 is expected if no concrete write indices have been created
@@ -186,9 +188,11 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
     // If there are some concrete indices but none of them are the write index, we'll throw an error
     // because one of the existing indices should have been the write target.
     if (concreteIndicesExist && !concreteWriteIndicesExist) {
-      throw new Error(
+      logger.debug(
         `Indices matching pattern ${indexPatterns.pattern} exist but none are set as the write index for alias ${indexPatterns.alias}`
       );
+      await setConcreteWriteIndex({ logger, esClient, concreteIndices });
+      concreteWriteIndicesExist = true;
     }
   }
 

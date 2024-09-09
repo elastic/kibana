@@ -41,7 +41,7 @@ const getMockSearchResponse = (
       {
         _id: '1',
         _index: 'index',
-        fields: { 'crowdstrike.host.id': [agentName] },
+        fields: { 'device.id': [agentName] },
         inner_hits: {
           most_recent: {
             hits: {
@@ -52,10 +52,12 @@ const getMockSearchResponse = (
                   _source: {
                     crowdstrike: {
                       host: {
-                        id: !wrongAgentName ? agentName : 'wrongAgentName',
                         last_seen: '2023-01-01',
                         status,
                       },
+                    },
+                    device: {
+                      id: !wrongAgentName ? agentName : 'wrongAgentName',
                     },
                   },
                 },

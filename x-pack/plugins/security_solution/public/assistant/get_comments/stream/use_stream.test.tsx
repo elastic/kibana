@@ -39,9 +39,7 @@ const readerComplete = {
 const defaultProps = {
   refetchCurrentConversation,
   reader: readerComplete,
-  isEnabledLangChain: false,
   isError: false,
-  actionTypeId: '.gen-ai',
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/180091

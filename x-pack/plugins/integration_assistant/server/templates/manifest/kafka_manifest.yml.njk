@@ -1,0 +1,223 @@
+- input: kafka
+  template_path: kafka.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: hosts
+      type: text
+      title: Hosts
+      description: |
+        A list of Kafka bootstrapping hosts (brokers) for this cluster.
+      required: true
+      show_user: true
+      multi: true
+    - name: topics
+      type: text
+      title: Topics
+      description: |
+        A list of topics to read from.
+      required: true
+      show_user: true
+      multi: true
+    - name: data_stream.dataset
+      type: text
+      title: Dataset name
+      description: |
+        Dataset to write data to. Changing the dataset will send the data to a different index. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).
+      default: kafka_log.generic
+      required: true
+      show_user: true
+    - name: pipeline
+      type: text
+      title: Ingest Pipeline
+      description: |
+        The Ingest Node pipeline ID to be used by the integration.
+      required: false
+      show_user: true
+    - name: group_id
+      type: text
+      title: Group ID
+      description: The Kafka consumer group id.
+      required: true
+      show_user: true
+    - name: client_id
+      type: text
+      title: Client ID
+      description: The Kafka client id (optional).
+      required: false
+      show_user: true
+    - name: version
+      type: text
+      title: Version
+      description: The version of the Kafka protocol to use (defaults to "1.0.0").
+      required: false
+      show_user: true
+    - name: expand_event_list_from_field
+      type: text
+      title: Expand Event List from Field
+      description: Split a field that contains an array of JSON objects, the value would be the name of this field.
+      required: false
+      show_user: true
+    - name: parsers
+      type: yaml
+      title: Parsers
+      description: |
+        This option expects a list of parsers that the payload has to go through. For more information see [Parsers](https://www.elastic.co/guide/en/beats/filebeat/8.0/filebeat-input-kafka.html#_parsers_2)
+      required: false
+      show_user: true
+      multi: false
+      default: |
+        #- ndjson:
+        #    keys_under_root: true
+        #    message_key: msg
+        #- multiline:
+        #    type: counter
+        #    lines_count: 3
+    - name: username
+      type: text
+      title: Username
+      description: Username used for SASL authentication.
+      required: false
+      show_user: true
+    - name: password
+      type: password
+      title: Password
+      description: Password used for SASL authentication.
+      required: false
+      show_user: true
+    - name: kerberos_enabled
+      type: bool
+      title: Kerberos Enabled
+      description: The enabled setting can be used to enable the Kerberos configuration by setting it to true. The default value is false.
+      required: false
+      show_user: false
+    - name: kerberos_auth_type
+      type: text
+      title: Kerberos Auth Type
+      description: |
+        There are two options to authenticate with Kerberos KDC: password and keytab.
+        Password expects the principal name and its password. When choosing keytab, you have to specify a principal name and a path to a keytab. The keytab must contain the keys of the selected principal. Otherwise, authentication will fail.
+      required: false
+      show_user: false
+    - name: kerberos_config_path
+      type: text
+      title: Kerberos Config Path
+      description: You need to set the path to the krb5.conf, so Elastic Agent can find the Kerberos KDC to retrieve a ticket.
+      required: false
+      show_user: false
+    - name: kerberos_username
+      type: text
+      title: Kerberos Username
+      description: Name of the principal used to connect to the output.
+      required: false
+      show_user: false
+    - name: kerberos_password
+      type: password
+      title: Kerberos Password
+      description: If you configured password for Auth Type, you have to provide a password for the selected principal.
+      required: false
+      show_user: false
+    - name: kerberos_keytab
+      type: text
+      title: Kerberos Keytab
+      description: If you configured keytab for Auth Type, you have to provide the path to the keytab of the selected principal.
+      required: false
+      show_user: false
+    - name: kerberos_service_name
+      type: text
+      title: Kerberos Service Name
+      description: This option can only be configured for Kafka. It is the name of the Kafka service, usually "kafka".
+      required: false
+      show_user: false
+    - name: kerberos_realm
+      type: text
+      title: Kerberos Realm
+      description: Name of the realm where the output resides.
+      required: false
+      show_user: false
+    - name: kerberos_enable_krb5_fast
+      type: bool
+      title: Kerberos KRB5 Fast
+      description: Enable Kerberos FAST authentication. This may conflict with some Active Directory installations. The default is false.
+      required: false
+      show_user: false
+    - name: initial_offset
+      type: text
+      title: Initial Offset
+      description: The initial offset to start reading, either "oldest" or "newest". Defaults to "oldest".
+      required: false
+      show_user: false
+    - name: connect_backoff
+      type: text
+      title: Connect Backoff
+      description: How long to wait before trying to reconnect to the kafka cluster after a fatal error. Default is 30s.
+      required: false
+      show_user: false
+    - name: consume_backoff
+      type: text
+      title: Consume Backoff
+      description: How long to wait before retrying a failed read. Default is 2s.
+      required: false
+      show_user: false
+    - name: max_wait_time
+      type: text
+      title: Max Wait Time
+      description: How long to wait for the minimum number of input bytes while reading. Default is 250ms.
+      required: false
+      show_user: false
+    - name: wait_close
+      type: text
+      title: Wait Close
+      description: When shutting down, how long to wait for in-flight messages to be delivered and acknowledged.
+      required: false
+      show_user: false
+    - name: isolation_level
+      type: text
+      title: Wait Close
+      description: This configures the Kafka group isolation level, supports the values "read_uncommitted" which returns all messages in the message channel and "read_committed" which hides messages that are part of an aborted transaction. The default is "read_uncommitted".
+      required: false
+      show_user: false
+    - name: fetch_min
+      type: text
+      title: Fetch Min
+      description: The minimum number of bytes to wait for. Defaults to 1.
+      required: false
+      show_user: false
+    - name: fetch_default
+      type: text
+      title: Fetch Default
+      description: The default number of bytes to read per request. Defaults to 1MB.
+      required: false
+      show_user: false
+    - name: fetch_max
+      type: text
+      title: Fetch Max
+      description: The maximum number of bytes to read per request. Defaults to 0 (no limit).
+      required: false
+      show_user: false
+    - name: rebalance_strategy
+      type: text
+      title: Rebalance Strategy
+      description: Either "range" or "roundrobin". Defaults to "range".
+      required: false
+      show_user: false
+    - name: rebalance_timeout
+      type: text
+      title: Rebalance Timeout
+      description: How long to wait for an attempted rebalance. Defaults to 60s.
+      required: false
+      show_user: false
+    - name: rebalance_max_retries
+      type: text
+      title: Rebalance Max Retries
+      description: How many times to retry if rebalancing fails. Defaults to 4.
+      required: false
+      show_user: false
+    - name: rebalance_retry_backoff
+      type: text
+      title: Rebalance Retry Backoff
+      description: How long to wait after an unsuccessful rebalance attempt. Defaults to 2s.
+      required: false
+      show_user: false

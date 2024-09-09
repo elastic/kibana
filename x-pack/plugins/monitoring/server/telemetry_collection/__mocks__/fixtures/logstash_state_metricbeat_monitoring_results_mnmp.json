@@ -49,6 +49,11 @@
                     "workers" : 1
                   }
                 }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
               }
             },
             "metricset": {
@@ -113,6 +118,11 @@
                     }
                   }
                 }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
               }
             },
             "metricset": {
@@ -137,6 +147,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -201,6 +216,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -265,6 +285,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -329,6 +354,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -393,6 +423,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -457,6 +492,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -521,6 +561,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -585,6 +630,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -649,6 +699,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -713,6 +768,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -777,6 +837,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -841,6 +906,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -905,6 +975,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -969,6 +1044,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {
@@ -1033,6 +1113,11 @@
           "_score" : 0.0,
           "_source" : {
             "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
               "node": {
                 "state": {
                   "pipeline" : {

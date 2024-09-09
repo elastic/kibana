@@ -36,9 +36,9 @@ export const journey = new Journey({
     await kibanaPage.waitForListViewTable();
     await deletedDashboard.waitFor({ state: 'detached' });
   })
-  .step('Add  dashboard', async ({ page, inputDelays }) => {
+  .step('Add dashboard', async ({ page, inputDelays }) => {
     await page.click(subj('newItemButton'));
-    await page.click(subj('dashboardSaveMenuItem'));
+    await page.click(subj('dashboardInteractiveSaveMenuItem'));
     await page.type(subj('savedObjectTitle'), `foobar dashboard ${uuidv4()}`, {
       delay: inputDelays.TYPING,
     });

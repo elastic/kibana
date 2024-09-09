@@ -6,4 +6,3 @@
  */
 
 export * from './construct_locator_path';
-export * from './construct_dataset_quality_locator_path';

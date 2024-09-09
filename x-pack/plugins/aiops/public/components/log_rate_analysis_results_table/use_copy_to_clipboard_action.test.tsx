@@ -14,7 +14,7 @@ import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
 import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
-import type { GroupTableItem } from '@kbn/aiops-components';
+import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
 import { getGroupTableItems } from './get_group_table_items';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';

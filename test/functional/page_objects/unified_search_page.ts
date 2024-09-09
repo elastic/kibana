@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrService } from '../ftr_provider_context';
@@ -13,20 +14,12 @@ export class UnifiedSearchPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
 
-  public async switchDataView(
-    switchButtonSelector: string,
-    dataViewTitle: string,
-    transitionFromTextBasedLanguages?: boolean
-  ) {
+  public async switchDataView(switchButtonSelector: string, dataViewTitle: string) {
     await this.testSubjects.click(switchButtonSelector);
 
     const indexPatternSwitcher = await this.testSubjects.find('indexPattern-switcher', 500);
     await this.testSubjects.setValue('indexPattern-switcher--input', dataViewTitle);
     await (await indexPatternSwitcher.findByCssSelector(`[title="${dataViewTitle}"]`)).click();
-
-    if (Boolean(transitionFromTextBasedLanguages)) {
-      await this.testSubjects.click('unifiedSearch_switch_noSave');
-    }
 
     await this.retry.waitFor(
       'wait for updating switcher',
@@ -49,5 +42,10 @@ export class UnifiedSearchPageObject extends FtrService {
     await this.find.clickByCssSelector(
       `[data-test-subj="text-based-languages-switcher"] [title="${language}"]`
     );
+  }
+
+  public async switchToDataViewMode() {
+    await this.testSubjects.click('switch-to-dataviews');
+    await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
   }
 }

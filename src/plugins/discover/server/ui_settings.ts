@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -28,6 +29,7 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
   TRUNCATE_MAX_HEIGHT,
+  TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
 } from '@kbn/discover-utils';
@@ -207,6 +209,15 @@ export const getUiSettings: (
       type: METRIC_TYPE.CLICK,
       name: 'discover:useLegacyDataGrid',
     },
+    deprecation: {
+      message: i18n.translate(
+        'discover.advancedSettings.discover.disableDocumentExplorerDeprecation',
+        {
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+        }
+      ),
+      docLinksKey: 'discoverSettings',
+    },
   },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
@@ -236,6 +247,15 @@ export const getUiSettings: (
     value: false,
     category: ['discover'],
     schema: schema.boolean(),
+    deprecation: {
+      message: i18n.translate(
+        'discover.advancedSettings.discover.readFieldsFromSourceDeprecation',
+        {
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+        }
+      ),
+      docLinksKey: 'discoverSettings',
+    },
   },
   [SHOW_FIELD_STATISTICS]: {
     name: i18n.translate('discover.advancedSettings.discover.showFieldStatistics', {
@@ -300,7 +320,7 @@ export const getUiSettings: (
     name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
       defaultMessage: 'Maximum cell height in the classic table',
     }),
-    value: 115,
+    value: TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
       defaultMessage:
@@ -308,5 +328,11 @@ export const getUiSettings: (
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
+    deprecation: {
+      message: i18n.translate('discover.advancedSettings.discover.maxCellHeightDeprecation', {
+        defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+      }),
+      docLinksKey: 'discoverSettings',
+    },
   },
 });

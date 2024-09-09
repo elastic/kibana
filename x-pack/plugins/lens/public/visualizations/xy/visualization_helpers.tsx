@@ -13,11 +13,11 @@ import {
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
+  UserMessage,
   VisualizationType,
 } from '../../types';
 import {
   State,
-  visualizationTypes,
   XYState,
   XYAnnotationLayerConfig,
   XYLayerConfig,
@@ -26,10 +26,13 @@ import {
   SeriesType,
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
+  visualizationTypes,
+  visualizationSubtypes,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
 import type { ExtraAppendLayerArg } from './visualization';
+import { XY_BREAKDOWN_MISSING_AXIS, XY_Y_MISSING_AXIS } from '../../user_messages_ids';
 
 export function getAxisName(
   axis: 'x' | 'y' | 'yLeft' | 'yRight',
@@ -189,10 +192,27 @@ export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLa
   return options[layerTypes.ANNOTATIONS](layer);
 };
 
+export function getVisualizationSubtypeId(state: State) {
+  if (!state.layers.length) {
+    return (
+      visualizationSubtypes.find((t) => t.id === state.preferredSeriesType) ??
+      visualizationSubtypes[0]
+    ).id;
+  }
+  const dataLayers = getDataLayers(state?.layers);
+  const subtype = (
+    visualizationSubtypes.find((t) => t.id === dataLayers[0].seriesType) ?? visualizationSubtypes[0]
+  ).id;
+  const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));
+
+  return subtype && seriesTypes.length === 1 ? subtype : 'mixed';
+}
+
 export function getVisualizationType(state: State, layerId?: string): VisualizationType | 'mixed' {
   if (!state.layers.length) {
     return (
-      visualizationTypes.find((t) => t.id === state.preferredSeriesType) ?? visualizationTypes[0]
+      visualizationTypes.find((t) => t.subtypes?.includes(state.preferredSeriesType)) ??
+      visualizationTypes[0]
     );
   }
   const dataLayers = getDataLayers(state?.layers);
@@ -200,9 +220,14 @@ export function getVisualizationType(state: State, layerId?: string): Visualizat
     const dataLayerSeries = layerId
       ? dataLayers.find((d) => d.layerId === layerId)?.seriesType
       : dataLayers[0].seriesType;
-    return visualizationTypes.find((t) => t.id === dataLayerSeries) || 'mixed';
+    return (
+      visualizationTypes.find((t) => dataLayerSeries && t.subtypes?.includes(dataLayerSeries)) ||
+      visualizationTypes[0]
+    );
   }
-  const visualizationType = visualizationTypes.find((t) => t.id === dataLayers[0].seriesType);
+  const visualizationType =
+    visualizationTypes.find((t) => t.subtypes?.includes(dataLayers[0].seriesType)) ??
+    visualizationTypes[0];
   const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));
 
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
@@ -256,15 +281,19 @@ export const supportedDataLayer = {
 };
 
 // i18n ids cannot be dynamically generated, hence the function below
-export function getMessageIdsForDimension(
-  dimension: string,
+function getMessageIdsForDimension(
+  dimension: 'y' | 'break_down',
   layers: number[],
   isHorizontal: boolean
-) {
+): UserMessage {
   const layersList = layers.map((i: number) => i + 1).join(', ');
   switch (dimension) {
-    case 'Break down':
+    case 'break_down':
       return {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        uniqueId: XY_BREAKDOWN_MISSING_AXIS,
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureSplitShort', {
           defaultMessage: `Missing {axis}.`,
           values: { axis: 'Break down by axis' },
@@ -274,8 +303,12 @@ export function getMessageIdsForDimension(
           values: { layers: layers.length, layersList, axis: 'Break down by axis' },
         }),
       };
-    case 'Y':
+    case 'y':
       return {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        uniqueId: XY_Y_MISSING_AXIS,
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYShort', {
           defaultMessage: `Missing {axis}.`,
           values: { axis: getAxisName('y', { isHorizontal }) },
@@ -286,7 +319,6 @@ export function getMessageIdsForDimension(
         }),
       };
   }
-  return { shortMessage: '', longMessage: '' };
 }
 
 const newLayerFn = {
@@ -368,14 +400,14 @@ export function getLayersByType(state: State, byType?: string) {
 }
 
 export function validateLayersForDimension(
-  dimension: string,
+  dimension: 'y' | 'break_down',
   allLayers: XYLayerConfig[],
   missingCriteria: (layer: XYDataLayerConfig) => boolean
 ):
   | { valid: true }
   | {
       valid: false;
-      payload: { shortMessage: string; longMessage: React.ReactNode };
+      error: UserMessage;
     } {
   const dataLayers = allLayers
     .map((layer, i) => ({ layer, originalIndex: i }))
@@ -411,7 +443,7 @@ export function validateLayersForDimension(
 
   return {
     valid: false,
-    payload: getMessageIdsForDimension(
+    error: getMessageIdsForDimension(
       dimension,
       layerMissingAccessors,
       isHorizontalChart(dataLayers.map(({ layer }) => layer))

@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import expect from 'expect';
-
+import sortBy from 'lodash/sortBy';
 import {
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
@@ -24,9 +24,11 @@ import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/ap
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { createRule } from '../../../../../../../common/utils/security_solution';
 import {
   getAlerts,
+  getOpenAlerts,
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,
   previewRule,
@@ -49,7 +51,8 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless @serverlessQA Threshold type rules, alert suppression', () => {
+  // NOTE: Add to second quality gate after feature is GA
+  describe('@ess @serverless Threshold type rules, alert suppression', () => {
     const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
@@ -96,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getAlerts(supertest, log, es, createdRule);
-      expect(alerts.hits.hits.length).toEqual(1);
+      expect(alerts.hits.hits).toHaveLength(1);
 
       // suppression start equal to alert timestamp
       const suppressionStart = alerts.hits.hits[0]._source?.[TIMESTAMP];
@@ -191,7 +194,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // Close the alert. Subsequent rule executions should ignore this closed alert
       // for suppression purposes.
-      const alertIds = alerts.hits.hits.map((alert) => alert._id);
+      const alertIds = alerts.hits.hits.map((alert) => alert._id!);
       await supertest
         .post(DETECTION_ENGINE_ALERTS_STATUS_URL)
         .set('kbn-xsrf', 'true')
@@ -235,6 +238,96 @@ export default ({ getService }: FtrProviderContext) => {
         })
       );
       expect(secondAlerts.hits.hits[1]._source).toEqual(
+        expect.objectContaining({
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: 'agent-1',
+            },
+          ],
+          [ALERT_ORIGINAL_TIME]: secondTimestamp,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+        })
+      );
+    });
+
+    it('deduplicates new alerts if they were previously created without suppression', async () => {
+      const id = uuidv4();
+      const firstTimestamp = new Date().toISOString();
+      const firstDocument = {
+        id,
+        '@timestamp': firstTimestamp,
+        agent: {
+          name: 'agent-1',
+        },
+      };
+      await indexListOfDocuments([firstDocument]);
+
+      const ruleWithoutSuppression: ThresholdRuleCreateProps = {
+        ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+        query: `id:${id}`,
+        threshold: {
+          field: ['agent.name'],
+          value: 1,
+        },
+        from: 'now-35m',
+        interval: '30m',
+      };
+      const alertSuppression = {
+        duration: {
+          value: 300,
+          unit: 'm',
+        },
+      };
+
+      const createdRule = await createRule(supertest, log, ruleWithoutSuppression);
+      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      expect(alerts.hits.hits).toHaveLength(1);
+      // alert does not have suppression properties
+      alerts.hits.hits.forEach((previewAlert) => {
+        const source = previewAlert._source;
+        expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+        expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+        expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+        expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+      });
+
+      const secondTimestamp = new Date().toISOString();
+      const secondDocument = {
+        id,
+        '@timestamp': secondTimestamp,
+        agent: {
+          name: 'agent-1',
+        },
+      };
+
+      await indexListOfDocuments([secondDocument, secondDocument]);
+
+      // update the rule to include suppression
+      await patchRule(supertest, log, {
+        id: createdRule.id,
+        alert_suppression: alertSuppression as AlertSuppression,
+        enabled: false,
+      });
+      await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+
+      const afterTimestamp = new Date();
+      const secondAlerts = await getOpenAlerts(
+        supertest,
+        log,
+        es,
+        createdRule,
+        RuleExecutionStatusEnum.succeeded,
+        undefined,
+        afterTimestamp
+      );
+
+      expect(secondAlerts.hits.hits.length).toEqual(2);
+
+      const sortedAlerts = sortBy(secondAlerts.hits.hits, ALERT_ORIGINAL_TIME);
+
+      // second alert is generated with suppression
+      expect(sortedAlerts[1]._source).toEqual(
         expect.objectContaining({
           [ALERT_SUPPRESSION_TERMS]: [
             {
@@ -865,7 +958,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    describe('with host risk index', async () => {
+    describe('with host risk index', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
@@ -898,7 +991,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', async () => {
+    describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
         await kibanaServer.uiSettings.update({

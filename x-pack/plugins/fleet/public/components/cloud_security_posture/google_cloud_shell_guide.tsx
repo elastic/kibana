@@ -57,6 +57,7 @@ export const GoogleCloudShellGuide = (props: { commandText: string; hasProjectId
                   <FormattedMessage
                     id="xpack.fleet.googleCloudShell.guide.steps.copyWithoutProjectId"
                     defaultMessage="Replace <PROJECT_ID> in the following command with your project ID and copy the command"
+                    ignoreTag
                   />
                 )}
                 <EuiSpacer size="m" />

@@ -9,7 +9,7 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
-import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
+import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloEditFormObjectiveSectionTimeslices as Component } from './slo_edit_form_objective_section_timeslices';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 

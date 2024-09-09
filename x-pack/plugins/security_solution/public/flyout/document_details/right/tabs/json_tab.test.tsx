@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { JsonTab } from './json_tab';
 import { JSON_TAB_CONTENT_TEST_ID, JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID } from './test_ids';
 
@@ -22,14 +22,14 @@ const searchHit = {
 };
 const contextValue = {
   searchHit,
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
 const renderJsonTab = () =>
   render(
     <IntlProvider locale="en">
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <JsonTab />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </IntlProvider>
   );
 

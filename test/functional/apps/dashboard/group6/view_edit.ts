@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -63,12 +64,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(isInViewMode).to.be(false);
     });
 
-    describe('save', function () {
-      it('auto exits out of edit mode', async function () {
+    describe('save as new', () => {
+      it('keeps duplicated dashboard in edit mode', async () => {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await PageObjects.dashboard.saveDashboard(dashboardName);
+        await PageObjects.dashboard.duplicateDashboard('edit');
         const isViewMode = await PageObjects.dashboard.getIsInViewMode();
-        expect(isViewMode).to.equal(true);
+        expect(isViewMode).to.equal(false);
+      });
+    });
+
+    describe('save', function () {
+      it('keeps dashboard in edit mode', async function () {
+        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+        await PageObjects.dashboard.saveDashboard(dashboardName, {
+          storeTimeWithDashboard: true,
+          saveAsNew: false,
+        });
+        const isViewMode = await PageObjects.dashboard.getIsInViewMode();
+        expect(isViewMode).to.equal(false);
       });
     });
 
@@ -85,6 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.dashboard.saveDashboard(dashboardName, {
             storeTimeWithDashboard: true,
+            saveAsNew: false,
           });
 
           await PageObjects.timePicker.setAbsoluteRange(
@@ -170,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Sep 19, 2013 @ 06:31:44.000',
             'Sep 19, 2013 @ 06:31:44.000'
           );
-          await PageObjects.dashboard.saveDashboard(dashboardName);
+          await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
           await PageObjects.dashboard.switchToEditMode();
           await PageObjects.timePicker.setAbsoluteRange(
             'Sep 19, 2015 @ 06:31:44.000',
@@ -180,6 +194,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.common.clickCancelOnModal();
           await PageObjects.dashboard.saveDashboard(dashboardName, {
+            saveAsNew: false,
             storeTimeWithDashboard: true,
           });
 
@@ -197,8 +212,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('when time changed is stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.timePicker.setDefaultDataRange();
-        await PageObjects.dashboard.saveDashboard(dashboardName);
-        await PageObjects.dashboard.switchToEditMode();
+        await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 19, 2013 @ 06:31:44.000',
           'Sep 19, 2013 @ 06:31:44.000'
@@ -208,7 +222,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.clickCancelOutOfEditMode(false);
 
         await PageObjects.common.clickCancelOnModal();
-        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+        await PageObjects.dashboard.saveDashboard(dashboardName, {
+          storeTimeWithDashboard: true,
+          saveAsNew: false,
+        });
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
@@ -222,7 +239,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Does not show lose changes warning', function () {
       it('when time changed is not stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
+        await PageObjects.dashboard.saveDashboard(dashboardName, {
+          storeTimeWithDashboard: false,
+          saveAsNew: false,
+        });
         await PageObjects.timePicker.setAbsoluteRange(
           'Oct 19, 2014 @ 06:31:44.000',
           'Dec 19, 2014 @ 06:31:44.000'

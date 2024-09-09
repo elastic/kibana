@@ -8,10 +8,8 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-
 import {
   MutationContext,
   SavedViewResult,
@@ -25,7 +23,7 @@ import {
 } from '../../common/http_api/latest';
 import type { InventoryView } from '../../common/inventory_views';
 import { useKibanaContextForPlugin } from './use_kibana';
-import { useUrlState } from '../utils/use_url_state';
+import { useUrlState } from './use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 
@@ -67,7 +65,10 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
     isFetching: isFetchingViews,
   } = useQuery({
     queryKey: queryKeys.find,
-    queryFn: () => inventoryViews.client.findInventoryViews(),
+    queryFn: async () => {
+      const client = await inventoryViews.getClient();
+      return client.findInventoryViews();
+    },
     enabled: false, // We will manually fetch the list when necessary
     placeholderData: [], // Use a default empty array instead of undefined
     onError: (error: ServerError) => notify.getViewFailure(error.body?.message ?? error.message),
@@ -79,7 +80,10 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
 
   const { data: currentView, isFetching: isFetchingCurrentView } = useQuery({
     queryKey: queryKeys.getById(currentViewId),
-    queryFn: ({ queryKey: [, id] }) => inventoryViews.client.getInventoryView(id),
+    queryFn: async ({ queryKey: [, id] }) => {
+      const client = await inventoryViews.getClient();
+      return client.getInventoryView(id);
+    },
     onError: (error: ServerError) => {
       notify.getViewFailure(error.body?.message ?? error.message);
       switchViewById(defaultViewId);
@@ -123,7 +127,10 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
     ServerError,
     CreateInventoryViewAttributesRequestPayload
   >({
-    mutationFn: (attributes) => inventoryViews.client.createInventoryView(attributes),
+    mutationFn: async (attributes) => {
+      const client = await inventoryViews.getClient();
+      return client.createInventoryView(attributes);
+    },
     onError: (error) => {
       notify.upsertViewFailure(error.body?.message ?? error.message);
     },
@@ -138,7 +145,10 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
     ServerError,
     UpdateViewParams<UpdateInventoryViewAttributesRequestPayload>
   >({
-    mutationFn: ({ id, attributes }) => inventoryViews.client.updateInventoryView(id, attributes),
+    mutationFn: async ({ id, attributes }) => {
+      const client = await inventoryViews.getClient();
+      return client.updateInventoryView(id, attributes);
+    },
     onError: (error) => {
       notify.upsertViewFailure(error.body?.message ?? error.message);
     },
@@ -153,7 +163,10 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
     string,
     MutationContext<InventoryView>
   >({
-    mutationFn: (id: string) => inventoryViews.client.deleteInventoryView(id),
+    mutationFn: async (id: string) => {
+      const client = await inventoryViews.getClient();
+      return client.deleteInventoryView(id);
+    },
     /**
      * To provide a quick feedback, we perform an optimistic update on the list
      * when deleting a view.

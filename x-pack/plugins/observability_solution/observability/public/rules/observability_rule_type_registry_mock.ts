@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
+import type { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 
 const createRuleTypeRegistryMock = () => ({
   getFormatter: () => () => 'a reason',

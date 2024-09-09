@@ -24,24 +24,24 @@ import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 
 import { LicenseService } from '../../../../common/license';
 import {
-  ISOLATE_HOST_ROUTE_V2,
-  UNISOLATE_HOST_ROUTE_V2,
   ENDPOINT_ACTIONS_INDEX,
-  KILL_PROCESS_ROUTE,
-  SUSPEND_PROCESS_ROUTE,
+  EXECUTE_ROUTE,
+  GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE,
+  ISOLATE_HOST_ROUTE_V2,
+  KILL_PROCESS_ROUTE,
+  SCAN_ROUTE,
+  SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE,
-  GET_FILE_ROUTE,
-  EXECUTE_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   ActionDetails,
-  ResponseActionApiResponse,
   HostMetadata,
   LogsEndpointAction,
-  ResponseActionRequestBody,
+  ResponseActionApiResponse,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
@@ -62,7 +62,10 @@ import * as ActionDetailsService from '../../services/actions/action_details_by_
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import { getResponseActionsClient as _getResponseActionsClient } from '../../services';
-import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
+import type {
+  ResponseActionsRequestBody,
+  UploadActionApiRequestBody,
+} from '../../../../common/api/endpoint';
 import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
 import type { HapiReadableStream, SecuritySolutionRequestHandlerContext } from '../../../types';
 import { createHapiReadableStreamMock } from '../../services/actions/mocks';
@@ -74,6 +77,7 @@ import { responseActionsClientMock } from '../../services/actions/clients/mocks'
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
 import { ResponseActionsClientError } from '../../services/actions/clients/errors';
+import type { EndpointAppContext } from '../../types';
 
 jest.mock('../../services', () => {
   const realModule = jest.requireActual('../../services');
@@ -89,7 +93,7 @@ jest.mock('../../services', () => {
 const getResponseActionsClientMock = _getResponseActionsClient;
 
 interface CallRouteInterface {
-  body?: ResponseActionRequestBody;
+  body?: ResponseActionsRequestBody;
   indexErrorResponse?: any;
   searchResponse?: HostMetadata;
   mockUser?: any;
@@ -116,6 +120,7 @@ describe('Response actions', () => {
     let mockResponse: jest.Mocked<KibanaResponseFactory>;
     let licenseService: LicenseService;
     let licenseEmitter: Subject<ILicense>;
+    let endpointContext: EndpointAppContext;
 
     let callRoute: (
       routePrefix: string,
@@ -150,7 +155,7 @@ describe('Response actions', () => {
       licenseService = new LicenseService();
       licenseService.start(licenseEmitter);
 
-      const endpointContext = {
+      endpointContext = {
         ...createMockEndpointAppContext(),
         service: endpointAppContextService,
       };
@@ -179,11 +184,6 @@ describe('Response actions', () => {
         }: CallRouteInterface,
         indexExists?: { endpointDsExists: boolean }
       ): Promise<AwaitedProperties<SecuritySolutionRequestHandlerContextMock>> => {
-        const asUser = mockUser ? mockUser : superUser;
-        (startContract.security.authc.getCurrentUser as jest.Mock).mockImplementationOnce(
-          () => asUser
-        );
-
         const ctx = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
 
         ctx.securitySolution.getEndpointAuthz.mockResolvedValue(
@@ -205,6 +205,9 @@ describe('Response actions', () => {
             };
           }
         );
+        const asUser = mockUser ? mockUser : superUser;
+        (ctx.core.security.authc.getCurrentUser as jest.Mock).mockImplementationOnce(() => asUser);
+
         const metadataResponse = docGen.generateHostMetadata();
 
         const withErrorResponse = indexErrorResponse ? indexErrorResponse : { statusCode: 201 };
@@ -285,10 +288,8 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
 
-      await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           agents: [AgentID],
@@ -304,10 +305,8 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
 
-      await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           user_id: testUser.username,
@@ -322,10 +321,8 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
 
-      await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({ comment }),
@@ -347,10 +344,8 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
 
-      await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           action_id: expect.any(String),
@@ -374,10 +369,8 @@ describe('Response actions', () => {
         body: { endpoint_ids: ['XYZ'] },
         version: '2023-10-31',
       });
-      await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           timeout: 300,
@@ -395,10 +388,8 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
 
-      await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           agents: [agentId],
@@ -412,10 +403,8 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
 
-      await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -431,10 +420,8 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
 
-      await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -450,10 +437,8 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
 
-      await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -469,10 +454,8 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
 
-      await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -488,10 +471,8 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
 
-      await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -507,10 +488,8 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
 
-      await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -526,14 +505,30 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
 
-      await expect(
-        (
-          await endpointAppContextService.getFleetActionsClient()
-        ).create as jest.Mock
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             command: 'execute',
+          }),
+        })
+      );
+    });
+
+    it('sends the `scan` command payload from the scan route', async () => {
+      await callRoute(SCAN_ROUTE, {
+        body: { endpoint_ids: ['XYZ'], parameters: { path: '/home/usr/' } },
+        version: '2023-10-31',
+      });
+
+      expect(
+        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            command: 'scan',
+            parameters: { path: '/home/usr/' },
           }),
         })
       );
@@ -550,10 +545,8 @@ describe('Response actions', () => {
           { endpointDsExists: true }
         );
 
-        await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+        expect(
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -585,10 +578,8 @@ describe('Response actions', () => {
           { endpointDsExists: true }
         );
 
-        await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+        expect(
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -621,10 +612,8 @@ describe('Response actions', () => {
           { endpointDsExists: true }
         );
 
-        await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+        expect(
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -659,10 +648,8 @@ describe('Response actions', () => {
           { endpointDsExists: true }
         );
 
-        await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+        expect(
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -696,10 +683,8 @@ describe('Response actions', () => {
           { endpointDsExists: true }
         );
 
-        await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+        expect(
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -731,10 +716,8 @@ describe('Response actions', () => {
           { endpointDsExists: true }
         );
 
-        await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+        expect(
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -768,10 +751,8 @@ describe('Response actions', () => {
           { endpointDsExists: true }
         );
 
-        await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+        expect(
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -806,10 +787,8 @@ describe('Response actions', () => {
           { endpointDsExists: true }
         );
 
-        await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+        expect(
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -836,6 +815,41 @@ describe('Response actions', () => {
         expect(responseBody.action).toBeUndefined();
       });
 
+      it('handles scan', async () => {
+        const ctx = await callRoute(
+          SCAN_ROUTE,
+          {
+            body: { endpoint_ids: ['XYZ'], parameters: { path: '/home/usr/' } },
+            version: '2023-10-31',
+          },
+          { endpointDsExists: true }
+        );
+
+        expect(
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              command: 'scan',
+              comment: undefined,
+              parameters: { path: '/home/usr/' },
+            }),
+          })
+        );
+
+        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
+          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
+        ];
+
+        expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('scan');
+
+        expect(mockResponse.ok).toBeCalled();
+        const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
+        expect(responseBody.action).toBeUndefined();
+      });
+
       it('signs the action', async () => {
         await callRoute(
           ISOLATE_HOST_ROUTE_V2,
@@ -846,10 +860,8 @@ describe('Response actions', () => {
           { endpointDsExists: true }
         );
 
-        await expect(
-          (
-            await endpointAppContextService.getFleetActionsClient()
-          ).create as jest.Mock
+        expect(
+          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             signed: {
@@ -956,6 +968,15 @@ describe('Response actions', () => {
         await callRoute(EXECUTE_ROUTE, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canWriteExecuteOperations: false },
+          version: '2023-10-31',
+        });
+        expect(mockResponse.forbidden).toBeCalled();
+      });
+
+      it('prohibits user from performing `scan` action if `canWriteScanOperations` is `false`', async () => {
+        await callRoute(SCAN_ROUTE, {
+          body: { endpoint_ids: ['XYZ'] },
+          authz: { canWriteScanOperations: false },
           version: '2023-10-31',
         });
         expect(mockResponse.forbidden).toBeCalled();

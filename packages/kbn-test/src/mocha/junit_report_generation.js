@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -17,6 +18,7 @@ import { getUniqueJunitReportPath } from '../report_path';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
 import { escapeCdata } from '../..';
+import { prettifyCommandLine } from '../prettify_command_line';
 
 const dateNow = Date.now.bind(Date);
 
@@ -93,16 +95,32 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       .map((node) => ({ skipped: true, node }));
 
     // cache codeowners for quicker lookup
-    const reversedCodeowners = getPathsWithOwnersReversed();
+    let reversedCodeowners = [];
+    try {
+      reversedCodeowners = getPathsWithOwnersReversed();
+    } catch {
+      /* no-op */
+    }
 
-    const builder = xmlBuilder.create(
+    const commandLine = prettifyCommandLine(process.argv);
+
+    const root = xmlBuilder.create(
       'testsuites',
       { encoding: 'utf-8' },
       {},
       { skipNullAttributes: true }
     );
 
-    const testsuitesEl = builder.ele('testsuite', {
+    root.att({
+      name: 'ftr',
+      time: getDuration(stats),
+      tests: allTests.length + failedHooks.length,
+      failures: failures.length,
+      skipped: skippedResults.length,
+      'command-line': commandLine,
+    });
+
+    const testsuitesEl = root.ele('testsuite', {
       name: reportName,
       timestamp: new Date(stats.startTime).toISOString().slice(0, -5),
       time: getDuration(stats),
@@ -110,6 +128,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       failures: failures.length,
       skipped: skippedResults.length,
       'metadata-json': JSON.stringify(metadata ?? {}),
+      'command-line': commandLine,
     });
 
     function addTestcaseEl(node, failed) {
@@ -147,7 +166,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     });
 
     const reportPath = getUniqueJunitReportPath(rootDirectory, reportName);
-    const reportXML = builder.end();
+    const reportXML = root.end();
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
   });

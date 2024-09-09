@@ -4,58 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Embeddable, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin/public';
-import { EMBEDDABLE_FUNCTIONS } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+
+import React, { useMemo } from 'react';
+import { TopNFunctions } from '@kbn/profiling-utils';
 import { AsyncEmbeddableComponent } from '../async_embeddable_component';
 import {
   ProfilingEmbeddableProvider,
   ProfilingEmbeddablesDependencies,
 } from '../profiling_embeddable_provider';
-import { EmbeddableFunctionsEmbeddableInput } from './embeddable_functions_factory';
 import { EmbeddableFunctionsGrid } from './embeddable_functions_grid';
 
-export class EmbeddableFunctions extends Embeddable<
-  EmbeddableFunctionsEmbeddableInput,
-  EmbeddableOutput
-> {
-  readonly type = EMBEDDABLE_FUNCTIONS;
-  private _domNode?: HTMLElement;
+export type EmbeddableFunctionsProps = FunctionsProps & ProfilingEmbeddablesDependencies;
 
-  constructor(
-    private deps: ProfilingEmbeddablesDependencies,
-    initialInput: EmbeddableFunctionsEmbeddableInput,
-    parent?: IContainer
-  ) {
-    super(initialInput, {}, parent);
-  }
+export type EmbeddableFunctionsSharedComponent = React.FC<FunctionsProps>;
 
-  render(domNode: HTMLElement) {
-    this._domNode = domNode;
-    const { data, isLoading, rangeFrom, rangeTo } = this.input;
-    const totalSeconds = (rangeTo - rangeFrom) / 1000;
-    render(
-      <ProfilingEmbeddableProvider deps={this.deps}>
-        <AsyncEmbeddableComponent isLoading={isLoading}>
-          <div style={{ width: '100%' }}>
-            <EmbeddableFunctionsGrid data={data} totalSeconds={totalSeconds} />
-          </div>
-        </AsyncEmbeddableComponent>
-      </ProfilingEmbeddableProvider>,
-      domNode
-    );
-  }
+export interface FunctionsProps {
+  data?: TopNFunctions;
+  isLoading: boolean;
+  rangeFrom: number;
+  rangeTo: number;
+  showFullScreenSelector?: boolean;
+}
 
-  public destroy() {
-    if (this._domNode) {
-      unmountComponentAtNode(this._domNode);
-    }
-  }
-
-  reload() {
-    if (this._domNode) {
-      this.render(this._domNode);
-    }
-  }
+export function EmbeddableFunctions({
+  data,
+  isLoading,
+  rangeFrom,
+  rangeTo,
+  showFullScreenSelector,
+  ...deps
+}: EmbeddableFunctionsProps) {
+  const totalSeconds = useMemo(() => (rangeTo - rangeFrom) / 1000, [rangeFrom, rangeTo]);
+  return (
+    <ProfilingEmbeddableProvider deps={deps}>
+      <AsyncEmbeddableComponent isLoading={isLoading}>
+        <div style={{ width: '100%' }}>
+          <EmbeddableFunctionsGrid
+            data={data}
+            totalSeconds={totalSeconds}
+            showFullScreenSelector={showFullScreenSelector}
+          />
+        </div>
+      </AsyncEmbeddableComponent>
+    </ProfilingEmbeddableProvider>
+  );
 }

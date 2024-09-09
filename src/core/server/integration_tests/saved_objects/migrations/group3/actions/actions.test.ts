@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -39,11 +40,12 @@ import {
   removeWriteBlock,
   transformDocs,
   waitForIndexStatus,
-  initAction,
+  fetchIndices,
   cloneIndex,
   type DocumentsTransformFailed,
   type DocumentsTransformSuccess,
   createBulkIndexOperationTuple,
+  checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
 
 const { startES } = createTestServers({
@@ -132,7 +134,7 @@ describe('migration actions', () => {
     await esServer.stop();
   });
 
-  describe('initAction', () => {
+  describe('fetchIndices', () => {
     afterAll(async () => {
       await client.cluster.putSettings({
         body: {
@@ -145,7 +147,7 @@ describe('migration actions', () => {
     });
     it('resolves right empty record if no indices were found', async () => {
       expect.assertions(1);
-      const task = initAction({ client, indices: ['no_such_index'] });
+      const task = fetchIndices({ client, indices: ['no_such_index'] });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -155,7 +157,7 @@ describe('migration actions', () => {
     });
     it('resolves right record with found indices', async () => {
       expect.assertions(1);
-      const res = (await initAction({
+      const res = (await fetchIndices({
         client,
         indices: ['no_such_index', 'existing_index_with_docs'],
       })()) as Either.Right<unknown>;
@@ -174,7 +176,7 @@ describe('migration actions', () => {
     });
     it('includes the _meta data of the indices in the response', async () => {
       expect.assertions(1);
-      const res = (await initAction({
+      const res = (await fetchIndices({
         client,
         indices: ['existing_index_with_docs'],
       })()) as Either.Right<unknown>;
@@ -200,6 +202,9 @@ describe('migration actions', () => {
         })
       );
     });
+  });
+
+  describe('checkClusterRoutingAllocation', () => {
     it('resolves left when cluster.routing.allocation.enabled is incompatible', async () => {
       expect.assertions(3);
       await client.cluster.putSettings({
@@ -210,10 +215,7 @@ describe('migration actions', () => {
           },
         },
       });
-      const task = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task = checkClusterRoutingAllocationEnabled(client);
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -230,10 +232,7 @@ describe('migration actions', () => {
           },
         },
       });
-      const task2 = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task2 = checkClusterRoutingAllocationEnabled(client);
       await expect(task2()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -250,10 +249,7 @@ describe('migration actions', () => {
           },
         },
       });
-      const task3 = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task3 = checkClusterRoutingAllocationEnabled(client);
       await expect(task3()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -272,10 +268,7 @@ describe('migration actions', () => {
           },
         },
       });
-      const task = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task = checkClusterRoutingAllocationEnabled(client);
       const result = await task();
       expect(Either.isRight(result)).toBe(true);
     });

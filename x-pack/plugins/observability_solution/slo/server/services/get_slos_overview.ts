@@ -17,7 +17,7 @@ import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import moment from 'moment';
 import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common';
 import { typedSearch } from '../utils/queries';
-import { getElasticsearchQueryOrThrow } from './transform_generators';
+import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
 import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 
 export class GetSLOsOverview {
@@ -36,12 +36,7 @@ export class GetSLOsOverview {
 
     const kqlQuery = params.kqlQuery ?? '';
     const filters = params.filters ?? '';
-    let parsedFilters: any = {};
-    try {
-      parsedFilters = JSON.parse(filters);
-    } catch (e) {
-      this.logger.error(`Failed to parse filters: ${e.message}`);
-    }
+    const parsedFilters = parseStringFilters(filters, this.logger);
 
     const response = await typedSearch(this.esClient, {
       index: indices,

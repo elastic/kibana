@@ -5,46 +5,69 @@
  * 2.0.
  */
 
-import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiText,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiBetaBadge, EuiLink, EuiPageHeader, EuiCode } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { KNOWN_TYPES } from '../../../common/constants';
 import { datasetQualityAppTitle } from '../../../common/translations';
-
-export const betaBadgeLabel = i18n.translate('xpack.datasetQuality.betaBadgeLabel', {
-  defaultMessage: 'Beta',
-});
-
-export const betaBadgeDescription = i18n.translate('xpack.datasetQuality.betaBadgeDescription', {
-  defaultMessage:
-    'This feature is currently in beta. If you encounter any bugs or have feedback, we’d love to hear from you. Please open a support issue and/or visit our discussion forum.',
-});
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Header() {
   return (
-    <EuiPageHeader bottomBorder>
-      <EuiPageHeaderSection>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiText>
-            <h2>{datasetQualityAppTitle}</h2>
-          </EuiText>
-          <EuiFlexItem>
-            <EuiBetaBadge
-              label={betaBadgeLabel}
-              title={betaBadgeLabel}
-              tooltipContent={betaBadgeDescription}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageHeaderSection>
-    </EuiPageHeader>
+    <EuiPageHeader
+      bottomBorder
+      pageTitle={
+        <>
+          {datasetQualityAppTitle}
+          &nbsp;
+          <EuiBetaBadge
+            label={betaBadgeLabel}
+            title={betaBadgeLabel}
+            tooltipContent={betaBadgeDescription}
+          />
+        </>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.datasetQuality.appDescription"
+          defaultMessage="Monitor the data set quality for {types} data streams that follow the {dsNamingSchemeLink}."
+          values={{
+            types: KNOWN_TYPES.map((type, index) => {
+              return (
+                <>
+                  {index > 0 && ', '}
+                  <EuiCode>{type}</EuiCode>
+                </>
+              );
+            }),
+            dsNamingSchemeLink: (
+              <EuiLink
+                data-test-subj="datasetQualityAppDescriptionDsNamingSchemeLink"
+                href="https://ela.st/data-stream-naming-scheme"
+                target="_blank"
+                rel="noopener"
+              >
+                <FormattedMessage
+                  id="xpack.datasetQuality.appDescription.dsNamingSchemeLinkText"
+                  defaultMessage="Data stream naming scheme"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      }
+    />
   );
 }
+
+const betaBadgeLabel = i18n.translate('xpack.datasetQuality.betaBadgeLabel', {
+  defaultMessage: 'Beta',
+});
+
+const betaBadgeDescription = i18n.translate('xpack.datasetQuality.betaBadgeDescription', {
+  defaultMessage:
+    'This feature is currently in beta. If you encounter any bugs or have feedback, we’d love to hear from you. Please open a support issue and/or visit our discussion forum.',
+});

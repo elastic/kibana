@@ -51,6 +51,7 @@ import {
   SuccessfulRunResult,
   TaskDefinition,
   TaskStatus,
+  DEFAULT_TIMEOUT,
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isRetryableError, isUnrecoverableError } from './errors';
@@ -67,7 +68,7 @@ export interface TaskRunner {
   isExpired: boolean;
   expiration: Date;
   startedAt: Date | null;
-  definition: TaskDefinition;
+  definition: TaskDefinition | undefined;
   cancel: CancelFunction;
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
@@ -119,6 +120,8 @@ export enum TaskRunResult {
   RetryScheduled = 'RetryScheduled',
   // Task has failed
   Failed = 'Failed',
+  // Task deleted
+  Deleted = 'Deleted',
 }
 
 // A ConcreteTaskInstance which we *know* has a `startedAt` Date on it
@@ -240,7 +243,7 @@ export class TaskManagerRunner implements TaskRunner {
   /**
    * Gets the task defintion from the dictionary.
    */
-  public get definition() {
+  public get definition(): TaskDefinition | undefined {
     return this.definitions.get(this.taskType);
   }
 
@@ -265,12 +268,12 @@ export class TaskManagerRunner implements TaskRunner {
   public get timeout() {
     if (this.instance.task.schedule) {
       // recurring tasks should use timeout in task type
-      return this.definition.timeout;
+      return this.definition?.timeout ?? DEFAULT_TIMEOUT;
     }
 
     return this.instance.task.timeoutOverride
       ? this.instance.task.timeoutOverride
-      : this.definition.timeout;
+      : this.definition?.timeout ?? DEFAULT_TIMEOUT;
   }
 
   /**
@@ -311,6 +314,11 @@ export class TaskManagerRunner implements TaskRunner {
    * @returns {Promise<Result<SuccessfulRunResult, FailedRunResult>>}
    */
   public async run(): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
+    const definition = this.definition;
+    if (!definition) {
+      throw new Error(`Running task ${this} failed because it has no definition`);
+    }
+
     if (!isReadyToRun(this.instance)) {
       throw new Error(
         `Running task ${this} failed as it ${
@@ -355,7 +363,7 @@ export class TaskManagerRunner implements TaskRunner {
     );
 
     try {
-      this.task = this.definition.createTaskRunner(modifiedContext);
+      this.task = definition.createTaskRunner(modifiedContext);
 
       const ctx = {
         type: 'task manager',
@@ -620,7 +628,13 @@ export class TaskManagerRunner implements TaskRunner {
           schedule: reschedule,
           state,
           attempts = 0,
+          shouldDeleteTask,
         }: SuccessfulRunResult & { attempts: number }) => {
+          if (shouldDeleteTask) {
+            // set the status to failed so task will get deleted
+            return asOk({ status: TaskStatus.ShouldDelete });
+          }
+
           const { startedAt, schedule } = this.instance.task;
 
           return asOk({
@@ -642,7 +656,10 @@ export class TaskManagerRunner implements TaskRunner {
         counterType: 'taskManagerTaskRunner',
         incrementBy: 1,
       });
-    } else if (fieldUpdates.status === TaskStatus.Failed) {
+    } else if (
+      fieldUpdates.status === TaskStatus.Failed ||
+      fieldUpdates.status === TaskStatus.ShouldDelete
+    ) {
       // Delete the SO instead so it doesn't remain in the index forever
       this.instance = asRan(this.instance.task);
       await this.removeTask();
@@ -667,6 +684,8 @@ export class TaskManagerRunner implements TaskRunner {
 
     return fieldUpdates.status === TaskStatus.Failed
       ? TaskRunResult.Failed
+      : fieldUpdates.status === TaskStatus.ShouldDelete
+      ? TaskRunResult.Deleted
       : hasTaskRunFailed
       ? TaskRunResult.SuccessRescheduled
       : TaskRunResult.RetryScheduled;
@@ -700,40 +719,54 @@ export class TaskManagerRunner implements TaskRunner {
     await eitherAsync(
       result,
       async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
-        const processedResult = {
-          task,
-          persistence:
-            schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
-          result: await (runAt || schedule || task.schedule
-            ? this.processResultForRecurringTask(result)
-            : this.processResultWhenDone()),
-        };
+        const taskPersistence =
+          schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring;
+        try {
+          const processedResult = {
+            task,
+            persistence: taskPersistence,
+            result: await (runAt || schedule || task.schedule
+              ? this.processResultForRecurringTask(result)
+              : this.processResultWhenDone()),
+          };
 
-        // Alerting task runner returns SuccessfulRunResult with taskRunError
-        // when the alerting task fails, so we check for this condition in order
-        // to emit the correct task run event for metrics collection
-        // taskRunError contains the "source" (TaskErrorSource) data
-        if (!!taskRunError) {
-          debugLogger.debug(`Emitting task run failed event for task ${this.taskType}`);
+          // Alerting task runner returns SuccessfulRunResult with taskRunError
+          // when the alerting task fails, so we check for this condition in order
+          // to emit the correct task run event for metrics collection
+          // taskRunError contains the "source" (TaskErrorSource) data
+          if (!!taskRunError) {
+            debugLogger.debug(`Emitting task run failed event for task ${this.taskType}`);
+            this.onTaskEvent(
+              asTaskRunEvent(
+                this.id,
+                asErr({ ...processedResult, isExpired: taskHasExpired, error: taskRunError }),
+                taskTiming
+              )
+            );
+          } else {
+            this.onTaskEvent(
+              asTaskRunEvent(
+                this.id,
+                asOk({ ...processedResult, isExpired: taskHasExpired }),
+                taskTiming
+              )
+            );
+          }
+        } catch (err) {
           this.onTaskEvent(
             asTaskRunEvent(
               this.id,
               asErr({
-                ...processedResult,
+                task,
+                persistence: taskPersistence,
+                result: TaskRunResult.Failed,
                 isExpired: taskHasExpired,
-                error: taskRunError,
+                error: err,
               }),
               taskTiming
             )
           );
-        } else {
-          this.onTaskEvent(
-            asTaskRunEvent(
-              this.id,
-              asOk({ ...processedResult, isExpired: taskHasExpired }),
-              taskTiming
-            )
-          );
+          throw err;
         }
       },
       async ({ error }: FailedRunResult) => {
@@ -793,9 +826,7 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private getMaxAttempts() {
-    return this.definition.maxAttempts !== undefined
-      ? this.definition.maxAttempts
-      : this.defaultMaxAttempts;
+    return this.definition?.maxAttempts ?? this.defaultMaxAttempts;
   }
 }
 

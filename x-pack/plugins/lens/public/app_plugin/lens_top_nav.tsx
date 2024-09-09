@@ -8,9 +8,9 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { useStore } from 'react-redux';
-import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -281,7 +281,6 @@ export const LensTopNavMenu = ({
   initialContext,
   indexPatternService,
   currentDoc,
-  onTextBasedSavedAndExit,
   getUserMessages,
   shortUrlService,
   isCurrentStateDirty,
@@ -625,7 +624,9 @@ export const LensTopNavMenu = ({
               allowEmbed: false,
               allowShortUrl: false,
               delegatedShareUrlHandler: () => {
-                return isCurrentStateDirty ? shareableUrl! : savedObjectURL.href;
+                return isCurrentStateDirty || !currentDoc?.savedObjectId
+                  ? shareableUrl!
+                  : savedObjectURL.href;
               },
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens',
@@ -636,7 +637,7 @@ export const LensTopNavMenu = ({
               },
               sharingData,
               // only want to know about changes when savedObjectURL.href
-              isDirty: isCurrentStateDirty,
+              isDirty: isCurrentStateDirty || !currentDoc?.savedObjectId,
               // disable the menu if both shortURL permission and the visualization has not been saved
               // TODO: improve here the disabling state with more specific checks
               disabledShareUrl: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
@@ -802,7 +803,9 @@ export const LensTopNavMenu = ({
     startServices,
   ]);
 
-  const onQuerySubmitWrapped = useCallback(
+  const onQuerySubmitWrapped = useCallback<
+    Required<TopNavMenuProps<AggregateQuery>>['onQuerySubmit']
+  >(
     (payload) => {
       const { dateRange, query: newQuery } = payload;
       const currentRange = data.query.timefilter.timefilter.getTime();
@@ -818,7 +821,7 @@ export const LensTopNavMenu = ({
       }
       if (newQuery) {
         if (!isEqual(newQuery, query)) {
-          dispatchSetState({ query: newQuery });
+          dispatchSetState({ query: newQuery as Query });
           // check if query is text-based (esql etc) and switchAndCleanDatasource
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
             setIsOnTextBasedMode(true);
@@ -845,14 +848,16 @@ export const LensTopNavMenu = ({
     ]
   );
 
-  const onSavedWrapped = useCallback(
+  const onSavedWrapped = useCallback<Required<TopNavMenuProps<AggregateQuery>>['onSaved']>(
     (newSavedQuery) => {
       dispatchSetState({ savedQuery: newSavedQuery });
     },
     [dispatchSetState]
   );
 
-  const onSavedQueryUpdatedWrapped = useCallback(
+  const onSavedQueryUpdatedWrapped = useCallback<
+    Required<TopNavMenuProps<AggregateQuery>>['onSavedQueryUpdated']
+  >(
     (newSavedQuery) => {
       // If the user tries to load the same saved query that is already loaded,
       // we will receive the same object reference which was previously frozen
@@ -911,7 +916,7 @@ export const LensTopNavMenu = ({
         ? async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
             if (currentIndexPattern?.id) {
               const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
-              closeFieldEditor.current = dataViewFieldEditor.openEditor({
+              closeFieldEditor.current = await dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: indexPatternInstance,
                 },
@@ -1110,7 +1115,6 @@ export const LensTopNavMenu = ({
         )
       }
       textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}

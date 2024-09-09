@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
@@ -26,12 +27,12 @@ import { BehaviorSubject } from 'rxjs';
 import { StartDeps } from '../../plugin';
 import { DATA_TABLE_ID } from './constants';
 import { initializeDataTableQueries } from './data_table_queries';
-import { DataTableApi, DataTableSerializedState } from './types';
+import { DataTableApi, DataTableRuntimeState, DataTableSerializedState } from './types';
 
 export const getDataTableFactory = (
   core: CoreStart,
   services: StartDeps
-): ReactEmbeddableFactory<DataTableSerializedState, DataTableApi> => ({
+): ReactEmbeddableFactory<DataTableSerializedState, DataTableRuntimeState, DataTableApi> => ({
   type: DATA_TABLE_ID,
   deserializeState: (state) => {
     return state.rawState as DataTableSerializedState;

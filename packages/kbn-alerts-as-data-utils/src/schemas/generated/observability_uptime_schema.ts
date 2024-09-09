@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 // ---------------------------------- WARNING ----------------------------------
 // this file was generated, and should not be edited by hand
@@ -74,7 +75,9 @@ const ObservabilityUptimeAlertOptional = rt.partial({
   'agent.name': schemaString,
   'anomaly.bucket_span.minutes': schemaString,
   'anomaly.start': schemaDate,
+  configId: schemaString,
   'error.message': schemaString,
+  'host.name': schemaString,
   'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
@@ -85,8 +88,11 @@ const ObservabilityUptimeAlertOptional = rt.partial({
       value: schemaStringArray,
     })
   ),
+  'location.id': schemaString,
+  'location.name': schemaString,
   'monitor.id': schemaString,
   'monitor.name': schemaString,
+  'monitor.tags': schemaStringArray,
   'monitor.type': schemaString,
   'observer.geo.name': schemaString,
   'tls.server.hash.sha256': schemaString,

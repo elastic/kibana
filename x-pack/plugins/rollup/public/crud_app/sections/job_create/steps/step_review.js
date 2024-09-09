@@ -107,7 +107,7 @@ export class StepReview extends Component {
           <h2>
             <FormattedMessage
               id="xpack.rollupJobs.create.stepReviewTitle"
-              defaultMessage="Review details for '{jobId}'"
+              defaultMessage="Review details for ''{jobId}''"
               values={{ jobId: job.id }}
             />
           </h2>

@@ -25,7 +25,7 @@ export function TimeoutPrompt({ isGlobalServiceMap }: { isGlobalServiceMap: bool
       body={
         <p>
           {i18n.translate('xpack.apm.serviceMap.timeoutPromptDescription', {
-            defaultMessage: `Timed out while fetching data for service map. Limit the scope by selecting a smaller time range, or use configuration setting '{configName}' with a reduced value.`,
+            defaultMessage: `Timed out while fetching data for service map. Limit the scope by selecting a smaller time range, or use configuration setting ''{configName}'' with a reduced value.`,
             values: {
               configName: isGlobalServiceMap
                 ? 'xpack.apm.serviceMapFingerprintGlobalBucketSize'

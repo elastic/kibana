@@ -9,7 +9,7 @@ import { pickBy, isEmpty } from 'lodash';
 import type { Plugin } from 'unified';
 import moment from 'moment';
 import React, { useContext, useMemo, useCallback, useState } from 'react';
-import type { RemarkTokenizer } from '@elastic/eui';
+import type { RemarkTokenizer, EuiSelectProps } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
   EuiIcon,
@@ -42,8 +42,8 @@ import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
 import { useInsightQuery } from './use_insight_query';
 import { useInsightDataProviders, type Provider } from './use_insight_data_providers';
-import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
-import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
+import { BasicAlertDataContext } from '../../../../../flyout/document_details/left/components/investigation_guide_view';
+import { InvestigateInTimelineButton } from '../../../event_details/investigate_in_timeline_button';
 import {
   getTimeRangeSettings,
   parseDateWithDefault,
@@ -52,13 +52,13 @@ import {
 } from '../../../../utils/default_date_settings';
 import type { TimeRange } from '../../../../store/inputs/model';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/constants';
-import { useSourcererDataView } from '../../../../containers/sourcerer';
-import { SourcererScopeName } from '../../../../store/sourcerer/model';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { filtersToInsightProviders } from './provider';
 import { useLicense } from '../../../../hooks/use_license';
 import { isProviderValid } from './helpers';
 import * as i18n from './translations';
-import { useGetScopedSourcererDataView } from '../../../sourcerer/use_get_sourcerer_data_view';
+import { useGetScopedSourcererDataView } from '../../../../../sourcerer/components/use_get_sourcerer_data_view';
 
 interface InsightComponentProps {
   label?: string;
@@ -382,7 +382,7 @@ const InsightEditorComponent = ({
   const onChange = useCallback((filters: Filter[]) => {
     setProviders(filtersToInsightProviders(filters));
   }, []);
-  const selectOnChange = useCallback(
+  const selectOnChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (event) => {
       relativeTimerangeController.field.onChange(event.target.value);
     },

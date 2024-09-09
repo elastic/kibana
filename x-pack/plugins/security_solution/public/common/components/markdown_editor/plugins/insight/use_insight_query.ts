@@ -14,9 +14,12 @@ import { TimelineId } from '../../../../../../common/types/timeline';
 import { useKibana } from '../../../../lib/kibana';
 import { combineQueries } from '../../../../lib/kuery';
 import { useTimelineEvents } from '../../../../../timelines/containers';
-import { useSourcererDataView } from '../../../../containers/sourcerer';
-import { SourcererScopeName } from '../../../../store/sourcerer/model';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import type { TimeRange } from '../../../../store/inputs/model';
+
+const fields = ['*'];
+const runtimeMappings = {};
 
 export interface UseInsightQuery {
   dataProviders: DataProvider[];
@@ -67,16 +70,16 @@ export const useInsightQuery = ({
 
   const [dataLoadingState, { events, totalCount }] = useTimelineEvents({
     dataViewId,
-    fields: ['*'],
+    fields,
     filterQuery: combinedQueries?.filterQuery,
     id: TimelineId.active,
     indexNames: selectedPatterns,
     language: 'kuery',
     limit: 1,
-    runtimeMappings: {},
-    ...(relativeTimerange
-      ? { startDate: relativeTimerange?.from, endDate: relativeTimerange?.to }
-      : {}),
+    runtimeMappings,
+    startDate: relativeTimerange?.from,
+    endDate: relativeTimerange?.to,
+    fetchNotes: false,
   });
 
   const isQueryLoading = useMemo(

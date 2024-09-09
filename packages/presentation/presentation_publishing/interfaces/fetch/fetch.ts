@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
+  BehaviorSubject,
   combineLatest,
   debounceTime,
   delay,
@@ -23,6 +25,7 @@ import {
   tap,
 } from 'rxjs';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { useMemo, useEffect } from 'react';
 import {
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
@@ -32,6 +35,7 @@ import {
 import { apiPublishesSearchSession, PublishesSearchSession } from './publishes_search_session';
 import { apiHasParentApi, HasParentApi } from '../has_parent_api';
 import { apiPublishesReload } from './publishes_reload';
+import { useStateFromPublishingSubject } from '../../publishing_subject';
 
 export interface FetchContext {
   isReload: boolean;
@@ -145,3 +149,19 @@ export function fetch$(api: unknown): Observable<FetchContext> {
 
   return merge(immediateChange$, batchedChanges$).pipe(startWith(getFetchContext(api, false)));
 }
+
+export const useFetchContext = (api: unknown): FetchContext => {
+  const context$: BehaviorSubject<FetchContext> = useMemo(() => {
+    return new BehaviorSubject<FetchContext>(getFetchContext(api, false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const subsctription = fetch$(api).subscribe((nextContext) => context$.next(nextContext));
+
+    return () => subsctription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return useStateFromPublishingSubject(context$);
+};

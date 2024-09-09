@@ -40,7 +40,7 @@ export const DeleteCrawlerDomainApiLogic = createApiLogic(
   {
     showSuccessFlashFn: ({ domain }) =>
       i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.action.delete.successMessage', {
-        defaultMessage: "Successfully deleted domain '{domainUrl}'",
+        defaultMessage: "Successfully deleted domain ''{domainUrl}''",
         values: {
           domainUrl: domain.url,
         },

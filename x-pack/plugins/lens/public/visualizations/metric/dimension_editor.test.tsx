@@ -13,7 +13,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
 import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import { VisualizationDimensionEditorProps } from '../../types';
-import { MetricVisualizationState } from './visualization';
+import { MetricVisualizationState } from './types';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
@@ -59,6 +59,10 @@ describe('dimension editor', () => {
     palette,
     icon: 'tag',
     showBar: true,
+    titlesTextAlign: 'left',
+    valuesTextAlign: 'right',
+    iconAlign: 'left',
+    valueFontMode: 'default',
     trendlineLayerId: 'second',
     trendlineLayerType: 'metricTrendline',
     trendlineMetricAccessor: 'trendline-metric-col-id',
@@ -132,7 +136,7 @@ describe('dimension editor', () => {
         />
       );
 
-      const colorModeGroup = screen.queryByRole('group', { name: /color mode/i });
+      const colorModeGroup = screen.queryByRole('group', { name: /Color by value/i });
       const staticColorPicker = screen.queryByTestId(SELECTORS.COLOR_PICKER);
 
       const typeColor = (color: string) => {
@@ -166,6 +170,7 @@ describe('dimension editor', () => {
       expect(screen.queryByTestId(SELECTORS.MAX_EDITOR)).not.toBeInTheDocument();
       expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).not.toBeInTheDocument();
     });
+
     it('Color mode switch is shown when the primary metric is numeric', () => {
       const { colorModeGroup } = renderPrimaryMetricEditor();
       expect(colorModeGroup).toBeInTheDocument();
@@ -245,9 +250,9 @@ describe('dimension editor', () => {
         userEvent.type(customPrefixTextbox, prefix);
       };
       return {
-        settingNone: screen.getByTitle(/none/i),
-        settingAuto: screen.getByTitle(/auto/i),
-        settingCustom: screen.getByTitle(/custom/i),
+        settingNone: () => screen.getByTitle(/none/i),
+        settingAuto: () => screen.getByTitle(/auto/i),
+        settingCustom: () => screen.getByTitle(/custom/i),
         customPrefixTextbox,
         typePrefix,
         ...rtlRender,
@@ -260,6 +265,11 @@ describe('dimension editor', () => {
       expect(screen.getByTestId(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeInTheDocument();
       expect(screen.queryByTestId(SELECTORS.MAX_EDITOR)).not.toBeInTheDocument();
       expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).not.toBeInTheDocument();
+    });
+
+    it(`doesn't break when layer data is missing`, () => {
+      renderSecondaryMetricEditor({ frame: { activeData: { first: undefined } } });
+      expect(screen.getByTestId(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeInTheDocument();
     });
 
     describe('metric prefix', () => {
@@ -276,9 +286,9 @@ describe('dimension editor', () => {
             state: localState,
           });
 
-        expect(settingAuto).toHaveAttribute('aria-pressed', 'true');
-        expect(settingNone).toHaveAttribute('aria-pressed', 'false');
-        expect(settingCustom).toHaveAttribute('aria-pressed', 'false');
+        expect(settingAuto()).toHaveAttribute('aria-pressed', 'true');
+        expect(settingNone()).toHaveAttribute('aria-pressed', 'false');
+        expect(settingCustom()).toHaveAttribute('aria-pressed', 'false');
         expect(customPrefixTextbox).not.toBeInTheDocument();
       });
 
@@ -286,9 +296,9 @@ describe('dimension editor', () => {
         const { settingAuto, settingCustom, settingNone, customPrefixTextbox } =
           renderSecondaryMetricEditor({ state: { ...localState, secondaryPrefix: NONE_PREFIX } });
 
-        expect(settingNone).toHaveAttribute('aria-pressed', 'true');
-        expect(settingAuto).toHaveAttribute('aria-pressed', 'false');
-        expect(settingCustom).toHaveAttribute('aria-pressed', 'false');
+        expect(settingNone()).toHaveAttribute('aria-pressed', 'true');
+        expect(settingAuto()).toHaveAttribute('aria-pressed', 'false');
+        expect(settingCustom()).toHaveAttribute('aria-pressed', 'false');
         expect(customPrefixTextbox).not.toBeInTheDocument();
       });
 
@@ -297,9 +307,9 @@ describe('dimension editor', () => {
         const { settingAuto, settingCustom, settingNone, customPrefixTextbox } =
           renderSecondaryMetricEditor({ state: customPrefixState });
 
-        expect(settingAuto).toHaveAttribute('aria-pressed', 'false');
-        expect(settingNone).toHaveAttribute('aria-pressed', 'false');
-        expect(settingCustom).toHaveAttribute('aria-pressed', 'true');
+        expect(settingAuto()).toHaveAttribute('aria-pressed', 'false');
+        expect(settingNone()).toHaveAttribute('aria-pressed', 'false');
+        expect(settingCustom()).toHaveAttribute('aria-pressed', 'true');
         expect(customPrefixTextbox).toHaveValue(customPrefixState.secondaryPrefix);
       });
 
@@ -312,12 +322,12 @@ describe('dimension editor', () => {
           state: { ...localState, secondaryPrefix: customPrefix },
         });
 
-        userEvent.click(settingNone);
+        userEvent.click(settingNone());
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({ secondaryPrefix: NONE_PREFIX })
         );
 
-        userEvent.click(settingAuto);
+        userEvent.click(settingAuto());
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({ secondaryPrefix: AUTO_PREFIX })
         );

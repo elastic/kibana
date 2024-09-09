@@ -15,11 +15,11 @@ import { TabNavigation } from '../../../common/components/navigation/tab_navigat
 import { inputsActions } from '../../../common/store/inputs';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 
-jest.mock('../../../common/containers/sourcerer');
+jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/components/empty_prompt');
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

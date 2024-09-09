@@ -20,6 +20,7 @@ describe('LeftPanel', () => {
         }}
         isRiskScoreExist
         user={{ name: 'test user', email: [] }}
+        scopeId={'scopeId'}
       />,
       {
         wrapper: TestProviders,
@@ -39,6 +40,7 @@ describe('LeftPanel', () => {
         }}
         isRiskScoreExist={false}
         user={{ name: 'test user', email: [] }}
+        scopeId={'scopeId'}
       />,
       {
         wrapper: TestProviders,

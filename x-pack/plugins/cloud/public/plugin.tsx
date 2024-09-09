@@ -8,17 +8,20 @@
 import React, { FC, PropsWithChildren } from 'react';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { CLOUD_SNAPSHOTS_PATH } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
-import type { CloudSetup, CloudStart } from './types';
 import { getFullCloudUrl } from '../common/utils';
+import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
+import type { CloudSetup, CloudStart } from './types';
 import { getSupportUrl } from './utils';
 
 export interface CloudConfigType {
   id?: string;
+  organization_id?: string;
   cname?: string;
   base_url?: string;
   profile_url?: string;
@@ -31,10 +34,14 @@ export interface CloudConfigType {
   performance_url?: string;
   trial_end_date?: string;
   is_elastic_staff_owned?: boolean;
+  onboarding?: {
+    default_solution?: string;
+  };
   serverless?: {
     project_id: string;
     project_name?: string;
     project_type?: string;
+    orchestrator_target?: string;
   };
 }
 
@@ -84,6 +91,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     return {
       cloudId: id,
+      organizationId: this.config.organization_id,
       deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
       cname,
       baseUrl,
@@ -95,11 +103,15 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       trialEndDate: trialEndDate ? new Date(trialEndDate) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
+      onboarding: {
+        defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
+      },
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
         projectType: this.config.serverless?.project_type,
+        orchestratorTarget: this.config.serverless?.orchestrator_target,
       },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);

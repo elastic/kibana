@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
@@ -40,6 +41,7 @@ import {
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
+import { useRootProfile } from '../../context_awareness';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -338,11 +340,14 @@ export function DiscoverMainRoute({
     stateContainer,
   ]);
 
+  const { solutionNavId } = customizationContext;
+  const { rootProfileLoading } = useRootProfile({ solutionNavId });
+
   if (error) {
     return <DiscoverError error={error} />;
   }
 
-  if (!customizationService) {
+  if (!customizationService || rootProfileLoading) {
     return loadingIndicator;
   }
 
@@ -350,7 +355,10 @@ export function DiscoverMainRoute({
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
         <>
-          <DiscoverTopNavInline stateContainer={stateContainer} hideNavMenuItems={loading} />
+          <DiscoverTopNavInline
+            stateContainer={stateContainer}
+            hideNavMenuItems={loading || showNoDataPage}
+          />
           {mainContent}
         </>
       </DiscoverMainProvider>
@@ -373,7 +381,7 @@ function getLoadParamsForNewSearch(stateContainer: DiscoverStateContainer): {
       ? {
           // reset to a default ES|QL query
           query: {
-            esql: getInitialESQLQuery(prevDataView.getIndexPattern()),
+            esql: getInitialESQLQuery(prevDataView),
           },
         }
       : undefined;

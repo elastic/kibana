@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -17,17 +16,35 @@ import {
   buildMetricThresholdRule,
 } from '../mocks/metric_threshold_rule';
 import { AlertDetailsAppSection } from './alert_details_app_section';
-import { ExpressionChart } from './expression_chart';
-import { Groups } from './groups';
-import { Tags } from './tags';
+import { RuleConditionChart } from '@kbn/observability-plugin/public';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();
+const mockedLensStartContract = lensPluginMock.createStartContract();
+
+Date.now = jest.fn(() => new Date('2024-06-13T07:00:33.381Z').getTime());
+
+jest.mock('../../../containers/metrics_source', () => ({
+  useMetricsDataViewContext: () => ({
+    metricsView: { dataViewReference: 'index' },
+  }),
+  withSourceProvider:
+    <ComponentProps extends {}>(Component: React.FC<ComponentProps>) =>
+    () => {
+      return function ComponentWithSourceProvider(props: ComponentProps) {
+        return <div />;
+      };
+    },
+}));
 
 jest.mock('@kbn/observability-alert-details', () => ({
   AlertAnnotation: () => {},
   AlertActiveTimeRangeAnnotation: () => {},
 }));
-
+jest.mock('@kbn/observability-alert-details', () => ({
+  AlertAnnotation: () => {},
+  AlertActiveTimeRangeAnnotation: () => {},
+}));
 jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
   getPaddedAlertTimeRange: () => ({
     from: '2023-03-28T10:43:13.802Z',
@@ -35,8 +52,9 @@ jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
   }),
 }));
 
-jest.mock('./expression_chart', () => ({
-  ExpressionChart: jest.fn(() => <div data-test-subj="ExpressionChart" />),
+jest.mock('@kbn/observability-plugin/public', () => ({
+  RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
+  getGroupFilters: jest.fn(),
 }));
 
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -44,6 +62,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
     services: {
       ...mockCoreMock.createStart(),
       charts: mockedChartStartContract,
+      lens: mockedLensStartContract,
     },
   }),
 }));
@@ -51,7 +70,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
 describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();
   const mockedSetAlertSummaryFields = jest.fn();
-  const ruleLink = 'ruleLink';
   const renderComponent = () => {
     return render(
       <IntlProvider locale="en">
@@ -59,7 +77,6 @@ describe('AlertDetailsAppSection', () => {
           <AlertDetailsAppSection
             alert={buildMetricThresholdAlert()}
             rule={buildMetricThresholdRule()}
-            ruleLink={ruleLink}
             setAlertSummaryFields={mockedSetAlertSummaryFields}
           />
         </QueryClientProvider>
@@ -78,45 +95,12 @@ describe('AlertDetailsAppSection', () => {
     expect(result.getByTestId('threshold-2000-2500')).toBeTruthy();
   });
 
-  it('should render alert summary fields', async () => {
-    renderComponent();
-
-    expect(mockedSetAlertSummaryFields).toBeCalledTimes(1);
-    expect(mockedSetAlertSummaryFields).toBeCalledWith([
-      {
-        label: 'Source',
-        value: (
-          <Groups
-            groups={[
-              {
-                field: 'host.name',
-                value: 'host-1',
-              },
-            ]}
-          />
-        ),
-      },
-      {
-        label: 'Tags',
-        value: <Tags tags={['tag 1', 'tag 2']} />,
-      },
-      {
-        label: 'Rule',
-        value: (
-          <EuiLink data-test-subj="metricsRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
-            Monitoring hosts
-          </EuiLink>
-        ),
-      },
-    ]);
-  });
-
   it('should render annotations', async () => {
-    const mockedExpressionChart = jest.fn(() => <div data-test-subj="ExpressionChart" />);
-    (ExpressionChart as jest.Mock).mockImplementation(mockedExpressionChart);
+    const mockedRuleConditionChart = jest.fn(() => <div data-test-subj="RuleConditionChart" />);
+    (RuleConditionChart as jest.Mock).mockImplementation(mockedRuleConditionChart);
     renderComponent();
 
-    expect(mockedExpressionChart).toHaveBeenCalledTimes(3);
-    expect(mockedExpressionChart.mock.calls[0]).toMatchSnapshot();
+    expect(mockedRuleConditionChart).toHaveBeenCalledTimes(3);
+    expect(mockedRuleConditionChart.mock.calls[0]).toMatchSnapshot();
   });
 });

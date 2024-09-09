@@ -61,7 +61,7 @@ describe('useHostCharts', () => {
           const expectedOrder = getHostChartsExpectedOrder(metric, true);
 
           const { result, waitForNextUpdate } = renderHook(() =>
-            useHostCharts({ dataViewId, metric, options: { overview: true } })
+            useHostCharts({ dataViewId, metric, overview: true })
           );
           await waitForNextUpdate();
 
@@ -81,7 +81,7 @@ describe('useHostCharts', () => {
 describe('useKubernetesCharts', () => {
   it('should return an array of charts with correct order - overview', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useKubernetesCharts({ dataViewId, options: { overview: true } })
+      useKubernetesCharts({ dataViewId, overview: true })
     );
     await waitForNextUpdate();
 
@@ -141,7 +141,7 @@ describe('useHostKpiCharts', () => {
     };
 
     const { result, waitForNextUpdate } = renderHook(() =>
-      useHostKpiCharts({ dataViewId, options })
+      useHostKpiCharts({ dataViewId, ...options })
     );
     await waitForNextUpdate();
 

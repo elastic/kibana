@@ -55,9 +55,33 @@
 
   .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content,
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'],
-  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'],
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id^='additionalRowControl_'],
+  .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id^='additionalRowControl_'] {
     padding-left: 0;
     padding-right: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='additionalRowControl_menuControl'] .euiDataGridRowCell__content {
+    padding-bottom: 0;
+  }
+
+  .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id='select'] {
+    padding-left: $euiSizeXS;
+    padding-right: 0;
+  }
+
+  .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id='colorIndicator'],
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] {
+    padding: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] .euiDataGridRowCell__content {
+    height: 100%;
+    padding: 0;
+    border-bottom: 0;
   }
 
   .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
@@ -120,6 +144,13 @@
   .euiDataGridRowCell__content--defaultHeight & { // "Single line" row height setting
     margin-top: 0;
   }
+
+  &--size-normal {
+    display: inline-block;
+    width: $euiSizeL;
+    height: $euiSizeL;
+    overflow: hidden;
+  }
 }
 
 .unifiedDataTable__descriptionList {
@@ -138,6 +169,7 @@
   padding-inline: 0;
   background: transparent;
   font-weight: $euiFontWeightBold;
+  line-height: inherit; // Required for EuiDataGrid lineCount to work correctly
 }
 
 .unifiedDataTable__descriptionListDescription {
@@ -145,6 +177,7 @@
   padding-inline: 0;
   word-break: break-all;
   white-space: normal;
+  line-height: inherit; // Required for EuiDataGrid lineCount to work correctly
 
   // Special handling for images coming from the image field formatter
   img {

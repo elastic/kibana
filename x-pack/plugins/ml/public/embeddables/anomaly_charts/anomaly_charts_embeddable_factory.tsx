@@ -37,161 +37,164 @@ import { buildDataViewPublishingApi } from '../common/anomaly_detection_embeddab
 export const getAnomalyChartsReactEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
 ) => {
-  const factory: ReactEmbeddableFactory<AnomalyChartsEmbeddableState, AnomalyChartsEmbeddableApi> =
-    {
-      type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-      deserializeState: (state) => state.rawState,
-      buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-        if (!apiHasExecutionContext(parentApi)) {
-          throw new Error('Parent API does not have execution context');
-        }
-        const [coreStartServices, pluginsStartServices] = await getStartServices();
-        const anomalyChartsDependencies = await getAnomalyChartsServiceDependencies(
-          coreStartServices,
-          pluginsStartServices
-        );
+  const factory: ReactEmbeddableFactory<
+    AnomalyChartsEmbeddableState,
+    AnomalyChartsEmbeddableState,
+    AnomalyChartsEmbeddableApi
+  > = {
+    type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    deserializeState: (state) => state.rawState,
+    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+      if (!apiHasExecutionContext(parentApi)) {
+        throw new Error('Parent API does not have execution context');
+      }
+      const [coreStartServices, pluginsStartServices] = await getStartServices();
+      const anomalyChartsDependencies = await getAnomalyChartsServiceDependencies(
+        coreStartServices,
+        pluginsStartServices
+      );
 
-        const [, , mlServices] = anomalyChartsDependencies;
+      const [, , mlServices] = anomalyChartsDependencies;
 
-        const subscriptions = new Subscription();
+      const subscriptions = new Subscription();
 
-        const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-        const {
-          api: timeRangeApi,
-          comparators: timeRangeComparators,
-          serialize: serializeTimeRange,
-        } = initializeTimeRange(state);
+      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const {
+        api: timeRangeApi,
+        comparators: timeRangeComparators,
+        serialize: serializeTimeRange,
+      } = initializeTimeRange(state);
 
-        const {
-          anomalyChartsControlsApi,
-          dataLoadingApi,
-          serializeAnomalyChartsState,
-          anomalyChartsComparators,
-          onAnomalyChartsDestroy,
-        } = initializeAnomalyChartsControls(state, titlesApi, parentApi);
+      const {
+        anomalyChartsControlsApi,
+        dataLoadingApi,
+        serializeAnomalyChartsState,
+        anomalyChartsComparators,
+        onAnomalyChartsDestroy,
+      } = initializeAnomalyChartsControls(state, titlesApi, parentApi);
 
-        const api = buildApi(
-          {
-            isEditingEnabled: () => true,
-            getTypeDisplayName: () =>
-              i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.typeDisplayName', {
-                defaultMessage: 'anomaly charts',
-              }),
-            onEdit: async () => {
-              try {
-                const { resolveEmbeddableAnomalyChartsUserInput } = await import(
-                  './anomaly_charts_setup_flyout'
-                );
-                const result = await resolveEmbeddableAnomalyChartsUserInput(
-                  coreStartServices,
-                  pluginsStartServices,
-                  parentApi,
-                  uuid,
-                  {
-                    ...serializeTitles(),
-                    ...serializeAnomalyChartsState(),
-                  }
-                );
-                anomalyChartsControlsApi.updateUserInput(result);
-              } catch (e) {
-                // eslint-disable-next-line no-console
-                console.error(e);
-                return Promise.reject();
-              }
-            },
-            ...titlesApi,
-            ...timeRangeApi,
-            ...anomalyChartsControlsApi,
-            ...dataLoadingApi,
-            dataViews: buildDataViewPublishingApi(
-              {
-                anomalyDetectorService: mlServices.anomalyDetectorService,
-                dataViewsService: pluginsStartServices.data.dataViews,
-              },
-              { jobIds: anomalyChartsControlsApi.jobIds$ },
-              subscriptions
-            ),
-            serializeState: () => {
-              return {
-                rawState: {
-                  timeRange: undefined,
+      const api = buildApi(
+        {
+          isEditingEnabled: () => true,
+          getTypeDisplayName: () =>
+            i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.typeDisplayName', {
+              defaultMessage: 'anomaly charts',
+            }),
+          onEdit: async () => {
+            try {
+              const { resolveEmbeddableAnomalyChartsUserInput } = await import(
+                './anomaly_charts_setup_flyout'
+              );
+              const result = await resolveEmbeddableAnomalyChartsUserInput(
+                coreStartServices,
+                pluginsStartServices,
+                parentApi,
+                uuid,
+                {
                   ...serializeTitles(),
-                  ...serializeTimeRange(),
                   ...serializeAnomalyChartsState(),
-                },
-                references: [],
-              };
-            },
-          },
-          {
-            ...timeRangeComparators,
-            ...titleComparators,
-            ...anomalyChartsComparators,
-          }
-        );
-
-        const appliedTimeRange$: Observable<TimeRange | undefined> = fetch$(api).pipe(
-          map((fetchContext) => fetchContext.timeRange),
-          distinctUntilChanged(fastIsEqual)
-        );
-
-        const { onRenderComplete, onLoading, onError } = dataLoadingApi;
-        const contextServices = {
-          mlServices: {
-            ...mlServices,
-          },
-          ...coreStartServices,
-          ...pluginsStartServices,
-        };
-
-        return {
-          api,
-          Component: () => {
-            if (!apiHasExecutionContext(parentApi)) {
-              throw new Error('Parent API does not have execution context');
+                }
+              );
+              anomalyChartsControlsApi.updateUserInput(result);
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.error(e);
+              return Promise.reject();
             }
-
-            useReactEmbeddableExecutionContext(
-              coreStartServices.executionContext,
-              parentApi.executionContext,
-              ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-              uuid
-            );
-
-            useUnmount(() => {
-              onAnomalyChartsDestroy();
-              subscriptions.unsubscribe();
-            });
-            const { euiTheme } = useEuiTheme();
-
-            return (
-              <KibanaRenderContextProvider {...coreStartServices}>
-                <KibanaContextProvider services={contextServices}>
-                  <div
-                    css={css`
-                      width: 100%;
-                      padding: ${euiTheme.size.xs};
-                      overflow-y: auto;
-                    `}
-                    data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
-                  >
-                    <LazyAnomalyChartsContainer
-                      id={uuid}
-                      severityThreshold={state.severityThreshold}
-                      api={api}
-                      services={anomalyChartsDependencies}
-                      onLoading={onLoading}
-                      onRenderComplete={onRenderComplete}
-                      onError={onError}
-                      timeRange$={appliedTimeRange$}
-                    />
-                  </div>
-                </KibanaContextProvider>
-              </KibanaRenderContextProvider>
-            );
           },
-        };
-      },
-    };
+          ...titlesApi,
+          ...timeRangeApi,
+          ...anomalyChartsControlsApi,
+          ...dataLoadingApi,
+          dataViews: buildDataViewPublishingApi(
+            {
+              anomalyDetectorService: mlServices.anomalyDetectorService,
+              dataViewsService: pluginsStartServices.data.dataViews,
+            },
+            { jobIds: anomalyChartsControlsApi.jobIds$ },
+            subscriptions
+          ),
+          serializeState: () => {
+            return {
+              rawState: {
+                timeRange: undefined,
+                ...serializeTitles(),
+                ...serializeTimeRange(),
+                ...serializeAnomalyChartsState(),
+              },
+              references: [],
+            };
+          },
+        },
+        {
+          ...timeRangeComparators,
+          ...titleComparators,
+          ...anomalyChartsComparators,
+        }
+      );
+
+      const appliedTimeRange$: Observable<TimeRange | undefined> = fetch$(api).pipe(
+        map((fetchContext) => fetchContext.timeRange),
+        distinctUntilChanged(fastIsEqual)
+      );
+
+      const { onRenderComplete, onLoading, onError } = dataLoadingApi;
+      const contextServices = {
+        mlServices: {
+          ...mlServices,
+        },
+        ...coreStartServices,
+        ...pluginsStartServices,
+      };
+
+      return {
+        api,
+        Component: () => {
+          if (!apiHasExecutionContext(parentApi)) {
+            throw new Error('Parent API does not have execution context');
+          }
+
+          useReactEmbeddableExecutionContext(
+            coreStartServices.executionContext,
+            parentApi.executionContext,
+            ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+            uuid
+          );
+
+          useUnmount(() => {
+            onAnomalyChartsDestroy();
+            subscriptions.unsubscribe();
+          });
+          const { euiTheme } = useEuiTheme();
+
+          return (
+            <KibanaRenderContextProvider {...coreStartServices}>
+              <KibanaContextProvider services={contextServices}>
+                <div
+                  css={css`
+                    width: 100%;
+                    padding: ${euiTheme.size.xs};
+                    overflow-y: auto;
+                  `}
+                  data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
+                >
+                  <LazyAnomalyChartsContainer
+                    id={uuid}
+                    severityThreshold={state.severityThreshold}
+                    api={api}
+                    services={anomalyChartsDependencies}
+                    onLoading={onLoading}
+                    onRenderComplete={onRenderComplete}
+                    onError={onError}
+                    timeRange$={appliedTimeRange$}
+                  />
+                </div>
+              </KibanaContextProvider>
+            </KibanaRenderContextProvider>
+          );
+        },
+      };
+    },
+  };
   return factory;
 };

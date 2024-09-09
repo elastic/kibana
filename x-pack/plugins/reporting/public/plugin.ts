@@ -148,6 +148,7 @@ export class ReportingPublicPlugin
       id: 'reporting',
       title: this.title,
       order: 3,
+      keywords: ['reports', 'report', 'reporting'],
       mount: async (params) => {
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[coreStart, startDeps], { mountManagementSection }] = await Promise.all([
@@ -179,8 +180,14 @@ export class ReportingPublicPlugin
     core.application.register({
       id: 'reportingRedirect',
       mount: async (params) => {
-        const { mountRedirectApp } = await import('./redirect');
-        return mountRedirectApp({
+        const [startServices, importParams] = await Promise.all([
+          core.getStartServices(),
+          import('./redirect'),
+        ]);
+        const [coreStart] = startServices;
+        const { mountRedirectApp } = importParams;
+
+        return mountRedirectApp(coreStart, {
           ...params,
           apiClient,
           screenshotMode: screenshotModeSetup,

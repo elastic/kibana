@@ -171,7 +171,9 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       try {
         await this.options.tokens.invalidate({ accessToken: state.accessToken });
       } catch (err) {
-        this.logger.debug(`Failed invalidating access token: ${getDetailedErrorMessage(err)}`);
+        this.logger.debug(
+          () => `Failed invalidating access token: ${getDetailedErrorMessage(err)}`
+        );
         return DeauthenticationResult.failed(err);
       }
     }
@@ -241,7 +243,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
       this.logger.debug(
-        `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
+        () => `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
       );
       return AuthenticationResult.failed(err);
     }
@@ -291,9 +293,10 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       })) as any;
     } catch (err) {
       this.logger.debug(
-        `Failed to exchange peer certificate chain to an access token: ${getDetailedErrorMessage(
-          err
-        )}`
+        () =>
+          `Failed to exchange peer certificate chain to an access token: ${getDetailedErrorMessage(
+            err
+          )}`
       );
       return AuthenticationResult.failed(err);
     }

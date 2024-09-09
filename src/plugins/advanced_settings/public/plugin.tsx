@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -30,10 +31,7 @@ const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
 export class AdvancedSettingsPlugin
   implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup>
 {
-  public setup(
-    core: CoreSetup,
-    { management, home, usageCollection }: AdvancedSettingsPluginSetup
-  ) {
+  public setup(core: CoreSetup, { management, home }: AdvancedSettingsPluginSetup) {
     const kibanaSection = management.sections.section.kibana;
 
     kibanaSection.registerApp({
@@ -42,6 +40,9 @@ export class AdvancedSettingsPlugin
       order: 3,
       async mount({ element, setBreadcrumbs, history }) {
         const [coreStart] = await core.getStartServices();
+
+        const { docTitle } = coreStart.chrome;
+        docTitle.change(title);
         setBreadcrumbs([{ text: title }]);
 
         ReactDOM.render(
@@ -53,6 +54,7 @@ export class AdvancedSettingsPlugin
           element
         );
         return () => {
+          docTitle.reset();
           ReactDOM.unmountComponentAtNode(element);
         };
       },

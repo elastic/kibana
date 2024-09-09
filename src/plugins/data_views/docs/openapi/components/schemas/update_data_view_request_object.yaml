@@ -18,7 +18,9 @@ properties:
       name:
         type: string
       runtimeFieldMap:
-        $ref: 'runtimefieldmap.yaml'
+        type: object
+        additionalProperties:
+          $ref: 'runtimefieldmap.yaml'
       sourceFilters:
         $ref: 'sourcefilters.yaml'
       timeFieldName:

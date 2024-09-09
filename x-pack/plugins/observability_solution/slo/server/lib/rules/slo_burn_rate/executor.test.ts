@@ -9,7 +9,6 @@ import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
-import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import {
   IBasePath,
   IUiSettingsClient,
@@ -47,6 +46,7 @@ import {
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUP,
   ALERT_REASON,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
@@ -54,7 +54,7 @@ import { SLODefinition, StoredSLODefinition } from '../../../domain/models';
 import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { createSLO } from '../../../services/fixtures/slo';
-import { getRuleExecutor } from './executor';
+import { BurnRateAlert, getRuleExecutor } from './executor';
 import {
   generateAboveThresholdKey,
   generateBurnRateKey,
@@ -163,7 +163,7 @@ describe('BurnRateRuleExecutor', () => {
       BurnRateAlertState,
       BurnRateAlertContext,
       BurnRateAllowedActionGroups,
-      ObservabilitySloAlert
+      BurnRateAlert
     >
   >;
 
@@ -173,19 +173,23 @@ describe('BurnRateRuleExecutor', () => {
     loggerMock = loggingSystemMock.createLogger();
     servicesMock = {
       savedObjectsClient: soClientMock,
-      scopedClusterClient: { asCurrentUser: esClientMock, asInternalUser: esClientMock },
+      scopedClusterClient: {
+        asCurrentUser: esClientMock,
+        asInternalUser: esClientMock,
+        asSecondaryAuthUser: esClientMock,
+      },
       alertsClient: publicAlertsClientMock.create(),
       alertFactory: {
         create: jest.fn(),
         done: jest.fn(),
         alertLimit: { getValue: jest.fn(), setLimitReached: jest.fn() },
       },
-      searchSourceClient: searchSourceClientMock,
+      getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceClientMock),
       uiSettingsClient: uiSettingsClientMock,
       shouldWriteAlerts: jest.fn(),
       shouldStopExecution: jest.fn(),
       share: {} as SharePluginStart,
-      dataViews: dataViewPluginMocks.createStartContract(),
+      getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
     };
   });
 
@@ -334,19 +338,22 @@ describe('BurnRateRuleExecutor', () => {
     });
 
     it('schedules an alert when both windows of first window definition burn rate have reached the threshold', async () => {
-      const slo = createSLO({ objective: { target: 0.9 } });
+      const slo = createSLO({
+        objective: { target: 0.9 },
+        groupBy: ['group.by.field', 'client.geo.continent_name'],
+      });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
       const buckets = [
         {
-          instanceId: 'foo',
+          instanceId: 'foo,asia',
           windows: [
             { shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
             { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
           ],
         },
         {
-          instanceId: 'bar',
+          instanceId: 'bar,asia',
           windows: [
             { shortWindowBurnRate: 2.2, longWindowBurnRate: 2.5 },
             { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
@@ -387,70 +394,100 @@ describe('BurnRateRuleExecutor', () => {
       });
 
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
-        id: 'foo',
+        id: 'foo,asia',
         actionGroup: ALERT_ACTION.id,
         state: {
           alertState: AlertStates.ALERT,
         },
         payload: {
           [ALERT_REASON]:
-            'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
+            'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo,asia. Alert when above 2 for both windows',
           [ALERT_EVALUATION_THRESHOLD]: 2,
           [ALERT_EVALUATION_VALUE]: 2.1,
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
-          [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [SLO_INSTANCE_ID_FIELD]: 'foo,asia',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'foo',
+            },
+            {
+              field: 'client.geo.continent_name',
+              value: 'asia',
+            },
+          ],
+          'client.geo.continent_name': 'asia',
         },
       });
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
-        id: 'bar',
+        id: 'bar,asia',
         actionGroup: ALERT_ACTION.id,
         state: {
           alertState: AlertStates.ALERT,
         },
         payload: {
           [ALERT_REASON]:
-            'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
+            'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar,asia. Alert when above 2 for both windows',
           [ALERT_EVALUATION_THRESHOLD]: 2,
           [ALERT_EVALUATION_VALUE]: 2.2,
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
-          [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [SLO_INSTANCE_ID_FIELD]: 'bar,asia',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'bar',
+            },
+            {
+              field: 'client.geo.continent_name',
+              value: 'asia',
+            },
+          ],
+          'client.geo.continent_name': 'asia',
         },
       });
+      expect(servicesMock.alertsClient?.setAlertData).toHaveBeenCalledTimes(2);
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
-        id: 'foo',
+        id: 'foo,asia',
         context: expect.objectContaining({
           longWindow: { burnRate: 2.3, duration: '1h' },
           shortWindow: { burnRate: 2.1, duration: '5m' },
           burnRateThreshold: 2,
           reason:
-            'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
+            'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo,asia. Alert when above 2 for both windows',
           alertDetailsUrl: 'mockedAlertsLocator > getLocation',
         }),
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(2, {
-        id: 'bar',
+        id: 'bar,asia',
         context: expect.objectContaining({
           longWindow: { burnRate: 2.5, duration: '1h' },
           shortWindow: { burnRate: 2.2, duration: '5m' },
           burnRateThreshold: 2,
           reason:
-            'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
+            'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar,asia. Alert when above 2 for both windows',
           alertDetailsUrl: 'mockedAlertsLocator > getLocation',
         }),
       });
 
-      expect(alertsLocatorMock.getLocation).toBeCalledWith({
+      expect(alertsLocatorMock.getLocation).toHaveBeenCalledTimes(2);
+      expect(alertsLocatorMock.getLocation).toHaveBeenNthCalledWith(1, {
         baseUrl: 'https://kibana.dev',
-        kuery: 'kibana.alert.uuid: "uuid-foo"',
+        kuery: 'kibana.alert.uuid: "uuid-foo,asia"',
+        rangeFrom: expect.stringMatching(ISO_DATE_REGEX),
+        spaceId: 'irrelevant',
+      });
+      expect(alertsLocatorMock.getLocation).toHaveBeenNthCalledWith(2, {
+        baseUrl: 'https://kibana.dev',
+        kuery: 'kibana.alert.uuid: "uuid-bar,asia"',
         rangeFrom: expect.stringMatching(ISO_DATE_REGEX),
         spaceId: 'irrelevant',
       });
     });
 
     it('schedules a suppressed alert when both windows of first window definition burn rate have reached the threshold but the dependency matches', async () => {
-      const slo = createSLO({ objective: { target: 0.9 } });
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
       const dependencyRuleParams = someRuleParamsWithWindows({ sloId: slo.id });
       const ruleParams = someRuleParamsWithWindows({
         sloId: slo.id,
@@ -534,6 +571,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'foo',
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
@@ -550,6 +593,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'bar',
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
@@ -584,7 +633,7 @@ describe('BurnRateRuleExecutor', () => {
     });
 
     it('schedules an alert when both windows of second window definition burn rate have reached the threshold', async () => {
-      const slo = createSLO({ objective: { target: 0.9 } });
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
       const buckets = [
@@ -609,6 +658,9 @@ describe('BurnRateRuleExecutor', () => {
       esClientMock.search.mockResolvedValueOnce(
         generateEsResponse(ruleParams, [], { instanceId: 'bar' })
       );
+      // Mock summary repository es searches
+      esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponse());
+      esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponse());
 
       // @ts-ignore
       servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
@@ -646,6 +698,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'foo',
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient!.report).toBeCalledWith({
@@ -662,6 +720,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'bar',
+            },
+          ],
         },
       });
 
@@ -673,6 +737,13 @@ describe('BurnRateRuleExecutor', () => {
           burnRateThreshold: 1,
           reason:
             'HIGH: The burn rate for the past 6h is 1.2 and for the past 30m is 1.9 for foo. Alert when above 1 for both windows',
+          sloId: slo.id,
+          sloName: slo.name,
+          sloInstanceId: 'foo',
+          sliValue: 0.9,
+          sloStatus: 'HEALTHY',
+          sloErrorBudgetRemaining: 0.4,
+          sloErrorBudgetConsumed: 0.6,
         }),
       });
 
@@ -684,6 +755,13 @@ describe('BurnRateRuleExecutor', () => {
           burnRateThreshold: 1,
           reason:
             'HIGH: The burn rate for the past 6h is 1.1 and for the past 30m is 1.5 for bar. Alert when above 1 for both windows',
+          sloId: slo.id,
+          sloName: slo.name,
+          sloInstanceId: 'bar',
+          sliValue: 0.9,
+          sloStatus: 'HEALTHY',
+          sloErrorBudgetRemaining: 0.4,
+          sloErrorBudgetConsumed: 0.6,
         }),
       });
     });
@@ -788,6 +866,26 @@ function generateEsResponse(
             )
           ),
       },
+    },
+  };
+}
+
+function generateEsSummaryResponse() {
+  return {
+    ...commonEsResponse,
+    hits: {
+      hits: [
+        {
+          _index: '.slo-observability.summary-v3.2',
+          _id: 'X19fX19fJWJbqiqq1WN9x1e_kHkXpwAA',
+          _source: {
+            sliValue: 0.9,
+            status: 'HEALTHY',
+            errorBudgetConsumed: 0.6,
+            errorBudgetRemaining: 0.4,
+          },
+        },
+      ],
     },
   };
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { registry } from '../../plugin_services.stub';
@@ -122,6 +123,34 @@ describe('Save dashboard state', () => {
       expect.objectContaining({
         data: expect.objectContaining({
           panelsJSON: expect.not.stringContaining('neverGonnaGetThisId'),
+        }),
+      })
+    );
+  });
+
+  it('should update prefixes on references when save as copy is true', async () => {
+    const result = await saveDashboardState({
+      currentState: {
+        ...getSampleDashboardInput(),
+        title: 'BooFour',
+        panels: { idOne: { type: 'boop' } },
+      } as unknown as DashboardContainerInput,
+      panelReferences: [{ name: 'idOne:panel_idOne', type: 'boop', id: 'idOne' }],
+      lastSavedId: 'Boogatoonie',
+      saveOptions: { saveAsCopy: true },
+      ...allServices,
+    });
+
+    expect(result.id).toBe('newlyGeneratedId');
+    expect(allServices.contentManagement.client.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          references: expect.arrayContaining([
+            expect.objectContaining({
+              id: 'idOne',
+              name: expect.not.stringContaining('idOne:panel_idOne'),
+            }),
+          ]),
         }),
       })
     );

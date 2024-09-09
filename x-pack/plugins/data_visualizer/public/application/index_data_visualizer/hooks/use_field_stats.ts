@@ -13,7 +13,8 @@ import { last, cloneDeep } from 'lodash';
 import { mergeMap, switchMap } from 'rxjs';
 import { Comparators } from '@elastic/eui';
 import type { ISearchOptions } from '@kbn/search-types';
-import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
+import { getSafeAggregationName } from '@kbn/ml-query-utils';
+import { buildFilterCriteria } from '../../../../common/utils/build_query_filters';
 import type {
   DataStatsFetchProgress,
   FieldStatsSearchStrategyReturnBase,
@@ -146,7 +147,7 @@ export function useFieldStatsSearchStrategy(
       return;
     }
 
-    const filterCriteria = buildBaseFilterCriteria(
+    const filterCriteria = buildFilterCriteria(
       searchStrategyParams.timeFieldName,
       searchStrategyParams.earliest,
       searchStrategyParams.latest,
@@ -194,11 +195,13 @@ export function useFieldStatsSearchStrategy(
       .filter((obs) => obs !== undefined) as Array<Observable<FieldStats[] | FieldStatsError>>;
 
     const onError = (error: any) => {
-      toasts.addError(error, {
-        title: i18n.translate('xpack.dataVisualizer.index.errorFetchingFieldStatisticsMessage', {
+      // eslint-disable-next-line no-console
+      console.error(
+        i18n.translate('xpack.dataVisualizer.index.errorFetchingFieldStatisticsMessage', {
           defaultMessage: 'Error fetching field statistics',
         }),
-      });
+        error
+      );
       setFetchState({
         isRunning: false,
         error,

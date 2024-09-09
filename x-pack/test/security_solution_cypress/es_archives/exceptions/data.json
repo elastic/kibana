@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "_aZE5nwBOpWiDweSth_D",
-    "index": "exceptions-0001",
+    "index": "auditbeat-exceptions-0001",
     "source": {
       "@timestamp": "2019-09-01T00:41:06.527Z",
       "agent": {
@@ -29,7 +29,7 @@
   "type": "doc",
   "value": {
     "id": "_aZE5nwBOpWiDweSth_A",
-    "index": "exceptions-0001",
+    "index": "auditbeat-exceptions-0001",
     "source": {
       "@timestamp": "2019-09-01T00:41:04.527Z",
       "agent": {
@@ -56,7 +56,7 @@
   "type": "doc",
   "value": {
     "id": "_aZE5nwBOpWiDweSth_C",
-    "index": "exceptions-0001",
+    "index": "auditbeat-exceptions-0001",
     "source": {
       "@timestamp": "2019-09-01T00:41:09.527Z",
       "agent": {

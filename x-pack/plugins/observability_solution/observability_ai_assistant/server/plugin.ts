@@ -34,6 +34,8 @@ import {
 import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
+import { initLangtrace } from './service/client/instrumentation/init_langtrace';
+import { aiAssistantCapabilities } from '../common/capabilities';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -45,10 +47,13 @@ export class ObservabilityAIAssistantPlugin
     >
 {
   logger: Logger;
+  config: ObservabilityAIAssistantConfig;
   service: ObservabilityAIAssistantService | undefined;
 
   constructor(context: PluginInitializerContext<ObservabilityAIAssistantConfig>) {
     this.logger = context.logger.get();
+    this.config = context.config.get<ObservabilityAIAssistantConfig>();
+    initLangtrace();
   }
   public setup(
     core: CoreSetup<
@@ -81,7 +86,7 @@ export class ObservabilityAIAssistantPlugin
             ],
             read: [],
           },
-          ui: ['show'],
+          ui: [aiAssistantCapabilities.show],
         },
         read: {
           disabled: true,
@@ -109,10 +114,14 @@ export class ObservabilityAIAssistantPlugin
 
     // Using once to make sure the same model ID is used during service init and Knowledge base setup
     const getModelId = once(async () => {
+      const configModelId = this.config.modelId;
+      if (configModelId) {
+        return configModelId;
+      }
       const defaultModelId = '.elser_model_2';
       const [_, pluginsStart] = await core.getStartServices();
+      // Wait for the license to be available so the ML plugin's guards pass once we ask for ELSER stats
       const license = await firstValueFrom(pluginsStart.licensing.license$);
-
       if (!license.hasAtLeast('enterprise')) {
         return defaultModelId;
       }

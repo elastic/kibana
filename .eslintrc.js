@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 require('@kbn/babel-register').install();
@@ -32,7 +33,7 @@ const APACHE_2_0_LICENSE_HEADER = `
  */
 `;
 
-const OLD_DUAL_LICENSE_HEADER = `
+const DUAL_ELV1_SSPL1_LICENSE_HEADER = `
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -42,13 +43,24 @@ const OLD_DUAL_LICENSE_HEADER = `
  */
 `;
 
-const DUAL_LICENSE_HEADER = `
+const DUAL_ELV2_SSPL1_LICENSE_HEADER = `
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0 and the Server Side Public License, v 1; you may not use this file except
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
+ */
+`;
+
+const TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER = `
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 `;
 
@@ -60,7 +72,7 @@ const OLD_ELASTIC_LICENSE_HEADER = `
  */
 `;
 
-const ELASTIC_LICENSE_HEADER = `
+const ELV2_LICENSE_HEADER = `
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -295,9 +307,24 @@ module.exports = {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
     },
-
     /**
-     * Files that require dual-license headers, settings
+     * FormatJS linter for i18n code.
+     * https://formatjs.io/docs/tooling/linter
+     */
+    {
+      files: [
+        'src/**/*.{js,mjs,ts,tsx}',
+        'x-pack/**/*.{js,mjs,ts,tsx}',
+        'packages/**/*.{js,mjs,ts,tsx}',
+      ],
+      plugins: ['formatjs'],
+      rules: {
+        'formatjs/enforce-default-message': ['error', 'anything'],
+        'formatjs/enforce-description': 'off',
+      },
+    },
+    /**
+     * Files that require triple-license headers, settings
      * are overridden below for files that require Elastic
      * Licence headers
      */
@@ -307,7 +334,7 @@ module.exports = {
         '@kbn/eslint/require-license-header': [
           'error',
           {
-            license: DUAL_LICENSE_HEADER,
+            license: TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
           },
         ],
         '@kbn/eslint/disallow-license-headers': [
@@ -315,8 +342,9 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -349,9 +377,10 @@ module.exports = {
           'error',
           {
             licenses: [
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -384,7 +413,7 @@ module.exports = {
         '@kbn/eslint/require-license-header': [
           'error',
           {
-            license: ELASTIC_LICENSE_HEADER,
+            license: ELV2_LICENSE_HEADER,
           },
         ],
         '@kbn/eslint/disallow-license-headers': [
@@ -392,8 +421,9 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -424,9 +454,10 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -453,9 +484,10 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -481,10 +513,11 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               KBN_HANDLEBARS_HEADER,
@@ -513,9 +546,10 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -541,9 +575,10 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -573,9 +608,10 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -603,7 +639,7 @@ module.exports = {
         'test/*/*.config.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/server_integration/**/*.ts',
-        'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
+        'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
@@ -893,10 +929,6 @@ module.exports = {
           },
         ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': [
-          'error',
-          { additionalHooks: '^(useFetcher|useProgressiveFetcher|useBreadcrumb)$' },
-        ],
       },
     },
     {
@@ -918,9 +950,25 @@ module.exports = {
     },
     {
       files: [
+        'x-pack/plugins/observability_solution/**/*.{ts,tsx}',
+        'x-pack/packages/observability/**/*.{ts,tsx}',
+      ],
+      rules: {
+        'react-hooks/exhaustive-deps': [
+          'error',
+          {
+            additionalHooks:
+              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$',
+          },
+        ],
+      },
+    },
+    {
+      files: [
         'x-pack/plugins/aiops/**/*.tsx',
         'x-pack/plugins/observability_solution/**/*.tsx',
         'src/plugins/ai_assistant_management/**/*.tsx',
+        'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
@@ -946,17 +994,6 @@ module.exports = {
           {
             allowTypedFunctionExpressions: false,
           },
-        ],
-      },
-    },
-    // Profiling
-    {
-      files: ['x-pack/plugins/observability_solution/profiling/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': [
-          'error',
-          { additionalHooks: '^(useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$' },
         ],
       },
     },
@@ -987,6 +1024,30 @@ module.exports = {
           {
             groups: ['builtin', 'external', 'internal', 'parent'],
             'newlines-between': 'always-and-inside-groups',
+          },
+        ],
+      },
+    },
+
+    /**
+     * Integration assistant overrides
+     */
+    {
+      // front end and common typescript and javascript files only
+      files: [
+        'x-pack/plugins/integration_assistant/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/integration_assistant/common/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-duplicate-imports': 'off',
+        '@typescript-eslint/no-duplicate-imports': 'error',
+        '@typescript-eslint/consistent-type-imports': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/server/*'],
           },
         ],
       },
@@ -1056,6 +1117,7 @@ module.exports = {
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
+        'x-pack/plugins/integration_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
@@ -1070,6 +1132,7 @@ module.exports = {
       excludedFiles: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/integration_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1090,6 +1153,7 @@ module.exports = {
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
+        'x-pack/plugins/integration_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
@@ -1129,6 +1193,7 @@ module.exports = {
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/integration_assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{js,mjs,ts,tsx}',
@@ -1323,6 +1388,27 @@ module.exports = {
         'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
+      },
+    },
+    {
+      files: [
+        'test/{accessibility,*functional*}/apps/**/*.{js,ts}',
+        'test/*api_integration*/**/*.{js,ts}',
+        'x-pack/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
+        'x-pack/test/*api_integration*/**/*.{js,ts}',
+        'x-pack/test_serverless/{functional,api_integration}/test_suites/**/*.{js,ts}',
+      ],
+      extends: ['plugin:mocha/recommended'],
+      plugins: ['mocha'],
+      env: {
+        mocha: true,
+      },
+      rules: {
+        'mocha/no-mocha-arrows': 'off',
+        'mocha/no-exports': 'off',
+        'mocha/no-setup-in-describe': 'off',
+        'mocha/no-nested-tests': 'off',
+        'mocha/no-skipped-tests': 'off',
       },
     },
     {

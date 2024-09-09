@@ -13,10 +13,12 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
+import { isBillablePolicy } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config_helpers';
 
-// set all endpoint policies serverless flag to true
+// set all endpoint policies serverless flag to true and
+// billable flag depending on policy configuration
 // required so that endpoint will write heartbeats
-export async function setEndpointPackagePolicyServerlessFlag(
+export async function setEndpointPackagePolicyServerlessBillingFlags(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   packagePolicyService: PackagePolicyClient
@@ -63,11 +65,10 @@ async function processBatch(
   const updatedEndpointPackages = endpointPackagesResult.items
     .filter(
       (endpointPackage) =>
-        !(
-          endpointPackage?.inputs.every(
-            (input) => input.config?.policy?.value?.meta?.serverless ?? false
-          ) ?? false
-        )
+        endpointPackage?.inputs.some((input) => {
+          const configMeta = input.config?.policy?.value?.meta ?? {};
+          return !configMeta.serverless || configMeta.billable === undefined;
+        }) ?? false
     )
     .map((endpointPackage) => ({
       ...endpointPackage,
@@ -76,7 +77,8 @@ async function processBatch(
         const policy = config.policy || {};
         const policyValue = policy?.value || {};
         const meta = policyValue?.meta || {};
-        return {
+
+        const updatedInput = {
           ...input,
           config: {
             ...config,
@@ -87,11 +89,17 @@ async function processBatch(
                 meta: {
                   ...meta,
                   serverless: true,
+                  billable: false,
                 },
               },
             },
           },
         };
+        updatedInput.config.policy.value.meta.billable = isBillablePolicy(
+          updatedInput.config.policy.value
+        );
+
+        return updatedInput;
       }),
     }));
 

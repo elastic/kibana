@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
+import { EventTracker, registerAnalyticsContext, registerSpacesEventTypes } from './analytics';
 import type { ConfigType } from './config';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { ManagementService } from './management';
@@ -22,11 +25,13 @@ import { getUiApi } from './ui_api';
 export interface PluginsSetup {
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
+  cloud?: CloudStart;
 }
 
 /**
@@ -42,9 +47,10 @@ export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart> {
   private spacesManager!: SpacesManager;
   private spacesApi!: SpacesApi;
+  private eventTracker!: EventTracker;
 
   private managementService?: ManagementService;
-  private readonly config: ConfigType;
+  private config: ConfigType;
   private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -54,7 +60,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
   public setup(core: CoreSetup<PluginsStart, SpacesPluginStart>, plugins: PluginsSetup) {
     const hasOnlyDefaultSpace = this.config.maxSpaces === 1;
-
     this.spacesManager = new SpacesManager(core.http);
     this.spacesApi = {
       ui: getUiApi({
@@ -66,7 +71,42 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       hasOnlyDefaultSpace,
     };
 
-    if (!this.isServerless) {
+    const onCloud = plugins.cloud !== undefined && plugins.cloud.isCloudEnabled;
+    if (!onCloud) {
+      this.config = {
+        ...this.config,
+        allowSolutionVisibility: false,
+      };
+    }
+    registerSpacesEventTypes(core);
+    this.eventTracker = new EventTracker(core.analytics);
+
+    // Only skip setup of space selector and management service if serverless and only one space is allowed
+    if (!(this.isServerless && hasOnlyDefaultSpace)) {
+      const getRolesAPIClient = async () => {
+        const { security } = await core.plugins.onSetup<{ security: SecurityPluginStart }>(
+          'security'
+        );
+
+        if (!security.found) {
+          throw new Error('Security plugin is not available as runtime dependency.');
+        }
+
+        return security.contract.authz.roles;
+      };
+
+      const getPrivilegesAPIClient = async () => {
+        const { security } = await core.plugins.onSetup<{ security: SecurityPluginStart }>(
+          'security'
+        );
+
+        if (!security.found) {
+          throw new Error('Security plugin is not available as runtime dependency.');
+        }
+
+        return security.contract.authz.privileges;
+      };
+
       if (plugins.home) {
         plugins.home.featureCatalogue.register(createSpacesFeatureCatalogueEntry());
       }
@@ -78,6 +118,9 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
           getStartServices: core.getStartServices,
           spacesManager: this.spacesManager,
           config: this.config,
+          getRolesAPIClient,
+          eventTracker: this.eventTracker,
+          getPrivilegesAPIClient,
         });
       }
 
@@ -88,12 +131,15 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
+    registerAnalyticsContext(core.analytics, this.spacesManager.onActiveSpaceChange$);
+
     return { hasOnlyDefaultSpace };
   }
 
   public start(core: CoreStart) {
-    if (!this.isServerless) {
-      initSpacesNavControl(this.spacesManager, core);
+    // Only skip spaces navigation if serverless and only one space is allowed
+    if (!(this.isServerless && this.config.maxSpaces === 1)) {
+      initSpacesNavControl(this.spacesManager, core, this.config, this.eventTracker);
     }
 
     return this.spacesApi;

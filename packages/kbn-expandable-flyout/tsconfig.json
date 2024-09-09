@@ -20,6 +20,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/i18n-react"
   ]
 }

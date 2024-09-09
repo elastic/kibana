@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -68,6 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.checkCurrentRowsPerPageToBe(100);
 
       await PageObjects.dashboard.saveDashboard(dashboardName, {
+        saveAsNew: true,
         waitDialogIsClosed: true,
         exitFromEditMode: false,
       });
@@ -78,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.changeRowsPerPageTo(10);
 
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
       await refreshDashboardPage();
 
       await dataGrid.checkCurrentRowsPerPageToBe(10);
@@ -88,11 +91,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await addSearchEmbeddableToDashboard();
       await PageObjects.dashboard.switchToEditMode();
 
-      const cell = await dataGrid.getCellElement(0, 2);
+      const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       expect(await cell.getVisibleText()).to.be('Sep 22, 2015 @ 23:50:13.253');
       await dataGrid.clickMoveColumnLeft('agent');
 
-      const cellAfter = await dataGrid.getCellElement(0, 2);
+      const cellAfter = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       expect(await cellAfter.getVisibleText()).to.be(
         'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)'
       );

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable @typescript-eslint/no-shadow */
@@ -43,6 +44,7 @@ import {
   createConflictErrorPayload,
   createGenericNotFoundErrorPayload,
   updateSuccess,
+  mockTimestampFieldsWithCreated,
 } from '../../test_helpers/repository.test.common';
 
 describe('#update', () => {
@@ -148,7 +150,7 @@ describe('#update', () => {
       it(`should use the ES get action then index action when type is not multi-namespace for existing objects`, async () => {
         const type = 'index-pattern';
         const id = 'logstash-*';
-        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
         await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
@@ -156,7 +158,7 @@ describe('#update', () => {
       });
 
       it(`should use the ES get action then index action when type is multi-namespace for existing objects`, async () => {
-        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
         await updateSuccess(
           client,
           repository,
@@ -171,7 +173,7 @@ describe('#update', () => {
       });
 
       it(`should use the ES get action then index action when type is namespace agnostic for existing objects`, async () => {
-        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
         await updateSuccess(client, repository, registry, NAMESPACE_AGNOSTIC_TYPE, id, attributes);
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
@@ -179,7 +181,7 @@ describe('#update', () => {
       });
 
       it(`should use the ES index action with the merged attributes when mergeAttributes is not false`, async () => {
-        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
 
         await updateSuccess(client, repository, registry, NAMESPACE_AGNOSTIC_TYPE, id, {
           foo: 'bar',
@@ -200,7 +202,7 @@ describe('#update', () => {
       });
 
       it(`should use the ES index action only with the provided attributes when mergeAttributes is false`, async () => {
-        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
 
         await updateSuccess(
           client,
@@ -228,7 +230,7 @@ describe('#update', () => {
       });
 
       it(`should check for alias conflicts if a new multi-namespace object before create action would be created then create action to create the object`, async () => {
-        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
         await updateSuccess(
           client,
           repository,
@@ -245,7 +247,7 @@ describe('#update', () => {
       });
 
       it(`defaults to empty array with no input references`, async () => {
-        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
         await updateSuccess(client, repository, registry, type, id, attributes);
         expect(
           (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
@@ -255,7 +257,7 @@ describe('#update', () => {
 
       it(`accepts custom references array 1`, async () => {
         const test = async (references: SavedObjectReference[]) => {
-          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
           await updateSuccess(client, repository, registry, type, id, attributes, {
             references,
           });
@@ -270,7 +272,7 @@ describe('#update', () => {
 
       it(`accepts custom references array 2`, async () => {
         const test = async (references: SavedObjectReference[]) => {
-          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
           await updateSuccess(client, repository, registry, type, id, attributes, {
             references,
           });
@@ -285,7 +287,7 @@ describe('#update', () => {
 
       it(`accepts custom references array 3`, async () => {
         const test = async (references: SavedObjectReference[]) => {
-          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
           await updateSuccess(client, repository, registry, type, id, attributes, {
             references,
           });
@@ -299,7 +301,7 @@ describe('#update', () => {
       });
 
       it(`uses the 'upsertAttributes' option when specified for a single-namespace type that does not exist`, async () => {
-        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
         await updateSuccess(
           client,
           repository,
@@ -319,7 +321,7 @@ describe('#update', () => {
         const expected = {
           'index-pattern': { description: 'bar', title: 'foo' },
           type: 'index-pattern',
-          ...mockTimestampFields,
+          ...mockTimestampFieldsWithCreated,
         };
         expect(
           (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
@@ -328,7 +330,7 @@ describe('#update', () => {
 
       it(`uses the 'upsertAttributes' option when specified for a multi-namespace type that does not exist`, async () => {
         const options = { upsert: { title: 'foo', description: 'bar' } };
-        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
         await updateSuccess(
           client,
           repository,
@@ -352,7 +354,7 @@ describe('#update', () => {
           multiNamespaceIsolatedType: { description: 'bar', title: 'foo' },
           namespaces: ['default'],
           type: 'multiNamespaceIsolatedType',
-          ...mockTimestampFields,
+          ...mockTimestampFieldsWithCreated,
         };
         expect(
           (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
@@ -362,7 +364,7 @@ describe('#update', () => {
       it(`ignores the 'upsertAttributes' option when specified for a multi-namespace type that already exists`, async () => {
         // attributes don't change
         const options = { upsert: { title: 'foo', description: 'bar' } };
-        migrator.migrateDocument.mockImplementation((doc) => ({ ...doc, migrated: true }));
+        migrator.migrateDocument.mockImplementation((doc) => ({ ...doc }));
         await updateSuccess(
           client,
           repository,
@@ -699,7 +701,7 @@ describe('#update', () => {
       it('migrates the fetched document from get', async () => {
         const type = 'index-pattern';
         const id = 'logstash-*';
-        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
         await updateSuccess(client, repository, registry, type, id, attributes);
         expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
         expectMigrationArgs({

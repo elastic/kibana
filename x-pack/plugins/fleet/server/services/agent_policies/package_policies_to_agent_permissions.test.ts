@@ -339,6 +339,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 
@@ -387,6 +388,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 
@@ -440,6 +442,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 
@@ -489,6 +492,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 
@@ -530,6 +534,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 
@@ -571,6 +576,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 
@@ -613,6 +619,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 

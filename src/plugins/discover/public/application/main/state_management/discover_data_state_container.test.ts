@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { BehaviorSubject, Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -26,6 +28,10 @@ jest.mock('@kbn/ebt-tools', () => ({
 const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
 
 describe('test getDataStateContainer', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('return is valid', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const dataState = stateContainer.dataState;
@@ -35,6 +41,7 @@ describe('test getDataStateContainer', () => {
     expect(dataState.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
   });
+
   test('refetch$ triggers a search', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     jest.spyOn(stateContainer.searchSessionManager, 'getNextSearchSessionId');
@@ -46,10 +53,15 @@ describe('test getDataStateContainer', () => {
     discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
       return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
     });
+
     const dataState = stateContainer.dataState;
-
     const unsubscribe = dataState.subscribe();
+    const resolveDataSourceProfileSpy = jest.spyOn(
+      discoverServiceMock.profilesManager,
+      'resolveDataSourceProfile'
+    );
 
+    expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
     expect(dataState.data$.totalHits$.value.result).toBe(undefined);
     expect(dataState.data$.documents$.value.result).toEqual(undefined);
 
@@ -58,6 +70,12 @@ describe('test getDataStateContainer', () => {
       expect(dataState.data$.main$.value.fetchStatus).toBe('complete');
     });
 
+    expect(resolveDataSourceProfileSpy).toHaveBeenCalledTimes(1);
+    expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
+      dataSource: stateContainer.appState.get().dataSource,
+      dataView: stateContainer.savedSearchState.getState().searchSource.getField('index'),
+      query: stateContainer.appState.get().query,
+    });
     expect(dataState.data$.totalHits$.value.result).toBe(0);
     expect(dataState.data$.documents$.value.result).toEqual([]);
 
@@ -117,9 +135,13 @@ describe('test getDataStateContainer', () => {
     ).not.toHaveBeenCalled();
 
     const dataState = stateContainer.dataState;
-
     const unsubscribe = dataState.subscribe();
+    const resolveDataSourceProfileSpy = jest.spyOn(
+      discoverServiceMock.profilesManager,
+      'resolveDataSourceProfile'
+    );
 
+    expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
     expect(dataState.data$.documents$.value.result).toEqual(initialRecords);
 
     let hasLoadingMoreStarted = false;
@@ -131,6 +153,7 @@ describe('test getDataStateContainer', () => {
       }
 
       if (hasLoadingMoreStarted && value.fetchStatus === FetchStatus.COMPLETE) {
+        expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
         expect(value.result).toEqual([...initialRecords, ...moreRecords]);
         // it uses the same current search session id
         expect(
@@ -143,5 +166,63 @@ describe('test getDataStateContainer', () => {
     });
 
     dataState.refetch$.next('fetch_more');
+  });
+
+  it('should update app state from default profile state', async () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const dataState = stateContainer.dataState;
+    const dataUnsub = dataState.subscribe();
+    const appUnsub = stateContainer.appState.initAndSync();
+    discoverServiceMock.profilesManager.resolveDataSourceProfile({});
+    stateContainer.actions.setDataView(dataViewMock);
+    stateContainer.internalState.transitions.setResetDefaultProfileState({
+      columns: true,
+      rowHeight: true,
+    });
+    dataState.data$.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 0,
+    });
+    dataState.refetch$.next(undefined);
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+    });
+    expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+      columns: false,
+      rowHeight: false,
+    });
+    expect(stateContainer.appState.get().columns).toEqual(['message', 'extension']);
+    expect(stateContainer.appState.get().rowHeight).toEqual(3);
+    dataUnsub();
+    appUnsub();
+  });
+
+  it('should not update app state from default profile state', async () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const dataState = stateContainer.dataState;
+    const dataUnsub = dataState.subscribe();
+    const appUnsub = stateContainer.appState.initAndSync();
+    discoverServiceMock.profilesManager.resolveDataSourceProfile({});
+    stateContainer.actions.setDataView(dataViewMock);
+    stateContainer.internalState.transitions.setResetDefaultProfileState({
+      columns: false,
+      rowHeight: false,
+    });
+    dataState.data$.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 0,
+    });
+    dataState.refetch$.next(undefined);
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+    });
+    expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+      columns: false,
+      rowHeight: false,
+    });
+    expect(stateContainer.appState.get().columns).toEqual(['default_column']);
+    expect(stateContainer.appState.get().rowHeight).toBeUndefined();
+    dataUnsub();
+    appUnsub();
   });
 });

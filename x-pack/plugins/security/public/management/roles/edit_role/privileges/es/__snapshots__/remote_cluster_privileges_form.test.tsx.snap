@@ -14,23 +14,32 @@ exports[`it renders without crashing 1`] = `
       <EuiPanel
         color="subdued"
       >
-        <EuiFlexGroup>
+        <EuiFlexGrid
+          css={
+            Object {
+              "map": undefined,
+              "name": "1hh4o6r",
+              "next": undefined,
+              "styles": "
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                @media (max-width: 575pxpx) {
+                  grid-template-columns: repeat(1, minmax(0, 1fr));
+                }
+              ",
+              "toString": [Function],
+            }
+          }
+        >
           <EuiFlexItem>
             <EuiFormRow
-              describedByIds={Array []}
-              display="row"
               fullWidth={true}
-              hasChildLabel={true}
-              hasEmptyLabelSpace={false}
               isInvalid={false}
               label={
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Remote clusters"
                   id="xpack.security.management.editRole.remoteClusterPrivilegeForm.clustersFormRowLabel"
-                  values={Object {}}
                 />
               }
-              labelType="label"
             >
               <RemoteClusterComboBox
                 data-test-subj="remoteClusterClustersInput0"
@@ -53,20 +62,14 @@ exports[`it renders without crashing 1`] = `
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow
-              describedByIds={Array []}
-              display="row"
               fullWidth={true}
-              hasChildLabel={true}
-              hasEmptyLabelSpace={false}
               isInvalid={false}
               label={
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Privileges"
                   id="xpack.security.management.editRole.remoteClusterPrivilegeForm.privilegesFormRowLabel"
-                  values={Object {}}
                 />
               }
-              labelType="label"
             >
               <EuiComboBox
                 async={false}
@@ -97,7 +100,7 @@ exports[`it renders without crashing 1`] = `
               />
             </EuiFormRow>
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </EuiFlexGrid>
       </EuiPanel>
     </EuiFlexItem>
     <EuiFlexItem

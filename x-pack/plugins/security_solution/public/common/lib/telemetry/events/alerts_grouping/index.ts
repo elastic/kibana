@@ -19,7 +19,7 @@ export const alertsGroupingToggledEvent: TelemetryEvent = {
       },
     },
     tableId: {
-      type: 'text',
+      type: 'keyword',
       _meta: {
         description: 'Table ID',
         optional: false,

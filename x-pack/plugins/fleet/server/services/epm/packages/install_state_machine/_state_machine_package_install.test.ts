@@ -41,7 +41,7 @@ jest.mock('../../elasticsearch/ilm/install');
 jest.mock('../../elasticsearch/datastream_ilm/install');
 
 import { updateCurrentWriteIndices } from '../../elasticsearch/template/template';
-import { installKibanaAssetsAndReferences } from '../../kibana/assets/install';
+import { installKibanaAssetsAndReferencesMultispace } from '../../kibana/assets/install';
 
 import { MAX_TIME_COMPLETE_INSTALL } from '../../../../../common/constants';
 
@@ -58,7 +58,9 @@ const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.Mocked
   typeof updateCurrentWriteIndices
 >;
 const mockedInstallKibanaAssetsAndReferences =
-  installKibanaAssetsAndReferences as jest.MockedFunction<typeof installKibanaAssetsAndReferences>;
+  installKibanaAssetsAndReferencesMultispace as jest.MockedFunction<
+    typeof installKibanaAssetsAndReferencesMultispace
+  >;
 
 function sleep(millis: number) {
   return new Promise((resolve) => setTimeout(resolve, millis));
@@ -293,9 +295,10 @@ describe('_stateMachineInstallPackage', () => {
     describe('When timeout is reached', () => {
       it('restarts installation', async () => {
         await _stateMachineInstallPackage({
+          installSource: 'registry',
+          installType: 'install',
+          spaceId: 'default',
           savedObjectsClient: soClient,
-          // @ts-ignore
-          savedObjectsImporter: jest.fn(),
           esClient,
           logger: loggerMock.create(),
           packageInstallContext: {
@@ -326,9 +329,10 @@ describe('_stateMachineInstallPackage', () => {
       describe('With no force flag', () => {
         it('throws concurrent installation error', async () => {
           const installPromise = _stateMachineInstallPackage({
+            installSource: 'registry',
+            installType: 'install',
+            spaceId: 'default',
             savedObjectsClient: soClient,
-            // @ts-ignore
-            savedObjectsImporter: jest.fn(),
             esClient,
             logger: loggerMock.create(),
             packageInstallContext: {
@@ -356,9 +360,10 @@ describe('_stateMachineInstallPackage', () => {
       describe('With force flag provided', () => {
         it('restarts installation', async () => {
           await _stateMachineInstallPackage({
+            installSource: 'registry',
+            installType: 'install',
+            spaceId: 'default',
             savedObjectsClient: soClient,
-            // @ts-ignore
-            savedObjectsImporter: jest.fn(),
             esClient,
             logger: loggerMock.create(),
             packageInstallContext: {

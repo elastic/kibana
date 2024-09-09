@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-export function getMoment(date?: string | number | null) {
+export function getMoment(date?: string | number | null | Date) {
   if (!date) {
     return null;
   }

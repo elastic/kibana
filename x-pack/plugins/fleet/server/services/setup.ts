@@ -11,14 +11,15 @@ import apm from 'elastic-apm-node';
 
 import { compact } from 'lodash';
 import pMap from 'p-map';
+import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { MessageSigningError } from '../../common/errors';
 
-import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
+import { AUTO_UPDATE_PACKAGES, FLEET_SETUP_LOCK_TYPE } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
-import type { DefaultPackagesInstallationError } from '../../common/types';
+import type { DefaultPackagesInstallationError, FleetSetupLock } from '../../common/types';
 
 import { appContextService } from './app_context';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
@@ -39,8 +40,8 @@ import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_
 import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
 import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
-import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
-import { upgradeManagedPackagePolicies } from './managed_package_policies';
+import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';
+import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
 import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
 import { migrateSettingsToFleetServerHost } from './fleet_server_host';
@@ -51,6 +52,7 @@ import {
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
+import { ensureSpaceSettings } from './preconfiguration/space_settings';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -65,11 +67,19 @@ export interface SetupStatus {
 
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  options: {
+    useLock: boolean;
+  } = { useLock: false }
 ): Promise<SetupStatus> {
   const t = apm.startTransaction('fleet-setup', 'fleet');
-
+  let created = false;
   try {
+    if (options.useLock) {
+      const { created: isCreated, toReturn } = await createLock(soClient);
+      created = isCreated;
+      if (toReturn) return toReturn;
+    }
     return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
   } catch (error) {
     apm.captureError(error);
@@ -77,6 +87,73 @@ export async function setupFleet(
     throw error;
   } finally {
     t.end();
+    // only delete lock if it was created by this instance
+    if (options.useLock && created) {
+      await deleteLock(soClient);
+    }
+  }
+}
+
+async function createLock(
+  soClient: SavedObjectsClientContract
+): Promise<{ created: boolean; toReturn?: SetupStatus }> {
+  const logger = appContextService.getLogger();
+  let created;
+  try {
+    // check if fleet setup is already started
+    const fleetSetupLock = await soClient.get<FleetSetupLock>(
+      FLEET_SETUP_LOCK_TYPE,
+      FLEET_SETUP_LOCK_TYPE
+    );
+
+    const LOCK_TIMEOUT = 60 * 60 * 1000; // 1 hour
+
+    // started more than 1 hour ago, delete previous lock
+    if (
+      fleetSetupLock.attributes.started_at &&
+      new Date(fleetSetupLock.attributes.started_at).getTime() < Date.now() - LOCK_TIMEOUT
+    ) {
+      await deleteLock(soClient);
+    } else {
+      logger.info('Fleet setup already in progress, abort setup');
+      return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };
+    }
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      logger.debug('Fleet setup lock does not exist, continue setup');
+    }
+  }
+
+  try {
+    created = await soClient.create<FleetSetupLock>(
+      FLEET_SETUP_LOCK_TYPE,
+      {
+        status: 'in_progress',
+        uuid: uuidv4(),
+        started_at: new Date().toISOString(),
+      },
+      { id: FLEET_SETUP_LOCK_TYPE }
+    );
+    if (logger.isLevelEnabled('debug')) {
+      logger.debug(`Fleet setup lock created: ${JSON.stringify(created)}`);
+    }
+  } catch (error) {
+    logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
+    return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };
+  }
+  return { created: !!created };
+}
+
+async function deleteLock(soClient: SavedObjectsClientContract) {
+  const logger = appContextService.getLogger();
+  try {
+    await soClient.delete(FLEET_SETUP_LOCK_TYPE, FLEET_SETUP_LOCK_TYPE, { refresh: true });
+    logger.debug(`Fleet setup lock deleted`);
+  } catch (error) {
+    // ignore 404 errors
+    if (error.statusCode !== 404) {
+      logger.error('Could not delete fleet setup lock', error);
+    }
   }
 }
 
@@ -114,6 +191,9 @@ async function createSetupSideEffects(
     esClient,
     getPreconfiguredFleetServerHostFromConfig(appContextService.getConfig())
   );
+
+  logger.debug('Setting up Space settings');
+  await ensureSpaceSettings(appContextService.getConfig()?.spaceSettings ?? []);
 
   logger.debug('Setting up Fleet outputs');
   await Promise.all([
@@ -170,9 +250,7 @@ async function createSetupSideEffects(
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Upgrade managed package policies', 'preconfiguration');
-  const packagePolicyUpgradeErrors = (
-    await upgradeManagedPackagePolicies(soClient, esClient)
-  ).filter((result) => (result.errors ?? []).length > 0);
+  await setupUpgradeManagedPackagePolicies(soClient, esClient);
   stepSpan?.end();
 
   logger.debug('Upgrade Fleet package install versions');
@@ -214,7 +292,6 @@ async function createSetupSideEffects(
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
-    ...packagePolicyUpgradeErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
   ];
 

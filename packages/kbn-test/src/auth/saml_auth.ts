@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
@@ -17,6 +18,7 @@ import {
   CloudSamlSessionParams,
   CreateSamlSessionParams,
   LocalSamlSessionParams,
+  RetryParams,
   SAMLResponseValueParams,
   UserProfile,
 } from './types';
@@ -24,17 +26,17 @@ import {
 export class Session {
   readonly cookie;
   readonly email;
-  readonly fullname;
-  constructor(cookie: Cookie, email: string, fullname: string) {
+  constructor(cookie: Cookie, email: string) {
     this.cookie = cookie;
     this.email = email;
-    this.fullname = fullname;
   }
 
   getCookieValue() {
     return this.cookie.value;
   }
 }
+
+const REQUEST_TIMEOUT_MS = 60_000;
 
 const cleanException = (url: string, ex: any) => {
   if (ex.isAxiosError) {
@@ -83,7 +85,13 @@ const getCloudUrl = (hostname: string, pathname: string) => {
   });
 };
 
-export const createCloudSession = async (params: CreateSamlSessionParams) => {
+export const createCloudSession = async (
+  params: CreateSamlSessionParams,
+  retryParams: RetryParams = {
+    attemptsCount: 3,
+    attemptDelay: 15_000,
+  }
+): Promise<string> => {
   const { hostname, email, password, log } = params;
   const cloudLoginUrl = getCloudUrl(hostname, '/api/v1/saas/auth/_login');
   let sessionResponse: AxiosResponse | undefined;
@@ -91,6 +99,7 @@ export const createCloudSession = async (params: CreateSamlSessionParams) => {
     return {
       url: cloudUrl,
       method: 'post',
+      timeout: REQUEST_TIMEOUT_MS,
       data: {
         email,
         password,
@@ -104,24 +113,55 @@ export const createCloudSession = async (params: CreateSamlSessionParams) => {
     };
   };
 
-  try {
-    sessionResponse = await axios.request(requestConfig(cloudLoginUrl));
-  } catch (ex) {
-    log.error(`Failed to create the new cloud session with 'POST ${cloudLoginUrl}'`);
-    cleanException(cloudLoginUrl, ex);
-    throw ex;
+  let attemptsLeft = retryParams.attemptsCount;
+  while (attemptsLeft > 0) {
+    try {
+      sessionResponse = await axios.request(requestConfig(cloudLoginUrl));
+      if (sessionResponse?.status !== 200) {
+        throw new Error(
+          `Failed to create the new cloud session: 'POST ${cloudLoginUrl}' returned ${sessionResponse?.status}`
+        );
+      } else {
+        const token = sessionResponse?.data?.token as string;
+        if (token) {
+          return token;
+        } else {
+          const keysToRedact = ['user_id', 'okta_session_id'];
+          const data = sessionResponse?.data;
+          if (data !== null && typeof data === 'object') {
+            Object.keys(data).forEach((key) => {
+              if (keysToRedact.includes(key)) {
+                data[key] = 'REDACTED';
+              }
+            });
+          }
+          throw new Error(
+            `Failed to create the new cloud session: token is missing in response data\n${JSON.stringify(
+              data
+            )}`
+          );
+        }
+      }
+    } catch (ex) {
+      cleanException(cloudLoginUrl, ex);
+      if (--attemptsLeft > 0) {
+        // log only error message
+        log.error(`${ex.message}\nWaiting ${retryParams.attemptDelay} ms before the next attempt`);
+        await new Promise((resolve) => setTimeout(resolve, retryParams.attemptDelay));
+      } else {
+        log.error(
+          `Failed to create the new cloud session with ${retryParams.attemptsCount} attempts`
+        );
+        // throw original error with stacktrace
+        throw ex;
+      }
+    }
   }
 
-  const token = sessionResponse?.data?.token as string;
-  if (!token) {
-    log.error(
-      `Failed to create cloud session, token is missing in response data: ${JSON.stringify(
-        sessionResponse?.data
-      )}`
-    );
-    throw new Error(`Unable to create Cloud session, token is missing.`);
-  }
-  return token;
+  // should never be reached
+  throw new Error(
+    `Failed to create the new cloud session, check retry arguments: ${JSON.stringify(retryParams)}`
+  );
 };
 
 export const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: ToolingLog) => {
@@ -239,7 +279,7 @@ export const finishSAMLHandshake = async ({
   );
 };
 
-const getSecurityProfile = async ({
+export const getSecurityProfile = async ({
   kbnHost,
   cookie,
   log,
@@ -274,8 +314,7 @@ export const createCloudSAMLSession = async (params: CloudSamlSessionParams) => 
   const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion, log);
   const samlResponse = await createSAMLResponse({ location, ecSession, email, kbnHost, log });
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, sid, log });
-  const userProfile = await getSecurityProfile({ kbnHost, cookie, log });
-  return new Session(cookie, email, userProfile.full_name);
+  return new Session(cookie, email);
 };
 
 export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => {
@@ -288,5 +327,5 @@ export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => 
     roles: [role],
   });
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, log });
-  return new Session(cookie, email, fullname);
+  return new Session(cookie, email);
 };

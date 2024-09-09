@@ -1,0 +1,68 @@
+- input: logfile
+  template_path: logfile.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: paths
+      type: text
+      title: Paths
+      multi: true
+      required: true
+      show_user: true
+      default:
+        - '/test/path'
+      description: The full path to the related log file.
+    - name: exclude_files
+      type: text
+      title: Exclude Files
+      description: A list of regular expressions to match the files that you want Filebeat to ignore.
+      required: false
+      show_user: true
+      default: 
+        - '\.gz$'
+    - name: custom
+      type: yaml
+      title: Additional Log Configuration Options
+      description: >
+          Configuration options that can be used to further change input configuration. Check the [Filebeat documentation](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-log.html) for more information.
+      required: false
+      show_user: false
+      default: |
+        #recursive_glob.enabled: true
+        #encoding: plain
+        harvester_buffer_size: 16384
+        max_bytes: 10485760
+        # json.keys_under_root: false
+        # json.add_error_key: false
+        # json.message_key: message
+        # json.overwrite_keys: false
+        # json.expand_keys: false
+        # json.document_id: ""
+        # json.ignore_decoding_error: false
+        # multiline.type: pattern
+        # multiline.pattern: "^{"
+        # multiline.negate: true
+        # multiline.match: after
+        # multiline.max_lines: 500
+        # multiline.timeout: 5s
+        # multiline.flush_pattern: ""
+        # exclude_lines: ['^DBG']
+        # include_lines: ['^ERR', '^WARN']
+        # scan_frequency: 10s
+        # harvester_limit: 0
+        # tail_files: false
+        # backoff: 1s
+        # max_backoff: 10s
+        # backoff_factor: 2
+        # close_inactive: 5m
+        # close_renamed: false
+        # close_removed: true
+        # close_eof: false
+        # close_timeout: 0
+        # clean_removed: true
+        # clean_inactive: 0
+        # ignore_older: 0
+        # max_bytes: 10485760
+        # symlinks: false

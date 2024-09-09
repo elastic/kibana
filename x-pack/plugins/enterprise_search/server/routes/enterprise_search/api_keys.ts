@@ -7,16 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-
 import { createApiKey } from '../../lib/indices/create_api_key';
 import { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
-export function registerApiKeysRoutes(
-  { log, router }: RouteDependencies,
-  security: SecurityPluginStart
-) {
+export function registerApiKeysRoutes({ log, router }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/{indexName}/api_keys',
@@ -32,8 +27,9 @@ export function registerApiKeysRoutes(
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.indexName);
       const { keyName } = request.body;
+      const { security: coreSecurity } = await context.core;
 
-      const createResponse = await createApiKey(request, security, indexName, keyName);
+      const createResponse = await createApiKey(coreSecurity, indexName, keyName);
 
       if (!createResponse) {
         throw new Error('Unable to create API Key');
@@ -51,8 +47,9 @@ export function registerApiKeysRoutes(
       validate: {},
     },
     async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
-      const user = security.authc.getCurrentUser(request);
+      const core = await context.core;
+      const { client } = core.elasticsearch;
+      const user = core.security.authc.getCurrentUser();
       if (user) {
         try {
           const apiKeys = await client.asCurrentUser.security.getApiKey({
@@ -60,6 +57,40 @@ export function registerApiKeysRoutes(
           });
           const validKeys = apiKeys.api_keys.filter(({ invalidated }) => !invalidated);
           return response.ok({ body: { api_keys: validKeys } });
+        } catch {
+          // Ideally we check the error response here for unauthorized user
+          // Unfortunately the error response is not structured enough for us to filter those
+          // Always returning an empty array should also be fine, and deals with transient errors
+
+          return response.ok({ body: { api_keys: [] } });
+        }
+      }
+      return response.customError({
+        body: 'Could not retrieve current user, security plugin is not ready',
+        statusCode: 502,
+      });
+    }
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/api_keys/{apiKeyId}',
+      validate: {
+        params: schema.object({
+          apiKeyId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const core = await context.core;
+      const { client } = core.elasticsearch;
+      const { apiKeyId } = request.params;
+      const user = core.security.authc.getCurrentUser();
+
+      if (user) {
+        try {
+          const apiKey = await client.asCurrentUser.security.getApiKey({ id: apiKeyId });
+          return response.ok({ body: apiKey.api_keys[0] });
         } catch {
           // Ideally we check the error response here for unauthorized user
           // Unfortunately the error response is not structured enough for us to filter those
@@ -83,7 +114,8 @@ export function registerApiKeysRoutes(
       },
     },
     async (context, request, response) => {
-      const result = await security.authc.apiKeys.create(request, request.body);
+      const { security: coreSecurity } = await context.core;
+      const result = await coreSecurity.authc.apiKeys.create(request.body);
       if (result) {
         const apiKey = { ...result, beats_logstash_format: `${result.id}:${result.api_key}` };
         return response.ok({ body: apiKey });

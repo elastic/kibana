@@ -205,7 +205,7 @@ function decodeDiscoveryRulesYaml(
   defaultDiscoveryRules: IDiscoveryRule[] = []
 ): IDiscoveryRule[] {
   try {
-    const parsedYaml: DiscoveryRulesParsedYaml = yaml.load(discoveryRulesYaml) ?? [];
+    const parsedYaml: DiscoveryRulesParsedYaml = yaml.safeLoad(discoveryRulesYaml) ?? [];
 
     if (parsedYaml.length === 0) {
       return defaultDiscoveryRules;
@@ -232,5 +232,5 @@ function encodeDiscoveryRulesYaml(discoveryRules: IDiscoveryRule[]): string {
       [`${operation}-${type}`]: probe,
     })
   );
-  return yaml.dump(mappedDiscoveryRules);
+  return yaml.safeDump(mappedDiscoveryRules);
 }

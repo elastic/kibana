@@ -6,8 +6,10 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
-import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import type {
+  RiskScoresCalculationResponse,
+  RiskScoresPreviewResponse,
+} from '../../../../common/api/entity_analytics';
 import type {
   CalculateAndPersistScoresParams,
   CalculateScoresParams,
@@ -35,6 +37,7 @@ export interface RiskScoreService {
   ) => Promise<RiskEngineConfigurationWithDefaults | null>;
   getRiskInputsIndex: ({ dataViewId }: { dataViewId: string }) => Promise<RiskInputsIndexResponse>;
   scheduleLatestTransformNow: () => Promise<void>;
+  refreshRiskScoreIndex: () => Promise<void>;
 }
 
 export interface RiskScoreServiceFactoryParams {
@@ -83,5 +86,7 @@ export const riskScoreServiceFactory = ({
     };
   },
   getRiskInputsIndex: async (params) => riskScoreDataClient.getRiskInputsIndex(params),
-  scheduleLatestTransformNow: () => scheduleLatestTransformNow({ namespace: spaceId, esClient }),
+  scheduleLatestTransformNow: () =>
+    scheduleLatestTransformNow({ namespace: spaceId, esClient, logger }),
+  refreshRiskScoreIndex: () => riskScoreDataClient.refreshRiskScoreIndex(),
 });

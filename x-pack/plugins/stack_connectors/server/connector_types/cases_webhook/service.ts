@@ -12,6 +12,8 @@ import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mus
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
 import { validateAndNormalizeUrl, validateJson } from './validators';
 import {
   createServiceError,
@@ -20,12 +22,11 @@ import {
   removeSlash,
   throwDescriptiveErrorIfResponseIsNotValid,
 } from './utils';
-import {
+import type {
   CreateIncidentParams,
   ExternalServiceCredentials,
   ExternalService,
   CasesWebhookPublicConfigurationType,
-  CasesWebhookSecretConfigurationType,
   ExternalServiceIncidentResponse,
   GetIncidentResponse,
   UpdateIncidentParams,
@@ -38,7 +39,8 @@ export const createExternalService = (
   actionId: string,
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities
+  configurationUtilities: ActionsConfigurationUtilities,
+  connectorUsageCollector: ConnectorUsageCollector
 ): ExternalService => {
   const {
     createCommentJson,
@@ -51,31 +53,41 @@ export const createExternalService = (
     getIncidentResponseExternalTitleKey,
     getIncidentUrl,
     hasAuth,
+    authType,
     headers,
     viewIncidentUrl,
     updateIncidentJson,
     updateIncidentMethod,
     updateIncidentUrl,
+    verificationMode,
+    ca,
   } = config as CasesWebhookPublicConfigurationType;
-  const { password, user } = secrets as CasesWebhookSecretConfigurationType;
-  if (
-    !getIncidentUrl ||
-    !createIncidentUrlConfig ||
-    !viewIncidentUrl ||
-    !updateIncidentUrl ||
-    (hasAuth && (!password || !user))
-  ) {
+
+  const { basicAuth, sslOverrides } = buildConnectorAuth({
+    hasAuth,
+    authType,
+    secrets,
+    verificationMode,
+    ca,
+  });
+
+  validateConnectorAuthConfiguration({
+    hasAuth,
+    authType,
+    basicAuth,
+    sslOverrides,
+    connectorName: i18n.NAME,
+  });
+
+  if (!getIncidentUrl || !createIncidentUrlConfig || !viewIncidentUrl || !updateIncidentUrl) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const createIncidentUrl = removeSlash(createIncidentUrlConfig);
-  const headersWithBasicAuth = hasAuth
-    ? combineHeadersWithBasicAuthHeader({
-        username: user ?? undefined,
-        password: password ?? undefined,
-        headers,
-      })
-    : {};
+  const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
+    username: basicAuth.auth?.username,
+    password: basicAuth.auth?.password,
+    headers,
+  });
 
   const axiosInstance = axios.create({
     headers: {
@@ -83,6 +95,8 @@ export const createExternalService = (
       ...headersWithBasicAuth,
     },
   });
+
+  const createIncidentUrl = removeSlash(createIncidentUrlConfig);
 
   const getIncident = async (id: string): Promise<GetIncidentResponse> => {
     try {
@@ -104,6 +118,8 @@ export const createExternalService = (
         url: normalizedUrl,
         logger,
         configurationUtilities,
+        sslOverrides,
+        connectorUsageCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -148,6 +164,8 @@ export const createExternalService = (
         method: createIncidentMethod,
         data: json,
         configurationUtilities,
+        sslOverrides,
+        connectorUsageCollector,
       });
 
       const { status, statusText, data } = res;
@@ -231,6 +249,8 @@ export const createExternalService = (
         logger,
         data: json,
         configurationUtilities,
+        sslOverrides,
+        connectorUsageCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -303,6 +323,8 @@ export const createExternalService = (
         logger,
         data: json,
         configurationUtilities,
+        sslOverrides,
+        connectorUsageCollector,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({

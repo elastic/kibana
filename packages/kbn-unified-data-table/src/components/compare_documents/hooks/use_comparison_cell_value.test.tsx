@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
+import { generateEsHits, additionalFieldGroups } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
@@ -55,7 +56,7 @@ const renderComparisonCellValue = (props: Partial<UseComparisonCellValueProps> =
     dataView: dataViewWithTimefieldMock,
     comparisonFields: ['message', 'extension', 'bytes'],
     fieldColumnId,
-    selectedDocs: ['0', '1', '2'],
+    selectedDocIds: ['0', '1', '2'],
     diffMode: undefined,
     fieldFormats: fieldFormatsMock,
     getDocById,
@@ -408,7 +409,7 @@ describe('useComparisonCellValue', () => {
     expect(calculateDiff).toHaveBeenCalledTimes(2);
     renderComparisonCell(cellProps2);
     expect(calculateDiff).toHaveBeenCalledTimes(2);
-    rerender({ diffMode: 'words', selectedDocs: ['1', '2', '0'] });
+    rerender({ diffMode: 'words', selectedDocIds: ['1', '2', '0'] });
     const cellProps3 = {
       ...cellProps1,
       columnId: '2',
@@ -425,7 +426,7 @@ describe('useComparisonCellValue', () => {
     expect(calculateDiff).toHaveBeenCalledTimes(4);
     renderComparisonCell(cellProps4);
     expect(calculateDiff).toHaveBeenCalledTimes(4);
-    rerender({ diffMode: 'lines', selectedDocs: ['2', '0', '1'] });
+    rerender({ diffMode: 'lines', selectedDocIds: ['2', '0', '1'] });
     const cellProps5 = {
       ...cellProps1,
       columnId: '0',
@@ -442,5 +443,20 @@ describe('useComparisonCellValue', () => {
     expect(calculateDiff).toHaveBeenCalledTimes(6);
     renderComparisonCell(cellProps6);
     expect(calculateDiff).toHaveBeenCalledTimes(6);
+  });
+  it('should render a tooltip when the field is derived from a Smart Field', async () => {
+    const { renderCellValue } = renderComparisonCellValue({
+      comparisonFields: ['message'],
+      additionalFieldGroups,
+    });
+    const baseCell = renderComparisonCell({
+      columnId: fieldColumnId,
+      colIndex: 0,
+      rowIndex: 0,
+      renderCellValue,
+    });
+
+    expect(await screen.findByTestId('smartFieldFallbackTooltipIcon')).toBeInTheDocument();
+    expect(baseCell.getCell()).toMatchSnapshot();
   });
 });

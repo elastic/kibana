@@ -8,6 +8,7 @@
 import { EuiLoadingSpinner, EuiSkeletonText } from '@elastic/eui';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { IBasePath } from '@kbn/core-http-browser';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -21,6 +22,7 @@ import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
 import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
 import PageNotFound from '../404';
@@ -33,6 +35,7 @@ import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
 import type { SloDetailsPathParams } from './types';
 
 export function SloDetailsPage() {
+  const { onPageReady } = usePerformanceContext();
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -41,6 +44,7 @@ export function SloDetailsPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+  const { data: permissions } = usePermissions();
 
   const { sloId } = useParams<SloDetailsPathParams>();
   const { instanceId: sloInstanceId, remoteName } = useGetQueryParams();
@@ -62,8 +66,6 @@ export function SloDetailsPage() {
     selectedTabId,
   });
 
-  useBreadcrumbs(getBreadcrumbs(basePath, slo));
-
   useEffect(() => {
     if (!slo || !observabilityAIAssistant) {
       return;
@@ -78,6 +80,7 @@ export function SloDetailsPage() {
         Instance Id: ${slo.instanceId}
         Description: ${slo.description}
         Observed value: ${slo.summary.sliValue}
+        Error budget remaining: ${slo.summary.errorBudget.remaining}
         Status: ${slo.summary.status}
       `),
       data: [
@@ -90,13 +93,23 @@ export function SloDetailsPage() {
     });
   }, [observabilityAIAssistant, slo]);
 
+  useEffect(() => {
+    if (hasRightLicense === false || permissions?.hasAllReadRequested === false) {
+      navigateToUrl(basePath.prepend(paths.slosWelcome));
+    }
+  }, [hasRightLicense, permissions, navigateToUrl, basePath]);
+
+  useEffect(() => {
+    if (!isLoading && slo !== undefined) {
+      onPageReady();
+    }
+  }, [onPageReady, slo, isLoading]);
+
+  useBreadcrumbs(getBreadcrumbs(basePath, slo));
+
   const isSloNotFound = !isLoading && slo === undefined;
   if (isSloNotFound) {
     return <PageNotFound />;
-  }
-
-  if (hasRightLicense === false) {
-    navigateToUrl(basePath.prepend(paths.slos));
   }
 
   const isPerformingAction = isLoading || isDeleting;

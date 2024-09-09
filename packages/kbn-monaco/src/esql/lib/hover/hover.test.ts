@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { monaco } from '../../../monaco_imports';
@@ -11,17 +12,21 @@ import { getHoverItem } from './hover';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import {
   ENRICH_MODES,
+  ESQLRealField,
   getFunctionDefinition,
   getFunctionSignatures,
 } from '@kbn/esql-validation-autocomplete';
+import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 
-const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
-  ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
+const types: FieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
+
+const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
+  ...types.map((type) => ({
     name: `${type}Field`,
     type,
   })),
-  { name: 'any#Char$Field', type: 'number', suggestedAs: '`any#Char$Field`' },
-  { name: 'kubernetes.something.something', type: 'number' },
+  { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
+  { name: 'kubernetes.something.something', type: 'double' },
 ];
 
 const indexes = (
@@ -56,7 +61,7 @@ const policies = [
 ];
 
 function createCustomCallbackMocks(
-  customFields: Array<{ name: string; type: string }> | undefined,
+  customFields: ESQLRealField[] | undefined,
   customSources: Array<{ name: string; hidden: boolean }> | undefined,
   customPolicies:
     | Array<{
@@ -156,7 +161,7 @@ describe('hover', () => {
   describe('policies', () => {
     function createPolicyContent(
       policyName: string,
-      customPolicies: Array<typeof policies[number]> = policies
+      customPolicies: Array<(typeof policies)[number]> = policies
     ) {
       const policyHit = customPolicies.find((p) => p.name === policyName);
       if (!policyHit) {

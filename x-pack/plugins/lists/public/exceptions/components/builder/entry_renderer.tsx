@@ -137,9 +137,10 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     ([newOperator]: OperatorOption[]): void => {
       const { updatedEntry, index } = getEntryOnOperatorChange(entry, newOperator);
       handleError(false);
+      handleWarning(false);
       onChange(updatedEntry, index);
     },
-    [onChange, entry, handleError]
+    [onChange, entry, handleError, handleWarning]
   );
 
   const handleFieldMatchValueChange = useCallback(
@@ -219,7 +220,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             exceptionItemIndex,
             entry.entryIndex
           )}
-          isClearable={false}
+          isClearable={true}
           isLoading={false}
           isDisabled={isDisabled || indexPattern == null}
           onChange={handleFieldChange}
@@ -420,7 +421,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         const value = typeof entry.value === 'string' ? entry.value : undefined;
         const fieldMatchWarning = /[*?]/.test(value ?? '')
           ? getWildcardWithIsOperatorWarning()
-          : '';
+          : undefined;
         return (
           <AutocompleteFieldMatchComponent
             autocompleteService={autocompleteService}

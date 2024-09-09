@@ -11,7 +11,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
@@ -102,7 +102,10 @@ export class CheckDeletedFilesTask {
 
     // Check that this task is current
     if (taskInstance.id !== this.taskId) {
-      throwUnrecoverableError(new Error('Outdated task version'));
+      this.logger.info(
+        `Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
+      );
+      return getDeleteTaskRunResult();
     }
 
     this.logger.info(`[runTask()] started`);

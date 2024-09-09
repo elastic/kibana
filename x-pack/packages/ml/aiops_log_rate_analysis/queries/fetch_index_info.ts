@@ -7,84 +7,48 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { ElasticsearchClient } from '@kbn/core/server';
-
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
+import {
+  fetchFieldCandidates,
+  type FetchFieldCandidatesParams,
+  type FetchFieldCandidatesParamsArguments,
+} from './fetch_field_candidates';
 import { getTotalDocCountRequest } from './get_total_doc_count_request';
 
 // TODO Consolidate with duplicate `fetchPValues` in
 // `x-pack/plugins/observability_solution/apm/server/routes/correlations/queries/fetch_duration_field_candidates.ts`
 
-const SUPPORTED_ES_FIELD_TYPES = [
-  ES_FIELD_TYPES.KEYWORD,
-  ES_FIELD_TYPES.IP,
-  ES_FIELD_TYPES.BOOLEAN,
-];
+export interface FetchIndexInfoParamsArguments {
+  skipFieldCandidates?: boolean;
+}
 
-const SUPPORTED_ES_FIELD_TYPES_TEXT = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.MATCH_ONLY_TEXT];
-
-interface IndexInfo {
-  fieldCandidates: string[];
+export interface FetchIndexInfoParams extends FetchFieldCandidatesParams {
+  arguments: AiopsLogRateAnalysisSchema &
+    FetchFieldCandidatesParamsArguments &
+    FetchIndexInfoParamsArguments;
+}
+export interface FetchIndexInfoResponse {
+  keywordFieldCandidates: string[];
   textFieldCandidates: string[];
   baselineTotalDocCount: number;
   deviationTotalDocCount: number;
   zeroDocsFallback: boolean;
 }
 
-export const fetchIndexInfo = async (
-  esClient: ElasticsearchClient,
-  params: AiopsLogRateAnalysisSchema,
-  textFieldCandidatesOverrides: string[] = [],
-  abortSignal?: AbortSignal
-): Promise<IndexInfo> => {
-  const { index } = params;
-  // Get all supported fields
-  const respMapping = await esClient.fieldCaps(
-    {
-      fields: '*',
-      filters: '-metadata',
-      include_empty_fields: false,
-      index,
-      index_filter: {
-        range: {
-          [params.timeFieldName]: {
-            gte: params.deviationMin,
-            lte: params.deviationMax,
-          },
-        },
-      },
-      types: [...SUPPORTED_ES_FIELD_TYPES, ...SUPPORTED_ES_FIELD_TYPES_TEXT],
-    },
-    { signal: abortSignal, maxRetries: 0 }
-  );
+export const fetchIndexInfo = async ({
+  esClient,
+  abortSignal,
+  arguments: args,
+}: FetchIndexInfoParams): Promise<FetchIndexInfoResponse> => {
+  const { skipFieldCandidates = false, ...fetchFieldCandidatesArguments } = args;
+  const { textFieldCandidatesOverrides = [], ...params } = fetchFieldCandidatesArguments;
 
-  const allFieldNames: string[] = [];
+  // There's a bit of logic involved here because we want to fetch the data
+  // in parallel but the call to `fetchFieldCandidates` is optional.
 
-  const acceptableFields: Set<string> = new Set();
-  const acceptableTextFields: Set<string> = new Set();
-
-  Object.entries(respMapping.fields).forEach(([key, value]) => {
-    const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
-    const isSupportedType = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES.includes(type));
-    const isAggregatable = fieldTypes.some((type) => value[type].aggregatable);
-    const isTextField = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES_TEXT.includes(type));
-
-    // Check if fieldName is something we can aggregate on
-    if (isSupportedType && isAggregatable) {
-      acceptableFields.add(key);
-    }
-
-    if (isTextField) {
-      acceptableTextFields.add(key);
-    }
-
-    allFieldNames.push(key);
-  });
-
-  // Get the total doc count for the baseline time range
-  const respBaselineTotalDocCount = await esClient.search(
+  // #1 First we define the promises that would fetch the data.
+  const baselineTotalDocCountPromise = esClient.search(
     getTotalDocCountRequest({ ...params, start: params.baselineMin, end: params.baselineMax }),
     {
       signal: abortSignal,
@@ -92,29 +56,39 @@ export const fetchIndexInfo = async (
     }
   );
 
-  // Get the total doc count for the deviation time range
-  const respDeviationTotalDocCount = await esClient.search(
-    getTotalDocCountRequest({ ...params, start: params.deviationMin, end: params.deviationMax }),
+  const deviationTotalDocCountPromise = esClient.search(
+    getTotalDocCountRequest({
+      ...params,
+      start: params.deviationMin,
+      end: params.deviationMax,
+    }),
     {
       signal: abortSignal,
       maxRetries: 0,
     }
   );
 
-  const textFieldCandidatesOverridesWithKeywordPostfix = textFieldCandidatesOverrides.map(
-    (d) => `${d}.keyword`
-  );
-
-  const fieldCandidates: string[] = [...acceptableFields].filter(
-    (field) => !textFieldCandidatesOverridesWithKeywordPostfix.includes(field)
-  );
-  const textFieldCandidates: string[] = [...acceptableTextFields].filter((field) => {
-    const fieldName = field.replace(new RegExp(/\.text$/), '');
-    return (
-      (!fieldCandidates.includes(fieldName) && !fieldCandidates.includes(`${fieldName}.keyword`)) ||
-      textFieldCandidatesOverrides.includes(field)
-    );
+  const fetchFieldCandidatesPromise = fetchFieldCandidates({
+    esClient,
+    abortSignal,
+    arguments: fetchFieldCandidatesArguments,
   });
+
+  // #2 Then we build an array of these promises. To be able to handle the
+  // responses properly we build a tuple based on the types of the promises.
+  const promises: [
+    typeof baselineTotalDocCountPromise,
+    typeof deviationTotalDocCountPromise,
+    typeof fetchFieldCandidatesPromise | undefined
+  ] = [
+    baselineTotalDocCountPromise,
+    deviationTotalDocCountPromise,
+    !skipFieldCandidates ? fetchFieldCandidatesPromise : undefined,
+  ];
+
+  // #3 Finally, we await the promises and return the results.
+  const [respBaselineTotalDocCount, respDeviationTotalDocCount, fieldCandidates] =
+    await Promise.all(promises);
 
   const baselineTotalDocCount = (respBaselineTotalDocCount.hits.total as estypes.SearchTotalHits)
     .value;
@@ -122,8 +96,8 @@ export const fetchIndexInfo = async (
     .value;
 
   return {
-    fieldCandidates: fieldCandidates.sort(),
-    textFieldCandidates: textFieldCandidates.sort(),
+    keywordFieldCandidates: fieldCandidates?.selectedKeywordFieldCandidates.sort() ?? [],
+    textFieldCandidates: fieldCandidates?.selectedTextFieldCandidates.sort() ?? [],
     baselineTotalDocCount,
     deviationTotalDocCount,
     zeroDocsFallback: baselineTotalDocCount === 0 || deviationTotalDocCount === 0,

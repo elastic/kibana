@@ -44,23 +44,7 @@ export async function setupFleetServer() {
       index: '.fleet-agents',
       docs: [createAgentDoc('fleet-server', policyId, 'online', kibanaVersion)],
     });
-    cy.task('insertDocs', {
-      index: '.fleet-servers',
-      docs: [
-        {
-          '@timestamp': new Date().toISOString(),
-        },
-      ],
-    });
     setFleetServerHost();
-  });
-}
-
-export function deleteFleetServer() {
-  cy.task('deleteDocsByQuery', {
-    index: '.fleet-servers',
-    query: { match_all: {} },
-    ignoreUnavailable: true,
   });
 }
 

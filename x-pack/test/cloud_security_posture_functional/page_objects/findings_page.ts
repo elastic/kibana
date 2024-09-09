@@ -14,7 +14,7 @@ const FINDINGS_INDEX = 'logs-cloud_security_posture.findings-default';
 const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 export const VULNERABILITIES_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.vulnerabilities-default';
-export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
+export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN =
   'logs-cloud_security_posture.vulnerabilities_latest-default';
 
 export function FindingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -72,14 +72,14 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     remove: () =>
       Promise.all([
         deleteByQuery(VULNERABILITIES_INDEX_DEFAULT_NS),
-        deleteByQuery(LATEST_VULNERABILITIES_INDEX_DEFAULT_NS),
+        deleteByQuery(CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN),
       ]),
     add: async (findingsMock: Array<Record<string, unknown>>) => {
       await es.bulk({
         refresh: true,
         operations: [
           ...insertOperation(VULNERABILITIES_INDEX_DEFAULT_NS, findingsMock),
-          ...insertOperation(LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, findingsMock),
+          ...insertOperation(CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, findingsMock),
         ],
       });
     },
@@ -235,27 +235,53 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
   });
 
-  const navigateToLatestFindingsPage = async () => {
+  const navigateToLatestFindingsPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       'cloud_security_posture/findings/configurations',
-      { shouldUseHashForSubUrl: false }
+      options
     );
   };
 
-  const navigateToLatestVulnerabilitiesPage = async () => {
+  const navigateToLatestVulnerabilitiesPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       'cloud_security_posture/findings/vulnerabilities',
-      { shouldUseHashForSubUrl: false }
+      options
     );
   };
 
-  const navigateToMisconfigurations = async () => {
+  const navigateToMisconfigurations = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       'cloud_security_posture/findings/configurations',
-      { shouldUseHashForSubUrl: false }
+      options
     );
   };
 
@@ -337,6 +363,10 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     return trueOrFalse;
   };
 
+  const getUnprivilegedPrompt = async () => {
+    return await testSubjects.find('status-api-unprivileged');
+  };
+
   return {
     navigateToLatestFindingsPage,
     navigateToLatestVulnerabilitiesPage,
@@ -356,5 +386,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     findingsGrouping,
     createDataTableObject,
     isLatestFindingsTableThere,
+    getUnprivilegedPrompt,
   };
 }

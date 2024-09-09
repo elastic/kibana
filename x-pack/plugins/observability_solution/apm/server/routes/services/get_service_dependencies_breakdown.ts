@@ -11,6 +11,7 @@ import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 
 export type ServiceDependenciesBreakdownResponse = Array<{
   title: string;
@@ -24,6 +25,7 @@ export async function getServiceDependenciesBreakdown({
   serviceName,
   environment,
   kuery,
+  randomSampler,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -31,8 +33,9 @@ export async function getServiceDependenciesBreakdown({
   serviceName: string;
   environment: string;
   kuery: string;
+  randomSampler: RandomSampler;
 }): Promise<ServiceDependenciesBreakdownResponse> {
-  const items = await getConnectionStats({
+  const { statsItems } = await getConnectionStats({
     apmEventClient,
     start,
     end,
@@ -43,9 +46,10 @@ export async function getServiceDependenciesBreakdown({
       ...kqlQuery(kuery),
       { term: { [SERVICE_NAME]: serviceName } },
     ],
+    randomSampler,
   });
 
-  return take(sortBy(items, (item) => item.stats.totalTime ?? 0).reverse(), 20).map((item) => {
+  return take(sortBy(statsItems, (item) => item.stats.totalTime ?? 0).reverse(), 20).map((item) => {
     const { stats, location } = item;
 
     return {

@@ -46,6 +46,7 @@ import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
   VisualizeFieldContext,
+  ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/public';
 import {
   VISUALIZE_EDITOR_TRIGGER,
@@ -647,8 +648,14 @@ export class LensPlugin {
     );
 
     // Displays the add ESQL panel in the dashboard add Panel menu
-    const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core);
-    startDependencies.uiActions.addTriggerAction('ADD_PANEL_TRIGGER', createESQLPanelAction);
+    const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core, async () => {
+      if (!this.editorFrameService) {
+        await this.initDependenciesForApi();
+      }
+
+      return this.editorFrameService!;
+    });
+    startDependencies.uiActions.addTriggerAction(ADD_PANEL_TRIGGER, createESQLPanelAction);
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {
@@ -692,8 +699,8 @@ export class LensPlugin {
         return Boolean(core.application.capabilities.visualize?.show);
       },
       getXyVisTypes: async () => {
-        const { visualizationTypes } = await import('./visualizations/xy/types');
-        return visualizationTypes;
+        const { visualizationSubtypes } = await import('./visualizations/xy/types');
+        return visualizationSubtypes;
       },
 
       stateHelperApi: async () => {

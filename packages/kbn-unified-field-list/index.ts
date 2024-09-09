@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export { FieldList, type FieldListProps } from './src/components/field_list';
@@ -45,12 +46,14 @@ export type {
   BucketedAggregation,
   NumberSummary,
   AddFieldFilterHandler,
+  FieldsGroup,
   FieldListGroups,
   FieldsGroupDetails,
   FieldListItem,
   GetCustomFieldType,
   RenderFieldItemParams,
   SearchMode,
+  AdditionalFieldGroups,
 } from './src/types';
 export { ExistenceFetchStatus, FieldsGroupNames } from './src/types';
 
@@ -89,3 +92,6 @@ export {
   type UnifiedFieldListSidebarContainerApi,
   type UnifiedFieldListSidebarContainerProps,
 } from './src/containers/unified_field_list_sidebar';
+
+export * from './src/utils/fallback_fields';
+export { SmartFieldFallbackTooltip } from './src/components/fallback_fields';

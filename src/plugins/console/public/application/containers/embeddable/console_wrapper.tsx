@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -34,7 +35,11 @@ import {
   getStorage,
 } from '../../../services';
 import { createUsageTracker } from '../../../services/tracker';
-import { MetricsTracker, EmbeddableConsoleDependencies } from '../../../types';
+import {
+  MetricsTracker,
+  EmbeddableConsoleDependencies,
+  ConsoleStartServices,
+} from '../../../types';
 
 import { createApi, createEsHostService } from '../../lib';
 import { EsHostService } from '../../lib/es_host_service';
@@ -47,7 +52,7 @@ import {
 import { Main } from '../main';
 import { EditorContentSpinner } from '../../components';
 
-interface ConsoleDependencies {
+interface ConsoleDependencies extends ConsoleStartServices {
   autocompleteInfo: AutocompleteInfo;
   docLinks: DocLinksStart['links'];
   docLinkVersion: string;
@@ -70,7 +75,7 @@ const loadDependencies = async (
     docLinks: { DOC_LINK_VERSION, links },
     http,
     notifications,
-    theme: { theme$ },
+    ...startServices
   } = core;
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_embedded_app');
@@ -86,6 +91,7 @@ const loadDependencies = async (
 
   autocompleteInfo.mapping.setup(http, settings);
   return {
+    ...startServices,
     autocompleteInfo,
     docLinks: links,
     docLinkVersion: DOC_LINK_VERSION,
@@ -96,7 +102,7 @@ const loadDependencies = async (
     objectStorageClient,
     settings,
     storage,
-    theme$,
+    theme$: startServices.theme.theme$,
     trackUiMetric,
   };
 };
@@ -112,9 +118,7 @@ interface ConsoleWrapperProps
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, usageCollection, onKeyDown, isMonacoEnabled, isOpen } = props;
-  const { analytics, i18n, theme } = core;
-  const startServices = { analytics, i18n, theme };
+  const { core, usageCollection, onKeyDown, isMonacoEnabled, isDevMode, isOpen } = props;
 
   useEffect(() => {
     if (dependencies === null && isOpen) {
@@ -144,11 +148,13 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
     settings,
     storage,
     trackUiMetric,
+    ...startServices
   } = dependencies;
   return (
     <KibanaRenderContextProvider {...core}>
       <ServicesContextProvider
         value={{
+          ...startServices,
           docLinkVersion,
           docLinks,
           services: {
@@ -164,8 +170,8 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
           },
           config: {
             isMonacoEnabled,
+            isDevMode,
           },
-          startServices,
         }}
       >
         <RequestContextProvider>

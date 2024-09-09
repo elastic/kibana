@@ -56,7 +56,7 @@ export const HeaderLeftContent: React.FunctionComponent<HeaderLeftContentProps> 
                   {(agentPolicy && agentPolicy.name) || (
                     <FormattedMessage
                       id="xpack.fleet.policyDetails.policyDetailsTitle"
-                      defaultMessage="Policy '{id}'"
+                      defaultMessage="Policy ''{id}''"
                       values={{ id: policyId }}
                     />
                   )}

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Index } from '@kbn/index-management-plugin/common';
+import { ROLLUP_DEPRECATION_BADGE_LABEL } from '@kbn/rollup';
 
 export const rollupToggleExtension = {
   matchIndex: (index: Index) => {
@@ -22,9 +23,7 @@ export const rollupBadgeExtension = {
   matchIndex: (index: Index) => {
     return Boolean(index.isRollupIndex);
   },
-  label: i18n.translate('xpack.rollupJobs.indexMgmtBadge.rollupLabel', {
-    defaultMessage: 'Rollup',
-  }),
-  color: 'success',
+  label: ROLLUP_DEPRECATION_BADGE_LABEL,
+  color: 'warning',
   filterExpression: 'isRollupIndex:true',
 };

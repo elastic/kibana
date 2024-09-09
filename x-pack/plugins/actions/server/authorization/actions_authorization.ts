@@ -18,7 +18,6 @@ import { AuthorizationMode } from './get_authorization_mode_by_source';
 export interface ConstructorOptions {
   request: KibanaRequest;
   authorization?: SecurityPluginSetup['authz'];
-  authentication?: SecurityPluginSetup['authc'];
   // In order to support legacy Alerts which predate the introduction of the
   // Actions feature in Kibana we need a way of "dialing down" the level of
   // authorization for certain opearations.
@@ -49,7 +48,6 @@ export class ActionsAuthorization {
   constructor({
     request,
     authorization,
-    authentication,
     authorizationMode = AuthorizationMode.RBAC,
   }: ConstructorOptions) {
     this.request = request;

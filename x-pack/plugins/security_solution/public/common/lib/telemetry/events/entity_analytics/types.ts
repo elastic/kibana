@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
+import type { RootSchema } from '@kbn/core/public';
 import type { RiskSeverity } from '../../../../../../common/search_strategy';
 import type { TelemetryEventTypes } from '../../constants';
 

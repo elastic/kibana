@@ -44,11 +44,11 @@ async function bumpRelatedPolicies(
     fleetServerHosts.some((host) => host.is_default) ||
     outputs.some((output) => output.is_default || output.is_default_monitoring)
   ) {
-    await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    await agentPolicyService.bumpAllAgentPolicies(esClient);
   } else {
     await pMap(
       outputs,
-      (output) => agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id),
+      (output) => agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id),
       {
         concurrency: 20,
       }
@@ -56,11 +56,7 @@ async function bumpRelatedPolicies(
     await pMap(
       fleetServerHosts,
       (fleetServerHost) =>
-        agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(
-          soClient,
-          esClient,
-          fleetServerHost.id
-        ),
+        agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, fleetServerHost.id),
       {
         concurrency: 20,
       }
@@ -69,11 +65,7 @@ async function bumpRelatedPolicies(
     await pMap(
       downloadSources,
       (downloadSource) =>
-        agentPolicyService.bumpAllAgentPoliciesForDownloadSource(
-          soClient,
-          esClient,
-          downloadSource.id
-        ),
+        agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, downloadSource.id),
       {
         concurrency: 20,
       }

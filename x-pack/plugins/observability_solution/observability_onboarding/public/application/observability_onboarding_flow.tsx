@@ -9,20 +9,27 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom-v5-compat';
-import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
-import { css } from '@emotion/react';
-import backgroundImageUrl from './header/background.svg';
-import { Footer } from './footer/footer';
-import { OnboardingFlowForm } from './onboarding_flow_form/onboarding_flow_form';
-import { Header } from './header/header';
-import { SystemLogsPanel } from './quickstart_flows/system_logs';
-import { CustomLogsPanel } from './quickstart_flows/custom_logs';
-import { BackButton } from './shared/back_button';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  AutoDetectPage,
+  CustomLogsPage,
+  KubernetesPage,
+  LandingPage,
+  OtelLogsPage,
+  SystemLogsPage,
+  FirehosePage,
+} from './pages';
+import { ObservabilityOnboardingAppServices } from '..';
 
 const queryClient = new QueryClient();
 
 export function ObservabilityOnboardingFlow() {
   const { pathname } = useLocation();
+  const {
+    services: {
+      context: { isDev, isCloud },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -30,41 +37,31 @@ export function ObservabilityOnboardingFlow() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <EuiPageTemplate.Section
-        paddingSize="xl"
-        css={css`
-          & > div {
-            background-image: url(${backgroundImageUrl});
-            background-position: right center;
-            background-repeat: no-repeat;
-          }
-        `}
-        grow={false}
-        restrictWidth
-      >
-        <EuiSpacer size="xl" />
-        <Header />
-      </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section paddingSize="xl" color="subdued" restrictWidth>
-        <Routes>
-          <Route path="/systemLogs">
-            <BackButton />
-            <SystemLogsPanel />
+      <Routes>
+        <Route path="/auto-detect">
+          <AutoDetectPage />
+        </Route>
+        <Route path="/systemLogs">
+          <SystemLogsPage />
+        </Route>
+        <Route path="/customLogs">
+          <CustomLogsPage />
+        </Route>
+        <Route path="/kubernetes">
+          <KubernetesPage />
+        </Route>
+        <Route path="/otel-logs">
+          <OtelLogsPage />
+        </Route>
+        {(isCloud || isDev) && (
+          <Route path="/firehose">
+            <FirehosePage />
           </Route>
-          <Route path="/customLogs">
-            <BackButton />
-            <CustomLogsPanel />
-          </Route>
-          <Route>
-            <OnboardingFlowForm />
-          </Route>
-        </Routes>
-        <EuiSpacer size="xl" />
-      </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section paddingSize="xl" grow={false} restrictWidth>
-        <Footer />
-        <EuiSpacer size="xl" />
-      </EuiPageTemplate.Section>
+        )}
+        <Route>
+          <LandingPage />
+        </Route>
+      </Routes>
     </QueryClientProvider>
   );
 }

@@ -33,13 +33,13 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 3.2,
+    "version": 3.3,
   },
   "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v3.2",
-    "pipeline": ".slo-observability.sli.pipeline-v3.2",
+    "index": ".slo-observability.sli-v3.3",
+    "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -174,16 +174,6 @@ Object {
           "fixed_interval": "2m",
         },
       },
-      "slo.id": Object {
-        "terms": Object {
-          "field": "slo.id",
-        },
-      },
-      "slo.revision": Object {
-        "terms": Object {
-          "field": "slo.revision",
-        },
-      },
     },
   },
   "settings": Object {
@@ -217,20 +207,7 @@ Object {
         ],
       },
     },
-    "runtime_mappings": Object {
-      "slo.id": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "slo.revision": Object {
-        "script": Object {
-          "source": "emit(1)",
-        },
-        "type": "long",
-      },
-    },
+    "runtime_mappings": Object {},
   },
   "sync": Object {
     "time": Object {
@@ -247,13 +224,13 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 3.2,
+    "version": 3.3,
   },
   "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v3.2",
-    "pipeline": ".slo-observability.sli.pipeline-v3.2",
+    "index": ".slo-observability.sli-v3.3",
+    "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -388,16 +365,6 @@ Object {
           "fixed_interval": "2m",
         },
       },
-      "slo.id": Object {
-        "terms": Object {
-          "field": "slo.id",
-        },
-      },
-      "slo.revision": Object {
-        "terms": Object {
-          "field": "slo.revision",
-        },
-      },
     },
   },
   "settings": Object {
@@ -431,20 +398,7 @@ Object {
         ],
       },
     },
-    "runtime_mappings": Object {
-      "slo.id": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "slo.revision": Object {
-        "script": Object {
-          "source": "emit(1)",
-        },
-        "type": "long",
-      },
-    },
+    "runtime_mappings": Object {},
   },
   "sync": Object {
     "time": Object {

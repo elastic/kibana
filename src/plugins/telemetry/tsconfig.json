@@ -11,6 +11,7 @@
     "../../../typings/**/*",
     "schema/oss_plugins.json",
     "schema/oss_root.json",
+    "schema/kbn_packages.json"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -20,12 +21,10 @@
     "@kbn/telemetry-collection-manager-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/security-plugin",
-    "@kbn/analytics-shippers-elastic-v3-browser",
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-utility",
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/analytics-shippers-elastic-v3-server",
     "@kbn/config-schema",
     "@kbn/utils",
     "@kbn/core-saved-objects-server",

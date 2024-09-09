@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -13,6 +14,7 @@ import {
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/common';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Reference } from '@kbn/content-management-utils';
 import { RefreshInterval } from '@kbn/data-plugin/common';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
@@ -35,6 +37,10 @@ export interface DashboardPanelState<
    * embeddable's input. This key is needed for BWC, but its value will be removed on Dashboard save.
    */
   version?: string;
+  /**
+   * React embeddables are serialized and may pass references that are later used in factory's deserialize method.
+   */
+  references?: Reference[];
 }
 
 export type DashboardContainerByReferenceInput = SavedObjectEmbeddableInput;

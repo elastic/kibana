@@ -123,14 +123,13 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
             defaultMessage="Include jobs or groups"
           />
         }
+        shouldUseDropdownJobCreate
       />
-
       <EuiSpacer size="m" />
-
       <JobSelectorControl
         jobsAndGroupIds={excludeJobsAndGroupIds}
         adJobsApiService={adJobsApiService}
-        onChange={useCallback((update) => {
+        onChange={useCallback((update: any) => {
           const callback = onAlertParamChange('excludeJobs');
           if (isPopulatedObject(update)) {
             callback(update);
@@ -148,10 +147,9 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
           />
         }
         options={excludeJobsOptions}
+        shouldUseDropdownJobCreate
       />
-
       <EuiSpacer size="m" />
-
       <TestsSelectionControl
         config={ruleParams.testsConfig}
         // eslint-disable-next-line react-hooks/exhaustive-deps

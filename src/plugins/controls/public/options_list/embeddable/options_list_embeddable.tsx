@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import deepEqual from 'fast-deep-equal';
@@ -11,8 +12,17 @@ import { isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  merge,
+  skip,
+  Subject,
+  Subscription,
+  switchMap,
+  tap,
+} from 'rxjs';
 
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
@@ -35,11 +45,12 @@ import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../..';
+import { OptionsListSelection } from '../../../common/options_list/options_list_selections';
 import { ControlFilterOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
-import { IClearableControl } from '../../types';
+import { CanClearSelections } from '../../types';
 import { OptionsListControl } from '../components/options_list_control';
 import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
 import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
@@ -81,7 +92,7 @@ type OptionsListReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class OptionsListEmbeddable
   extends Embeddable<OptionsListEmbeddableInput, ControlOutput>
-  implements IClearableControl
+  implements CanClearSelections
 {
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;
@@ -223,8 +234,8 @@ export class OptionsListEmbeddable
               this.dispatch.clearValidAndInvalidSelections({});
             } else {
               const { invalidSelections } = this.getState().componentState ?? {};
-              const newValidSelections: string[] = [];
-              const newInvalidSelections: string[] = [];
+              const newValidSelections: OptionsListSelection[] = [];
+              const newInvalidSelections: OptionsListSelection[] = [];
               for (const selectedOption of newSelectedOptions) {
                 if (invalidSelections?.includes(selectedOption)) {
                   newInvalidSelections.push(selectedOption);
@@ -360,10 +371,10 @@ export class OptionsListEmbeddable
         });
         this.reportInvalidSelections(false);
       } else {
-        const valid: string[] = [];
-        const invalid: string[] = [];
+        const valid: OptionsListSelection[] = [];
+        const invalid: OptionsListSelection[] = [];
         for (const selectedOption of selectedOptions ?? []) {
-          if (invalidSelections?.includes(String(selectedOption))) invalid.push(selectedOption);
+          if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
           else valid.push(selectedOption);
         }
         this.dispatch.updateQueryResults({
@@ -428,14 +439,13 @@ export class OptionsListEmbeddable
 
   private buildFilter = async (): Promise<ControlFilterOutput> => {
     const {
-      componentState: { validSelections },
-      explicitInput: { existsSelected, exclude },
+      explicitInput: { existsSelected, exclude, selectedOptions },
     } = this.getState();
 
     return await this.selectionsToFilters({
       existsSelected,
       exclude,
-      selectedOptions: validSelections,
+      selectedOptions,
     });
   };
 

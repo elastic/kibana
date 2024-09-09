@@ -54,7 +54,7 @@ import { getUsersDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -64,6 +64,7 @@ import { LastEventTime } from '../../../../common/components/last_event_time';
 import { LastEventIndexKey, RiskScoreEntity } from '../../../../../common/search_strategy';
 
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
+import type { UserSummaryProps } from '../../../../overview/components/user_overview';
 import {
   UserOverview,
   USER_OVERVIEW_RISK_SCORE_QUERY_ID,
@@ -159,7 +160,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   useQueryInspector({ setQuery, deleteQuery, refetch, inspect, loading, queryId: QUERY_ID });
 
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<UserSummaryProps['narrowDateRange']>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(

@@ -14,9 +14,7 @@ exports[`LinkToAlertsPage component renders correctly with default props 1`] = `
       <span
         class="eui-textTruncate euiButtonEmpty__text"
       >
-        <span>
-          Show all
-        </span>
+        Show all
       </span>
       <span
         color="inherit"
@@ -41,9 +39,7 @@ exports[`LinkToAlertsPage component renders correctly with optional props 1`] = 
       <span
         class="eui-textTruncate euiButtonEmpty__text"
       >
-        <span>
-          Show all
-        </span>
+        Show all
       </span>
       <span
         color="inherit"

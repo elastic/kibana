@@ -54,9 +54,9 @@ describe('Category ', () => {
     render(<CategoryComponent {...defaultProps} />);
 
     userEvent.type(screen.getByRole('combobox'), 'new{enter}');
-
-    expect(onChange).toBeCalledWith('new');
-    expect(screen.getByRole('combobox')).toHaveValue('new');
+    await waitFor(() => {
+      expect(onChange).toBeCalledWith('new');
+    });
   });
 
   it('renders current option list', async () => {
@@ -74,7 +74,6 @@ describe('Category ', () => {
     userEvent.click(screen.getByText('foo'));
 
     expect(onChange).toHaveBeenCalledWith('foo');
-    expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('foo');
   });
 
   it('should call onChange when adding new category', async () => {
@@ -84,7 +83,6 @@ describe('Category ', () => {
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith('hi');
-      expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('hi');
     });
   });
 
@@ -100,7 +98,7 @@ describe('Category ', () => {
     userEvent.type(screen.getByRole('combobox'), ' there{enter}');
 
     await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith('hi there');
+      expect(onChange).toHaveBeenCalledWith('there');
     });
   });
 });

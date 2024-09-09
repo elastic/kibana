@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 jest.mock('uuid', () => ({
@@ -217,7 +218,31 @@ describe('CoreKibanaRequest', () => {
     });
 
     describe('route.protocol property', () => {
-      it('return a static value for now as only http1 is supported', () => {
+      it('return the correct value for http/1.0 requests', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '1.0',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.protocol).toEqual('http1');
+      });
+      it('return the correct value for http/1.1 requests', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '1.1',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.protocol).toEqual('http1');
+      });
+      it('return the correct value for http/2 requests', () => {
         const request = hapiMocks.createRequest({
           raw: {
             req: {
@@ -227,7 +252,7 @@ describe('CoreKibanaRequest', () => {
         });
         const kibanaRequest = CoreKibanaRequest.from(request);
 
-        expect(kibanaRequest.protocol).toEqual('http1');
+        expect(kibanaRequest.protocol).toEqual('http2');
       });
     });
 

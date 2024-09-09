@@ -48,8 +48,8 @@ export function DataVisualizerDataViewManagement(props: DataVisualizerDataViewMa
     return null;
   }
 
-  const addField = () => {
-    closeFieldEditor.current = dataViewFieldEditor.openEditor({
+  const addField = async () => {
+    closeFieldEditor.current = await dataViewFieldEditor.openEditor({
       ctx: {
         dataView: currentDataView,
       },

@@ -96,13 +96,16 @@ export const ConnectorNameAndDescriptionLogic = kea<
       false,
       {
         apiSuccess: () => false,
+        // @ts-expect-error upgrade typescript v5.1.6
         setIsEditing: (_, { isEditing }) => isEditing,
       },
     ],
     localNameAndDescription: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setLocalNameAndDescription: (_, nameAndDescription) => nameAndDescription,
+        // @ts-expect-error upgrade typescript v5.1.6
         updateLocalNameAndDescription: (localNameAndDescription, nameAndDescription) => ({
           ...localNameAndDescription,
           ...nameAndDescription,
@@ -112,7 +115,9 @@ export const ConnectorNameAndDescriptionLogic = kea<
     nameAndDescription: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         apiSuccess: (_, { description, name }) => ({ description, name }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setNameAndDescription: (_, nameAndDescription) => nameAndDescription,
       },
     ],

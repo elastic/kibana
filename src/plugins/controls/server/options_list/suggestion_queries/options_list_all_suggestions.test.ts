@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
@@ -119,9 +120,9 @@ describe('options list fetch all suggestions query', () => {
         aggregations: {
           suggestions: {
             buckets: [
-              { doc_count: 5, key: '1' },
-              { doc_count: 4, key: '2' },
-              { doc_count: 3, key: '3' },
+              { doc_count: 5, key: 1 },
+              { doc_count: 4, key: 2 },
+              { doc_count: 3, key: 3 },
             ],
           },
           unique_terms: {
@@ -133,9 +134,9 @@ describe('options list fetch all suggestions query', () => {
       const parsed = aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock);
       expect(parsed).toMatchObject({
         suggestions: [
-          { value: '1', docCount: 5 },
-          { value: '2', docCount: 4 },
-          { value: '3', docCount: 3 },
+          { value: 1, docCount: 5 },
+          { value: 2, docCount: 4 },
+          { value: 3, docCount: 3 },
         ],
         totalCardinality: 3,
       });

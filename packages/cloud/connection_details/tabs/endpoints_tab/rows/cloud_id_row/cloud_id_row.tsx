@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as React from 'react';
@@ -44,7 +45,14 @@ export const CloudIdRow: React.FC<CloudIdRowProps> = ({
 
       {showCloudId && (
         <EuiFormRow
-          label={<Label learnMoreUrl={learnMoreUrl} />}
+          label={
+            <Label
+              learnMoreUrl={learnMoreUrl}
+              aria-label={i18n.translate('cloud.connectionDetails.cloudId.learnMore', {
+                defaultMessage: 'Learn more about Cloud ID',
+              })}
+            />
+          }
           helpText={i18n.translate('cloud.connectionDetails.tab.endpoints.cloudIdField.helpText', {
             defaultMessage:
               'Specific client libraries and connectors can use this unique identifier specific to Elastic Cloud.',
@@ -52,7 +60,13 @@ export const CloudIdRow: React.FC<CloudIdRowProps> = ({
           fullWidth
           data-test-subj="connectionDetailsCloudId"
         >
-          <CopyInput value={value} onCopyClick={() => onCopyClick?.()} />
+          <CopyInput
+            value={value}
+            onCopyClick={() => onCopyClick?.()}
+            aria-label={i18n.translate('cloud.connectionDetails.tab.cloudId.label', {
+              defaultMessage: 'Copy Cloud ID to clipboard',
+            })}
+          />
         </EuiFormRow>
       )}
     </>

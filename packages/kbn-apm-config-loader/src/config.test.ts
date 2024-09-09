@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
 import {
   packageMock,
@@ -142,6 +144,35 @@ describe('ApmConfiguration', () => {
         active: true,
         serverUrl: 'https://url',
         secretToken: 'secret',
+      })
+    );
+  });
+
+  it('flattens the `globalLabels` object', () => {
+    const kibanaConfig = {
+      elastic: {
+        apm: {
+          globalLabels: {
+            keyOne: 'k1',
+            objectOne: {
+              objectOneKeyOne: 'o1k1',
+              objectOneKeyTwo: {
+                objectOneKeyTwoSubkeyOne: 'o1k2s1',
+              },
+            },
+          },
+        },
+      },
+    };
+    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, true);
+    expect(config.getConfig('serviceName')).toEqual(
+      expect.objectContaining({
+        globalLabels: {
+          git_rev: 'sha',
+          keyOne: 'k1',
+          'objectOne.objectOneKeyOne': 'o1k1',
+          'objectOne.objectOneKeyTwo.objectOneKeyTwoSubkeyOne': 'o1k2s1',
+        },
       })
     );
   });

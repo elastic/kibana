@@ -13,7 +13,6 @@ import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
 
-import type { BrowserFields } from '../../../../common/containers/source';
 import { OpenTimelineModal } from '../../../../timelines/components/open_timeline/open_timeline_modal';
 import type { ActionTimelineToShow } from '../../../../timelines/components/open_timeline/types';
 import { QueryBar } from '../../../../common/components/query_bar';
@@ -31,7 +30,6 @@ export interface FieldValueQueryBar {
   title?: string;
 }
 export interface QueryBarDefineRuleProps {
-  browserFields: BrowserFields;
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
@@ -74,7 +72,6 @@ const savedQueryToFieldValue = (savedQuery: SavedQuery): FieldValueQueryBar => (
 
 export const QueryBarDefineRule = ({
   defaultSavedQuery,
-  browserFields,
   dataTestSubj,
   field,
   idAria,

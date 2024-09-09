@@ -11,7 +11,6 @@ import fs from 'fs';
 import path from 'path';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 import { bundlePackage, removeBundledPackages } from './install_bundled';
 
@@ -20,6 +19,7 @@ export default function (providerContext: FtrProviderContext) {
 
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const testPkgName = 'apache';
   const testPkgVersion = '0.1.4';
@@ -40,9 +40,24 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_0.1.4.zip'
   );
 
+  async function uploadPackage(zipPackage: string) {
+    // wait 10s before uploading again to avoid getting 429
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+    const buf = fs.readFileSync(zipPackage);
+    return await supertest
+      .post(`/api/fleet/epm/packages`)
+      .set('kbn-xsrf', 'xxxx')
+      .type('application/zip')
+      .send(buf)
+      .expect(200);
+  }
+
   describe('EPM - get', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     it('returns package info from the registry if it was installed from the registry', async function () {
       // this will install through the registry by default
@@ -57,14 +72,9 @@ export default function (providerContext: FtrProviderContext) {
       expect(packageInfo.download).to.not.equal(undefined);
       await uninstallPackage(testPkgName, testPkgVersion);
     });
+
     it('returns correct package info if it was installed by upload', async function () {
-      const buf = fs.readFileSync(testPkgArchiveZip);
-      await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(200);
+      await uploadPackage(testPkgArchiveZip);
 
       const res = await supertest
         .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
@@ -76,14 +86,9 @@ export default function (providerContext: FtrProviderContext) {
       expect(packageInfo.download).to.not.equal(undefined);
       await uninstallPackage(testPkgName, testPkgVersion);
     });
+
     it('returns correct package info from registry if a different version is installed by upload', async function () {
-      const buf = fs.readFileSync(testPkgArchiveZip);
-      await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(200);
+      await uploadPackage(testPkgArchiveZip);
 
       const res = await supertest.get(`/api/fleet/epm/packages/apache/0.1.3`).expect(200);
       const packageInfo = res.body.item;
@@ -97,13 +102,7 @@ export default function (providerContext: FtrProviderContext) {
         path.dirname(__filename),
         '../fixtures/direct_upload_packages/apache_9999.0.0.zip'
       );
-      const buf = fs.readFileSync(testPkgArchiveZipV9999);
-      await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf)
-        .expect(200);
+      await uploadPackage(testPkgArchiveZipV9999);
 
       const res = await supertest.get(`/api/fleet/epm/packages/apache/9999.0.0`).expect(200);
       const packageInfo = res.body.item;
@@ -111,6 +110,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(packageInfo.download).to.equal(undefined);
       await uninstallPackage(testPkgName, '9999.0.0');
     });
+
     describe('Installed Packages', () => {
       before(async () => {
         await installPackage(testPkgName, testPkgVersion);
@@ -122,8 +122,6 @@ export default function (providerContext: FtrProviderContext) {
         await uninstallPackage(testPkgName, testPkgVersion);
         await uninstallPackage('experimental', '0.1.0');
         await uninstallPackage('endpoint', '8.6.1');
-      });
-      after(async () => {
         await removeBundledPackages(log);
       });
       it('Allows the fetching of installed packages', async () => {

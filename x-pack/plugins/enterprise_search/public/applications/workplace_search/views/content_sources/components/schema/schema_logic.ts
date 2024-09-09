@@ -152,30 +152,40 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     sourceId: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeSchema: (_, { sourceId }) => sourceId,
       },
     ],
     activeSchema: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeSchema: (_, { schema }) => schema,
+        // @ts-expect-error upgrade typescript v5.1.6
         onSchemaSetSuccess: (_, { schema }) => schema,
+        // @ts-expect-error upgrade typescript v5.1.6
         onFieldUpdate: (_, { schema }) => schema,
       },
     ],
     serverSchema: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeSchema: (_, { schema }) => schema,
+        // @ts-expect-error upgrade typescript v5.1.6
         onSchemaSetSuccess: (_, { schema }) => schema,
       },
     ],
     mostRecentIndexJob: [
       {} as IndexJob,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeSchema: (_, { mostRecentIndexJob }) => mostRecentIndexJob,
+        // @ts-expect-error upgrade typescript v5.1.6
         resetMostRecentIndexJob: (_, emptyReindexJob) => emptyReindexJob,
+        // @ts-expect-error upgrade typescript v5.1.6
         onSchemaSetSuccess: (_, { mostRecentIndexJob }) => mostRecentIndexJob,
+        // @ts-expect-error upgrade typescript v5.1.6
         onIndexingComplete: (state, numDocumentsWithErrors) => ({
           ...state,
           numDocumentsWithErrors,
@@ -183,6 +193,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
           hasErrors: numDocumentsWithErrors > 0,
           isActive: false,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         updateFields: (state) => ({
           ...state,
           percentageComplete: 0,
@@ -192,6 +203,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     newFieldType: [
       SchemaType.Text,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         updateNewFieldType: (_, newFieldType) => newFieldType,
         onSchemaSetSuccess: () => SchemaType.Text,
       },
@@ -201,12 +213,14 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       {
         onSchemaSetSuccess: () => null,
         closeAddFieldModal: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         onSchemaSetFormErrors: (_, addFieldFormErrors) => addFieldFormErrors,
       },
     ],
     filterValue: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setFilterValue: (_, filterValue) => filterValue,
       },
     ],
@@ -214,6 +228,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       true,
       {
         onSchemaSetSuccess: () => true,
+        // @ts-expect-error upgrade typescript v5.1.6
         onFieldUpdate: (_, { formUnchanged }) => formUnchanged,
       },
     ],
@@ -236,6 +251,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     rawFieldName: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setFieldName: (_, rawFieldName) => rawFieldName,
         onSchemaSetSuccess: () => '',
       },
@@ -243,6 +259,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     fieldCoercionErrors: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeSchemaFieldErrors: (_, { fieldCoercionErrors }) => fieldCoercionErrors,
       },
     ],

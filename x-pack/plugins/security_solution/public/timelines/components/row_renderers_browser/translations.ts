@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const EVENT_RENDERERS_TITLE = i18n.translate(
   'xpack.securitySolution.customizeEventRenderers.eventRenderersTitle',
   {
-    defaultMessage: 'Event Renderers',
+    defaultMessage: 'Event renderers',
   }
 );
 
 export const CUSTOMIZE_EVENT_RENDERERS_TITLE = i18n.translate(
   'xpack.securitySolution.customizeEventRenderers.customizeEventRenderersTitle',
   {
-    defaultMessage: 'Customize Event Renderers',
+    defaultMessage: 'Customize event renderers',
   }
 );
 
@@ -25,7 +25,7 @@ export const CUSTOMIZE_EVENT_RENDERERS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.customizeEventRenderers.customizeEventRenderersDescription',
   {
     defaultMessage:
-      'Event Renderers automatically convey the most relevant details in an event to reveal its story',
+      'Event renderers automatically convey the most relevant details in an event to reveal its story',
   }
 );
 

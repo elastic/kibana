@@ -99,11 +99,11 @@ export async function getFailedAndUnrecognizedTasksPerDay({
       },
     };
 
-    logger.debug(`query for getFailedAndUnrecognizedTasksPerDay - ${JSON.stringify(query)}`);
+    logger.debug(() => `query for getFailedAndUnrecognizedTasksPerDay - ${JSON.stringify(query)}`);
     const results = await esClient.search(query);
 
     logger.debug(
-      `results for getFailedAndUnrecognizedTasksPerDay query - ${JSON.stringify(results)}`
+      () => `results for getFailedAndUnrecognizedTasksPerDay query - ${JSON.stringify(results)}`
     );
 
     const aggregations = results.aggregations as {

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { fetchDocuments } from './fetch_documents';
 import { throwError as throwErrorRx, of } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -30,6 +32,10 @@ const getDeps = () =>
   } as unknown as FetchDeps);
 
 describe('test fetchDocuments', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('resolves with returned documents', async () => {
     const hits = [
       { _id: '1', foo: 'bar' },
@@ -38,10 +44,17 @@ describe('test fetchDocuments', () => {
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     savedSearchMock.searchSource.fetch$ = <T>() =>
       of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
+    const resolveDocumentProfileSpy = jest.spyOn(
+      discoverServiceMock.profilesManager,
+      'resolveDocumentProfile'
+    );
     expect(await fetchDocuments(savedSearchMock.searchSource, getDeps())).toEqual({
       interceptedWarnings: [],
       records: documents,
     });
+    expect(resolveDocumentProfileSpy).toHaveBeenCalledTimes(2);
+    expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: documents[0] });
+    expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: documents[1] });
   });
 
   test('rejects on query failure', async () => {

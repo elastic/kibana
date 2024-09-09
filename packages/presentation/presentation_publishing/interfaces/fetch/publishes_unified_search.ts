@@ -1,31 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { TimeRange, Filter, Query, AggregateQuery } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { useEffect, useMemo } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { PublishingSubject } from '../../publishing_subject';
 
-export interface PublishesTimeRange {
+export interface PublishesTimeslice {
+  timeslice$: PublishingSubject<[number, number] | undefined>;
+}
+
+export interface PublishesTimeRange extends Partial<PublishesTimeslice> {
   timeRange$: PublishingSubject<TimeRange | undefined>;
   timeRestore$?: PublishingSubject<boolean | undefined>;
-  timeslice$?: PublishingSubject<[number, number] | undefined>;
 }
 
 export type PublishesWritableTimeRange = PublishesTimeRange & {
   setTimeRange: (timeRange: TimeRange | undefined) => void;
 };
 
-export type PublishesUnifiedSearch = PublishesTimeRange & {
-  isCompatibleWithUnifiedSearch?: () => boolean;
+export interface PublishesFilters {
   filters$: PublishingSubject<Filter[] | undefined>;
-  query$: PublishingSubject<Query | AggregateQuery | undefined>;
-};
+}
+
+export type PublishesUnifiedSearch = PublishesTimeRange &
+  PublishesFilters & {
+    isCompatibleWithUnifiedSearch?: () => boolean;
+    query$: PublishingSubject<Query | AggregateQuery | undefined>;
+  };
 
 export type PublishesWritableUnifiedSearch = PublishesUnifiedSearch &
   PublishesWritableTimeRange & {
@@ -33,10 +41,20 @@ export type PublishesWritableUnifiedSearch = PublishesUnifiedSearch &
     setQuery: (query: Query | undefined) => void;
   };
 
+export const apiPublishesTimeslice = (
+  unknownApi: null | unknown
+): unknownApi is PublishesTimeslice => {
+  return Boolean(unknownApi && (unknownApi as PublishesTimeslice)?.timeslice$ !== undefined);
+};
+
 export const apiPublishesTimeRange = (
   unknownApi: null | unknown
 ): unknownApi is PublishesTimeRange => {
   return Boolean(unknownApi && (unknownApi as PublishesTimeRange)?.timeRange$ !== undefined);
+};
+
+export const apiPublishesFilters = (unknownApi: unknown): unknownApi is PublishesFilters => {
+  return Boolean(unknownApi && (unknownApi as PublishesFilters)?.filters$ !== undefined);
 };
 
 export const apiPublishesUnifiedSearch = (
@@ -45,7 +63,7 @@ export const apiPublishesUnifiedSearch = (
   return Boolean(
     unknownApi &&
       apiPublishesTimeRange(unknownApi) &&
-      (unknownApi as PublishesUnifiedSearch)?.filters$ !== undefined &&
+      apiPublishesFilters(unknownApi) &&
       (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
   );
 };
@@ -55,7 +73,7 @@ export const apiPublishesPartialUnifiedSearch = (
 ): unknownApi is Partial<PublishesUnifiedSearch> => {
   return Boolean(
     apiPublishesTimeRange(unknownApi) ||
-      (unknownApi as PublishesUnifiedSearch)?.filters$ !== undefined ||
+      apiPublishesFilters(unknownApi) ||
       (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
   );
 };

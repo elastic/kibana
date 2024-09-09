@@ -11,6 +11,8 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -45,6 +47,7 @@ import {
   getField,
   addToSearchAfterReturn,
   getUnprocessedExceptionsWarnings,
+  getDisabledActionsWarningText,
 } from './utils';
 import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from '../types';
 import {
@@ -451,76 +454,69 @@ describe('utils', () => {
     });
 
     test('should return a single tuple if no gap', async () => {
-      const { tuples, remainingGap, wroteWarningStatus, warningStatusMessage } =
-        await getRuleRangeTuples({
-          previousStartedAt: moment().subtract(30, 's').toDate(),
-          startedAt: moment().subtract(30, 's').toDate(),
-          interval: '30s',
-          from: 'now-30s',
-          to: 'now',
-          maxSignals: 20,
-          ruleExecutionLogger,
-          alerting,
-        });
+      const { tuples, remainingGap, warningStatusMessage } = await getRuleRangeTuples({
+        previousStartedAt: moment().subtract(30, 's').toDate(),
+        startedAt: moment().subtract(30, 's').toDate(),
+        interval: '30s',
+        from: 'now-30s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+      });
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
       expect(tuples.length).toEqual(1);
       expect(remainingGap.asMilliseconds()).toEqual(0);
-      expect(wroteWarningStatus).toEqual(false);
       expect(warningStatusMessage).toEqual(undefined);
     });
 
     test('should return a single tuple if malformed interval prevents gap calculation', async () => {
-      const { tuples, remainingGap, wroteWarningStatus, warningStatusMessage } =
-        await getRuleRangeTuples({
-          previousStartedAt: moment().subtract(30, 's').toDate(),
-          startedAt: moment().subtract(30, 's').toDate(),
-          interval: 'invalid',
-          from: 'now-30s',
-          to: 'now',
-          maxSignals: 20,
-          ruleExecutionLogger,
-          alerting,
-        });
+      const { tuples, remainingGap, warningStatusMessage } = await getRuleRangeTuples({
+        previousStartedAt: moment().subtract(30, 's').toDate(),
+        startedAt: moment().subtract(30, 's').toDate(),
+        interval: 'invalid',
+        from: 'now-30s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+      });
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
       expect(tuples.length).toEqual(1);
       expect(remainingGap.asMilliseconds()).toEqual(0);
-      expect(wroteWarningStatus).toEqual(false);
       expect(warningStatusMessage).toEqual(undefined);
     });
 
     test('should return two tuples if gap and previouslyStartedAt', async () => {
-      const { tuples, remainingGap, wroteWarningStatus, warningStatusMessage } =
-        await getRuleRangeTuples({
-          previousStartedAt: moment().subtract(65, 's').toDate(),
-          startedAt: moment().toDate(),
-          interval: '50s',
-          from: 'now-55s',
-          to: 'now',
-          maxSignals: 20,
-          ruleExecutionLogger,
-          alerting,
-        });
+      const { tuples, remainingGap, warningStatusMessage } = await getRuleRangeTuples({
+        previousStartedAt: moment().subtract(65, 's').toDate(),
+        startedAt: moment().toDate(),
+        interval: '50s',
+        from: 'now-55s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+      });
       const someTuple = tuples[1];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(55);
       expect(remainingGap.asMilliseconds()).toEqual(0);
-      expect(wroteWarningStatus).toEqual(false);
       expect(warningStatusMessage).toEqual(undefined);
     });
 
     test('should return five tuples when give long gap', async () => {
-      const { tuples, remainingGap, wroteWarningStatus, warningStatusMessage } =
-        await getRuleRangeTuples({
-          previousStartedAt: moment().subtract(65, 's').toDate(), // 64 is 5 times the interval + lookback, which will trigger max lookback
-          startedAt: moment().toDate(),
-          interval: '10s',
-          from: 'now-13s',
-          to: 'now',
-          maxSignals: 20,
-          ruleExecutionLogger,
-          alerting,
-        });
+      const { tuples, remainingGap, warningStatusMessage } = await getRuleRangeTuples({
+        previousStartedAt: moment().subtract(65, 's').toDate(), // 64 is 5 times the interval + lookback, which will trigger max lookback
+        startedAt: moment().toDate(),
+        interval: '10s',
+        from: 'now-13s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+      });
       expect(tuples.length).toEqual(5);
       tuples.forEach((item, index) => {
         if (index === 0) {
@@ -531,33 +527,30 @@ describe('utils', () => {
         expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(10);
       });
       expect(remainingGap.asMilliseconds()).toEqual(12000);
-      expect(wroteWarningStatus).toEqual(false);
       expect(warningStatusMessage).toEqual(undefined);
     });
 
     test('should return a single tuple when give a negative gap (rule ran sooner than expected)', async () => {
-      const { tuples, remainingGap, wroteWarningStatus, warningStatusMessage } =
-        await getRuleRangeTuples({
-          previousStartedAt: moment().subtract(-15, 's').toDate(),
-          startedAt: moment().subtract(-15, 's').toDate(),
-          interval: '10s',
-          from: 'now-13s',
-          to: 'now',
-          maxSignals: 20,
-          ruleExecutionLogger,
-          alerting,
-        });
+      const { tuples, remainingGap, warningStatusMessage } = await getRuleRangeTuples({
+        previousStartedAt: moment().subtract(-15, 's').toDate(),
+        startedAt: moment().subtract(-15, 's').toDate(),
+        interval: '10s',
+        from: 'now-13s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+      });
       expect(tuples.length).toEqual(1);
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(13);
       expect(remainingGap.asMilliseconds()).toEqual(0);
-      expect(wroteWarningStatus).toEqual(false);
       expect(warningStatusMessage).toEqual(undefined);
     });
 
     test('should use alerting framework max alerts value if maxSignals is greater than limit', async () => {
       alerting.getConfig = jest.fn().mockReturnValue({ run: { alerts: { max: 10 } } });
-      const { tuples, wroteWarningStatus, warningStatusMessage } = await getRuleRangeTuples({
+      const { tuples, warningStatusMessage } = await getRuleRangeTuples({
         previousStartedAt: moment().subtract(30, 's').toDate(),
         startedAt: moment().subtract(30, 's').toDate(),
         interval: '30s',
@@ -570,14 +563,13 @@ describe('utils', () => {
       const someTuple = tuples[0];
       expect(someTuple.maxSignals).toEqual(10);
       expect(tuples.length).toEqual(1);
-      expect(wroteWarningStatus).toEqual(true);
       expect(warningStatusMessage).toEqual(
         "The rule's max alerts per run setting (20) is greater than the Kibana alerting limit (10). The rule will only write a maximum of 10 alerts per rule run."
       );
     });
 
     test('should use maxSignals value if maxSignals is less than alerting framework limit', async () => {
-      const { tuples, wroteWarningStatus, warningStatusMessage } = await getRuleRangeTuples({
+      const { tuples, warningStatusMessage } = await getRuleRangeTuples({
         previousStartedAt: moment().subtract(30, 's').toDate(),
         startedAt: moment().subtract(30, 's').toDate(),
         interval: '30s',
@@ -590,7 +582,6 @@ describe('utils', () => {
       const someTuple = tuples[0];
       expect(someTuple.maxSignals).toEqual(20);
       expect(tuples.length).toEqual(1);
-      expect(wroteWarningStatus).toEqual(false);
       expect(warningStatusMessage).toEqual(undefined);
     });
   });
@@ -709,7 +700,7 @@ describe('utils', () => {
         },
       };
 
-      const { wroteWarningStatus, foundNoIndices } = await hasTimestampFields({
+      const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -719,7 +710,6 @@ describe('utils', () => {
         ruleExecutionLogger,
       });
 
-      expect(wroteWarningStatus).toBeTruthy();
       expect(foundNoIndices).toBeFalsy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],
@@ -753,7 +743,7 @@ describe('utils', () => {
         },
       };
 
-      const { wroteWarningStatus, foundNoIndices } = await hasTimestampFields({
+      const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -763,7 +753,6 @@ describe('utils', () => {
         ruleExecutionLogger,
       });
 
-      expect(wroteWarningStatus).toBeTruthy();
       expect(foundNoIndices).toBeFalsy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],
@@ -786,7 +775,7 @@ describe('utils', () => {
         ruleName: 'Endpoint Security',
       });
 
-      const { wroteWarningStatus, foundNoIndices } = await hasTimestampFields({
+      const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -796,7 +785,6 @@ describe('utils', () => {
         ruleExecutionLogger,
       });
 
-      expect(wroteWarningStatus).toBeTruthy();
       expect(foundNoIndices).toBeTruthy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],
@@ -820,7 +808,7 @@ describe('utils', () => {
         ruleName: 'NOT Endpoint Security',
       });
 
-      const { wroteWarningStatus, foundNoIndices } = await hasTimestampFields({
+      const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -830,7 +818,6 @@ describe('utils', () => {
         ruleExecutionLogger,
       });
 
-      expect(wroteWarningStatus).toBeTruthy();
       expect(foundNoIndices).toBeTruthy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],
@@ -1748,6 +1735,76 @@ describe('utils', () => {
         `The following exceptions won't be applied to rule execution: ${
           getExceptionListItemSchemaMock().name
         }`
+      );
+    });
+  });
+
+  describe('getDisabledActionsWarningText', () => {
+    const alertsCreated = true;
+    const alertsNotCreated = false;
+
+    const singleDisabledAction = [{ actionTypeId: '.webhook' }];
+    const multipleDisabledActionsDiffType = [
+      { actionTypeId: '.webhook' },
+      { actionTypeId: '.pagerduty' },
+    ];
+    const multipleDisabledActionsSameType = [
+      { actionTypeId: '.webhook' },
+      { actionTypeId: '.webhook' },
+    ];
+    test('returns string for single disabled action with alerts generated', () => {
+      const warning = getDisabledActionsWarningText({
+        alertsCreated,
+        disabledActions: singleDisabledAction as SanitizedRuleAction[],
+      });
+      expect(warning).toEqual(
+        'This rule generated alerts but did not send external notifications because rule action connector .webhook is not enabled. To send notifications, you need a higher Security Analytics license / tier'
+      );
+    });
+    test('returns string for single disabled action with no alerts generated', () => {
+      const warning = getDisabledActionsWarningText({
+        alertsCreated: alertsNotCreated,
+        disabledActions: singleDisabledAction as SanitizedRuleAction[],
+      });
+      expect(warning).toEqual(
+        'Rule action connector .webhook is not enabled. To send notifications, you need a higher Security Analytics license / tier'
+      );
+    });
+    test('returns string for multiple distinct disabled action types with alerts generated', () => {
+      const warning = getDisabledActionsWarningText({
+        alertsCreated,
+        disabledActions: multipleDisabledActionsDiffType as SanitizedRuleAction[],
+      });
+      expect(warning).toEqual(
+        'This rule generated alerts but did not send external notifications because rule action connectors .webhook, .pagerduty are not enabled. To send notifications, you need a higher Security Analytics license / tier'
+      );
+    });
+    test('returns string for multiple distinct disabled action types with alerts NOT generated', () => {
+      const warning = getDisabledActionsWarningText({
+        alertsCreated: alertsNotCreated,
+        disabledActions: multipleDisabledActionsDiffType as SanitizedRuleAction[],
+      });
+      expect(warning).toEqual(
+        'Rule action connectors .webhook, .pagerduty are not enabled. To send notifications, you need a higher Security Analytics license / tier'
+      );
+    });
+    test('returns string for multiple same type disabled action types with alerts generated', () => {
+      const warning = getDisabledActionsWarningText({
+        alertsCreated,
+        disabledActions: multipleDisabledActionsSameType as SanitizedRuleAction[],
+      });
+      expect(warning).toEqual(
+        'This rule generated alerts but did not send external notifications because rule action connector .webhook is not enabled. To send notifications, you need a higher Security Analytics license / tier'
+      );
+    });
+
+    test('returns string for multiple same type disabled action types with alerts NOT generated', () => {
+      const warning = getDisabledActionsWarningText({
+        alertsCreated: alertsNotCreated,
+        disabledActions: multipleDisabledActionsSameType as SanitizedRuleAction[],
+      });
+      expect(warning).toEqual(
+        'Rule action connector .webhook is not enabled. To send notifications, you need a higher Security Analytics license / tier'
       );
     });
   });

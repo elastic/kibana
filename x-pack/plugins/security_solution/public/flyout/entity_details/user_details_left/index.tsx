@@ -8,9 +8,9 @@
 import React, { useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
+import { FlyoutLoading } from '@kbn/security-solution-common';
+import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useTabs } from './tabs';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import type {
   EntityDetailsLeftPanelTab,
   LeftPanelTabsType,
@@ -27,6 +27,7 @@ export interface UserDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
   user: UserParam;
   path?: PanelPath;
+  scopeId: string;
 }
 export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'user_details';
@@ -34,9 +35,14 @@ export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
 }
 export const UserDetailsPanelKey: UserDetailsExpandableFlyoutProps['key'] = 'user_details';
 
-export const UserDetailsPanel = ({ isRiskScoreExist, user, path }: UserDetailsPanelProps) => {
+export const UserDetailsPanel = ({
+  isRiskScoreExist,
+  user,
+  path,
+  scopeId,
+}: UserDetailsPanelProps) => {
   const managedUser = useManagedUser(user.name, user.email);
-  const tabs = useTabs(managedUser.data, user.name, isRiskScoreExist);
+  const tabs = useTabs(managedUser.data, user.name, isRiskScoreExist, scopeId);
   const { selectedTabId, setSelectedTabId } = useSelectedTab(isRiskScoreExist, user, tabs, path);
 
   if (managedUser.isLoading) return <FlyoutLoading />;

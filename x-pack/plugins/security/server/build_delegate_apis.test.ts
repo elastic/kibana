@@ -65,6 +65,21 @@ describe('buildSecurityApi', () => {
       expect(auditService.asScoped(request).log).toHaveBeenCalledWith({ message: 'an event' });
     });
   });
+
+  describe('authc.apiKeys', () => {
+    it('properly delegates to the service', async () => {
+      await authc.apiKeys.areAPIKeysEnabled();
+      expect(authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns the result from the service', async () => {
+      authc.apiKeys.areAPIKeysEnabled.mockReturnValue(Promise.resolve(false));
+
+      const areAPIKeysEnabled = await authc.apiKeys.areAPIKeysEnabled();
+
+      expect(areAPIKeysEnabled).toBe(false);
+    });
+  });
 });
 
 describe('buildUserProfileApi', () => {

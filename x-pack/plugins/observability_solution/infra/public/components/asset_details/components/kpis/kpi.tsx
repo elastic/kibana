@@ -36,11 +36,11 @@ export const Kpi = ({
 
   return (
     <LensChart
-      {...chartProps}
       id={`infraAssetDetailsKPI${id}`}
       dateRange={dateRange}
       height={KPI_CHART_HEIGHT}
       filters={filters}
+      lensAttributes={chartProps}
       query={query}
       loading={loading}
       toolTip={tooltipContent}

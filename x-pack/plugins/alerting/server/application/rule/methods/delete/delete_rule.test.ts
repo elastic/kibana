@@ -52,6 +52,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+const backfillClient = backfillClientMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -78,7 +79,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
-  backfillClient: backfillClientMock.create(),
+  backfillClient,
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
 };
@@ -146,6 +147,11 @@ describe('delete()', () => {
       undefined
     );
     expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledWith({
+      ruleIds: ['1'],
+      namespace: 'default',
+      unsecuredSavedObjectsClient,
+    });
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
@@ -173,6 +179,11 @@ describe('delete()', () => {
       undefined
     );
     expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledWith({
+      ruleIds: ['1'],
+      namespace: 'default',
+      unsecuredSavedObjectsClient,
+    });
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -259,6 +270,14 @@ describe('delete()', () => {
 
     await expect(rulesClient.delete({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"TM Fail"`
+    );
+  });
+
+  test('throws error when backfillClient.deleteBackfillForRules throws an error', async () => {
+    backfillClient.deleteBackfillForRules.mockRejectedValue(new Error('backfill Fail'));
+
+    await expect(rulesClient.delete({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"backfill Fail"`
     );
   });
 

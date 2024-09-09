@@ -8,10 +8,14 @@
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { omit } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+
 import { ExperimentalFeaturesService } from '../../../../../services';
 import {
   generateCreatePackagePolicyDevToolsRequest,
   generateCreateAgentPolicyDevToolsRequest,
+  generateUpdatePackagePolicyDevToolsRequest,
 } from '../../../services';
 import {
   FLEET_SYSTEM_PACKAGE,
@@ -26,12 +30,14 @@ export function useDevToolsRequest({
   packageInfo,
   selectedPolicyTab,
   withSysMonitoring,
+  packagePolicyId,
 }: {
   withSysMonitoring: boolean;
   selectedPolicyTab: SelectedPolicyTab;
   newAgentPolicy: NewAgentPolicy;
   packagePolicy: NewPackagePolicy;
   packageInfo?: PackageInfo;
+  packagePolicyId?: string;
 }) {
   const { showDevtoolsRequest: isShowDevtoolRequestExperimentEnabled } =
     ExperimentalFeaturesService.get();
@@ -47,28 +53,55 @@ export function useDevToolsRequest({
         `${generateCreateAgentPolicyDevToolsRequest(
           newAgentPolicy,
           withSysMonitoring && !packagePolicyIsSystem
-        )}\n\n${generateCreatePackagePolicyDevToolsRequest({
-          ...{ ...packagePolicy, policy_id: '' },
-        })}`,
-        i18n.translate(
-          'xpack.fleet.createPackagePolicy.devtoolsRequestWithAgentPolicyDescription',
-          {
-            defaultMessage:
-              'These Kibana requests create a new agent policy and a new package policy.',
-          }
-        ),
+        )}\n\n${
+          packagePolicyId
+            ? generateUpdatePackagePolicyDevToolsRequest(
+                packagePolicyId,
+                set(omit(packagePolicy, 'elasticsearch', 'policy_id'), 'policy_ids', [
+                  ...packagePolicy.policy_ids,
+                  '',
+                ])
+              )
+            : generateCreatePackagePolicyDevToolsRequest({
+                ...{ ...packagePolicy, policy_ids: [''] },
+              })
+        }`,
+        packagePolicyId
+          ? i18n.translate(
+              'xpack.fleet.editPackagePolicy.devtoolsRequestWithAgentPolicyDescription',
+              {
+                defaultMessage:
+                  'These Kibana requests create a new agent policy and update a package policy.',
+              }
+            )
+          : i18n.translate(
+              'xpack.fleet.createPackagePolicy.devtoolsRequestWithAgentPolicyDescription',
+              {
+                defaultMessage:
+                  'These Kibana requests create a new agent policy and a new package policy.',
+              }
+            ),
       ];
     }
 
     return [
-      generateCreatePackagePolicyDevToolsRequest({
-        ...packagePolicy,
-      }),
-      i18n.translate('xpack.fleet.createPackagePolicy.devtoolsRequestDescription', {
-        defaultMessage: 'This Kibana request creates a new package policy.',
-      }),
+      packagePolicyId
+        ? generateUpdatePackagePolicyDevToolsRequest(
+            packagePolicyId,
+            omit(packagePolicy, 'elasticsearch', 'policy_id')
+          )
+        : generateCreatePackagePolicyDevToolsRequest({
+            ...packagePolicy,
+          }),
+      packagePolicyId
+        ? i18n.translate('xpack.fleet.editPackagePolicy.devtoolsRequestDescription', {
+            defaultMessage: 'This Kibana request updates package policy.',
+          })
+        : i18n.translate('xpack.fleet.createPackagePolicy.devtoolsRequestDescription', {
+            defaultMessage: 'This Kibana request creates a new package policy.',
+          }),
     ];
-  }, [packagePolicy, newAgentPolicy, withSysMonitoring, selectedPolicyTab]);
+  }, [packagePolicy, newAgentPolicy, withSysMonitoring, selectedPolicyTab, packagePolicyId]);
 
   return { showDevtoolsRequest, devtoolRequest, devtoolRequestDescription };
 }

@@ -9,7 +9,7 @@ import React from 'react';
 
 import moment from 'moment';
 
-import { EuiComment, EuiText } from '@elastic/eui';
+import { EuiComment, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UserAvatar } from '@kbn/user-profile-components';
 
@@ -26,10 +26,17 @@ const UserMessageCSS = css`
 `;
 
 export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) => {
+  const { euiTheme } = useEuiTheme();
   const currentUserProfile = useUserProfile();
 
   return (
     <EuiComment
+      eventColor="subdued"
+      css={{
+        '.euiCommentEvent__body': {
+          backgroundColor: euiTheme.colors.emptyShade,
+        },
+      }}
       username={i18n.translate('xpack.searchPlayground.chat.message.user.name', {
         defaultMessage: 'You',
       })}

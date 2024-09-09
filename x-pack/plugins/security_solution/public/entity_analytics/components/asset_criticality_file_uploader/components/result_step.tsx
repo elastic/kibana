@@ -16,13 +16,13 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { AssetCriticalityCsvUploadResponse } from '../../../../../common/entity_analytics/asset_criticality/types';
+import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { buildAnnotationsFromError } from '../helpers';
+import { ScheduleRiskEngineCallout } from './schedule_risk_engine_callout';
 
 export const AssetCriticalityResultStep: React.FC<{
-  result?: AssetCriticalityCsvUploadResponse;
+  result?: BulkUpsertAssetCriticalityRecordsResponse;
   validLinesAsText: string;
   errorMessage?: string;
   onReturn: () => void;
@@ -59,10 +59,12 @@ export const AssetCriticalityResultStep: React.FC<{
       <>
         <EuiCallOut
           data-test-subj="asset-criticality-result-step-success"
-          title={i18n.translate(
-            'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successTitle',
-            { defaultMessage: 'Success' }
-          )}
+          title={
+            <FormattedMessage
+              defaultMessage="success"
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successTitle"
+            />
+          }
           color="success"
           iconType="checkInCircleFilled"
         >
@@ -71,6 +73,8 @@ export const AssetCriticalityResultStep: React.FC<{
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successMessage"
           />
         </EuiCallOut>
+        <EuiSpacer size="s" />
+        <ScheduleRiskEngineCallout />
         <ResultStepFooter onReturn={onReturn} />
       </>
     );

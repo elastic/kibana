@@ -58,7 +58,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
     unsafe: {
       alertDetails: {
         apm: { enabled: false },
-        metrics: { enabled: false },
         uptime: { enabled: false },
         observability: { enabled: false },
       },
@@ -216,7 +215,11 @@ describe('RulesPage with show only capability', () => {
       },
     });
 
-    return render(<RulesPage />);
+    return render(
+      <IntlProvider>
+        <RulesPage />
+      </IntlProvider>
+    );
   }
 
   it('renders a create rule button which is not disabled', async () => {

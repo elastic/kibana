@@ -46,7 +46,7 @@ export const executionType = {
   STANDARD: 'standard',
   BACKFILL: 'backfill',
 } as const;
-export type ExecutionType = typeof executionType[keyof typeof executionType];
+export type ExecutionType = (typeof executionType)[keyof typeof executionType];
 
 interface BackfillOpts {
   id: string;
@@ -255,6 +255,7 @@ export class AlertingEventLogger {
           typeId: type?.id,
           type: RULE_SAVED_OBJECT_TYPE,
           namespace: this.context?.namespace,
+          relation: SAVED_OBJECT_REL_PRIMARY,
         });
       }
     }

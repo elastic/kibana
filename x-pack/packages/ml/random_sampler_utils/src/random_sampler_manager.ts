@@ -42,7 +42,8 @@ export const RANDOM_SAMPLER_OPTION = {
 /**
  * Default option for random sampler type
  */
-export type RandomSamplerOption = typeof RANDOM_SAMPLER_OPTION[keyof typeof RANDOM_SAMPLER_OPTION];
+export type RandomSamplerOption =
+  (typeof RANDOM_SAMPLER_OPTION)[keyof typeof RANDOM_SAMPLER_OPTION];
 
 /**
  * Type for the random sampler probability
@@ -157,7 +158,7 @@ export class RandomSampler {
     const mode = this.getMode();
     const probability = this.getProbability();
 
-    let prob = {};
+    let prob = Object.create(null);
     if (mode === RANDOM_SAMPLER_OPTION.ON_MANUAL) {
       prob = { probability };
     } else if (mode === RANDOM_SAMPLER_OPTION.OFF) {

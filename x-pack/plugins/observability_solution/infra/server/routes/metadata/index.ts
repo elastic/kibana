@@ -11,6 +11,7 @@ import { get } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { throwErrors } from '@kbn/io-ts-utils';
 import {
   InfraMetadataFeature,
   InfraMetadataRequestRT,
@@ -21,7 +22,7 @@ import { getMetricMetadata } from './lib/get_metric_metadata';
 import { pickFeatureName } from './lib/pick_feature_name';
 import { getCloudMetricsMetadata } from './lib/get_cloud_metric_metadata';
 import { getNodeInfo } from './lib/get_node_info';
-import { throwErrors } from '../../../common/runtime_types';
+import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
@@ -44,13 +45,19 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
 
       const soClient = (await requestContext.core).savedObjects.client;
       const { configuration } = await libs.sources.getSourceConfiguration(soClient, sourceId);
+      const infraMetricsClient = await getInfraMetricsClient({
+        request,
+        libs,
+        context: requestContext,
+      });
       const metricsMetadata = await getMetricMetadata(
         framework,
         requestContext,
         configuration,
         nodeId,
         nodeType,
-        timeRange
+        timeRange,
+        infraMetricsClient
       );
       const metricFeatures = pickFeatureName(metricsMetadata.buckets).map(nameToFeature('metrics'));
 
@@ -78,17 +85,22 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
       );
       const id = metricsMetadata.id;
       const name = metricsMetadata.name || id;
-      return response.ok({
-        body: InfraMetadataRT.encode({
-          id,
-          name,
-          features: [...metricFeatures, ...cloudMetricsFeatures],
-          info: {
-            ...info,
-            timestamp: info['@timestamp'],
-          },
-        }),
+
+      const responseBody = InfraMetadataRT.encode({
+        id,
+        name,
+        features: [...metricFeatures, ...cloudMetricsFeatures],
+        info: {
+          ...info,
+          timestamp: info['@timestamp'],
+        },
       });
+      if (nodeType === 'host') {
+        const hasSystemIntegration = metricsMetadata?.hasSystemIntegration;
+        return response.ok({ body: { ...responseBody, hasSystemIntegration } });
+      }
+
+      return response.ok({ body: responseBody });
     }
   );
 };

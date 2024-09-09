@@ -79,12 +79,13 @@ async function getTemplatePriority(esClient: ElasticsearchClient, name: string) 
 function getIsNonStandardIndexTemplate(templateName: string) {
   const apmIndexTemplateNames = getApmIndexTemplateNames();
   const stackIndexTemplateNames = ['logs', 'metrics'];
-  const isNonStandard = [...apmIndexTemplateNames, ...stackIndexTemplateNames].every(
-    (apmIndexTemplateName) => {
-      const notMatch = templateName !== apmIndexTemplateName;
-      return notMatch;
-    }
-  );
+  const isNonStandard = [
+    ...Object.values(apmIndexTemplateNames).flat(),
+    ...stackIndexTemplateNames,
+  ].every((apmIndexTemplateName) => {
+    const notMatch = templateName !== apmIndexTemplateName;
+    return notMatch;
+  });
 
   return isNonStandard;
 }

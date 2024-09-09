@@ -30,7 +30,8 @@
       "lens",
       "maps",
       "uiActions",
-      "logsDataAccess"
+      "logsDataAccess",
+      "entityManager"
     ],
     "optionalPlugins": [
       "actions",
@@ -44,6 +45,7 @@
       "ml",
       "security",
       "spaces",
+      "serverless",
       "taskManager",
       "usageCollection",
       "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App
@@ -52,13 +54,6 @@
       "cases",
       "observabilityAIAssistant"
     ],
-    "requiredBundles": [
-      "fleet",
-      "kibanaReact",
-      "kibanaUtils",
-      "ml",
-      "observability",
-      "maps"
-    ]
+    "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
   }
 }

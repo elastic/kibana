@@ -1,0 +1,171 @@
+{
+  "id": "@kbn/json-schemas",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/json-schemas",
+        "id": "def-common.JsonSchemaService",
+        "type": "Class",
+        "tags": [],
+        "label": "JsonSchemaService",
+        "description": [
+          "\n"
+        ],
+        "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/json-schemas",
+            "id": "def-common.JsonSchemaService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/json-schemas",
+                "id": "def-common.JsonSchemaService.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pathToOpenAPI",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/json-schemas",
+            "id": "def-common.JsonSchemaService.resolveSchema",
+            "type": "Function",
+            "tags": [],
+            "label": "resolveSchema",
+            "description": [],
+            "signature": [
+              "(path: \"/_ml/anomaly_detectors/{job_id}\" | \"/_ml/datafeeds/{datafeed_id}\" | \"/_transform/{transform_id}\" | \"/_ml/data_frame/analytics/{id}\", method: string, props?: string[] | undefined, schema?: object | undefined) => Promise<any>"
+            ],
+            "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/json-schemas",
+                "id": "def-common.JsonSchemaService.resolveSchema.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "\"/_ml/anomaly_detectors/{job_id}\" | \"/_ml/datafeeds/{datafeed_id}\" | \"/_transform/{transform_id}\" | \"/_ml/data_frame/analytics/{id}\""
+                ],
+                "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/json-schemas",
+                "id": "def-common.JsonSchemaService.resolveSchema.$2",
+                "type": "string",
+                "tags": [],
+                "label": "method",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/json-schemas",
+                "id": "def-common.JsonSchemaService.resolveSchema.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/json-schemas",
+                "id": "def-common.JsonSchemaService.resolveSchema.$4",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "object | undefined"
+                ],
+                "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/json-schemas",
+            "id": "def-common.JsonSchemaService.createSchemaFiles",
+            "type": "Function",
+            "tags": [],
+            "label": "createSchemaFiles",
+            "description": [
+              "\nGenerates schema files for each supported endpoint from the openapi file."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

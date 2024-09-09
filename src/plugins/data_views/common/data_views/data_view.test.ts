@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -247,6 +248,7 @@ describe('IndexPattern', () => {
       ...runtime,
       popularity: 5,
       customLabel: 'custom name',
+      customDescription: 'custom desc',
       format: {
         id: 'bytes',
       },
@@ -275,6 +277,7 @@ describe('IndexPattern', () => {
           ...runtimeComposite.fields.a,
           popularity: 3,
           customLabel: 'custom name a',
+          customDescription: 'custom desc a',
           format: {
             id: 'bytes',
           },
@@ -283,6 +286,7 @@ describe('IndexPattern', () => {
           ...runtimeComposite.fields.b,
           popularity: 4,
           customLabel: 'custom name b',
+          customDescription: 'custom desc b',
           format: {
             id: 'bytes',
           },
@@ -311,8 +315,10 @@ describe('IndexPattern', () => {
         id: 'bytes',
       });
       expect(field.customLabel).toEqual('custom name');
+      expect(field.customDescription).toEqual('custom desc');
       expect(indexPattern.toSpec().fieldAttrs!['@tags']).toEqual({
         customLabel: 'custom name',
+        customDescription: 'custom desc',
         count: 5,
       });
 
@@ -376,6 +382,20 @@ describe('IndexPattern', () => {
       indexPattern.removeRuntimeField(newField);
     });
 
+    test('add and remove a custom description from a runtime field', () => {
+      const newField = 'new_field_test';
+      indexPattern.addRuntimeField(newField, {
+        ...runtimeWithAttrs,
+        customDescription: 'test1',
+      });
+      expect(indexPattern.getFieldByName(newField)?.customDescription).toEqual('test1');
+      indexPattern.setFieldCustomDescription(newField, 'test2');
+      expect(indexPattern.getFieldByName(newField)?.customDescription).toEqual('test2');
+      indexPattern.setFieldCustomDescription(newField, undefined);
+      expect(indexPattern.getFieldByName(newField)?.customDescription).toBeUndefined();
+      indexPattern.removeRuntimeField(newField);
+    });
+
     test('add and remove composite runtime field as new fields', () => {
       const fieldCount = indexPattern.fields.length;
       indexPattern.addRuntimeField('new_field', runtimeCompositeWithAttrs);
@@ -390,10 +410,12 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec().fieldAttrs!['new_field.a']).toEqual({
         count: 3,
         customLabel: 'custom name a',
+        customDescription: 'custom desc a',
       });
       expect(indexPattern.toSpec().fieldAttrs!['new_field.b']).toEqual({
         count: 4,
         customLabel: 'custom name b',
+        customDescription: 'custom desc b',
       });
 
       indexPattern.removeRuntimeField('new_field');
@@ -482,6 +504,66 @@ describe('IndexPattern', () => {
       const dataView1 = create('test1', spec);
       const dataView2 = create('test2', spec);
       expect(dataView1.sourceFilters).not.toBe(dataView2.sourceFilters);
+    });
+  });
+
+  describe('should initialize from spec with field attributes', () => {
+    it('should read field attrs from fields', () => {
+      const dataView = create('test', {
+        fields: {
+          test1: {
+            name: 'test1',
+            type: 'keyword',
+            aggregatable: true,
+            searchable: true,
+            readFromDocValues: false,
+            customLabel: 'custom test1',
+            customDescription: 'custom test1 desc',
+            count: 5,
+          },
+        },
+      });
+      expect(dataView.getFieldAttrs()).toMatchInlineSnapshot(`
+        Object {
+          "test1": Object {
+            "count": 5,
+            "customDescription": "custom test1 desc",
+            "customLabel": "custom test1",
+          },
+        }
+      `);
+    });
+
+    it('should read field attrs from fields or fieldAttrs', () => {
+      const dataView = create('test', {
+        fields: {
+          test1: {
+            name: 'test1',
+            type: 'keyword',
+            aggregatable: true,
+            searchable: true,
+            readFromDocValues: false,
+            customLabel: 'custom test1',
+            customDescription: 'custom test1 desc',
+          },
+        },
+        fieldAttrs: {
+          test1: {
+            customLabel: 'custom test2',
+            customDescription: 'custom test2 desc',
+            count: 2,
+          },
+        },
+      });
+      expect(dataView.getFieldAttrs()).toMatchInlineSnapshot(`
+        Object {
+          "test1": Object {
+            "count": 2,
+            "customDescription": "custom test2 desc",
+            "customLabel": "custom test2",
+          },
+        }
+      `);
     });
   });
 

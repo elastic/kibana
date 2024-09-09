@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useRef, FC } from 'react';
@@ -136,21 +137,18 @@ export const PageReduxStream: FC = () => {
           label="Simulate errors (gets applied to new streams only, not currently running ones)."
           checked={simulateErrors}
           onChange={(e) => dispatch(setSimulateErrors(!simulateErrors))}
-          compressed
         />
         <EuiCheckbox
           id="responseStreamCompressionCheckbox"
           label="Toggle compression setting for response stream."
           checked={compressResponse}
           onChange={(e) => dispatch(setCompressResponse(!compressResponse))}
-          compressed
         />
         <EuiCheckbox
           id="responseStreamFlushFixCheckbox"
           label="Toggle flushFix setting for response stream."
           checked={flushFix}
           onChange={(e) => dispatch(setFlushFix(!flushFix))}
-          compressed
         />
       </EuiText>
     </Page>

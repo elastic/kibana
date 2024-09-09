@@ -149,7 +149,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               description: agent.last_checkin_message ? agent.last_checkin_message : '-',
             },
             {
-              title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
+              title: i18n.translate('xpack.fleet.agentDetails.agentIdLabel', {
                 defaultMessage: 'Agent ID',
               }),
               description: agent.id,
@@ -195,6 +195,15 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               description:
                 typeof agent.local_metadata?.host?.hostname === 'string'
                   ? agent.local_metadata.host.hostname
+                  : '-',
+            },
+            {
+              title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
+                defaultMessage: 'Host ID',
+              }),
+              description:
+                typeof agent.local_metadata?.host?.id === 'string'
+                  ? agent.local_metadata.host.id
                   : '-',
             },
             {

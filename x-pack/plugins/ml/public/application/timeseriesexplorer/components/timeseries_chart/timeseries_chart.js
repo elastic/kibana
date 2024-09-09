@@ -57,6 +57,9 @@ import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_u
 import { LinksMenuUI } from '../../../components/anomalies_table/links_menu';
 import { RuleEditorFlyout } from '../../../components/rule_editor';
 
+const percentFocusChartHeight = 0.634;
+const minSvgHeight = 350;
+
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
 const focusHeight = focusZoomPanelHeight + focusChartHeight;
@@ -90,10 +93,27 @@ const anomalyGrayScale = d3.scale
   .domain([3, 25, 50, 75, 100])
   .range(['#dce7ed', '#b0c5d6', '#b1a34e', '#b17f4e', '#c88686']);
 
-function getSvgHeight(showAnnotations) {
+function getChartHeights(height) {
+  const actualHeight = height < minSvgHeight ? minSvgHeight : height;
+  const focusChartHeight = Math.round(actualHeight * percentFocusChartHeight);
+
+  const heights = {
+    focusChartHeight,
+    focusHeight: focusZoomPanelHeight + focusChartHeight,
+  };
+  return heights;
+}
+
+function getSvgHeight(showAnnotations, incomingHeight) {
   const adjustedAnnotationHeight = showAnnotations ? annotationHeight : 0;
+  const incomingHeightActual =
+    incomingHeight && incomingHeight < minSvgHeight ? minSvgHeight : incomingHeight;
+  const { focusHeight: focusHeightIncoming } = incomingHeight
+    ? getChartHeights(incomingHeightActual)
+    : {};
+
   return (
-    focusHeight +
+    (focusHeightIncoming ?? focusHeight) +
     contextChartHeight +
     swimlaneHeight +
     adjustedAnnotationHeight +
@@ -141,9 +161,18 @@ class TimeseriesChartIntl extends Component {
   rowMouseenterSubscriber = null;
   rowMouseleaveSubscriber = null;
 
-  constructor(props) {
+  constructor(props, constructorContext) {
     super(props);
     this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
+
+    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
+      constructorContext.services.uiSettings,
+      constructorContext.services.mlServices.mlApi,
+      constructorContext.services.mlServices.mlResultsService
+    );
+    this.getTimeBuckets = timeBucketsServiceFactory(
+      constructorContext.services.uiSettings
+    ).getTimeBuckets;
   }
 
   componentWillUnmount() {
@@ -159,22 +188,18 @@ class TimeseriesChartIntl extends Component {
   }
 
   componentDidMount() {
-    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
-      this.context.services.uiSettings,
-      this.context.services.mlServices.mlApiServices,
-      this.context.services.mlServices.mlResultsService
-    );
-    this.getTimeBuckets = timeBucketsServiceFactory(
-      this.context.services.uiSettings
-    ).getTimeBuckets;
-
-    const { svgWidth } = this.props;
+    const { svgWidth, svgHeight } = this.props;
+    const { focusHeight: focusHeightIncoming, focusChartHeight: focusChartIncoming } = svgHeight
+      ? getChartHeights(svgHeight)
+      : {};
 
     this.vizWidth = svgWidth - margin.left - margin.right;
     const vizWidth = this.vizWidth;
 
     this.focusXScale = d3.time.scale().range([0, vizWidth]);
-    this.focusYScale = d3.scale.linear().range([focusHeight, focusZoomPanelHeight]);
+    this.focusYScale = d3.scale
+      .linear()
+      .range([focusHeightIncoming ?? focusHeight, focusZoomPanelHeight]);
     const focusXScale = this.focusXScale;
     const focusYScale = this.focusYScale;
 
@@ -182,7 +207,7 @@ class TimeseriesChartIntl extends Component {
       .axis()
       .scale(focusXScale)
       .orient('bottom')
-      .innerTickSize(-focusChartHeight)
+      .innerTickSize(-(focusChartIncoming ?? focusChartHeight))
       .outerTickSize(0)
       .tickPadding(10);
     this.focusYAxis = d3.svg
@@ -292,6 +317,7 @@ class TimeseriesChartIntl extends Component {
       modelPlotEnabled,
       selectedJob,
       svgWidth,
+      svgHeight: incomingSvgHeight,
       showAnnotations,
     } = this.props;
 
@@ -301,7 +327,10 @@ class TimeseriesChartIntl extends Component {
     const focusYAxis = this.focusYAxis;
     const focusYScale = this.focusYScale;
 
-    const svgHeight = getSvgHeight(showAnnotations);
+    const svgHeight = getSvgHeight(showAnnotations, incomingSvgHeight);
+    const { focusHeight: focusHeightIncoming } = incomingSvgHeight
+      ? getChartHeights(incomingSvgHeight)
+      : {};
 
     // Clear any existing elements from the visualization,
     // then build the svg elements for the bubble chart.
@@ -391,6 +420,10 @@ class TimeseriesChartIntl extends Component {
     focusXScale.range([0, this.vizWidth]);
     focusYAxis.innerTickSize(-this.vizWidth);
 
+    if (focusHeightIncoming !== undefined) {
+      focusYScale.range([focusHeightIncoming, focusZoomPanelHeight]);
+    }
+
     const focus = svg
       .append('g')
       .attr('class', 'focus-chart')
@@ -401,7 +434,11 @@ class TimeseriesChartIntl extends Component {
       .attr('class', 'context-chart')
       .attr(
         'transform',
-        'translate(' + margin.left + ',' + (focusHeight + margin.top + chartSpacing) + ')'
+        'translate(' +
+          margin.left +
+          ',' +
+          ((focusHeightIncoming ?? focusHeight) + margin.top + chartSpacing) +
+          ')'
       );
 
     // Mask to hide annotations overflow
@@ -412,11 +449,11 @@ class TimeseriesChartIntl extends Component {
       .attr('x', 0)
       .attr('y', 0)
       .attr('width', this.vizWidth)
-      .attr('height', focusHeight)
+      .attr('height', focusHeightIncoming ?? focusHeight)
       .style('fill', 'white');
 
     // Draw each of the component elements.
-    createFocusChart(focus, this.vizWidth, focusHeight);
+    createFocusChart(focus, this.vizWidth, focusHeightIncoming ?? focusHeight);
     drawContextElements(
       context,
       this.vizWidth,
@@ -491,6 +528,9 @@ class TimeseriesChartIntl extends Component {
     // as we want to re-render the paths and points when the zoom area changes.
 
     const { contextForecastData } = this.props;
+    const { focusChartHeight: focusChartIncoming } = this.props.svgHeight
+      ? getChartHeights(this.props.svgHeight)
+      : {};
 
     // Add a group at the top to display info on the chart aggregation interval
     // and links to set the brush span to 1h, 1d, 1w etc.
@@ -524,7 +564,7 @@ class TimeseriesChartIntl extends Component {
       .attr('x', brushX)
       .attr('y', focusZoomPanelHeight)
       .attr('width', brushWidth)
-      .attr('height', focusChartHeight);
+      .attr('height', focusChartIncoming ?? focusChartHeight);
 
     fcsGroup.append('g').classed('mlAnnotations', true);
 
@@ -534,7 +574,7 @@ class TimeseriesChartIntl extends Component {
       .attr('x', 0)
       .attr('y', focusZoomPanelHeight)
       .attr('width', fcsWidth)
-      .attr('height', focusChartHeight)
+      .attr('height', focusChartIncoming ?? focusChartHeight)
       .attr('class', 'chart-border');
 
     // Add background for x axis.
@@ -767,11 +807,16 @@ class TimeseriesChartIntl extends Component {
         .classed('hidden', !showModelBounds);
     }
 
+    const { focusChartHeight: focusChartIncoming, focusHeight: focusHeightIncoming } = this.props
+      .svgHeight
+      ? getChartHeights(this.props.svgHeight)
+      : {};
+
     renderAnnotations(
       focusChart,
       focusAnnotationData,
       focusZoomPanelHeight,
-      focusChartHeight,
+      focusChartIncoming ?? focusChartHeight,
       this.focusXScale,
       showAnnotations,
       showFocusChartTooltip,
@@ -904,7 +949,7 @@ class TimeseriesChartIntl extends Component {
       .attr('x', (d) => this.focusXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
       .attr('y', (d) => {
         const focusYValue = this.focusYScale(d.value);
-        return isNaN(focusYValue) ? -focusHeight - 3 : focusYValue - 3;
+        return isNaN(focusYValue) ? -(focusHeightIncoming ?? focusHeight) - 3 : focusYValue - 3;
       });
 
     // Plot any forecast data in scope.
@@ -1971,6 +2016,7 @@ class TimeseriesChartIntl extends Component {
     return (
       <>
         <RuleEditorFlyout
+          selectedJob={this.props.selectedJob}
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
         />
@@ -1990,6 +2036,7 @@ class TimeseriesChartIntl extends Component {
             >
               <LinksMenuUI
                 anomaly={this.state.popoverData}
+                selectedJob={this.props.selectedJob}
                 bounds={this.props.bounds}
                 showMapsLink={false}
                 showViewSeriesLink={false}

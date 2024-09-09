@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Position } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +27,8 @@ import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-com
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import useObservable from 'react-use/lib/useObservable';
+import { EuiPopover, EuiSelectable } from '@elastic/eui';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -37,7 +39,7 @@ import {
   getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
-import { XyToolbar } from './xy_config_panel';
+import { XyToolbar, updateLayer } from './xy_config_panel';
 import {
   DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,
@@ -60,6 +62,7 @@ import {
   type XYLayerConfig,
   type XYDataLayerConfig,
   type SeriesType,
+  visualizationSubtypes,
   visualizationTypes,
 } from './types';
 import {
@@ -109,8 +112,6 @@ import {
 } from './visualization_helpers';
 import { getAxesConfiguration, groupAxesByType } from './axes_configuration';
 import type { XYByValueAnnotationLayerConfig, XYState } from './types';
-import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
-import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import { createAnnotationActions } from './annotations/actions';
@@ -118,7 +119,20 @@ import { AddLayerButton } from './add_layer';
 import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import { getLegendStatsTelemetryEvents } from './legend_stats_telemetry_helpers';
 import { XYPersistedState, convertToPersistable, convertToRuntime } from './persistence';
+import { shouldDisplayTable } from '../../shared_components/legend/legend_settings_popover';
+import {
+  ANNOTATION_MISSING_DATE_HISTOGRAM,
+  LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
+  XY_MIXED_LOG_SCALE,
+  XY_MIXED_LOG_SCALE_DIMENSION,
+  XY_RENDER_ARRAY_VALUES,
+  XY_X_WRONG_DATA_TYPE,
+  XY_Y_WRONG_DATA_TYPE,
+} from '../../user_messages_ids';
+import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel/annotations_panel';
+import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel/reference_line_panel';
 
 const XY_ID = 'lnsXY';
 
@@ -150,11 +164,12 @@ export const getXyVisualization = ({
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }): Visualization<State, XYPersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
-  visualizationTypes,
-  getVisualizationTypeId(state) {
-    const type = getVisualizationType(state);
+  getVisualizationTypeId(state, layerId) {
+    const type = getVisualizationType(state, layerId);
     return type === 'mixed' ? type : type.id;
   },
+
+  visualizationTypes,
 
   getLayerIds(state) {
     return getLayersByType(state).map((l) => l.layerId);
@@ -248,14 +263,30 @@ export const getXyVisualization = ({
   getDescription,
 
   switchVisualizationType(seriesType: string, state: State, layerId?: string) {
+    const dataLayer = state.layers.find((l) => l.layerId === layerId);
+    if (dataLayer && !isDataLayer(dataLayer)) {
+      throw new Error('Cannot switch series type for non-data layer');
+    }
+    if (!dataLayer) {
+      return state;
+    }
+    // todo: test how they switch between percentage etc
+    const currentStackingType = stackingTypes.find(({ subtypes }) =>
+      subtypes.includes(dataLayer.seriesType)
+    );
+    const chosenTypeIndex = defaultSeriesTypesByIndex.indexOf(seriesType);
+
+    const compatibleSeriesType: SeriesType = (currentStackingType?.subtypes[chosenTypeIndex] ||
+      seriesType) as SeriesType;
+
     return {
       ...state,
-      preferredSeriesType: seriesType as SeriesType,
+      preferredSeriesType: compatibleSeriesType,
       layers: layerId
         ? state.layers.map((layer) =>
-            layer.layerId === layerId ? { ...layer, seriesType: seriesType as SeriesType } : layer
+            layer.layerId === layerId ? { ...layer, seriesType: compatibleSeriesType } : layer
           )
-        : state.layers.map((layer) => ({ ...layer, seriesType: seriesType as SeriesType })),
+        : state.layers.map((layer) => ({ ...layer, seriesType: compatibleSeriesType })),
     };
   },
 
@@ -661,6 +692,23 @@ export const getXyVisualization = ({
       (!isHorizontalSeries(subtype1 as SeriesType) && !isHorizontalSeries(subtype2 as SeriesType))
     );
   },
+  getSubtypeSwitch({ state, setState, layerId }) {
+    const index = state.layers.findIndex((l) => l.layerId === layerId);
+    const layer = state.layers[index];
+
+    if (!layer || !isDataLayer(layer) || layer.seriesType === 'line') {
+      return null;
+    }
+
+    return () => (
+      <SubtypeSwitch
+        layer={layer}
+        setLayerState={(newLayer: XYDataLayerConfig) =>
+          setState(updateLayer(state, newLayer, index))
+        }
+      />
+    );
+  },
 
   getCustomLayerHeader(props) {
     const layer = props.state.layers.find((l) => l.layerId === props.layerId);
@@ -693,14 +741,14 @@ export const getXyVisualization = ({
       paletteService,
     };
 
-    const darkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />
     ) : isAnnotationsLayer(layer) ? (
       <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />
     ) : (
-      <DataDimensionEditor {...allProps} darkMode={darkMode} />
+      <DataDimensionEditor {...allProps} isDarkMode={isDarkMode} />
     );
 
     return dimensionEditor;
@@ -773,6 +821,7 @@ export const getXyVisualization = ({
       layer.annotations.forEach((annotation) => {
         if (!hasDateHistogram) {
           errors.push({
+            uniqueId: ANNOTATION_MISSING_DATE_HISTOGRAM,
             severity: 'error',
             fixableInEditor: true,
             displayLocations: [{ id: 'dimensionButton', dimensionId: annotation.id }],
@@ -788,72 +837,43 @@ export const getXyVisualization = ({
         }
 
         const errorMessages = getAnnotationLayerErrors(layer, annotation.id, dataViews);
-        errors.push(
-          ...errorMessages.map((errorMessage) => {
-            const message: UserMessage = {
-              severity: 'error',
-              fixableInEditor: true,
-              displayLocations: [
-                { id: 'visualization' },
-                { id: 'dimensionButton', dimensionId: annotation.id },
-              ],
-              shortMessage: errorMessage,
-              longMessage: (
-                <FormattedMessage
-                  id="xpack.lens.xyChart.annotationError"
-                  defaultMessage="Annotation {annotationName} has an error: {errorMessage}"
-                  values={{
-                    annotationName: annotation.label,
-                    errorMessage,
-                  }}
-                />
-              ),
-            };
-            return message;
-          })
-        );
+        errors.push(...errorMessages);
       });
     });
-
-    // Data error handling below here
-    const hasNoAccessors = ({ accessors }: XYDataLayerConfig) =>
-      accessors == null || accessors.length === 0;
-
-    const hasNoSplitAccessor = ({ splitAccessor, seriesType }: XYDataLayerConfig) =>
-      seriesType.includes('percentage') && splitAccessor == null;
 
     // check if the layers in the state are compatible with this type of chart
     if (state && state.layers.length > 1) {
       // Order is important here: Y Axis is fundamental to exist to make it valid
-      const checks: Array<[string, (layer: XYDataLayerConfig) => boolean]> = [
-        ['Y', hasNoAccessors],
-        ['Break down', hasNoSplitAccessor],
-      ];
+      const yLayerValidation = validateLayersForDimension(
+        'y',
+        state.layers,
+        ({ accessors }) => accessors == null || accessors.length === 0 // has no accessor
+      );
+      if (!yLayerValidation.valid) {
+        errors.push(yLayerValidation.error);
+      }
 
-      for (const [dimension, criteria] of checks) {
-        const result = validateLayersForDimension(dimension, state.layers, criteria);
-        if (!result.valid) {
-          errors.push({
-            severity: 'error',
-            fixableInEditor: true,
-            displayLocations: [{ id: 'visualization' }],
-            shortMessage: result.payload.shortMessage,
-            longMessage: result.payload.longMessage,
-          });
-        }
+      const breakDownLayerValidation = validateLayersForDimension(
+        'break_down',
+        state.layers,
+        ({ splitAccessor, seriesType }) =>
+          seriesType.includes('percentage') && splitAccessor == null // check if no split accessor
+      );
+      if (!breakDownLayerValidation.valid) {
+        errors.push(breakDownLayerValidation.error);
       }
     }
     // temporary fix for #87068
     errors.push(
-      ...checkXAccessorCompatibility(state, datasourceLayers).map(
-        ({ shortMessage, longMessage }) =>
-          ({
-            severity: 'error',
-            fixableInEditor: true,
-            displayLocations: [{ id: 'visualization' }],
-            shortMessage,
-            longMessage,
-          } as UserMessage)
+      ...checkXAccessorCompatibility(state, datasourceLayers).map<UserMessage>(
+        ({ shortMessage, longMessage }) => ({
+          severity: 'error',
+          uniqueId: XY_X_WRONG_DATA_TYPE,
+          fixableInEditor: true,
+          displayLocations: [{ id: 'visualization' }],
+          shortMessage,
+          longMessage,
+        })
       )
     );
 
@@ -864,6 +884,7 @@ export const getXyVisualization = ({
           const operation = datasourceAPI.getOperationForColumnId(accessor);
           if (operation && operation.dataType !== 'number') {
             errors.push({
+              uniqueId: XY_Y_WRONG_DATA_TYPE,
               severity: 'error',
               fixableInEditor: true,
               displayLocations: [{ id: 'visualization' }],
@@ -914,6 +935,7 @@ export const getXyVisualization = ({
 
       accessorsWithArrayValues.forEach((label) =>
         warnings.push({
+          uniqueId: XY_RENDER_ARRAY_VALUES,
           severity: 'warning',
           fixableInEditor: true,
           displayLocations: [{ id: 'toolbar' }],
@@ -974,7 +996,8 @@ export const getXyVisualization = ({
           const { groupId } = axisGroup;
 
           warnings.push({
-            uniqueId: `mixedLogScale-${groupId}`,
+            // TODO: can we push the group into the metadata and use a correct unique ID here?
+            uniqueId: `${XY_MIXED_LOG_SCALE}${groupId}`,
             severity: 'warning',
             shortMessage: '',
             longMessage: (
@@ -1003,7 +1026,8 @@ export const getXyVisualization = ({
 
           axisGroup.mixedDomainSeries.forEach(({ accessor }) => {
             warnings.push({
-              uniqueId: `mixedLogScale-dimension-${accessor}`,
+              // TODO: can we push the group into the metadata and use a correct unique ID here?
+              uniqueId: `${XY_MIXED_LOG_SCALE_DIMENSION}${accessor}`,
               severity: 'warning',
               shortMessage: '',
               longMessage: (
@@ -1077,10 +1101,22 @@ export const getXyVisualization = ({
   getTelemetryEventsOnSave(state, prevState) {
     const dataLayers = getDataLayers(state.layers);
     const prevLayers = prevState ? getDataLayers(prevState.layers) : undefined;
-    return dataLayers.flatMap((l) => {
+    const colorMappingEvents = dataLayers.flatMap((l) => {
       const prevLayer = prevLayers?.find((prevL) => prevL.layerId === l.layerId);
       return getColorMappingTelemetryEvents(l.colorMapping, prevLayer?.colorMapping);
     });
+    const legendStatsEvents = getLegendStatsTelemetryEvents(
+      state.legend.legendStats,
+      prevState ? prevState.legend.legendStats : undefined
+    );
+    return colorMappingEvents.concat(legendStatsEvents);
+  },
+
+  getRenderEventCounters(state) {
+    if (shouldDisplayTable(state.legend.legendStats ?? [])) {
+      return [`legend_stats`];
+    }
+    return [];
   },
 });
 
@@ -1138,9 +1174,9 @@ function getVisualizationInfo(
 
     if (isDataLayer(layer)) {
       chartType = layer.seriesType;
-      const layerVisType = visualizationTypes.find((visType) => visType.id === chartType);
+      const layerVisType = visualizationSubtypes.find((visType) => visType.id === chartType);
       icon = layerVisType?.icon;
-      label = layerVisType?.fullLabel || layerVisType?.label;
+      label = layerVisType?.label;
 
       if (layer.xAccessor) {
         dimensions.push({
@@ -1276,7 +1312,7 @@ function getNotifiableFeatures(
 
   return [
     {
-      uniqueId: 'ignoring-global-filters-layers',
+      uniqueId: LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
       severity: 'info',
       fixableInEditor: false,
       shortMessage: i18n.translate('xpack.lens.xyChart.layerAnnotationsIgnoreTitle', {
@@ -1296,3 +1332,97 @@ function getNotifiableFeatures(
     },
   ];
 }
+
+const defaultSeriesTypesByIndex = ['bar', 'area', 'bar_horizontal'];
+
+export const stackingTypes = [
+  {
+    type: 'stacked',
+    label: i18n.translate('xpack.lens.shared.barLayerStacking.stacked', {
+      defaultMessage: 'Stacked',
+    }),
+    subtypes: ['bar_stacked', 'area_stacked', 'bar_horizontal_stacked'],
+  },
+  {
+    type: 'unstacked',
+    label: i18n.translate('xpack.lens.shared.barLayerStacking.unstacked', {
+      defaultMessage: 'Unstacked',
+    }),
+    subtypes: ['bar', 'area', 'bar_horizontal'],
+  },
+  {
+    type: 'percentage',
+    label: i18n.translate('xpack.lens.shared.barLayerStacking.percentage', {
+      defaultMessage: 'Percentage',
+    }),
+    subtypes: [
+      'bar_percentage_stacked',
+      'area_percentage_stacked',
+      'bar_horizontal_percentage_stacked',
+    ],
+  },
+];
+
+const SubtypeSwitch = ({
+  layer,
+  setLayerState,
+}: {
+  layer: XYDataLayerConfig;
+  setLayerState: (l: XYDataLayerConfig) => void;
+}): JSX.Element | null => {
+  const [flyoutOpen, setFlyoutOpen] = useState(false);
+
+  const stackingType = stackingTypes.find(({ subtypes }) => subtypes.includes(layer.seriesType));
+  if (!stackingType) {
+    return null;
+  }
+  const subTypeIndex = stackingType.subtypes.indexOf(layer.seriesType);
+  const options = stackingTypes.map(({ label, subtypes }) => ({
+    label,
+    value: subtypes[subTypeIndex],
+    checked: subtypes[subTypeIndex] === layer.seriesType ? ('on' as const) : undefined,
+  }));
+
+  return (
+    <>
+      <EuiPopover
+        ownFocus
+        panelPaddingSize="none"
+        button={
+          <ToolbarButton
+            aria-label={i18n.translate('xpack.lens.xyChart.stackingOptions', {
+              defaultMessage: 'Stacking',
+            })}
+            onClick={() => setFlyoutOpen(true)}
+            fullWidth
+            size="s"
+            label={stackingType.label}
+          />
+        }
+        isOpen={flyoutOpen}
+        closePopover={() => setFlyoutOpen(false)}
+        anchorPosition="downLeft"
+      >
+        <EuiSelectable
+          css={{ width: 200 }}
+          singleSelection
+          data-test-subj="lnsChartSwitchList"
+          options={options}
+          onChange={(newOptions) => {
+            setFlyoutOpen(false);
+            const chosenType = newOptions.find(({ checked }) => checked === 'on');
+            if (!chosenType) {
+              return;
+            }
+            setLayerState({
+              ...layer,
+              seriesType: chosenType.value as SeriesType,
+            });
+          }}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </EuiPopover>
+    </>
+  );
+};

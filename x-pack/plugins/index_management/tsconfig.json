@@ -49,9 +49,12 @@
     "@kbn/utility-types",
     "@kbn/inference_integration_flyout",
     "@kbn/ml-plugin",
-    "@kbn/ml-error-utils",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/rollup",
+    "@kbn/ml-error-utils",
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/shared-ux-table-persist",
   ],
   "exclude": ["target/**/*"]
 }

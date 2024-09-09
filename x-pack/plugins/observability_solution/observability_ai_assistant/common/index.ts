@@ -8,7 +8,7 @@
 export type { Message, Conversation, KnowledgeBaseEntry } from './types';
 export type { ConversationCreateRequest } from './types';
 export { KnowledgeBaseEntryRole, MessageRole } from './types';
-export type { FunctionDefinition } from './functions/types';
+export type { FunctionDefinition, CompatibleJSONSchema } from './functions/types';
 export { FunctionVisibility } from './functions/function_visibility';
 export {
   VISUALIZE_ESQL_USER_INTENTIONS,
@@ -38,7 +38,6 @@ export {
 } from './conversation_complete';
 
 export {
-  aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
@@ -46,6 +45,8 @@ export {
 
 export { concatenateChatCompletionChunks } from './utils/concatenate_chat_completion_chunks';
 
-export { DEFAULT_LANGUAGE_OPTION, LANGUAGE_OPTIONS } from './ui_settings/language_options';
-
 export { isSupportedConnectorType } from './connectors';
+
+export { ShortIdTable } from './utils/short_id_table';
+
+export { KnowledgeBaseType } from './types';

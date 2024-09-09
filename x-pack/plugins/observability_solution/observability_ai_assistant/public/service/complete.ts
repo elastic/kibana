@@ -20,19 +20,16 @@ import {
 import {
   MessageRole,
   StreamingChatResponseEventType,
-  type BufferFlushEvent,
   type ConversationCreateEvent,
   type ConversationUpdateEvent,
   type Message,
   type MessageAddEvent,
-  type StreamingChatResponseEvent,
   type StreamingChatResponseEventWithoutError,
 } from '../../common';
-import { ObservabilityAIAssistantScreenContext } from '../../common/types';
+import type { ObservabilityAIAssistantScreenContext } from '../../common/types';
 import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
-import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
 import type { ObservabilityAIAssistantAPIClientRequestParamsOf } from '../api';
-import { ObservabilityAIAssistantChatService } from '../types';
+import type { ObservabilityAIAssistantChatService } from '../types';
 import { createPublicFunctionResponseError } from '../utils/create_function_response_error';
 
 export function complete(
@@ -45,21 +42,14 @@ export function complete(
     persist,
     disableFunctions,
     signal,
-    responseLanguage,
+    instructions,
   }: {
     client: Pick<ObservabilityAIAssistantChatService, 'chat' | 'complete'>;
     getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
-    connectorId: string;
-    conversationId?: string;
-    messages: Message[];
-    persist: boolean;
-    disableFunctions: boolean;
-    signal: AbortSignal;
-    responseLanguage: string;
-  },
+  } & Parameters<ObservabilityAIAssistantChatService['complete']>[0],
   requestCallback: (
     params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat/complete'>
-  ) => Observable<StreamingChatResponseEvent | BufferFlushEvent>
+  ) => Observable<StreamingChatResponseEventWithoutError>
 ): Observable<StreamingChatResponseEventWithoutError> {
   return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
     const screenContexts = getScreenContexts();
@@ -74,17 +64,10 @@ export function complete(
           disableFunctions,
           screenContexts,
           conversationId,
-          responseLanguage,
+          instructions,
         },
       },
-    }).pipe(
-      filter(
-        (event): event is StreamingChatResponseEvent =>
-          event.type !== StreamingChatResponseEventType.BufferFlush
-      ),
-      throwSerializedChatCompletionErrors(),
-      shareReplay()
-    );
+    }).pipe(shareReplay());
 
     const messages$ = response$.pipe(
       filter(
@@ -146,8 +129,8 @@ export function complete(
               messages: initialMessages.concat(nextMessages),
               signal,
               persist,
-              responseLanguage,
               disableFunctions,
+              instructions,
             },
             requestCallback
           ).subscribe(subscriber);

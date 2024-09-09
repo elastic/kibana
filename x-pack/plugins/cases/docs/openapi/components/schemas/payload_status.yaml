@@ -1,4 +1,4 @@
 type: object
 properties:
   status:
-    $ref: 'status.yaml'
+    $ref: 'case_status.yaml'

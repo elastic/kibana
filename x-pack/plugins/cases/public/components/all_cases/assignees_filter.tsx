@@ -112,7 +112,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
         isOpen={isPopoverOpen}
         closePopover={togglePopover}
         panelStyle={{
-          minWidth: 520,
+          width: 400,
         }}
         button={
           <EuiFilterButton

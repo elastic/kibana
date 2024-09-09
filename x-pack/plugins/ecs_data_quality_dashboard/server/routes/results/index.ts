@@ -7,14 +7,16 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 
-import { postResultsRoute } from './post_results';
-import { getResultsIndicesLatestRoute } from './get_results_indices_latest';
+import { postIndexResultsRoute } from './post_index_results';
+import { getIndexResultsLatestRoute } from './get_index_results_latest';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
+import { getIndexResultsRoute } from './get_index_results';
 
 export const resultsRoutes = (
   router: IRouter<DataQualityDashboardRequestHandlerContext>,
   logger: Logger
 ) => {
-  postResultsRoute(router, logger);
-  getResultsIndicesLatestRoute(router, logger);
+  postIndexResultsRoute(router, logger);
+  getIndexResultsLatestRoute(router, logger);
+  getIndexResultsRoute(router, logger);
 };

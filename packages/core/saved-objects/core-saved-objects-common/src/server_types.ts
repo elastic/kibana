@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -76,6 +77,8 @@ export interface SavedObject<T = unknown> {
   created_by?: string;
   /** Timestamp of the last time this document had been updated.  */
   updated_at?: string;
+  /** The ID of the user who last updated this object. */
+  updated_by?: string;
   /** Error associated with this object, populated if an operation failed for this object.  */
   error?: SavedObjectError;
   /** The data for a Saved Object is stored as an object in the `attributes` property. **/

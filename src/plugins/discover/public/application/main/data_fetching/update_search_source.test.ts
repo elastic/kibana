@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { updateVolatileSearchSource } from './update_search_source';
@@ -42,7 +43,7 @@ describe('updateVolatileSearchSource', () => {
       sort: [] as SortOrder[],
       customFilters: [],
     });
-    expect(searchSource.getField('fields')).toEqual([{ field: '*', include_unmapped: 'true' }]);
+    expect(searchSource.getField('fields')).toEqual([{ field: '*', include_unmapped: true }]);
     expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
   });
 
@@ -56,7 +57,7 @@ describe('updateVolatileSearchSource', () => {
       customFilters: [],
     });
     expect(volatileSearchSourceMock.getField('fields')).toEqual([
-      { field: '*', include_unmapped: 'true' },
+      { field: '*', include_unmapped: true },
     ]);
     expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
   });

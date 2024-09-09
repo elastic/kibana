@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -122,6 +123,40 @@ describe('updateSavedSearch', () => {
       from: 'now-666m',
       to: 'now',
     });
+  });
+
+  it('should pass breakdownField if state has breakdownField', async () => {
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+    };
+    expect(savedSearch.breakdownField).toBeUndefined();
+    updateSavedSearch({
+      savedSearch,
+      globalStateContainer: createGlobalStateContainer(),
+      services: discoverServiceMock,
+      state: {
+        breakdownField: 'test',
+      },
+    });
+    expect(savedSearch.breakdownField).toEqual('test');
+  });
+
+  it('should pass an empty string if state already has breakdownField', async () => {
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+      breakdownField: 'test',
+    };
+    updateSavedSearch({
+      savedSearch,
+      globalStateContainer: createGlobalStateContainer(),
+      services: discoverServiceMock,
+      state: {
+        breakdownField: undefined,
+      },
+    });
+    expect(savedSearch.breakdownField).toEqual('');
   });
 
   it('should set query and filters from services', async () => {

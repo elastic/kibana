@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
@@ -36,6 +36,9 @@ import {
   useIsPackagePolicyUpgradable,
   usePermissionCheck,
   useStartServices,
+  useMultipleAgentPolicies,
+  useGetOutputs,
+  useDefaultOutput,
 } from '../../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../../services';
 
@@ -63,9 +66,11 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   const { application } = useStartServices();
   const authz = useAuthz();
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
+  const canReadAgentPolicies = authz.fleet.readAgentPolicies;
   const canReadIntegrationPolicies = authz.integrations.readIntegrationPolicies;
   const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
@@ -99,6 +104,20 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     return [mappedPackagePolicies, namespaceFilterOptions];
   }, [originalPackagePolicies, isPackagePolicyUpgradable]);
 
+  const getSharedPoliciesNumber = useCallback((packagePolicy: PackagePolicy) => {
+    return packagePolicy.policy_ids.length || 0;
+  }, []);
+
+  const { data: outputsData, isLoading: isOutputsLoading } = useGetOutputs();
+  const { output: defaultOutputData } = useDefaultOutput();
+  const outputNamesById = useMemo(() => {
+    const outputs = outputsData?.items ?? [];
+    return outputs.reduce<Record<string, string>>((acc, output) => {
+      acc[output.id] = output.name;
+      return acc;
+    }, {});
+  }, [outputsData]);
+
   const columns = useMemo(
     (): EuiInMemoryTableProps<InMemoryPackagePolicy>['columns'] => [
       {
@@ -106,32 +125,64 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         sortable: true,
         truncateText: true,
         name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.nameColumnTitle', {
-          defaultMessage: 'Name',
+          defaultMessage: 'Integration policy',
         }),
+        width: '35%',
         render: (value: string, packagePolicy: InMemoryPackagePolicy) => (
-          <EuiLink
-            title={value}
-            {...(canReadIntegrationPolicies
-              ? {
-                  href: getHref('edit_integration', {
-                    policyId: agentPolicy.id,
-                    packagePolicyId: packagePolicy.id,
-                  }),
-                }
-              : { disabled: true })}
-          >
-            <span className="eui-textTruncate" title={value}>
-              {value}
-            </span>
-            {packagePolicy.description ? (
-              <span>
-                &nbsp;
-                <EuiToolTip content={packagePolicy.description}>
-                  <EuiIcon type="help" />
-                </EuiToolTip>
-              </span>
-            ) : null}
-          </EuiLink>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem data-test-subj="PackagePoliciesTableName" grow={false}>
+              <EuiLink
+                title={value}
+                {...(canReadIntegrationPolicies
+                  ? {
+                      href: getHref('edit_integration', {
+                        policyId: agentPolicy.id,
+                        packagePolicyId: packagePolicy.id,
+                      }),
+                    }
+                  : { disabled: true })}
+              >
+                <span className="eui-textTruncate">{value}</span>
+                {packagePolicy.description ? (
+                  <span>
+                    &nbsp;
+                    <EuiToolTip content={packagePolicy.description}>
+                      <EuiIcon type="help" />
+                    </EuiToolTip>
+                  </span>
+                ) : null}
+              </EuiLink>
+            </EuiFlexItem>
+            {canUseMultipleAgentPolicies &&
+              canReadAgentPolicies &&
+              canReadIntegrationPolicies &&
+              getSharedPoliciesNumber(packagePolicy) > 1 && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.fleet.agentPolicyList.agentsColumn.sharedTooltip"
+                        defaultMessage="This integration is shared by {numberShared} agent policies"
+                        values={{ numberShared: getSharedPoliciesNumber(packagePolicy) }}
+                      />
+                    }
+                  >
+                    <EuiText
+                      data-test-subj="PackagePoliciesTableSharedLabel"
+                      color="subdued"
+                      size="xs"
+                      className="eui-textNoWrap"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.agentPolicyList.agentsColumn.sharedText"
+                        defaultMessage="Shared"
+                      />{' '}
+                      <EuiIcon type="iInCircle" />
+                    </EuiText>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+          </EuiFlexGroup>
         ),
       },
       {
@@ -241,15 +292,72 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         },
       },
       {
+        field: 'output_id',
+        name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.outputColumnTitle', {
+          defaultMessage: 'Output',
+        }),
+        render: (outputId: InMemoryPackagePolicy['output_id']) => {
+          if (isOutputsLoading) {
+            return null;
+          }
+          if (outputId) {
+            return <EuiBadge color="hollow">{outputNamesById[outputId] || outputId}</EuiBadge>;
+          }
+          if (agentPolicy.data_output_id) {
+            return (
+              <>
+                <EuiBadge color="default">
+                  {outputNamesById[agentPolicy.data_output_id] || agentPolicy.data_output_id}
+                </EuiBadge>
+                &nbsp;
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.fleet.policyDetails.packagePoliciesTable.outputFromParentPolicyText',
+                    {
+                      defaultMessage: 'Output defined in parent agent policy',
+                    }
+                  )}
+                  position="right"
+                  type="iInCircle"
+                  color="subdued"
+                />
+              </>
+            );
+          }
+          if (defaultOutputData) {
+            return (
+              <>
+                <EuiBadge color="default">
+                  {outputNamesById[defaultOutputData.id] || defaultOutputData.id}
+                </EuiBadge>
+                &nbsp;
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.fleet.policyDetails.packagePoliciesTable.outputFromFleetSettingsText',
+                    {
+                      defaultMessage: 'Output defined in Fleet settings',
+                    }
+                  )}
+                  position="right"
+                  type="iInCircle"
+                  color="subdued"
+                />
+              </>
+            );
+          }
+        },
+      },
+      {
         name: i18n.translate('xpack.fleet.policyDetails.packagePoliciesTable.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
+        width: '70px',
         actions: [
           {
             render: (packagePolicy: InMemoryPackagePolicy) => {
               return canWriteIntegrationPolicies ? (
                 <PackagePolicyActionsMenu
-                  agentPolicy={agentPolicy}
+                  agentPolicies={[agentPolicy]}
                   from={'fleet-policy-list'}
                   packagePolicy={packagePolicy}
                   upgradePackagePolicyHref={`${getHref('upgrade_package_policy', {
@@ -265,7 +373,18 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         ],
       },
     ],
-    [agentPolicy, getHref, canWriteIntegrationPolicies, canReadIntegrationPolicies]
+    [
+      canReadIntegrationPolicies,
+      getHref,
+      agentPolicy,
+      canUseMultipleAgentPolicies,
+      canReadAgentPolicies,
+      getSharedPoliciesNumber,
+      canWriteIntegrationPolicies,
+      isOutputsLoading,
+      defaultOutputData,
+      outputNamesById,
+    ]
   );
 
   return (

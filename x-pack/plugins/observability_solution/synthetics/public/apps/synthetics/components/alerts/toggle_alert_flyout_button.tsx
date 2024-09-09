@@ -26,8 +26,12 @@ import {
 import { ManageRulesLink } from '../common/links/manage_rules_link';
 import { ClientPluginsStart } from '../../../../plugin';
 import { ToggleFlyoutTranslations } from './hooks/translations';
-import { useSyntheticsAlert } from './hooks/use_synthetics_alert';
-import { selectAlertFlyoutVisibility, setAlertFlyoutVisible } from '../../state';
+import { useSyntheticsRules } from './hooks/use_synthetics_rules';
+import {
+  selectAlertFlyoutVisibility,
+  selectMonitorListState,
+  setAlertFlyoutVisible,
+} from '../../state';
 
 export const ToggleAlertFlyoutButton = () => {
   const dispatch = useDispatch();
@@ -36,7 +40,11 @@ export const ToggleAlertFlyoutButton = () => {
   const { application } = useKibana<ClientPluginsStart>().services;
   const hasUptimeWrite = application?.capabilities.uptime?.save ?? false;
 
-  const { EditAlertFlyout, loading } = useSyntheticsAlert(isOpen);
+  const { EditAlertFlyout, loading } = useSyntheticsRules(isOpen);
+
+  const { loaded, data: monitors } = useSelector(selectMonitorListState);
+
+  const hasMonitors = loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0;
 
   const monitorStatusAlertContextMenuItem: EuiContextMenuPanelItemDescriptor = {
     'aria-label': ToggleFlyoutTranslations.toggleMonitorStatusAriaLabel,
@@ -109,6 +117,7 @@ export const ToggleAlertFlyoutButton = () => {
             iconType="arrowDown"
             iconSide="right"
             onClick={() => setIsOpen(!isOpen)}
+            disabled={!hasMonitors}
           >
             {ToggleFlyoutTranslations.alertsAndRules}
           </EuiHeaderLink>

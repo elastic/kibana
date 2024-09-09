@@ -35,12 +35,15 @@ export function useTabSwitcher({ defaultActiveTabId }: TabSwitcherParams) {
     showTab(activeTabId as TabIds, { scrollTo: to });
   };
 
+  const isActiveTab = (tabId: TabIds) => tabId === activeTabId;
+
   return {
     activeTabId,
     scrollTo,
     renderedTabsSet,
     showTab,
     setScrollTo,
+    isActiveTab,
   };
 }
 

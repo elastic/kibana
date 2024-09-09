@@ -19,7 +19,6 @@ import type { IndexPatternField } from '../../../../types';
 import {
   getInvalidFieldMessage,
   getFilter,
-  combineErrorMessages,
   getFormatFromPreviousColumn,
   isColumnOfType,
 } from './helpers';
@@ -87,11 +86,11 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   type: COUNT_ID,
   displayName: COUNT_NAME,
   input: 'field',
-  getErrorMessage: (layer, columnId, indexPattern) =>
-    combineErrorMessages([
-      getInvalidFieldMessage(layer, columnId, indexPattern),
-      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
-    ]),
+  getErrorMessage: (layer, columnId, indexPattern) => [
+    ...getInvalidFieldMessage(layer, columnId, indexPattern),
+    ...getColumnReducedTimeRangeError(layer, columnId, indexPattern),
+  ],
+
   allowAsReference: true,
   onFieldChange: (oldColumn, field) => {
     return {

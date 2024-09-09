@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { ReasonFound } from '.';
 
 jest.mock('../../../legacy_shims', () => ({
@@ -23,7 +23,7 @@ const enabler = {};
 
 describe('ReasonFound', () => {
   test('should load ExplainCollectionInterval component', () => {
-    const component = renderWithIntl(
+    const component = renderWithI18nProvider(
       <ReasonFound
         reason={{
           property: 'xpack.monitoring.collection.interval',
@@ -37,7 +37,7 @@ describe('ReasonFound', () => {
   });
 
   test('should load ExplainExporters component', () => {
-    const component = renderWithIntl(
+    const component = renderWithI18nProvider(
       <ReasonFound
         reason={{
           property: 'xpack.monitoring.exporters',
@@ -51,7 +51,7 @@ describe('ReasonFound', () => {
   });
 
   test('should load ExplainExportersCloud component', () => {
-    const component = renderWithIntl(
+    const component = renderWithI18nProvider(
       <ReasonFound
         reason={{
           property: 'xpack.monitoring.exporters.cloud_enabled',
@@ -65,7 +65,7 @@ describe('ReasonFound', () => {
   });
 
   test('should load ExplainPluginEnabled component', () => {
-    const component = renderWithIntl(
+    const component = renderWithI18nProvider(
       <ReasonFound
         reason={{
           property: 'xpack.monitoring.enabled',

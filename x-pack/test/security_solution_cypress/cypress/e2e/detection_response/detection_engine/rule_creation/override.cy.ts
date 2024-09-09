@@ -63,7 +63,7 @@ import {
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
+import { getDetails } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 
@@ -149,7 +149,6 @@ describe('Rules override', { tags: ['@ess', '@serverless'] }, () => {
         .should('have.text', `${humanizedDuration}`);
     });
 
-    waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
     cy.get(ALERTS_COUNT)

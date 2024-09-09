@@ -14,7 +14,7 @@ import {
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import {
   ArtifactBodyType,
   getArtifactsListTestsData,
@@ -30,12 +30,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'artifactEntriesList']);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const endpointArtifactTestResources = getService('endpointArtifactTestResources');
+  const endpointArtifactsTestResources = getService('endpointArtifactTestResources');
   const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
   const esClient = getService('es');
   const supertest = getService('supertest');
-  const find = getService('find');
   const toasts = getService('toasts');
   const policyTestResources = getService('policyTestResources');
   const unzipPromisify = promisify(unzip);
@@ -53,10 +52,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('For each artifact list under management', function () {
-    // It's flaky only in Serverless
     targetTags(this, ['@ess', '@serverless']);
-
     this.timeout(60_000 * 5);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
 
@@ -76,13 +74,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Check edited artifact is in the list with new values (wait for list to be updated)
       let updatedArtifact: ArtifactElasticsearchProperties | undefined;
       await retry.waitForWithTimeout('fleet artifact is updated', 120_000, async () => {
-        const artifacts = await endpointArtifactTestResources.getArtifacts();
+        const artifacts = await endpointArtifactsTestResources.getArtifactsFromUnifiedManifestSO();
 
+        // This expects manifest artifact to come from unified so
         const manifestArtifact = artifacts.find((artifact) => {
           return (
-            artifact.artifactId ===
-              `${expectedArtifact.identifier}-${expectedArtifact.decoded_sha256}` &&
-            artifact.policyId === policy?.packagePolicy.id
+            artifact.artifactIds.includes(
+              `${expectedArtifact.identifier}-${expectedArtifact.decoded_sha256}`
+            ) && artifact.policyId === policy?.packagePolicy.id
           );
         });
 
@@ -150,9 +149,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       suffix?: string
     ) => {
       for (const formAction of actions) {
-        if (formAction.type === 'customClick') {
-          await find.clickByCssSelector(formAction.selector, testSubjects.FIND_TIME);
-        } else if (formAction.type === 'click') {
+        if (formAction.type === 'click') {
           await testSubjects.click(formAction.selector);
         } else if (formAction.type === 'input') {
           const newValue = (formAction.value || '') + (suffix ? suffix : '');
@@ -261,7 +258,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it(`should be able to update an existing ${testData.title} entry`, async () => {
-          await createArtifact(testData);
+          await endpointArtifactsTestResources.createArtifact(testData.listId, testData.createBody);
+          await browser.refresh();
+
           await updateArtifact(testData, { policyId: policyInfo.packagePolicy.id });
 
           // Check edited artifact is in the list with new values (wait for list to be updated)
@@ -295,7 +294,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it(`should be able to delete the existing ${testData.title} entry`, async () => {
-          await createArtifact(testData);
+          await endpointArtifactsTestResources.createArtifact(testData.listId, testData.createBody);
+          await browser.refresh();
+
           await deleteArtifact(testData);
           // We only expect one artifact to have been visible
           await testSubjects.missingOrFail(testData.delete.card);
@@ -332,7 +333,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       const testData = getCreateMultipleData();
-      it(`should get correct atifact when multiple entries are created`, async () => {
+      it(`should get correct artifact when multiple entries are created`, async () => {
         // Create first trusted app
         await createArtifact(testData, {
           policyId: firstPolicy.packagePolicy.id,

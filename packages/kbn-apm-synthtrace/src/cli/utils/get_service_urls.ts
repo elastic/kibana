@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fetch from 'node-fetch';
 import { format, parse, Url } from 'url';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
+import { getFetchAgent } from './ssl';
 
 async function discoverAuth(parsedTarget: Url) {
-  const possibleCredentials = [`admin:changeme`, `elastic:changeme`];
+  const possibleCredentials = [`admin:changeme`, `elastic:changeme`, `elastic_serverless:changeme`];
   for (const auth of possibleCredentials) {
     const url = format({
       ...parsedTarget,
@@ -20,7 +22,9 @@ async function discoverAuth(parsedTarget: Url) {
     });
     let status: number;
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        agent: getFetchAgent(url),
+      });
       status = response.status;
     } catch (err) {
       status = 0;
@@ -43,6 +47,7 @@ async function getKibanaUrl({ target, logger }: { target: string; logger: Logger
       method: 'HEAD',
       follow: 1,
       redirect: 'manual',
+      agent: getFetchAgent(target),
     });
 
     const discoveredKibanaUrl =
@@ -62,6 +67,7 @@ async function getKibanaUrl({ target, logger }: { target: string; logger: Logger
 
     const redirectedResponse = await fetch(discoveredKibanaUrlWithAuth, {
       method: 'HEAD',
+      agent: getFetchAgent(discoveredKibanaUrlWithAuth),
     });
 
     if (redirectedResponse.status !== 200) {

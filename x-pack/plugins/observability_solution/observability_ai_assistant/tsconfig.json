@@ -15,7 +15,6 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/core-analytics-browser",
-    "@kbn/analytics-client",
     "@kbn/logging",
     "@kbn/core",
     "@kbn/server-route-repository",
@@ -39,6 +38,10 @@
     "@kbn/features-plugin",
     "@kbn/cloud-plugin",
     "@kbn/serverless",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-ui-settings-server",
+    "@kbn/server-route-repository-utils",
+    "@kbn/inference-plugin",
   ],
   "exclude": ["target/**/*"]
 }

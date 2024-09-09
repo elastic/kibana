@@ -12,7 +12,8 @@ import {
   StreamingChatResponseEventType,
 } from '../../../../common';
 import { ChatEvent } from '../../../../common/conversation_complete';
-import { getGeneratedTitle } from './get_generated_title';
+import { LangTracer } from '../instrumentation/lang_tracer';
+import { TITLE_CONVERSATION_FUNCTION_NAME, getGeneratedTitle } from './get_generated_title';
 
 describe('getGeneratedTitle', () => {
   const messages: Message[] = [
@@ -37,9 +38,7 @@ describe('getGeneratedTitle', () => {
     };
   }
 
-  function callGenerateTitle(
-    ...rest: [ChatEvent[]] | [{ responseLanguage?: string }, ChatEvent[]]
-  ) {
+  function callGenerateTitle(...rest: [ChatEvent[]] | [{}, ChatEvent[]]) {
     const options = rest.length === 1 ? {} : rest[0];
     const chunks = rest.length === 1 ? rest[0] : rest[1];
 
@@ -52,6 +51,9 @@ describe('getGeneratedTitle', () => {
         error: jest.fn(),
       },
       messages,
+      tracer: {
+        startActiveSpan: jest.fn(),
+      } as unknown as LangTracer,
       ...options,
     });
 
@@ -79,7 +81,7 @@ describe('getGeneratedTitle', () => {
     const { chatSpy, title$ } = callGenerateTitle([
       createChatCompletionChunk({
         function_call: {
-          name: 'title_conversation',
+          name: TITLE_CONVERSATION_FUNCTION_NAME,
           arguments: JSON.stringify({ title: 'My title' }),
         },
       }),
@@ -113,27 +115,6 @@ describe('getGeneratedTitle', () => {
     expect(await testTitle(`"My title"`)).toEqual('My title');
     expect(await testTitle(`'My title'`)).toEqual('My title');
     expect(await testTitle(`"User's request for a title"`)).toEqual(`User's request for a title`);
-  });
-
-  it('mentions the given response language in the instruction', async () => {
-    const { chatSpy, title$ } = callGenerateTitle(
-      {
-        responseLanguage: 'Orcish',
-      },
-      [
-        createChatCompletionChunk({
-          function_call: {
-            name: 'title_conversation',
-            arguments: JSON.stringify({ title: 'My title' }),
-          },
-        }),
-      ]
-    );
-
-    await lastValueFrom(title$);
-
-    const [, params] = chatSpy.mock.calls[0];
-    expect(params.messages[0].message.content).toContain('Orcish');
   });
 
   it('handles partial updates', async () => {
@@ -204,6 +185,9 @@ describe('getGeneratedTitle', () => {
       chat: chatSpy,
       logger,
       messages,
+      tracer: {
+        startActiveSpan: jest.fn(),
+      } as unknown as LangTracer,
     });
 
     const title = await lastValueFrom(title$);

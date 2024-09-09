@@ -54,6 +54,9 @@ Object {
     "updated_at": Object {
       "type": "date",
     },
+    "updated_by": Object {
+      "type": "keyword",
+    },
   },
 }
 `;
@@ -128,6 +131,9 @@ Object {
     },
     "updated_at": Object {
       "type": "date",
+    },
+    "updated_by": Object {
+      "type": "keyword",
     },
   },
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Observable, Subscription, combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
@@ -29,6 +30,7 @@ import type {
 import { Router, RouterOptions } from '@kbn/core-http-router-server-internal';
 
 import { CspConfigType, cspConfig } from './csp';
+import { PermissionsPolicyConfigType, permissionsPolicyConfig } from './permissions_policy';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
@@ -76,7 +78,13 @@ export class HttpService
       configService.atPath<HttpConfigType>(httpConfig.path, { ignoreUnchanged: false }),
       configService.atPath<CspConfigType>(cspConfig.path),
       configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
-    ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
+      configService.atPath<PermissionsPolicyConfigType>(permissionsPolicyConfig.path),
+    ]).pipe(
+      map(
+        ([http, csp, externalUrl, permissionsPolicy]) =>
+          new HttpConfig(http, csp, externalUrl, permissionsPolicy)
+      )
+    );
     const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
     this.prebootServer = new HttpServer(coreContext, 'Preboot', shutdownTimeout$);
     this.httpServer = new HttpServer(coreContext, 'Kibana', shutdownTimeout$);
@@ -250,8 +258,33 @@ export class HttpService
       path: '/api/oas',
       method: 'GET',
       handler: async (req, h) => {
-        const pathStartsWith = req.query?.pathStartsWith;
+        const version = req.query?.version;
+
+        let pathStartsWith: undefined | string[];
+        if (typeof req.query?.pathStartsWith === 'string') {
+          pathStartsWith = [req.query.pathStartsWith];
+        } else {
+          pathStartsWith = req.query?.pathStartsWith;
+        }
+
+        let excludePathsMatching: undefined | string[];
+        if (typeof req.query?.excludePathsMatching === 'string') {
+          excludePathsMatching = [req.query.excludePathsMatching];
+        } else {
+          excludePathsMatching = req.query?.excludePathsMatching;
+        }
+
         const pluginId = req.query?.pluginId;
+
+        const access = req.query?.access as 'public' | 'internal' | undefined;
+        if (access && !['public', 'internal'].some((a) => a === access)) {
+          return h
+            .response({
+              message: 'Invalid access query parameter. Must be one of "public" or "internal".',
+            })
+            .code(400);
+        }
+
         return await firstValueFrom(
           of(1).pipe(
             HttpService.generateOasSemaphore.acquire(),
@@ -262,7 +295,7 @@ export class HttpService
                   baseUrl,
                   title: 'Kibana HTTP APIs',
                   version: '0.0.0', // TODO get a better version here
-                  pathStartsWith,
+                  filters: { pathStartsWith, excludePathsMatching, access, version },
                 });
                 return h.response(result);
               } catch (e) {

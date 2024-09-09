@@ -18,10 +18,10 @@ import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { TimelineModalHeader } from '../modal/header';
 import type { TimelineId, RowRenderer, TimelineTabs } from '../../../../common/types/timeline';
-import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
@@ -75,8 +75,8 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const containerElement = useRef<HTMLDivElement | null>(null);
@@ -129,10 +129,13 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       dispatch(
         timelineActions.createTimeline({
           id: timelineId,
-          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
           dataViewId: selectedDataViewIdSourcerer,
           indexNames: selectedPatternsSourcerer,
           show: false,
+          excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
+            ? timelineDefaults.excludedRowRendererIds
+            : [],
         })
       );
     }
@@ -234,7 +237,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       >
         <TimelineSavingProgress timelineId={timelineId} />
         <TimelineBody data-test-subj="timeline-body">
-          {timelineType === TimelineType.template && (
+          {timelineType === TimelineTypeEnum.template && (
             <TimelineTemplateBadge className="timeline-template-badge">
               {i18n.TIMELINE_TEMPLATE}
             </TimelineTemplateBadge>

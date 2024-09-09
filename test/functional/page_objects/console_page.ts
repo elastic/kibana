@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Key } from 'selenium-webdriver';
@@ -17,6 +18,170 @@ export class ConsolePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   private readonly browser = this.ctx.getService('browser');
+
+  public monaco = {
+    getTextArea: async () => {
+      const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
+      return await codeEditor.findByTagName('textarea');
+    },
+    getEditorText: async () => {
+      const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
+      const editorViewDiv = await codeEditor.findByClassName('view-lines');
+      return await editorViewDiv.getVisibleText();
+    },
+    getEditorTextAtLine: async (line: number) => {
+      const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
+      const editorViewDiv = await codeEditor.findAllByClassName('view-line');
+      return await editorViewDiv[line].getVisibleText();
+    },
+    getCurrentLineNumber: async () => {
+      const textArea = await this.monaco.getTextArea();
+      const styleAttribute = (await textArea.getAttribute('style')) ?? '';
+      const height = parseFloat(styleAttribute.replace(/.*height: ([+-]?\d+(\.\d+)?).*/, '$1'));
+      const top = parseFloat(styleAttribute.replace(/.*top: ([+-]?\d+(\.\d+)?).*/, '$1'));
+      // calculate the line number by dividing the top position by the line height
+      // and adding 1 because line numbers start at 1
+      return Math.ceil(top / height) + 1;
+    },
+    clearEditorText: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.clickMouseButton();
+      await textArea.clearValueWithKeyboard();
+    },
+    getOutputText: async () => {
+      const outputPanel = await this.testSubjects.find('consoleMonacoOutput');
+      const outputViewDiv = await outputPanel.findByClassName('monaco-scrollable-element');
+      return await outputViewDiv.getVisibleText();
+    },
+    pressEnter: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys(Key.ENTER);
+    },
+    enterText: async (text: string) => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.type(text);
+    },
+    promptAutocomplete: async (letter = 'b') => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.type(letter);
+      await this.retry.waitFor('autocomplete to be visible', () =>
+        this.monaco.isAutocompleteVisible()
+      );
+    },
+    isAutocompleteVisible: async () => {
+      const element = await this.find.byClassName('suggest-widget').catch(() => null);
+      if (!element) return false;
+
+      const attribute = await element.getAttribute('style');
+      return !attribute?.includes('display: none;');
+    },
+    getAutocompleteSuggestion: async (index: number) => {
+      const suggestionsWidget = await this.find.byClassName('suggest-widget');
+      const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
+      const suggestion = suggestions[index];
+      if (!suggestion) {
+        return undefined;
+      }
+      const label = await suggestion.findByClassName('label-name');
+      return label.getVisibleText();
+    },
+    pressUp: async (shift: boolean = false) => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys(shift ? [Key.SHIFT, Key.UP] : Key.UP);
+    },
+    pressDown: async (shift: boolean = false) => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys(shift ? [Key.SHIFT, Key.DOWN] : Key.DOWN);
+    },
+    pressRight: async (shift: boolean = false) => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys(shift ? [Key.SHIFT, Key.RIGHT] : Key.RIGHT);
+    },
+    pressLeft: async (shift: boolean = false) => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys(shift ? [Key.SHIFT, Key.LEFT] : Key.LEFT);
+    },
+    pressCtrlSpace: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([
+        Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+        Key.SPACE,
+      ]);
+    },
+    pressCtrlEnter: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([
+        Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+        Key.ENTER,
+      ]);
+    },
+    pressCtrlI: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'i']);
+    },
+    pressCtrlUp: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([
+        Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+        Key.UP,
+      ]);
+    },
+    pressCtrlDown: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([
+        Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+        Key.DOWN,
+      ]);
+    },
+    pressCtrlL: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'l']);
+    },
+    pressCtrlSlash: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], '/']);
+    },
+    pressEscape: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys(Key.ESCAPE);
+    },
+    selectAllRequests: async () => {
+      const textArea = await this.monaco.getTextArea();
+      const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+      await textArea.pressKeys([selectionKey, 'a']);
+    },
+    getEditor: async () => {
+      return await this.testSubjects.find('consoleMonacoEditor');
+    },
+    hasInvalidSyntax: async () => {
+      return await this.find.existsByCssSelector('.squiggly-error');
+    },
+    responseHasDeprecationWarning: async () => {
+      const response = await this.monaco.getOutputText();
+      return response.trim().startsWith('#!');
+    },
+    selectCurrentRequest: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.clickMouseButton();
+    },
+    getFontSize: async () => {
+      const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
+      const editorViewDiv = await codeEditor.findByClassName('view-line');
+      return await editorViewDiv.getComputedStyle('font-size');
+    },
+    pasteClipboardValue: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'v']);
+    },
+    copyRequestsToClipboard: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'a']);
+      await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'c']);
+    },
+    isA11yOverlayVisible: async () => {
+      return await this.testSubjects.exists('codeEditorAccessibilityOverlay');
+    },
+  };
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -117,6 +282,18 @@ export class ConsolePageObject extends FtrService {
       await fontSizeInput.clearValue({ withJS: true });
       await fontSizeInput.click();
       await fontSizeInput.type(String(newSize));
+    });
+
+    await this.testSubjects.click('settings-save-button');
+  }
+
+  public async toggleKeyboardShortcuts(enabled: boolean) {
+    await this.openSettings();
+
+    // while the settings form opens/loads this may fail, so retry for a while
+    await this.retry.try(async () => {
+      const toggle = await this.testSubjects.find('enableKeyboardShortcuts');
+      await toggle.click();
     });
 
     await this.testSubjects.click('settings-save-button');
@@ -377,7 +554,7 @@ export class ConsolePageObject extends FtrService {
     await this.retry.try(async () => {
       const firstInnerHtml = await line.getAttribute('innerHTML');
       // The line number is not updated immediately after the click, so we need to wait for it.
-      this.common.sleep(500);
+      await this.common.sleep(500);
       line = await editor.findByCssSelector('.ace_active-line');
       const secondInnerHtml = await line.getAttribute('innerHTML');
       // The line number will change as the user types, but we want to wait until it's stable.
@@ -462,8 +639,41 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('a11y-overlay');
   }
 
+  public async isCopyAsButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuCopyAsButton');
+  }
+
   public async clickCopyAsCurlButton() {
     const button = await this.testSubjects.find('consoleMenuCopyAsCurl');
+    await button.click();
+  }
+
+  public async changeLanguageAndCopy(language: string) {
+    const openModalButton = await this.testSubjects.find('changeLanguageButton');
+    await openModalButton.click();
+
+    const changeLangButton = await this.testSubjects.find(`languageOption-${language}`);
+    await changeLangButton.click();
+
+    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
+    await submitButton.click();
+  }
+
+  public async changeDefaultLanguage(language: string) {
+    const openModalButton = await this.testSubjects.find('changeLanguageButton');
+    await openModalButton.click();
+
+    const changeDefaultLangButton = await this.testSubjects.find(
+      `changeDefaultLanguageTo-${language}`
+    );
+    await changeDefaultLangButton.click();
+
+    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
+    await submitButton.click();
+  }
+
+  public async clickCopyAsButton() {
+    const button = await this.testSubjects.find('consoleMenuCopyAsButton');
     await button.click();
   }
 

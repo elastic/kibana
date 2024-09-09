@@ -13,6 +13,7 @@ import type {
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import merge from 'lodash/merge';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
@@ -24,8 +25,6 @@ import {
   CLOUDBEAT_GCP,
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
-  CSPM_POLICY_TEMPLATE,
-  KSPM_POLICY_TEMPLATE,
   SUPPORTED_CLOUDBEAT_INPUTS,
   SUPPORTED_POLICY_TEMPLATES,
   VULN_MGMT_POLICY_TEMPLATE,
@@ -152,7 +151,7 @@ type RegistryPolicyTemplateWithInputs = RegistryPolicyTemplate & {
 export const hasPolicyTemplateInputs = (
   policyTemplate: RegistryPolicyTemplate
 ): policyTemplate is RegistryPolicyTemplateWithInputs => {
-  return policyTemplate.hasOwnProperty('inputs');
+  return Object.hasOwn(policyTemplate, 'inputs');
 };
 
 export const getVulnMgmtCloudFormationDefaultValue = (packageInfo: PackageInfo): string => {
@@ -394,4 +393,8 @@ export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
     .map((cis) => cis?.vars)
     .flat()
     .find((vars) => vars?.name === key);
+};
+
+export const POLICY_TEMPLATE_FORM_DTS = {
+  LOADER: 'policy-template-form-loader',
 };

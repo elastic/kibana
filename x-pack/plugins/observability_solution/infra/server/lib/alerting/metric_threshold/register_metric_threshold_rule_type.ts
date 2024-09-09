@@ -8,17 +8,14 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import {
-  GetViewInAppRelativeUrlFnOpts,
-  PluginSetupContract,
-  RuleType,
-} from '@kbn/alerting-plugin/server';
+import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
-import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
+import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
-import { InfraBackendLibs } from '../../infra_types';
+import { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
   alertStateActionVariableDescription,
@@ -48,29 +45,23 @@ import {
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
-type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
->;
-export type MetricThresholdAlertType = Omit<RuleType, 'ActionGroupIdsOf'> & {
-  ActionGroupIdsOf: MetricThresholdAllowedActionGroups;
-};
-
 export function registerMetricThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs,
-  { featureFlags }: InfraConfig
+  { featureFlags }: InfraConfig,
+  locators: InfraLocators
 ) {
   if (!featureFlags.metricThresholdAlertRuleEnabled) {
     return;
   }
-
+  const comparator = Object.values({ ...COMPARATORS, ...LEGACY_COMPARATORS });
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
-    comparator: oneOfLiterals(Object.values(Comparator)),
+    comparator: oneOfLiterals(comparator),
     timeUnit: schema.string(),
     timeSize: schema.number(),
     warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
-    warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))),
+    warningComparator: schema.maybe(oneOfLiterals(comparator)),
   };
 
   const nonCountCriterion = schema.object({
@@ -152,7 +143,7 @@ export function registerMetricThresholdRuleType(
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS, NO_DATA_ACTIONS],
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor: createMetricThresholdExecutor(libs),
+    executor: createMetricThresholdExecutor(libs, locators),
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [

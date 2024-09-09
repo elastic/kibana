@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -31,32 +32,18 @@ describe('PreviewSection', () => {
   const component = <div>{'component'}</div>;
   const left = 500;
 
-  it('should render close button in header', () => {
-    const showBackButton = false;
-
+  it('should render back button and close button in header', () => {
     const { getByTestId } = render(
       <TestProvider state={context}>
-        <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
+        <PreviewSection component={component} leftPosition={left} />
       </TestProvider>
     );
 
     expect(getByTestId(PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render back button in header', () => {
-    const showBackButton = true;
-
-    const { getByTestId } = render(
-      <TestProvider state={context}>
-        <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
-      </TestProvider>
-    );
-
     expect(getByTestId(PREVIEW_SECTION_BACK_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render banner', () => {
-    const showBackButton = false;
     const title = 'test';
     const banner: PreviewBanner = {
       title,
@@ -66,12 +53,7 @@ describe('PreviewSection', () => {
 
     const { getByTestId, getByText } = render(
       <TestProvider state={context}>
-        <PreviewSection
-          component={component}
-          leftPosition={left}
-          showBackButton={showBackButton}
-          banner={banner}
-        />
+        <PreviewSection component={component} leftPosition={left} banner={banner} />
       </TestProvider>
     );
 

@@ -19,6 +19,7 @@
     "@kbn/repo-info",
     "@kbn/repo-packages",
     "@kbn/es",
+    "@kbn/dev-utils",
   ],
   "exclude": [
     "target/**/*",

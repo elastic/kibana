@@ -12,6 +12,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ChatState, Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { createMockChatService } from './create_mock_chat_service';
 import { KibanaContextProvider } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
 
 const mockChatService = createMockChatService();
 
@@ -135,7 +136,7 @@ describe('getTimelineItemsFromConversation', () => {
             message: {
               role: MessageRole.Assistant,
               function_call: {
-                name: 'context',
+                name: CONTEXT_FUNCTION_NAME,
                 arguments: JSON.stringify({ queries: [], contexts: [] }),
                 trigger: MessageRole.Assistant,
               },
@@ -145,7 +146,7 @@ describe('getTimelineItemsFromConversation', () => {
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.User,
-              name: 'context',
+              name: CONTEXT_FUNCTION_NAME,
               content: JSON.stringify([]),
             },
           },
@@ -430,7 +431,7 @@ describe('getTimelineItemsFromConversation', () => {
             message: {
               role: MessageRole.Assistant,
               function_call: {
-                name: 'context',
+                name: CONTEXT_FUNCTION_NAME,
                 arguments: JSON.stringify({ queries: [], contexts: [] }),
                 trigger: MessageRole.User,
               },
@@ -440,7 +441,7 @@ describe('getTimelineItemsFromConversation', () => {
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.User,
-              name: 'context',
+              name: CONTEXT_FUNCTION_NAME,
               content: JSON.stringify([]),
             },
           },

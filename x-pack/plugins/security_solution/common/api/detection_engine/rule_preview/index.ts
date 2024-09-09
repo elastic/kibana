@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './preview_rules_route';
+export * from './rule_preview.gen';

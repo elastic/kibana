@@ -5,8 +5,15 @@ properties:
   syncDelay:
     description: The synch delay to apply to the transform. Default 1m
     type: string
+    default: 1m
     example: 5m
   frequency:
     description: Configure how often the transform runs, default 1m
     type: string
+    default: 1m
     example: 5m
+  preventInitialBackfill:
+    description: Prevents the transform from backfilling data when it starts.
+    type: boolean
+    default: false
+    example: true

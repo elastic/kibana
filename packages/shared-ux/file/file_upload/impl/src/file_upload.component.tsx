@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -16,6 +17,10 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type {
+  EuiFilePickerClass,
+  EuiFilePickerProps,
+} from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { css } from '@emotion/react';
@@ -48,7 +53,7 @@ const styles = {
   `,
 };
 
-export const FileUpload = React.forwardRef<EuiFilePicker, Props>(
+export const FileUpload = React.forwardRef<EuiFilePickerClass, Props>(
   (
     {
       compressed,
@@ -90,7 +95,7 @@ export const FileUpload = React.forwardRef<EuiFilePicker, Props>(
           fullWidth={fullWidth}
           aria-label={i18nTexts.defaultPickerLabel}
           id={id}
-          ref={ref}
+          ref={ref as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
           onChange={(fs) => {
             uploadState.setFiles(Array.from(fs ?? []));
             if (immediate && uploadState.hasFiles()) uploadState.upload(meta);

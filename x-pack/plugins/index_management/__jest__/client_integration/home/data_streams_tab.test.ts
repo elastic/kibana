@@ -301,16 +301,19 @@ describe('Data Streams tab', () => {
           'Delete',
         ],
       ]);
+
+      // Revert sorting back on Name column to not impact the rest of the tests
+      actions.sortTableOnName();
     });
 
-    test('hides Storage size column from stats if enableDataStreamsStorageColumn===false', async () => {
+    test('hides stats toggle if enableDataStreamStats===false', async () => {
       testBed = await setup(httpSetup, {
         config: {
-          enableDataStreamsStorageColumn: false,
+          enableDataStreamStats: false,
         },
       });
 
-      const { actions, component, table } = testBed;
+      const { actions, component, exists } = testBed;
 
       await act(async () => {
         actions.goToDataStreamsList();
@@ -318,18 +321,7 @@ describe('Data Streams tab', () => {
 
       component.update();
 
-      // Switching the stats on
-      await act(async () => {
-        actions.clickIncludeStatsSwitch();
-      });
-      component.update();
-
-      // The table renders with the stats columns except the Storage size column
-      const { tableCellsValues } = table.getMetaData('dataStreamTable');
-      expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '1', '7 days', 'Delete'],
-        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1', '5 days ', 'Delete'],
-      ]);
+      expect(exists('includeStatsSwitch')).toBeFalsy();
     });
 
     test('clicking the indices count navigates to the backing indices', async () => {

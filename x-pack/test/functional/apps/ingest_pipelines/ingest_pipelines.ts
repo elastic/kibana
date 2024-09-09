@@ -133,6 +133,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    it('Shows a prompt when trying to navigate away from the creation form when the form is dirty', async () => {
+      // Navigate to creation flow
+      await testSubjects.click('createPipelineDropdown');
+      await testSubjects.click('createNewPipeline');
+
+      // Fill in the form with some data
+      await testSubjects.setValue('nameField > input', 'test_name');
+      await testSubjects.setValue('descriptionField > input', 'test_description');
+
+      // Try to navigate to another page
+      await testSubjects.click('logo');
+
+      // Since the form is now dirty it should trigger a confirmation prompt
+      expect(await testSubjects.exists('navigationBlockConfirmModal')).to.be(true);
+    });
+
     describe('Create pipeline', () => {
       afterEach(async () => {
         // Delete the pipeline that was created

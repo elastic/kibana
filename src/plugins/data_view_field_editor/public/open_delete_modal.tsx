@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -13,6 +14,7 @@ import {
   toMountPoint,
   DataViewsPublicPluginStart,
   DataView,
+  DataViewLazy,
   UsageCollectionStart,
 } from './shared_imports';
 
@@ -29,7 +31,7 @@ export interface OpenFieldDeleteModalOptions {
    * Config for the delete modal
    */
   ctx: {
-    dataView: DataView;
+    dataView: DataView | DataViewLazy;
   };
   /**
    * Callback fired when fields are deleted
@@ -60,9 +62,9 @@ export class DeleteCompositeSubfield extends Error {
 
 export const getFieldDeleteModalOpener =
   ({ core, dataViews, usageCollection }: Dependencies) =>
-  (options: OpenFieldDeleteModalOptions): CloseEditor => {
+  async (options: OpenFieldDeleteModalOptions): Promise<CloseEditor> => {
     if (typeof options.fieldName === 'string') {
-      const fieldToDelete = options.ctx.dataView.getFieldByName(options.fieldName);
+      const fieldToDelete = await options.ctx.dataView.getFieldByName(options.fieldName);
       // we can check for composite type since composite runtime field definitions themselves don't become fields
       const doesBelongToCompositeField = fieldToDelete?.runtimeField?.type === 'composite';
 

@@ -24,7 +24,7 @@ import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
-import { IndexSelection } from '../custom_common/index_selection';
+import { DATA_VIEW_FIELD, IndexSelection } from '../custom_common/index_selection';
 import { MetricIndicator } from './metric_indicator';
 import { COMPARATOR_MAPPING } from '../../constants';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
@@ -34,9 +34,11 @@ export { NEW_TIMESLICE_METRIC } from './metric_indicator';
 export function TimesliceMetricIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
+  const dataViewId = watch(DATA_VIEW_FIELD);
 
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: index,
+    dataViewId,
   });
 
   const timestampFields = dataView?.fields.filter((field) => field.type === 'date');
@@ -78,7 +80,7 @@ export function TimesliceMetricIndicatorTypeForm() {
         <EuiFlexItem>
           <QueryBuilder
             dataTestSubj="timesliceMetricIndicatorFormQueryFilterInput"
-            indexPatternString={watch('indicator.params.index')}
+            dataView={dataView}
             label={i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.queryFilter', {
               defaultMessage: 'Query filter',
             })}
@@ -118,6 +120,7 @@ export function TimesliceMetricIndicatorTypeForm() {
           <MetricIndicator
             indexFields={dataView?.fields ?? []}
             isLoadingIndex={isIndexFieldsLoading}
+            dataView={dataView}
           />
         </EuiFlexItem>
 

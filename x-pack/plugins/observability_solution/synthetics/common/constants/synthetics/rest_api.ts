@@ -25,7 +25,8 @@ export enum SYNTHETICS_API_URLS {
 
   SYNTHETICS_OVERVIEW = '/internal/synthetics/overview',
   PINGS = '/internal/synthetics/pings',
-  PING_STATUSES = '/internal/synthetics/ping_statuses',
+  MONITOR_STATUS_HEATMAP = '/internal/synthetics/ping_heatmap',
+  OVERVIEW_TRENDS = '/internal/synthetics/overview_trends',
   OVERVIEW_STATUS = `/internal/synthetics/overview_status`,
   INDEX_SIZE = `/internal/synthetics/index_size`,
   AGENT_POLICIES = `/internal/synthetics/agent_policies`,
@@ -52,5 +53,5 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_MONITORS_PROJECT_UPDATE = '/api/synthetics/project/{projectName}/monitors/_bulk_update',
   SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
 
-  DYNAMIC_SETTINGS = `/api/uptime/settings`,
+  DYNAMIC_SETTINGS = `/api/synthetics/settings`,
 }

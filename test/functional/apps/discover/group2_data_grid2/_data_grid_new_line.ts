@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -71,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const rows = await dataGrid.getDocTableRows();
       expect(rows.length).to.be.above(0);
 
-      const cell = await dataGrid.getCellElement(0, 2);
+      const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       const content = await cell.findByCssSelector('.unifiedDataTable__descriptionListDescription');
       expect(await content.getVisibleText()).to.be(VALUE_WITHOUT_NEW_LINES);
       expect(await content.getComputedStyle('white-space')).to.be('normal');
@@ -81,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('message');
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      let cell = await dataGrid.getCellElement(0, 2);
+      let cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       let content = await cell.findByCssSelector('.unifiedDataTable__cellValue');
       expect(await content.getVisibleText()).to.be(VALUE_WITH_NEW_LINES);
       expect(await content.getComputedStyle('white-space')).to.be('pre-wrap');
@@ -91,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.changeRowHeightValue('Auto fit');
       await dataGrid.clickGridSettings();
 
-      cell = await dataGrid.getCellElement(0, 2);
+      cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       content = await cell.findByCssSelector('.unifiedDataTable__cellValue');
       expect(await content.getVisibleText()).to.be(VALUE_WITH_NEW_LINES);
       expect(await content.getComputedStyle('white-space')).to.be('pre-wrap');
@@ -101,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.changeRowHeightValue('Single');
       await dataGrid.clickGridSettings();
 
-      cell = await dataGrid.getCellElement(0, 2);
+      cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       content = await cell.findByCssSelector('.unifiedDataTable__cellValue');
       expect(await content.getVisibleText()).to.be(VALUE_WITHOUT_NEW_LINES);
       expect(await content.getComputedStyle('white-space')).to.be('nowrap');

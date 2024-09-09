@@ -11,6 +11,7 @@ const createRiskScoreDataClientMock = () =>
   ({
     getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn().mockResolvedValue({ errors: [] }) }),
     init: jest.fn(),
+    tearDown: jest.fn(),
     getRiskInputsIndex: jest.fn(),
     upgradeIfNeeded: jest.fn(),
   } as unknown as jest.Mocked<RiskScoreDataClient>);

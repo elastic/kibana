@@ -34,7 +34,7 @@ const DatasetWithFewDegradedDocs = ({ degradedDocsCount }: { degradedDocsCount?:
       ~0%{' '}
       <EuiToolTip
         content={i18n.translate('xpack.datasetQuality.fewDegradedDocsTooltip', {
-          defaultMessage: '{degradedDocsCount} degraded docs in this dataset.',
+          defaultMessage: '{degradedDocsCount} degraded docs in this data set.',
           values: {
             degradedDocsCount,
           },

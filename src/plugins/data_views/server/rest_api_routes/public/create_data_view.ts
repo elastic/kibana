@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -23,6 +24,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  CREATE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 import { DataViewSpecRestResponse } from '../route_types';
 
@@ -47,7 +49,7 @@ export const createDataView = async ({
 };
 
 const registerCreateDataViewRouteFactory =
-  (path: string, serviceKey: string) =>
+  (path: string, serviceKey: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -56,7 +58,7 @@ const registerCreateDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
@@ -127,7 +129,8 @@ const registerCreateDataViewRouteFactory =
 
 export const registerCreateDataViewRoute = registerCreateDataViewRouteFactory(
   DATA_VIEW_PATH,
-  SERVICE_KEY
+  SERVICE_KEY,
+  CREATE_DATA_VIEW_DESCRIPTION
 );
 
 export const registerCreateDataViewRouteLegacy = registerCreateDataViewRouteFactory(

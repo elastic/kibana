@@ -22,7 +22,8 @@ import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { first, last } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import { useTimelineChartTheme } from '../../../hooks/use_timeline_chart_theme';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
@@ -155,7 +156,7 @@ export const ExpressionChart: React.FC<Props> = ({
             stack={false}
           />
           <ThresholdAnnotations
-            comparator={expression.comparator}
+            comparator={convertToBuiltInComparators(expression.comparator)}
             threshold={expression.threshold}
             sortedThresholds={criticalThresholds}
             color={Color.color1}
@@ -166,7 +167,7 @@ export const ExpressionChart: React.FC<Props> = ({
           />
           {expression.warningComparator && expression.warningThreshold && (
             <ThresholdAnnotations
-              comparator={expression.warningComparator}
+              comparator={convertToBuiltInComparators(expression.comparator)}
               threshold={expression.warningThreshold}
               sortedThresholds={warningThresholds}
               color={Color.color5}

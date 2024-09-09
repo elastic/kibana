@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { of, Subscription } from 'rxjs';
-import type { AnalyticsClient } from '@kbn/analytics-client';
-import { createAnalytics } from '@kbn/analytics-client';
+import type { AnalyticsClient } from '@elastic/ebt/client';
+import { createAnalytics } from '@elastic/ebt/client';
 import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
@@ -17,7 +18,6 @@ import { trackPerformanceMeasureEntries } from './track_performance_measure_entr
 import { trackClicks } from './track_clicks';
 
 import { getSessionId } from './get_session_id';
-import { createLogger } from './logger';
 import { trackViewportSize } from './track_viewport_size';
 
 /** @internal */
@@ -32,10 +32,7 @@ export class AnalyticsService {
   constructor(core: CoreContext) {
     this.analyticsClient = createAnalytics({
       isDev: core.env.mode.dev,
-      logger: createLogger(core.env.mode.dev),
-      // TODO: We need to be able to edit sendTo once we resolve the telemetry config.
-      //  For now, we are relying on whether it's a distributable or running from source.
-      sendTo: core.env.packageInfo.dist ? 'production' : 'staging',
+      logger: core.logger.get('analytics'),
     });
 
     this.registerBuildInfoAnalyticsContext(core);

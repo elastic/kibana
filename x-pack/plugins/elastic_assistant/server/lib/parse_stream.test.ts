@@ -106,6 +106,46 @@ describe('handleStreamStorage', () => {
       );
     });
   });
+  describe('Gemini stream', () => {
+    beforeEach(() => {
+      stream = createStreamMock();
+      const payload = {
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: 'Single.',
+                },
+              ],
+            },
+          },
+        ],
+      };
+      stream.write(`data: ${JSON.stringify(payload)}`);
+      defaultProps = {
+        responseStream: stream.transform,
+        actionTypeId: '.gemini',
+        onMessageSent,
+        logger: mockLogger,
+      };
+    });
+
+    it('saves the final string successful streaming event', async () => {
+      stream.complete();
+      await handleStreamStorage(defaultProps);
+      expect(onMessageSent).toHaveBeenCalledWith('Single.');
+    });
+    it('saves the error message on a failed streaming event', async () => {
+      const tokenPromise = handleStreamStorage(defaultProps);
+
+      stream.fail();
+      await expect(tokenPromise).resolves.not.toThrow();
+      expect(onMessageSent).toHaveBeenCalledWith(
+        `An error occurred while streaming the response:\n\nStream failed`
+      );
+    });
+  });
 });
 
 function encodeBedrockResponse(completion: string) {

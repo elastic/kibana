@@ -232,14 +232,6 @@
           {
             "plugin": "@kbn/reporting-export-types-pdf",
             "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/routes/common/generate/request_handler.test.ts"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/routes/common/generate/request_handler.test.ts"
           }
         ],
         "initialIsOpen": false

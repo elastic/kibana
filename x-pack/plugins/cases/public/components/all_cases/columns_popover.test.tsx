@@ -22,6 +22,10 @@ describe('ColumnsPopover', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(async () => {
+    await appMockRenderer.clearQueryCache();
+  });
+
   const selectedColumns = [
     { field: 'title', name: 'Title', isChecked: true },
     { field: 'category', name: 'Category', isChecked: false },

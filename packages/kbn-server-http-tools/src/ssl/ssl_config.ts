@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEqual } from 'lodash';
@@ -11,13 +12,14 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { constants as cryptoConstants } from 'crypto';
 import { readFileSync } from 'fs';
+import { TLS_V1, TLS_V1_1, TLS_V1_2, TLS_V1_3 } from './constants';
 
 const protocolMap = new Map<string, number>([
-  ['TLSv1', cryptoConstants.SSL_OP_NO_TLSv1],
-  ['TLSv1.1', cryptoConstants.SSL_OP_NO_TLSv1_1],
-  ['TLSv1.2', cryptoConstants.SSL_OP_NO_TLSv1_2],
+  [TLS_V1, cryptoConstants.SSL_OP_NO_TLSv1],
+  [TLS_V1_1, cryptoConstants.SSL_OP_NO_TLSv1_1],
+  [TLS_V1_2, cryptoConstants.SSL_OP_NO_TLSv1_2],
   // @ts-expect-error According to the docs SSL_OP_NO_TLSv1_3 should exist (https://nodejs.org/docs/latest-v12.x/api/crypto.html)
-  ['TLSv1.3', cryptoConstants.SSL_OP_NO_TLSv1_3],
+  [TLS_V1_3, cryptoConstants.SSL_OP_NO_TLSv1_3],
 ]);
 
 export const sslSchema = schema.object(
@@ -45,12 +47,12 @@ export const sslSchema = schema.object(
     redirectHttpFromPort: schema.maybe(schema.number()),
     supportedProtocols: schema.arrayOf(
       schema.oneOf([
-        schema.literal('TLSv1'),
-        schema.literal('TLSv1.1'),
-        schema.literal('TLSv1.2'),
-        schema.literal('TLSv1.3'),
+        schema.literal(TLS_V1),
+        schema.literal(TLS_V1_1),
+        schema.literal(TLS_V1_2),
+        schema.literal(TLS_V1_3),
       ]),
-      { defaultValue: ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'], minSize: 1 }
+      { defaultValue: [TLS_V1_1, TLS_V1_2, TLS_V1_3], minSize: 1 }
     ),
     clientAuthentication: schema.oneOf(
       [schema.literal('none'), schema.literal('optional'), schema.literal('required')],

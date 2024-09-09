@@ -16,7 +16,6 @@
 
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/security-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
@@ -24,6 +23,7 @@
     "@kbn/shared-ux-router",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
+    "@kbn/core-plugins-browser",
   ],
   "exclude": [
     "target/**/*",

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
@@ -39,6 +40,7 @@ const BOOLEAN_OPTIONS = [
 ];
 
 const SINGLE_SELECTION = { asPlainText: true };
+
 type Warning = string | React.ReactNode;
 
 interface AutocompleteFieldMatchProps {
@@ -152,9 +154,10 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
 
       handleSpacesWarning(newValue);
       handleError(undefined);
+      handleWarning(undefined);
       onChange(newValue ?? '');
     },
-    [handleError, handleSpacesWarning, labels, onChange, optionsMemo]
+    [handleError, handleWarning, handleSpacesWarning, labels, onChange, optionsMemo]
   );
 
   const handleSearchChange = useCallback(

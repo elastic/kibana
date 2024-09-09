@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './sense_editor.test.mocks';
@@ -948,8 +949,6 @@ describe('Integration', () => {
         autoCompleteSet: [
           tt('field1.1.1', { f: 1 }, 'string'),
           tt('field1.1.2', { f: 1 }, 'string'),
-          tt('field2.1.1', { f: 1 }, 'string'),
-          tt('field2.1.2', { f: 1 }, 'string'),
         ],
       },
       {
@@ -958,8 +957,6 @@ describe('Integration', () => {
         autoCompleteSet: [
           { name: 'field1.1.1', meta: 'string' },
           { name: 'field1.1.2', meta: 'string' },
-          { name: 'field2.1.1', meta: 'string' },
-          { name: 'field2.1.2', meta: 'string' },
         ],
       },
     ]

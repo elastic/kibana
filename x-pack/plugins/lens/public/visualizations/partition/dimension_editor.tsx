@@ -13,11 +13,12 @@ import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   PaletteRegistry,
   ColorMapping,
-  SPECIAL_TOKENS_STRING_CONVERTION,
+  SPECIAL_TOKENS_STRING_CONVERSION,
   AVAILABLE_PALETTES,
   getColorsFromMapping,
 } from '@kbn/coloring';
-import { ColorPicker, useDebouncedValue } from '@kbn/visualization-ui-components';
+import { ColorPicker } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, EuiBadge } from '@elastic/eui';
 import { useState, useCallback } from 'react';
 import { getColorCategories } from '@kbn/chart-expressions-common';
@@ -50,7 +51,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const [useNewColorMapping, setUseNewColorMapping] = useState(canUseColorMapping);
 
   const setConfig = useCallback(
-    ({ color }) => {
+    ({ color }: { color?: string }) => {
       if (!currentLayer) {
         return;
       }
@@ -126,7 +127,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       {props.accessor === firstNonCollapsedColumnId && (
         <EuiFormRow
           display="columnCompressed"
-          label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionlabel', {
+          label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
             defaultMessage: 'Color mapping',
           })}
           style={{ alignItems: 'center' }}
@@ -138,7 +139,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             title={
               useNewColorMapping
                 ? i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
-                    defaultMessage: 'Edit colors by term mapping',
+                    defaultMessage: 'Assign colors to terms',
                   })
                 : i18n.translate('xpack.lens.colorMapping.editColorsTitle', {
                     defaultMessage: 'Edit colors',
@@ -187,7 +188,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         type: 'categories',
                         categories: splitCategories,
                       }}
-                      specialTokens={SPECIAL_TOKENS_STRING_CONVERTION}
+                      specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
                     />
                   ) : (
                     <PalettePicker

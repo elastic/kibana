@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -27,8 +27,10 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
 
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="baseline" wrap direction="column">
-      <div>
-        {first}
+      <EuiFlexItem className="eui-textTruncate">
+        <EuiToolTip delay="long" content={first}>
+          <p className="eui-textTruncate">{first}</p>
+        </EuiToolTip>
         {shouldShowMore && (
           <>
             {' ... '}
@@ -46,7 +48,7 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
             </EuiLink>
           </>
         )}
-      </div>
+      </EuiFlexItem>
       {isExpanded && others.map((item, index) => <EuiFlexItem key={index}>{item}</EuiFlexItem>)}
       {hasOthers && isExpanded && (
         <EuiFlexItem>

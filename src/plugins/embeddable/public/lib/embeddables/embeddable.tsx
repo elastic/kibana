@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fastIsEqual from 'fast-deep-equal';
@@ -127,7 +128,7 @@ export abstract class Embeddable<
       dataLoading: this.dataLoading,
       filters$: this.filters$,
       blockingError: this.blockingError,
-      onPhaseChange: this.onPhaseChange,
+      phase$: this.phase$,
       setPanelTitle: this.setPanelTitle,
       linkToLibrary: this.linkToLibrary,
       hidePanelTitle: this.hidePanelTitle,
@@ -168,7 +169,7 @@ export abstract class Embeddable<
   public panelTitle: LegacyEmbeddableAPI['panelTitle'];
   public dataLoading: LegacyEmbeddableAPI['dataLoading'];
   public filters$: LegacyEmbeddableAPI['filters$'];
-  public onPhaseChange: LegacyEmbeddableAPI['onPhaseChange'];
+  public phase$: LegacyEmbeddableAPI['phase$'];
   public linkToLibrary: LegacyEmbeddableAPI['linkToLibrary'];
   public blockingError: LegacyEmbeddableAPI['blockingError'];
   public setPanelTitle: LegacyEmbeddableAPI['setPanelTitle'];

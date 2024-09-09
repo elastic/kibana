@@ -7,10 +7,9 @@
 
 import { useMemo, useCallback } from 'react';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { getAttackDiscoveryMarkdown } from '../../get_attack_discovery_markdown/get_attack_discovery_markdown';
-import type { AttackDiscovery } from '../../types';
 
 /**
  * This category is provided in the prompt context for the assistant
@@ -39,7 +38,7 @@ export const useViewInAiAssistant = ({
     attackDiscovery.title, // conversation title
     attackDiscovery.title, // description used in context pill
     getPromptContext,
-    attackDiscovery.id, // accept the UUID default for this prompt context
+    attackDiscovery.id ?? null, // accept the UUID default for this prompt context
     null, // suggestedUserPrompt
     null, // tooltip
     isAssistantEnabled,

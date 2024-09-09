@@ -13,7 +13,7 @@ exports[`StatusByLocation component renders properly against props 1`] = `
   size="s"
 >
   <h2>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="{status} in {loc} locations"
       id="xpack.uptime.monitorStatusBar.locations.upStatus"
       values={

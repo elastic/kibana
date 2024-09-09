@@ -27,7 +27,7 @@ export const esSearchHitToArtifact = <
 }: T): Artifact => {
   return {
     ...attributesNotNeedingRename,
-    id,
+    id: id!,
     compressionAlgorithm,
     decodedSha256,
     decodedSize,

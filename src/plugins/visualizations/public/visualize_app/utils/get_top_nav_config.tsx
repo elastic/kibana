@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -28,7 +29,7 @@ import {
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
-import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput, getFullPath } from '../..';
+import { VISUALIZE_EMBEDDABLE_TYPE, getFullPath } from '../..';
 
 import {
   VisualizeServices,
@@ -152,7 +153,7 @@ export const getTopNavConfig = (
           title: i18n.translate(
             'visualizations.topNavMenu.saveVisualization.successNotificationText',
             {
-              defaultMessage: `Saved '{visTitle}'`,
+              defaultMessage: `Saved ''{visTitle}''`,
               values: {
                 visTitle: savedVis.title,
               },
@@ -225,7 +226,7 @@ export const getTopNavConfig = (
         title: i18n.translate(
           'visualizations.topNavMenu.saveVisualization.failureNotificationText',
           {
-            defaultMessage: `Error on saving '{visTitle}'`,
+            defaultMessage: `Error on saving ''{visTitle}''`,
             values: {
               visTitle: savedVis.title,
             },
@@ -245,8 +246,8 @@ export const getTopNavConfig = (
 
     const state = {
       input: {
-        savedVis: vis.serialize(),
-      } as VisualizeInput,
+        serializedVis: vis.serialize(),
+      },
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
       searchSessionId: data.search.session.getSessionId(),
@@ -514,12 +515,12 @@ export const getTopNavConfig = (
 
                   const state = {
                     input: {
-                      savedVis: {
+                      serializedVis: {
                         ...vis.serialize(),
                         title: newTitle,
                         description: newDescription,
                       },
-                    } as VisualizeInput,
+                    },
                     embeddableId,
                     type: VISUALIZE_EMBEDDABLE_TYPE,
                     searchSessionId: data.search.session.getSessionId(),

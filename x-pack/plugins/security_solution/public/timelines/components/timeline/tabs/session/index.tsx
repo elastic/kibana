@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import styled from 'styled-components';
 import type { TimelineId } from '../../../../../../common/types/timeline';
 import { useSessionViewNavigation, useSessionView } from './use_session_view';
-import { VerticalRule } from '../shared/layout';
 
 const MaxWidthFlexItem = styled(EuiFlexItem)`
   width: 100%;
@@ -24,19 +23,13 @@ const MaxWidthPageFlexGroup = styled(EuiFlexGroup)`
   box-sizing: border-box;
 `;
 
-const StyledFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
-  height: 100%;
-  min-width: 320px;
-`;
-
 interface Props {
   timelineId: TimelineId;
 }
 
 const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
   const [height, setHeight] = useState(0);
-  const measuredRef = useCallback((node) => {
+  const measuredRef = useCallback((node: HTMLDivElement | HTMLSpanElement | null) => {
     if (node !== null) {
       setHeight(node.getBoundingClientRect().height);
     }
@@ -44,7 +37,7 @@ const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
   const { Navigation } = useSessionViewNavigation({
     scopeId: timelineId,
   });
-  const { SessionView, shouldShowDetailsPanel, DetailsPanel } = useSessionView({
+  const { SessionView } = useSessionView({
     scopeId: timelineId,
     height,
   });
@@ -63,12 +56,6 @@ const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
         <EuiSpacer size="m" />
         <SessionViewWrapper>{SessionView}</SessionViewWrapper>
       </MaxWidthFlexItem>
-      {shouldShowDetailsPanel && (
-        <>
-          <VerticalRule />
-          <StyledFlexItem grow={1}>{DetailsPanel}</StyledFlexItem>
-        </>
-      )}
     </MaxWidthPageFlexGroup>
   );
 };

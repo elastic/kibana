@@ -8,7 +8,10 @@ import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import React from 'react';
 import { Observable, of } from 'rxjs';
-import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
+import type {
+  ChatCompletionChunkEvent,
+  StreamingChatResponseEventWithoutError,
+} from '../common/conversation_complete';
 import { MessageRole, ScreenContextActionDefinition } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type {
@@ -21,7 +24,7 @@ import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './utils
 
 export const mockChatService: ObservabilityAIAssistantChatService = {
   sendAnalyticsEvent: noop,
-  chat: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
+  chat: (options) => new Observable<ChatCompletionChunkEvent>(),
   complete: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
   getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
   renderFunction: (name) => (
@@ -75,12 +78,6 @@ function createStartContract(): ObservabilityAIAssistantPublicStart {
       loading: false,
       selectConnector: () => {},
       reloadConnectors: () => {},
-    }),
-    useUserPreferredLanguage: () => ({
-      LANGUAGE_OPTIONS: [{ label: 'English' }],
-      selectedLanguage: 'English',
-      setSelectedLanguage: () => {},
-      getPreferredLanguage: () => 'English',
     }),
     getContextualInsightMessages: () => [],
     createScreenContextAction: () => ({} as ScreenContextActionDefinition<any>),
