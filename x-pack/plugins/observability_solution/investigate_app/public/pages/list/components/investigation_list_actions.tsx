@@ -27,9 +27,6 @@ export function InvestigationListActions({
 }: {
   investigation: InvestigationResponse;
 }) {
-  const handleDeleteEffects = () => {
-    setIsDeleteModalVisible(false);
-  };
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const {
     mutate: deleteInvestigation,
