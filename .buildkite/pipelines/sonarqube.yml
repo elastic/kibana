@@ -8,5 +8,5 @@ steps:
       memory: 32G
       cpu: 4
     env:
-      SONAR_SCANNER_OPTS: '-Xmx16384m'
+      SONAR_SCANNER_JAVA_OPTS: '-Xmx16384m'
     command: /scan-source-code.sh
