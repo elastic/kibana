@@ -3095,6 +3095,22 @@
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ESQLCallbacks.getPreferences",
+            "type": "Function",
+            "tags": [],
+            "label": "getPreferences",
+            "description": [],
+            "signature": [
+              "(() => Promise<{ histogramBarTarget: number; }>) | undefined"
+            ],
+            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3193,7 +3209,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"unsupported\""
+              "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"unsupported\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\""
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,

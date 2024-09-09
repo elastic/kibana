@@ -10,13 +10,13 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { ErrorEmptyPrompt } from '../../error_empty_prompt';
 import { LoadingEmptyPrompt } from '../../loading_empty_prompt';
-import { getIndexPropertiesContainerId } from '../../helpers';
 import * as i18n from './translations';
 import type { IlmPhase, PatternRollup } from '../../../../../types';
 import { useIndicesCheckContext } from '../../../../../contexts/indices_check_context';
 import { IndexCheckFields } from './index_check_fields';
 import { IndexStatsPanel } from './index_stats_panel';
 import { useDataQualityContext } from '../../../../../data_quality_context';
+import { getIndexPropertiesContainerId } from './utils/get_index_properties_container_id';
 
 export interface Props {
   docsCount: number;

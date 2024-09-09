@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('certs api', () => {
-    describe('empty index', async () => {
+    describe('empty index', () => {
       it('returns empty array for no data', async () => {
         const apiResponse = await supertest
           .post(`/internal/search/ese`)
@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when data is present', async () => {
+    describe('when data is present', () => {
       const now = moment();
       const cnva = now.add(6, 'months').toISOString();
       const cnvb = now.subtract(23, 'weeks').toISOString();

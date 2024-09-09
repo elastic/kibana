@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -2288,7 +2289,7 @@ const locateDefinition: FunctionDefinition = {
   name: 'locate',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.locate', {
     defaultMessage:
-      'Returns an integer that indicates the position of a keyword substring within another string.',
+      'Returns an integer that indicates the position of a keyword substring within another string.\nReturns `0` if the substring cannot be found.\nNote that string positions start from `1`.',
   }),
   alias: undefined,
   signatures: [
