@@ -53,8 +53,8 @@ import {
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
-  INFERENCE_ENDPOINTS_PLUGIN,
   SEMANTIC_SEARCH_PLUGIN,
+  SEARCH_RELEVANCE_PLUGIN,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
 
@@ -141,7 +141,7 @@ const contentLinks: AppDeepLink[] = [
 
 const relevanceLinks: AppDeepLink[] = [
   {
-    id: 'inferenceEndpoints',
+    id: 'searchInferenceEndpoints',
     path: `/${INFERENCE_ENDPOINTS_PATH}`,
     title: i18n.translate(
       'xpack.enterpriseSearch.navigation.relevanceInferenceEndpointsLinkLabel',
@@ -470,15 +470,15 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
-      appRoute: INFERENCE_ENDPOINTS_PLUGIN.URL,
+      appRoute: SEARCH_RELEVANCE_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       deepLinks: relevanceLinks,
-      euiIconType: INFERENCE_ENDPOINTS_PLUGIN.LOGO,
-      id: INFERENCE_ENDPOINTS_PLUGIN.ID,
+      euiIconType: SEARCH_RELEVANCE_PLUGIN.LOGO,
+      id: SEARCH_RELEVANCE_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(INFERENCE_ENDPOINTS_PLUGIN.NAME);
+        chrome.docTitle.change(SEARCH_RELEVANCE_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
@@ -490,7 +490,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(EnterpriseSearchRelevance, kibanaDeps, pluginData);
       },
-      title: INFERENCE_ENDPOINTS_PLUGIN.NAV_TITLE,
+      title: SEARCH_RELEVANCE_PLUGIN.NAV_TITLE,
       visibleIn: [],
     });
 

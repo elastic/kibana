@@ -212,6 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
               'packs_all',
               'packs_read',
             ],
+            enterpriseSearch: ['all', 'read', 'minimal_all', 'minimal_read'],
             rulesSettings: [
               'all',
               'read',

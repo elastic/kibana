@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
-
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   Plugin,
@@ -47,8 +45,8 @@ import {
   SEMANTIC_SEARCH_PLUGIN,
   AI_SEARCH_PLUGIN,
   APPLICATIONS_PLUGIN,
-  INFERENCE_ENDPOINTS_PLUGIN,
   SEARCH_PRODUCT_NAME,
+  SEARCH_RELEVANCE_PLUGIN,
 } from '../common/constants';
 
 import {
@@ -170,6 +168,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     const PLUGIN_IDS = [
       ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
       ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      SEARCH_RELEVANCE_PLUGIN.ID,
       ELASTICSEARCH_PLUGIN.ID,
       ANALYTICS_PLUGIN.ID,
       ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
@@ -178,7 +177,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       SEMANTIC_SEARCH_PLUGIN.ID,
       APPLICATIONS_PLUGIN.ID,
       AI_SEARCH_PLUGIN.ID,
-      INFERENCE_ENDPOINTS_PLUGIN.ID,
     ];
     const isCloud = !!cloud?.cloudId;
 
@@ -250,17 +248,13 @@ export class EnterpriseSearchPlugin implements Plugin {
         };
 
         const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
-        const license = await firstValueFrom(licensing.license$);
-        const showRelevance = license.isActive && license.hasAtLeast('enterprise');
 
         return {
           navLinks: {
-            enterpriseSearchRelevance: showRelevance,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
           },
           catalogue: {
-            enterpriseSearchRelevance: showRelevance,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
           },
