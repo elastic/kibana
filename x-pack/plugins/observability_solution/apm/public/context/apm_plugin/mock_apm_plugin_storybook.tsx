@@ -122,9 +122,16 @@ const mockCore = {
   },
 };
 
+const mockUnifiedSearchBar = {
+  ui: {
+    SearchBar: () => <div />,
+  },
+};
+
 const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
+  unifiedSearch: mockUnifiedSearchBar,
   observabilityAIAssistant: {
     service: { setScreenContext: () => noop },
   },
@@ -157,6 +164,8 @@ export function MockApmPluginStorybook({
   const history2 = createMemoryHistory({
     initialEntries: [routePath || '/services/?rangeFrom=now-15m&rangeTo=now'],
   });
+
+  console.log('Initial history location:', history2.location);
 
   return (
     <IntlProvider locale="en">
