@@ -20,6 +20,459 @@
     "classes": [
       {
         "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.BsearchService",
+        "type": "Class",
+        "tags": [],
+        "label": "BsearchService",
+        "description": [
+          "\nBsearch Service that can reduce flake on the CI systems when they are under\npressure and bsearch returns an async search response or a sync response.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.BsearchService",
+            "text": "BsearchService"
+          },
+          " extends ",
+          "FtrService"
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/services/bsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.BsearchService.send",
+            "type": "Function",
+            "tags": [],
+            "label": "send",
+            "description": [
+              "Send method to send in your supertest, url, options, and strategy name"
+            ],
+            "signature": [
+              "<T extends ",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.IEsSearchResponse",
+                "text": "IEsSearchResponse"
+              },
+              "<any>>({ supertest, options, strategy, space }: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.SendOptions",
+                "text": "SendOptions"
+              },
+              ") => Promise<any>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/bsearch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.BsearchService.send.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ supertest, options, strategy, space }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SendOptions",
+                    "text": "SendOptions"
+                  }
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/bsearch.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.DeploymentService",
+        "type": "Class",
+        "tags": [],
+        "label": "DeploymentService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.DeploymentService",
+            "text": "DeploymentService"
+          },
+          " extends ",
+          "FtrService"
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/services/deployment.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.DeploymentService.getHostPort",
+            "type": "Function",
+            "tags": [],
+            "label": "getHostPort",
+            "description": [
+              "\nReturns Kibana host URL"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/deployment.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.DeploymentService.getEsHostPort",
+            "type": "Function",
+            "tags": [],
+            "label": "getEsHostPort",
+            "description": [
+              "\nReturns ES host URL"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/deployment.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.DeploymentService.isCloud",
+            "type": "Function",
+            "tags": [],
+            "label": "isCloud",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/deployment.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.IndexPatternsService",
+        "type": "Class",
+        "tags": [],
+        "label": "IndexPatternsService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.IndexPatternsService",
+            "text": "IndexPatternsService"
+          },
+          " extends ",
+          "FtrService"
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/services/index_patterns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.IndexPatternsService.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nCreate a new index pattern"
+            ],
+            "signature": [
+              "(indexPattern: { title: string; timeFieldName?: string | undefined; }, { override }?: { override: boolean; }, spaceId?: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/index_patterns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.IndexPatternsService.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "path": "packages/kbn-ftr-common-functional-services/services/index_patterns.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ftr-common-functional-services",
+                    "id": "def-common.IndexPatternsService.create.$1.title",
+                    "type": "string",
+                    "tags": [],
+                    "label": "title",
+                    "description": [],
+                    "path": "packages/kbn-ftr-common-functional-services/services/index_patterns.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/ftr-common-functional-services",
+                    "id": "def-common.IndexPatternsService.create.$1.timeFieldName",
+                    "type": "string",
+                    "tags": [],
+                    "label": "timeFieldName",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "packages/kbn-ftr-common-functional-services/services/index_patterns.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.IndexPatternsService.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ override }",
+                "description": [],
+                "signature": [
+                  "{ override: boolean; }"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/index_patterns.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.IndexPatternsService.create.$3",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/index_patterns.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.RandomnessService",
+        "type": "Class",
+        "tags": [],
+        "label": "RandomnessService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RandomnessService",
+            "text": "RandomnessService"
+          },
+          " extends ",
+          "FtrService"
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/services/randomness.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.RandomnessService.naturalNumber",
+            "type": "Function",
+            "tags": [],
+            "label": "naturalNumber",
+            "description": [
+              "\nGenerate a random natural number\n\n range: 0 to 9007199254740991\n"
+            ],
+            "signature": [
+              "(options?: NumberOptions | undefined) => number"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/randomness.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.RandomnessService.naturalNumber.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "NumberOptions | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/randomness.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.RandomnessService.integer",
+            "type": "Function",
+            "tags": [],
+            "label": "integer",
+            "description": [
+              "\nGenerate a random integer"
+            ],
+            "signature": [
+              "(options?: NumberOptions | undefined) => number"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/randomness.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.RandomnessService.integer.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "NumberOptions | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/randomness.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.RandomnessService.word",
+            "type": "Function",
+            "tags": [],
+            "label": "word",
+            "description": [
+              "\nGenerate a random number, defaults to at least 4 and no more than 8 syllables"
+            ],
+            "signature": [
+              "(options?: { syllables?: number | undefined; }) => string"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/randomness.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.RandomnessService.word.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "packages/kbn-ftr-common-functional-services/services/randomness.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/ftr-common-functional-services",
+                    "id": "def-common.RandomnessService.word.$1.syllables",
+                    "type": "number",
+                    "tags": [],
+                    "label": "syllables",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "packages/kbn-ftr-common-functional-services/services/randomness.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.RandomnessService.string",
+            "type": "Function",
+            "tags": [],
+            "label": "string",
+            "description": [
+              "\nGenerate a random string, defaults to at least 8 and no more than 15 alpha-numeric characters"
+            ],
+            "signature": [
+              "(options?: StringOptions) => string"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/randomness.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.RandomnessService.string.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "StringOptions"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/randomness.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
         "id": "def-common.RetryService",
         "type": "Class",
         "tags": [],
@@ -431,9 +884,311 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.SavedObjectInfoService",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedObjectInfoService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.SavedObjectInfoService",
+            "text": "SavedObjectInfoService"
+          },
+          " extends ",
+          "FtrService"
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/services/saved_object_info/saved_object_info.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.SavedObjectInfoService.logSoTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "logSoTypes",
+            "description": [],
+            "signature": [
+              "(log: ",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              },
+              ", msg?: string | null) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/saved_object_info/saved_object_info.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.SavedObjectInfoService.logSoTypes.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/saved_object_info/saved_object_info.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.SavedObjectInfoService.logSoTypes.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/saved_object_info/saved_object_info.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.ElasticsearchSupertestProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ElasticsearchSupertestProvider",
+        "description": [],
+        "signature": [
+          "({\n  getService,\n}: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          "Agent"
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/services/supertest.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.ElasticsearchSupertestProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  getService,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.FtrProviderContext",
+                "text": "FtrProviderContext"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/supertest.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.EsProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "EsProvider",
+        "description": [],
+        "signature": [
+          "({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          "default"
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/services/es.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.EsProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ getService }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.FtrProviderContext",
+                "text": "FtrProviderContext"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/es.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.KibanaServerProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaServerProvider",
+        "description": [],
+        "signature": [
+          "({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.KbnClient",
+            "text": "KbnClient"
+          }
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.KibanaServerProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ getService }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.FtrProviderContext",
+                "text": "FtrProviderContext"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.KibanaSupertestProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaSupertestProvider",
+        "description": [],
+        "signature": [
+          "({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          "Agent"
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/services/supertest.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.KibanaSupertestProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ getService }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.FtrProviderContext",
+                "text": "FtrProviderContext"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/supertest.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.runSavedObjInfoSvc",
+        "type": "Function",
+        "tags": [],
+        "label": "runSavedObjInfoSvc",
+        "description": [],
+        "signature": [
+          "() => Promise<void | undefined>"
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/services/saved_object_info/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/ftr-common-functional-services",
@@ -485,6 +1240,75 @@
               "{ Cookie: string; }"
             ],
             "path": "packages/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.SendOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SendOptions",
+        "description": [
+          "\nOptions for the send method"
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/services/bsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.SendOptions.supertest",
+            "type": "Object",
+            "tags": [],
+            "label": "supertest",
+            "description": [],
+            "signature": [
+              "Agent"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/bsearch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.SendOptions.options",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "object"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/bsearch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.SendOptions.strategy",
+            "type": "string",
+            "tags": [],
+            "label": "strategy",
+            "description": [],
+            "path": "packages/kbn-ftr-common-functional-services/services/bsearch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.SendOptions.space",
+            "type": "string",
+            "tags": [],
+            "label": "space",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/bsearch.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -586,7 +1410,15 @@
             "section": "def-common.RetryService",
             "text": "RetryService"
           },
-          "; supertestWithoutAuth: ({ getService }: ",
+          "; bsearch: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.BsearchService",
+            "text": "BsearchService"
+          },
+          "; console: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -594,11 +1426,47 @@
             "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
-          ") => ",
-          "node_modules/@types/supertest/lib/agent",
-          "<",
-          "SuperTestStatic",
-          ".Test>; samlAuth: ({ getService }: ",
+          ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.DeploymentService",
+            "text": "DeploymentService"
+          },
+          "; esDeleteAllIndices: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.IndexPatternsService",
+            "text": "IndexPatternsService"
+          },
+          "; savedObjectInfo: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.SavedObjectInfoService",
+            "text": "SavedObjectInfoService"
+          },
+          "; randomness: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RandomnessService",
+            "text": "RandomnessService"
+          },
+          "; samlAuth: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -640,7 +1508,39 @@
             "section": "def-common.InternalRequestHeader",
             "text": "InternalRequestHeader"
           },
-          "; DEFAULT_ROLE: string; }; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+          "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          "Agent",
+          "; esSupertest: ({ getService, }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          "Agent",
+          "; supertestWithoutAuth: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          "node_modules/@types/supertest/lib/agent",
+          "<",
+          "SuperTestStatic",
+          ".Test>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -690,7 +1590,15 @@
             "section": "def-common.RetryService",
             "text": "RetryService"
           },
-          "; supertestWithoutAuth: ({ getService }: ",
+          "; bsearch: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.BsearchService",
+            "text": "BsearchService"
+          },
+          "; console: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -698,11 +1606,47 @@
             "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
-          ") => ",
-          "node_modules/@types/supertest/lib/agent",
-          "<",
-          "SuperTestStatic",
-          ".Test>; samlAuth: ({ getService }: ",
+          ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.DeploymentService",
+            "text": "DeploymentService"
+          },
+          "; esDeleteAllIndices: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.IndexPatternsService",
+            "text": "IndexPatternsService"
+          },
+          "; savedObjectInfo: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.SavedObjectInfoService",
+            "text": "SavedObjectInfoService"
+          },
+          "; randomness: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.RandomnessService",
+            "text": "RandomnessService"
+          },
+          "; samlAuth: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -744,7 +1688,39 @@
             "section": "def-common.InternalRequestHeader",
             "text": "InternalRequestHeader"
           },
-          "; DEFAULT_ROLE: string; }; }>, ProvidedTypeMap<{}>>"
+          "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          "Agent",
+          "; esSupertest: ({ getService, }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          "Agent",
+          "; supertestWithoutAuth: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => ",
+          "node_modules/@types/supertest/lib/agent",
+          "<",
+          "SuperTestStatic",
+          ".Test>; }>, ProvidedTypeMap<{}>>"
         ],
         "path": "packages/kbn-ftr-common-functional-services/services/ftr_provider_context.ts",
         "deprecated": false,
@@ -956,7 +1932,15 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; supertestWithoutAuth: ({ getService }: ",
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -964,11 +1948,47 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
-                  "node_modules/@types/supertest/lib/agent",
-                  "<",
-                  "SuperTestStatic",
-                  ".Test>; samlAuth: ({ getService }: ",
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1010,7 +2030,39 @@
                     "section": "def-common.InternalRequestHeader",
                     "text": "InternalRequestHeader"
                   },
-                  "; DEFAULT_ROLE: string; }; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1060,7 +2112,15 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; supertestWithoutAuth: ({ getService }: ",
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1068,11 +2128,47 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
-                  "node_modules/@types/supertest/lib/agent",
-                  "<",
-                  "SuperTestStatic",
-                  ".Test>; samlAuth: ({ getService }: ",
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1114,7 +2210,39 @@
                     "section": "def-common.InternalRequestHeader",
                     "text": "InternalRequestHeader"
                   },
-                  "; DEFAULT_ROLE: string; }; }>, ProvidedTypeMap<{}>>"
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-services/services/es.ts",
                 "deprecated": false,
@@ -1217,7 +2345,15 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; supertestWithoutAuth: ({ getService }: ",
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1225,11 +2361,47 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
-                  "node_modules/@types/supertest/lib/agent",
-                  "<",
-                  "SuperTestStatic",
-                  ".Test>; samlAuth: ({ getService }: ",
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1271,7 +2443,39 @@
                     "section": "def-common.InternalRequestHeader",
                     "text": "InternalRequestHeader"
                   },
-                  "; DEFAULT_ROLE: string; }; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1321,7 +2525,15 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; supertestWithoutAuth: ({ getService }: ",
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1329,11 +2541,47 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
-                  "node_modules/@types/supertest/lib/agent",
-                  "<",
-                  "SuperTestStatic",
-                  ".Test>; samlAuth: ({ getService }: ",
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1375,7 +2623,39 @@
                     "section": "def-common.InternalRequestHeader",
                     "text": "InternalRequestHeader"
                   },
-                  "; DEFAULT_ROLE: string; }; }>, ProvidedTypeMap<{}>>"
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts",
                 "deprecated": false,
@@ -1478,7 +2758,15 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; supertestWithoutAuth: ({ getService }: ",
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1486,11 +2774,47 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
-                  "node_modules/@types/supertest/lib/agent",
-                  "<",
-                  "SuperTestStatic",
-                  ".Test>; samlAuth: ({ getService }: ",
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1532,7 +2856,39 @@
                     "section": "def-common.InternalRequestHeader",
                     "text": "InternalRequestHeader"
                   },
-                  "; DEFAULT_ROLE: string; }; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1582,7 +2938,15 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; supertestWithoutAuth: ({ getService }: ",
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1590,11 +2954,47 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
-                  "node_modules/@types/supertest/lib/agent",
-                  "<",
-                  "SuperTestStatic",
-                  ".Test>; samlAuth: ({ getService }: ",
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1636,7 +3036,39 @@
                     "section": "def-common.InternalRequestHeader",
                     "text": "InternalRequestHeader"
                   },
-                  "; DEFAULT_ROLE: string; }; }>, ProvidedTypeMap<{}>>"
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-services/services/es_archiver.ts",
                 "deprecated": false,
@@ -1667,10 +3099,31 @@
           },
           {
             "parentPluginId": "@kbn/ftr-common-functional-services",
-            "id": "def-common.services.supertestWithoutAuth",
+            "id": "def-common.services.bsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "bsearch",
+            "description": [],
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.BsearchService",
+                "text": "BsearchService"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.services.console",
             "type": "Function",
             "tags": [],
-            "label": "supertestWithoutAuth",
+            "label": "console",
             "description": [],
             "signature": [
               "({ getService }: ",
@@ -1681,11 +3134,7 @@
                 "section": "def-common.FtrProviderContext",
                 "text": "FtrProviderContext"
               },
-              ") => ",
-              "node_modules/@types/supertest/lib/agent",
-              "<",
-              "SuperTestStatic",
-              ".Test>"
+              ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }"
             ],
             "path": "packages/kbn-ftr-common-functional-services/services/all.ts",
             "deprecated": false,
@@ -1694,7 +3143,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-common.services.supertestWithoutAuth.$1",
+                "id": "def-common.services.console.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -1757,7 +3206,15 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; supertestWithoutAuth: ({ getService }: ",
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1765,11 +3222,47 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
-                  "node_modules/@types/supertest/lib/agent",
-                  "<",
-                  "SuperTestStatic",
-                  ".Test>; samlAuth: ({ getService }: ",
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1811,7 +3304,39 @@
                     "section": "def-common.InternalRequestHeader",
                     "text": "InternalRequestHeader"
                   },
-                  "; DEFAULT_ROLE: string; }; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1861,7 +3386,15 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; supertestWithoutAuth: ({ getService }: ",
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1869,11 +3402,47 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
-                  "node_modules/@types/supertest/lib/agent",
-                  "<",
-                  "SuperTestStatic",
-                  ".Test>; samlAuth: ({ getService }: ",
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -1915,13 +3484,535 @@
                     "section": "def-common.InternalRequestHeader",
                     "text": "InternalRequestHeader"
                   },
-                  "; DEFAULT_ROLE: string; }; }>, ProvidedTypeMap<{}>>"
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }>, ProvidedTypeMap<{}>>"
                 ],
-                "path": "packages/kbn-ftr-common-functional-services/services/supertest_without_auth.ts",
+                "path": "packages/kbn-ftr-common-functional-services/services/console.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.services.deployment",
+            "type": "Object",
+            "tags": [],
+            "label": "deployment",
+            "description": [],
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.DeploymentService",
+                "text": "DeploymentService"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.services.esDeleteAllIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "esDeleteAllIndices",
+            "description": [],
+            "signature": [
+              "({ getService }: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.FtrProviderContext",
+                "text": "FtrProviderContext"
+              },
+              ") => (patterns: string | string[], remote?: boolean) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.services.esDeleteAllIndices.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GenericFtrProviderContext",
+                    "text": "GenericFtrProviderContext"
+                  },
+                  "<{ es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "default",
+                  "; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; esArchiver: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.EsArchiver",
+                    "text": "EsArchiver"
+                  },
+                  "; retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "default",
+                  "; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; esArchiver: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.EsArchiver",
+                    "text": "EsArchiver"
+                  },
+                  "; retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }>, ProvidedTypeMap<{}>>"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/es_delete_all_indices.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.services.indexPatterns",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.IndexPatternsService",
+                "text": "IndexPatternsService"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.services.savedObjectInfo",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectInfo",
+            "description": [],
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.SavedObjectInfoService",
+                "text": "SavedObjectInfoService"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.services.randomness",
+            "type": "Object",
+            "tags": [],
+            "label": "randomness",
+            "description": [],
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.RandomnessService",
+                "text": "RandomnessService"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ftr-common-functional-services",
@@ -2045,7 +4136,15 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; supertestWithoutAuth: ({ getService }: ",
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2053,11 +4152,47 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
-                  "node_modules/@types/supertest/lib/agent",
-                  "<",
-                  "SuperTestStatic",
-                  ".Test>; samlAuth: ({ getService }: ",
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2099,7 +4234,39 @@
                     "section": "def-common.InternalRequestHeader",
                     "text": "InternalRequestHeader"
                   },
-                  "; DEFAULT_ROLE: string; }; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2149,7 +4316,15 @@
                     "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
-                  "; supertestWithoutAuth: ({ getService }: ",
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2157,11 +4332,47 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
-                  "node_modules/@types/supertest/lib/agent",
-                  "<",
-                  "SuperTestStatic",
-                  ".Test>; samlAuth: ({ getService }: ",
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2203,9 +4414,1265 @@
                     "section": "def-common.InternalRequestHeader",
                     "text": "InternalRequestHeader"
                   },
-                  "; DEFAULT_ROLE: string; }; }>, ProvidedTypeMap<{}>>"
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-services/services/saml_auth/saml_auth_provider.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.services.supertest",
+            "type": "Function",
+            "tags": [],
+            "label": "supertest",
+            "description": [],
+            "signature": [
+              "({ getService }: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.FtrProviderContext",
+                "text": "FtrProviderContext"
+              },
+              ") => ",
+              "Agent"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.services.supertest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GenericFtrProviderContext",
+                    "text": "GenericFtrProviderContext"
+                  },
+                  "<{ es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "default",
+                  "; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; esArchiver: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.EsArchiver",
+                    "text": "EsArchiver"
+                  },
+                  "; retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "default",
+                  "; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; esArchiver: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.EsArchiver",
+                    "text": "EsArchiver"
+                  },
+                  "; retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }>, ProvidedTypeMap<{}>>"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/supertest.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.services.esSupertest",
+            "type": "Function",
+            "tags": [],
+            "label": "esSupertest",
+            "description": [],
+            "signature": [
+              "({ getService, }: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.FtrProviderContext",
+                "text": "FtrProviderContext"
+              },
+              ") => ",
+              "Agent"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.services.esSupertest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GenericFtrProviderContext",
+                    "text": "GenericFtrProviderContext"
+                  },
+                  "<{ es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "default",
+                  "; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; esArchiver: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.EsArchiver",
+                    "text": "EsArchiver"
+                  },
+                  "; retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "default",
+                  "; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; esArchiver: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.EsArchiver",
+                    "text": "EsArchiver"
+                  },
+                  "; retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }>, ProvidedTypeMap<{}>>"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/supertest.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.services.supertestWithoutAuth",
+            "type": "Function",
+            "tags": [],
+            "label": "supertestWithoutAuth",
+            "description": [],
+            "signature": [
+              "({ getService }: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.FtrProviderContext",
+                "text": "FtrProviderContext"
+              },
+              ") => ",
+              "node_modules/@types/supertest/lib/agent",
+              "<",
+              "SuperTestStatic",
+              ".Test>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.services.supertestWithoutAuth.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GenericFtrProviderContext",
+                    "text": "GenericFtrProviderContext"
+                  },
+                  "<{ es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "default",
+                  "; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; esArchiver: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.EsArchiver",
+                    "text": "EsArchiver"
+                  },
+                  "; retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "default",
+                  "; kibanaServer: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.KbnClient",
+                    "text": "KbnClient"
+                  },
+                  "; esArchiver: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.EsArchiver",
+                    "text": "EsArchiver"
+                  },
+                  "; retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; bsearch: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.BsearchService",
+                    "text": "BsearchService"
+                  },
+                  "; console: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { createIndex: (indexName: string) => Promise<void>; createAlias: (indexName: string, aliasName: string) => Promise<void>; createLegacyTemplate: (templateName: string) => Promise<void>; createIndexTemplate: (templateName: string, indexPatterns: string[], composedOf: string[]) => Promise<void>; createComponentTemplate: (templateName: string) => Promise<void>; createDataStream: (dataStream: string) => Promise<void>; deleteIndex: (indexName: string) => Promise<void>; deleteAlias: (indexName: string, aliasName: string) => Promise<void>; deleteLegacyTemplate: (templateName: string) => Promise<void>; deleteIndexTemplate: (templateName: string) => Promise<void>; deleteComponentTemplate: (templateName: string) => Promise<void>; deleteDataStream: (dataStream: string) => Promise<void>; }; deployment: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.DeploymentService",
+                    "text": "DeploymentService"
+                  },
+                  "; esDeleteAllIndices: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => (patterns: string | string[], remote?: boolean) => Promise<void>; indexPatterns: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.IndexPatternsService",
+                    "text": "IndexPatternsService"
+                  },
+                  "; savedObjectInfo: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.SavedObjectInfoService",
+                    "text": "SavedObjectInfoService"
+                  },
+                  "; randomness: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RandomnessService",
+                    "text": "RandomnessService"
+                  },
+                  "; samlAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { getInteractiveUserSessionCookieWithRoleScope(role: string): Promise<string>; getM2MApiCredentialsWithRoleScope(role: string): Promise<{ Cookie: string; }>; getEmail(role: string): Promise<string>; getUserData(role: string): Promise<",
+                  "UserProfile",
+                  ">; createM2mApiKeyWithDefaultRoleScope(): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; createM2mApiKeyWithRoleScope(role: string): Promise<",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  ">; invalidateM2mApiKeyWithRoleScope(roleCredentials: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RoleCredentials",
+                    "text": "RoleCredentials"
+                  },
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.InternalRequestHeader",
+                    "text": "InternalRequestHeader"
+                  },
+                  "; DEFAULT_ROLE: string; }; supertest: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; esSupertest: ({ getService, }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "Agent",
+                  "; supertestWithoutAuth: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => ",
+                  "node_modules/@types/supertest/lib/agent",
+                  "<",
+                  "SuperTestStatic",
+                  ".Test>; }>, ProvidedTypeMap<{}>>"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/supertest_without_auth.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
