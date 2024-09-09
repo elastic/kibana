@@ -507,7 +507,7 @@ export const DocViewerTable = ({
             <EuiFlexItem grow={false}>
               <EuiSwitch
                 label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
-                  defaultMessage: 'Hide nulls',
+                  defaultMessage: 'Hide null fields',
                   description: 'Switch label to hide fields with null values in the table',
                 })}
                 checked={areNullValuesHidden ?? false}
