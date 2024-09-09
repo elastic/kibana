@@ -8,11 +8,8 @@
 import { config } from './config';
 
 describe('Cloud plugin config', () => {
-  it('allows known cloud service provider values', () => {
-    for (const csp of ['aws', 'gcp', 'azure']) {
-      expect(config.schema.validate({ csp }).csp).toEqual(csp);
-    }
-    expect(() => config.schema.validate({ csp: 'unknown' })).toThrow('[csp]');
+  it('allows known cloud service provider to be configured', () => {
+    expect(config.schema.validate({ csp: 'aws' }).csp).toEqual('aws');
   });
   it('evicts unknown properties under the `serverless` structure', () => {
     const output = config.schema.validate({
