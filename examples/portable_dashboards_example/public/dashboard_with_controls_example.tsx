@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -11,7 +12,8 @@ import React, { useEffect, useState } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
+import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
+import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import {
   AwaitingDashboardAPI,
   DashboardRenderer,
@@ -62,15 +64,16 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
       <EuiPanel hasBorder={true}>
         <DashboardRenderer
           getCreationOptions={async (): Promise<DashboardCreationOptions> => {
-            const controlGroupState = {};
-            await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
+            const builder = controlGroupInputBuilder;
+            const controlGroupInput = getDefaultControlGroupInput();
+            await builder.addDataControlFromField(controlGroupInput, {
               dataViewId: dataView.id ?? '',
               title: 'Destintion country',
               fieldName: 'geo.dest',
               width: 'medium',
               grow: false,
             });
-            await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
+            await builder.addDataControlFromField(controlGroupInput, {
               dataViewId: dataView.id ?? '',
               fieldName: 'bytes',
               width: 'medium',
@@ -83,7 +86,7 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
               getInitialInput: () => ({
                 timeRange: { from: 'now-30d', to: 'now' },
                 viewMode: ViewMode.VIEW,
-                controlGroupState,
+                controlGroupInput,
               }),
             };
           }}
