@@ -25,10 +25,18 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type {
+  RuleAction as AlertingRuleAction,
+  RuleSystemAction as AlertingRuleSystemAction,
+} from '@kbn/alerting-plugin/common';
+
+import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformAlertToRuleAction,
   transformAlertToRuleResponseAction,
+  transformAlertToRuleSystemAction,
 } from '../../../../../common/detection_engine/transform_actions';
 
 import type {
@@ -45,7 +53,11 @@ import {
   DataSourceType,
   GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  RuleCreateProps,
+  AlertSuppression,
+  RequiredFieldInput,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 
@@ -392,6 +404,12 @@ export const getStepDataDataSource = (
   return copiedStepData;
 };
 
+/**
+ * Strips away form rows that were not filled out by the user
+ */
+const removeEmptyRequiredFields = (requiredFields: RequiredFieldInput[]): RequiredFieldInput[] =>
+  requiredFields.filter((field) => field.name !== '' && field.type !== '');
+
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
   const stepData = getStepDataDataSource(defineStepData);
 
@@ -400,6 +418,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
 
   const baseFields = {
     type: ruleType,
+    related_integrations: defineStepData.relatedIntegrations?.filter((ri) => !isEmpty(ri.package)),
     ...(timeline.id != null &&
       timeline.title != null && {
         timeline_id: timeline.id,
@@ -407,10 +426,28 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
       }),
   };
 
+  const alertSuppressionFields =
+    ruleFields.groupByFields.length > 0
+      ? {
+          alert_suppression: {
+            group_by: ruleFields.groupByFields,
+            duration:
+              ruleFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
+                ? ruleFields.groupByDuration
+                : undefined,
+            missing_fields_strategy: (ruleFields.suppressionMissingFields ||
+              DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) as AlertSuppression['missing_fields_strategy'],
+          },
+        }
+      : {};
+
+  const requiredFields = removeEmptyRequiredFields(defineStepData.requiredFields ?? []);
+
   const typeFields = isMlFields(ruleFields)
     ? {
         anomaly_threshold: ruleFields.anomalyThreshold,
         machine_learning_job_id: ruleFields.machineLearningJobId,
+        ...alertSuppressionFields,
       }
     : isThresholdFields(ruleFields)
     ? {
@@ -419,6 +456,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id ?? undefined,
+        required_fields: requiredFields,
         ...(ruleType === 'threshold' && {
           threshold: {
             field: ruleFields.threshold?.field ?? [],
@@ -446,11 +484,13 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id ?? undefined,
+        required_fields: requiredFields,
         threat_index: ruleFields.threatIndex,
         threat_query: ruleFields.threatQueryBar?.query?.query as string,
         threat_filters: ruleFields.threatQueryBar?.filters,
         threat_mapping: ruleFields.threatMapping,
         threat_language: ruleFields.threatQueryBar?.query?.language,
+        ...alertSuppressionFields,
       }
     : isEqlFields(ruleFields)
     ? {
@@ -459,9 +499,11 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id ?? undefined,
+        required_fields: requiredFields,
         timestamp_field: ruleFields.eqlOptions?.timestampField,
         event_category_override: ruleFields.eqlOptions?.eventCategoryField,
         tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
+        ...alertSuppressionFields,
       }
     : isNewTermsFields(ruleFields)
     ? {
@@ -469,34 +511,26 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
+        required_fields: requiredFields,
         new_terms_fields: ruleFields.newTermsFields,
         history_window_start: `now-${ruleFields.historyWindowSize}`,
+        ...alertSuppressionFields,
       }
     : isEsqlFields(ruleFields) && !('index' in ruleFields)
     ? {
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
+        required_fields: requiredFields,
+        ...alertSuppressionFields,
       }
     : {
-        ...(ruleFields.groupByFields.length > 0
-          ? {
-              alert_suppression: {
-                group_by: ruleFields.groupByFields,
-                duration:
-                  ruleFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
-                    ? ruleFields.groupByDuration
-                    : undefined,
-                missing_fields_strategy:
-                  ruleFields.suppressionMissingFields ||
-                  DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
-              },
-            }
-          : {}),
+        ...alertSuppressionFields,
         index: ruleFields.index,
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: undefined,
+        required_fields: requiredFields,
         type: 'query' as const,
         // rule only be updated as saved_query type if it has saved_id and shouldLoadQueryDynamically checkbox checked
         ...(['query', 'saved_query'].includes(ruleType) &&
@@ -550,6 +584,7 @@ export const formatAboutStepData = (
     threat,
     isAssociatedToEndpointList,
     isBuildingBlock,
+    maxSignals,
     note,
     ruleNameOverride,
     threatIndicatorPath,
@@ -604,16 +639,29 @@ export const formatAboutStepData = (
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     ...(!isEmpty(note) ? { note } : {}),
+    max_signals: Number.isSafeInteger(maxSignals) ? maxSignals : undefined,
     ...rest,
   };
   return resp;
 };
 
-export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
+export const isRuleAction = (
+  action: AlertingRuleAction | AlertingRuleSystemAction,
+  actionTypeRegistry: ActionTypeRegistryContract
+): action is AlertingRuleAction => !actionTypeRegistry.get(action.actionTypeId).isSystemActionType;
+
+export const formatActionsStepData = (
+  actionsStepData: ActionsStepRule,
+  actionTypeRegistry: ActionTypeRegistryContract
+): ActionsStepRuleJson => {
   const { actions = [], responseActions, enabled, kibanaSiemAppUrl } = actionsStepData;
 
   return {
-    actions: actions.map((action) => transformAlertToRuleAction(action)),
+    actions: actions.map((action) =>
+      isRuleAction(action, actionTypeRegistry)
+        ? transformAlertToRuleAction(action)
+        : transformAlertToRuleSystemAction(action)
+    ),
     response_actions: responseActions?.map(transformAlertToRuleResponseAction),
     enabled,
     meta: {
@@ -630,13 +678,14 @@ export const formatRule = <T>(
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
   actionsData: ActionsStepRule,
+  actionTypeRegistry: ActionTypeRegistryContract,
   exceptionsList?: List[]
 ): T =>
   deepmerge.all([
     formatDefineStepData(defineStepData),
     formatAboutStepData(aboutStepData, exceptionsList),
     formatScheduleStepData(scheduleData),
-    formatActionsStepData(actionsData),
+    formatActionsStepData(actionsData, actionTypeRegistry),
   ]) as unknown as T;
 
 export const formatPreviewRule = ({
@@ -644,10 +693,12 @@ export const formatPreviewRule = ({
   aboutRuleData,
   scheduleRuleData,
   exceptionsList,
+  actionTypeRegistry,
 }: {
   defineRuleData: DefineStepRule;
   aboutRuleData: AboutStepRule;
   scheduleRuleData: ScheduleStepRule;
+  actionTypeRegistry: ActionTypeRegistryContract;
   exceptionsList?: List[];
 }): RuleCreateProps => {
   const aboutStepData = {
@@ -661,6 +712,7 @@ export const formatPreviewRule = ({
       aboutStepData,
       scheduleRuleData,
       stepActionsDefaultValue,
+      actionTypeRegistry,
       exceptionsList
     ),
   };

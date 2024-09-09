@@ -33,6 +33,7 @@
     "@kbn/object-versioning",
     "@kbn/core-saved-objects-server",
     "@kbn/logging",
+    "@kbn/crypto-browser",
   ],
   "exclude": [
     "target/**/*",

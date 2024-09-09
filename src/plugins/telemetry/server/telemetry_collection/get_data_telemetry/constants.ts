@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export const DATA_TELEMETRY_ID = 'data';
 
 export const DATA_KNOWN_TYPES = ['logs', 'traces', 'metrics'] as const;
 
-export type DataTelemetryType = typeof DATA_KNOWN_TYPES[number];
+export type DataTelemetryType = (typeof DATA_KNOWN_TYPES)[number];
 
-export type DataPatternName = typeof DATA_DATASETS_INDEX_PATTERNS[number]['patternName'];
+export type DataPatternName = (typeof DATA_DATASETS_INDEX_PATTERNS)[number]['patternName'];
 
 // TODO: Ideally this list should be updated from an external public URL (similar to the newsfeed)
 // But it's good to have a minimum list shipped with the build.
@@ -39,11 +40,16 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
 
   // Observability - Elastic
   { pattern: 'filebeat-*', patternName: 'filebeat', shipper: 'filebeat' },
+  { pattern: '*filebeat*', patternName: 'generic-filebeat' },
   { pattern: 'metricbeat-*', patternName: 'metricbeat', shipper: 'metricbeat' },
+  { pattern: '*metricbeat*', patternName: 'generic-metricbeat' },
   { pattern: 'apm-*', patternName: 'apm', shipper: 'apm' },
   { pattern: 'functionbeat-*', patternName: 'functionbeat', shipper: 'functionbeat' },
+  { pattern: '*functionbeat*', patternName: 'generic-functionbeat' },
   { pattern: 'heartbeat-*', patternName: 'heartbeat', shipper: 'heartbeat' },
+  { pattern: '*heartbeat*', patternName: 'generic-heartbeat' },
   { pattern: 'logstash-*', patternName: 'logstash', shipper: 'logstash' },
+  { pattern: '*logstash*', patternName: 'generic-logstash' },
   // Observability - 3rd party
   { pattern: 'fluentd*', patternName: 'fluentd' },
   { pattern: 'telegraf*', patternName: 'telegraf' },
@@ -51,7 +57,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: 'fluentbit*', patternName: 'fluentbit' },
   { pattern: '*nginx*', patternName: 'nginx' },
   { pattern: '*apache*', patternName: 'apache' }, // Already in Security (keeping it in here for documentation)
-  // { pattern: '*logs*', patternName: 'third-party-logs' }, Disabled for now
+  { pattern: '*logs*', patternName: 'generic-logs' },
 
   // Security - Elastic
   { pattern: 'logstash-*', patternName: 'logstash', shipper: 'logstash' },
@@ -63,6 +69,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: 'winlogbeat-*', patternName: 'winlogbeat', shipper: 'winlogbeat' },
   { pattern: 'packetbeat-*', patternName: 'packetbeat', shipper: 'packetbeat' },
   { pattern: 'filebeat-*', patternName: 'filebeat', shipper: 'filebeat' },
+  { pattern: '.internal.alerts-*', patternName: 'alerts' },
   // Security - 3rd party
   { pattern: '*apache*', patternName: 'apache' }, // Already in Observability (keeping it in here for documentation)
   { pattern: '*tomcat*', patternName: 'tomcat' },

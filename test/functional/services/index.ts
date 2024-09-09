@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
-import { services as commonServiceProviders } from '../../common/services';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
 import { AppsMenuService } from './apps_menu';
 import {
@@ -17,6 +18,7 @@ import {
   SnapshotsService,
 } from './common';
 import { ComboBoxService } from './combo_box';
+import { SelectableService } from './selectable';
 import {
   DashboardAddPanelService,
   DashboardReplacePanelService,
@@ -38,7 +40,6 @@ import { FieldEditorService } from './field_editor';
 import { ManagementMenuService } from './management';
 import { QueryBarService } from './query_bar';
 import { RenderableService } from './renderable';
-import { ToastsService } from './toasts';
 import { DataGridService } from './data_grid';
 import {
   PieChartService,
@@ -53,9 +54,11 @@ import { MonacoEditorService } from './monaco_editor';
 import { UsageCollectionService } from './usage_collection';
 import { SavedObjectsFinderService } from './saved_objects_finder';
 import { DashboardSettingsProvider } from './dashboard/dashboard_settings';
+import { ESQLService } from './esql';
+import { DataViewsService } from './data_views';
 
 export const services = {
-  ...commonServiceProviders,
+  ...commonFunctionalServices,
   ...commonFunctionalUIServices,
   filterBar: FilterBarService,
   queryBar: QueryBarService,
@@ -75,8 +78,10 @@ export const services = {
   dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
   dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
   dashboardSettings: DashboardSettingsProvider,
+  dataViews: DataViewsService,
   flyout: FlyoutService,
   comboBox: ComboBoxService,
+  selectable: SelectableService,
   dataGrid: DataGridService,
   embedding: EmbeddingService,
   renderable: RenderableService,
@@ -86,7 +91,6 @@ export const services = {
   vegaDebugInspector: VegaDebugInspectorViewService,
   appsMenu: AppsMenuService,
   globalNav: GlobalNavService,
-  toasts: ToastsService,
   savedQueryManagementComponent: SavedQueryManagementComponentService,
   elasticChart: ElasticChartService,
   supertest: KibanaSupertestProvider,
@@ -95,4 +99,5 @@ export const services = {
   menuToggle: MenuToggleService,
   usageCollection: UsageCollectionService,
   savedObjectsFinder: SavedObjectsFinderService,
+  esql: ESQLService,
 };

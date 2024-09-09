@@ -7,9 +7,9 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { appIds } from '@kbn/management-cards-navigation';
-import { appCategories } from '@kbn/management-cards-navigation/src/types';
-import { getObservabilitySideNavComponent } from './components/side_navigation';
+import { appCategories, appIds } from '@kbn/management-cards-navigation';
+import { of } from 'rxjs';
+import { navigationTree } from './navigation_tree';
 import { createObservabilityDashboardRegistration } from './logs_signal/overview_registration';
 import {
   ServerlessObservabilityPublicSetup,
@@ -49,30 +49,35 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { observabilityShared, serverless, management, cloud } = setupDeps;
-    observabilityShared.setIsSidebarEnabled(false);
+    const { serverless, management, security } = setupDeps;
+    const navigationTree$ = of(navigationTree);
     serverless.setProjectHome('/app/observability/landing');
-    serverless.setSideNavComponent(getObservabilitySideNavComponent(core, { serverless, cloud }));
-    management.setIsSidebarEnabled(false);
+    serverless.initNavigation('oblt', navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
+    const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
+    const extendCardNavDefinitions = aiAssistantIsEnabled
+      ? serverless.getNavigationCards(security.authz.isRoleManagementEnabled(), {
+          observabilityAiAssistantManagement: {
+            category: appCategories.OTHER,
+            title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
+              defaultMessage: 'AI Assistant for Observability Settings',
+            }),
+            description: i18n.translate(
+              'xpack.serverlessObservability.aiAssistantManagementDescription',
+              {
+                defaultMessage:
+                  'Manage knowledge base and control assistant behavior, including response language.',
+              }
+            ),
+            icon: 'sparkles',
+          },
+        })
+      : undefined;
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.RULES],
-      extendCardNavDefinitions: {
-        aiAssistantManagementObservability: {
-          category: appCategories.OTHER,
-          title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
-            defaultMessage: 'AI assistant for Observability settings',
-          }),
-          description: i18n.translate(
-            'xpack.serverlessObservability.aiAssistantManagementDescription',
-            {
-              defaultMessage: 'Manage your AI assistant for Observability settings.',
-            }
-          ),
-          icon: 'sparkles',
-        },
-      },
+      extendCardNavDefinitions,
     });
+
     return {};
   }
 

@@ -69,8 +69,8 @@ describe('contextMiddleware', () => {
       expect(store.dispatch).toHaveBeenCalledWith({
         payload: {
           resolvedDateRange: {
-            fromDate: '2021-01-10T04:00:00.000Z',
-            toDate: '2021-01-10T08:00:00.000Z',
+            fromDate: 'now-2m',
+            toDate: 'now',
           },
           searchSessionId: 'sessionId-1',
         },

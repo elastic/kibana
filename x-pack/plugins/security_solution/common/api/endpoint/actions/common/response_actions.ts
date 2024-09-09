@@ -7,17 +7,27 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { UploadActionRequestSchema } from '../..';
-import { ExecuteActionRequestSchema } from '../execute_route';
-import { EndpointActionGetFileSchema } from '../get_file_route';
-import { KillOrSuspendProcessRequestSchema, NoParametersRequestSchema } from './base';
+
+import { ExecuteActionRequestSchema } from '../response_actions/execute';
+import { EndpointActionGetFileSchema } from '../response_actions/get_file';
+import { ScanActionRequestSchema } from '../response_actions/scan';
+import { IsolateRouteRequestSchema } from '../response_actions/isolate';
+import { UnisolateRouteRequestSchema } from '../response_actions/unisolate';
+import { GetProcessesRouteRequestSchema } from '../response_actions/running_procs';
+import { KillProcessRouteRequestSchema } from '../response_actions/kill_process';
+import { SuspendProcessRouteRequestSchema } from '../response_actions/suspend_process';
+import { UploadActionRequestSchema } from '../response_actions/upload';
 
 export const ResponseActionBodySchema = schema.oneOf([
-  NoParametersRequestSchema.body,
-  KillOrSuspendProcessRequestSchema.body,
+  IsolateRouteRequestSchema.body,
+  UnisolateRouteRequestSchema.body,
+  GetProcessesRouteRequestSchema.body,
+  KillProcessRouteRequestSchema.body,
+  SuspendProcessRouteRequestSchema.body,
   EndpointActionGetFileSchema.body,
   ExecuteActionRequestSchema.body,
   UploadActionRequestSchema.body,
+  ScanActionRequestSchema.body,
 ]);
 
 export type ResponseActionsRequestBody = TypeOf<typeof ResponseActionBodySchema>;

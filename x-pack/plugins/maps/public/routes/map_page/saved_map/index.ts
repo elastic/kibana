@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { RefreshConfig, SerializedMapState, SerializedUiState } from './types';
+export type { RefreshConfig, ParsedMapStateJSON, ParsedUiStateJSON } from './types';
 export { SavedMap } from './saved_map';
 export { getInitialLayersFromUrlParam } from './get_initial_layers_from_url_param';
 export { getInitialQuery } from './get_initial_query';

@@ -30,10 +30,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const logger = getService('log');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   registry.when('transaction error rate alert', { config: 'basic', archives: [] }, () => {
-    before(async () => {
+    before(() => {
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -66,11 +66,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .success(),
           ];
         });
-      await synthtraceEsClient.index(events);
+      return apmSynthtraceEsClient.index(events);
     });
 
     after(async () => {
-      await synthtraceEsClient.clean();
+      await apmSynthtraceEsClient.clean();
     });
 
     describe('create rule without kql query', () => {
@@ -200,7 +200,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let ruleId: string;
       let alerts: ApmAlertFields[];
 
-      before(async () => {
+      beforeEach(async () => {
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.TransactionErrorRate,
@@ -232,7 +232,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         alerts = await waitForAlertsForRule({ es, ruleId });
       });
 
-      after(async () => {
+      afterEach(async () => {
         await cleanupRuleAndAlertState({ es, supertest, logger });
       });
 
@@ -249,8 +249,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/173419
-      it.skip('shows alert count=1 for opbeans-node on service inventory', async () => {
+      it('shows alert count=1 for opbeans-node on service inventory', async () => {
         const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
         expect(serviceInventoryAlertCounts).to.eql({
           'opbeans-node': 1,
@@ -258,8 +257,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/173439
-      it.skip('shows alert count=0 in opbeans-java service', async () => {
+      it('shows alert count=0 in opbeans-java service', async () => {
         const serviceTabAlertCount = await fetchServiceTabAlertCount({
           apmApiClient,
           serviceName: 'opbeans-java',

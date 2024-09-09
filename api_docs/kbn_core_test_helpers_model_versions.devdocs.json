@@ -58,9 +58,9 @@
           "({ type, }: { type: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsType",
+            "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
           "<any>; }) => ",
@@ -97,9 +97,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-common.SavedObjectsType",
+                    "section": "def-server.SavedObjectsType",
                     "text": "SavedObjectsType"
                   },
                   "<any>"
@@ -268,9 +268,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.ISavedObjectsRepository",
+                "section": "def-server.ISavedObjectsRepository",
                 "text": "ISavedObjectsRepository"
               }
             ],
@@ -290,9 +290,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.ISavedObjectsRepository",
+                "section": "def-server.ISavedObjectsRepository",
                 "text": "ISavedObjectsRepository"
               }
             ],
@@ -302,10 +302,10 @@
           },
           {
             "parentPluginId": "@kbn/core-test-helpers-model-versions",
-            "id": "def-common.ModelVersionTestKit.tearsDown",
+            "id": "def-common.ModelVersionTestKit.tearDown",
             "type": "Function",
             "tags": [],
-            "label": "tearsDown",
+            "label": "tearDown",
             "description": [
               "\nCleanup function that will delete the test index.\nShould be called before calling `testbed.prepareTestKit` again."
             ],
@@ -382,9 +382,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsBulkCreateObject",
+                "section": "def-server.SavedObjectsBulkCreateObject",
                 "text": "SavedObjectsBulkCreateObject"
               },
               "<unknown>[] | undefined"
@@ -545,9 +545,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsType",
+                "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
               "<any>"

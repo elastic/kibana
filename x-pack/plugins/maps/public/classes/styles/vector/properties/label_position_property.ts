@@ -65,7 +65,7 @@ export class LabelPositionProperty extends AbstractStyleProperty<
   getDisabledReason() {
     if (this._labelSizeProperty.isDynamic()) {
       return i18n.translate('xpack.maps.labelPosition.dynamicLabelSizeNotSupported', {
-        defaultMessage: `{labelPositionPropertyLabel} is not supported with '{byValueLabel}' {labelSizePropertyLabel}. Set {labelSizePropertyLabel} to '{fixedLabel}' to enable.`,
+        defaultMessage: `{labelPositionPropertyLabel} is not supported with ''{byValueLabel}'' {labelSizePropertyLabel}. Set {labelSizePropertyLabel} to ''{fixedLabel}'' to enable.`,
         values: {
           byValueLabel: BY_VALUE_LABEL.toLowerCase(),
           fixedLabel: FIXED_LABEL.toLowerCase(),

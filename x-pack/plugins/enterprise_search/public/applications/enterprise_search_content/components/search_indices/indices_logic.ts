@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { IngestionMethod } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../common/types/api';
 import { Meta } from '../../../../../common/types/pagination';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
@@ -28,7 +30,7 @@ import {
   FetchIndicesApiActions,
   FetchIndicesAPILogic,
 } from '../../api/index/fetch_indices_api_logic';
-import { ElasticsearchViewIndex, IngestionMethod } from '../../types';
+import { ElasticsearchViewIndex } from '../../types';
 import { getIngestionMethod, indexToViewIndex } from '../../utils/indices';
 
 export interface IndicesActions {
@@ -149,11 +151,13 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
     },
   }),
   path: ['enterprise_search', 'content', 'indices_logic'],
+  // @ts-expect-error upgrade typescript v5.1.6
   reducers: () => ({
     deleteModalIndexName: [
       '',
       {
         closeDeleteModal: () => '',
+        // @ts-expect-error upgrade typescript v5.1.6
         openDeleteModal: (_, { indexName }) => indexName,
       },
     ],
@@ -181,7 +185,9 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       },
       {
         apiSuccess: (
+          // @ts-expect-error upgrade typescript v5.1.6
           _,
+          // @ts-expect-error upgrade typescript v5.1.6
           { meta, onlyShowSearchOptimizedIndices, returnHiddenIndices, searchQuery }
         ) => ({
           from: meta.page.from,
@@ -190,6 +196,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
           searchQuery,
           size: meta.page.size,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { newPageIndex }) => ({
           ...state,
           from: (newPageIndex - 1) * state.size,

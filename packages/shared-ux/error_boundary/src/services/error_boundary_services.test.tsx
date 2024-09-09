@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { render } from '@testing-library/react';
@@ -17,6 +18,7 @@ import { BadComponent } from '../../mocks';
 describe('<KibanaErrorBoundaryProvider>', () => {
   let analytics: KibanaErrorBoundaryProviderDeps['analytics'];
   beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     analytics = analyticsServiceMock.createAnalyticsServiceStart();
   });
 
@@ -34,7 +36,9 @@ describe('<KibanaErrorBoundaryProvider>', () => {
 
     expect(reportEventSpy).toBeCalledWith('fatal-error-react', {
       component_name: 'BadComponent',
+      component_stack: expect.any(String),
       error_message: 'Error: This is an error to show the test user!',
+      error_stack: expect.any(String),
     });
   });
 
@@ -61,7 +65,9 @@ describe('<KibanaErrorBoundaryProvider>', () => {
     expect(reportEventSpy2).not.toBeCalled();
     expect(reportEventSpy1).toBeCalledWith('fatal-error-react', {
       component_name: 'BadComponent',
+      component_stack: expect.any(String),
       error_message: 'Error: This is an error to show the test user!',
+      error_stack: expect.any(String),
     });
   });
 });

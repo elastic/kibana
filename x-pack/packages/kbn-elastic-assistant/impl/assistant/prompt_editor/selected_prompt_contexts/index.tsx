@@ -5,53 +5,31 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiAccordion, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty, omit } from 'lodash/fp';
 import React, { useCallback } from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
-
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { Conversation } from '../../../assistant_context/types';
 import { DataAnonymizationEditor } from '../../../data_anonymization_editor';
 import type { PromptContext, SelectedPromptContext } from '../../prompt_context/types';
 import * as i18n from './translations';
 
 export interface Props {
-  isNewConversation: boolean;
   promptContexts: Record<string, PromptContext>;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
+  currentReplacements: Conversation['replacements'] | undefined;
 }
 
-export const EditorContainer = styled.div<{
-  $accordionState: 'closed' | 'open';
-}>`
-  ${({ $accordionState }) => ($accordionState === 'closed' ? 'height: 0px;' : '')}
-  ${({ $accordionState }) => ($accordionState === 'closed' ? 'overflow: hidden;' : '')}
-  ${({ $accordionState }) => ($accordionState === 'closed' ? 'position: absolute;' : '')}
-`;
-
 const SelectedPromptContextsComponent: React.FC<Props> = ({
-  isNewConversation,
   promptContexts,
   selectedPromptContexts,
   setSelectedPromptContexts,
+  currentReplacements,
 }) => {
-  const [accordionState, setAccordionState] = React.useState<'closed' | 'open'>('closed');
-
-  const onToggle = useCallback(
-    () => setAccordionState((prev) => (prev === 'open' ? 'closed' : 'open')),
-    []
-  );
-
   const unselectPromptContext = useCallback(
     (unselectedId: string) => {
       setSelectedPromptContexts((prev) => omit(unselectedId, prev));
@@ -64,17 +42,16 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
   }
 
   return (
-    <EuiFlexGroup data-test-subj="selectedPromptContexts" direction="column" gutterSize="none">
+    <EuiFlexGroup data-test-subj="selectedPromptContexts" direction="column" gutterSize={'s'}>
       {Object.keys(selectedPromptContexts)
         .sort()
-        .map((id) => (
+        .map((id, i) => (
           <EuiFlexItem data-test-subj={`selectedPromptContext-${id}`} grow={false} key={id}>
-            {isNewConversation || Object.keys(selectedPromptContexts).length > 1 ? (
-              <EuiSpacer data-test-subj="spacer" />
-            ) : null}
             <EuiAccordion
               buttonContent={promptContexts[id]?.description}
-              forceState={accordionState}
+              buttonProps={{
+                'data-test-subj': `selectedPromptContext-${i}-button`,
+              }}
               extraAction={
                 <EuiToolTip content={i18n.REMOVE_CONTEXT}>
                   <EuiButtonIcon
@@ -86,15 +63,26 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
                 </EuiToolTip>
               }
               id={id}
-              onToggle={onToggle}
               paddingSize="s"
+              css={css`
+                background: ${euiThemeVars.euiPageBackgroundColor};
+                border-radius: ${euiThemeVars.euiBorderRadius};
+
+                > div:first-child {
+                  color: ${euiThemeVars.euiColorPrimary};
+                  padding: ${euiThemeVars.euiFormControlPadding};
+                }
+              `}
+              borders={'all'}
+              arrowProps={{
+                color: 'primary',
+              }}
             >
-              <EditorContainer $accordionState={accordionState}>
-                <DataAnonymizationEditor
-                  selectedPromptContext={selectedPromptContexts[id]}
-                  setSelectedPromptContexts={setSelectedPromptContexts}
-                />
-              </EditorContainer>
+              <DataAnonymizationEditor
+                currentReplacements={currentReplacements}
+                selectedPromptContext={selectedPromptContexts[id]}
+                setSelectedPromptContexts={setSelectedPromptContexts}
+              />
             </EuiAccordion>
           </EuiFlexItem>
         ))}

@@ -14,6 +14,9 @@ import { InstallationMessage } from '../agent_enrollment_flyout/installation_mes
 import type { K8sMode, CloudSecurityIntegration } from '../agent_enrollment_flyout/types';
 import { PlatformSelector } from '../platform_selector';
 
+import { RootPrivilegesCallout } from './root_privileges_callout';
+import { UnprivilegedInfo } from './unprivileged_info';
+
 interface Props {
   installCommand: CommandsByPlatform;
   isK8s: K8sMode | undefined;
@@ -23,6 +26,7 @@ interface Props {
   fullCopyButton?: boolean;
   isManaged?: boolean;
   onCopy?: () => void;
+  rootIntegrations?: Array<{ name: string; title: string }>;
 }
 
 export const InstallSection: React.FunctionComponent<Props> = ({
@@ -34,10 +38,13 @@ export const InstallSection: React.FunctionComponent<Props> = ({
   fullCopyButton = false,
   isManaged = true,
   onCopy,
+  rootIntegrations,
 }) => {
   return (
     <>
       <InstallationMessage isK8s={isK8s} isManaged={isManaged} />
+      <RootPrivilegesCallout rootIntegrations={rootIntegrations} />
+      <UnprivilegedInfo />
       <PlatformSelector
         fullCopyButton={fullCopyButton}
         onCopy={onCopy}

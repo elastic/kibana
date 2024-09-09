@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 import { CaseDetailsLink } from '../../../../common/components/links';
 import {
@@ -17,11 +18,10 @@ import {
   CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
 } from './test_ids';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 
 const ICON = 'warning';
 
-const columns: Array<EuiBasicTableColumn<RelatedCase>> = [
+const getColumns: (data: RelatedCase[]) => Array<EuiBasicTableColumn<RelatedCase>> = (data) => [
   {
     field: 'title',
     name: (
@@ -30,13 +30,16 @@ const columns: Array<EuiBasicTableColumn<RelatedCase>> = [
         defaultMessage="Name"
       />
     ),
-    render: (value: string, caseData: RelatedCase) => (
-      <CellTooltipWrapper tooltip={caseData.title}>
-        <CaseDetailsLink detailName={caseData.id} title={caseData.title}>
-          {caseData.title}
-        </CaseDetailsLink>
-      </CellTooltipWrapper>
-    ),
+    render: (value: string, caseData: RelatedCase) => {
+      const index = data.findIndex((d) => d.id === caseData.id);
+      return (
+        <CellTooltipWrapper tooltip={caseData.title}>
+          <CaseDetailsLink detailName={caseData.id} title={caseData.title} index={index}>
+            {caseData.title}
+          </CaseDetailsLink>
+        </CellTooltipWrapper>
+      );
+    },
   },
   {
     field: 'status',
@@ -61,8 +64,9 @@ export interface RelatedCasesProps {
 /**
  *
  */
-export const RelatedCases: React.VFC<RelatedCasesProps> = ({ eventId }) => {
+export const RelatedCases: React.FC<RelatedCasesProps> = ({ eventId }) => {
   const { loading, error, data, dataCount } = useFetchRelatedCases({ eventId });
+  const columns = useMemo(() => getColumns(data), [data]);
 
   if (error) {
     return null;

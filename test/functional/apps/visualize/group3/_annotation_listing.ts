@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -50,8 +51,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('by text', () => {
         it('matches on the first word', async function () {
-          await listingTable.searchForItemWithName('search');
-          await listingTable.expectItemsCount('eventAnnotation', 1);
+          await retry.try(async () => {
+            await listingTable.searchForItemWithName('search');
+            await listingTable.expectItemsCount('eventAnnotation', 1);
+          });
         });
 
         it('matches the second word', async function () {
@@ -141,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             color: '#00FF00',
           });
 
-          retry.try(async () => {
+          await retry.try(async () => {
             expect(await PageObjects.annotationEditor.getAnnotationCount()).to.be(2);
           });
         });

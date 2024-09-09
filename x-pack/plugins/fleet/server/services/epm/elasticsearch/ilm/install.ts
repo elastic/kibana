@@ -11,7 +11,7 @@ import type { EsAssetReference } from '../../../../types';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
-import { updateEsAssetReferences } from '../../packages/install';
+import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 import { PackageInvalidArchiveError } from '../../../../errors';

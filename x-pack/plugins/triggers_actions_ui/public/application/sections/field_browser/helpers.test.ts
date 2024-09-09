@@ -16,7 +16,7 @@ import {
   filterSelectedBrowserFields,
 } from './helpers';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { EcsFlat } from '@kbn/ecs';
+import { EcsFlat } from '@elastic/ecs';
 
 describe('helpers', () => {
   describe('getCategory', () => {
@@ -66,7 +66,6 @@ describe('helpers', () => {
               category: 'auditd',
               description: null,
               example: null,
-              format: '',
               indexes: ['auditbeat'],
               name: 'auditd.data.a0',
               searchable: true,
@@ -87,7 +86,6 @@ describe('helpers', () => {
               description:
                 'Ephemeral identifier of this agent (if one exists). This id normally changes across restarts, but `agent.id` does not.',
               example: '8a4f500f',
-              format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
               name: 'agent.ephemeral_id',
               searchable: true,
@@ -98,7 +96,6 @@ describe('helpers', () => {
               category: 'agent',
               description: null,
               example: null,
-              format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
               name: 'agent.hostname',
               searchable: true,
@@ -128,7 +125,6 @@ describe('helpers', () => {
               category: 'auditd',
               description: null,
               example: null,
-              format: '',
               indexes: ['auditbeat'],
               name: 'auditd.data.a0',
               searchable: true,
@@ -149,7 +145,6 @@ describe('helpers', () => {
               description:
                 'Ephemeral identifier of this agent (if one exists). This id normally changes across restarts, but `agent.id` does not.',
               example: '8a4f500f',
-              format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
               name: 'agent.ephemeral_id',
               searchable: true,
@@ -160,7 +155,6 @@ describe('helpers', () => {
               category: 'agent',
               description: null,
               example: null,
-              format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
               name: 'agent.hostname',
               searchable: true,
@@ -211,7 +205,6 @@ describe('helpers', () => {
               description:
                 'Ephemeral identifier of this agent (if one exists). This id normally changes across restarts, but `agent.id` does not.',
               example: '8a4f500f',
-              format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
               name: 'agent.ephemeral_id',
               searchable: true,
@@ -223,7 +216,6 @@ describe('helpers', () => {
               description:
                 'Unique identifier of this agent (if one exists). Example: For Beats this would be beat.id.',
               example: '8a4f500d',
-              format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
               name: 'agent.id',
               searchable: true,
@@ -253,7 +245,6 @@ describe('helpers', () => {
               description:
                 'The cloud account or organization id used to identify different entities in a multi-tenant environment. Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.',
               example: '666777888999',
-              format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
               name: 'cloud.account.id',
               searchable: true,
@@ -268,7 +259,6 @@ describe('helpers', () => {
               category: 'container',
               description: 'Unique container id.',
               example: null,
-              format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
               name: 'container.id',
               searchable: true,
@@ -285,7 +275,7 @@ describe('helpers', () => {
               aggregatable: true,
               readFromDocValues: true,
               category: 'kibana',
-              format: 'string',
+              format: { id: 'string' },
             },
           },
         },
@@ -312,7 +302,7 @@ describe('helpers', () => {
                 aggregatable: true,
                 readFromDocValues: true,
                 category: 'kibana',
-                format: 'string',
+                format: { id: 'string' },
               },
             },
           },
@@ -358,7 +348,6 @@ describe('helpers', () => {
               description:
                 'Ephemeral identifier of this agent (if one exists). This id normally changes across restarts, but `agent.id` does not.',
               example: '8a4f500f',
-              format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
               name: 'agent.ephemeral_id',
               searchable: true,
@@ -370,7 +359,6 @@ describe('helpers', () => {
               description:
                 'Unique identifier of this agent (if one exists). Example: For Beats this would be beat.id.',
               example: '8a4f500d',
-              format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
               name: 'agent.id',
               searchable: true,
@@ -385,7 +373,6 @@ describe('helpers', () => {
               category: 'container',
               description: 'Unique container id.',
               example: null,
-              format: '',
               indexes: ['auditbeat', 'filebeat', 'packetbeat'],
               name: 'container.id',
               searchable: true,

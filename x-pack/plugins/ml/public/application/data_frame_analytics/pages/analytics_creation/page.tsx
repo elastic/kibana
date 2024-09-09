@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,14 +15,13 @@ import {
   EuiPageBody,
   EuiSpacer,
   EuiSteps,
-  EuiStepStatus,
   EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataFrameAnalyticsId } from '@kbn/ml-data-frame-analytics-utils';
 import { useDataSource } from '../../../contexts/ml/data_source_context';
-import { ml } from '../../../services/ml_api_service';
+import { useMlApi } from '../../../contexts/kibana';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
 import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor';
 import {
@@ -45,6 +46,7 @@ interface Props {
 }
 
 export const Page: FC<Props> = ({ jobId }) => {
+  const mlApi = useMlApi();
   const [currentStep, setCurrentStep] = useState<ANALYTICS_STEPS>(ANALYTICS_STEPS.CONFIGURATION);
   const [activatedSteps, setActivatedSteps] = useState<boolean[]>([
     true,
@@ -69,7 +71,10 @@ export const Page: FC<Props> = ({ jobId }) => {
     if (selectedDataView) {
       (async function () {
         if (jobId !== undefined) {
-          const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId, true);
+          const analyticsConfigs = await mlApi.dataFrameAnalytics.getDataFrameAnalytics(
+            jobId,
+            true
+          );
           if (
             Array.isArray(analyticsConfigs.data_frame_analytics) &&
             analyticsConfigs.data_frame_analytics.length > 0
@@ -103,6 +108,7 @@ export const Page: FC<Props> = ({ jobId }) => {
           setCurrentStep={setCurrentStep}
           step={currentStep}
           stepActivated={activatedSteps[ANALYTICS_STEPS.CONFIGURATION]}
+          sourceDataViewTitle={selectedDataView.getIndexPattern()}
         />
       ),
       status:
@@ -188,7 +194,7 @@ export const Page: FC<Props> = ({ jobId }) => {
                   <FormattedMessage
                     id="xpack.ml.dataframe.analytics.creationPageSourceIndexTitle"
                     defaultMessage="Source data view: {dataViewTitle}"
-                    values={{ dataViewTitle: selectedDataView.title }}
+                    values={{ dataViewTitle: selectedDataView.getIndexPattern() }}
                   />
                 </h2>
               </EuiFlexItem>

@@ -11,6 +11,7 @@ import type {
   Agent,
   AgentPolicy,
   AgentStatus,
+  CopyAgentPolicyResponse,
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
   CreatePackagePolicyRequest,
@@ -28,7 +29,7 @@ import type {
 import {
   AGENT_API_ROUTES,
   AGENT_POLICY_API_ROUTES,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   agentPolicyRouteService,
   agentRouteService,
   AGENTS_INDEX,
@@ -36,6 +37,7 @@ import {
   APP_API_ROUTES,
   epmRouteService,
   PACKAGE_POLICY_API_ROUTES,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SETUP_API_ROUTE,
 } from '@kbn/fleet-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -47,6 +49,7 @@ import {
   outputRoutesService,
 } from '@kbn/fleet-plugin/common/services';
 import type {
+  CopyAgentPolicyRequest,
   DeleteAgentPolicyResponse,
   EnrollmentAPIKey,
   GenerateServiceTokenResponse,
@@ -55,10 +58,11 @@ import type {
   GetOutputsResponse,
   PostAgentUnenrollResponse,
 } from '@kbn/fleet-plugin/common/types';
-import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
+import pRetry from 'p-retry';
+import { fetchKibanaStatus } from '../../../common/endpoint/utils/kibana_status';
 import { isFleetServerRunning } from './fleet_server/fleet_server_services';
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 import type { DownloadAndStoreAgentResponse } from './agent_downloads_service';
@@ -69,15 +73,29 @@ import {
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
 } from '../../../common/endpoint/data_loaders/utils';
-import { fetchKibanaStatus } from './stack_services';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
 const CURRENT_USERNAME = userInfo().username.toLowerCase();
 const DEFAULT_AGENT_POLICY_NAME = `${CURRENT_USERNAME} test policy`;
+
 /** A Fleet agent policy that includes integrations that don't actually require an agent to run on a host. Example: SenttinelOne */
 export const DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME = `${CURRENT_USERNAME} - agentless integrations`;
+
+const randomAgentPolicyName = (() => {
+  let counter = fleetGenerator.randomN(100);
+
+  return (): string => {
+    return `agent policy - ${fleetGenerator.randomString(10)}_${counter++}`;
+  };
+})();
+
+/**
+ * Check if the given version string is a valid artifact version
+ * @param version Version string
+ */
+const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.\d+(-SNAPSHOT)?$/);
 
 export const checkInFleetAgent = async (
   esClient: Client,
@@ -378,14 +396,36 @@ export const fetchIntegrationPolicyList = async (
  * Returns the Agent Version that matches the current stack version. Will use `SNAPSHOT` if
  * appropriate too.
  * @param kbnClient
+ * @param log
  */
 export const getAgentVersionMatchingCurrentStack = async (
-  kbnClient: KbnClient
+  kbnClient: KbnClient,
+  log: ToolingLog = createToolingLogger()
 ): Promise<string> => {
   const kbnStatus = await fetchKibanaStatus(kbnClient);
-  const agentVersions = await axios
-    .get('https://artifacts-api.elastic.co/v1/versions')
-    .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));
+
+  log.debug(`Kibana status:\n`, kbnStatus);
+
+  if (!kbnStatus.version) {
+    throw new Error(
+      `Kibana status api response did not include 'version' information - possibly due to invalid credentials`
+    );
+  }
+
+  const agentVersions = await pRetry<string[]>(
+    async () => {
+      return axios
+        .get('https://artifacts-api.elastic.co/v1/versions')
+        .catch(catchAxiosErrorFormatAndThrow)
+        .then((response) =>
+          map(
+            response.data.versions.filter(isValidArtifactVersion),
+            (version) => version.split('-SNAPSHOT')[0]
+          )
+        );
+    },
+    { maxTimeout: 10000 }
+  );
 
   let version =
     semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
@@ -459,16 +499,16 @@ export const getAgentDownloadUrl = async (
 
   log?.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
 
-  const searchResult: ElasticArtifactSearchResponse = await nodeFetch(artifactSearchUrl).then(
-    (response) => {
-      if (!response.ok) {
-        throw new Error(
-          `Failed to search elastic's artifact repository: ${response.statusText} (HTTP ${response.status}) {URL: ${artifactSearchUrl})`
-        );
-      }
-
-      return response.json();
-    }
+  const searchResult: ElasticArtifactSearchResponse = await pRetry(
+    async () => {
+      return axios
+        .get<ElasticArtifactSearchResponse>(artifactSearchUrl)
+        .catch(catchAxiosErrorFormatAndThrow)
+        .then((response) => {
+          return response.data;
+        });
+    },
+    { maxTimeout: 10000 }
   );
 
   log?.verbose(searchResult);
@@ -495,21 +535,22 @@ export const getLatestAgentDownloadVersion = async (
   log?: ToolingLog
 ): Promise<string> => {
   const artifactsUrl = 'https://artifacts-api.elastic.co/v1/versions';
-  const semverMatch = `<=${version}`;
-  const artifactVersionsResponse: { versions: string[] } = await nodeFetch(artifactsUrl).then(
-    (response) => {
-      if (!response.ok) {
-        throw new Error(
-          `Failed to retrieve list of versions from elastic's artifact repository: ${response.statusText} (HTTP ${response.status}) {URL: ${artifactsUrl})`
-        );
-      }
-
-      return response.json();
-    }
+  const semverMatch = `<=${version.replace(`-SNAPSHOT`, '')}`;
+  const artifactVersionsResponse: { versions: string[] } = await pRetry(
+    async () => {
+      return axios
+        .get<{ versions: string[] }>(artifactsUrl)
+        .catch(catchAxiosErrorFormatAndThrow)
+        .then((response) => {
+          return response.data;
+        });
+    },
+    { maxTimeout: 10000 }
   );
 
-  const stackVersionToArtifactVersion: Record<string, string> =
-    artifactVersionsResponse.versions.reduce((acc, artifactVersion) => {
+  const stackVersionToArtifactVersion: Record<string, string> = artifactVersionsResponse.versions
+    .filter(isValidArtifactVersion)
+    .reduce((acc, artifactVersion) => {
       const stackVersion = artifactVersion.split('-SNAPSHOT')[0];
       acc[stackVersion] = artifactVersion;
       return acc;
@@ -527,6 +568,8 @@ export const getLatestAgentDownloadVersion = async (
     Object.keys(stackVersionToArtifactVersion),
     semverMatch
   );
+
+  log?.verbose(`Matched [${matchedVersion}] for .maxStatisfying(${semverMatch})`);
 
   if (!matchedVersion) {
     throw new Error(`Unable to find a semver version that meets ${semverMatch}`);
@@ -753,6 +796,41 @@ export const enrollHostVmWithFleet = async ({
   return waitForHostToEnroll(kbnClient, log, hostVm.name, timeoutMs);
 };
 
+interface CreateAgentPolicyOptions {
+  kbnClient: KbnClient;
+  policy?: CreateAgentPolicyRequest['body'];
+}
+
+/**
+ * Create a new Agent Policy in fleet
+ * @param kbnClient
+ * @param log
+ * @param policy
+ */
+export const createAgentPolicy = async ({
+  kbnClient,
+  policy,
+}: CreateAgentPolicyOptions): Promise<AgentPolicy> => {
+  const body: CreateAgentPolicyRequest['body'] = policy ?? {
+    name: randomAgentPolicyName(),
+    description: `Policy created by security solution tooling: ${__filename}`,
+    namespace: 'default',
+    monitoring_enabled: ['logs', 'metrics'],
+  };
+
+  return kbnClient
+    .request<CreateAgentPolicyResponse>({
+      path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
+      method: 'POST',
+      body,
+    })
+    .then((response) => response.data.item)
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
 interface GetOrCreateDefaultAgentPolicyOptions {
   kbnClient: KbnClient;
   log: ToolingLog;
@@ -772,7 +850,7 @@ export const getOrCreateDefaultAgentPolicy = async ({
   policyName = DEFAULT_AGENT_POLICY_NAME,
 }: GetOrCreateDefaultAgentPolicyOptions): Promise<AgentPolicy> => {
   const existingPolicy = await fetchAgentPolicyList(kbnClient, {
-    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"`,
+    kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"`,
   });
 
   if (existingPolicy.items[0]) {
@@ -784,24 +862,15 @@ export const getOrCreateDefaultAgentPolicy = async ({
 
   log.info(`Creating default test/dev Fleet agent policy with name: [${policyName}]`);
 
-  const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-    name: policyName,
-    description: `Policy created by security solution tooling: ${__filename}`,
-    namespace: 'default',
-    monitoring_enabled: ['logs', 'metrics'],
-  };
-
-  const newAgentPolicy = await kbnClient
-    .request<CreateAgentPolicyResponse>({
-      path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
-      headers: {
-        'elastic-api-version': API_VERSIONS.public.v1,
-      },
-      method: 'POST',
-      body: newAgentPolicyData,
-    })
-    .then((response) => response.data.item)
-    .catch(catchAxiosErrorFormatAndThrow);
+  const newAgentPolicy = await createAgentPolicy({
+    kbnClient,
+    policy: {
+      name: policyName,
+      description: `Policy created by security solution tooling: ${__filename}`,
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+    },
+  });
 
   log.verbose(newAgentPolicy);
 
@@ -922,6 +991,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
     description: `Created by script: ${__filename}`,
     namespace: 'default',
     policy_id: agentPolicyId,
+    policy_ids: [agentPolicyId],
     enabled: true,
     inputs: [
       {
@@ -941,7 +1011,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '1m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -969,7 +1039,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '5m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -997,7 +1067,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '5m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -1025,7 +1095,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '5m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -1053,7 +1123,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '5m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -1149,6 +1219,7 @@ export const addEndpointIntegrationToAgentPolicy = async ({
     description: `Created by: ${__filename}`,
     namespace: 'default',
     policy_id: agentPolicyId,
+    policy_ids: [agentPolicyId],
     enabled: true,
     inputs: [
       {
@@ -1182,6 +1253,40 @@ export const addEndpointIntegrationToAgentPolicy = async ({
   return newIntegrationPolicy;
 };
 
+type CopyAgentPolicyOptions = Partial<CopyAgentPolicyRequest['body']> & {
+  kbnClient: KbnClient;
+  agentPolicyId: string;
+};
+
+/**
+ * Copy (clone) a Fleet Agent Policy
+ * @param kbnClient
+ * @param agentPolicyId
+ * @param name
+ * @param description
+ */
+export const copyAgentPolicy = async ({
+  kbnClient,
+  agentPolicyId,
+  name = randomAgentPolicyName(),
+  description,
+}: CopyAgentPolicyOptions) => {
+  return kbnClient
+    .request<CopyAgentPolicyResponse>({
+      path: agentPolicyRouteService.getCopyPath(agentPolicyId),
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
+      method: 'POST',
+      body: {
+        name,
+        description,
+      },
+    })
+    .then((response) => response.data.item)
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
 /**
  * Calls the fleet setup API to ensure fleet configured with default settings
  * @param kbnClient
@@ -1205,3 +1310,45 @@ export const ensureFleetSetup = memoize(
     return setupResponse.data;
   }
 );
+
+/**
+ * Fetches a list of Endpoint Integration policies from fleet
+ * @param kbnClient
+ * @param kuery
+ * @param options
+ */
+export const fetchEndpointIntegrationPolicyList = async (
+  kbnClient: KbnClient,
+  { kuery, ...options }: GetPackagePoliciesRequest['query'] = {}
+) => {
+  const endpointPackageMatchValue = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`;
+
+  return fetchIntegrationPolicyList(kbnClient, {
+    ...options,
+    kuery: kuery ? `${kuery} AND ${endpointPackageMatchValue}` : endpointPackageMatchValue,
+  });
+};
+
+/**
+ * Retrieves all Endpoint Integration policy IDs - but only up to 10k
+ * @param kbnClient
+ */
+export const fetchAllEndpointIntegrationPolicyListIds = async (
+  kbnClient: KbnClient
+): Promise<string[]> => {
+  const perPage = 1000;
+  const policyIds = [];
+  let hasMoreData = true;
+
+  do {
+    const result = await fetchEndpointIntegrationPolicyList(kbnClient, { perPage });
+    policyIds.push(...result.items.map((policy) => policy.id));
+
+    // If no more results or the next page of content goes over 10k, then end loop here.
+    if (!result.items.length || policyIds.length + perPage < 10000) {
+      hasMoreData = false;
+    }
+  } while (hasMoreData);
+
+  return policyIds;
+};

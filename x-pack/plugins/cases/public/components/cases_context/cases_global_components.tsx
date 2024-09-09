@@ -8,7 +8,7 @@
 import React from 'react';
 import { getAllCasesSelectorModalNoProviderLazy } from '../../client/ui/get_all_cases_selector_modal';
 import { getCreateCaseFlyoutLazyNoProvider } from '../../client/ui/get_create_case_flyout';
-import type { CasesContextState } from './cases_context_reducer';
+import type { CasesContextState } from './state/cases_context_reducer';
 
 export const CasesGlobalComponents = React.memo(({ state }: { state: CasesContextState }) => {
   return (

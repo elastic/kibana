@@ -8,11 +8,13 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { UseChatSend } from './use_chat_send';
 import { ChatActions } from '../chat_actions';
 import { PromptTextArea } from '../prompt_textarea';
+import { useAutosizeTextArea } from './use_autosize_textarea';
 
-export interface Props extends UseChatSend {
+export interface Props extends Omit<UseChatSend, 'abortStream' | 'handleOnChatCleared'> {
   isDisabled: boolean;
   shouldRefocusPrompt: boolean;
   userPrompt: string | null;
@@ -23,10 +25,8 @@ export interface Props extends UseChatSend {
  * Allows the user to clear the chat and switch between different system prompts.
  */
 export const ChatSend: React.FC<Props> = ({
-  handleButtonSendMessage,
-  handleOnChatCleared,
-  handlePromptChange,
-  handleSendMessage,
+  setUserPrompt,
+  handleChatSend,
   isDisabled,
   isLoading,
   shouldRefocusPrompt,
@@ -42,38 +42,51 @@ export const ChatSend: React.FC<Props> = ({
   const promptValue = useMemo(() => (isDisabled ? '' : userPrompt ?? ''), [isDisabled, userPrompt]);
 
   const onSendMessage = useCallback(() => {
-    handleButtonSendMessage(promptTextAreaRef.current?.value?.trim() ?? '');
-  }, [handleButtonSendMessage, promptTextAreaRef]);
+    handleChatSend(promptTextAreaRef.current?.value?.trim() ?? '');
+    setUserPrompt('');
+  }, [handleChatSend, promptTextAreaRef, setUserPrompt]);
+
+  useAutosizeTextArea(promptTextAreaRef?.current, promptValue);
+
+  useEffect(() => {
+    setUserPrompt(promptValue);
+  }, [setUserPrompt, promptValue]);
 
   return (
     <EuiFlexGroup
       gutterSize="none"
+      alignItems={'flexEnd'}
       css={css`
-        width: 100%;
+        position: relative;
       `}
     >
-      <EuiFlexItem>
+      <EuiFlexItem
+        css={css`
+          width: 100%;
+        `}
+      >
         <PromptTextArea
-          onPromptSubmit={handleSendMessage}
+          onPromptSubmit={handleChatSend}
           ref={promptTextAreaRef}
-          handlePromptChange={handlePromptChange}
+          setUserPrompt={setUserPrompt}
           value={promptValue}
           isDisabled={isDisabled}
         />
       </EuiFlexItem>
       <EuiFlexItem
         css={css`
-          left: -34px;
-          position: relative;
-          top: 11px;
+          right: 0;
+          position: absolute;
+          margin-right: ${euiThemeVars.euiSizeS};
+          margin-bottom: ${euiThemeVars.euiSizeS};
         `}
         grow={false}
       >
         <ChatActions
-          onChatCleared={handleOnChatCleared}
           isDisabled={isDisabled}
           isLoading={isLoading}
           onSendMessage={onSendMessage}
+          promptValue={promptValue}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

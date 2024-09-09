@@ -75,7 +75,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
 
-  describe('alert', async () => {
+  describe('alert', () => {
     const objectRemover = new ObjectRemover(supertest);
     let actionId: string;
 
@@ -156,6 +156,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(doc._source['kibana.alert.url']).to.contain(
           '/s/space1/app/ml/explorer/?_g=(ml%3A(jobIds%3A!(rt-anomaly-mean-value))'
         );
+        expect(doc._source['kibana.alert.anomaly_score'][0]).to.be.above(0);
       }
     });
 

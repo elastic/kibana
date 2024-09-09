@@ -179,7 +179,7 @@ async function ensureManagedTag(
       description: '',
       color: MANAGED_TAG_COLOR,
     },
-    { id: managedTagId, overwrite: true, refresh: false }
+    { id: managedTagId, overwrite: true, refresh: false, managed: true }
   );
 
   return managedTagId;
@@ -206,7 +206,7 @@ async function ensurePackageTag(
       description: '',
       color: PACKAGE_TAG_COLOR,
     },
-    { id: packageTagId, overwrite: true, refresh: false }
+    { id: packageTagId, overwrite: true, refresh: false, managed: true }
   );
 
   return packageTagId;
@@ -232,7 +232,7 @@ async function getPackageSpecTags(
             description: 'Tag defined in package-spec',
             color: getRandomColor(),
           },
-          { id: uniqueTagId, overwrite: true, refresh: false }
+          { id: uniqueTagId, overwrite: true, refresh: false, managed: true }
         );
       }
       const assetTypes = getAssetTypesObjectReferences(tag?.asset_types, taggableAssets);

@@ -8,7 +8,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'discover']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'lens',
+    'common',
+    'header',
+    'discover',
+    'unifiedFieldList',
+  ]);
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const listingTable = getService('listingTable');
@@ -41,7 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('unifiedHistogramChart');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await testSubjects.existOrFail('unifiedDataTableToolbar');
       // check the table columns
       const columns = await PageObjects.discover.getColumnHeaders();
       expect(columns).to.eql(['@timestamp', 'extension.raw', 'bytes']);
@@ -125,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the open button for a compatible saved visualization with a lucene query', async () => {
-      // Make the breakdown dimention contribute to filters again
+      // Make the breakdown dimension contribute to filters again
       await PageObjects.lens.openDimensionEditor(
         'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
       );
@@ -154,6 +162,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
       await testSubjects.existOrFail('unifiedHistogramChart');
       // check the query
       expect(await queryBar.getQueryString()).be.eql(

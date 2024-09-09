@@ -6,77 +6,137 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import { AssistantHeader } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { alertConvo, emptyWelcomeConvo } from '../../mock/conversation';
+import { alertConvo, emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
+import { useLoadConnectors } from '../../connectorland/use_load_connectors';
+import { mockConnectors } from '../../mock/connectors';
 
+const onConversationSelected = jest.fn();
+const mockConversations = {
+  [alertConvo.title]: alertConvo,
+  [welcomeConvo.title]: welcomeConvo,
+};
 const testProps = {
-  currentConversation: emptyWelcomeConvo,
+  conversationsLoaded: true,
+  selectedConversation: welcomeConvo,
   title: 'Test Title',
   docLinks: {
     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
     DOC_LINK_VERSION: 'master',
   },
+  isLoading: false,
   isDisabled: false,
   isSettingsModalVisible: false,
-  onConversationSelected: jest.fn(),
+  onConversationSelected,
   onToggleShowAnonymizedValues: jest.fn(),
-  selectedConversationId: emptyWelcomeConvo.id,
   setIsSettingsModalVisible: jest.fn(),
-  setSelectedConversationId: jest.fn(),
+  onConversationCreate: jest.fn(),
+  onChatCleared: jest.fn(),
   showAnonymizedValues: false,
+  conversations: mockConversations,
+  refetchCurrentUserConversations: jest.fn(),
+  isAssistantEnabled: true,
+  anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
+  refetchAnonymizationFieldsResults: jest.fn(),
+  allPrompts: [],
 };
 
+jest.mock('../../connectorland/use_load_connectors', () => ({
+  useLoadConnectors: jest.fn(() => {
+    return {
+      data: [],
+      error: null,
+      isSuccess: true,
+    };
+  }),
+}));
+
+(useLoadConnectors as jest.Mock).mockReturnValue({
+  data: mockConnectors,
+  error: null,
+  isSuccess: true,
+});
+const mockSetApiConfig = alertConvo;
+jest.mock('../use_conversation', () => ({
+  useConversation: jest.fn(() => {
+    return {
+      setApiConfig: jest.fn().mockReturnValue(mockSetApiConfig),
+    };
+  }),
+}));
+
 describe('AssistantHeader', () => {
-  it('showAnonymizedValues is not checked when currentConversation.replacements is null', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  it('showAnonymizedValues is not checked when selectedConversation.replacements is null', () => {
     const { getByText, getByTestId } = render(<AssistantHeader {...testProps} />, {
       wrapper: TestProviders,
     });
-    expect(getByText('Test Title')).toBeInTheDocument();
-    expect(getByTestId('showAnonymizedValues')).toHaveAttribute('aria-checked', 'false');
+    expect(getByText(welcomeConvo.title)).toBeInTheDocument();
+    expect(getByTestId('showAnonymizedValues').firstChild).toHaveAttribute(
+      'data-euiicon-type',
+      'eyeClosed'
+    );
   });
 
-  it('showAnonymizedValues is not checked when currentConversation.replacements is empty', () => {
+  it('showAnonymizedValues is not checked when selectedConversation.replacements is empty', () => {
     const { getByText, getByTestId } = render(
       <AssistantHeader
         {...testProps}
-        currentConversation={{ ...emptyWelcomeConvo, replacements: {} }}
+        selectedConversation={{ ...emptyWelcomeConvo, replacements: {} }}
       />,
       {
         wrapper: TestProviders,
       }
     );
-    expect(getByText('Test Title')).toBeInTheDocument();
-    expect(getByTestId('showAnonymizedValues')).toHaveAttribute('aria-checked', 'false');
+    expect(getByText(welcomeConvo.title)).toBeInTheDocument();
+    expect(getByTestId('showAnonymizedValues').firstChild).toHaveAttribute(
+      'data-euiicon-type',
+      'eyeClosed'
+    );
   });
 
-  it('showAnonymizedValues is not checked when currentConversation.replacements has values and showAnonymizedValues is false', () => {
+  it('showAnonymizedValues is not checked when selectedConversation.replacements has values and showAnonymizedValues is false', () => {
     const { getByTestId } = render(
-      <AssistantHeader
-        {...testProps}
-        currentConversation={alertConvo}
-        selectedConversationId={alertConvo.id}
-      />,
+      <AssistantHeader {...testProps} selectedConversation={alertConvo} />,
       {
         wrapper: TestProviders,
       }
     );
-    expect(getByTestId('showAnonymizedValues')).toHaveAttribute('aria-checked', 'false');
+    expect(getByTestId('showAnonymizedValues').firstChild).toHaveAttribute(
+      'data-euiicon-type',
+      'eyeClosed'
+    );
   });
 
-  it('showAnonymizedValues is checked when currentConversation.replacements has values and showAnonymizedValues is true', () => {
+  it('showAnonymizedValues is checked when selectedConversation.replacements has values and showAnonymizedValues is true', () => {
     const { getByTestId } = render(
-      <AssistantHeader
-        {...testProps}
-        currentConversation={alertConvo}
-        selectedConversationId={alertConvo.id}
-        showAnonymizedValues
-      />,
+      <AssistantHeader {...testProps} selectedConversation={alertConvo} showAnonymizedValues />,
       {
         wrapper: TestProviders,
       }
     );
-    expect(getByTestId('showAnonymizedValues')).toHaveAttribute('aria-checked', 'true');
+    expect(getByTestId('showAnonymizedValues').firstChild).toHaveAttribute(
+      'data-euiicon-type',
+      'eye'
+    );
+  });
+
+  it('Conversation is updated when connector change occurs', async () => {
+    const { getByTestId } = render(<AssistantHeader {...testProps} />, {
+      wrapper: TestProviders,
+    });
+    fireEvent.click(getByTestId('connector-selector'));
+
+    await act(async () => {
+      fireEvent.click(getByTestId('connectorId'));
+    });
+    expect(onConversationSelected).toHaveBeenCalledWith({
+      cId: alertConvo.id,
+      cTitle: alertConvo.title,
+    });
   });
 });

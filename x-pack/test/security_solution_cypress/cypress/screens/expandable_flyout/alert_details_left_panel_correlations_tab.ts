@@ -5,73 +5,76 @@
  * 2.0.
  */
 
-import { INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/document_details/left/tabs/test_ids';
-import {
-  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
-  CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
-  CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
-  CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
-  CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/document_details/left/components/test_ids';
-import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/shared/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON = getDataTestSubjectSelector(
-  INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID
+  'securitySolutionFlyoutInsightsTabCorrelationsButton'
 );
 
 export const CORRELATIONS_ANCESTRY_SECTION_TITLE = getDataTestSubjectSelector(
-  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID)
+  'securitySolutionFlyoutCorrelationsDetailsAlertsByAncestrySectionTitleText'
 );
 
 export const CORRELATIONS_ANCESTRY_SECTION_TABLE = getDataTestSubjectSelector(
-  `${CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}Table`
+  'securitySolutionFlyoutCorrelationsDetailsAlertsByAncestrySectionTable'
 );
 
 export const CORRELATIONS_ANCESTRY_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON =
   getDataTestSubjectSelector(
-    `${CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}InvestigateInTimeline`
+    'securitySolutionFlyoutCorrelationsDetailsAlertsByAncestrySectionInvestigateInTimeline'
   );
 
+export const CORRELATIONS_ANCESTRY_SECTION_PREVIEW_BUTTON = getDataTestSubjectSelector(
+  'securitySolutionFlyoutCorrelationsDetailsAlertsByAncestrySectionAlertPreviewButton'
+);
+
 export const CORRELATIONS_SOURCE_SECTION_TITLE = getDataTestSubjectSelector(
-  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID)
+  'securitySolutionFlyoutCorrelationsDetailsAlertsBySourceSectionTitleText'
 );
 
 export const CORRELATIONS_SOURCE_SECTION_TABLE = getDataTestSubjectSelector(
-  `${CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID}Table`
+  'securitySolutionFlyoutCorrelationsDetailsAlertsBySourceSectionTable'
 );
 
 export const CORRELATIONS_SOURCE_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON =
   getDataTestSubjectSelector(
-    `${CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID}InvestigateInTimeline`
+    'securitySolutionFlyoutCorrelationsDetailsAlertsBySourceSectionInvestigateInTimeline'
   );
 
+export const CORRELATIONS_SOURCE_SECTION_PREVIEW_BUTTON = getDataTestSubjectSelector(
+  'securitySolutionFlyoutCorrelationsDetailsAlertsBySourceSectionAlertPreviewButton'
+);
+
 export const CORRELATIONS_SESSION_SECTION_TITLE = getDataTestSubjectSelector(
-  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID)
+  'securitySolutionFlyoutCorrelationsDetailsAlertsBySessionSectionTitleText'
 );
 
 export const CORRELATIONS_SESSION_SECTION_TABLE = getDataTestSubjectSelector(
-  `${CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID}Table`
+  'securitySolutionFlyoutCorrelationsDetailsAlertsBySessionSectionTable'
 );
 
 export const CORRELATIONS_SESSION_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON =
   getDataTestSubjectSelector(
-    `${CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID}InvestigateInTimeline`
+    'securitySolutionFlyoutCorrelationsDetailsAlertsBySessionSectionInvestigateInTimeline'
   );
 
+export const CORRELATIONS_SESSION_SECTION_PREVIEW_BUTTON = getDataTestSubjectSelector(
+  'securitySolutionFlyoutCorrelationsDetailsAlertsBySessionSectionAlertPreviewButton'
+);
+
 export const CORRELATIONS_CASES_SECTION_TITLE = getDataTestSubjectSelector(
-  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID)
+  'securitySolutionFlyoutCorrelationsDetailsCasesSectionTitleText'
 );
 
 export const CORRELATIONS_CASES_SECTION_TABLE = getDataTestSubjectSelector(
-  `${CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID}Table`
+  'securitySolutionFlyoutCorrelationsDetailsCasesSectionTable'
 );
 
 export const CORRELATIONS_SUPPRESSED_ALERTS_TITLE = getDataTestSubjectSelector(
-  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID)
+  'securitySolutionFlyoutCorrelationsDetailsSuppressedAlertsSectionTitleText'
 );
 
 export const CORRELATIONS_SUPPRESSED_ALERTS_INVESTIGATE_IN_TIMELINE_BUTTON =
   getDataTestSubjectSelector(
-    `${CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID}InvestigateInTimeline`
+    'securitySolutionFlyoutCorrelationsDetailsSuppressedAlertsSectionInvestigateInTimeline'
   );

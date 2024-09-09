@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import moment from 'moment';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
@@ -17,6 +18,7 @@ import {
 } from '@kbn/ml-ui-actions';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { i18n } from '@kbn/i18n';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 interface Props {
@@ -25,6 +27,7 @@ interface Props {
   query: QueryDslQueryContainer;
   earliest: number | undefined;
   latest: number | undefined;
+  iconOnly?: boolean;
 }
 
 export const CreateCategorizationJobButton: FC<Props> = ({
@@ -33,6 +36,7 @@ export const CreateCategorizationJobButton: FC<Props> = ({
   query,
   earliest,
   latest,
+  iconOnly = false,
 }) => {
   const {
     uiActions,
@@ -57,20 +61,40 @@ export const CreateCategorizationJobButton: FC<Props> = ({
     return null;
   }
 
-  return (
-    <>
-      <EuiButtonEmpty
-        data-test-subj="aiopsLogCategorizationFlyoutAdJobButton"
-        onClick={createADJob}
-        flush="left"
-        iconSide="left"
-        iconType={'machineLearningApp'}
+  if (iconOnly) {
+    return (
+      <EuiToolTip
+        content={i18n.translate('xpack.aiops.categorizeFlyout.findAnomalies.tooltip', {
+          defaultMessage: 'Create anomaly detection job to find anomalies in patterns',
+        })}
       >
-        <FormattedMessage
-          id="xpack.aiops.categorizeFlyout.findAnomalies"
-          defaultMessage="Find anomalies in patterns"
+        <EuiButtonIcon
+          data-test-subj="aiopsEmbeddableMenuOptionsButton"
+          size="s"
+          iconType="machineLearningApp"
+          onClick={createADJob}
+          // @ts-ignore - subdued does work
+          color="subdued"
+          aria-label={i18n.translate('xpack.aiops.categorizeFlyout.findAnomalies.tooltip', {
+            defaultMessage: 'Create anomaly detection job to find anomalies in patterns',
+          })}
         />
-      </EuiButtonEmpty>
-    </>
+      </EuiToolTip>
+    );
+  }
+
+  return (
+    <EuiButtonEmpty
+      data-test-subj="aiopsLogCategorizationFlyoutAdJobButton"
+      onClick={createADJob}
+      flush="left"
+      iconSide="left"
+      iconType={'machineLearningApp'}
+    >
+      <FormattedMessage
+        id="xpack.aiops.categorizeFlyout.findAnomalies"
+        defaultMessage="Find anomalies in patterns"
+      />
+    </EuiButtonEmpty>
   );
 };

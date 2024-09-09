@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -13,8 +14,9 @@ import { AVAILABLE_PALETTES } from './palettes';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from './config/default_color_mapping';
 import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 
-const AUTO_ASSIGN_SWITCH = '[data-test-subj="lns-colorMapping-autoAssignSwitch"]';
 const ASSIGNMENTS_LIST = '[data-test-subj="lns-colorMapping-assignmentsList"]';
+const ASSIGNMENTS_PROMPT = '[data-test-subj="lns-colorMapping-assignmentsPrompt"]';
+const ASSIGNMENTS_PROMPT_ADD_ALL = '[data-test-subj="lns-colorMapping-assignmentsPromptAddAll"]';
 const ASSIGNMENT_ITEM = (i: number) => `[data-test-subj="lns-colorMapping-assignmentsItem${i}"]`;
 
 describe('color mapping', () => {
@@ -35,19 +37,12 @@ describe('color mapping', () => {
       />
     );
 
-    expect(component.find(AUTO_ASSIGN_SWITCH).hostNodes().prop('aria-checked')).toEqual(true);
-    expect(component.find(ASSIGNMENTS_LIST).hostNodes().children().length).toEqual(
-      dataInput.categories.length
-    );
-    dataInput.categories.forEach((category, index) => {
-      const assignment = component.find(ASSIGNMENT_ITEM(index)).hostNodes();
-      expect(assignment.text()).toEqual(category);
-      expect(assignment.hasClass('euiComboBox-isDisabled')).toEqual(true);
-    });
+    // empty list prompt visible
+    expect(component.find(ASSIGNMENTS_PROMPT)).toBeTruthy();
     expect(onModelUpdateFn).not.toBeCalled();
   });
 
-  it('switch to manual assignments', () => {
+  it('Add all terms to assignments', () => {
     const dataInput: ColorMappingInputData = {
       type: 'categories',
       categories: ['categoryA', 'categoryB'],
@@ -63,9 +58,8 @@ describe('color mapping', () => {
         specialTokens={new Map()}
       />
     );
-    component.find(AUTO_ASSIGN_SWITCH).hostNodes().simulate('click');
+    component.find(ASSIGNMENTS_PROMPT_ADD_ALL).hostNodes().simulate('click');
     expect(onModelUpdateFn).toBeCalledTimes(1);
-    expect(component.find(AUTO_ASSIGN_SWITCH).hostNodes().prop('aria-checked')).toEqual(false);
     expect(component.find(ASSIGNMENTS_LIST).hostNodes().children().length).toEqual(
       dataInput.categories.length
     );
@@ -97,6 +91,7 @@ describe('color mapping', () => {
         }
       />
     );
+    component.find(ASSIGNMENTS_PROMPT_ADD_ALL).hostNodes().simulate('click');
     expect(component.find(ASSIGNMENTS_LIST).hostNodes().children().length).toEqual(
       dataInput.categories.length
     );

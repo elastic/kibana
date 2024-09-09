@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useLoadIndexSettings } from '../../../../services';
-import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { DetailsPageSettingsContent } from './details_page_settings_content';
 
 export const DetailsPageSettings: FunctionComponent<{
   indexName: string;
-  isIndexOpen: boolean;
-}> = ({ indexName, isIndexOpen }) => {
+}> = ({ indexName }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexSettings(indexName);
-
-  useEffect(() => {
-    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsSettings);
-  }, []);
 
   if (isLoading) {
     return (
@@ -79,7 +73,6 @@ export const DetailsPageSettings: FunctionComponent<{
   }
   return (
     <DetailsPageSettingsContent
-      isIndexOpen={isIndexOpen}
       data={data}
       indexName={indexName}
       reloadIndexSettings={resendRequest}

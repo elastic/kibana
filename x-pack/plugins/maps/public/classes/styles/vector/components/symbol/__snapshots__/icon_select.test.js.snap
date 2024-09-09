@@ -49,6 +49,7 @@ exports[`Should render icon select 1`] = `
         compressed={true}
         isPreFiltered={false}
         onChange={[Function]}
+        optionMatcher={[Function]}
         options={
           Array [
             Object {
@@ -141,6 +142,7 @@ exports[`Should render icon select with custom icons 1`] = `
         compressed={true}
         isPreFiltered={false}
         onChange={[Function]}
+        optionMatcher={[Function]}
         options={
           Array [
             Object {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -30,7 +31,7 @@ const mockStorage: Storage = {
   clear: jest.fn(),
 };
 
-const Provider: FC = ({ children }) => {
+const Provider: FC<{ children?: React.ReactNode }> = ({ children }) => {
   return (
     <StorageContextProvider storage={mockStorage} storageKeys={ML_STORAGE_KEYS}>
       {children}

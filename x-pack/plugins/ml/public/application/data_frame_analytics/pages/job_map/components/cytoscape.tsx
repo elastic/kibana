@@ -5,29 +5,20 @@
  * 2.0.
  */
 
-import React, {
-  CSSProperties,
-  useState,
-  useRef,
-  useEffect,
-  ReactNode,
-  createContext,
-  useCallback,
-  useMemo,
-} from 'react';
+import type { CSSProperties, PropsWithChildren } from 'react';
+import React, { useState, useRef, useEffect, createContext, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import cytoscape, { type Stylesheet } from 'cytoscape';
 // @ts-ignore no declaration file
 import dagre from 'cytoscape-dagre';
 import { getCytoscapeOptions } from './cytoscape_options';
-import { EuiThemeType } from '../../../../components/color_range_legend';
+import type { EuiThemeType } from '../../../../components/color_range_legend';
 
 cytoscape.use(dagre);
 
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(undefined);
 
 interface CytoscapeProps {
-  children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
   theme: EuiThemeType;
   height: number;
@@ -85,7 +76,7 @@ export function Cytoscape({
   resetCy,
   style,
   width,
-}: CytoscapeProps) {
+}: PropsWithChildren<CytoscapeProps>) {
   const cytoscapeOptions = useMemo(() => {
     return {
       ...getCytoscapeOptions(theme),

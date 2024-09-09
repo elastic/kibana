@@ -10,10 +10,9 @@ exports[`DeleteFilterListModal false canDeleteFilter privilege renders as disabl
     key="delete_filter_list"
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Delete"
       id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"
-      values={Object {}}
     />
   </EuiButton>
 </div>
@@ -29,10 +28,9 @@ exports[`DeleteFilterListModal renders as delete button after opening and closin
     key="delete_filter_list"
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Delete"
       id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"
-      values={Object {}}
     />
   </EuiButton>
 </div>
@@ -48,10 +46,9 @@ exports[`DeleteFilterListModal renders as disabled delete button when no lists s
     key="delete_filter_list"
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Delete"
       id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"
-      values={Object {}}
     />
   </EuiButton>
 </div>
@@ -67,10 +64,9 @@ exports[`DeleteFilterListModal renders as enabled delete button when a list is s
     key="delete_filter_list"
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Delete"
       id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"
-      values={Object {}}
     />
   </EuiButton>
 </div>
@@ -86,10 +82,9 @@ exports[`DeleteFilterListModal renders modal after clicking delete button 1`] = 
     key="delete_filter_list"
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Delete"
       id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"
-      values={Object {}}
     />
   </EuiButton>
   <EuiConfirmModal

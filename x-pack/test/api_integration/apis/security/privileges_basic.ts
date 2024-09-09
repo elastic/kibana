@@ -44,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
             ml: ['all', 'read', 'minimal_all', 'minimal_read'],
             siem: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -54,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
             rulesSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
+            aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
@@ -144,6 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
               'trusted_applications_read',
               'file_operations_all',
               'execute_operations_all',
+              'scan_operations_all',
             ],
             uptime: [
               'all',
@@ -152,7 +155,14 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_all',
               'minimal_read',
             ],
-            securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionAssistant: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'update_anonymization',
+            ],
+            securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: [
               'all',
               'read',
@@ -211,6 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
+            aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
         };

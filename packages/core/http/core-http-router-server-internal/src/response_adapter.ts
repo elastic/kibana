@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -33,7 +34,8 @@ function setHeaders(response: HapiResponseObject, headers: Record<string, string
 
 const statusHelpers = {
   isSuccess: (code: number) => code >= 100 && code < 300,
-  isRedirect: (code: number) => code >= 300 && code < 400,
+  isNotModified: (code: number) => code === 304,
+  isRedirect: (code: number) => code >= 300 && code < 400 && code !== 304,
   isError: (code: number) => code >= 400 && code < 600,
 };
 
@@ -76,7 +78,10 @@ export class HapiResponseAdapter {
     if (statusHelpers.isError(kibanaResponse.status)) {
       return this.toError(kibanaResponse);
     }
-    if (statusHelpers.isSuccess(kibanaResponse.status)) {
+    if (
+      statusHelpers.isSuccess(kibanaResponse.status) ||
+      statusHelpers.isNotModified(kibanaResponse.status)
+    ) {
       return this.toSuccess(kibanaResponse);
     }
     if (statusHelpers.isRedirect(kibanaResponse.status)) {
@@ -111,7 +116,7 @@ export class HapiResponseAdapter {
     return response;
   }
 
-  private toError(kibanaResponse: KibanaResponse<ResponseError | Buffer | stream.Readable>) {
+  private toError(kibanaResponse: KibanaResponse<ResponseError>) {
     const { payload } = kibanaResponse;
 
     // Special case for when we are proxying requests and want to enable streaming back error responses opaquely.
@@ -149,7 +154,12 @@ function getErrorMessage(payload?: ResponseError): string {
   if (!payload) {
     throw new Error('expected error message to be provided');
   }
-  if (typeof payload === 'string') return payload;
+  if (typeof payload === 'string') {
+    return payload;
+  }
+  if (isStreamOrBuffer(payload)) {
+    throw new Error(`can't resolve error message from stream or buffer`);
+  }
   // for ES response errors include nested error reason message. it doesn't contain sensitive data.
   if (isElasticsearchResponseError(payload)) {
     return `[${payload.message}]: ${
@@ -158,6 +168,10 @@ function getErrorMessage(payload?: ResponseError): string {
   }
 
   return getErrorMessage(payload.message);
+}
+
+function isStreamOrBuffer(payload: ResponseError): payload is stream.Stream | Buffer {
+  return Buffer.isBuffer(payload) || stream.isReadable(payload as stream.Readable);
 }
 
 function getErrorAttributes(payload?: ResponseError): ResponseErrorAttributes | undefined {

@@ -28,6 +28,13 @@ describe('Edit settings', () => {
           host_urls: ['https://localhost:8220'],
           is_default: true,
         },
+        {
+          id: 'fleet-internal-host',
+          name: 'Internal Host',
+          host_urls: ['https://internal:8220'],
+          is_default: false,
+          is_internal: true,
+        },
       ],
       page: 1,
       perPage: 10000,
@@ -159,5 +166,9 @@ describe('Edit settings', () => {
     cy.wait('@postLogstashOutput').then((interception) => {
       expect(interception.request.body.name).to.equal('output-logstash-1');
     });
+  });
+
+  it('should not display internal fleet server hosts', () => {
+    cy.getBySel(SETTINGS_FLEET_SERVER_HOSTS.TABLE).should('not.contain', 'Internal Host');
   });
 });

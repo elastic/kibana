@@ -14,11 +14,10 @@ import {
   formatPipelineName,
   generateMlInferencePipelineBody,
   getMlInferencePrefixedFieldName,
-  getMlModelTypesForModelConfig,
   ML_INFERENCE_PREFIX,
-  parseMlInferenceParametersFromPipeline,
 } from '../../../../../../../common/ml_inference_pipeline';
 import { Status } from '../../../../../../../common/types/api';
+import { MlModel } from '../../../../../../../common/types/ml';
 import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 
@@ -34,10 +33,10 @@ import {
   MappingsApiLogic,
 } from '../../../../api/mappings/mappings_logic';
 import {
-  TrainedModel,
-  TrainedModelsApiLogicActions,
-  TrainedModelsApiLogic,
-} from '../../../../api/ml_models/ml_trained_models_logic';
+  CachedFetchModelsApiLogic,
+  CachedFetchModlesApiLogicActions,
+  FetchModelsApiResponse,
+} from '../../../../api/ml_models/cached_fetch_models_api_logic';
 import {
   StartTextExpansionModelApiLogic,
   StartTextExpansionModelApiLogicActions,
@@ -68,12 +67,7 @@ import {
 } from '../../../../api/pipelines/fetch_pipeline';
 
 import { isConnectorIndex } from '../../../../utils/indices';
-import {
-  getMLType,
-  isSupportedMLModel,
-  sortModels,
-  sortSourceFields,
-} from '../../../shared/ml_inference/utils';
+import { sortSourceFields } from '../../../shared/ml_inference/utils';
 import { PipelinesLogic } from '../pipelines_logic';
 
 import {
@@ -83,7 +77,6 @@ import {
 } from './types';
 
 import {
-  EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS,
   validateInferencePipelineConfiguration,
   validateInferencePipelineFields,
   validatePipelineNameIsAvailable,
@@ -109,16 +102,6 @@ const getFullTargetFieldName = (
   return getMlInferencePrefixedFieldName(suffixedTargetField);
 };
 
-export interface MLInferencePipelineOption {
-  disabled: boolean;
-  disabledReason?: string;
-  modelId: string;
-  modelType: string;
-  pipelineName: string;
-  sourceFields: string[];
-  indexFields: string[];
-}
-
 export interface MLInferenceProcessorsActions {
   addSelectedFieldsToMapping: (isTextExpansionModelSelected: boolean) => {
     isTextExpansionModelSelected: boolean;
@@ -143,6 +126,7 @@ export interface MLInferenceProcessorsActions {
     CreateMlInferencePipelineResponse
   >['apiSuccess'];
   createPipeline: () => void;
+  fetchModelsApiSuccess: CachedFetchModlesApiLogicActions['apiSuccess'];
   fetchPipelineByName: FetchPipelineApiLogicActions['makeRequest'];
   fetchPipelineSuccess: FetchPipelineApiLogicActions['apiSuccess'];
   makeAttachPipelineRequest: Actions<
@@ -153,7 +137,6 @@ export interface MLInferenceProcessorsActions {
     CreateMlInferencePipelineApiLogicArgs,
     CreateMlInferencePipelineResponse
   >['makeRequest'];
-  makeMLModelsRequest: TrainedModelsApiLogicActions['makeRequest'];
   makeMappingRequest: Actions<GetMappingsArgs, GetMappingsResponse>['makeRequest'];
   makeMlInferencePipelinesRequest: Actions<
     FetchMlInferencePipelinesArgs,
@@ -164,14 +147,10 @@ export interface MLInferenceProcessorsActions {
     FetchMlInferencePipelinesArgs,
     FetchMlInferencePipelinesResponse
   >['apiSuccess'];
-  mlModelsApiError: TrainedModelsApiLogicActions['apiError'];
   onAddInferencePipelineStepChange: (step: AddInferencePipelineSteps) => {
     step: AddInferencePipelineSteps;
   };
   removeFieldFromMapping: (fieldName: string) => { fieldName: string };
-  selectExistingPipeline: (pipelineName: string) => {
-    pipelineName: string;
-  };
   selectFields: (fieldNames: string[]) => { fieldNames: string[] };
   setAddInferencePipelineStep: (step: AddInferencePipelineSteps) => {
     step: AddInferencePipelineSteps;
@@ -181,6 +160,7 @@ export interface MLInferenceProcessorsActions {
     configuration: InferencePipelineConfiguration;
   };
   setTargetField: (targetFieldName: string) => { targetFieldName: string };
+  startPollingModels: CachedFetchModlesApiLogicActions['startPolling'];
   startTextExpansionModelSuccess: StartTextExpansionModelApiLogicActions['apiSuccess'];
 }
 
@@ -195,11 +175,11 @@ export interface MLInferenceProcessorsValues {
   addInferencePipelineModal: AddInferencePipelineModal;
   createErrors: string[];
   existingPipeline: FetchPipelineResponse | undefined;
-  existingInferencePipelines: MLInferencePipelineOption[];
   formErrors: AddInferencePipelineFormErrors;
   index: CachedFetchIndexApiLogicValues['indexData'];
   isConfigureStepValid: boolean;
   isLoading: boolean;
+  isModelsInitialLoading: boolean;
   isPipelineDataValid: boolean;
   isTextExpansionModelSelected: boolean;
   mappingData: typeof MappingsApiLogic.values.data;
@@ -207,11 +187,11 @@ export interface MLInferenceProcessorsValues {
   mlInferencePipeline: MlInferencePipeline | undefined;
   mlInferencePipelineProcessors: FetchMlInferencePipelineProcessorsResponse | undefined;
   mlInferencePipelinesData: FetchMlInferencePipelinesResponse | undefined;
-  mlModelsData: TrainedModel[] | null;
-  mlModelsStatus: Status;
-  selectedMLModel: TrainedModel | null;
+  modelsData: FetchModelsApiResponse | undefined;
+  modelsStatus: Status;
+  selectableModels: MlModel[];
+  selectedModel: MlModel | undefined;
   sourceFields: string[] | undefined;
-  supportedMLModels: TrainedModel[];
 }
 
 export const MLInferenceLogic = kea<
@@ -227,7 +207,6 @@ export const MLInferenceLogic = kea<
     createPipeline: true,
     onAddInferencePipelineStepChange: (step: AddInferencePipelineSteps) => ({ step }),
     removeFieldFromMapping: (fieldName: string) => ({ fieldName }),
-    selectExistingPipeline: (pipelineName: string) => ({ pipelineName }),
     selectFields: (fieldNames: string[]) => ({ fieldNames }),
     setAddInferencePipelineStep: (step: AddInferencePipelineSteps) => ({ step }),
     setIndexName: (indexName: string) => ({ indexName }),
@@ -238,6 +217,8 @@ export const MLInferenceLogic = kea<
   },
   connect: {
     actions: [
+      CachedFetchModelsApiLogic,
+      ['apiSuccess as fetchModelsApiSuccess', 'startPolling as startPollingModels'],
       FetchMlInferencePipelinesApiLogic,
       [
         'makeRequest as makeMlInferencePipelinesRequest',
@@ -245,8 +226,6 @@ export const MLInferenceLogic = kea<
       ],
       MappingsApiLogic,
       ['makeRequest as makeMappingRequest', 'apiError as mappingsApiError'],
-      TrainedModelsApiLogic,
-      ['makeRequest as makeMLModelsRequest', 'apiError as mlModelsApiError'],
       CreateMlInferencePipelineApiLogic,
       [
         'apiError as createApiError',
@@ -260,7 +239,7 @@ export const MLInferenceLogic = kea<
         'makeRequest as makeAttachPipelineRequest',
       ],
       PipelinesLogic,
-      ['closeAddMlInferencePipelineModal as closeAddMlInferencePipelineModal'],
+      ['closeAddMlInferencePipelineModal'],
       StartTextExpansionModelApiLogic,
       ['apiSuccess as startTextExpansionModelSuccess'],
       FetchPipelineApiLogic,
@@ -271,21 +250,20 @@ export const MLInferenceLogic = kea<
       ],
     ],
     values: [
+      CachedFetchModelsApiLogic,
+      ['modelsData', 'status as modelsStatus', 'isInitialLoading as isModelsInitialLoading'],
       CachedFetchIndexApiLogic,
       ['indexData as index'],
       FetchMlInferencePipelinesApiLogic,
       ['data as mlInferencePipelinesData'],
       MappingsApiLogic,
       ['data as mappingData', 'status as mappingStatus'],
-      TrainedModelsApiLogic,
-      ['data as mlModelsData', 'status as mlModelsStatus'],
       FetchMlInferencePipelineProcessorsApiLogic,
       ['data as mlInferencePipelineProcessors'],
       FetchPipelineApiLogic,
       ['data as existingPipeline'],
     ],
   },
-  events: {},
   listeners: ({ values, actions }) => ({
     attachPipeline: () => {
       const {
@@ -327,24 +305,6 @@ export const MLInferenceLogic = kea<
         pipelineName: configuration.pipelineName,
       });
     },
-    selectExistingPipeline: ({ pipelineName }) => {
-      const pipeline = values.mlInferencePipelinesData?.[pipelineName];
-      if (!pipeline) return;
-      const params = parseMlInferenceParametersFromPipeline(pipelineName, pipeline);
-      if (params === null) return;
-      actions.setInferencePipelineConfiguration({
-        existingPipeline: true,
-        modelID: params.model_id,
-        pipelineName,
-        fieldMappings: params.field_mappings,
-        targetField: '',
-      });
-    },
-    setIndexName: ({ indexName }) => {
-      actions.makeMlInferencePipelinesRequest(undefined);
-      actions.makeMLModelsRequest(undefined);
-      actions.makeMappingRequest({ indexName });
-    },
     mlInferencePipelinesSuccess: (data) => {
       if (
         (data?.length ?? 0) === 0 &&
@@ -359,7 +319,7 @@ export const MLInferenceLogic = kea<
     },
     startTextExpansionModelSuccess: () => {
       // Refresh ML models list when the text expansion model is started
-      actions.makeMLModelsRequest(undefined);
+      actions.startPollingModels();
     },
     onAddInferencePipelineStepChange: ({ step }) => {
       const {
@@ -377,12 +337,12 @@ export const MLInferenceLogic = kea<
         // back to the Configuration step if we find a pipeline with the same name
 
         // Re-fetch ML model list to include those that were deployed in this step
-        actions.makeMLModelsRequest(undefined);
+        actions.startPollingModels();
       }
       actions.setAddInferencePipelineStep(step);
     },
     fetchPipelineSuccess: () => {
-      // We found a pipeline with the name go back to configuration step
+      // We found a pipeline with the name, go back to configuration step
       actions.setAddInferencePipelineStep(AddInferencePipelineSteps.Configuration);
     },
   }),
@@ -397,6 +357,7 @@ export const MLInferenceLogic = kea<
         step: AddInferencePipelineSteps.Configuration,
       },
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         addSelectedFieldsToMapping: (modal, { isTextExpansionModelSelected }) => {
           const {
             configuration: { fieldMappings, targetField },
@@ -439,6 +400,7 @@ export const MLInferenceLogic = kea<
           indexName: '',
           step: AddInferencePipelineSteps.Configuration,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         removeFieldFromMapping: (modal, { fieldName }) => {
           const {
             configuration: { fieldMappings },
@@ -452,10 +414,12 @@ export const MLInferenceLogic = kea<
             ...modal,
             configuration: {
               ...modal.configuration,
+              // @ts-expect-error upgrade typescript v5.1.6
               fieldMappings: fieldMappings?.filter(({ sourceField }) => sourceField !== fieldName),
             },
           };
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         selectFields: (modal, { fieldNames }) => ({
           ...modal,
           configuration: {
@@ -463,12 +427,16 @@ export const MLInferenceLogic = kea<
           },
           selectedSourceFields: fieldNames,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setAddInferencePipelineStep: (modal, { step }) => ({ ...modal, step }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setIndexName: (modal, { indexName }) => ({ ...modal, indexName }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setInferencePipelineConfiguration: (modal, { configuration }) => ({
           ...modal,
           configuration,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setTargetField: (modal, { targetFieldName }) => ({
           ...modal,
           configuration: {
@@ -481,7 +449,9 @@ export const MLInferenceLogic = kea<
     createErrors: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         attachApiError: (_, error) => getErrorsFromHttpResponse(error),
+        // @ts-expect-error upgrade typescript v5.1.6
         createApiError: (_, error) => getErrorsFromHttpResponse(error),
         makeAttachPipelineRequest: () => [],
         makeCreatePipelineRequest: () => [],
@@ -509,30 +479,28 @@ export const MLInferenceLogic = kea<
       },
     ],
     isLoading: [
-      () => [selectors.mlModelsStatus, selectors.mappingStatus],
-      (mlModelsStatus, mappingStatus) =>
-        !API_REQUEST_COMPLETE_STATUSES.includes(mlModelsStatus) ||
-        !API_REQUEST_COMPLETE_STATUSES.includes(mappingStatus),
+      () => [selectors.mappingStatus],
+      (mappingStatus: Status) => !API_REQUEST_COMPLETE_STATUSES.includes(mappingStatus),
     ],
     isPipelineDataValid: [
       () => [selectors.formErrors],
       (errors: AddInferencePipelineFormErrors) => Object.keys(errors).length === 0,
     ],
     isTextExpansionModelSelected: [
-      () => [selectors.selectedMLModel],
-      (model: TrainedModel | null) => !!model?.inference_config?.text_expansion,
+      () => [selectors.selectedModel],
+      (model: MlModel | null) => model?.type === 'text_expansion',
     ],
     mlInferencePipeline: [
       () => [
         selectors.isPipelineDataValid,
         selectors.addInferencePipelineModal,
-        selectors.mlModelsData,
+        selectors.modelsData,
         selectors.mlInferencePipelinesData,
       ],
       (
         isPipelineDataValid: MLInferenceProcessorsValues['isPipelineDataValid'],
         { configuration }: MLInferenceProcessorsValues['addInferencePipelineModal'],
-        models: MLInferenceProcessorsValues['mlModelsData'],
+        models: MLInferenceProcessorsValues['modelsData'],
         mlInferencePipelinesData: MLInferenceProcessorsValues['mlInferencePipelinesData']
       ) => {
         if (configuration.existingPipeline) {
@@ -546,7 +514,7 @@ export const MLInferenceLogic = kea<
           return pipeline as MlInferencePipeline;
         }
         if (!isPipelineDataValid) return undefined;
-        const model = models?.find((mlModel) => mlModel.model_id === configuration.modelID);
+        const model = models?.find((mlModel) => mlModel.modelId === configuration.modelID);
         if (!model) return undefined;
 
         return generateMlInferencePipelineBody({
@@ -581,78 +549,16 @@ export const MLInferenceLogic = kea<
           .sort(sortSourceFields);
       },
     ],
-    supportedMLModels: [
-      () => [selectors.mlModelsData],
-      (mlModelsData: MLInferenceProcessorsValues['mlModelsData']) => {
-        return (mlModelsData?.filter(isSupportedMLModel) ?? []).sort(sortModels);
-      },
+    selectableModels: [
+      () => [selectors.modelsData],
+      (response: FetchModelsApiResponse) => response ?? [],
     ],
-    existingInferencePipelines: [
-      () => [
-        selectors.mlInferencePipelinesData,
-        selectors.sourceFields,
-        selectors.supportedMLModels,
-        selectors.mlInferencePipelineProcessors,
-      ],
+    selectedModel: [
+      () => [selectors.selectableModels, selectors.addInferencePipelineModal],
       (
-        mlInferencePipelinesData: MLInferenceProcessorsValues['mlInferencePipelinesData'],
-        indexFields: MLInferenceProcessorsValues['sourceFields'],
-        supportedMLModels: MLInferenceProcessorsValues['supportedMLModels'],
-        mlInferencePipelineProcessors: MLInferenceProcessorsValues['mlInferencePipelineProcessors']
-      ) => {
-        if (!mlInferencePipelinesData) {
-          return [];
-        }
-        const indexProcessorNames =
-          mlInferencePipelineProcessors?.map((processor) => processor.pipelineName) ?? [];
-
-        const existingPipelines: MLInferencePipelineOption[] = Object.entries(
-          mlInferencePipelinesData
-        )
-          .map(([pipelineName, pipeline]): MLInferencePipelineOption | undefined => {
-            if (!pipeline || indexProcessorNames.includes(pipelineName)) return undefined;
-
-            // Parse configuration from pipeline definition
-            const pipelineParams = parseMlInferenceParametersFromPipeline(pipelineName, pipeline);
-            if (!pipelineParams) return undefined;
-            const { model_id: modelId, field_mappings: fieldMappings } = pipelineParams;
-
-            const sourceFields = fieldMappings?.map((m) => m.sourceField) ?? [];
-            const missingSourceFields = sourceFields.filter((f) => !indexFields?.includes(f)) ?? [];
-            const mlModel = supportedMLModels.find((model) => model.model_id === modelId);
-            const modelType = mlModel ? getMLType(getMlModelTypesForModelConfig(mlModel)) : '';
-            const disabledReason =
-              missingSourceFields.length > 0
-                ? EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS(missingSourceFields.join(', '))
-                : undefined;
-
-            return {
-              disabled: disabledReason !== undefined,
-              disabledReason,
-              modelId,
-              modelType,
-              pipelineName,
-              sourceFields,
-              indexFields: indexFields ?? [],
-            };
-          })
-          .filter((p): p is MLInferencePipelineOption => p !== undefined);
-
-        return existingPipelines;
-      },
-    ],
-    selectedMLModel: [
-      () => [selectors.supportedMLModels, selectors.addInferencePipelineModal],
-      (
-        supportedMLModels: MLInferenceProcessorsValues['supportedMLModels'],
+        models: MlModel[],
         addInferencePipelineModal: MLInferenceProcessorsValues['addInferencePipelineModal']
-      ) => {
-        return (
-          supportedMLModels.find(
-            (model) => model.model_id === addInferencePipelineModal.configuration.modelID
-          ) ?? null
-        );
-      },
+      ) => models.find((m) => m.modelId === addInferencePipelineModal.configuration.modelID),
     ],
   }),
 });

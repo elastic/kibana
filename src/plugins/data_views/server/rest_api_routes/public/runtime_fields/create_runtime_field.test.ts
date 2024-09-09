@@ -1,40 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createRuntimeField } from './create_runtime_field';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataView } from '../../../../common';
+import { DataViewLazy } from '../../../../common';
 
 describe('create runtime field', () => {
-  it('call usageCollection', () => {
+  it('call usageCollection', async () => {
     const usageCollection = getUsageCollection();
 
-    dataViewsService.get.mockImplementation(
+    dataViewsService.getDataViewLazy.mockImplementation(
       async (id: string) =>
         ({
           addRuntimeField: jest.fn(),
-          fields: {
-            getByName: jest
-              .fn()
-              .mockReturnValueOnce(undefined)
-              .mockReturnValueOnce(undefined)
-              .mockReturnValueOnce({}),
-          },
+          getFields: jest.fn().mockReturnValue({ getFieldMap: jest.fn().mockReturnValue({}) }),
           getRuntimeField: jest
             .fn()
             .mockReturnValueOnce(undefined)
             .mockReturnValueOnce(undefined)
             .mockReturnValueOnce({}),
-        } as unknown as DataView)
+        } as unknown as DataViewLazy)
     );
 
-    createRuntimeField({
+    await createRuntimeField({
       dataViewsService,
       counterName: 'POST /path',
       usageCollection,

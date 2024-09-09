@@ -8,14 +8,14 @@
 import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
-  EuiDataGridColumnCellActionProps,
   EuiDataGridControlColumn,
 } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ComponentType, JSXElementConstructor, ReactNode } from 'react';
+import type { ComponentType, JSXElementConstructor } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { OnRowSelected, SetEventsDeleted, SetEventsLoading } from '..';
 import type { BrowserFields, TimelineNonEcsData } from '../../search_strategy';
 
@@ -23,50 +23,6 @@ export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
 /** Uniquely identifies a column */
 export type ColumnId = string;
-
-/**
- * A `DataTableCellAction` function accepts `data`, where each row of data is
- * represented as a `TimelineNonEcsData[]`. For example, `data[0]` would
- * contain a `TimelineNonEcsData[]` with the first row of data.
- *
- * A `DataTableCellAction` returns a function that has access to all the
- * `EuiDataGridColumnCellActionProps`, _plus_ access to `data`,
- *  which enables code like the following example to be written:
- *
- * Example:
- * ```
- * ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
- *   const value = getMappedNonEcsValue({
- *     data: data[rowIndex], // access a specific row's values
- *     fieldName: columnId,
- *   });
- *
- *   return (
- *     <Component onClick={() => alert(`row ${rowIndex} col ${columnId} has value ${value}`)} iconType="heart">
- *       {'Love it'}
- *      </Component>
- *   );
- * };
- * ```
- */
-export type DataTableCellAction = ({
-  browserFields,
-  data,
-  ecsData,
-  header,
-  pageSize,
-  scopeId,
-  closeCellPopover,
-}: {
-  browserFields: BrowserFields;
-  /** each row of data is represented as one TimelineNonEcsData[] */
-  data: TimelineNonEcsData[][];
-  ecsData: Ecs[];
-  header?: ColumnHeaderOptions;
-  pageSize: number;
-  scopeId: string;
-  closeCellPopover?: () => void;
-}) => (props: EuiDataGridColumnCellActionProps) => ReactNode;
 
 /** The specification of a column header */
 export type ColumnHeaderOptions = Pick<
@@ -88,7 +44,7 @@ export type ColumnHeaderOptions = Pick<
   description?: string | null;
   esTypes?: string[];
   example?: string | number | null;
-  format?: string;
+  format?: SerializedFieldFormat;
   linkField?: string;
   placeholder?: string;
   subType?: IFieldSubType;
@@ -104,6 +60,7 @@ export interface HeaderActionProps {
   onSelectAll: ({ isSelected }: { isSelected: boolean }) => void;
   showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
+  showFullScreenToggle?: boolean;
   sort: SortColumnTable[];
   tabType: string;
   timelineId: string;
@@ -114,7 +71,8 @@ export type HeaderCellRender = ComponentType | ComponentType<HeaderActionProps>;
 type GenericActionRowCellRenderProps = Pick<
   EuiDataGridCellValueElementProps,
   'rowIndex' | 'columnId'
->;
+> &
+  Partial<EuiDataGridCellValueElementProps>;
 
 export type RowCellRender =
   | JSXElementConstructor<GenericActionRowCellRenderProps>
@@ -129,6 +87,7 @@ export interface ActionProps {
   columnId: string;
   columnValues: string;
   data: TimelineNonEcsData[];
+  disableExpandAction?: boolean;
   disabled?: boolean;
   ecsData: Ecs;
   eventId: string;
@@ -145,11 +104,16 @@ export interface ActionProps {
   setEventsDeleted: SetEventsDeleted;
   setEventsLoading: SetEventsLoading;
   showCheckboxes: boolean;
+  /**
+   * This prop is used to determine if the notes button should be displayed
+   * as the part of Row Actions
+   * */
   showNotes?: boolean;
   tabType?: string;
   timelineId: string;
   toggleShowNotes?: () => void;
   width?: number;
+  disablePinAction?: boolean;
 }
 
 interface AdditionalControlColumnProps {
@@ -159,7 +123,6 @@ interface AdditionalControlColumnProps {
   checked: boolean;
   onRowSelected: OnRowSelected;
   eventId: string;
-  id: string;
   columnId: string;
   loadingEventIds: Readonly<string[]>;
   onEventDetailsPanelOpened: () => void;

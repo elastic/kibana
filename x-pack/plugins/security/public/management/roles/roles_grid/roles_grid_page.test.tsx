@@ -44,6 +44,7 @@ const waitForRender = async (
 describe('<RolesGridPage />', () => {
   let apiClientMock: jest.Mocked<PublicMethodsOf<RolesAPIClient>>;
   let history: ReturnType<typeof scopedHistoryMock.create>;
+  const { theme, i18n, analytics, notifications } = coreMock.createStart();
 
   beforeEach(() => {
     history = scopedHistoryMock.create();
@@ -53,6 +54,12 @@ describe('<RolesGridPage />', () => {
     apiClientMock.getRoles.mockResolvedValue([
       {
         name: 'test-role-1',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+      },
+      {
+        name: 'test-role-with-description',
+        description: 'role-description',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
@@ -81,7 +88,11 @@ describe('<RolesGridPage />', () => {
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
-        notifications={coreMock.createStart().notifications}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor={'traditional'}
+        analytics={analytics}
+        theme={theme}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -99,7 +110,11 @@ describe('<RolesGridPage />', () => {
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
-        notifications={coreMock.createStart().notifications}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor={'traditional'}
+        analytics={analytics}
+        theme={theme}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -119,7 +134,11 @@ describe('<RolesGridPage />', () => {
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
-        notifications={coreMock.createStart().notifications}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor={'traditional'}
+        analytics={analytics}
+        theme={theme}
       />
     );
     await waitForRender(wrapper, (updatedWrapper) => {
@@ -133,7 +152,11 @@ describe('<RolesGridPage />', () => {
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
-        notifications={coreMock.createStart().notifications}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor={'traditional'}
+        analytics={analytics}
+        theme={theme}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -144,34 +167,28 @@ describe('<RolesGridPage />', () => {
 
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
 
-    let editButton = wrapper.find('EuiButtonEmpty[data-test-subj="edit-role-action-test-role-1"]');
+    let editButton = wrapper.find('a[data-test-subj="edit-role-action-test-role-1"]');
     expect(editButton).toHaveLength(1);
     expect(editButton.prop('href')).toBe('/edit/test-role-1');
 
-    editButton = wrapper.find(
-      'EuiButtonEmpty[data-test-subj="edit-role-action-special%chars%role"]'
-    );
+    editButton = wrapper.find('a[data-test-subj="edit-role-action-special%chars%role"]');
     expect(editButton).toHaveLength(1);
     expect(editButton.prop('href')).toBe('/edit/special%25chars%25role');
 
-    let cloneButton = wrapper.find(
-      'EuiButtonEmpty[data-test-subj="clone-role-action-test-role-1"]'
-    );
+    let cloneButton = wrapper.find('a[data-test-subj="clone-role-action-test-role-1"]');
     expect(cloneButton).toHaveLength(1);
     expect(cloneButton.prop('href')).toBe('/clone/test-role-1');
 
-    cloneButton = wrapper.find(
-      'EuiButtonEmpty[data-test-subj="clone-role-action-special%chars%role"]'
-    );
+    cloneButton = wrapper.find('a[data-test-subj="clone-role-action-special%chars%role"]');
     expect(cloneButton).toHaveLength(1);
     expect(cloneButton.prop('href')).toBe('/clone/special%25chars%25role');
 
-    expect(
-      wrapper.find('EuiButtonEmpty[data-test-subj="edit-role-action-disabled-role"]')
-    ).toHaveLength(1);
-    expect(
-      wrapper.find('EuiButtonEmpty[data-test-subj="clone-role-action-disabled-role"]')
-    ).toHaveLength(1);
+    expect(wrapper.find('a[data-test-subj="edit-role-action-disabled-role"]')).toHaveLength(1);
+    expect(wrapper.find('a[data-test-subj="clone-role-action-disabled-role"]')).toHaveLength(1);
+
+    expect(findTestSubject(wrapper, 'roleRowDescription-test-role-with-description')).toHaveLength(
+      1
+    );
   });
 
   it('hides reserved roles when instructed to', async () => {
@@ -179,7 +196,11 @@ describe('<RolesGridPage />', () => {
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
-        notifications={coreMock.createStart().notifications}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor={'traditional'}
+        analytics={analytics}
+        theme={theme}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -190,26 +211,86 @@ describe('<RolesGridPage />', () => {
 
     expect(wrapper.find(EuiBasicTable).props().items).toEqual([
       {
-        name: 'disabled-role',
-        elasticsearch: { cluster: [], indices: [], run_as: [] },
-        kibana: [{ base: [], spaces: [], feature: {} }],
-        transient_metadata: { enabled: false },
+        name: 'test-role-1',
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: [],
+            feature: {},
+          },
+        ],
+      },
+      {
+        name: 'test-role-with-description',
+        description: 'role-description',
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: [],
+            feature: {},
+          },
+        ],
       },
       {
         name: 'reserved-role',
-        elasticsearch: { cluster: [], indices: [], run_as: [] },
-        kibana: [{ base: [], spaces: [], feature: {} }],
-        metadata: { _reserved: true },
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: [],
+            feature: {},
+          },
+        ],
+        metadata: {
+          _reserved: true,
+        },
+      },
+      {
+        name: 'disabled-role',
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: [],
+            feature: {},
+          },
+        ],
+        transient_metadata: {
+          enabled: false,
+        },
       },
       {
         name: 'special%chars%role',
-        elasticsearch: { cluster: [], indices: [], run_as: [] },
-        kibana: [{ base: [], spaces: [], feature: {} }],
-      },
-      {
-        name: 'test-role-1',
-        elasticsearch: { cluster: [], indices: [], run_as: [] },
-        kibana: [{ base: [], spaces: [], feature: {} }],
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: [],
+            feature: {},
+          },
+        ],
       },
     ]);
 
@@ -217,6 +298,17 @@ describe('<RolesGridPage />', () => {
 
     expect(wrapper.find(EuiBasicTable).props().items).toEqual([
       {
+        name: 'test-role-1',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+      },
+      {
+        name: 'test-role-with-description',
+        description: 'role-description',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+      },
+      {
         name: 'disabled-role',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
@@ -224,11 +316,6 @@ describe('<RolesGridPage />', () => {
       },
       {
         name: 'special%chars%role',
-        elasticsearch: { cluster: [], indices: [], run_as: [] },
-        kibana: [{ base: [], spaces: [], feature: {} }],
-      },
-      {
-        name: 'test-role-1',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
@@ -240,7 +327,11 @@ describe('<RolesGridPage />', () => {
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
-        notifications={coreMock.createStart().notifications}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor={'traditional'}
+        analytics={analytics}
+        theme={theme}
         readOnly
       />
     );

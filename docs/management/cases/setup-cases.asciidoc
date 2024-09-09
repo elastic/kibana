@@ -30,8 +30,13 @@ and comments and edit case settings unless you customize the sub-feature privile
 | Give assignee access to cases
 a| `All` for the *Cases* feature under *Management*.
 
-NOTE: Before a user can be assigned to a case, they must log into {kib} at
+[NOTE]
+====
+Before a user can be assigned to a case, they must log into {kib} at
 least once, which creates a user profile.
+
+This privilege is also required to add <<cases-action-type,case actions>> to rules.
+====
 
 | Give view-only access to cases
 a| `Read` for the *Cases* feature under *Management*.

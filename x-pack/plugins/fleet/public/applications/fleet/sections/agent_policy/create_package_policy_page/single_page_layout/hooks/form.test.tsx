@@ -10,13 +10,15 @@ import type { RenderHookResult } from '@testing-library/react-hooks';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
-import type { AgentPolicy, PackageInfo } from '../../../../../types';
+import type { PackageInfo } from '../../../../../types';
 
-import { sendGetPackagePolicies } from '../../../../../hooks';
+import { sendGetPackagePolicies, useConfig } from '../../../../../hooks';
 
 import { SelectedPolicyTab } from '../../components';
 
 import { useOnSubmit } from './form';
+
+type MockFn = jest.MockedFunction<any>;
 
 jest.mock('../../../../../hooks', () => {
   return {
@@ -31,6 +33,7 @@ jest.mock('../../../../../hooks', () => {
     sendGetStatus: jest
       .fn()
       .mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
+    useConfig: jest.fn(),
   };
 });
 
@@ -78,13 +81,17 @@ describe('useOnSubmit', () => {
         packageInfo,
         withSysMonitoring: false,
         selectedPolicyTab: SelectedPolicyTab.NEW,
-        newAgentPolicy: { name: 'test', namespace: 'default' },
+        newAgentPolicy: { name: 'test', namespace: '' },
         queryParamsPolicyId: undefined,
+        hasFleetAddAgentsPrivileges: true,
       })
     ));
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
+    (useConfig as MockFn).mockReturnValue({
+      agentless: undefined,
+    } as any);
   });
 
   describe('default API response', () => {
@@ -94,21 +101,23 @@ describe('useOnSubmit', () => {
       });
     });
 
-    it('should set package policy id and namespace when agent policy changes', () => {
+    it('should set new values when package policy changes', () => {
       act(() => {
-        renderResult.result.current.updateAgentPolicy({
-          id: 'some-id',
-          namespace: 'default',
-        } as AgentPolicy);
+        renderResult.result.current.updatePackagePolicy({
+          id: 'new-id',
+          namespace: 'newspace',
+          name: 'apache-2',
+        });
       });
 
       expect(renderResult.result.current.packagePolicy).toEqual({
-        policy_id: 'some-id',
-        namespace: 'default',
+        id: 'new-id',
+        policy_ids: [],
+        namespace: 'newspace',
         description: '',
         enabled: true,
         inputs: [],
-        name: 'apache-1',
+        name: 'apache-2',
         package: {
           name: 'apache',
           title: 'Apache',
@@ -142,8 +151,8 @@ describe('useOnSubmit', () => {
         enabled: true,
         inputs: [],
         name: 'apache-1',
-        namespace: 'default',
-        policy_id: '',
+        namespace: '',
+        policy_ids: [],
         package: {
           name: 'apache',
           title: 'Apache',
@@ -187,8 +196,8 @@ describe('useOnSubmit', () => {
       enabled: true,
       inputs: [],
       name: 'apache-11',
-      namespace: 'default',
-      policy_id: '',
+      namespace: '',
+      policy_ids: [],
       package: {
         name: 'apache',
         title: 'Apache',

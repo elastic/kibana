@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { AnySchema } from 'joi';
@@ -16,7 +17,13 @@ export type Props = Record<string, Type<any>>;
 
 export type NullableProps = Record<string, Type<any> | undefined | null>;
 
-export type TypeOf<RT extends Type<any>> = RT['type'];
+export type TypeOrLazyType = Type<any> | (() => Type<any>);
+
+export type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any>
+  ? ReturnType<RT>['type']
+  : RT extends Type<any>
+  ? RT['type']
+  : never;
 
 type OptionalProperties<Base extends Props> = Pick<
   Base,
@@ -63,8 +70,16 @@ interface UnknownOptions {
   unknowns?: OptionsForUnknowns;
 }
 
+interface ObjectTypeOptionsMeta {
+  /**
+   * A string that uniquely identifies this schema. Used when generating OAS
+   * to create refs instead of inline schemas.
+   */
+  id?: string;
+}
+
 export type ObjectTypeOptions<P extends Props = any> = TypeOptions<ObjectResultType<P>> &
-  UnknownOptions;
+  UnknownOptions & { meta?: TypeOptions<ObjectResultType<P>>['meta'] & ObjectTypeOptionsMeta };
 
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
   private props: P;
@@ -73,17 +88,26 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
 
   constructor(props: P, options: ObjectTypeOptions<P> = {}) {
     const schemaKeys = {} as Record<string, AnySchema>;
-    const { unknowns = 'forbid', ...typeOptions } = options;
+    const { unknowns, ...typeOptions } = options;
     for (const [key, value] of Object.entries(props)) {
       schemaKeys[key] = value.getSchema();
     }
-    const schema = internals
-      .object()
-      .keys(schemaKeys)
-      .default()
-      .optional()
-      .unknown(unknowns === 'allow')
-      .options({ stripUnknown: { objects: unknowns === 'ignore' } });
+    let schema = internals.object().keys(schemaKeys).default().optional();
+
+    // We need to specify the `.unknown` property only when we want to override the default `forbid`
+    // or it will break `stripUnknown` functionality.
+    if (unknowns === 'allow') {
+      schema = schema.unknown(unknowns === 'allow');
+    }
+
+    // Only set stripUnknown if we have an explicit value of `unknowns`
+    if (unknowns) {
+      schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
+    }
+
+    if (options.meta?.id) {
+      schema = schema.id(options.meta.id);
+    }
 
     super(schema, typeOptions);
     this.props = props;
@@ -203,6 +227,15 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       case 'object.child':
         return reason[0];
     }
+  }
+
+  /**
+   * Return the schema for this object's underlying properties
+   *
+   * @internal should only be used internal for type reflection
+   */
+  public getPropSchemas(): P {
+    return this.props;
   }
 
   validateKey(key: string, value: any) {

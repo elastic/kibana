@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import {
@@ -19,7 +20,7 @@ const RedirectAppLinksContext = React.createContext<RedirectAppLinksServices | n
 /**
  * Contextual services Provider.
  */
-export const RedirectAppLinksProvider: FC<RedirectAppLinksServices> = ({
+export const RedirectAppLinksProvider: FC<PropsWithChildren<RedirectAppLinksServices>> = ({
   children,
   ...services
 }) => {
@@ -34,10 +35,9 @@ export const RedirectAppLinksProvider: FC<RedirectAppLinksServices> = ({
 /**
  * Kibana-specific contextual services Provider.
  */
-export const RedirectAppLinksKibanaProvider: FC<RedirectAppLinksKibanaDependencies> = ({
-  children,
-  coreStart,
-}) => {
+export const RedirectAppLinksKibanaProvider: FC<
+  PropsWithChildren<RedirectAppLinksKibanaDependencies>
+> = ({ children, coreStart }) => {
   const { navigateToUrl, currentAppId$ } = coreStart.application;
   const currentAppId = useObservable(currentAppId$, undefined);
 

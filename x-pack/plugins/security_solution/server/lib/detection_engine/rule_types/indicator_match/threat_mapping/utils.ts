@@ -8,7 +8,11 @@
 import moment from 'moment';
 
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
+
+import { TelemetryChannel } from '../../../../telemetry/types';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
+
 import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../../types';
 import { parseInterval } from '../../utils/utils';
 import { ThreatMatchQueryType } from './types';
@@ -21,6 +25,10 @@ import type {
   GetSignalValuesMap,
   ThreatMatchNamedQuery,
 } from './types';
+
+export const MANY_NESTED_CLAUSES_ERR =
+  'Query contains too many nested clauses; maxClauseCount is set to';
+export const FAILED_CREATE_QUERY_MAX_CLAUSE = 'failed to create query: maxClauseCount is set to';
 
 /**
  * Given two timers this will take the max of each and add them to each other and return that addition.
@@ -92,6 +100,8 @@ export const combineResults = (
   createdSignals: [...currentResult.createdSignals, ...newResult.createdSignals],
   warningMessages: [...currentResult.warningMessages, ...newResult.warningMessages],
   errors: [...new Set([...currentResult.errors, ...newResult.errors])],
+  suppressedAlertsCount:
+    (currentResult.suppressedAlertsCount ?? 0) + (newResult.suppressedAlertsCount ?? 0),
 });
 
 /**
@@ -120,6 +130,8 @@ export const combineConcurrentResults = (
         createdSignals: [...accum.createdSignals, ...item.createdSignals],
         warningMessages: [...accum.warningMessages, ...item.warningMessages],
         errors: [...new Set([...accum.errors, ...item.errors])],
+        suppressedAlertsCount:
+          (accum.suppressedAlertsCount ?? 0) + (item.suppressedAlertsCount ?? 0),
       };
     },
     {
@@ -130,6 +142,7 @@ export const combineConcurrentResults = (
       enrichmentTimes: [],
       lastLookBackDate: undefined,
       createdSignalsCount: 0,
+      suppressedAlertsCount: 0,
       createdSignals: [],
       errors: [],
       warningMessages: [],
@@ -230,7 +243,83 @@ export const getSignalValueMap = ({
       if (!acc[field][fieldValue]) {
         acc[field][fieldValue] = [];
       }
-      acc[field][fieldValue].push(event._id);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      acc[field][fieldValue].push(event._id!);
     });
     return acc;
   }, {});
+
+export const getMaxClauseCountErrorValue = (
+  searchesPerformed: SearchAfterAndBulkCreateReturnType[],
+  threatEntriesCount: number,
+  previousChunkSize: number,
+  eventsTelemetry: ITelemetryEventsSender | undefined
+) =>
+  searchesPerformed.reduce<{
+    maxClauseCountValue: number;
+    errorType: string;
+  }>(
+    (acc, search) => {
+      const failedToCreateQueryMessage: string | undefined = search.errors.find((err) =>
+        err.includes(FAILED_CREATE_QUERY_MAX_CLAUSE)
+      );
+
+      // the below error is specific to an error returned by getSignalsQueryMapFromThreatIndex
+      const tooManyNestedClausesMessage: string | undefined = search.errors.find((err) =>
+        err.includes(MANY_NESTED_CLAUSES_ERR)
+      );
+
+      const regex = /[0-9]+/g;
+      const foundMaxClauseCountValue = failedToCreateQueryMessage?.match(regex)?.[0];
+      const foundNestedClauseCountValue = tooManyNestedClausesMessage?.match(regex)?.[0];
+
+      if (foundNestedClauseCountValue != null && !isEmpty(foundNestedClauseCountValue)) {
+        const errorType = `${MANY_NESTED_CLAUSES_ERR} ${foundNestedClauseCountValue}`;
+        const tempVal = parseInt(foundNestedClauseCountValue, 10);
+        eventsTelemetry?.sendAsync(TelemetryChannel.DETECTION_ALERTS, [
+          `Query contains too many nested clauses error received during IM search`,
+        ]);
+
+        // minus 1 since the max clause count value is exclusive
+        // multiplying by two because we need to account for the
+        // threat fields and event fields. A single threat entries count
+        // is comprised of two fields, one field from the threat index
+        // and another field from the event index. so we need to multiply by 2
+        // to cover the fact that the nested clause error happens
+        // because we are searching over event and threat fields.
+        // so we need to make this smaller than a single 'failed to create query'
+        // max clause count error.
+        const val = Math.floor((tempVal - 1) / (2 * (threatEntriesCount + 1)));
+        // There is a chance the new calculated val still may yield a too many nested queries
+        // error message. In that case we want to make sure we don't fall into an infinite loop
+        // and so we send a new value that is guaranteed to be smaller than the previous one.
+        if (val >= previousChunkSize) {
+          return {
+            maxClauseCountValue: Math.floor(previousChunkSize / 2),
+            errorType,
+          };
+        }
+        return { maxClauseCountValue: val, errorType };
+      } else if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
+        const errorType = `${FAILED_CREATE_QUERY_MAX_CLAUSE} ${foundNestedClauseCountValue}`;
+        const tempVal = parseInt(foundMaxClauseCountValue, 10);
+        eventsTelemetry?.sendAsync(TelemetryChannel.DETECTION_ALERTS, [
+          `failed to create query error received during IM search`,
+        ]);
+        // minus 1 since the max clause count value is exclusive
+        // and we add 1 to threatEntries to increase the number of "buckets"
+        // that our searches are spread over, smaller buckets means less clauses
+        const val = Math.floor((tempVal - 1) / (threatEntriesCount + 1));
+        return {
+          maxClauseCountValue: val,
+          errorType,
+        };
+      } else {
+        return acc;
+      }
+    },
+    {
+      maxClauseCountValue: Number.NEGATIVE_INFINITY,
+      errorType: 'no helpful error message available',
+    }
+  );

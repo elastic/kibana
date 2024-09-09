@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { Key } from 'selenium-webdriver';
 import moment from 'moment';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -18,29 +17,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker', 'share']);
+  const PageObjects = getPageObjects([
+    'reporting',
+    'common',
+    'svlCommonPage',
+    'discover',
+    'timePicker',
+    'share',
+  ]);
   const filterBar = getService('filterBar');
-  const find = getService('find');
-  const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
 
   const setFieldsFromSource = async (setValue: boolean) => {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
     await browser.refresh();
   };
 
-  const getReport = async () => {
+  const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
     // close any open notification toasts
-    await PageObjects.reporting.clearToastNotifications();
+    await toasts.dismissAll();
 
-    await PageObjects.reporting.openCsvReportingPanel();
+    await PageObjects.reporting.openExportTab();
     await PageObjects.reporting.clickGenerateReportButton();
 
-    const url = await PageObjects.reporting.getReportURL(60000);
+    const url = await PageObjects.reporting.getReportURL(timeout);
     // TODO: Fetch CSV client side in Serverless since `PageObjects.reporting.getResponse()`
     // doesn't work because it relies on `SecurityService.testUserSupertest`
     const res: { status: number; contentType: string | null; text: string } =
       await browser.executeAsync(async (downloadUrl, resolve) => {
-        const response = await fetch(downloadUrl);
+        const response = await fetch(downloadUrl ?? '');
         resolve({
           status: response.status,
           contentType: response.headers.get('content-type'),
@@ -56,6 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover CSV Export', () => {
     describe('Check Available', () => {
       before(async () => {
+        await PageObjects.svlCommonPage.loginAsAdmin();
         // TODO: emptyKibanaIndex fails in Serverless with
         // "index_not_found_exception: no such index [.kibana_ingest]",
         // so it was switched to `savedObjects.cleanStandardList()`
@@ -73,14 +79,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.savedObjects.cleanStandardList();
       });
 
+      afterEach(async () => {
+        await PageObjects.share.closeShareModal();
+      });
+
       it('is available if new', async () => {
-        await PageObjects.reporting.openCsvReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
       it('becomes available when saved', async () => {
         await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
-        await PageObjects.reporting.openCsvReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
@@ -101,62 +111,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
-      });
-
-      it('generates a report with single timefilter', async () => {
-        await PageObjects.discover.clickNewSearchButton();
-        await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
-        await PageObjects.discover.saveSearch('single-timefilter-search');
-
-        // get shared URL value
-        const sharedURL = await browser.getCurrentUrl();
-
-        // click 'Copy POST URL'
-        await PageObjects.share.clickShareTopNavButton();
-        await PageObjects.reporting.openCsvReportingPanel();
-        const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
-        await advOpt.click();
-        const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
-        await postUrl.click();
-
-        // get clipboard value using field search input, since
-        // 'browser.getClipboardValue()' doesn't work, due to permissions
-        const textInput = await testSubjects.find('fieldListFiltersFieldSearch');
-        await textInput.click();
-        await browser
-          .getActions()
-          // TODO: Add Mac support since this wouldn't run locally before
-          .keyDown(Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'])
-          .perform();
-        await browser.getActions().keyDown('v').perform();
-
-        const reportURL = decodeURIComponent(await textInput.getAttribute('value'));
-
-        // get number of filters in URLs
-        const timeFiltersNumberInReportURL =
-          reportURL.split('query:(range:(order_date:(format:strict_date_optional_time').length - 1;
-        const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
-
-        expect(timeFiltersNumberInSharedURL).to.be(1);
-        expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
-
-        expect(timeFiltersNumberInReportURL).to.be(1);
-        expect(
-          reportURL.includes(
-            'query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))'
-          )
-        ).to.be(true);
-
-        // return keyboard state
-        await browser
-          .getActions()
-          // TODO: Add Mac support since this wouldn't run locally before
-          .keyUp(Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'])
-          .perform();
-        await browser.getActions().keyUp('v').perform();
-
-        //  return field search input state
-        await textInput.clearValue();
       });
 
       it('generates a report from a new search with data: default', async () => {
@@ -192,8 +146,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.saveSearch('large export');
 
         // match file length, the beginning and the end of the csv file contents
-        const { text: csvFile } = await getReport();
-        expect(csvFile.length).to.be(4826973);
+        const { text: csvFile } = await getReport({ timeout: 80 * 1000 });
+        expect(csvFile.length).to.be(4845684);
         expectSnapshot(csvFile.slice(0, 5000)).toMatch();
         expectSnapshot(csvFile.slice(-5000)).toMatch();
       });

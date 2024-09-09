@@ -1,21 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Logger } from '@kbn/core/server';
 import { set } from '@kbn/safer-lodash-set';
 import { Readable } from 'stream';
-import { encode } from 'cbor-x';
+import { encode, decode } from '@kbn/cbor';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FileDocument } from '../../../../file_client/file_metadata_client/adapters/es_index';
-import * as cborx from 'cbor-x';
 import { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 
 describe('ContentStream', () => {
@@ -415,7 +415,7 @@ describe('ContentStream', () => {
       stream.end('some data');
       await new Promise((resolve) => stream.once('finish', resolve));
       const docBuffer = (client.index.mock.calls[0][0] as IndexRequest).document as Buffer;
-      const docData = cborx.decode(docBuffer);
+      const docData = decode(docBuffer);
 
       expect(docData).toHaveProperty('@timestamp');
     });

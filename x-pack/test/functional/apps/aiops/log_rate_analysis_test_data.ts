@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
 import { kibanaLogsDataViewTestData } from './log_rate_analysis/test_data/kibana_logs_data_view_test_data';
 import { farequoteDataViewTestData } from './log_rate_analysis/test_data/farequote_data_view_test_data';
@@ -22,40 +22,48 @@ export const logRateAnalysisTestData: TestData[] = [
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: false,
     zeroDocsFallback: false,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: true,
     zeroDocsFallback: false,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: false,
     zeroDocsFallback: false,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: true,
     zeroDocsFallback: false,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: true,
     zeroDocsFallback: true,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: false,
     zeroDocsFallback: true,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: true,
     zeroDocsFallback: true,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: false,
     zeroDocsFallback: true,
+    autoRun: false,
   }),
 ];

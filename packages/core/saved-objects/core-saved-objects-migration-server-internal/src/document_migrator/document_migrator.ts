@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Boom from '@hapi/boom';
@@ -13,29 +14,17 @@ import type {
   SavedObjectUnsanitizedDoc,
   ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
+import type {
+  IDocumentMigrator,
+  DocumentMigrateOptions,
+  IsDowngradeRequiredOptions,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { ActiveMigrations } from './types';
 import { maxVersion } from './pipelines/utils';
 import { buildActiveMigrations } from './build_active_migrations';
 import { DocumentUpgradePipeline, DocumentDowngradePipeline } from './pipelines';
 import { downgradeRequired } from './utils';
 import { TransformType } from './types';
-
-/**
- * Options for {@link VersionedTransformer.migrate}
- */
-export interface DocumentMigrateOptions {
-  /**
-   * Defines whether it is allowed to convert documents from an higher version or not.
-   * - If `true`, documents from higher versions will go though the downgrade pipeline.
-   * - If `false`, an error will be thrown when trying to process a document with an higher type version.
-   * Defaults to `false`.
-   */
-  allowDowngrade?: boolean;
-  /**
-   * If specified, will migrate to the given version instead of the latest known version.
-   */
-  targetTypeVersion?: string;
-}
 
 interface TransformOptions {
   convertNamespaceTypes?: boolean;
@@ -65,31 +54,9 @@ interface MigrationVersionParams {
 }
 
 /**
- * Manages transformations of individual documents.
+ * A concrete implementation of the {@link IDocumentMigrator} interface.
  */
-export interface VersionedTransformer {
-  /**
-   * Migrates a document to its latest version.
-   */
-  migrate(
-    doc: SavedObjectUnsanitizedDoc,
-    options?: DocumentMigrateOptions
-  ): SavedObjectUnsanitizedDoc;
-
-  /**
-   * Migrates a document to the latest version and applies type conversions if applicable.
-   * Also returns any additional document(s) that may have been created during the transformation process.
-   *
-   * @remark This only be used by the savedObject migration during upgrade. For all other scenarios,
-   *         {@link VersionedTransformer#migrate} should be used instead.
-   */
-  migrateAndConvert(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[];
-}
-
-/**
- * A concrete implementation of the {@link VersionedTransformer} interface.
- */
-export class DocumentMigrator implements VersionedTransformer {
+export class DocumentMigrator implements IDocumentMigrator {
   private options: DocumentMigratorOptions;
   private migrations?: ActiveMigrations;
 
@@ -173,6 +140,21 @@ export class DocumentMigrator implements VersionedTransformer {
       allowDowngrade: false,
     });
     return [document, ...additionalDocs];
+  }
+
+  /**
+   * Returns true if the provided document has a higher version that the `targetTypeVersion`
+   * (defaulting to the last known version), false otherwise.
+   */
+  public isDowngradeRequired(
+    doc: SavedObjectUnsanitizedDoc,
+    { targetTypeVersion }: IsDowngradeRequiredOptions = {}
+  ): boolean {
+    if (!this.migrations) {
+      throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
+    }
+    const typeMigrations = this.migrations[doc.type];
+    return downgradeRequired(doc, typeMigrations?.latestVersion ?? {}, targetTypeVersion);
   }
 
   private transform(

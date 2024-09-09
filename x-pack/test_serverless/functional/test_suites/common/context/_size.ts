@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['context']);
+  const PageObjects = getPageObjects(['context', 'svlCommonPage']);
   let expectedRowLength = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
 
   describe('context size', function contextSize() {
@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
       });
+      await PageObjects.svlCommonPage.loginAsViewer();
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID);
     });
 

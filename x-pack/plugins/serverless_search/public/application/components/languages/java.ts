@@ -44,7 +44,7 @@ ElasticsearchClient esClient = new ElasticsearchClient(transport);`,
   testConnection: `InfoResponse info = esClient.info();
 
 logger.info(info.toString());`,
-  ingestData: `List<Book> books = new ArrayList<>();
+  ingestData: ({ ingestPipeline }) => `List<Book> books = new ArrayList<>();
 books.add(new Book("9780553351927", "Snow Crash", "Neal Stephenson", "1992-06-01", 470));
 books.add(new Book("9780441017225", "Revelation Space", "Alastair Reynolds", "2000-03-15", 585));
 books.add(new Book("9780451524935", "1984", "George Orwell", "1985-06-01", 328));
@@ -57,7 +57,7 @@ BulkRequest.Builder br = new BulkRequest.Builder();
 for (Book book : books) {
     br.operations(op -> op
         .index(idx -> idx
-            .index("books")
+            .index("books")${ingestPipeline ? `\n            .pipeline("${ingestPipeline}")` : ''}
             .id(product.getId())
             .document(book)
         )
@@ -75,7 +75,7 @@ if (result.errors()) {
         }
     }
 }`,
-  ingestDataIndex: ({ apiKey, indexName, url }) => `// URL and API key
+  ingestDataIndex: ({ apiKey, indexName, url, ingestPipeline }) => `// URL and API key
 String serverUrl = "${url}";
 String apiKey = "${apiKey}";
 
@@ -107,7 +107,9 @@ BulkRequest.Builder br = new BulkRequest.Builder();
 for (Book book : books) {
     br.operations(op -> op
         .index(idx -> idx
-            .index("${indexName}")
+            .index("${indexName}")${
+    ingestPipeline ? `\n            .pipeline("${ingestPipeline}")` : ''
+  }
             .id(product.getId())
             .document(book)
         )

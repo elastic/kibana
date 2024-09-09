@@ -22,11 +22,11 @@ export const expectedValues = {
 };
 
 export async function generateData({
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
   start,
   end,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
   start: number;
   end: number;
 }) {
@@ -73,5 +73,5 @@ export async function generateData({
         .timestamp(timestamp),
     ]);
 
-  await synthtraceEsClient.index(transactionsEvents);
+  await apmSynthtraceEsClient.index(transactionsEvents);
 }

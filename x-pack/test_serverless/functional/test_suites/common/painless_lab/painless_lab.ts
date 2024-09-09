@@ -27,15 +27,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Painless lab', function describeIndexTests() {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('dev_tools', { hash: '/painless_lab' });
       await retry.waitFor('Wait for editor to be visible', async () => {
         return testSubjects.isDisplayed('painless_lab');
       });
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('should show the editor and preview panels', async () => {

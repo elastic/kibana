@@ -71,7 +71,7 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     },
 
     async ensureViewIsLoaded(name: string) {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         const subject = await testSubjects.find('savedViews-openPopover');
         expect(await subject.getVisibleText()).to.be(name);
       });

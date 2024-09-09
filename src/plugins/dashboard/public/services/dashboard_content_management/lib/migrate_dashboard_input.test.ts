@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
 
-import { DashboardContainerInput } from '../../../../common';
-import { migrateDashboardInput } from './migrate_dashboard_input';
-import { DashboardEmbeddableService } from '../../embeddable/types';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../../../mocks';
+import { DashboardEmbeddableService } from '../../embeddable/types';
+import { SavedDashboardInput } from '../types';
+import { migrateDashboardInput } from './migrate_dashboard_input';
 
 jest.mock('@kbn/embeddable-plugin/public', () => {
   return {
@@ -25,7 +26,7 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
 
 describe('Migrate dashboard input', () => {
   it('should run factory migrations on all Dashboard content', () => {
-    const dashboardInput: DashboardContainerInput = getSampleDashboardInput();
+    const dashboardInput: SavedDashboardInput = getSampleDashboardInput();
     dashboardInput.panels = {
       panel1: getSampleDashboardPanel({ type: 'superLens', explicitInput: { id: 'panel1' } }),
       panel2: getSampleDashboardPanel({ type: 'superLens', explicitInput: { id: 'panel2' } }),

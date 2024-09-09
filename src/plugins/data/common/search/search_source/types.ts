@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { Query, AggregateQuery } from '@kbn/es-query';
-import { SerializableRecord } from '@kbn/utility-types';
-import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { Serializable, SerializableRecord } from '@kbn/utility-types';
+import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { ISearchOptions } from '@kbn/search-types';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { AggConfigSerialized, IAggConfigs, ISearchOptions } from '../../../public';
+import type { SearchField } from '@kbn/es-types';
+import type { AggConfigSerialized, IAggConfigs } from '../../../public';
 import type { SearchSource } from './search_source';
 
 /**
@@ -33,6 +35,8 @@ export interface ISearchStartSearchSource
    * @param fields
    */
   create: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
+
+  createLazy: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
   /**
    * creates empty {@link SearchSource}
    */
@@ -61,12 +65,7 @@ export type EsQuerySortValue = Record<
   SortDirection | SortDirectionNumeric | SortDirectionFormat
 >;
 
-interface SearchField {
-  [key: string]: SearchFieldValue;
-}
-
-// @internal
-export type SearchFieldValue = string | SearchField;
+export type SearchFieldValue = SearchField & Serializable;
 
 /**
  * search source fields

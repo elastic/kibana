@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -109,7 +110,7 @@ export function DashboardSettingsProvider({ getService }: FtrProviderContext) {
     public async clickApplyButton(shouldClose: boolean = true) {
       log.debug('clickApplyButton');
       await retry.try(async () => {
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
         await testSubjects.click('applyCustomizeDashboardButton');
         if (shouldClose) await this.expectDashboardSettingsFlyoutClosed();
       });
@@ -118,7 +119,7 @@ export function DashboardSettingsProvider({ getService }: FtrProviderContext) {
     public async clickCancelButton() {
       log.debug('clickCancelButton');
       await retry.try(async () => {
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
         await testSubjects.click('cancelCustomizeDashboardButton');
         await this.expectDashboardSettingsFlyoutClosed();
       });
@@ -127,7 +128,7 @@ export function DashboardSettingsProvider({ getService }: FtrProviderContext) {
     public async clickCloseFlyoutButton() {
       log.debug();
       await retry.try(async () => {
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
         await (await this.findFlyoutTestSubject('euiFlyoutCloseButton')).click();
         await this.expectDashboardSettingsFlyoutClosed();
       });

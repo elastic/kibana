@@ -31,10 +31,6 @@
     },
     "settings": {
       "index": {
-        "lifecycle": {
-          "name": "ml_host_risk_score_latest_default",
-          "rollover_alias": "ml_host_risk_score_latest_default"
-        },
         "mapping": {
           "total_fields": {
             "limit": "10000"
@@ -83,10 +79,6 @@
     },
     "settings": {
       "index": {
-        "lifecycle": {
-          "name": "ml_host_risk_score_default",
-          "rollover_alias": "ml_host_risk_score_default"
-        },
         "mapping": {
           "total_fields": {
             "limit": "10000"

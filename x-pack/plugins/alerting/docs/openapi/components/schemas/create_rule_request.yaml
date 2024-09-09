@@ -1,48 +1,36 @@
 title: Create rule request body properties
 description: The properties vary depending on the rule type.
-oneOf:
-  - $ref: 'create_anomaly_detection_alert_rule_request.yaml'
-  - $ref: 'create_anomaly_detection_jobs_health_rule_request.yaml'
-  - $ref: 'create_apm_anomaly_rule_request.yaml'
-  - $ref: 'create_apm_error_count_rule_request.yaml'
-  - $ref: 'create_apm_transaction_duration_rule_request.yaml'
-  - $ref: 'create_apm_transaction_error_rate_rule_request.yaml'
-  - $ref: 'create_es_query_rule_request.yaml'
-  - $ref: 'create_geo_containment_rule_request.yaml'
-  - $ref: 'create_index_threshold_rule_request.yaml'
-  - $ref: 'create_infra_inventory_rule_request.yaml'
-  - $ref: 'create_infra_metric_anomaly_rule_request.yaml'
-  - $ref: 'create_infra_metric_threshold_rule_request.yaml'
-  - $ref: 'create_monitoring_jvm_memory_usage_rule_request.yaml'
-  - $ref: 'create_log_threshold_rule_request.yaml'
-  - $ref: 'create_monitoring_ccr_exceptions_rule_request.yaml'
-  - $ref: 'create_monitoring_cluster_health_rule_request.yaml'
-  - $ref: 'create_monitoring_cpu_usage_rule_request.yaml'
-  - $ref: 'create_monitoring_disk_usage_rule_request.yaml'
-  - $ref: 'create_monitoring_elasticsearch_version_mismatch_rule_request.yaml'
-  - $ref: 'create_monitoring_license_expiration_rule_request.yaml'
-  - $ref: 'create_monitoring_kibana_version_mismatch_rule_request.yaml'
-  - $ref: 'create_monitoring_logstash_version_mismatch_rule_request.yaml'
-  - $ref: 'create_monitoring_missing_data_rule_request.yaml'
-  - $ref: 'create_monitoring_nodes_changed_rule_request.yaml'
-  - $ref: 'create_monitoring_shard_size_rule_request.yaml'
-  - $ref: 'create_monitoring_thread_pool_search_rejections_rule_request.yaml'
-  - $ref: 'create_monitoring_thread_pool_write_rejections_rule_request.yaml'
-  - $ref: 'create_siem_eql_rule_request.yaml'
-  - $ref: 'create_siem_indicator_rule_request.yaml'
-  - $ref: 'create_siem_ml_rule_request.yaml'
-  - $ref: 'create_siem_new_terms_rule_request.yaml'
-  - $ref: 'create_siem_notifications_rule_request.yaml'
-  - $ref: 'create_siem_query_rule_request.yaml'
-  - $ref: 'create_siem_saved_query_rule_request.yaml'
-  - $ref: 'create_siem_threshold_rule_request.yaml'
-  - $ref: 'create_slo_burn_rate_rule_request.yaml'
-  - $ref: 'create_synthetics_monitor_status_rule_request.yaml'
-  - $ref: 'create_synthetics_uptime_duration_anomaly_rule_request.yaml'
-  - $ref: 'create_synthetics_uptime_tls_rule_request.yaml'
-  - $ref: 'create_synthetics_uptime_tls_certificate_rule_request.yaml'
-  - $ref: 'create_transform_health_rule_request.yaml'
-  - $ref: 'create_uptime_monitor_status_rule_request.yaml'
-discriminator:
-  propertyName: rule_type_id
-       
+type: object
+required:
+  - consumer
+  - name
+  - params
+  - rule_type_id
+  - schedule
+properties:
+  actions:
+    $ref: 'actions.yaml'
+  alert_delay:
+    $ref: 'alert_delay.yaml'
+  consumer:
+    $ref: 'consumer.yaml'
+  enabled:
+    $ref: 'enabled_rule.yaml'
+  name:
+    $ref: 'name_rule.yaml'
+  notify_when:
+    $ref: 'notify_when.yaml'
+  params:
+    type: object
+    description: The parameters for the rule.
+    additionalProperties: true
+  rule_type_id:
+    type: string
+    description: The ID of the rule type that you want to call when the rule is scheduled to run.
+  schedule:
+    $ref: 'schedule.yaml'
+  tags:
+    $ref: 'tags.yaml'
+  throttle:
+    $ref: 'throttle.yaml'
+ 

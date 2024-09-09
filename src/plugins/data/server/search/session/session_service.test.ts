@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -17,8 +18,8 @@ import { SearchSessionService } from './session_service';
 import { createRequestHash } from './utils';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ConfigSchema } from '../../../config';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { ConfigSchema } from '../../config';
+import type { AuthenticatedUser } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -102,31 +103,31 @@ describe('SearchSessionService', () => {
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
     });
 
-    it('Save throws', () => {
-      expect(() =>
+    it('Save throws', async () => {
+      await expect(() =>
         service.save({ savedObjectsClient }, mockUser1, sessionId, {})
       ).rejects.toBeInstanceOf(Error);
     });
 
-    it('Update throws', () => {
+    it('Update throws', async () => {
       const attributes = { name: 'new_name' };
       const response = service.update({ savedObjectsClient }, mockUser1, sessionId, attributes);
-      expect(response).rejects.toBeInstanceOf(Error);
+      await expect(response).rejects.toBeInstanceOf(Error);
     });
 
-    it('Cancel throws', () => {
+    it('Cancel throws', async () => {
       const response = service.cancel({ savedObjectsClient }, mockUser1, sessionId);
-      expect(response).rejects.toBeInstanceOf(Error);
+      await expect(response).rejects.toBeInstanceOf(Error);
     });
 
-    it('getId throws', () => {
+    it('getId throws', async () => {
       const response = service.getId({ savedObjectsClient }, mockUser1, {}, {});
-      expect(response).rejects.toBeInstanceOf(Error);
+      await expect(response).rejects.toBeInstanceOf(Error);
     });
 
-    it('Delete throws', () => {
+    it('Delete throws', async () => {
       const response = service.delete({ savedObjectsClient }, mockUser1, sessionId);
-      expect(response).rejects.toBeInstanceOf(Error);
+      await expect(response).rejects.toBeInstanceOf(Error);
     });
   });
 
@@ -156,7 +157,7 @@ describe('SearchSessionService', () => {
       const coreStart = coreMock.createStart();
 
       await flushPromises();
-      await service.start(coreStart, {});
+      service.start(coreStart, {});
     });
 
     afterEach(() => {
@@ -164,22 +165,22 @@ describe('SearchSessionService', () => {
     });
 
     describe('save', () => {
-      it('throws if `name` is not provided', () => {
-        expect(() =>
+      it('throws if `name` is not provided', async () => {
+        await expect(() =>
           service.save({ savedObjectsClient }, mockUser1, sessionId, {})
         ).rejects.toMatchInlineSnapshot(`[Error: Name is required]`);
       });
 
-      it('throws if `appId` is not provided', () => {
-        expect(
+      it('throws if `appId` is not provided', async () => {
+        await expect(
           service.save({ savedObjectsClient }, mockUser1, sessionId, {
             name: 'banana',
           })
         ).rejects.toMatchInlineSnapshot(`[Error: AppId is required]`);
       });
 
-      it('throws if `locatorId` is not provided', () => {
-        expect(
+      it('throws if `locatorId` is not provided', async () => {
+        await expect(
           service.save({ savedObjectsClient }, mockUser1, sessionId, {
             name: 'banana',
             appId: 'nanana',
@@ -220,10 +221,10 @@ describe('SearchSessionService', () => {
         expect(callAttributes).toHaveProperty('username', mockUser1.username);
       });
 
-      it('throws error if user conflicts', () => {
+      it('throws error if user conflicts', async () => {
         savedObjectsClient.get.mockResolvedValue(mockSavedObject);
 
-        expect(
+        await expect(
           service.get({ savedObjectsClient }, mockUser2, sessionId)
         ).rejects.toMatchInlineSnapshot(`[Error: Not Found]`);
       });
@@ -614,7 +615,7 @@ describe('SearchSessionService', () => {
         expect(callAttributes).toHaveProperty('name', attributes.name);
       });
 
-      it('throws if user conflicts', () => {
+      it('throws if user conflicts', async () => {
         const mockUpdateSavedObject = {
           ...mockSavedObject,
           attributes: {},
@@ -623,7 +624,7 @@ describe('SearchSessionService', () => {
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
 
         const attributes = { name: 'new_name' };
-        expect(
+        await expect(
           service.update({ savedObjectsClient }, mockUser2, sessionId, attributes)
         ).rejects.toMatchInlineSnapshot(`[Error: Not Found]`);
       });
@@ -659,10 +660,10 @@ describe('SearchSessionService', () => {
         expect(callAttributes).toHaveProperty('isCanceled', true);
       });
 
-      it('throws if user conflicts', () => {
+      it('throws if user conflicts', async () => {
         savedObjectsClient.get.mockResolvedValue(mockSavedObject);
 
-        expect(
+        await expect(
           service.cancel({ savedObjectsClient }, mockUser2, sessionId)
         ).rejects.toMatchInlineSnapshot(`[Error: Not Found]`);
       });
@@ -803,18 +804,18 @@ describe('SearchSessionService', () => {
     });
 
     describe('getId', () => {
-      it('throws if `sessionId` is not provided', () => {
+      it('throws if `sessionId` is not provided', async () => {
         const searchRequest = { params: {} };
 
-        expect(() =>
+        await expect(() =>
           service.getId({ savedObjectsClient }, mockUser1, searchRequest, {})
         ).rejects.toMatchInlineSnapshot(`[Error: Session ID is required]`);
       });
 
-      it('throws if there is not a saved object', () => {
+      it('throws if there is not a saved object', async () => {
         const searchRequest = { params: {} };
 
-        expect(() =>
+        await expect(() =>
           service.getId({ savedObjectsClient }, mockUser1, searchRequest, {
             sessionId,
             isStored: false,
@@ -824,10 +825,10 @@ describe('SearchSessionService', () => {
         );
       });
 
-      it('throws if not restoring a saved session', () => {
+      it('throws if not restoring a saved session', async () => {
         const searchRequest = { params: {} };
 
-        expect(() =>
+        await expect(() =>
           service.getId({ savedObjectsClient }, mockUser1, searchRequest, {
             sessionId,
             isStored: true,

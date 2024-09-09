@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import {
   ContactCardEmbeddable,
@@ -30,13 +31,11 @@ import { pluginServices } from '../../../services/plugin_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 
-test('throws error when no data views are available', async () => {
+test("doesn't throw error when no data views are available", async () => {
   pluginServices.getServices().data.dataViews.defaultDataViewExists = jest
     .fn()
     .mockReturnValue(false);
-  await expect(async () => {
-    await createDashboard();
-  }).rejects.toThrow('Dashboard requires at least one data view before it can be initialized.');
+  expect(await createDashboard()).toBeDefined();
 
   // reset get default data view
   pluginServices.getServices().data.dataViews.defaultDataViewExists = jest
@@ -170,7 +169,7 @@ test('pulls state from backup which overrides state from saved object', async ()
     });
   pluginServices.getServices().dashboardBackup.getState = jest
     .fn()
-    .mockReturnValue({ description: 'wow this description marginally better' });
+    .mockReturnValue({ dashboardState: { description: 'wow this description marginally better' } });
   const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'wow-such-id');
   expect(dashboard).toBeDefined();
   expect(dashboard!.getState().explicitInput.description).toBe(
@@ -178,7 +177,7 @@ test('pulls state from backup which overrides state from saved object', async ()
   );
 });
 
-test('pulls state from creation options initial input which overrides all other state sources', async () => {
+test('pulls state from override input which overrides all other state sources', async () => {
   pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
     .fn()
     .mockResolvedValue({
@@ -202,6 +201,83 @@ test('pulls state from creation options initial input which overrides all other 
   expect(dashboard!.getState().explicitInput.description).toBe(
     'wow this description is a masterpiece'
   );
+});
+
+test('pulls panels from override input', async () => {
+  pluginServices.getServices().embeddable.reactEmbeddableRegistryHasKey = jest
+    .fn()
+    .mockImplementation((type: string) => type === 'reactEmbeddable');
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
+    .fn()
+    .mockResolvedValue({
+      dashboardInput: {
+        ...DEFAULT_DASHBOARD_INPUT,
+        panels: {
+          ...DEFAULT_DASHBOARD_INPUT.panels,
+          someLegacyPanel: {
+            type: 'legacy',
+            gridData: { x: 0, y: 0, w: 0, h: 0, i: 'someLegacyPanel' },
+            explicitInput: {
+              id: 'someLegacyPanel',
+              title: 'stateFromSavedObject',
+            },
+          },
+          someReactEmbeddablePanel: {
+            type: 'reactEmbeddable',
+            gridData: { x: 0, y: 0, w: 0, h: 0, i: 'someReactEmbeddablePanel' },
+            explicitInput: {
+              id: 'someReactEmbeddablePanel',
+              title: 'stateFromSavedObject',
+            },
+          },
+        },
+      },
+    });
+  const dashboard = await createDashboard(
+    {
+      useSessionStorageIntegration: true,
+      getInitialInput: () => ({
+        ...DEFAULT_DASHBOARD_INPUT,
+        panels: {
+          ...DEFAULT_DASHBOARD_INPUT.panels,
+          someLegacyPanel: {
+            type: 'legacy',
+            gridData: { x: 0, y: 0, w: 0, h: 0, i: 'someLegacyPanel' },
+            explicitInput: {
+              id: 'someLegacyPanel',
+              title: 'Look at me, I am the override now',
+            },
+          },
+          someReactEmbeddablePanel: {
+            type: 'reactEmbeddable',
+            gridData: { x: 0, y: 0, w: 0, h: 0, i: 'someReactEmbeddablePanel' },
+            explicitInput: {
+              id: 'someReactEmbeddablePanel',
+              title: 'an elegant override, from a more civilized age',
+            },
+          },
+        },
+      }),
+    },
+    0,
+    'wow-such-id'
+  );
+  expect(dashboard).toBeDefined();
+
+  // legacy panels should be completely overwritten directly in the explicitInput
+  expect(dashboard!.getState().explicitInput.panels.someLegacyPanel.explicitInput.title).toBe(
+    'Look at me, I am the override now'
+  );
+
+  // React embeddable should still have the old state in their explicit input
+  expect(
+    dashboard!.getState().explicitInput.panels.someReactEmbeddablePanel.explicitInput.title
+  ).toBe('stateFromSavedObject');
+
+  // instead, the unsaved changes for React embeddables should be applied to the "restored runtime state" property of the Dashboard.
+  expect(
+    (dashboard!.getRuntimeStateForChild('someReactEmbeddablePanel') as { title: string }).title
+  ).toEqual('an elegant override, from a more civilized age');
 });
 
 test('applies filters and query from state to query service', async () => {
@@ -422,15 +498,17 @@ test('creates new embeddable with specified size if size is provided', async () 
   expect(dashboard!.getState().explicitInput.panels.new_panel.gridData.h).toBe(1);
 });
 
-test('creates a control group from the control group factory and waits for it to be initialized', async () => {
+test('creates a control group from the control group factory', async () => {
   const mockControlGroupContainer = {
     destroy: jest.fn(),
     render: jest.fn(),
     updateInput: jest.fn(),
-    untilInitialized: jest.fn(),
     getInput: jest.fn().mockReturnValue({}),
     getInput$: jest.fn().mockReturnValue(new Observable()),
+    getOutput: jest.fn().mockReturnValue({}),
     getOutput$: jest.fn().mockReturnValue(new Observable()),
+    onFiltersPublished$: new Observable(),
+    unsavedChanges: new BehaviorSubject(undefined),
   } as unknown as ControlGroupContainer;
   const mockControlGroupFactory = {
     create: jest.fn().mockReturnValue(mockControlGroupContainer),
@@ -450,9 +528,10 @@ test('creates a control group from the control group factory and waits for it to
     'control_group'
   );
   expect(mockControlGroupFactory.create).toHaveBeenCalledWith(
-    expect.objectContaining({ controlStyle: 'twoLine' })
+    expect.objectContaining({ controlStyle: 'twoLine' }),
+    undefined,
+    { lastSavedInput: expect.objectContaining({ controlStyle: 'oneLine' }) }
   );
-  expect(mockControlGroupContainer.untilInitialized).toHaveBeenCalled();
 });
 
 /*

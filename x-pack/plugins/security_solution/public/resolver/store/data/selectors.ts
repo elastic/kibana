@@ -50,6 +50,14 @@ export function detectedBounds(state: DataState) {
   return state.detectedBounds;
 }
 
+export function overriddenTimeBounds(state: DataState) {
+  return state.overriddenTimeBounds;
+}
+
+export function agentId(state: DataState): string {
+  return state.tree?.lastResponse?.parameters.agentId || '';
+}
+
 /**
  * If a request was made and it threw an error or returned a failure response code.
  */
@@ -627,6 +635,28 @@ export const relatedEventCountOfTypeForNode: (
       return undefined;
     } else {
       return stats.byCategory[category];
+    }
+  }
+);
+
+export const currentAppliedTimeRange = createSelector(
+  (state: DataState) => state.tree?.currentParameters?.filters,
+  (state: DataState) => state.tree?.lastResponse?.parameters?.filters,
+  detectedBounds,
+  overriddenTimeBounds,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  function (currentFilters, lastFilters, detectedBounds, overriddenTimeBounds) {
+    if (overriddenTimeBounds) {
+      return overriddenTimeBounds;
+    } else if (detectedBounds) {
+      return {
+        from: detectedBounds.from,
+        to: detectedBounds.to,
+      };
+    } else if (lastFilters) {
+      return lastFilters;
+    } else if (currentFilters) {
+      return currentFilters;
     }
   }
 );

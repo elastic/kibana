@@ -40,13 +40,15 @@ describe('Transform: Transform List <TransformList />', () => {
             transforms={[]}
             transformsLoading={false}
             transformsStatsLoading={false}
+            pageState={{ pageSize: 10, pageIndex: 0, sortField: 'id', sortDirection: 'asc' }}
+            updatePageState={jest.fn()}
           />
         </QueryClientProvider>
       </IntlProvider>
     );
 
     await waitFor(() => {
-      expect(useQueryMock).toHaveBeenCalledTimes(4);
+      expect(useQueryMock).toHaveBeenCalledTimes(5);
       expect(container.textContent).toContain('Create your first transform');
     });
   });

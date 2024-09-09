@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
@@ -31,8 +32,10 @@ const errorsToString = (errors: ValidationError[]): string[] | null => {
 };
 
 export const useField = <T, FormType = FormData, I = T>(
+  // @ts-expect-error upgrade typescript v4.9.5
   form: FormHook<FormType>,
   path: string,
+  // @ts-expect-error upgrade typescript v4.9.5
   config: FieldConfig<T, FormType, I> & InternalFieldConfig<T>,
   valueChangeListener?: (value: I) => void,
   errorChangeListener?: (errors: string[] | null) => void,
@@ -231,7 +234,7 @@ export const useField = <T, FormType = FormData, I = T>(
       // -- helpers
       const doByPassValidation = ({
         type: validationType,
-        isBlocking,
+        isBlocking, // @ts-expect-error upgrade typescript v4.9.5
       }: ValidationConfig<FormType, string, I>) => {
         if (validationType !== undefined && validationType !== validationTypeToValidate) {
           return true;
@@ -246,6 +249,7 @@ export const useField = <T, FormType = FormData, I = T>(
 
       const enhanceValidationError = (
         validationError: ValidationError,
+        // @ts-expect-error upgrade typescript v4.9.5
         validation: ValidationConfig<FormType, string, I>,
         validationType: string
       ) => ({
@@ -275,6 +279,7 @@ export const useField = <T, FormType = FormData, I = T>(
           inflightValidation.current = validator({
             value: valueToValidate,
             errors: validationErrors,
+            // @ts-expect-error upgrade typescript v4.9.5
             form: { getFormData, getFields },
             formData,
             path,
@@ -318,6 +323,7 @@ export const useField = <T, FormType = FormData, I = T>(
           const validationResult = validator({
             value: valueToValidate,
             errors: validationErrors,
+            // @ts-expect-error upgrade typescript v4.9.5
             form: { getFormData, getFields },
             formData,
             path,
@@ -544,7 +550,7 @@ export const useField = <T, FormType = FormData, I = T>(
       type,
       label,
       labelAppend,
-      helpText,
+      helpText: typeof helpText === 'function' ? helpText() : helpText,
       value,
       errors,
       isPristine,

@@ -11,11 +11,11 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { SearchRequest } from '@kbn/data-plugin/common';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import { buildMutedRulesFilter } from '../routes/benchmark_rules/get_states/v1';
+import { getMutedRulesFilterQuery } from '../routes/benchmark_rules/get_states/v1';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { FindingsStatsTaskResult, ScoreByPolicyTemplateBucket, VulnSeverityAggs } from './types';
@@ -24,7 +24,7 @@ import {
   CSPM_FINDINGS_STATS_INTERVAL,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_SEVERITY,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
@@ -227,7 +227,7 @@ const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest =
 });
 
 const getVulnStatsTrendQuery = (): SearchRequest => ({
-  index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   size: 0,
   query: {
     match_all: {},
@@ -382,7 +382,7 @@ export const aggregateLatestFindings = async (
   try {
     const startAggTime = performance.now();
 
-    const rulesFilter = await buildMutedRulesFilter(encryptedSoClient);
+    const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
 
     const customScoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
       getScoreQuery(rulesFilter)

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -15,17 +16,20 @@ import { DeleteConfirmModal } from './delete_confirm_modal';
 interface CreateObjectOptions {
   namespaces?: string[];
   hiddenType?: boolean;
+  managed?: boolean;
 }
 
 const createObject = ({
   namespaces,
   hiddenType = false,
+  managed = false,
 }: CreateObjectOptions = {}): SavedObjectWithMetadata => ({
   id: 'foo',
   type: 'bar',
   attributes: {},
   references: [],
   namespaces,
+  managed,
   meta: {
     hiddenType,
   },
@@ -81,7 +85,7 @@ describe('DeleteConfirmModal', () => {
         allowedTypes={allowedTypes}
       />
     );
-    expect(wrapper.find('.euiTableRow')).toHaveLength(3);
+    expect(wrapper.find('tr.euiTableRow')).toHaveLength(3);
   });
 
   it('calls `onCancel` when clicking on the cancel button', () => {
@@ -132,7 +136,7 @@ describe('DeleteConfirmModal', () => {
           allowedTypes={allowedTypes}
         />
       );
-      expect(wrapper.find('.euiTableRow')).toHaveLength(1);
+      expect(wrapper.find('tr.euiTableRow')).toHaveLength(1);
     });
 
     it('displays a callout when at least one object cannot be deleted', () => {

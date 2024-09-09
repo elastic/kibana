@@ -18,12 +18,14 @@ import {
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SearchConnectorsPluginSetup } from '@kbn/search-connectors-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
@@ -77,8 +79,11 @@ import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 
+import { GlobalConfigService } from './services/global_config_service';
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
+import { getConnectorsSearchResultProvider } from './utils/connectors_search_result_provider';
+import { getIndicesSearchResultProvider } from './utils/indices_search_result_provider';
 import { getSearchResultProvider } from './utils/search_result_provider';
 
 import { ConfigType } from '.';
@@ -91,22 +96,22 @@ interface PluginsSetup {
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   logsShared: LogsSharedPluginSetup;
   ml?: MlPluginSetup;
+  licensing: LicensingPluginStart;
+  searchConnectors?: SearchConnectorsPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
 export interface PluginsStart {
   data: DataPluginStart;
-  security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }
 
 export interface RouteDependencies {
   config: ConfigType;
   enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
-
   getSavedObjectsService?(): SavedObjectsServiceStart;
-
+  globalConfigService: GlobalConfigService;
   log: Logger;
   ml?: MlPluginSetup;
   router: IRouter;
@@ -115,6 +120,7 @@ export interface RouteDependencies {
 export class EnterpriseSearchPlugin implements Plugin {
   private readonly config: ConfigType;
   private readonly logger: Logger;
+  private readonly globalConfigService: GlobalConfigService;
 
   /**
    * Exposed services
@@ -122,11 +128,19 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigType>();
+    this.globalConfigService = new GlobalConfigService();
     this.logger = initializerContext.logger.get();
   }
 
   public setup(
-    { capabilities, http, savedObjects, getStartServices, uiSettings }: CoreSetup<PluginsStart>,
+    {
+      capabilities,
+      elasticsearch,
+      http,
+      savedObjects,
+      getStartServices,
+      uiSettings,
+    }: CoreSetup<PluginsStart>,
     {
       usageCollection,
       security,
@@ -135,10 +149,13 @@ export class EnterpriseSearchPlugin implements Plugin {
       logsShared,
       customIntegrations,
       ml,
+      licensing,
       guidedOnboarding,
       cloud,
+      searchConnectors,
     }: PluginsSetup
   ) {
+    this.globalConfigService.setup(elasticsearch.legacy.config$, cloud);
     const config = this.config;
     const log = this.logger;
     const PLUGIN_IDS = [
@@ -149,10 +166,15 @@ export class EnterpriseSearchPlugin implements Plugin {
       ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
       SEARCH_EXPERIENCES_PLUGIN.ID,
     ];
-    const isCloud = !!cloud.cloudId;
+    const isCloud = !!cloud?.cloudId;
 
     if (customIntegrations) {
-      registerEnterpriseSearchIntegrations(config, http, customIntegrations, isCloud);
+      registerEnterpriseSearchIntegrations(
+        config,
+        customIntegrations,
+        isCloud,
+        searchConnectors?.getConnectorTypes() || []
+      );
     }
 
     /*
@@ -185,7 +207,14 @@ export class EnterpriseSearchPlugin implements Plugin {
       async (request: KibanaRequest) => {
         const [, { spaces }] = await getStartServices();
 
-        const dependencies = { config, security, spaces, request, log, ml };
+        const dependencies = {
+          config,
+          security,
+          spaces,
+          request,
+          log,
+          ml,
+        };
 
         const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
         const showEnterpriseSearch =
@@ -199,6 +228,7 @@ export class EnterpriseSearchPlugin implements Plugin {
             enterpriseSearchApplications: showEnterpriseSearch,
             enterpriseSearchAISearch: showEnterpriseSearch,
             enterpriseSearchVectorSearch: showEnterpriseSearch,
+            enterpriseSearchSemanticSearch: showEnterpriseSearch,
             enterpriseSearchElasticsearch: showEnterpriseSearch,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
@@ -211,6 +241,7 @@ export class EnterpriseSearchPlugin implements Plugin {
             enterpriseSearchApplications: showEnterpriseSearch,
             enterpriseSearchAISearch: showEnterpriseSearch,
             enterpriseSearchVectorSearch: showEnterpriseSearch,
+            enterpriseSearchSemanticSearch: showEnterpriseSearch,
             enterpriseSearchElasticsearch: showEnterpriseSearch,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
@@ -228,7 +259,15 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
     const router = http.createRouter();
     const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({ config, log });
-    const dependencies = { router, config, log, enterpriseSearchRequestHandler, ml };
+    const dependencies = {
+      router,
+      config,
+      globalConfigService: this.globalConfigService,
+      log,
+      enterpriseSearchRequestHandler,
+      ml,
+      licensing,
+    };
 
     registerConfigDataRoute(dependencies);
     if (config.canDeployEntSearch) registerAppSearchRoutes(dependencies);
@@ -240,13 +279,11 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerStatsRoutes(dependencies);
 
     // Analytics Routes (stand-alone product)
-    getStartServices().then(([coreStart, { data }]) => {
+    void getStartServices().then(([coreStart, { data }]) => {
       registerAnalyticsRoutes({ ...dependencies, data, savedObjects: coreStart.savedObjects });
     });
 
-    getStartServices().then(([, { security: securityStart }]) => {
-      registerApiKeysRoutes(dependencies, securityStart);
-    });
+    registerApiKeysRoutes(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry
@@ -258,12 +295,12 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
     let savedObjectsStarted: SavedObjectsServiceStart;
 
-    getStartServices().then(([coreStart]) => {
+    void getStartServices().then(([coreStart]) => {
       savedObjectsStarted = coreStart.savedObjects;
 
       if (usageCollection) {
         registerESTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
-        registerCNTelemetryUsageCollector(usageCollection);
+        registerCNTelemetryUsageCollector(usageCollection, this.logger);
         if (config.canDeployEntSearch) {
           registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
           registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
@@ -274,7 +311,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     /*
      * Register logs source configuration, used by LogStream components
-     * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/logs_shared/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
+     * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability_solution/logs_shared/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
      */
     logsShared.logViews.defineInternalLogView(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
       logIndices: {
@@ -318,7 +355,16 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
 
     if (globalSearch) {
-      globalSearch.registerResultProvider(getSearchResultProvider(http.basePath, config));
+      globalSearch.registerResultProvider(
+        getSearchResultProvider(
+          config,
+          searchConnectors?.getConnectorTypes() || [],
+          isCloud,
+          http.staticAssets.getPluginAssetHref('images/crawler.svg')
+        )
+      );
+      globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
+      globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));
     }
   }
 

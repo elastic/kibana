@@ -25,20 +25,25 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('logs audit events when reading and writing saved objects', async () => {
       await supertest.get('/audit_log?query=param').set('kbn-xsrf', 'foo').expect(204);
-      await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
+      await logFile.isWritten();
       const content = await logFile.readJSON();
 
-      const httpEvent = content.find((c) => c.event.action === 'http_request');
+      const httpEvent = content.find(
+        (c) => c.event.action === 'http_request' && c.url.path === '/audit_log'
+      );
       expect(httpEvent).to.be.ok();
       expect(httpEvent.trace.id).to.be.ok();
 
       expect(httpEvent.user.name).to.be(username);
       expect(httpEvent.kibana.space_id).to.be('default');
       expect(httpEvent.http.request.method).to.be('get');
-      expect(httpEvent.url.path).to.be('/audit_log');
       expect(httpEvent.url.query).to.be('query=param');
 
-      const createEvent = content.find((c) => c.event.action === 'saved_object_create');
+      const createEvent = content.find(
+        (c) =>
+          c.event.action === 'saved_object_create' && c.kibana.saved_object.type === 'dashboard'
+      );
+
       expect(createEvent).to.be.ok();
       expect(createEvent.trace.id).to.be.ok();
       expect(createEvent.user.name).to.be(username);
@@ -68,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username, password },
         })
         .expect(200);
-      await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
+      await logFile.isWritten();
       const content = await logFile.readJSON();
 
       const loginEvent = content.find((c) => c.event.action === 'user_login');
@@ -92,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username, password: 'invalid_password' },
         })
         .expect(401);
-      await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
+      await logFile.isWritten();
       const content = await logFile.readJSON();
 
       const loginEvent = content.find((c) => c.event.action === 'user_login');

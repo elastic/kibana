@@ -20,6 +20,8 @@ The latest stable version of Kibana can be found on the
 link:/downloads/kibana[Download Kibana] page. Other versions can
 be found on the link:/downloads/past-releases[Past Releases page].
 
+TIP: For a step-by-step example of setting up the {stack} on your own premises, try out our tutorial: {stack-ref}/installing-stack-demo-self.html[Installing a self-managed Elastic Stack].
+
 [[rpm-key]]
 ==== Import the Elastic PGP key
 
@@ -184,7 +186,7 @@ locations for an RPM-based system:
 | logs
   | Logs files location
   | /var/log/kibana
-  | path.logs
+  | <<logging-configuration, Logging configuration>>
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.

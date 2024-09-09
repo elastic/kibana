@@ -839,6 +839,22 @@
           },
           {
             "parentPluginId": "share",
+            "id": "def-public.ShareContext.objectTypeMeta",
+            "type": "Object",
+            "tags": [],
+            "label": "objectTypeMeta",
+            "description": [
+              "\nAllows for passing contextual information that each consumer can provide to customize the share menu"
+            ],
+            "signature": [
+              "{ title: string; }"
+            ],
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "share",
             "id": "def-public.ShareContext.objectId",
             "type": "string",
             "tags": [],
@@ -860,6 +876,9 @@
             "description": [
               "\nCurrent url for sharing. This can be set in cases where `window.location.href`\ndoes not contain a shareable URL (e.g. if using session storage to store the current\napp state is enabled). In these cases the property should contain the URL in a\nformat which makes it possible to use it without having access to any other state\nlike the current session.\n\nIf not set it will default to `window.location.href`"
             ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -868,15 +887,31 @@
             "parentPluginId": "share",
             "id": "def-public.ShareContext.shareableUrlForSavedObject",
             "type": "string",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "shareableUrlForSavedObject",
             "description": [],
             "signature": [
               "string | undefined"
             ],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/components/top_nav/get_top_nav_links.tsx"
+              },
+              {
+                "plugin": "@kbn/reporting-public",
+                "path": "packages/kbn-reporting/public/share/share_context_menu/register_pdf_png_modal_reporting.tsx"
+              },
+              {
+                "plugin": "@kbn/reporting-public",
+                "path": "packages/kbn-reporting/public/share/share_context_menu/register_pdf_png_modal_reporting.tsx"
+              }
+            ]
           },
           {
             "parentPluginId": "share",
@@ -899,6 +934,26 @@
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ShareContext.delegatedShareUrlHandler",
+            "type": "Function",
+            "tags": [
+              "description"
+            ],
+            "label": "delegatedShareUrlHandler",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "(() => string) | undefined"
+            ],
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "share",
@@ -1000,6 +1055,26 @@
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ShareContext.toasts",
+            "type": "Object",
+            "tags": [],
+            "label": "toasts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-public.IToasts",
+                "text": "IToasts"
+              }
+            ],
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1057,54 +1132,6 @@
       },
       {
         "parentPluginId": "share",
-        "id": "def-public.ShareMenuItem",
-        "type": "Interface",
-        "tags": [],
-        "label": "ShareMenuItem",
-        "description": [],
-        "path": "src/plugins/share/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItem.shareMenuItem",
-            "type": "Object",
-            "tags": [],
-            "label": "shareMenuItem",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.ShareContextMenuPanelItem",
-                "text": "ShareContextMenuPanelItem"
-              }
-            ],
-            "path": "src/plugins/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareMenuItem.panel",
-            "type": "Object",
-            "tags": [],
-            "label": "panel",
-            "description": [],
-            "signature": [
-              "EuiContextMenuPanelDescriptor"
-            ],
-            "path": "src/plugins/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "share",
         "id": "def-public.ShareMenuProvider",
         "type": "Interface",
         "tags": [],
@@ -1141,15 +1168,7 @@
                 "section": "def-public.ShareContext",
                 "text": "ShareContext"
               },
-              ") => ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.ShareMenuItem",
-                "text": "ShareMenuItem"
-              },
-              "[]"
+              ") => ShareMenuItemType[]"
             ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
@@ -1294,13 +1313,13 @@
           },
           {
             "parentPluginId": "share",
-            "id": "def-public.ShowShareMenuOptions.objectTypeTitle",
-            "type": "string",
+            "id": "def-public.ShowShareMenuOptions.publicAPIEnabled",
+            "type": "CompoundType",
             "tags": [],
-            "label": "objectTypeTitle",
+            "label": "publicAPIEnabled",
             "description": [],
             "signature": [
-              "string | undefined"
+              "boolean | undefined"
             ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
@@ -1326,6 +1345,21 @@
           ">"
         ],
         "path": "src/plugins/share/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.ConfigSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "ConfigSchema",
+        "description": [],
+        "signature": [
+          "{ readonly new_version: Readonly<{} & { enabled: boolean; }>; }"
+        ],
+        "path": "src/plugins/share/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1371,6 +1405,22 @@
           "Blob | { content: string; type: string; }"
         ],
         "path": "src/plugins/share/public/lib/download_as.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.ShareMenuItem",
+        "type": "Type",
+        "tags": [],
+        "label": "ShareMenuItem",
+        "description": [],
+        "signature": [
+          "ShareMenuItemLegacy | ",
+          "ShareMenuItemV2"
+        ],
+        "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

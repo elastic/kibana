@@ -7,9 +7,9 @@
 
 import { useState } from 'react';
 
-import { PostTransformsPreviewRequestSchema } from '../../../../../../../common/api_schemas/transforms';
+import type { PostTransformsPreviewRequestSchema } from '../../../../../../../server/routes/api_schemas/transforms';
 
-import { StepDefineExposedState } from '../common';
+import type { StepDefineExposedState } from '../common';
 
 export const useAdvancedSourceEditor = (
   defaults: StepDefineExposedState,

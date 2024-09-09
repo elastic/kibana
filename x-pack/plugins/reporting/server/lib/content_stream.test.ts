@@ -44,6 +44,11 @@ describe('ContentStream', () => {
     );
   });
 
+  afterEach(() => {
+    stream.destroy();
+    base64Stream.destroy();
+  });
+
   describe('read', () => {
     it('should perform a search using index and the document id', async () => {
       await new Promise((resolve) => stream.once('data', resolve));
@@ -122,12 +127,12 @@ describe('ContentStream', () => {
         'body.query.constant_score.filter.bool.must.0.term._id',
         'something'
       );
-      expect(request2).toHaveProperty('index', 'somewhere');
+      expect(request2).toHaveProperty('index', '.reporting-*,.kibana-reporting*');
       expect(request2).toHaveProperty(
         'body.query.constant_score.filter.bool.must.0.term.parent_id',
         'something'
       );
-      expect(request3).toHaveProperty('index', 'somewhere');
+      expect(request3).toHaveProperty('index', '.reporting-*,.kibana-reporting*');
       expect(request3).toHaveProperty(
         'body.query.constant_score.filter.bool.must.0.term.parent_id',
         'something'
@@ -280,9 +285,7 @@ describe('ContentStream', () => {
     });
 
     it('should split raw data into chunks', async () => {
-      client.cluster.getSettings.mockResponseOnce(
-        set<any>({}, 'defaults.http.max_content_length', 1028)
-      );
+      stream.chunkSize = 2;
       stream.end('123456');
       await new Promise((resolve) => stream.once('finish', resolve));
 
@@ -295,8 +298,11 @@ describe('ContentStream', () => {
         1,
         expect.objectContaining({
           id: expect.any(String),
-          index: 'somewhere',
+          index: '.kibana-reporting',
+          op_type: 'create',
+          refresh: 'wait_for',
           body: {
+            '@timestamp': '1970-01-01T00:00:00.000Z',
             parent_id: 'something',
             output: {
               content: '34',
@@ -309,8 +315,11 @@ describe('ContentStream', () => {
         2,
         expect.objectContaining({
           id: expect.any(String),
-          index: 'somewhere',
+          index: '.kibana-reporting',
+          op_type: 'create',
+          refresh: 'wait_for',
           body: {
+            '@timestamp': '1970-01-01T00:00:00.000Z',
             parent_id: 'something',
             output: {
               content: '56',
@@ -322,9 +331,7 @@ describe('ContentStream', () => {
     });
 
     it('should encode every chunk separately', async () => {
-      client.cluster.getSettings.mockResponseOnce(
-        set<any>({}, 'defaults.http.max_content_length', 1028)
-      );
+      base64Stream.chunkSize = 3;
       base64Stream.end('12345678');
       await new Promise((resolve) => base64Stream.once('finish', resolve));
 
@@ -339,9 +346,12 @@ describe('ContentStream', () => {
         1,
         expect.objectContaining({
           id: expect.any(String),
-          index: 'somewhere',
+          index: '.kibana-reporting',
+          op_type: 'create',
+          refresh: 'wait_for',
           body: {
             parent_id: 'something',
+            '@timestamp': '1970-01-01T00:00:00.000Z',
             output: {
               content: Buffer.from('456').toString('base64'),
               chunk: 1,
@@ -353,9 +363,12 @@ describe('ContentStream', () => {
         2,
         expect.objectContaining({
           id: expect.any(String),
-          index: 'somewhere',
+          index: '.kibana-reporting',
+          op_type: 'create',
+          refresh: 'wait_for',
           body: {
             parent_id: 'something',
+            '@timestamp': '1970-01-01T00:00:00.000Z',
             output: {
               content: Buffer.from('78').toString('base64'),
               chunk: 2,

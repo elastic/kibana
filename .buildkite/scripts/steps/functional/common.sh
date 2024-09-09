@@ -22,6 +22,3 @@ fi
 
 is_test_execution_step
 
-# logins into docker as a common step for functional tests
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT

@@ -16,14 +16,13 @@
       "features",
       "triggersActionsUi",
       "kibanaReact",
-      "savedObjects",
       "data",
       "dataViews",
       "kibanaUtils"
     ],
     "requiredBundles": [
       "esUiShared",
-      "textBasedLanguages"
+      "esql"
     ],
     "extraPublicDirs": ["common"]
   }

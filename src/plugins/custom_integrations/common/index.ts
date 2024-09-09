@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 export const PLUGIN_ID = 'customIntegrations';
 export const PLUGIN_NAME = 'customIntegrations';
 
@@ -39,6 +41,7 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   datastore: { title: 'Database', parent_id: undefined },
   dns_security: { title: 'DNS', parent_id: 'security' },
   edr_xdr: { title: 'EDR/XDR', parent_id: 'security' },
+  cloudsecurity_cdr: { title: 'Cloud Security/CDR', parent_id: 'security' },
   elasticsearch_sdk: { title: 'Elasticsearch SDK', parent_id: undefined },
   elastic_stack: { title: 'Elastic Stack', parent_id: undefined },
   email_security: { title: 'Email', parent_id: 'security' },

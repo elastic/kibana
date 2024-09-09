@@ -56,7 +56,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test')).toHaveAttribute('aria-checked', 'true');
-    expect(getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware enabled'));
+    expect(getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));
   });
 
   it('should render expected output when disabled', () => {
@@ -64,12 +64,16 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test')).toHaveAttribute('aria-checked', 'false');
-    expect(getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware disabled'));
+    expect(getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));
   });
 
   it('should be able to disable it', () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-    setMalwareMode(expectedUpdatedPolicy, true, true, false);
+    setMalwareMode({
+      policy: expectedUpdatedPolicy,
+      turnOff: true,
+      includeSubfeatures: false,
+    });
     render();
     userEvent.click(renderResult.getByTestId('test'));
 
@@ -80,9 +84,17 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
   });
 
   it('should be able to enable it', () => {
-    setMalwareMode(formProps.policy, true, true, false);
+    setMalwareMode({
+      policy: formProps.policy,
+      turnOff: true,
+      includeSubfeatures: false,
+    });
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-    setMalwareMode(expectedUpdatedPolicy, false, true, false);
+    setMalwareMode({
+      policy: expectedUpdatedPolicy,
+      turnOff: false,
+      includeSubfeatures: false,
+    });
     render();
     userEvent.click(renderResult.getByTestId('test'));
 
@@ -100,7 +112,11 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     });
 
     const expectedPolicyDataBeforeAdditionalCallback = cloneDeep(formProps.policy);
-    setMalwareMode(expectedPolicyDataBeforeAdditionalCallback, true, true, false);
+    setMalwareMode({
+      policy: expectedPolicyDataBeforeAdditionalCallback,
+      turnOff: true,
+      includeSubfeatures: false,
+    });
 
     const expectedUpdatedPolicy = cloneDeep(expectedPolicyDataBeforeAdditionalCallback);
     expectedUpdatedPolicy.windows.popup.malware.message = 'foo';
@@ -134,7 +150,12 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
 
     it('should NOT update notification settings when disabling', () => {
       const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-      setMalwareMode(expectedUpdatedPolicy, true, false, false);
+      setMalwareMode({
+        policy: expectedUpdatedPolicy,
+        turnOff: true,
+        includePopup: false,
+        includeSubfeatures: false,
+      });
       render();
       userEvent.click(renderResult.getByTestId('test'));
 
@@ -146,7 +167,12 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
 
     it('should NOT update notification settings when enabling', () => {
       const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-      setMalwareMode(formProps.policy, true, false, false);
+      setMalwareMode({
+        policy: formProps.policy,
+        turnOff: true,
+        includePopup: false,
+        includeSubfeatures: false,
+      });
       render();
       userEvent.click(renderResult.getByTestId('test'));
 
@@ -162,25 +188,29 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
       formProps.mode = 'view';
     });
 
-    it('should not include any form elements', () => {
+    it('should not include any enabled form elements', () => {
       render();
 
       expectIsViewOnly(renderResult.getByTestId('test'));
     });
 
-    it('should show option enabled', () => {
+    it('should show option when checked', () => {
       render();
 
-      expect(renderResult.getByTestId('test')).toHaveTextContent(exactMatchText('Malware enabled'));
+      expect(renderResult.getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));
+      expect(renderResult.getByTestId('test').getAttribute('aria-checked')).toBe('true');
     });
 
-    it('should show option disabled', () => {
-      setMalwareMode(formProps.policy, true, true, false);
+    it('should show option when unchecked', () => {
+      setMalwareMode({
+        policy: formProps.policy,
+        turnOff: true,
+        includeSubfeatures: false,
+      });
       render();
 
-      expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText('Malware disabled')
-      );
+      expect(renderResult.getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));
+      expect(renderResult.getByTestId('test').getAttribute('aria-checked')).toBe('false');
     });
   });
 });

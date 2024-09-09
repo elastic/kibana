@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment from 'moment';
 
-import { createFiltersFromRangeSelectAction } from './create_filters_from_range_select';
+import {
+  createFiltersFromRangeSelectAction,
+  type RangeSelectDataContext,
+} from './create_filters_from_range_select';
 
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { dataPluginMock } from '../../mocks';
@@ -20,12 +24,8 @@ import { RangeFilter } from '@kbn/es-query';
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
   const JAN_01_2014 = 1388559600000;
-  let baseEvent: {
-    table: any;
-    column: number;
-    range: number[];
-    timeFieldName?: string;
-  };
+  let baseEvent: RangeSelectDataContext;
+  let esqlEventContext: RangeSelectDataContext;
 
   const mockField = {
     name: 'time',
@@ -75,6 +75,28 @@ describe('brushEvent', () => {
                 ...serializedAggConfig,
               },
               source: 'esaggs',
+            },
+          },
+        ],
+        rows: [],
+      },
+      range: [],
+    };
+
+    esqlEventContext = {
+      column: 0,
+      query: { esql: 'FROM indexPatternId | limit 10' },
+      table: {
+        type: 'datatable',
+        meta: {
+          type: 'es_ql',
+        },
+        columns: [
+          {
+            id: '1',
+            name: '1',
+            meta: {
+              type: 'date',
             },
           },
         ],
@@ -194,6 +216,35 @@ describe('brushEvent', () => {
         expect(rangeFilter.query.range.numberField.gte).toBe(1);
         expect(rangeFilter.query.range.numberField.lt).toBe(4);
         expect(rangeFilter.query.range.numberField).not.toHaveProperty('format');
+      }
+    });
+  });
+
+  describe('handles an event for an ES_QL query', () => {
+    afterAll(() => {
+      esqlEventContext.range = [];
+    });
+
+    test('by ignoring the event when range does not span at least 2 values', async () => {
+      esqlEventContext.range = [JAN_01_2014];
+      const filter = await createFiltersFromRangeSelectAction(esqlEventContext);
+      expect(filter).toEqual([]);
+    });
+
+    test('by creating a new filter', async () => {
+      const rangeBegin = JAN_01_2014;
+      const rangeEnd = rangeBegin + DAY_IN_MS;
+      esqlEventContext.range = [rangeBegin, rangeEnd];
+      const filter = await createFiltersFromRangeSelectAction(esqlEventContext);
+
+      expect(filter).toBeDefined();
+
+      if (filter.length) {
+        const rangeFilter = filter[0] as RangeFilter;
+        expect(rangeFilter.meta.index).toBeUndefined();
+        expect(rangeFilter.query.range['1'].gte).toBe(moment(rangeBegin).toISOString());
+        expect(rangeFilter.query.range['1'].lt).toBe(moment(rangeEnd).toISOString());
+        expect(rangeFilter.query.range['1']).toHaveProperty('format', 'strict_date_optional_time');
       }
     });
   });

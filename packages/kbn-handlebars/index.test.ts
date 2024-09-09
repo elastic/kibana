@@ -20,18 +20,226 @@ it('Handlebars.create', () => {
 
 describe('Handlebars.compileAST', () => {
   describe('compiler options', () => {
-    it('noEscape', () => {
-      expectTemplate('{{value}}').withInput({ value: '<foo>' }).toCompileTo('&lt;foo&gt;');
+    describe('noEscape', () => {
+      describe('basic', () => {
+        it('should escape a non-nested value with default value set for `noEscape`', () => {
+          expectTemplate('{{value}}').withInput({ value: '<foo>' }).toCompileTo('&lt;foo&gt;');
+        });
 
-      expectTemplate('{{value}}')
-        .withCompileOptions({ noEscape: false })
-        .withInput({ value: '<foo>' })
-        .toCompileTo('&lt;foo&gt;');
+        it('should escape a nested value with default value set for `noEscape`', () => {
+          expectTemplate('{{nested.value}}')
+            .withInput({ nested: { value: '<foo>' } })
+            .toCompileTo('&lt;foo&gt;');
+        });
 
-      expectTemplate('{{value}}')
-        .withCompileOptions({ noEscape: true })
-        .withInput({ value: '<foo>' })
-        .toCompileTo('<foo>');
+        it('should escape a non-nested value with `noEscape` set to false', () => {
+          expectTemplate('{{value}}')
+            .withCompileOptions({ noEscape: false })
+            .withInput({ value: '<foo>' })
+            .toCompileTo('&lt;foo&gt;');
+        });
+
+        it('should escape a nested value with `noEscape` set to false', () => {
+          expectTemplate('{{nested.value}}')
+            .withCompileOptions({ noEscape: false })
+            .withInput({ nested: { value: '<foo>' } })
+            .toCompileTo('&lt;foo&gt;');
+        });
+
+        it('should not escape a non-nested value with `noEscape` set to true', () => {
+          expectTemplate('{{value}}')
+            .withCompileOptions({ noEscape: true })
+            .withInput({ value: '<foo>' })
+            .toCompileTo('<foo>');
+        });
+
+        it('should not escape a nested value with `noEscape` set to true', () => {
+          expectTemplate('{{nested.value}}')
+            .withCompileOptions({ noEscape: true })
+            .withInput({ nested: { value: '<foo>' } })
+            .toCompileTo('<foo>');
+        });
+      });
+
+      describe('known helper', () => {
+        it('should escape a non-nested value with a known helper and default value set for `noEscape`', () => {
+          expectTemplate('{{#with foo}}{{value}}{{/with}}')
+            .withInput({ foo: { value: '<bar>' } })
+            .toCompileTo('&lt;bar&gt;');
+        });
+
+        it('should escape a nested value with a known helper and default value set for `noEscape`', () => {
+          expectTemplate('{{#with foo}}{{nested.value}}{{/with}}')
+            .withInput({ foo: { nested: { value: '<bar>' } } })
+            .toCompileTo('&lt;bar&gt;');
+        });
+
+        it('should escape a non-nested value with a known helper and false value set for `noEscape`', () => {
+          expectTemplate('{{#with foo}}{{value}}{{/with}}')
+            .withCompileOptions({ noEscape: false })
+            .withInput({ foo: { value: '<bar>' } })
+            .toCompileTo('&lt;bar&gt;');
+        });
+
+        it('should escape a nested value with a known helper and false value set for `noEscape`', () => {
+          expectTemplate('{{#with foo}}{{nested.value}}{{/with}}')
+            .withCompileOptions({ noEscape: false })
+            .withInput({ foo: { nested: { value: '<bar>' } } })
+            .toCompileTo('&lt;bar&gt;');
+        });
+
+        it('should not escape a non-nested value with a known helper and true value set for `noEscape`', () => {
+          expectTemplate('{{#with foo}}{{value}}{{/with}}')
+            .withCompileOptions({ noEscape: true })
+            .withInput({ foo: { value: '<bar>' } })
+            .toCompileTo('<bar>');
+        });
+
+        it('should not escape a nested value with a known helper and true value set for `noEscape`', () => {
+          expectTemplate('{{#with foo}}{{nested.value}}{{/with}}')
+            .withCompileOptions({ noEscape: true })
+            .withInput({ foo: { nested: { value: '<bar>' } } })
+            .toCompileTo('<bar>');
+        });
+      });
+
+      describe('unknown helper', () => {
+        it('should escape a non-nested value with an unknown helper and no value set for `noEscape`', () => {
+          expectTemplate('{{foo value}}')
+            .withHelper('foo', (value: string) => {
+              return value + 'baz';
+            })
+            .withInput({ value: '<bar>' })
+            .toCompileTo('&lt;bar&gt;baz');
+        });
+
+        it('should escape a nested value with an unknown helper and no value set for `noEscape`', () => {
+          expectTemplate('{{foo nested.value}}')
+            .withHelper('foo', (value: string) => {
+              return value + 'baz';
+            })
+            .withInput({ nested: { value: '<bar>' } })
+            .toCompileTo('&lt;bar&gt;baz');
+        });
+
+        it('should escape a non-nested value with an unknown helper and false value set for `noEscape`', () => {
+          expectTemplate('{{foo value}}')
+            .withHelper('foo', (value: string) => {
+              return value + 'baz';
+            })
+            .withCompileOptions({ noEscape: false })
+            .withInput({ value: '<bar>' })
+            .toCompileTo('&lt;bar&gt;baz');
+        });
+
+        it('should escape a nested value with an unknown helper and false value set for `noEscape`', () => {
+          expectTemplate('{{foo nested.value}}')
+            .withHelper('foo', (value: string) => {
+              return value + 'baz';
+            })
+            .withCompileOptions({ noEscape: false })
+            .withInput({ nested: { value: '<bar>' } })
+            .toCompileTo('&lt;bar&gt;baz');
+        });
+
+        it('should not escape a non-nested value with an unknown helper and true value set for `noEscape`', () => {
+          expectTemplate('{{foo value}}')
+            .withHelper('foo', (value: string) => {
+              return value + 'baz';
+            })
+            .withCompileOptions({ noEscape: true })
+            .withInput({ value: '<bar>' })
+            .toCompileTo('<bar>baz');
+        });
+
+        it('should not escape a nested value with an unknown helper and true value set for `noEscape`', () => {
+          expectTemplate('{{foo nested.value}}')
+            .withHelper('foo', (value: string) => {
+              return value + 'baz';
+            })
+            .withCompileOptions({ noEscape: true })
+            .withInput({ nested: { value: '<bar>' } })
+            .toCompileTo('<bar>baz');
+        });
+      });
+
+      describe('blocks', () => {
+        it('should escape a non-nested value with a block input and default value for `noEscape`', () => {
+          expectTemplate('{{#with foo}}{{#../myFunction}}{{value}}{{/../myFunction}}{{/with}}')
+            .withInput({
+              foo: { value: '<bar>' },
+              myFunction() {
+                return this;
+              },
+            })
+            .toCompileTo('&lt;bar&gt;');
+        });
+
+        it('should escape a non-nested value with an block input and false value set for `noEscape`', () => {
+          expectTemplate('{{#with foo}}{{#../myFunction}}{{value}}{{/../myFunction}}{{/with}}')
+            .withInput({
+              foo: { value: '<bar>' },
+              myFunction() {
+                return this;
+              },
+            })
+            .withCompileOptions({ noEscape: false })
+            .toCompileTo('&lt;bar&gt;');
+        });
+
+        it('should not escape a non-nested value with an block input and true value set for `noEscape`', () => {
+          expectTemplate('{{#with foo}}{{#../myFunction}}{{value}}{{/../myFunction}}{{/with}}')
+            .withInput({
+              foo: { value: '<bar>' },
+              myFunction() {
+                return this;
+              },
+            })
+            .withCompileOptions({ noEscape: true })
+            .toCompileTo('<bar>');
+        });
+
+        it('should escape a nested value with an block input and default value for `noEscape`', () => {
+          expectTemplate(
+            '{{#with foo}}{{#../myFunction}}{{nested.value}}{{/../myFunction}}{{/with}}'
+          )
+            .withInput({
+              foo: { nested: { value: '<bar>' } },
+              myFunction() {
+                return this;
+              },
+            })
+            .toCompileTo('&lt;bar&gt;');
+        });
+
+        it('should escape a nested value with an block input and false value for `noEscape`', () => {
+          expectTemplate(
+            '{{#with foo}}{{#../myFunction}}{{nested.value}}{{/../myFunction}}{{/with}}'
+          )
+            .withInput({
+              foo: { nested: { value: '<bar>' } },
+              myFunction() {
+                return this;
+              },
+            })
+            .withCompileOptions({ noEscape: false })
+            .toCompileTo('&lt;bar&gt;');
+        });
+
+        it('should escape a nested value with an block input and true value for `noEscape`', () => {
+          expectTemplate(
+            '{{#with foo}}{{#../myFunction}}{{nested.value}}{{/../myFunction}}{{/with}}'
+          )
+            .withInput({
+              foo: { nested: { value: '<bar>' } },
+              myFunction() {
+                return this;
+              },
+            })
+            .withCompileOptions({ noEscape: true })
+            .toCompileTo('<bar>');
+        });
+      });
     });
   });
 

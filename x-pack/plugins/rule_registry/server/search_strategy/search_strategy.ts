@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { map, mergeMap, catchError } from 'rxjs/operators';
+import { map, mergeMap, catchError } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import { from, of } from 'rxjs';
@@ -19,10 +19,7 @@ import {
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { buildAlertFieldsRequest } from '@kbn/alerts-as-data-utils';
-import {
-  RuleRegistrySearchRequest,
-  RuleRegistrySearchResponse,
-} from '../../common/search_strategy';
+import type { RuleRegistrySearchRequest, RuleRegistrySearchResponse } from '../../common';
 import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '..';
 import { getSpacesFilter, getAuthzFilter } from '../lib';
@@ -32,6 +29,9 @@ export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
 };
 
 export const RULE_SEARCH_STRATEGY_NAME = 'privateRuleRegistryAlertsSearchStrategy';
+
+// these are deprecated types should never show up in any alert table
+const EXCLUDED_RULE_TYPE_IDS = ['siem.notifications'];
 
 export const ruleRegistrySearchStrategyProvider = (
   data: PluginStart,
@@ -85,14 +85,16 @@ export const ruleRegistrySearchStrategyProvider = (
           featureIds.length > 0
             ? await authorization.getAuthorizedRuleTypes(AlertingAuthorizationEntity.Alert, fIds)
             : [];
+
         return { space, authzFilter, authorizedRuleTypes };
       };
       return from(getAsync(request.featureIds)).pipe(
         mergeMap(({ space, authzFilter, authorizedRuleTypes }) => {
-          const indices = alerting.getAlertIndicesAlias(
-            authorizedRuleTypes.map((art: { id: any }) => art.id),
-            space?.id
+          const allRuleTypes = authorizedRuleTypes.map((art: { id: string }) => art.id);
+          const ruleTypes = (allRuleTypes ?? []).filter(
+            (ruleTypeId: string) => !EXCLUDED_RULE_TYPE_IDS.includes(ruleTypeId)
           );
+          const indices = alerting.getAlertIndicesAlias(ruleTypes, space?.id);
           if (indices.length === 0) {
             return of(EMPTY_RESPONSE);
           }
@@ -116,6 +118,7 @@ export const ruleRegistrySearchStrategyProvider = (
               ? { ids: request.query?.ids }
               : {
                   bool: {
+                    ...request.query?.bool,
                     filter,
                   },
                 }),
@@ -193,8 +196,8 @@ export const ruleRegistrySearchStrategyProvider = (
       );
     },
     cancel: async (id, options, deps) => {
-      if (internalUserEs.cancel) internalUserEs.cancel(id, options, deps);
-      if (requestUserEs.cancel) requestUserEs.cancel(id, options, deps);
+      if (internalUserEs.cancel) internalUserEs.cancel(id, options, deps).catch(() => {});
+      if (requestUserEs.cancel) requestUserEs.cancel(id, options, deps).catch(() => {});
     },
   };
 };

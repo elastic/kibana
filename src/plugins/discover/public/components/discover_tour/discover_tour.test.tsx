@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -14,12 +15,16 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverTourProvider } from './discover_tour_provider';
 import { useDiscoverTourContext } from './discover_tour_context';
 import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
+import { DiscoverMainProvider } from '../../application/main/state_management/discover_state_provider';
+import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 
 describe('Discover tour', () => {
   const mountComponent = (innerContent: JSX.Element) => {
     return mountWithIntl(
       <KibanaContextProvider services={discoverServiceMock}>
-        <DiscoverTourProvider isPlainRecord={false}>{innerContent}</DiscoverTourProvider>
+        <DiscoverMainProvider value={getDiscoverStateMock({})}>
+          <DiscoverTourProvider>{innerContent}</DiscoverTourProvider>
+        </DiscoverMainProvider>
       </KibanaContextProvider>
     );
   };

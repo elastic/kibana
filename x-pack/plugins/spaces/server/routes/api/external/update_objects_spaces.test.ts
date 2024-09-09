@@ -43,7 +43,7 @@ describe('update_objects_spaces', () => {
     const { savedObjects, savedObjectsClient } = createMockSavedObjectsService(spaces);
     coreStart.savedObjects = savedObjects;
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -67,6 +67,7 @@ describe('update_objects_spaces', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
     const [[updateObjectsSpaces, updateObjectsSpacesRouteHandler]] = router.post.mock.calls;

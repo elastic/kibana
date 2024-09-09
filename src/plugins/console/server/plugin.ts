@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SemVer } from 'semver';
 
 import { ProxyConfigCollection } from './lib';
@@ -18,6 +20,9 @@ import { registerRoutes } from './routes';
 import { ESConfigForProxy, ConsoleSetup, ConsoleStart } from './types';
 import { handleEsError } from './shared_imports';
 
+interface PluginsSetup {
+  cloud?: CloudSetup;
+}
 export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
   log: Logger;
 
@@ -29,7 +34,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     this.log = this.ctx.logger.get();
   }
 
-  setup({ http, capabilities, elasticsearch }: CoreSetup) {
+  setup({ http, capabilities, elasticsearch }: CoreSetup, { cloud }: PluginsSetup) {
     capabilities.registerProvider(() => ({
       dev_tools: {
         show: true,
@@ -48,7 +53,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       proxyConfigCollection = new ProxyConfigCollection((config as ConsoleConfig7x).proxyConfig);
     }
 
-    this.esLegacyConfigService.setup(elasticsearch.legacy.config$);
+    this.esLegacyConfigService.setup(elasticsearch.legacy.config$, cloud);
 
     const router = http.createRouter();
 

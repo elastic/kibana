@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
@@ -141,7 +142,10 @@ export class WebElementWrapper {
   }
 
   private getActions() {
-    return this.driver.actions();
+    return this.driver.actions({
+      async: undefined,
+      bridge: undefined,
+    });
   }
 
   /**
@@ -231,7 +235,7 @@ export class WebElementWrapper {
    * @return {Promise<boolean>}
    */
   public async elementHasClass(className: string): Promise<boolean> {
-    const classes: string = await this._webElement.getAttribute('class');
+    const classes = (await this._webElement.getAttribute('class')) ?? '';
 
     return classes.includes(className);
   }
@@ -262,7 +266,7 @@ export class WebElementWrapper {
    */
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
     const value = await this.getAttribute('value');
-    if (!value.length) {
+    if (!value?.length) {
       return;
     }
 
@@ -344,10 +348,11 @@ export class WebElementWrapper {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getAttribute
    *
    * @param {string} name
+   * @return {Promise<string|null>}
    */
-  public async getAttribute(name: string) {
-    return await this.retryCall(async function getAttribute(wrapper) {
-      return await wrapper._webElement.getAttribute(name);
+  public async getAttribute(name: string): Promise<string | null> {
+    return await this.retryCall(async function getAttribute(wrapper): Promise<string | null> {
+      return await wrapper._webElement.getAttribute(name); // this returns null if not found
     });
   }
 

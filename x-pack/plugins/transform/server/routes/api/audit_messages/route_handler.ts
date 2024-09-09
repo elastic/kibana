@@ -7,12 +7,12 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 
+import type { TransformIdParamSchema } from '../../api_schemas/common';
 import {
   DEFAULT_MAX_AUDIT_MESSAGE_SIZE,
   TRANSFORM_NOTIFICATIONS_INDEX,
 } from '../../../../common/constants';
-import type { TransformIdParamSchema } from '../../../../common/api_schemas/common';
-import { AuditMessage } from '../../../../common/types/messages';
+import type { AuditMessage } from '../../../../common/types/messages';
 
 import { wrapError, wrapEsError } from '../../utils/error_utils';
 

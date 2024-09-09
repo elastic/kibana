@@ -26,10 +26,12 @@ import type {
 import type {
   AlertInstanceContext,
   AlertInstanceState,
+  PluginSetupContract,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
+import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -72,7 +74,7 @@ export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   uiSettingsClient: IUiSettingsClient;
-}): Promise<{ wroteWarningMessage: boolean; warningStatusMessage: string | undefined }> => {
+}): Promise<string | undefined> => {
   const { privileges, ruleExecutionLogger, uiSettingsClient } = args;
 
   const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
@@ -97,10 +99,9 @@ export const hasReadIndexPrivileges = async (args: {
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: warningStatusMessage,
     });
-    return { wroteWarningMessage: true, warningStatusMessage };
   }
 
-  return { wroteWarningMessage: false, warningStatusMessage };
+  return warningStatusMessage;
 };
 
 export const hasTimestampFields = async (args: {
@@ -112,7 +113,6 @@ export const hasTimestampFields = async (args: {
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<{
-  wroteWarningStatus: boolean;
   foundNoIndices: boolean;
   warningMessage: string | undefined;
 }> => {
@@ -134,7 +134,6 @@ export const hasTimestampFields = async (args: {
     });
 
     return {
-      wroteWarningStatus: true,
       foundNoIndices: true,
       warningMessage: errorString.trimEnd(),
     };
@@ -161,10 +160,10 @@ export const hasTimestampFields = async (args: {
       message: errorString,
     });
 
-    return { wroteWarningStatus: true, foundNoIndices: false, warningMessage: errorString };
+    return { foundNoIndices: false, warningMessage: errorString };
   }
 
-  return { wroteWarningStatus: false, foundNoIndices: false, warningMessage: undefined };
+  return { foundNoIndices: false, warningMessage: undefined };
 };
 
 export const checkPrivileges = async (
@@ -410,7 +409,7 @@ export const errorAggregator = (
   }, Object.create(null));
 };
 
-export const getRuleRangeTuples = ({
+export const getRuleRangeTuples = async ({
   startedAt,
   previousStartedAt,
   from,
@@ -418,6 +417,7 @@ export const getRuleRangeTuples = ({
   interval,
   maxSignals,
   ruleExecutionLogger,
+  alerting,
 }: {
   startedAt: Date;
   previousStartedAt: Date | null | undefined;
@@ -426,18 +426,31 @@ export const getRuleRangeTuples = ({
   interval: string;
   maxSignals: number;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  alerting: PluginSetupContract;
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
+  let warningStatusMessage;
   if (originalFrom == null || originalTo == null) {
     throw new Error('Failed to parse date math of rule.from or rule.to');
+  }
+
+  const maxAlertsAllowed = alerting.getConfig().run.alerts.max;
+  let maxSignalsToUse = maxSignals;
+  if (maxSignals > maxAlertsAllowed) {
+    maxSignalsToUse = maxAlertsAllowed;
+    warningStatusMessage = `The rule's max alerts per run setting (${maxSignals}) is greater than the Kibana alerting limit (${maxAlertsAllowed}). The rule will only write a maximum of ${maxAlertsAllowed} alerts per rule run.`;
+    await ruleExecutionLogger.logStatusChange({
+      newStatus: RuleExecutionStatusEnum['partial failure'],
+      message: warningStatusMessage,
+    });
   }
 
   const tuples = [
     {
       to: originalTo,
       from: originalFrom,
-      maxSignals,
+      maxSignals: maxSignalsToUse,
     },
   ];
 
@@ -448,7 +461,7 @@ export const getRuleRangeTuples = ({
         interval
       )}"`
     );
-    return { tuples, remainingGap: moment.duration(0) };
+    return { tuples, remainingGap: moment.duration(0), warningStatusMessage };
   }
 
   const gap = getGapBetweenRuns({
@@ -464,7 +477,7 @@ export const getRuleRangeTuples = ({
   const catchupTuples = getCatchupTuples({
     originalTo,
     originalFrom,
-    ruleParamsMaxSignals: maxSignals,
+    ruleParamsMaxSignals: maxSignalsToUse,
     catchup,
     intervalDuration,
   });
@@ -480,6 +493,7 @@ export const getRuleRangeTuples = ({
   return {
     tuples: tuples.reverse(),
     remainingGap: moment.duration(remainingGapMilliseconds),
+    warningStatusMessage,
   };
 };
 
@@ -668,6 +682,7 @@ export const createSearchAfterReturnType = ({
   createdSignals,
   errors,
   warningMessages,
+  suppressedAlertsCount,
 }: {
   success?: boolean | undefined;
   warning?: boolean;
@@ -679,6 +694,7 @@ export const createSearchAfterReturnType = ({
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
   warningMessages?: string[] | undefined;
+  suppressedAlertsCount?: number | undefined;
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
@@ -691,6 +707,7 @@ export const createSearchAfterReturnType = ({
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
     warningMessages: warningMessages ?? [],
+    suppressedAlertsCount: suppressedAlertsCount ?? 0,
   };
 };
 
@@ -732,6 +749,10 @@ export const addToSearchAfterReturn = ({
   current.bulkCreateTimes.push(next.bulkCreateDuration);
   current.enrichmentTimes.push(next.enrichmentDuration);
   current.errors = [...new Set([...current.errors, ...next.errors])];
+  if (next.suppressedItemsCount != null) {
+    current.suppressedAlertsCount =
+      (current.suppressedAlertsCount ?? 0) + next.suppressedItemsCount;
+  }
 };
 
 export const mergeReturns = (
@@ -749,6 +770,7 @@ export const mergeReturns = (
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
       warningMessages: existingWarningMessages,
+      suppressedAlertsCount: existingSuppressedAlertsCount,
     }: SearchAfterAndBulkCreateReturnType = prev;
 
     const {
@@ -762,6 +784,7 @@ export const mergeReturns = (
       createdSignals: newCreatedSignals,
       errors: newErrors,
       warningMessages: newWarningMessages,
+      suppressedAlertsCount: newSuppressedAlertsCount,
     }: SearchAfterAndBulkCreateReturnType = next;
 
     return {
@@ -775,6 +798,7 @@ export const mergeReturns = (
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
       warningMessages: [...existingWarningMessages, ...newWarningMessages],
+      suppressedAlertsCount: (existingSuppressedAlertsCount ?? 0) + (newSuppressedAlertsCount ?? 0),
     };
   });
 };
@@ -972,4 +996,31 @@ export const getUnprocessedExceptionsWarnings = (
 
 export const getMaxSignalsWarning = (): string => {
   return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created.`;
+};
+
+export const getSuppressionMaxSignalsWarning = (): string => {
+  return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created or suppressed.`;
+};
+
+export const getDisabledActionsWarningText = ({
+  alertsCreated,
+  disabledActions,
+}: {
+  alertsCreated: boolean;
+  disabledActions: SanitizedRuleAction[];
+}) => {
+  const uniqueActionTypes = new Set(disabledActions.map((action) => action.actionTypeId));
+
+  const actionTypesJoined = [...uniqueActionTypes].join(', ');
+
+  // This rule generated alerts but did not send external notifications because rule action connectors ${actionTypes} aren't enabled. To send notifications, you need a higher Security Analytics tier.
+  const alertsGeneratedText = alertsCreated
+    ? 'This rule generated alerts but did not send external notifications because rule action'
+    : 'Rule action';
+
+  if (uniqueActionTypes.size > 1) {
+    return `${alertsGeneratedText} connectors ${actionTypesJoined} are not enabled. To send notifications, you need a higher Security Analytics license / tier`;
+  } else {
+    return `${alertsGeneratedText} connector ${actionTypesJoined} is not enabled. To send notifications, you need a higher Security Analytics license / tier`;
+  }
 };

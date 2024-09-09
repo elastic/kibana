@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import { FunctionComponent } from 'react';
+import { FC, ReactNode } from 'react';
 
-declare const AutoFollowPatternDeleteProvider: FunctionComponent;
+declare const AutoFollowPatternDeleteProvider: FC<{
+  children: (deleteAutoFollowPattern: (ids: string[]) => void) => ReactNode;
+}>;

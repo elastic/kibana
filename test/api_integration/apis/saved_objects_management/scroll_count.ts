@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SuperTest, Test } from 'supertest';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -14,7 +14,7 @@ const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';
 const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest') as SuperTest<Test>;
+  const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { NewAgentAction, AgentActionType } from '../../../common/types';
 
@@ -307,16 +307,17 @@ describe('Agent actions', () => {
   });
 
   describe('cancelAgentAction', () => {
-    it('throw if the target action is not found', async () => {
+    it('should throw if the target action is not found', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
       esClient.search.mockResolvedValue({
         hits: {
           hits: [],
         },
       } as any);
-      await expect(() => cancelAgentAction(esClient, 'i-do-not-exists')).rejects.toThrowError(
-        /Action not found/
-      );
+      const soClient = savedObjectsClientMock.create();
+      await expect(() =>
+        cancelAgentAction(esClient, soClient, 'i-do-not-exists')
+      ).rejects.toThrowError(/Action not found/);
     });
 
     it('should create one CANCEL action for each UPGRADE action found', async () => {
@@ -343,7 +344,8 @@ describe('Agent actions', () => {
           ],
         },
       } as any);
-      await cancelAgentAction(esClient, 'action1');
+      const soClient = savedObjectsClientMock.create();
+      await cancelAgentAction(esClient, soClient, 'action1');
 
       expect(esClient.create).toBeCalledTimes(2);
       expect(esClient.create).toBeCalledWith(
@@ -382,7 +384,8 @@ describe('Agent actions', () => {
           ],
         },
       } as any);
-      await cancelAgentAction(esClient, 'action1');
+      const soClient = savedObjectsClientMock.create();
+      await cancelAgentAction(esClient, soClient, 'action1');
 
       expect(mockedBulkUpdateAgents).toBeCalled();
       expect(mockedBulkUpdateAgents).toBeCalledWith(
@@ -449,6 +452,84 @@ describe('Agent actions', () => {
         'agent6',
         'agent7',
       ]);
+    });
+
+    it('should find agents assigned to agent policies when passing agent policy action ids', async () => {
+      esClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'agent1',
+            },
+            {
+              _id: 'agent2',
+            },
+          ],
+        },
+      } as any);
+      const actionsIds = ['action1:1'];
+      expect(await getAgentsByActionsIds(esClientMock, actionsIds)).toEqual(['agent1', 'agent2']);
+    });
+
+    it('should find agents when passing both agent action and agent policy action ids', async () => {
+      esClientMock.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  action_id: 'action2',
+                  agents: ['agent3', 'agent4'],
+                  expiration: '2022-05-12T18:16:18.019Z',
+                  type: 'UPGRADE',
+                },
+              },
+              {
+                _source: {
+                  action_id: 'action3',
+                  agents: ['agent5', 'agent6', 'agent7'],
+                  expiration: '2022-05-12T18:16:18.019Z',
+                  type: 'UNENROLL',
+                },
+              },
+            ],
+          },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'agent1',
+              },
+              {
+                _id: 'agent2',
+              },
+            ],
+          },
+        } as any);
+
+      const actionsIds = ['action1:1', 'action2', 'actions3'];
+
+      // policy changes are processed second
+      expect(await getAgentsByActionsIds(esClientMock, actionsIds)).toEqual([
+        'agent3',
+        'agent4',
+        'agent5',
+        'agent6',
+        'agent7',
+        'agent1',
+        'agent2',
+      ]);
+    });
+
+    it('should return an empty array if no actions were found', async () => {
+      esClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [],
+        },
+      } as any);
+      const actionsIds = ['action1:1', 'action2'];
+      expect(await getAgentsByActionsIds(esClientMock, actionsIds)).toEqual([]);
     });
   });
 });

@@ -93,6 +93,12 @@ export const Hunks = ({ hunks, oldSource, expandRange }: HunksProps) => {
   const hunkElements = hunks.reduce((children: ReactElement[], hunk: HunkData, index: number) => {
     const previousElement = children[children.length - 1];
 
+    // If old source doesn't exist, we don't render expandable sections
+    if (!oldSource) {
+      children.push(<Hunk key={`hunk-${hunk.content}`} hunk={hunk} />);
+      return children;
+    }
+
     children.push(
       <UnfoldCollapsed
         key={`decoration-${hunk.content}`}

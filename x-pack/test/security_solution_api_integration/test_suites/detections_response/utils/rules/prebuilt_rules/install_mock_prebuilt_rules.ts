@@ -19,7 +19,7 @@ import { installPrebuiltRulesAndTimelines } from './install_prebuilt_rules_and_t
  * @returns Install prebuilt rules response
  */
 export const installMockPrebuiltRules = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   es: Client
 ): Promise<InstallPrebuiltRulesAndTimelinesResponse> => {
   // Ensure there are prebuilt rule saved objects before installing rules

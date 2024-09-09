@@ -22,7 +22,8 @@ export const getComposableTemplate = ({
   hasDatastream = false,
   isLegacy = false,
   type = 'default',
-  allowAutoCreate = false,
+  allowAutoCreate = 'NO_OVERWRITE',
+  composedOf = [],
 }: Partial<
   TemplateDeserialized & {
     isLegacy?: boolean;
@@ -53,6 +54,7 @@ export const getComposableTemplate = ({
       hasDatastream,
       isLegacy,
     },
+    composedOf,
   };
 
   return indexTemplate;
@@ -65,10 +67,12 @@ export const getTemplate = ({
   indexPatterns = [],
   template: { settings, aliases, mappings } = {},
   dataStream,
+  composedOf,
+  ignoreMissingComponentTemplates,
   hasDatastream = false,
   isLegacy = false,
   type = 'default',
-  allowAutoCreate = false,
+  allowAutoCreate = 'NO_OVERWRITE',
 }: Partial<
   TemplateDeserialized & {
     isLegacy?: boolean;
@@ -96,6 +100,8 @@ export const getTemplate = ({
       hasDatastream: dataStream !== undefined ? true : hasDatastream,
       isLegacy,
     },
+    composedOf,
+    ignoreMissingComponentTemplates,
   };
 
   return indexTemplate;

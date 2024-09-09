@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
@@ -31,12 +32,26 @@ export type StorageContextGetTransformFn = (
 
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
+  /** The Core HTTP request handler context */
   requestHandlerContext: RequestHandlerContext;
   version: {
+    /**
+     * The content type version for the request. It usually is the latest version although in some
+     * cases the client (browser) might still be on an older version and make requests with that version.
+     */
     request: Version;
+    /**
+     * The latest version of the content type. This is the version that the content type is currently on
+     * after updating the Kibana server.
+     */
     latest: Version;
   };
   utils: {
+    /**
+     * Get the transforms handlers for the content type.
+     * The transforms are used to transform the content object to the latest schema (up) and back
+     * to a previous schema (down).
+     */
     getTransforms: StorageContextGetTransformFn;
   };
 }

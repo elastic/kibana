@@ -6,14 +6,18 @@
  */
 
 import { Subject } from 'rxjs';
-import { take, bufferCount } from 'rxjs/operators';
+import { take, bufferCount } from 'rxjs';
 import { createConfigurationAggregator } from './configuration_statistics';
 import { TaskManagerConfig } from '../config';
 
 describe('Configuration Statistics Aggregator', () => {
   test('merges the static config with the merged configs', async () => {
     const configuration: TaskManagerConfig = {
-      max_workers: 10,
+      discovery: {
+        active_nodes_lookback: '30s',
+        interval: 10000,
+      },
+      kibanas_per_partition: 2,
       max_attempts: 9,
       poll_interval: 6000000,
       allow_reading_invalid_state: false,
@@ -47,17 +51,16 @@ describe('Configuration Statistics Aggregator', () => {
         warn_threshold: 5000,
       },
       worker_utilization_running_average_window: 5,
-      requeue_invalid_tasks: {
-        enabled: false,
-        delay: 3000,
-        max_attempts: 20,
-      },
       metrics_reset_interval: 3000,
       claim_strategy: 'default',
+      request_timeouts: {
+        update_by_query: 1000,
+      },
     };
 
     const managedConfig = {
-      maxWorkersConfiguration$: new Subject<number>(),
+      startingCapacity: 10,
+      capacityConfiguration$: new Subject<number>(),
       pollIntervalConfiguration$: new Subject<number>(),
     };
 
@@ -67,7 +70,12 @@ describe('Configuration Statistics Aggregator', () => {
           .pipe(take(3), bufferCount(3))
           .subscribe(([initial, updatedWorkers, updatedInterval]) => {
             expect(initial.value).toEqual({
-              max_workers: 10,
+              capacity: {
+                config: 10,
+                as_workers: 10,
+                as_cost: 20,
+              },
+              claim_strategy: 'default',
               poll_interval: 6000000,
               request_capacity: 1000,
               monitored_aggregated_stats_refresh_rate: 5000,
@@ -81,7 +89,12 @@ describe('Configuration Statistics Aggregator', () => {
               },
             });
             expect(updatedWorkers.value).toEqual({
-              max_workers: 8,
+              capacity: {
+                config: 8,
+                as_workers: 8,
+                as_cost: 16,
+              },
+              claim_strategy: 'default',
               poll_interval: 6000000,
               request_capacity: 1000,
               monitored_aggregated_stats_refresh_rate: 5000,
@@ -95,7 +108,12 @@ describe('Configuration Statistics Aggregator', () => {
               },
             });
             expect(updatedInterval.value).toEqual({
-              max_workers: 8,
+              capacity: {
+                config: 8,
+                as_workers: 8,
+                as_cost: 16,
+              },
+              claim_strategy: 'default',
               poll_interval: 3000,
               request_capacity: 1000,
               monitored_aggregated_stats_refresh_rate: 5000,
@@ -110,7 +128,7 @@ describe('Configuration Statistics Aggregator', () => {
             });
             resolve();
           }, reject);
-        managedConfig.maxWorkersConfiguration$.next(8);
+        managedConfig.capacityConfiguration$.next(8);
         managedConfig.pollIntervalConfiguration$.next(3000);
       } catch (error) {
         reject(error);

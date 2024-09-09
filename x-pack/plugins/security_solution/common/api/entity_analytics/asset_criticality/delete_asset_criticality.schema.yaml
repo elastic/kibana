@@ -1,24 +1,52 @@
+# ⚠️ Updating this file? Also update the public API docs at https://github.com/elastic/security-docs/tree/main/docs/advanced-entity-analytics/api
 openapi: 3.0.0
 info:
-  version: 1.0.0
+  version: '2023-10-31'
   title: Asset Criticality Delete Record Schema
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
-  /internal/asset_criticality:
+  /api/asset_criticality:
     delete:
-      operationId: AssetCriticalityDeleteRecord
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: DeleteAssetCriticalityRecord
       summary: Delete Criticality Record
+      description: Delete the asset criticality record for a specific asset if it exists.
       parameters:
-        - $ref: './common.schema.yaml#/components/parameters/id_value'
-        - $ref: './common.schema.yaml#/components/parameters/id_field'
+        - name: id_value
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The ID value of the asset.
+        - name: id_field
+          in: query
+          required: true
+          schema:
+            $ref: './common.schema.yaml#/components/schemas/IdField'
+          example: 'host.name'
+          description: The field representing the ID.
+        - name: refresh
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [wait_for]
+          description: If 'wait_for' the request will wait for the index refresh.
       responses:
         '200':
           description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+                    description: True if the record was deleted or false if the record did not exist.
+                  record:
+                    description: The deleted record if it existed.
+                    $ref: './common.schema.yaml#/components/schemas/AssetCriticalityRecord'
+                required:
+                  - deleted
         '400':
           description: Invalid request

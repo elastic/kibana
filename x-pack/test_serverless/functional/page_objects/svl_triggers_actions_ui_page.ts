@@ -51,7 +51,7 @@ export function SvlTriggersActionsPageProvider({ getService }: FtrProviderContex
       return await noPermissionsTitle.getVisibleText();
     },
     async clickCreateConnectorButton() {
-      const createBtn = await testSubjects.find('createActionButton');
+      const createBtn = await testSubjects.find('createConnectorButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
       if (createBtnIsVisible) {
         await createBtn.click();
@@ -202,7 +202,7 @@ export function SvlTriggersActionsPageProvider({ getService }: FtrProviderContex
         await this.searchRules(ruleName);
         const statusControl = await testSubjects.find(controlName);
         const title = await statusControl.getAttribute('title');
-        expect(title.toLowerCase()).to.eql(expectedStatus.toLowerCase());
+        expect(title?.toLowerCase()).to.eql(expectedStatus.toLowerCase());
       });
     },
     async ensureEventLogColumnExists(columnId: string) {

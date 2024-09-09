@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import { EuiScreenReaderOnly } from '@elastic/eui';
@@ -18,7 +20,6 @@ import 'brace/mode/text';
 import 'brace/mode/hjson';
 import 'brace/mode/yaml';
 
-import { expandLiteralStrings } from '../../../../../shared_imports';
 import {
   useEditorReadContext,
   useRequestReadContext,
@@ -27,23 +28,7 @@ import {
 import { createReadOnlyAceEditor, CustomAceEditor } from '../../../../models/legacy_core_editor';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
-
-const isJSONContentType = (contentType?: string) =>
-  Boolean(contentType && contentType.indexOf('application/json') >= 0);
-
-const isMapboxVectorTile = (contentType?: string) =>
-  contentType?.includes('application/vnd.mapbox-vector-tile') ?? false;
-
-/**
- * Best effort expand literal strings
- */
-const safeExpandLiteralStrings = (data: string): string => {
-  try {
-    return expandLiteralStrings(data);
-  } catch (e) {
-    return data;
-  }
-};
+import { isJSONContentType, isMapboxVectorTile, safeExpandLiteralStrings } from '../../utilities';
 
 function modeForContentType(contentType?: string) {
   if (!contentType) {

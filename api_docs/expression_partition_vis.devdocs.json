@@ -701,13 +701,20 @@
           },
           {
             "parentPluginId": "expressionPartitionVis",
-            "id": "def-common.PartitionVisParams.showValuesInLegend",
-            "type": "CompoundType",
+            "id": "def-common.PartitionVisParams.legendStats",
+            "type": "Array",
             "tags": [],
-            "label": "showValuesInLegend",
+            "label": "legendStats",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.PartitionLegendValue",
+                "text": "PartitionLegendValue"
+              },
+              "[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false,
@@ -996,11 +1003,21 @@
           },
           {
             "parentPluginId": "expressionPartitionVis",
-            "id": "def-common.WaffleVisConfig.showValuesInLegend",
-            "type": "boolean",
+            "id": "def-common.WaffleVisConfig.legendStats",
+            "type": "Array",
             "tags": [],
-            "label": "showValuesInLegend",
+            "label": "legendStats",
             "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.PartitionLegendValue",
+                "text": "PartitionLegendValue"
+              },
+              "[] | undefined"
+            ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false

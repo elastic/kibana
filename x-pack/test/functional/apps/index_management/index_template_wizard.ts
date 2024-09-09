@@ -25,7 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    describe('Create', async () => {
+    describe('Create', () => {
       before(async () => {
         // Click Create Template button
         await testSubjects.click('createTemplateButton');
@@ -102,7 +102,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Mappings step', async () => {
+    describe('Mappings step', () => {
       beforeEach(async () => {
         await pageObjects.common.navigateToApp('indexManagement');
         // Navigate to the index templates tab
@@ -117,13 +117,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.setValue('indexPatternsField', 'test-index-pattern');
 
         // Go to Mappings step
-        await pageObjects.indexManagement.clickNextButton();
-        expect(await testSubjects.getVisibleText('stepTitle')).to.be(
-          'Component templates (optional)'
-        );
-        await pageObjects.indexManagement.clickNextButton();
-        expect(await testSubjects.getVisibleText('stepTitle')).to.be('Index settings (optional)');
-        await pageObjects.indexManagement.clickNextButton();
+        await testSubjects.click('formWizardStep-3');
         expect(await testSubjects.getVisibleText('stepTitle')).to.be('Mappings (optional)');
       });
 

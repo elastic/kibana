@@ -7,7 +7,7 @@
 
 import { lazy } from 'react';
 import type { PackageCustomExtensionComponent } from '@kbn/fleet-plugin/public';
-import type { FleetUiExtensionGetterOptions } from './types';
+import type { FleetUiExtensionGetterOptions } from '../../../../../common/types';
 
 export const getLazyEndpointPackageCustomExtension = ({
   coreStart,
@@ -16,7 +16,7 @@ export const getLazyEndpointPackageCustomExtension = ({
 }: FleetUiExtensionGetterOptions) => {
   return lazy<PackageCustomExtensionComponent>(async () => {
     const [{ withSecurityContext }, { EndpointPackageCustomExtension }] = await Promise.all([
-      import('./components/with_security_context/with_security_context'),
+      import('../../../../../common/components/with_security_context/with_security_context'),
       import('./endpoint_package_custom_extension'),
     ]);
     return {

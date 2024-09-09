@@ -1,0 +1,15 @@
+{
+  "connector.sync_job_update_stats": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_connector/_sync_job/{connector_sync_job_id}/_stats"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/set-connector-sync-job-stats-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

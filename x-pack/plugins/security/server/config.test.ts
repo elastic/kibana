@@ -8,6 +8,7 @@
 jest.mock('crypto', () => ({
   randomBytes: jest.fn(),
   constants: jest.requireActual('crypto').constants,
+  createHash: jest.requireActual('crypto').createHash,
 }));
 
 jest.mock('@kbn/utils', () => ({
@@ -60,8 +61,12 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "experimental": Object {
+          "fipsMode": Object {
+            "enabled": false,
+          },
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -115,8 +120,12 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "experimental": Object {
+          "fipsMode": Object {
+            "enabled": false,
+          },
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -170,7 +179,11 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
+        "experimental": Object {
+          "fipsMode": Object {
+            "enabled": false,
+          },
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -227,9 +240,14 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
+        "experimental": Object {
+          "fipsMode": Object {
+            "enabled": false,
+          },
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
+        "roleManagementEnabled": false,
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
@@ -239,7 +257,6 @@ describe('config schema', () => {
         "showInsecureClusterWarning": true,
         "showNavLinks": true,
         "ui": Object {
-          "roleManagementEnabled": true,
           "roleMappingManagementEnabled": true,
           "userManagementEnabled": true,
         },
@@ -1491,14 +1508,8 @@ describe('config schema', () => {
         ConfigSchema.validate(
           { authc: { http: { jwt: { taggedRoutesOnly: false } } } },
           { serverless: true }
-        ).ui
-      ).toMatchInlineSnapshot(`
-          Object {
-            "roleManagementEnabled": true,
-            "roleMappingManagementEnabled": true,
-            "userManagementEnabled": true,
-          }
-        `);
+        ).authc.http.jwt.taggedRoutesOnly
+      ).toEqual(false);
     });
   });
 
@@ -1509,7 +1520,6 @@ describe('config schema', () => {
           {
             ui: {
               userManagementEnabled: false,
-              roleManagementEnabled: false,
               roleMappingManagementEnabled: false,
             },
           },
@@ -1524,7 +1534,6 @@ describe('config schema', () => {
           {
             ui: {
               userManagementEnabled: false,
-              roleManagementEnabled: false,
               roleMappingManagementEnabled: false,
             },
           },
@@ -1532,11 +1541,36 @@ describe('config schema', () => {
         ).ui
       ).toMatchInlineSnapshot(`
         Object {
-          "roleManagementEnabled": false,
           "roleMappingManagementEnabled": false,
           "userManagementEnabled": false,
         }
       `);
+    });
+  });
+
+  describe('roleManagementEnabled', () => {
+    it('should not allow xpack.security.roleManagementEnabled to be configured outside of the serverless context', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          {
+            roleManagementEnabled: false,
+          },
+          { serverless: false }
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[roleManagementEnabled]: a value wasn't expected to be present"`
+      );
+    });
+
+    it('should allow xpack.security.roleManagementEnabled to be configured inside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            roleManagementEnabled: false,
+          },
+          { serverless: true }
+        ).roleManagementEnabled
+      ).toEqual(false);
     });
   });
 
@@ -1989,6 +2023,57 @@ describe('createConfig()', () => {
         },
       })
     ).toThrow('[audit.appender.1.layout]: expected at least one defined value but got [undefined]');
+  });
+
+  it('allows filtering audit events', () => {
+    expect(
+      ConfigSchema.validate({
+        audit: {
+          enabled: true,
+          appender: {
+            type: 'file',
+            fileName: '/path/to/file.txt',
+            layout: {
+              type: 'json',
+            },
+          },
+          ignore_filters: [
+            {
+              actions: ['authentication_success', 'authorization_failure'],
+              categories: ['database'],
+              outcomes: ['unknown'],
+              spaces: ['default'],
+              types: ['index'],
+              users: ['elastic'],
+            },
+          ],
+        },
+      }).audit.ignore_filters
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "actions": Array [
+            "authentication_success",
+            "authorization_failure",
+          ],
+          "categories": Array [
+            "database",
+          ],
+          "outcomes": Array [
+            "unknown",
+          ],
+          "spaces": Array [
+            "default",
+          ],
+          "types": Array [
+            "index",
+          ],
+          "users": Array [
+            "elastic",
+          ],
+        },
+      ]
+    `);
   });
 
   describe('#getExpirationTimeouts', () => {

@@ -36,7 +36,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async changeCaseStatusViaDropdownAndVerify(status: CaseStatuses) {
-      this.openCaseSetStatusDropdown();
+      await this.openCaseSetStatusDropdown();
       await testSubjects.click(`case-view-status-dropdown-${status}`);
       await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail(`case-status-badge-popover-button-${status}`);
@@ -94,7 +94,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async expectToasterToContain(content: string) {
-      const toast = await toasts.getToastElement(1);
+      const toast = await toasts.getElementByIndex(1);
       expect(await toast.getVisibleText()).to.contain(content);
     },
 

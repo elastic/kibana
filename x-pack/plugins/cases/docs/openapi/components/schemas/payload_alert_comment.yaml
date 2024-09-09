@@ -6,16 +6,14 @@ properties:
       alertId:
         oneOf:
           - type: string
-            examples:
-              - 1c0b056b-cc9f-4b61-b5c9-cb801abd5e1d
+            example: 1c0b056b-cc9f-4b61-b5c9-cb801abd5e1d
           - type: array
             items:
               type: string
       index:
         oneOf:
           - type: string
-            examples:
-              - .alerts-observability.logs.alerts-default
+            example: .alerts-observability.logs.alerts-default
           - type: array
             items:
               type: string

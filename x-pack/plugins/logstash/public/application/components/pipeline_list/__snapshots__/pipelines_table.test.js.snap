@@ -39,7 +39,6 @@ exports[`PipelinesTable component renders component as expected 1`] = `
     ]
   }
   data-test-subj="pipelineTable"
-  isSelectable={true}
   itemId="id"
   items={
     Array [
@@ -62,7 +61,6 @@ exports[`PipelinesTable component renders component as expected 1`] = `
       "totalItemCount": 1,
     }
   }
-  responsive={true}
   rowProps={
     Object {
       "data-test-subj": "row",
@@ -96,10 +94,9 @@ exports[`PipelinesTable component renders component as expected 1`] = `
         isDisabled={false}
         onClick={[MockFunction]}
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Create pipeline"
           id="xpack.logstash.pipelinesTable.createPipelineButtonLabel"
-          values={Object {}}
         />
       </EuiButton>,
     }

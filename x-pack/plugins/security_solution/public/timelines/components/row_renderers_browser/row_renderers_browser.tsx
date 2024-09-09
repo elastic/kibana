@@ -22,6 +22,10 @@ interface RowRenderersBrowserProps {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   .euiTable {
+    tr:has(.isNotSelected) {
+      background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+    }
+
     tr > *:last-child {
       display: none;
     }
@@ -92,7 +96,7 @@ const RowRenderersBrowserComponent = ({
   );
 
   const nameColumnRenderCallback = useCallback(
-    (value, item) => (
+    (value: string, item: RowRendererOption) => (
       <StyledNameButton className="kbn-resetFocusState" onClick={handleNameClick(item)}>
         {value}
       </StyledNameButton>
@@ -101,10 +105,11 @@ const RowRenderersBrowserComponent = ({
   );
 
   const idColumnRenderCallback = useCallback(
-    (_, item) => (
+    (_: unknown, item: RowRendererOption) => (
       <EuiCheckbox
         id={item.id}
         onChange={handleNameClick(item)}
+        className={`${!excludedRowRendererIds.includes(item.id) ? 'isSelected' : 'isNotSelected'}`}
         checked={!excludedRowRendererIds.includes(item.id)}
       />
     ),
@@ -119,6 +124,7 @@ const RowRenderersBrowserComponent = ({
         sortable: false,
         width: '32px',
         render: idColumnRenderCallback,
+        'data-test-subj': 'renderer-checkbox',
       },
       {
         field: 'name',
@@ -126,18 +132,21 @@ const RowRenderersBrowserComponent = ({
         sortable: true,
         width: '10%',
         render: nameColumnRenderCallback,
+        'data-test-subj': 'renderer-name',
       },
       {
         field: 'description',
         name: 'Description',
         width: '25%',
         render: (description: React.ReactNode) => description,
+        'data-test-subj': 'renderer-description',
       },
       {
         field: 'example',
         name: 'Example',
         width: '65%',
         render: ExampleWrapperComponent,
+        'data-test-subj': 'renderer-example',
       },
       {
         field: 'searchableDescription',
@@ -145,6 +154,7 @@ const RowRenderersBrowserComponent = ({
         sortable: false,
         width: '0px',
         render: renderSearchableDescriptionNoop,
+        'data-test-subj': 'renderer-searchable-description',
       },
     ],
     [idColumnRenderCallback, nameColumnRenderCallback]
@@ -157,7 +167,6 @@ const RowRenderersBrowserComponent = ({
       columns={columns}
       search={search}
       sorting={initialSorting}
-      isSelectable={true}
     />
   );
 };

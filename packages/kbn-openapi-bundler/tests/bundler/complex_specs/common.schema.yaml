@@ -1,0 +1,70 @@
+openapi: 3.0.3
+info:
+  title: Test endpoint
+  version: 'no applicable'
+paths: {}
+
+components:
+  schemas:
+    FieldSchemaA:
+      type: object
+      properties:
+        fieldX:
+          type: string
+        fieldY:
+          type: integer
+
+    SchemaA:
+      type: object
+      properties:
+        schemaAField1:
+          type: string
+          enum:
+            - value1
+            - value2
+        schemaAField2:
+          type: integer
+      required:
+        - schemaAField1
+        - schemaAField2
+
+    SchemaB:
+      allOf:
+        - $ref: '#/components/schemas/SharedSchema'
+        - $ref: '#/components/schemas/SchemaA'
+        - type: object
+          properties:
+            schemaBField:
+              type: boolean
+
+    SharedSchema:
+      x-inline: true
+      type: object
+      properties:
+        fieldA:
+          type: string
+        fieldRef:
+          $ref: '#/components/schemas/FieldSchemaA'
+          x-modify: required
+        fieldB:
+          type: boolean
+
+    SharedSchemaWithAllOf:
+      x-inline: true
+      allOf:
+        - type: object
+          properties:
+            sharedSchemaFieldX:
+              type: string
+            sharedSchemaFieldY:
+              type: string
+            commonField:
+              type: string
+          required:
+            - commonField
+        - type: object
+          properties:
+            sharedSchemaField1:
+              type: string
+            sharedSchemaField2:
+              type: string

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
@@ -18,8 +19,10 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import { useMlKibana } from '../../../../contexts/kibana';
+import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
+import { useMlJobService } from '../../../../services/job_service';
 import { stopDatafeeds } from '../utils';
 import { ManagedJobsWarningCallout } from './managed_jobs_warning_callout';
 
@@ -37,6 +40,12 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
   unsetShowFunction,
   refreshJobs,
 }) => {
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useMlKibana();
+  const mlJobService = useMlJobService();
   const [modalVisible, setModalVisible] = useState(false);
   const [hasManagedJob, setHasManaged] = useState(true);
   const [jobsToStop, setJobsToStop] = useState<MlSummaryJob[]>([]);
@@ -113,7 +122,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
 
             <EuiButton
               onClick={() => {
-                stopDatafeeds(jobsToStop, refreshJobs);
+                stopDatafeeds(toasts, mlJobService, jobsToStop, refreshJobs);
                 closeModal();
               }}
               fill

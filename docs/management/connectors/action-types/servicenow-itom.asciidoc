@@ -31,7 +31,7 @@ image::management/connectors/images/servicenow-itom-connector-oauth.png[{sn-itom
 [[servicenow-itom-connector-configuration]]
 ==== Connector configuration
 
-{sn-itom} connectors have a name and the following configuration properties:
+{sn-itom} connectors have the following configuration properties:
 
 Client ID::
 The client identifier assigned to your OAuth application.
@@ -61,8 +61,7 @@ The username for HTTP basic authentication.
 [[servicenow-itom-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}. For example:
+You can test connectors as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-itom-params-test.png[{sn-itom} params test]

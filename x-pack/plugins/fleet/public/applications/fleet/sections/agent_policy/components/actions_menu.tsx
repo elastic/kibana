@@ -20,6 +20,8 @@ import { FLEET_SERVER_PACKAGE } from '../../../constants';
 
 import { policyHasFleetServer, ExperimentalFeaturesService } from '../../../services';
 
+import { AgentUpgradeAgentModal } from '../../agents/components';
+
 import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
@@ -38,13 +40,15 @@ export const AgentPolicyActionMenu = memo<{
     enrollmentFlyoutOpenByDefault = false,
     onCancelEnrollment,
   }) => {
-    const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+    const authz = useAuthz();
+
     const [isYamlFlyoutOpen, setIsYamlFlyoutOpen] = useState<boolean>(false);
     const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(
       enrollmentFlyoutOpenByDefault
     );
     const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] =
       useState<boolean>(false);
+    const [isUpgradeAgentsModalOpen, setIsUpgradeAgentsModalOpen] = useState<boolean>(false);
 
     const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
 
@@ -52,7 +56,7 @@ export const AgentPolicyActionMenu = memo<{
       () =>
         agentPolicy.package_policies?.some(
           (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
-        ),
+        ) ?? false,
       [agentPolicy]
     );
 
@@ -101,6 +105,11 @@ export const AgentPolicyActionMenu = memo<{
             : [
                 <EuiContextMenuItem
                   icon="plusInCircle"
+                  disabled={
+                    (isFleetServerPolicy && !authz.fleet.addFleetServers) ||
+                    (!isFleetServerPolicy && !authz.fleet.addAgents)
+                  }
+                  data-test-subj="agentPolicyActionMenuAddAgentButton"
                   onClick={() => {
                     setIsContextMenuOpen(false);
                     setIsEnrollmentFlyoutOpen(true);
@@ -121,7 +130,7 @@ export const AgentPolicyActionMenu = memo<{
                 </EuiContextMenuItem>,
                 viewPolicyItem,
                 <EuiContextMenuItem
-                  disabled={!canWriteIntegrationPolicies}
+                  disabled={!authz.integrations.writeIntegrationPolicies}
                   icon="copy"
                   onClick={() => {
                     setIsContextMenuOpen(false);
@@ -137,11 +146,12 @@ export const AgentPolicyActionMenu = memo<{
                 <AgentPolicyDeleteProvider
                   hasFleetServer={policyHasFleetServer(agentPolicy as AgentPolicy)}
                   key="deletePolicy"
+                  packagePolicies={agentPolicy.package_policies}
                 >
                   {(deleteAgentPolicyPrompt) => (
                     <EuiContextMenuItem
                       data-test-subj="agentPolicyActionMenuDeleteButton"
-                      disabled={hasManagedPackagePolicy}
+                      disabled={!authz.fleet.allAgentPolicies || hasManagedPackagePolicy}
                       toolTipContent={
                         hasManagedPackagePolicy ? (
                           <FormattedMessage
@@ -165,7 +175,25 @@ export const AgentPolicyActionMenu = memo<{
                 </AgentPolicyDeleteProvider>,
               ];
 
-          if (agentTamperProtectionEnabled && !agentPolicy?.is_managed) {
+          if (authz.fleet.allAgents && !agentPolicy?.is_managed) {
+            menuItems.push(
+              <EuiContextMenuItem
+                icon="refresh"
+                onClick={() => {
+                  setIsUpgradeAgentsModalOpen(true);
+                }}
+                key="upgradeAgents"
+                data-test-subj="agentPolicyActionMenuUpgradeAgentsButton"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyActionMenu.upgradeAgentsActionText"
+                  defaultMessage="Upgrade agents on this policy"
+                />
+              </EuiContextMenuItem>
+            );
+          }
+
+          if (authz.fleet.allAgents && agentTamperProtectionEnabled && !agentPolicy?.is_managed) {
             menuItems.push(
               <EuiContextMenuItem
                 icon="minusInCircle"
@@ -197,6 +225,17 @@ export const AgentPolicyActionMenu = memo<{
               {isEnrollmentFlyoutOpen && (
                 <EuiPortal>
                   <AgentEnrollmentFlyout agentPolicy={agentPolicy} onClose={onClose} />
+                </EuiPortal>
+              )}
+              {isUpgradeAgentsModalOpen && (
+                <EuiPortal>
+                  <AgentUpgradeAgentModal
+                    agents={`policy_id: ${agentPolicy.id}`}
+                    agentCount={agentPolicy.agents || 0}
+                    onClose={() => {
+                      setIsUpgradeAgentsModalOpen(false);
+                    }}
+                  />
                 </EuiPortal>
               )}
               {isUninstallCommandFlyoutOpen && (

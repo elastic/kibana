@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 // ---------------------------------- WARNING ----------------------------------
 // this file was generated, and should not be edited by hand
@@ -11,6 +12,7 @@
 import * as rt from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 import { AlertSchema } from './alert_schema';
+import { EcsSchema } from './ecs_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
   'IsoDateString',
@@ -77,6 +79,6 @@ const StackAlertOptional = rt.partial({
 });
 
 // prettier-ignore
-export const StackAlertSchema = rt.intersection([StackAlertRequired, StackAlertOptional, AlertSchema]);
+export const StackAlertSchema = rt.intersection([StackAlertRequired, StackAlertOptional, AlertSchema, EcsSchema]);
 // prettier-ignore
 export type StackAlert = rt.TypeOf<typeof StackAlertSchema>;

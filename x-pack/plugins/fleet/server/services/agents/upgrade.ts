@@ -10,6 +10,9 @@ import type { Agent } from '../../types';
 import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 
+import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import { openPointInTime } from './crud';
@@ -43,12 +46,15 @@ export async function sendUpgradeAgentAction({
     );
   }
 
+  const currentSpaceId = getCurrentNamespace(soClient);
+
   await createAgentAction(esClient, {
     agents: [agentId],
     created_at: now,
     data,
     ack_data: data,
     type: 'UPGRADE',
+    namespaces: [currentSpaceId],
   });
   await updateAgent(esClient, agentId, {
     upgraded_at: null,
@@ -63,14 +69,17 @@ export async function sendUpgradeAgentsActions(
     version: string;
     sourceUri?: string | undefined;
     force?: boolean;
+    skipRateLimitCheck?: boolean;
     upgradeDurationSeconds?: number;
     startTime?: string;
     batchSize?: number;
   }
 ): Promise<{ actionId: string }> {
+  const currentSpaceId = getCurrentNamespace(soClient);
   // Full set of agents
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
+
   if ('agents' in options) {
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
@@ -86,12 +95,16 @@ export async function sendUpgradeAgentsActions(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+    const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
+    const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
+
     const res = await getAgentsByKuery(esClient, soClient, {
-      kuery: options.kuery,
+      kuery,
       showInactive: options.showInactive ?? false,
       page: 1,
       perPage: batchSize,
     });
+
     if (res.total <= batchSize) {
       givenAgents = res.agents;
     } else {
@@ -102,11 +115,12 @@ export async function sendUpgradeAgentsActions(
           ...options,
           batchSize,
           total: res.total,
+          spaceId: currentSpaceId,
         },
         { pitId: await openPointInTime(esClient) }
       ).runActionAsyncWithRetry();
     }
   }
 
-  return await upgradeBatch(soClient, esClient, givenAgents, outgoingErrors, options);
+  return await upgradeBatch(esClient, givenAgents, outgoingErrors, options, currentSpaceId);
 }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
-
 import type { FailedTransactionsCorrelationsResponse } from '@kbn/apm-plugin/common/correlations/failed_transactions_correlations/types';
 import { EVENT_OUTCOME } from '@kbn/apm-plugin/common/es_fields/apm';
 import { EventOutcome } from '@kbn/apm-plugin/common/event_outcome';
@@ -155,10 +155,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         (t) => !(t === EVENT_OUTCOME)
       );
 
-      // Identified 68 fieldCandidates.
+      // Identified 80 fieldCandidates.
       expect(fieldCandidates.length).to.eql(
-        68,
-        `Expected field candidates length to be '68', got '${fieldCandidates.length}'`
+        80,
+        `Expected field candidates length to be '80', got '${fieldCandidates.length}'`
       );
 
       const failedTransactionsCorrelationsResponse = await apmApiClient.readUser({
@@ -197,12 +197,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(finalRawResponse?.overallHistogram?.length).to.be(101);
 
       expect(finalRawResponse?.failedTransactionsCorrelations?.length).to.eql(
-        30,
-        `Expected 30 identified correlations, got ${finalRawResponse?.failedTransactionsCorrelations?.length}.`
+        29,
+        `Expected 29 identified correlations, got ${finalRawResponse?.failedTransactionsCorrelations?.length}.`
       );
 
-      const sortedCorrelations = finalRawResponse?.failedTransactionsCorrelations?.sort(
-        (a, b) => b.score - a.score
+      const sortedCorrelations = orderBy(
+        finalRawResponse?.failedTransactionsCorrelations,
+        ['score', 'fieldName', 'fieldValue'],
+        ['desc', 'asc', 'asc']
       );
       const correlation = sortedCorrelations?.[0];
 
@@ -210,8 +212,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(correlation?.doc_count).to.be(31);
       expect(correlation?.score).to.be(83.70467673605746);
       expect(correlation?.bg_count).to.be(31);
-      expect(correlation?.fieldName).to.be('http.response.status_code');
-      expect(correlation?.fieldValue).to.be(500);
+      expect(correlation?.fieldName).to.be('transaction.result');
+      expect(correlation?.fieldValue).to.be('HTTP 5xx');
       expect(typeof correlation?.pValue).to.be('number');
       expect(typeof correlation?.normalizedScore).to.be('number');
       expect(typeof correlation?.failurePercentage).to.be('number');

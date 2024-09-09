@@ -18,11 +18,15 @@ export default createTestConfig({
   },
   suiteTags: { exclude: ['skipSvlSearch'] },
   // add feature flags
-  kbnServerArgs: [],
+  kbnServerArgs: [
+    '--xpack.security.roleManagementEnabled=true', // enables custom roles
+    `--xpack.spaces.maxSpaces=100`, // enables spaces UI capabilities
+    `--xpack.searchIndices.enabled=true`, // global empty state FF
+  ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
-  esServerArgs: [],
+  esServerArgs: ['xpack.security.authc.native_roles.enabled=true'],
 });

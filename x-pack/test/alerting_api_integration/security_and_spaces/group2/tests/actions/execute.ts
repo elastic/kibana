@@ -508,11 +508,17 @@ export default function ({ getService }: FtrProviderContext) {
         it('should authorize system actions correctly', async () => {
           const startDate = new Date().toISOString();
           const connectorId = 'system-connector-test.system-action-kibana-privileges';
-          const name = 'System action: test.system-action-kibana-privileges';
+          const name = 'Test system action with kibana privileges';
           const reference = `actions-enqueue-${scenario.id}:${space.id}:${connectorId}`;
 
+          /**
+           * The test are using a test endpoint that calls the actions client.
+           * The route is defined here x-pack/test/alerting_api_integration/common/plugins/alerts/server/routes.ts.
+           * The public execute API does not allows the execution of system actions. We use the
+           * test route to test the execution of system actions
+           */
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/actions/connector/${connectorId}/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts_fixture/${connectorId}/_execute_connector`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -536,7 +542,7 @@ export default function ({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 403,
                 error: 'Forbidden',
-                message: 'Unauthorized to execute actions',
+                message: 'Unauthorized to execute a "test.system-action-kibana-privileges" action',
               });
               break;
             /**
@@ -645,6 +651,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     expect(executeEvent?.message).to.eql(message);
     expect(startExecuteEvent?.message).to.eql(message.replace('executed', 'started'));
+
+    expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.eql(0);
 
     if (source) {
       expect(executeEvent?.kibana?.action?.execution?.source).to.eql(source.toLowerCase());

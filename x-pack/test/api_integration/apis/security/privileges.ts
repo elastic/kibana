@@ -68,9 +68,17 @@ export default function ({ getService }: FtrProviderContext) {
         'process_operations_all',
         'file_operations_all',
         'execute_operations_all',
+        'scan_operations_all',
       ],
       uptime: ['all', 'read', 'minimal_all', 'minimal_read', 'elastic_managed_locations_enabled'],
-      securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+      securitySolutionAssistant: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'update_anonymization',
+      ],
+      securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
       securitySolutionCases: [
         'all',
         'read',
@@ -129,6 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
+      aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
   };

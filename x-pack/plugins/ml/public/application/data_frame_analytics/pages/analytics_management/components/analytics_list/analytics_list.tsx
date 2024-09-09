@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiSearchBar,
-  EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
 import {
@@ -21,25 +22,23 @@ import {
   DATA_FRAME_TASK_STATE,
   type DataFrameAnalyticsId,
 } from '@kbn/ml-data-frame-analytics-utils';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
-import {
-  DataFrameAnalyticsListColumn,
-  DataFrameAnalyticsListRow,
-  ItemIdToExpandedRowMap,
-} from './common';
-import { getAnalyticsFactory } from '../../services/analytics_service';
+import type { DataFrameAnalyticsListRow, ItemIdToExpandedRowMap } from './common';
+import { DataFrameAnalyticsListColumn } from './common';
+import { useGetAnalytics } from '../../services/analytics_service';
 import { getJobTypeBadge, getTaskStateBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
-import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
+import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
+import { StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
-import { ListingPageUrlState } from '../../../../../../../common/types/common';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 import { useRefresh } from '../../../../../routing/use_refresh';
 
@@ -101,7 +100,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   const searchQueryText = pageState.queryText ?? '';
   const setSearchQueryText = useCallback(
-    (value) => {
+    (value: any) => {
       updatePageState({ queryText: value });
     },
     [updatePageState]
@@ -128,7 +127,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   const disabled = !canCreateDataFrameAnalytics || !canStartStopDataFrameAnalytics;
 
-  const getAnalytics = getAnalyticsFactory(
+  const getAnalytics = useGetAnalytics(
     setAnalytics,
     setAnalyticsStats,
     setErrorMessage,
@@ -279,12 +278,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       <EuiSpacer size="m" />
       <div data-test-subj="mlAnalyticsTableContainer">
         <EuiInMemoryTable<DataFrameAnalyticsListRow>
+          rowHeader={DataFrameAnalyticsListColumn.id}
           allowNeutralSort={false}
           columns={columns}
-          hasActions={false}
-          isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isSelectable={false}
           items={analytics}
           itemId={DataFrameAnalyticsListColumn.id}
           loading={isLoading}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
@@ -23,6 +24,7 @@ import {
 
 import { useServicesContext } from '../../contexts';
 import { HistoryViewer } from './history_viewer';
+import { HistoryViewer as HistoryViewerMonaco } from './history_viewer_monaco';
 import { useEditorReadContext } from '../../contexts/editor_context';
 import { useRestoreRequestFromHistory } from '../../hooks';
 
@@ -35,6 +37,7 @@ const CHILD_ELEMENT_PREFIX = 'historyReq';
 export function ConsoleHistory({ close }: Props) {
   const {
     services: { history },
+    config: { isMonacoEnabled },
   } = useServicesContext();
 
   const { settings: readOnlySettings } = useEditorReadContext();
@@ -91,7 +94,7 @@ export function ConsoleHistory({ close }: Props) {
     initialize();
   };
 
-  const restoreRequestFromHistory = useRestoreRequestFromHistory();
+  const restoreRequestFromHistory = useRestoreRequestFromHistory(isMonacoEnabled);
 
   useEffect(() => {
     initialize();
@@ -181,7 +184,11 @@ export function ConsoleHistory({ close }: Props) {
 
           <div className="conHistory__body__spacer" />
 
-          <HistoryViewer settings={readOnlySettings} req={viewingReq} />
+          {isMonacoEnabled ? (
+            <HistoryViewerMonaco settings={readOnlySettings} req={viewingReq} />
+          ) : (
+            <HistoryViewer settings={readOnlySettings} req={viewingReq} />
+          )}
         </div>
 
         <EuiSpacer size="s" />

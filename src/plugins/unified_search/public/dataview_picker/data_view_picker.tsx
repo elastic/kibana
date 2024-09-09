@@ -1,31 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import { TextBasedLanguages } from '@kbn/esql-utils';
 import { ChangeDataView } from './change_dataview';
 
 export type ChangeDataViewTriggerProps = EuiButtonProps & {
   label: string;
   title?: string;
 };
-
-export enum TextBasedLanguages {
-  SQL = 'SQL',
-  ESQL = 'ESQL',
-}
-
-export interface OnSaveTextLanguageQueryProps {
-  onSave: () => void;
-  onCancel: () => void;
-}
 
 /** @public */
 export interface DataViewPickerProps {
@@ -81,25 +72,9 @@ export interface DataViewPickerProps {
    */
   textBasedLanguages?: TextBasedLanguages[];
   /**
-   * Callback that is called when the user clicks the Save and switch transition modal button
-   */
-  onSaveTextLanguageQuery?: ({ onSave, onCancel }: OnSaveTextLanguageQueryProps) => void;
-
-  /**
    * Makes the picker disabled by disabling the popover trigger
    */
   isDisabled?: boolean;
-}
-
-export interface DataViewPickerPropsExtended extends DataViewPickerProps {
-  /**
-   * Callback that is called when the user clicks the submit button
-   */
-  onTextLangQuerySubmit?: (query?: Query | AggregateQuery) => void;
-  /**
-   * Text based language that is currently selected; depends on the query
-   */
-  textBasedLanguage?: string;
 }
 
 export const DataViewPicker = ({
@@ -114,12 +89,9 @@ export const DataViewPicker = ({
   trigger,
   selectableProps,
   textBasedLanguages,
-  onSaveTextLanguageQuery,
-  onTextLangQuerySubmit,
-  textBasedLanguage,
   onCreateDefaultAdHocDataView,
   isDisabled,
-}: DataViewPickerPropsExtended) => {
+}: DataViewPickerProps) => {
   return (
     <ChangeDataView
       isMissingCurrent={isMissingCurrent}
@@ -134,9 +106,6 @@ export const DataViewPicker = ({
       savedDataViews={savedDataViews}
       selectableProps={selectableProps}
       textBasedLanguages={textBasedLanguages}
-      onSaveTextLanguageQuery={onSaveTextLanguageQuery}
-      onTextLangQuerySubmit={onTextLangQuerySubmit}
-      textBasedLanguage={textBasedLanguage}
       isDisabled={isDisabled}
     />
   );

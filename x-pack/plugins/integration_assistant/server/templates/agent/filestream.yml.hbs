@@ -1,0 +1,20 @@
+paths:
+{{#each paths as |path|}}
+  - {{path}}
+{{/each}}
+{{#if exclude_files}}
+prospector.scanner.exclude_files:
+{{#each exclude_files as |pattern f|}}
+  - {{pattern}}
+{{/each}}
+{{/if}}
+{{#if multiline_json}}
+multiline.pattern: '^{'
+multiline.negate: true
+multiline.match: after
+multiline.max_lines: 5000
+multiline.timeout: 10
+{{/if}}
+{{#if custom}}
+{{custom}}
+{{/if}}

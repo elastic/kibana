@@ -8,8 +8,8 @@
 import { get } from 'lodash';
 
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { ml } from '../../../../services/ml_api_service';
-import { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
+import type { MlApi } from '../../../../services/ml_api_service';
+import type { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
 
 interface CategoryResults {
   success: boolean;
@@ -17,6 +17,7 @@ interface CategoryResults {
 }
 
 export function getCategoryFields(
+  mlApi: MlApi,
   indexPatternName: string,
   fieldName: string,
   size: number,
@@ -25,23 +26,24 @@ export function getCategoryFields(
   indicesOptions?: IndicesOptions
 ): Promise<CategoryResults> {
   return new Promise((resolve, reject) => {
-    ml.esSearch({
-      index: indexPatternName,
-      size: 0,
-      body: {
-        query,
-        aggs: {
-          catFields: {
-            terms: {
-              field: fieldName,
-              size,
+    mlApi
+      .esSearch({
+        index: indexPatternName,
+        size: 0,
+        body: {
+          query,
+          aggs: {
+            catFields: {
+              terms: {
+                field: fieldName,
+                size,
+              },
             },
           },
+          ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
         },
-        ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
-      },
-      ...(indicesOptions ?? {}),
-    })
+        ...(indicesOptions ?? {}),
+      })
       .then((resp: any) => {
         const catFields = get(resp, ['aggregations', 'catFields', 'buckets'], []);
 

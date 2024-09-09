@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { writeFileSync, existsSync } from 'fs';
@@ -16,9 +17,15 @@ interface ShowOptions {
   output?: string;
 }
 
-export function show(keystore: Keystore, key: string, options: ShowOptions = {}): number | void {
+export async function show(
+  keystore: Keystore,
+  key: string,
+  options: ShowOptions = {}
+): Promise<number | void> {
   const { silent, output } = options;
   const logger = new Logger({ silent });
+
+  await keystore.load();
 
   if (!keystore.exists()) {
     logger.error("ERROR: Kibana keystore not found. Use 'create' command to create one.");
@@ -56,7 +63,7 @@ export function showCli(program: any, keystore: Keystore) {
     )
     .option('-s, --silent', 'prevent all logging')
     .option('-o, --output <file>', 'output value to a file')
-    .action((key: string, options: ShowOptions) => {
-      process.exitCode = show(keystore, key, options) || 0;
+    .action(async (key: string, options: ShowOptions) => {
+      process.exitCode = (await show(keystore, key, options)) || 0;
     });
 }

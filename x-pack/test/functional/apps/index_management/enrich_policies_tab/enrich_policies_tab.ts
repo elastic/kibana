@@ -90,15 +90,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.clickExecuteEnrichPolicyAt(0);
       await pageObjects.indexManagement.clickConfirmModalButton();
 
-      const successToast = await toasts.getToastElement(1);
+      const successToast = await toasts.getElementByIndex(1);
       expect(await successToast.getVisibleText()).to.contain(`Executed ${ENRICH_POLICY_NAME}`);
     });
 
     it('can delete a policy', async () => {
+      // Since we disabled wait_for_completion in the server request, we dont know when
+      // a given policy will finish executing. Until that happens the policy cannot
+      // be deleted. 2s seems to be plenty enough to guarantee that, at least for this
+      // test.
+      await pageObjects.common.sleep(2000);
+
       await pageObjects.indexManagement.clickDeleteEnrichPolicyAt(0);
       await pageObjects.indexManagement.clickConfirmModalButton();
 
-      const successToast = await toasts.getToastElement(2);
+      const successToast = await toasts.getElementByIndex(2);
       expect(await successToast.getVisibleText()).to.contain(`Deleted ${ENRICH_POLICY_NAME}`);
     });
   });

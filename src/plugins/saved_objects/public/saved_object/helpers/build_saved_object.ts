@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { once } from 'lodash';
@@ -17,6 +18,7 @@ import {
   SavedObjectConfig,
   SavedObjectKibanaServices,
   SavedObjectSaveOpts,
+  StartServices,
 } from '../../types';
 import { applyESResp } from './apply_es_resp';
 import { saveSavedObject } from './save_saved_object';
@@ -37,6 +39,7 @@ export function buildSavedObject(
   savedObject: SavedObject,
   config: SavedObjectConfig,
   services: SavedObjectKibanaServices,
+  startServices: StartServices,
   decorators: SavedObjectDecorator[] = []
 ) {
   applyDecorators(savedObject, config, decorators);
@@ -110,7 +113,7 @@ export function buildSavedObject(
 
   savedObject.save = async (opts: SavedObjectSaveOpts) => {
     try {
-      const result = await saveSavedObject(savedObject, config, opts, services);
+      const result = await saveSavedObject(savedObject, config, opts, services, startServices);
       return Promise.resolve(result);
     } catch (e) {
       return Promise.reject(e);

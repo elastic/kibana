@@ -13,11 +13,16 @@ import { ActionResult, ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 const paramSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: { description: 'An identifier for the connector.' },
+  }),
 });
 
 export const bodySchema = schema.object({
-  name: schema.string({ validate: validateEmptyStrings }),
+  name: schema.string({
+    validate: validateEmptyStrings,
+    meta: { description: 'The display name for the connector.' },
+  }),
   config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
     defaultValue: {},
   }),
@@ -49,9 +54,21 @@ export const updateActionRoute = (
   router.put(
     {
       path: `${BASE_ACTION_API_PATH}/connector/{id}`,
+      options: {
+        access: 'public',
+        summary: `Update a connector`,
+        tags: ['oas-tag:connectors'],
+      },
       validate: {
-        body: bodySchema,
-        params: paramSchema,
+        request: {
+          body: bodySchema,
+          params: paramSchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

@@ -11,6 +11,7 @@ import { addTimeZoneToDate, getErrorMessage } from '@kbn/actions-plugin/server/l
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import {
   ExternalServiceCredentials,
   Incident,
@@ -23,13 +24,23 @@ import {
 import { FIELD_PREFIX } from './config';
 import * as i18n from './translations';
 
-export const prepareIncident = (useOldApi: boolean, incident: PartialIncident): PartialIncident =>
-  useOldApi
-    ? incident
-    : Object.entries(incident).reduce(
-        (acc, [key, value]) => ({ ...acc, [`${FIELD_PREFIX}${key}`]: value }),
-        {} as Incident
-      );
+export const prepareIncident = (
+  useOldApi: boolean,
+  incident: PartialIncident
+): Record<string, unknown> => {
+  const { additional_fields: additionalFields, ...restIncidentFields } = incident;
+
+  if (useOldApi) {
+    return restIncidentFields;
+  }
+
+  const baseFields = Object.entries(restIncidentFields).reduce<Partial<Incident>>(
+    (acc, [key, value]) => ({ ...acc, [`${FIELD_PREFIX}${key}`]: value }),
+    {}
+  );
+
+  return { ...additionalFields, ...baseFields };
+};
 
 const createErrorMessage = (errorResponse?: ServiceNowError): string => {
   if (errorResponse == null) {
@@ -90,6 +101,18 @@ export const throwIfSubActionIsNotSupported = ({
   }
 };
 
+export const throwIfAdditionalFieldsNotSupported = (
+  useOldApi: boolean,
+  incident: PartialIncident
+) => {
+  if (useOldApi && incident.additional_fields) {
+    throw new AxiosError(
+      'ServiceNow additional fields are not supported for deprecated connectors.',
+      '400'
+    );
+  }
+};
+
 export interface GetAxiosInstanceOpts {
   connectorId: string;
   logger: Logger;
@@ -115,7 +138,7 @@ export const getAxiosInstance = ({
 
   if (!isOAuth && username && password) {
     axiosInstance = axios.create({
-      auth: { username, password },
+      headers: getBasicAuthHeader({ username, password }),
     });
   } else {
     axiosInstance = axios.create();

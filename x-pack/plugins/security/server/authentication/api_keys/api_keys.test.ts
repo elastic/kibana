@@ -30,6 +30,7 @@ describe('API Keys', () => {
   >;
   let mockLicense: jest.Mocked<SecurityLicense>;
   let logger: Logger;
+  const roleDescriptors: { [key: string]: any } = { foo: true };
 
   beforeEach(() => {
     mockValidateKibanaPrivileges.mockReset().mockReturnValue({ validationErrors: [] });
@@ -239,9 +240,10 @@ describe('API Keys', () => {
       });
       const result = await apiKeys.create(httpServerMock.createKibanaRequest(), {
         name: 'key-name',
-        role_descriptors: { foo: true },
+        role_descriptors: roleDescriptors,
         expiration: '1d',
       });
+
       expect(result).toEqual({
         api_key: 'abc123',
         expiration: '1d',
@@ -253,13 +255,13 @@ describe('API Keys', () => {
       expect(mockScopedClusterClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
         body: {
           name: 'key-name',
-          role_descriptors: { foo: true },
+          role_descriptors: roleDescriptors,
           expiration: '1d',
         },
       });
     });
 
-    it('creates Cross-Cluster API key when type is `cross_cluster`', async () => {
+    it('creates cross-cluster API key when type is `cross_cluster`', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
 
       mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
@@ -343,7 +345,7 @@ describe('API Keys', () => {
 
       const result = await apiKeys.update(httpServerMock.createKibanaRequest(), {
         id: 'test_id',
-        role_descriptors: { foo: true },
+        role_descriptors: roleDescriptors,
         metadata: {},
       });
 
@@ -370,7 +372,7 @@ describe('API Keys', () => {
 
       const result = await apiKeys.update(httpServerMock.createKibanaRequest(), {
         id: 'test_id',
-        role_descriptors: { foo: true },
+        role_descriptors: roleDescriptors,
         metadata: {},
       });
 
@@ -388,7 +390,7 @@ describe('API Keys', () => {
       });
     });
 
-    it('updates Cross-Cluster API key when type is `cross_cluster`', async () => {
+    it('updates cross-cluster API key when type is `cross_cluster`', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
 
       mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
@@ -473,7 +475,7 @@ describe('API Keys', () => {
         }),
         {
           name: 'test_api_key',
-          role_descriptors: { foo: true },
+          role_descriptors: roleDescriptors,
           expiration: '1d',
         }
       );
@@ -512,7 +514,7 @@ describe('API Keys', () => {
         }),
         {
           name: 'test_api_key',
-          role_descriptors: { foo: true },
+          role_descriptors: roleDescriptors,
           expiration: '1d',
         }
       );
@@ -527,7 +529,7 @@ describe('API Keys', () => {
         body: {
           api_key: {
             name: 'test_api_key',
-            role_descriptors: { foo: true },
+            role_descriptors: roleDescriptors,
             expiration: '1d',
           },
           grant_type: 'access_token',
@@ -553,7 +555,7 @@ describe('API Keys', () => {
         }),
         {
           name: 'test_api_key',
-          role_descriptors: { foo: true },
+          role_descriptors: roleDescriptors,
           expiration: '1d',
         }
       );
@@ -592,7 +594,7 @@ describe('API Keys', () => {
           }),
           {
             name: 'test_api_key',
-            role_descriptors: { foo: true },
+            role_descriptors: roleDescriptors,
             expiration: '1d',
           }
         )

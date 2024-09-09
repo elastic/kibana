@@ -7,9 +7,10 @@
 
 import type { Datatable } from '@kbn/expressions-plugin/public';
 
-import { checkTableForContainsSmallValues, shouldShowValuesInLegend } from './render_helpers';
+import { checkTableForContainsSmallValues, getLegendStats } from './render_helpers';
 import { PieLayerState } from '../../../common/types';
 import { PieChartTypes } from '../../../common/constants';
+import { LegendValue } from '@elastic/charts';
 
 describe('render helpers', () => {
   describe('#checkTableForContainsSmallValues', () => {
@@ -68,39 +69,27 @@ describe('render helpers', () => {
     });
   });
 
-  describe('#shouldShowValuesInLegend', () => {
+  describe('#getLegendStats', () => {
     it('should firstly read the state value', () => {
       expect(
-        shouldShowValuesInLegend(
-          { showValuesInLegend: true } as PieLayerState,
-          PieChartTypes.WAFFLE
-        )
-      ).toBeTruthy();
+        getLegendStats({ legendStats: [LegendValue.Value] } as PieLayerState, PieChartTypes.WAFFLE)
+      ).toEqual([LegendValue.Value]);
 
       expect(
-        shouldShowValuesInLegend(
-          { showValuesInLegend: false } as PieLayerState,
-          PieChartTypes.WAFFLE
-        )
-      ).toBeFalsy();
+        getLegendStats({ legendStats: [] as LegendValue[] } as PieLayerState, PieChartTypes.WAFFLE)
+      ).toEqual([]);
     });
 
     it('should read value from meta in case of value in state is undefined', () => {
-      expect(
-        shouldShowValuesInLegend(
-          { showValuesInLegend: undefined } as PieLayerState,
-          PieChartTypes.WAFFLE
-        )
-      ).toBeTruthy();
-
-      expect(shouldShowValuesInLegend({} as PieLayerState, PieChartTypes.WAFFLE)).toBeTruthy();
+      expect(getLegendStats({} as PieLayerState, PieChartTypes.WAFFLE)).toEqual([
+        LegendValue.Value,
+      ]);
 
       expect(
-        shouldShowValuesInLegend(
-          { showValuesInLegend: undefined } as PieLayerState,
-          PieChartTypes.PIE
-        )
-      ).toBeFalsy();
+        getLegendStats({ legendStats: undefined } as PieLayerState, PieChartTypes.WAFFLE)
+      ).toEqual([LegendValue.Value]);
+
+      expect(getLegendStats({} as PieLayerState, PieChartTypes.PIE)).toEqual(undefined);
     });
   });
 });

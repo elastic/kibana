@@ -7,10 +7,11 @@
 
 import React from 'react';
 
-import { EuiText, EuiLink, EuiFlexGroup, EuiFlexItem, EuiFieldSearch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { documentationService } from '../../../../services/documentation';
+import { DocumentFieldsSearch } from './document_fields_search';
 
 interface Props {
   searchValue: string;
@@ -37,34 +38,7 @@ export const DocumentFieldsHeader = React.memo(({ searchValue, onSearchChange }:
           />
         </EuiText>
       </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiFieldSearch
-          style={{ minWidth: '350px' }}
-          placeholder={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsPlaceholder',
-            {
-              defaultMessage: 'Search fields',
-            }
-          )}
-          value={searchValue}
-          onChange={(e) => {
-            // Temporary fix until EUI fixes the contract
-            // See my comment https://github.com/elastic/eui/pull/2723/files#r366725059
-            if (typeof e === 'string') {
-              onSearchChange(e);
-            } else {
-              onSearchChange(e.target.value);
-            }
-          }}
-          aria-label={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsAriaLabel',
-            {
-              defaultMessage: 'Search mapped fields',
-            }
-          )}
-        />
-      </EuiFlexItem>
+      <DocumentFieldsSearch searchValue={searchValue} onSearchChange={onSearchChange} />
     </EuiFlexGroup>
   );
 });

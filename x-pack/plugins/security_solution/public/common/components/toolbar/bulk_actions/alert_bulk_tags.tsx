@@ -8,7 +8,7 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiPopoverTitle, EuiSelectable, EuiButton } from '@elastic/eui';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
-import React, { memo, useCallback, useMemo, useReducer } from 'react';
+import React, { memo, useCallback, useMemo, useReducer, useEffect } from 'react';
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { DEFAULT_ALERT_TAGS_KEY } from '../../../../../common/constants';
@@ -18,7 +18,7 @@ import { createInitialTagsState } from './helpers';
 import { createAlertTagsReducer, initialState } from './reducer';
 import type { SetAlertTagsFunc } from './use_set_alert_tags';
 
-interface BulkAlertTagsPanelComponentProps {
+export interface BulkAlertTagsPanelComponentProps {
   alertItems: TimelineItem[];
   refetchQuery?: () => void;
   setIsLoading: (isLoading: boolean) => void;
@@ -27,6 +27,7 @@ interface BulkAlertTagsPanelComponentProps {
   closePopoverMenu: () => void;
   onSubmit: SetAlertTagsFunc;
 }
+
 const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = ({
   alertItems,
   refresh,
@@ -47,12 +48,7 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
   );
   const [{ selectableAlertTags, tagsToAdd, tagsToRemove }, dispatch] = useReducer(
     createAlertTagsReducer(),
-    {
-      ...initialState,
-      selectableAlertTags: createInitialTagsState(existingTags, defaultAlertTagOptions),
-      tagsToAdd: new Set<string>(),
-      tagsToRemove: new Set<string>(),
-    }
+    initialState
   );
 
   const addAlertTag = useCallback(
@@ -121,6 +117,13 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
     },
     [addAlertTag, removeAlertTag, setSelectableAlertTags]
   );
+
+  useEffect(() => {
+    dispatch({
+      type: 'setSelectableAlertTags',
+      value: createInitialTagsState(existingTags, defaultAlertTagOptions),
+    });
+  }, [existingTags, defaultAlertTagOptions]);
 
   return (
     <>

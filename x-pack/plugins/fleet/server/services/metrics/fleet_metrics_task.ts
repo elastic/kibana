@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
-import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
@@ -20,7 +20,7 @@ import { appContextService } from '../app_context';
 import type { AgentMetrics } from './fetch_agent_metrics';
 
 export const TYPE = 'Fleet-Metrics-Task';
-export const VERSION = '1.0.0';
+export const VERSION = '1.1.1';
 const TITLE = 'Fleet Metrics Task';
 const TIMEOUT = '1m';
 const SCOPE = ['fleet'];
@@ -68,8 +68,12 @@ export class FleetMetricsTask {
     }
     // Check that this task is current
     if (taskInstance.id !== this.taskId) {
-      throwUnrecoverableError(new Error('Outdated task version for task: ' + taskInstance.id));
-      return;
+      appContextService
+        .getLogger()
+        .info(
+          `Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
+        );
+      return getDeleteTaskRunResult();
     }
     if (!this.esClient) {
       appContextService.getLogger().debug('esClient not set, skipping Fleet metrics task');
@@ -115,6 +119,7 @@ export class FleetMetricsTask {
             unhealthy: agents.unhealthy,
             inactive: agents.inactive,
             upgrading_step: agentMetrics.upgrading_step,
+            unhealthy_reason: agentMetrics.unhealthy_reason,
           },
         },
       };
@@ -185,7 +190,7 @@ export class FleetMetricsTask {
     this.wasStarted = true;
 
     try {
-      appContextService.getLogger().info(`Task ${this.taskId} scheduled with interval 1h`);
+      appContextService.getLogger().info(`Task ${this.taskId} scheduled with interval ${INTERVAL}`);
 
       await this.taskManager.ensureScheduled({
         id: this.taskId,

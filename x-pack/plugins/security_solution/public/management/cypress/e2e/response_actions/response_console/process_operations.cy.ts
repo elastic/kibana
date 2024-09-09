@@ -24,7 +24,9 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
+const AGENT_BEAT_FILE_PATH_SUFFIX = '/components/agentbeat';
+
+describe('Response console', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
   });
@@ -42,7 +44,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
 
           return enableAllPolicyProtections(policy.id).then(() => {
             // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
+            return createEndpointHost(policy.policy_ids[0]).then((host) => {
               createdHost = host as CreateAndEnrollEndpointHostResponse;
             });
           });
@@ -74,13 +76,13 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains('Action pending.').should('exist');
 
       // on success
-      cy.getByTestSubj('getProcessListTable', { timeout: 120000 }).within(() => {
+      cy.getByTestSubj('processesOutput-processListTable', { timeout: 120000 }).within(() => {
         ['USER', 'PID', 'ENTITY ID', 'COMMAND'].forEach((header) => {
           cy.contains(header);
         });
 
         cy.get('tbody > tr').should('have.length.greaterThan', 0);
-        cy.get('tbody > tr > td').should('contain', '/components/filebeat');
+        cy.get('tbody > tr > td').should('contain', AGENT_BEAT_FILE_PATH_SUFFIX);
       });
     });
 
@@ -89,7 +91,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       openResponseConsoleFromEndpointList();
 
       // get running processes
-      getRunningProcesses('/components/filebeat').then((pid) => {
+      getRunningProcesses(AGENT_BEAT_FILE_PATH_SUFFIX).then((pid) => {
         // kill the process using PID
         inputConsoleCommand(`kill-process --pid ${pid}`);
         submitCommand();
@@ -102,7 +104,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       openResponseConsoleFromEndpointList();
 
       // get running processes
-      getRunningProcesses('/components/filebeat').then((pid) => {
+      getRunningProcesses(AGENT_BEAT_FILE_PATH_SUFFIX).then((pid) => {
         // suspend the process using PID
         inputConsoleCommand(`suspend-process --pid ${pid}`);
         submitCommand();

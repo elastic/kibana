@@ -43,7 +43,8 @@ export function useLinks() {
       version: string;
     }) => {
       const imagePath = removeRelativePath(path);
-      const filePath = `${epmRouteService.getInfoPath(packageName, version)}/${imagePath}`;
+
+      const filePath = `${epmRouteService.getInfoPath(packageName, version)}${imagePath}`;
       return http.basePath.prepend(filePath);
     },
   };

@@ -8,49 +8,49 @@
 import { i18n } from '@kbn/i18n';
 
 export const SELECTED_CONVERSATION_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelectorSettings.defaultConversationTitle',
+  'xpack.elasticAssistant.assistant.conversationSelector.defaultConversationTitle',
   {
     defaultMessage: 'Conversations',
   }
 );
 
 export const CONVERSATION_SELECTOR_ARIA_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelectorSettings.ariaLabel',
+  'xpack.elasticAssistant.assistant.conversationSelector.ariaLabel',
   {
     defaultMessage: 'Conversation selector',
   }
 );
 
 export const CONVERSATION_SELECTOR_PLACE_HOLDER = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelectorSettings.placeholderTitle',
+  'xpack.elasticAssistant.assistant.conversationSelector.placeholderTitle',
   {
     defaultMessage: 'Select or type to create new...',
   }
 );
 
 export const CONVERSATION_SELECTOR_CUSTOM_OPTION_TEXT = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelectorSettings.CustomOptionTextTitle',
+  'xpack.elasticAssistant.assistant.conversationSelector.CustomOptionTextTitle',
   {
     defaultMessage: 'Create new conversation:',
   }
 );
 
 export const PREVIOUS_CONVERSATION_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelectorSettings.previousConversationTitle',
+  'xpack.elasticAssistant.assistant.conversationSelector.previousConversationTitle',
   {
     defaultMessage: 'Previous conversation',
   }
 );
 
 export const NEXT_CONVERSATION_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelectorSettings.nextConversationTitle',
+  'xpack.elasticAssistant.assistant.conversationSelector.nextConversationTitle',
   {
     defaultMessage: 'Next conversation',
   }
 );
 
 export const DELETE_CONVERSATION = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelectorSettings.deleteConversationTitle',
+  'xpack.elasticAssistant.assistant.conversationSelector.deleteConversationTitle',
   {
     defaultMessage: 'Delete conversation',
   }

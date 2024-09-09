@@ -36,7 +36,7 @@ jest.mock('../utils/create_or_update_index', () => ({
 }));
 
 jest.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());
-jest.spyOn(transforms, 'startTransform').mockResolvedValue(Promise.resolve());
+jest.spyOn(transforms, 'scheduleTransformNow').mockResolvedValue(Promise.resolve());
 
 describe('RiskScoreDataClient', () => {
   let riskScoreDataClient: RiskScoreDataClient;
@@ -282,7 +282,7 @@ describe('RiskScoreDataClient', () => {
         options: {
           index: `risk-score.risk-score-latest-default`,
           mappings: {
-            dynamic: 'strict',
+            dynamic: false,
             properties: {
               '@timestamp': {
                 ignore_malformed: false,
@@ -428,11 +428,19 @@ describe('RiskScoreDataClient', () => {
           },
           sync: {
             time: {
-              delay: '2s',
+              delay: '0s',
               field: '@timestamp',
             },
           },
           transform_id: 'risk_score_latest_transform_default',
+          settings: {
+            unattended: true,
+          },
+          _meta: {
+            version: 2,
+            managed: true,
+            managed_by: 'security-entity-analytics',
+          },
         },
       });
     });
@@ -450,6 +458,42 @@ describe('RiskScoreDataClient', () => {
           `Error initializing risk engine resources: ${error.message}`
         );
       }
+    });
+  });
+  describe('upgrade process', () => {
+    it('upserts the configuration for the latest risk score index when upgrading', async () => {
+      await riskScoreDataClient.upgradeIfNeeded();
+
+      expect(esClient.indices.putMapping).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dynamic: 'false',
+        })
+      );
+    });
+  });
+
+  describe('tearDown', () => {
+    it('deletes all resources', async () => {
+      const errors = await riskScoreDataClient.tearDown();
+
+      expect(esClient.transform.deleteTransform).toHaveBeenCalledTimes(1);
+      expect(esClient.indices.deleteDataStream).toHaveBeenCalledTimes(1);
+      expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledTimes(1);
+      expect(esClient.cluster.deleteComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(errors).toEqual([]);
+    });
+
+    it('returns errors when promises are rejected', async () => {
+      const error = new Error('test error');
+
+      esClient.transform.deleteTransform.mockRejectedValueOnce(error);
+      esClient.indices.deleteDataStream.mockRejectedValueOnce(error);
+      esClient.indices.deleteIndexTemplate.mockRejectedValueOnce(error);
+      esClient.cluster.deleteComponentTemplate.mockRejectedValueOnce(error);
+
+      const errors = await riskScoreDataClient.tearDown();
+
+      expect(errors).toEqual([error, error, error, error]);
     });
   });
 });

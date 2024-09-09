@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { AgentEcs } from './agent';
@@ -109,7 +110,7 @@ export interface EcsSecurityExtension {
   };
   // I believe these parameters are all snake cased to correspond with how they are sent "over the wire" as request / response
   // Not representative of the parsed types that are camel cased.
-  'kibana.alert.rule.parameters'?: { index: string[]; data_view_id?: string };
+  'kibana.alert.rule.parameters'?: { index: string[]; data_view_id?: string; type?: string };
   'kibana.alert.workflow_status'?: 'open' | 'acknowledged' | 'in-progress' | 'closed';
   // eslint-disable-next-line @typescript-eslint/naming-convention
   Memory_protection?: MemoryProtection;

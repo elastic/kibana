@@ -5,14 +5,11 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "centralMajorMode": Array [
-          "custom",
-        ],
         "colorMode": Array [
           "palette",
         ],
         "labelMajorMode": Array [
-          "none",
+          "custom",
         ],
         "labelMinor": Array [
           "some custom sublabel",

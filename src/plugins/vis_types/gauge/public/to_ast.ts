@@ -1,19 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getStopsWithColorsFromRanges } from '@kbn/visualizations-plugin/common/utils';
 import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import type {
+import {
+  GaugeArguments,
   GaugeExpressionFunctionDefinition,
   GaugeShape,
+  GaugeShapes,
 } from '@kbn/expression-gauge-plugin/common';
-import { GaugeType, GaugeVisParams } from './types';
+import { Gauge, GaugeType, GaugeVisParams } from './types';
+
+const gaugeTypeToShape = (type: GaugeType): GaugeShape => {
+  return {
+    [GaugeType.Arc]: GaugeShapes.ARC,
+    [GaugeType.Circle]: GaugeShapes.CIRCLE,
+  }[type];
+};
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -26,30 +36,30 @@ const prepareDimension = (params: SchemaConfig) => {
   return buildExpression([visdimension]);
 };
 
-const gaugeTypeToShape = (type: GaugeType): GaugeShape => {
-  const arc: GaugeShape = 'arc';
-  const circle: GaugeShape = 'circle';
+export const getDefaultGaugeArgsFromParams = ({
+  gaugeType,
+  percentageMode,
+  scale,
+  style,
+  labels,
+}: Gauge): GaugeArguments => {
+  const labelMajorMode = labels.show ? (style.subText ? 'custom' : 'auto') : 'none';
 
   return {
-    [GaugeType.Arc]: arc,
-    [GaugeType.Circle]: circle,
-  }[type];
+    shape: gaugeTypeToShape(gaugeType),
+    ticksPosition: scale.show ? 'auto' : 'hidden',
+    colorMode: 'palette',
+    labelMajorMode,
+    ...(labelMajorMode === 'custom' ? { labelMinor: style.subText } : {}),
+    percentageMode,
+  };
 };
 
 export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params) => {
   const schemas = getVisSchemas(vis, params);
 
-  const {
-    gaugeType,
-    percentageMode,
-    percentageFormatPattern,
-    colorSchema,
-    colorsRange,
-    invertColors,
-    scale,
-    style,
-    labels,
-  } = vis.params.gauge;
+  const { percentageMode, percentageFormatPattern, colorSchema, colorsRange, invertColors } =
+    vis.params.gauge;
 
   // fix formatter for percentage mode
   if (percentageMode === true) {
@@ -61,18 +71,13 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
     });
   }
 
-  const centralMajorMode = labels.show ? (style.subText ? 'custom' : 'auto') : 'none';
   const gauge = buildExpressionFunction<GaugeExpressionFunctionDefinition>('gauge', {
-    shape: gaugeTypeToShape(gaugeType),
+    ...getDefaultGaugeArgsFromParams(vis.params.gauge),
     metric: schemas.metric.map(prepareDimension),
-    ticksPosition: scale.show ? 'auto' : 'hidden',
-    labelMajorMode: 'none',
-    colorMode: 'palette',
-    centralMajorMode,
-    ...(centralMajorMode === 'custom' ? { labelMinor: style.subText } : {}),
+    labelMajor: schemas.metric?.[0]?.label,
     percentageMode,
     respectRanges: true,
-    commonLabel: schemas.metric?.[0]?.label,
+    commonLabel: schemas.metric.length > 1 ? schemas.metric?.[0]?.label : undefined,
   });
 
   if (colorsRange && colorsRange.length) {

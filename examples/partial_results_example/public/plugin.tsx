@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import { ExpressionsServiceFork } from '@kbn/expressions-plugin/common/service/expressions_fork';
-import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { App, ExpressionsContext } from './app';
 import { countEvent, getEvents, pluck } from './functions';
@@ -33,7 +35,7 @@ export class PartialResultsExamplePlugin implements Plugin<void, void, SetupDeps
     application.register({
       id: 'partialResultsExample',
       title: 'Partial Results Example',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async ({ element }: AppMountParameters) => {
         ReactDOM.render(
           <ExpressionsContext.Provider value={expressionsStart}>

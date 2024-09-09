@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { LanguageDefinition } from '../types';
@@ -19,7 +20,9 @@ export const consoleDefinition: Partial<LanguageDefinition> = {
     }
   }
 }`,
-  ingestData: `POST _bulk?pretty
+  ingestData: ({ ingestPipeline }) => `POST _bulk?pretty${
+    ingestPipeline ? `&pipeline=${ingestPipeline}` : ''
+  }
 { "index" : { "_index" : "books" } }
 {"name": "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470}
 { "index" : { "_index" : "books" } }

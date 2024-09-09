@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
@@ -13,10 +14,7 @@ import type {
   DataFrameTaskStateType,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import { getToastNotifications } from '../../../../../util/dependency_cache';
-import { useMlKibana } from '../../../../../contexts/kibana';
-
-import { ResultsSearchQuery } from '../../../../common/analytics';
+import type { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSectionResults } from '../expandable_section';
 
@@ -32,19 +30,7 @@ interface Props {
 
 export const ExplorationResultsTable: FC<Props> = React.memo(
   ({ dataView, jobConfig, needsDestDataView, searchQuery }) => {
-    const {
-      services: {
-        mlServices: { mlApiServices },
-      },
-    } = useMlKibana();
-
-    const classificationData = useExplorationResults(
-      dataView,
-      jobConfig,
-      searchQuery,
-      getToastNotifications(),
-      mlApiServices
-    );
+    const classificationData = useExplorationResults(dataView, jobConfig, searchQuery);
 
     if (jobConfig === undefined || classificationData === undefined) {
       return null;

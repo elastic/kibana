@@ -42,3 +42,10 @@ export const UNIT = (totalCount: number) =>
 export const USER_RISK = i18n.translate('xpack.securitySolution.usersTable.riskTitle', {
   defaultMessage: 'User risk level',
 });
+
+export const ASSET_CRITICALITY = i18n.translate(
+  'xpack.securitySolution.hostsTable.assetCriticality',
+  {
+    defaultMessage: 'Asset criticality',
+  }
+);

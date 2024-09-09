@@ -27,6 +27,9 @@ export {
   stripUndefinedValues,
   normalizeRuntimeFields,
   deNormalizeRuntimeFields,
+  getAllFieldTypesFromState,
+  getFieldsFromState,
+  getFieldsMatchingFilterFromState,
 } from './utils';
 
 export * from './serializers';

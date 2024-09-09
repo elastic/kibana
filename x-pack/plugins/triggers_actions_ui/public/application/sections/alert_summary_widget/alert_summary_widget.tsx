@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { getTimeZone } from '@kbn/visualization-utils';
 import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
 import { AlertSummaryWidgetProps } from '.';
 import {
@@ -14,6 +15,7 @@ import {
   AlertSummaryWidgetFullSize,
   AlertSummaryWidgetLoader,
 } from './components';
+import { AlertSummaryWidgetDependencies, DependencyProps } from './types';
 
 export const AlertSummaryWidget = ({
   chartProps,
@@ -23,8 +25,10 @@ export const AlertSummaryWidget = ({
   onClick = () => {},
   timeRange,
   hideChart,
+  hideStats,
   onLoaded,
-}: AlertSummaryWidgetProps) => {
+  dependencies: { charts, uiSettings },
+}: AlertSummaryWidgetProps & AlertSummaryWidgetDependencies) => {
   const {
     alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount },
     isLoading,
@@ -37,9 +41,14 @@ export const AlertSummaryWidget = ({
 
   useEffect(() => {
     if (!isLoading && onLoaded) {
-      onLoaded();
+      onLoaded({ activeAlertCount, recoveredAlertCount });
     }
-  }, [isLoading, onLoaded]);
+  }, [activeAlertCount, isLoading, onLoaded, recoveredAlertCount]);
+
+  const dependencyProps: DependencyProps = {
+    baseTheme: charts.theme.useChartsBaseTheme(),
+    sparklineTheme: charts.theme.useSparklineOverrides(),
+  };
 
   if (isLoading)
     return <AlertSummaryWidgetLoader fullSize={fullSize} isLoadingWithoutChart={hideChart} />;
@@ -55,7 +64,10 @@ export const AlertSummaryWidget = ({
         chartProps={chartProps}
         dateFormat={timeRange.dateFormat}
         recoveredAlertCount={recoveredAlertCount}
+        timeZone={getTimeZone(uiSettings)}
         hideChart={hideChart}
+        hideStats={hideStats}
+        dependencyProps={dependencyProps}
       />
     ) : null
   ) : (
@@ -66,6 +78,7 @@ export const AlertSummaryWidget = ({
       onClick={onClick}
       recoveredAlertCount={recoveredAlertCount}
       timeRangeTitle={timeRange.title}
+      dependencyProps={dependencyProps}
     />
   );
 };

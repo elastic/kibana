@@ -4324,14 +4324,12 @@ table .info a,
 .table-bordered > tfoot > tr > td {
   border: 1px solid #343741;
 }
-.form-control,
-input {
+.form-control {
   border-width: 1px;
   -webkit-box-shadow: none;
   box-shadow: none;
 }
-.form-control:focus,
-input:focus {
+.form-control:focus {
   -webkit-box-shadow: none;
   box-shadow: none;
 }

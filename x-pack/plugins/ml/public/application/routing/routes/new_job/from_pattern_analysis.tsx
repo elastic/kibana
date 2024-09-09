@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { parse } from 'query-string';
 import { useMlKibana } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../locator';
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
+import type { MlRoute, PageProps } from '../../router';
+import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { resolver } from '../../../jobs/new_job/job_from_pattern_analysis';
+import { useMlJobService } from '../../../services/job_service';
 
 export const fromPatternAnalysisRouteFactory = (): MlRoute => ({
   path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS),
@@ -38,15 +41,17 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
       data,
       dashboard: dashboardService,
       uiSettings: kibanaConfig,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
+  const mlJobService = useMlJobService();
 
   const { context } = useRouteResolver('full', ['canCreateJob'], {
     redirect: () =>
       resolver(
         {
-          mlApiServices,
+          mlApi,
+          mlJobService,
           timeFilter: data.query.timefilter.timefilter,
           kibanaConfig,
           dashboardService,

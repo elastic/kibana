@@ -58,7 +58,7 @@ describe('gauge', () => {
 
   describe('#getConfiguration', () => {
     beforeEach(() => {
-      const mockDatasource = createMockDatasource('testDatasource');
+      const mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
@@ -446,7 +446,7 @@ describe('gauge', () => {
   describe('#toExpression', () => {
     let datasourceLayers: DatasourceLayers;
     beforeEach(() => {
-      const mockDatasource = createMockDatasource('testDatasource');
+      const mockDatasource = createMockDatasource();
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
@@ -508,7 +508,7 @@ describe('gauge', () => {
 
   describe('#getUserMessages', () => {
     beforeEach(() => {
-      const mockDatasource = createMockDatasource('testDatasource');
+      const mockDatasource = createMockDatasource();
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
@@ -565,6 +565,7 @@ describe('gauge', () => {
             "longMessage": "",
             "severity": "error",
             "shortMessage": "Minimum value may not be greater than maximum value",
+            "uniqueId": "gauge_min_gt_max",
           },
         ]
       `);

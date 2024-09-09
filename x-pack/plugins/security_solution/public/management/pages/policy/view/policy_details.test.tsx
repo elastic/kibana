@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
 import React from 'react';
 import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
@@ -57,7 +57,8 @@ describe('Policy Details', () => {
     const AppWrapper = appContextMockRenderer.AppWrapper;
 
     ({ history, coreStart, middlewareSpy } = appContextMockRenderer);
-    render = () => mount(<PolicyDetails />, { wrappingComponent: AppWrapper });
+    render = () =>
+      mount(<PolicyDetails />, { wrappingComponent: AppWrapper as EnzymeComponentType<{}> });
     http = coreStart.http;
   });
 
@@ -75,7 +76,7 @@ describe('Policy Details', () => {
     });
 
     it('should NOT display timeline', async () => {
-      expect(policyView.find('flyoutOverlay')).toHaveLength(0);
+      expect(policyView.find('timeline-bottom-bar-title-button')).toHaveLength(0);
     });
 
     it('should show loader followed by error message', async () => {
@@ -96,6 +97,7 @@ describe('Policy Details', () => {
     beforeEach(() => {
       policyPackagePolicy = generator.generatePolicyPackagePolicy();
       policyPackagePolicy.id = '1';
+      policyPackagePolicy.policy_id = policyPackagePolicy.policy_ids[0];
 
       const policyListApiHandlers = policyListApiPathHandlers();
 
@@ -136,7 +138,7 @@ describe('Policy Details', () => {
     it('should NOT display timeline', async () => {
       policyView = render();
       await asyncActions;
-      expect(policyView.find('flyoutOverlay')).toHaveLength(0);
+      expect(policyView.find('timeline-bottom-bar-title-button')).toHaveLength(0);
     });
 
     it('should display back to policy list button and policy title', async () => {

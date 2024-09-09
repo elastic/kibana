@@ -9,7 +9,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '../../common/mock/react_beautiful_dnd';
-
 import { TestProviders } from '../../common/mock';
 import { TimelineId } from '../../../common/types/timeline';
 import * as timelineActions from '../store/actions';
@@ -45,8 +44,8 @@ describe('TimelineWrapper', () => {
         <TimelineWrapper {...props} />
       </TestProviders>
     );
-    expect(getByTestId('flyout-pane')).toBeInTheDocument();
-    expect(getByTestId('flyoutBottomBar')).toBeInTheDocument();
+    expect(getByTestId('timeline-portal-ref')).toBeInTheDocument();
+    expect(getByTestId('timeline-bottom-bar')).toBeInTheDocument();
   });
 
   it('should render the default timeline state as a bottom bar', () => {
@@ -66,7 +65,7 @@ describe('TimelineWrapper', () => {
       </TestProviders>
     );
 
-    userEvent.click(getByTestId('flyoutOverlay'));
+    userEvent.click(getByTestId('timeline-bottom-bar-title-button'));
 
     expect(mockDispatch).toBeCalledWith(
       timelineActions.showTimeline({ id: TimelineId.test, show: true })

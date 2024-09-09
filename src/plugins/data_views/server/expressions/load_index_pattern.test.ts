@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { IndexPatternLoadStartDependencies } from '../../common/expressions';
@@ -35,7 +36,7 @@ describe('indexPattern expression function', () => {
 
   test('throws if getKibanaRequest is not available', async () => {
     const indexPatternDefinition = getFunctionDefinition({ getStartDependencies });
-    expect(async () => {
+    await expect(async () => {
       await indexPatternDefinition().fn(null, { id: '1' }, {} as any);
     }).rejects.toThrowErrorMatchingInlineSnapshot(
       `"A KibanaRequest is required to execute this search on the server. Please provide a request object to the expression execution params."`

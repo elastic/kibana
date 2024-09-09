@@ -7,7 +7,11 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetryDiagnosticTimelineTaskConfig } from './timelines_diagnostic';
-import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import {
+  createMockTelemetryEventsSender,
+  createMockTelemetryReceiver,
+  createMockTaskMetrics,
+} from '../__mocks__';
 
 describe('timeline telemetry diagnostic task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -24,12 +28,14 @@ describe('timeline telemetry diagnostic task test', () => {
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const telemetryTelemetryDiagnosticTaskConfig = createTelemetryDiagnosticTimelineTaskConfig();
+    const mockTaskMetrics = createMockTaskMetrics();
 
     await telemetryTelemetryDiagnosticTaskConfig.runTask(
       'test-timeline-diagnostic-task-id',
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
+      mockTaskMetrics,
       testTaskExecutionPeriod
     );
 
@@ -48,12 +54,14 @@ describe('timeline telemetry diagnostic task test', () => {
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
     const mockTelemetryReceiver = createMockTelemetryReceiver(null, true);
     const telemetryTelemetryDiagnosticTaskConfig = createTelemetryDiagnosticTimelineTaskConfig();
+    const mockTaskMetrics = createMockTaskMetrics();
 
     await telemetryTelemetryDiagnosticTaskConfig.runTask(
       'test-timeline-diagnostic-task-id',
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
+      mockTaskMetrics,
       testTaskExecutionPeriod
     );
 

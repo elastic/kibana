@@ -15,6 +15,8 @@ import {
   throwIfResponseIsNotValid,
 } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import {
   CreateCommentParams,
   CreateIncidentParams,
@@ -46,7 +48,8 @@ const createMetaCapabilities = ['list-project-issuetypes', 'list-issuetype-field
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities
+  configurationUtilities: ActionsConfigurationUtilities,
+  connectorUsageCollector: ConnectorUsageCollector
 ): ExternalService => {
   const { apiUrl: url, projectKey } = config as JiraPublicConfigurationType;
   const { apiToken, email } = secrets as JiraSecretConfigurationType;
@@ -66,7 +69,7 @@ export const createExternalService = (
   const searchUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/search`;
 
   const axiosInstance = axios.create({
-    auth: { username: email, password: apiToken },
+    headers: getBasicAuthHeader({ username: email, password: apiToken }),
   });
 
   const getIncidentViewURL = (key: string) => {
@@ -104,6 +107,10 @@ export const createExternalService = (
 
     if (incident.parent) {
       fields = { ...fields, parent: { key: incident.parent } };
+    }
+
+    if (incident.otherFields) {
+      fields = { ...fields, ...incident.otherFields };
     }
 
     return fields;
@@ -184,6 +191,7 @@ export const createExternalService = (
         url: `${incidentUrl}/${id}`,
         logger,
         configurationUtilities,
+        connectorUsageCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -215,7 +223,6 @@ export const createExternalService = (
         2. Create the issue.
         3. Get the created issue with all the necessary fields.
     */
-
     let issueType = incident.issueType;
 
     if (!incident.issueType) {
@@ -238,6 +245,7 @@ export const createExternalService = (
           fields,
         },
         configurationUtilities,
+        connectorUsageCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -284,6 +292,7 @@ export const createExternalService = (
         logger,
         data: { fields },
         configurationUtilities,
+        connectorUsageCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -322,6 +331,7 @@ export const createExternalService = (
         logger,
         data: { body: comment.comment },
         configurationUtilities,
+        connectorUsageCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -354,6 +364,7 @@ export const createExternalService = (
         url: capabilitiesUrl,
         logger,
         configurationUtilities,
+        connectorUsageCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -385,6 +396,7 @@ export const createExternalService = (
           url: getIssueTypesOldAPIURL,
           logger,
           configurationUtilities,
+          connectorUsageCollector,
         });
 
         throwIfResponseIsNotValid({
@@ -400,6 +412,7 @@ export const createExternalService = (
           url: getIssueTypesUrl,
           logger,
           configurationUtilities,
+          connectorUsageCollector,
         });
 
         throwIfResponseIsNotValid({
@@ -432,6 +445,7 @@ export const createExternalService = (
           url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsOldAPIURL, issueTypeId),
           logger,
           configurationUtilities,
+          connectorUsageCollector,
         });
 
         throwIfResponseIsNotValid({
@@ -511,6 +525,7 @@ export const createExternalService = (
         url: query,
         logger,
         configurationUtilities,
+        connectorUsageCollector,
       });
 
       throwIfResponseIsNotValid({
@@ -539,6 +554,7 @@ export const createExternalService = (
         url: getIssueUrl,
         logger,
         configurationUtilities,
+        connectorUsageCollector,
       });
 
       throwIfResponseIsNotValid({

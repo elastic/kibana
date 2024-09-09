@@ -23,7 +23,7 @@ import {
 import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
 import type { MetricVisExpressionFunctionDefinition } from '@kbn/expression-legacy-metric-vis-plugin/common';
 import { getSuggestions } from './metric_suggestions';
-import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
+import { Visualization, OperationMetadata, DatasourceLayers, FramePublicAPI } from '../../types';
 import type { LegacyMetricState } from '../../../common/types';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';
@@ -157,6 +157,9 @@ export const getLegacyMetricVisualization = ({
 }): Visualization<LegacyMetricState> => ({
   id: 'lnsLegacyMetric',
 
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
       id: 'lnsLegacyMetric',
@@ -164,14 +167,17 @@ export const getLegacyMetricVisualization = ({
       label: i18n.translate('xpack.lens.legacyMetric.label', {
         defaultMessage: 'Legacy Metric',
       }),
-      groupLabel: i18n.translate('xpack.lens.legacyMetric.groupLabel', {
-        defaultMessage: 'Goal and single value',
+      isDeprecated: true,
+      sortPriority: 100,
+      description: i18n.translate('xpack.lens.legacyMetric.visualizationDescription', {
+        defaultMessage: 'Present individual key metrics or KPIs.',
       }),
     },
   ],
-
-  getVisualizationTypeId() {
-    return 'lnsLegacyMetric';
+  hideFromChartSwitch(frame: FramePublicAPI) {
+    return Object.values(frame.datasourceLayers).some(
+      (datasource) => datasource && datasource.datasourceId === 'textBased'
+    );
   },
 
   clearLayer(state) {

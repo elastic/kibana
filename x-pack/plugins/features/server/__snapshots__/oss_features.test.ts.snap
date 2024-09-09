@@ -434,7 +434,7 @@ Array [
                     "reporting",
                   ],
                 },
-                "name": "Download CSV reports from Saved Search panels",
+                "name": "Generate CSV reports from Saved Search panels",
                 "savedObject": Object {
                   "all": Array [],
                   "read": Array [],
@@ -546,6 +546,8 @@ Array [
         },
       },
       "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
         "store_search_session",
       ],
       "app": Array [
@@ -600,6 +602,10 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
+      ],
       "app": Array [
         "dashboards",
         "kibana",
@@ -1162,6 +1168,8 @@ Array [
         },
       },
       "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
         "store_search_session",
       ],
       "app": Array [
@@ -1216,6 +1224,10 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
+      ],
       "app": Array [
         "dashboards",
         "kibana",

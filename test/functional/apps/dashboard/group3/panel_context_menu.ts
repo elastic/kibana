@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -53,7 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardPanelActions.expectExistsEditPanelAction();
       await dashboardPanelActions.expectExistsClonePanelAction();
-      await dashboardPanelActions.expectExistsReplacePanelAction();
       await dashboardPanelActions.expectExistsRemovePanelAction();
       await dashboardPanelActions.expectExistsToggleExpandAction();
     });
@@ -69,7 +69,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardPanelActions.expectExistsEditPanelAction();
       await dashboardPanelActions.expectExistsClonePanelAction();
-      await dashboardPanelActions.expectExistsReplacePanelAction();
       await dashboardPanelActions.expectExistsRemovePanelAction();
 
       // Get rid of the timestamp in the url.
@@ -78,7 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('visualization object edit menu', () => {
       it('opens a visualization when edit link is clicked', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const currentUrl = await browser.getCurrentUrl();
@@ -120,7 +118,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('opens a saved search when edit link is clicked', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const queryName = await PageObjects.discover.getCurrentQueryName();
@@ -141,22 +138,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before('reset dashboard', async () => {
         const currentUrl = await browser.getCurrentUrl();
         await browser.get(currentUrl.toString(), false);
-      });
-
-      before('and add one panel and save to put dashboard in "view" mode', async () => {
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         await PageObjects.dashboard.saveDashboard(dashboardName + '2');
-      });
-
-      before('expand panel to "full screen"', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickExpandPanelToggle();
       });
 
       it('context menu actions are hidden in view mode', async function () {
         await dashboardPanelActions.expectMissingEditPanelAction();
         await dashboardPanelActions.expectMissingDuplicatePanelAction();
-        await dashboardPanelActions.expectMissingReplacePanelAction();
         await dashboardPanelActions.expectMissingRemovePanelAction();
       });
 
@@ -168,7 +157,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('some context menu actions should be present', async function () {
           await dashboardPanelActions.expectExistsEditPanelAction();
           await dashboardPanelActions.expectExistsClonePanelAction();
-          await dashboardPanelActions.expectExistsReplacePanelAction();
         });
 
         it('"remove panel" action should not be present', async function () {

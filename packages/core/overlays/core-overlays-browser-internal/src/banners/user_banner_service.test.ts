@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { UserBannerService } from './user_banner_service';
 import { overlayBannersServiceMock } from './banners_service.test.mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { Subject } from 'rxjs';
 
 describe('OverlayBannersService', () => {
@@ -33,7 +36,9 @@ describe('OverlayBannersService', () => {
     service = new UserBannerService();
     service.start({
       banners,
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
       i18n: i18nServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
       uiSettings,
     });
   };

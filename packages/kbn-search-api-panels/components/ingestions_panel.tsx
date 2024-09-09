@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -41,6 +42,12 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
       links: [
         {
           href: docLinks.logstash,
+          ariaLabel: i18n.translate(
+            'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.logstashDocumentation.ariaLabel',
+            {
+              defaultMessage: 'Logstash documentation',
+            }
+          ),
           label: i18n.translate(
             'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.logstashDocumentationLabel',
             {
@@ -72,6 +79,12 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
       links: [
         {
           href: docLinks.beats,
+          ariaLabel: i18n.translate(
+            'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.beatsDocumentation.ariaLabel',
+            {
+              defaultMessage: 'Beats documentation',
+            }
+          ),
           label: i18n.translate(
             'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.beatsDocumentationLabel',
             {
@@ -109,12 +122,17 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
           {links && links.length > 0 && (
             <>
               <EuiFlexGroup direction="row" justifyContent="flexStart" alignItems="center">
-                {links.map(({ label, href, isGithubLink }, linksIndex) => (
+                {links.map(({ label, href, isGithubLink, ariaLabel }, linksIndex) => (
                   <EuiFlexItem grow={false} key={linksIndex}>
                     {isGithubLink ? (
-                      <GithubLink assetBasePath={assetBasePath} label={label} href={href} />
+                      <GithubLink
+                        href={href}
+                        label={label}
+                        assetBasePath={assetBasePath}
+                        aria-label={ariaLabel}
+                      />
                     ) : (
-                      <EuiLink href={href} target="_blank">
+                      <EuiLink aria-label={ariaLabel} href={href} target="_blank">
                         {label}
                       </EuiLink>
                     )}

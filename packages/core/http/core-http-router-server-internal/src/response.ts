@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { Stream } from 'stream';
 import type {
   IKibanaResponse,
@@ -17,15 +19,12 @@ import type {
   ErrorHttpResponseOptions,
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,
+  KibanaNotModifiedResponseFactory,
   KibanaSuccessResponseFactory,
   KibanaResponseFactory,
   LifecycleResponseFactory,
 } from '@kbn/core-http-server';
 import mime from 'mime';
-
-export function isKibanaResponse(response: Record<string, any>): response is IKibanaResponse {
-  return typeof response.status === 'number' && typeof response.options === 'object';
-}
 
 /**
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
@@ -43,12 +42,19 @@ export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
 
 const successResponseFactory: KibanaSuccessResponseFactory = {
   ok: (options: HttpResponseOptions = {}) => new KibanaResponse(200, options.body, options),
+  created: (options: HttpResponseOptions = {}) => new KibanaResponse(201, options.body, options),
   accepted: (options: HttpResponseOptions = {}) => new KibanaResponse(202, options.body, options),
   noContent: (options: HttpResponseOptions = {}) => new KibanaResponse(204, undefined, options),
+  multiStatus: (options: HttpResponseOptions = {}) =>
+    new KibanaResponse(207, options.body, options),
 };
 
 const redirectionResponseFactory: KibanaRedirectionResponseFactory = {
   redirected: (options: RedirectResponseOptions) => new KibanaResponse(302, options.body, options),
+};
+
+const notModifiedResponseFactory: KibanaNotModifiedResponseFactory = {
+  notModified: (options: HttpResponseOptions = {}) => new KibanaResponse(304, undefined, options),
 };
 
 const errorResponseFactory: KibanaErrorResponseFactory = {
@@ -62,6 +68,8 @@ const errorResponseFactory: KibanaErrorResponseFactory = {
     new KibanaResponse(404, options.body || 'Not Found', options),
   conflict: (options: ErrorHttpResponseOptions = {}) =>
     new KibanaResponse(409, options.body || 'Conflict', options),
+  unprocessableContent: (options: ErrorHttpResponseOptions = {}) =>
+    new KibanaResponse(422, options.body || 'Unprocessable Content', options),
   customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => {
     if (!options || !options.statusCode) {
       throw new Error(
@@ -120,6 +128,7 @@ export const fileResponseFactory = {
 export const kibanaResponseFactory: KibanaResponseFactory = {
   ...successResponseFactory,
   ...redirectionResponseFactory,
+  ...notModifiedResponseFactory,
   ...errorResponseFactory,
   ...fileResponseFactory,
   custom: <T extends HttpResponsePayload | ResponseError>(

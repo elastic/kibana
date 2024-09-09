@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useReducer, Reducer, Dispatch } from 'react';
@@ -65,6 +66,10 @@ interface ResetAction {
   type: 'reset';
 }
 
+interface DragEndAction {
+  type: 'dragEnd';
+}
+
 interface RegisterDraggingItemHeightAction {
   type: 'registerDraggingItemHeight';
   payload: number;
@@ -90,6 +95,7 @@ interface SetReorderedItemsAction {
 }
 
 type ReorderAction =
+  | DragEndAction
   | ResetAction
   | RegisterDraggingItemHeightAction
   | RegisterReorderedItemHeightAction
@@ -98,6 +104,8 @@ type ReorderAction =
 
 const reorderReducer = (state: ReorderState, action: ReorderAction) => {
   switch (action.type) {
+    case 'dragEnd':
+      return { ...state, reorderedItems: [], isReorderOn: false };
     case 'reset':
       return { ...state, reorderedItems: [] };
     case 'registerDraggingItemHeight':
@@ -110,7 +118,11 @@ const reorderReducer = (state: ReorderState, action: ReorderAction) => {
         ),
       };
     case 'setIsReorderOn':
-      return { ...state, isReorderOn: action.payload };
+      return {
+        ...state,
+        isReorderOn: action.payload,
+        reorderedItems: action.payload ? state.reorderedItems : [],
+      };
     case 'setReorderedItems':
       const { items, draggingIndex, droppingIndex } = action.payload;
       return draggingIndex < droppingIndex
@@ -146,7 +158,7 @@ export function ReorderProvider({
   return (
     <div
       data-test-subj={`${dataTestSubj}-reorderableGroup`}
-      className={classNames(className, {
+      className={classNames(className, 'domDragDrop-group', {
         'domDragDrop-isActiveGroup': state.isReorderOn && React.Children.count(children) > 1,
       })}
     >

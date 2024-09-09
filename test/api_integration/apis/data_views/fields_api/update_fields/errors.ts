@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -68,6 +69,29 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response2.status).to.be(400);
           expect(response2.body.statusCode).to.be(400);
           expect(response2.body.message).to.be('Change set is empty.');
+        });
+
+        it('returns validation error', async () => {
+          const title = `foo-${Date.now()}-${Math.random()}*`;
+          const response1 = await supertest.post(config.path).send({
+            [config.serviceKey]: {
+              title,
+            },
+          });
+
+          const response2 = await supertest
+            .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
+            .send({
+              fields: {
+                foo: {
+                  customDescription: 'too long value'.repeat(50),
+                },
+              },
+            });
+
+          expect(response2.status).to.be(400);
+          expect(response2.body.statusCode).to.be(400);
+          expect(response2.body.message).to.contain('it must have a maximum length');
         });
       });
     });

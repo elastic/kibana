@@ -31,6 +31,7 @@ The API returns the following:
 --------------------------------------------------
 {
   "name": "my_restricted_kibana_role",
+  "description": "My restricted kibana role description",
   "metadata" : {
     "version" : 1
   },

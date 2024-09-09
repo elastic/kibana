@@ -246,7 +246,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
                         aria-label={i18n.translate(
                           'xpack.snapshotRestore.snapshotList.table.actionDeleteAriaLabel',
                           {
-                            defaultMessage: `Delete snapshot '{name}'`,
+                            defaultMessage: `Delete snapshot ''{name}''`,
                             values: { name: snapshot },
                           }
                         )}
@@ -330,7 +330,6 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
           });
         }}
         loading={isLoading}
-        isSelectable={true}
         selection={selection}
         pagination={pagination}
         rowProps={() => ({

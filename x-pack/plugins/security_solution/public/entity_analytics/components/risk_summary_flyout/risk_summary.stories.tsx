@@ -7,34 +7,46 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
-import { mockRiskScoreState } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
-import { RiskSummary } from './risk_summary';
+import { mockRiskScoreState } from '../../../flyout/shared/mocks';
+import { FlyoutRiskSummary } from './risk_summary';
 
 export default {
-  component: RiskSummary,
-  title: 'Components/RiskSummary',
+  component: FlyoutRiskSummary,
+  title: 'Components/FlyoutRiskSummary',
 };
-
-const flyoutContextValue = {
-  openLeftPanel: () => window.alert('openLeftPanel called'),
-  panels: {},
-} as unknown as ExpandableFlyoutContextValue;
 
 export const Default: Story<void> = () => {
   return (
     <StorybookProviders>
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+      <TestProvider>
         <div style={{ maxWidth: '300px' }}>
-          <RiskSummary
+          <FlyoutRiskSummary
             openDetailsPanel={() => {}}
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
+            recalculatingScore={false}
           />
         </div>
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
+    </StorybookProviders>
+  );
+};
+
+export const PreviewMode: Story<void> = () => {
+  return (
+    <StorybookProviders>
+      <TestProvider>
+        <div style={{ maxWidth: '300px' }}>
+          <FlyoutRiskSummary
+            riskScoreData={{ ...mockRiskScoreState, data: [] }}
+            queryId={'testQuery'}
+            recalculatingScore={false}
+            isPreviewMode
+          />
+        </div>
+      </TestProvider>
     </StorybookProviders>
   );
 };

@@ -22,6 +22,8 @@ export function registerAnomalyDetectionRule(
   getStartServices: MlCoreSetup['getStartServices'],
   mlCapabilities: MlCapabilities
 ) {
+  const MlAlertTrigger = lazy(() => import('./ml_anomaly_alert_trigger'));
+
   triggersActionsUi.ruleTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyDetection.description', {
@@ -32,7 +34,6 @@ export function registerAnomalyDetectionRule(
       return docLinks.links.ml.alertingRules;
     },
     ruleParamsExpression: (props: RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>) => {
-      const MlAlertTrigger = lazy(() => import('./ml_anomaly_alert_trigger'));
       return (
         <MlAlertTrigger
           {...props}
@@ -115,29 +116,29 @@ export function registerAnomalyDetectionRule(
     defaultActionMessage: i18n.translate(
       'xpack.ml.alertTypes.anomalyDetection.defaultActionMessage',
       {
-        defaultMessage: `[\\{\\{rule.name\\}\\}] Elastic Stack Machine Learning Alert:
-- Job IDs: \\{\\{context.jobIds\\}\\}
-- Time: \\{\\{context.timestampIso8601\\}\\}
-- Anomaly score: \\{\\{context.score\\}\\}
+        defaultMessage: `['{{rule.name}}'] Elastic Stack Machine Learning Alert:
+- Job IDs: '{{context.jobIds}}'
+- Time: '{{context.timestampIso8601}}'
+- Anomaly score: '{{context.score}}'
 
-\\{\\{context.message\\}\\}
+'{{context.message}}'
 
-\\{\\{#context.topInfluencers.length\\}\\}
+'{{#context.topInfluencers.length}}'
   Top influencers:
-  \\{\\{#context.topInfluencers\\}\\}
-    \\{\\{influencer_field_name\\}\\} = \\{\\{influencer_field_value\\}\\} [\\{\\{score\\}\\}]
-  \\{\\{/context.topInfluencers\\}\\}
-\\{\\{/context.topInfluencers.length\\}\\}
+  '{{#context.topInfluencers}}'
+    '{{influencer_field_name}}' = '{{influencer_field_value}}' ['{{score}}']
+  '{{/context.topInfluencers}}'
+'{{/context.topInfluencers.length}}'
 
-\\{\\{#context.topRecords.length\\}\\}
+'{{#context.topRecords.length}}'
   Top records:
-  \\{\\{#context.topRecords\\}\\}
-    \\{\\{function\\}\\}(\\{\\{field_name\\}\\}) \\{\\{by_field_value\\}\\}\\{\\{over_field_value\\}\\}\\{\\{partition_field_value\\}\\} [\\{\\{score\\}\\}]. Typical: \\{\\{typical\\}\\}, Actual: \\{\\{actual\\}\\}
-  \\{\\{/context.topRecords\\}\\}
-\\{\\{/context.topRecords.length\\}\\}
+  '{{#context.topRecords}}'
+    '{{function}}'('{{field_name}}') '{{by_field_value}}''{{over_field_value}}''{{partition_field_value}}' ['{{score}}']. Typical: '{{typical}}', Actual: '{{actual}}'
+  '{{/context.topRecords}}'
+'{{/context.topRecords.length}}'
 
-\\{\\{! Replace kibanaBaseUrl if not configured in Kibana \\}\\}
-[Open in Anomaly Explorer](\\{\\{\\{kibanaBaseUrl\\}\\}\\}\\{\\{\\{context.anomalyExplorerUrl\\}\\}\\})
+'{{! Replace kibanaBaseUrl if not configured in Kibana }}'
+[Open in Anomaly Explorer]('{{{kibanaBaseUrl}}}{{{context.anomalyExplorerUrl}}'})
 `,
       }
     ),

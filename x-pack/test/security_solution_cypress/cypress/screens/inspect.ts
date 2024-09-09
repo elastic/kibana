@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { hostsUrl, NETWORK_URL, USERS_URL } from '../urls/navigation';
+import { hostsUrl, networkUrl, usersUrl } from '../urls/navigation';
 import { EVENT_CONTAINER_TABLE_NOT_LOADING } from './alerts';
 import { ALL_HOSTS_TAB, ALL_HOSTS_TABLE, UNIQUE_IPS_VISUALIZATIONS } from './hosts/all_hosts';
 import { HOST_BY_RISK_TABLE, RISK_DETAILS_NAV } from './hosts/host_risk';
@@ -35,9 +35,13 @@ import { EVENTS_HISTOGRAM, EVENTS_TAB } from './users/user_events';
 import { HTTP_TAB, HTTP_TABLE } from './network/http';
 import { TLS_TAB, TLS_TABLE } from './network/tls';
 import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from './users/user_risk_score';
+import { getDataTestSubjectSelector } from '../helpers/common';
 
 export const INSPECT_BUTTON_ICON = '[data-test-subj="inspect-icon-button"]';
 export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
+export const INSPECT_MODAL_REQUEST_TAB = getDataTestSubjectSelector('modal-inspect-request-tab');
+export const INSPECT_MODAL_RESPONSE_TAB = getDataTestSubjectSelector('modal-inspect-response-tab');
+export const INSPECT_MODAL_STATS_TAB = getDataTestSubjectSelector('modal-inspect-statistics-tab');
 export const INSPECT_MODAL_INDEX_PATTERN = '[data-test-subj="index-pattern-description"]';
 export const EMBEDDABLE_PANEL_TOGGLE_ICON = '[data-test-subj="embeddablePanelToggleMenuIcon"]';
 export const EMBEDDABLE_PANEL_INSPECT = '[data-test-subj="embeddablePanelAction-inspect"]';
@@ -134,7 +138,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
   },
   {
     pageName: 'Network',
-    url: NETWORK_URL,
+    url: networkUrl('flows'),
     lensVisualizations: [
       {
         title: 'Network events',
@@ -221,7 +225,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
   },
   {
     pageName: 'Users',
-    url: USERS_URL,
+    url: usersUrl('allUsers'),
     lensVisualizations: [
       {
         title: 'Users',

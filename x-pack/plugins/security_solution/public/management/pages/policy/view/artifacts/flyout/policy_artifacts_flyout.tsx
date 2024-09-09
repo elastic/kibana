@@ -22,7 +22,9 @@ import {
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { ArtifactEntryCardDecoratorProps } from '../../../../../components/artifact_entry_card';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { useToasts } from '../../../../../../common/lib/kibana';
@@ -37,12 +39,13 @@ interface PolicyArtifactsFlyoutProps {
   searchableFields: string[];
   onClose: () => void;
   labels: typeof POLICY_ARTIFACT_FLYOUT_LABELS;
+  CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
 }
 
 export const MAX_ALLOWED_RESULTS = 100;
 
 export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
-  ({ policyItem, apiClient, searchableFields, onClose, labels }) => {
+  ({ policyItem, apiClient, searchableFields, onClose, labels, CardDecorator }) => {
     const toasts = useToasts();
     const queryClient = useQueryClient();
     const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
@@ -85,7 +88,7 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
       searchableFields
     );
 
-    const handleOnSearch = useCallback((query) => {
+    const handleOnSearch = useCallback((query: string) => {
       setSelectedArtifactIds([]);
       setCurrentFilter(query);
     }, []);
@@ -175,11 +178,19 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
       labels.flyoutNoSearchResultsMessage,
     ]);
 
+    const artifactsAssignFlyoutTitleId = useGeneratedHtmlId({
+      prefix: 'artifactsAssignFlyoutTitle',
+    });
+
     return (
-      <EuiFlyout onClose={onClose} data-test-subj="artifacts-assign-flyout">
+      <EuiFlyout
+        onClose={onClose}
+        data-test-subj="artifacts-assign-flyout"
+        aria-labelledby={artifactsAssignFlyoutTitleId}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>{labels.flyoutTitle}</h2>
+            <h2 id={artifactsAssignFlyoutTitleId}>{labels.flyoutTitle}</h2>
           </EuiTitle>
           <EuiSpacer size="m" />
           {labels.flyoutSubtitle(policyItem.name)}
@@ -201,6 +212,7 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
             selectedArtifactIds={selectedArtifactIds}
             isListLoading={isLoadingArtifacts || isRefetchingArtifacts}
             selectedArtifactsUpdated={handleSelectArtifacts}
+            CardDecorator={CardDecorator}
           />
 
           {noItemsMessage}

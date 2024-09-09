@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -16,12 +17,13 @@
  * This class seems to interface with ES primarily through the es Angular
  * service and the saved object api.
  */
-import { SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../types';
+import { SavedObject, SavedObjectConfig, SavedObjectKibanaServices, StartServices } from '../types';
 import { ISavedObjectDecoratorRegistry } from './decorators';
 import { buildSavedObject } from './helpers/build_saved_object';
 
 export function createSavedObjectClass(
   services: SavedObjectKibanaServices,
+  startServices: StartServices,
   decoratorRegistry: ISavedObjectDecoratorRegistry
 ) {
   /**
@@ -35,7 +37,13 @@ export function createSavedObjectClass(
     constructor(config: SavedObjectConfig = {}) {
       // @ts-ignore
       const self: SavedObject = this;
-      buildSavedObject(self, config, services, decoratorRegistry.getOrderedDecorators(services));
+      buildSavedObject(
+        self,
+        config,
+        services,
+        startServices,
+        decoratorRegistry.getOrderedDecorators(services)
+      );
     }
   }
 

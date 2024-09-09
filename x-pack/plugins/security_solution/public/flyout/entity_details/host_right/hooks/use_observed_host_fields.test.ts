@@ -7,11 +7,11 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useObservedHostFields } from './use_observed_host_fields';
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { mockObservedHostData } from '../../mocks';
+import { TestProviders } from '../../../../common/mock';
 
-describe('useManagedUserItems', () => {
-  it('returns managed user items for Entra user', () => {
+describe('useObservedHostFields', () => {
+  it('returns managed host items for Entra host', () => {
     const { result } = renderHook(() => useObservedHostFields(mockObservedHostData), {
       wrapper: TestProviders,
     });

@@ -13,12 +13,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { IngestionStatus } from '@kbn/search-connectors';
+
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
-import { IngestionStatus } from '../../../types';
 import { isConnectorIndex } from '../../../utils/indices';
 
 import {
@@ -31,7 +32,7 @@ import { SearchIndexTabId } from '../search_index';
 const StatusPanel: React.FC<{ ingestionStatus: IngestionStatus }> = ({ ingestionStatus }) => (
   <EuiPanel color={ingestionStatusToColor(ingestionStatus)} hasShadow={false} paddingSize="l">
     <EuiStat
-      titleSize="m"
+      titleSize="s"
       description={i18n.translate('xpack.enterpriseSearch.connector.ingestionStatus.title', {
         defaultMessage: 'Ingestion status',
       })}
@@ -49,7 +50,7 @@ export const ConnectorOverviewPanels: React.FC = () => {
         <EuiPanel color="primary" hasShadow={false} paddingSize="l">
           <EuiStat
             data-test-subj="entSearchContent-indexOverview-totalStats-documentCount"
-            titleSize="m"
+            titleSize="s"
             description={i18n.translate(
               'xpack.enterpriseSearch.content.searchIndex.totalStats.documentCountCardLabel',
               {

@@ -6,7 +6,13 @@
  */
 
 import { noop } from 'lodash/fp';
-import { EuiFocusTrap, EuiOutsideClickDetector, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFocusTrap,
+  EuiOutsideClickDetector,
+  EuiScreenReaderOnly,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import {
@@ -16,10 +22,10 @@ import {
 } from '@kbn/timelines-plugin/public';
 import type { RowRenderer } from '../../../../../../../common/types';
 import type { TimelineItem } from '../../../../../../../common/search_strategy/timeline';
-import { getRowRenderer } from '../../renderers/get_row_renderer';
 import { useStatefulEventFocus } from '../use_stateful_event_focus';
 
 import * as i18n from '../translations';
+import { useStatefulRowRenderer } from './use_stateful_row_renderer';
 
 /**
  * This component addresses the accessibility of row renderers.
@@ -58,10 +64,10 @@ export const StatefulRowRenderer = ({
     rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
   });
 
-  const rowRenderer = useMemo(
-    () => getRowRenderer({ data: event.ecs, rowRenderers }),
-    [event.ecs, rowRenderers]
-  );
+  const { rowRenderer } = useStatefulRowRenderer({
+    data: event.ecs,
+    rowRenderers,
+  });
 
   const content = useMemo(
     () =>
@@ -73,13 +79,15 @@ export const StatefulRowRenderer = ({
               <EuiScreenReaderOnly data-test-subj="eventRendererScreenReaderOnly">
                 <p>{i18n.YOU_ARE_IN_AN_EVENT_RENDERER(ariaRowindex)}</p>
               </EuiScreenReaderOnly>
-              <div onKeyDown={onKeyDown}>
-                {rowRenderer.renderRow({
-                  data: event.ecs,
-                  isDraggable: true,
-                  scopeId: timelineId,
-                })}
-              </div>
+              <EuiFlexGroup direction="column" onKeyDown={onKeyDown}>
+                <EuiFlexItem grow={true}>
+                  {rowRenderer.renderRow({
+                    data: event.ecs,
+                    isDraggable: true,
+                    scopeId: timelineId,
+                  })}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFocusTrap>
           </EuiOutsideClickDetector>
         </div>

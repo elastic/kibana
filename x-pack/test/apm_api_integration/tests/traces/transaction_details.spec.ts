@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
@@ -51,6 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177546
   registry.when('Transaction details', { config: 'basic', archives: [] }, () => {
     let traceId: string;
     let transactionId: string;
@@ -95,10 +96,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       transactionId = transaction?.['transaction.id']!;
       traceId = transaction?.['trace.id']!;
 
-      await synthtraceEsClient.index(Readable.from(unserialized));
+      await apmSynthtraceEsClient.index(Readable.from(unserialized));
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('transaction details', () => {
       let transactionDetails: Awaited<ReturnType<typeof fetchTransactionDetails>>['body'];

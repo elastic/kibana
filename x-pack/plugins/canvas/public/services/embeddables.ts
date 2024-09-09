@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import { EmbeddableFactory, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableFactory,
+  type EmbeddableStateTransfer,
+  ReactEmbeddableSavedObject,
+} from '@kbn/embeddable-plugin/public';
+import { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 
 export interface CanvasEmbeddablesService {
+  reactEmbeddableRegistryHasKey: (key: string) => boolean;
+  getReactEmbeddableSavedObjects: <
+    TSavedObjectAttributes extends FinderAttributes
+  >() => IterableIterator<[string, ReactEmbeddableSavedObject<TSavedObjectAttributes>]>;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
   getStateTransfer: () => EmbeddableStateTransfer;
 }

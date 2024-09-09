@@ -8,14 +8,12 @@
 import type { FC } from 'react';
 import React from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { DocumentDetailsIsolateHostPanelKey } from '../shared/constants/panel_keys';
 import { PanelContent } from './content';
 import { PanelHeader } from './header';
 
-export const DocumentDetailsIsolateHostPanelKey: IsolateHostPanelProps['key'] =
-  'document-details-isolate-host';
-
 export interface IsolateHostPanelProps extends FlyoutPanelProps {
-  key: 'document-details-isolate-host';
+  key: typeof DocumentDetailsIsolateHostPanelKey;
   params?: {
     id: string;
     indexName: string;

@@ -1,0 +1,32 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts", "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/i18n",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/licensing-plugin",
+    "@kbn/i18n-react",
+    "@kbn/discover-utils",
+    "@kbn/saved-search-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/reporting-public",
+    "@kbn/presentation-publishing",
+  ]
+}

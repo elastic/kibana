@@ -10,7 +10,7 @@ import {
   TopNodesRequestRT,
   TopNodesResponseRT,
 } from '@kbn/infra-plugin/common/http_api/overview_api';
-import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 

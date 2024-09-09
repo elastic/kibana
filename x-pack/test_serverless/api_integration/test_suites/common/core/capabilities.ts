@@ -7,13 +7,23 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+
   describe('/api/core/capabilities', () => {
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+    });
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
     it(`returns a 400 when an invalid app id is provided`, async () => {
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .post('/api/core/capabilities')
         .set(svlCommonApi.getInternalRequestHeader())
         .send({

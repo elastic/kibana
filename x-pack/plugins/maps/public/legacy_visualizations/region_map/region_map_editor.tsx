@@ -14,7 +14,7 @@ import { extractLayerDescriptorParams } from './utils';
 import { RegionMapVisParams } from './types';
 import { title } from './region_map_vis_type';
 
-function RegionMapEditor(props: VisEditorOptionsProps) {
+export function RegionMapEditor(props: VisEditorOptionsProps) {
   const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
@@ -32,7 +32,3 @@ function RegionMapEditor(props: VisEditorOptionsProps) {
 
   return <ViewInMaps onClick={onClick} visualizationLabel={title} />;
 }
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export default RegionMapEditor;

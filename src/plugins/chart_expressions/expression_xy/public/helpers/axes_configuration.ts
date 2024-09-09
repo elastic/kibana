@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Position } from '@elastic/charts';
@@ -11,7 +12,6 @@ import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plu
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
 import {
-  AxisExtentConfig,
   CommonXYDataLayerConfig,
   DataDecorationConfig,
   YAxisConfig,
@@ -269,18 +269,4 @@ export function getAxesConfiguration(
   }
 
   return axisGroups;
-}
-
-export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
-  const inclusiveZeroError =
-    extent &&
-    hasBarOrArea &&
-    ((extent.lowerBound !== undefined && extent.lowerBound > 0) ||
-      (extent.upperBound !== undefined && extent.upperBound) < 0);
-  const boundaryError =
-    extent &&
-    extent.lowerBound !== undefined &&
-    extent.upperBound !== undefined &&
-    extent.upperBound <= extent.lowerBound;
-  return { inclusiveZeroError, boundaryError };
 }

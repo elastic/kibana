@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 jest.mock('uuid', () => ({
@@ -201,6 +202,60 @@ describe('CoreKibanaRequest', () => {
       });
     });
 
+    describe('route.httpVersion property', () => {
+      it('returns the version from the raw request', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '7.4',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.httpVersion).toEqual('7.4');
+      });
+    });
+
+    describe('route.protocol property', () => {
+      it('return the correct value for http/1.0 requests', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '1.0',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.protocol).toEqual('http1');
+      });
+      it('return the correct value for http/1.1 requests', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '1.1',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.protocol).toEqual('http1');
+      });
+      it('return the correct value for http/2 requests', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '2.0',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.protocol).toEqual('http2');
+      });
+    });
+
     describe('route.options.authRequired property', () => {
       it('handles required auth: undefined', () => {
         const auth: RouteOptions['auth'] = undefined;
@@ -367,6 +422,17 @@ describe('CoreKibanaRequest', () => {
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.isFakeRequest).toBe(true);
+      });
+    });
+
+    describe('httpVersion', () => {
+      it('should be 1.0', () => {
+        const request: FakeRawRequest = {
+          headers: {},
+          path: '/',
+        };
+        const kibanaRequest = CoreKibanaRequest.from(request);
+        expect(kibanaRequest.httpVersion).toEqual('1.0');
       });
     });
 

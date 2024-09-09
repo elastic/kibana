@@ -62,6 +62,7 @@ export {
   FormDataProvider,
   getFieldValidityAndErrorMessage,
   useFormData,
+  useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export { fieldFormatters, fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
@@ -82,10 +83,9 @@ export {
 
 export { isJSON, isEmptyString } from '@kbn/es-ui-shared-plugin/static/validators/string';
 
-export {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  useExecutionContext,
-} from '@kbn/kibana-react-plugin/public';
+export { KibanaContextProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+export { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+
+export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 export const useKibana = () => _useKibana<AppServices>();

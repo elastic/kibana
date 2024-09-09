@@ -51,6 +51,14 @@
             "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
           {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
           },
@@ -59,12 +67,12 @@
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/add_to_library_action.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/add_to_library_action.tsx"
           },
           {
             "plugin": "discover",
@@ -184,6 +192,22 @@
           },
           {
             "parentPluginId": "savedObjects",
+            "id": "def-public.SavedObjectSaveModal.componentDidMount",
+            "type": "Function",
+            "tags": [],
+            "label": "componentDidMount",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "savedObjects",
             "id": "def-public.SavedObjectSaveModal.render",
             "type": "Function",
             "tags": [],
@@ -231,7 +255,9 @@
           },
           ">, \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
           "SavedObjectKibanaServices",
-          ", \"overlays\" | \"savedObjectsClient\">) => Promise<true>"
+          ", \"overlays\" | \"savedObjectsClient\">, startServices: ",
+          "StartServices",
+          ") => Promise<true>"
         ],
         "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
         "deprecated": false,
@@ -309,6 +335,21 @@
               "Pick<",
               "SavedObjectKibanaServices",
               ", \"overlays\" | \"savedObjectsClient\">"
+            ],
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.checkForDuplicateTitle.$5",
+            "type": "Object",
+            "tags": [],
+            "label": "startServices",
+            "description": [],
+            "signature": [
+              "StartServices"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
@@ -433,33 +474,35 @@
           ", savedObject: { getEsType(): string; title: string; displayName: string; }, options: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-            "section": "def-common.SavedObjectsCreateOptions",
+            "section": "def-public.SavedObjectsCreateOptions",
             "text": "SavedObjectsCreateOptions"
           },
           ", services: { savedObjectsClient: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-            "section": "def-common.SavedObjectsClientContract",
+            "section": "def-public.SavedObjectsClientContract",
             "text": "SavedObjectsClientContract"
           },
           "; overlays: ",
           {
             "pluginId": "@kbn/core-overlays-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-            "section": "def-common.OverlayStart",
+            "section": "def-public.OverlayStart",
             "text": "OverlayStart"
           },
-          "; }) => Promise<",
+          "; }, startServices: ",
+          "StartServices",
+          ") => Promise<",
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-            "section": "def-common.SimpleSavedObject",
+            "section": "def-public.SimpleSavedObject",
             "text": "SimpleSavedObject"
           },
           "<",
@@ -562,9 +605,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SavedObjectsCreateOptions",
+                "section": "def-public.SavedObjectsCreateOptions",
                 "text": "SavedObjectsCreateOptions"
               }
             ],
@@ -594,9 +637,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                    "section": "def-common.SavedObjectsClientContract",
+                    "section": "def-public.SavedObjectsClientContract",
                     "text": "SavedObjectsClientContract"
                   }
                 ],
@@ -614,9 +657,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayStart",
+                    "section": "def-public.OverlayStart",
                     "text": "OverlayStart"
                   }
                 ],
@@ -625,6 +668,21 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.saveWithConfirmation.$5",
+            "type": "Object",
+            "tags": [],
+            "label": "startServices",
+            "description": [],
+            "signature": [
+              "StartServices"
+            ],
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [
@@ -640,7 +698,7 @@
         "label": "showSaveModal",
         "description": [],
         "signature": [
-          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{}> | undefined) => void"
+          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{ children?: React.ReactNode; }> | undefined) => void"
         ],
         "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
         "deprecated": false,
@@ -669,7 +727,7 @@
             "label": "Wrapper",
             "description": [],
             "signature": [
-              "React.FC<{}> | undefined"
+              "React.FC<{ children?: React.ReactNode; }> | undefined"
             ],
             "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
             "deprecated": false,

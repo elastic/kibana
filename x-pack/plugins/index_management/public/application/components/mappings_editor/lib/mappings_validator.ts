@@ -206,6 +206,9 @@ export const validateProperties = (properties: unknown = {}): PropertiesValidato
 export const mappingsConfigurationSchema = t.exact(
   t.partial({
     properties: t.UnknownRecord,
+    _data_stream_timestamp: t.interface({
+      enabled: t.boolean,
+    }),
     runtime: t.UnknownRecord,
     dynamic: t.union([
       t.literal(true),
@@ -223,6 +226,7 @@ export const mappingsConfigurationSchema = t.exact(
         enabled: t.boolean,
         includes: t.array(t.string),
         excludes: t.array(t.string),
+        mode: t.union([t.literal('disabled'), t.literal('stored'), t.literal('synthetic')]),
       })
     ),
     _meta: t.UnknownRecord,
@@ -234,6 +238,7 @@ export const mappingsConfigurationSchema = t.exact(
     _size: t.interface({
       enabled: t.boolean,
     }),
+    subobjects: t.boolean,
   })
 );
 

@@ -11,6 +11,7 @@ import { sortBy } from 'lodash';
 import moment from 'moment';
 
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { toLocaleString } from '../../../../util/string_utils';
 import { JobIcon } from '../../../../components/job_message_icon';
@@ -31,10 +32,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
 import { isManagedJob } from '../../../jobs_utils';
+import { mlJobServiceFactory } from '../../../../services/job_service';
+import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-export class JobsList extends Component {
+export class JobsListUI extends Component {
   constructor(props) {
     super(props);
 
@@ -42,6 +45,12 @@ export class JobsList extends Component {
       jobsSummaryList: props.jobsSummaryList,
       itemIdToExpandedRowMap: {},
     };
+
+    this.mlApi = props.kibana.services.mlServices.mlApi;
+    this.mlJobService = mlJobServiceFactory(
+      toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
+      this.mlApi
+    );
   }
 
   static getDerivedStateFromProps(props) {
@@ -170,7 +179,6 @@ export class JobsList extends Component {
         sortable: true,
         truncateText: false,
         width: '15%',
-        scope: 'row',
         render: (id, item) => {
           if (!isManagedJob(item)) return id;
 
@@ -304,13 +312,10 @@ export class JobsList extends Component {
         field: 'latestTimestampSortValue',
         'data-test-subj': 'mlJobListColumnLatestTimestamp',
         sortable: true,
-        render: (time, item) => (
-          <span className="euiTableCellContent__text">
-            {item.latestTimestampMs === undefined
-              ? ''
-              : moment(item.latestTimestampMs).format(TIME_FORMAT)}
-          </span>
-        ),
+        render: (time, item) =>
+          item.latestTimestampMs === undefined
+            ? ''
+            : moment(item.latestTimestampMs).format(TIME_FORMAT),
         textOnly: true,
         width: '15%',
       },
@@ -333,6 +338,10 @@ export class JobsList extends Component {
           defaultMessage: 'Actions',
         }),
         actions: actionsMenuContent(
+          this.props.kibana.services.notifications.toasts,
+          this.props.kibana.services.application,
+          this.mlApi,
+          this.mlJobService,
           this.props.showEditJobFlyout,
           this.props.showDatafeedChartFlyout,
           this.props.showDeleteJobModal,
@@ -393,18 +402,17 @@ export class JobsList extends Component {
         onChange={this.onTableChange}
         selection={selectionControls}
         itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
-        isExpandable={true}
         sorting={sorting}
-        hasActions={true}
         rowProps={(item) => ({
           'data-test-subj': `mlJobListRow row-${item.id}`,
         })}
         css={{ '.euiTableRow-isExpandedRow .euiTableCellContent': { animation: 'none' } }}
+        rowHeader="id"
       />
     );
   }
 }
-JobsList.propTypes = {
+JobsListUI.propTypes = {
   jobsSummaryList: PropTypes.array.isRequired,
   fullJobsList: PropTypes.object.isRequired,
   isMlEnabledInSpace: PropTypes.bool,
@@ -424,7 +432,9 @@ JobsList.propTypes = {
   jobsViewState: PropTypes.object,
   onJobsViewStateUpdate: PropTypes.func,
 };
-JobsList.defaultProps = {
+JobsListUI.defaultProps = {
   isMlEnabledInSpace: true,
   loading: false,
 };
+
+export const JobsList = withKibana(JobsListUI);

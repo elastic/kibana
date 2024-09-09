@@ -44,14 +44,14 @@ describe('CustomFieldsList', () => {
         `custom-field-${customFieldsConfigurationMock[0].key}-${customFieldsConfigurationMock[0].type}`
       )
     ).toBeInTheDocument();
-    expect(await screen.findByText('Text')).toBeInTheDocument();
-    expect(await screen.findByText('Required')).toBeInTheDocument();
+    expect((await screen.findAllByText('Text')).length).toBe(2);
+    expect((await screen.findAllByText('Required')).length).toBe(2);
     expect(
       await screen.findByTestId(
         `custom-field-${customFieldsConfigurationMock[1].key}-${customFieldsConfigurationMock[1].type}`
       )
     ).toBeInTheDocument();
-    expect(await screen.findByText('Toggle')).toBeInTheDocument();
+    expect((await screen.findAllByText('Toggle')).length).toBe(2);
   });
 
   it('shows single CustomFieldsList correctly', async () => {
@@ -99,7 +99,7 @@ describe('CustomFieldsList', () => {
         )
       );
 
-      expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
     });
 
     it('calls onDeleteCustomField when confirm', async () => {
@@ -113,12 +113,12 @@ describe('CustomFieldsList', () => {
         )
       );
 
-      expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
       userEvent.click(await screen.findByText('Delete'));
 
       await waitFor(() => {
-        expect(screen.queryByTestId('confirm-delete-custom-field-modal')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
         expect(props.onDeleteCustomField).toHaveBeenCalledWith(
           customFieldsConfigurationMock[0].key
         );
@@ -136,12 +136,12 @@ describe('CustomFieldsList', () => {
         )
       );
 
-      expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
       userEvent.click(await screen.findByText('Cancel'));
 
       await waitFor(() => {
-        expect(screen.queryByTestId('confirm-delete-custom-field-modal')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
         expect(props.onDeleteCustomField).not.toHaveBeenCalledWith();
       });
     });

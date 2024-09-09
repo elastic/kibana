@@ -123,8 +123,8 @@ export default function alertingMonitoringCollectionTests({ getService }: FtrPro
             rule_type_id: 'test.cancellableRule',
             schedule: { interval: '4s' },
             params: {
-              doLongSearch: true,
-              doLongPostProcessing: false,
+              doLongSearch: false,
+              doLongPostProcessing: true,
             },
           })
         );

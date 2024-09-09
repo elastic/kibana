@@ -20,12 +20,12 @@ import { getColorMappingDefaults } from '../../utils';
 import {
   State,
   XYState,
-  visualizationTypes,
+  visualizationSubtypes,
   XYLayerConfig,
   XYDataLayerConfig,
   SeriesType,
 } from './types';
-import { getIconForSeries } from './state_helpers';
+import { flipSeriesType, getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 
 const columnSortOrder = {
@@ -61,7 +61,7 @@ export function getSuggestions({
     !table.isMultiRow ||
     table.columns.length <= 1 ||
     table.columns.every((col) => col.operation.dataType !== 'number') ||
-    table.columns.some((col) => !columnSortOrder.hasOwnProperty(col.operation.dataType));
+    table.columns.some((col) => !Object.hasOwn(columnSortOrder, col.operation.dataType));
 
   if (
     (incompleteTable && state && !subVisualizationId) ||
@@ -134,23 +134,6 @@ function getSuggestionForColumns(
       mainPalette,
       allowMixed,
     });
-  }
-}
-
-function flipSeriesType(seriesType: SeriesType) {
-  switch (seriesType) {
-    case 'bar_horizontal':
-      return 'bar';
-    case 'bar_horizontal_stacked':
-      return 'bar_stacked';
-    case 'bar':
-      return 'bar_horizontal';
-    case 'bar_horizontal_percentage_stacked':
-      return 'bar_percentage_stacked';
-    case 'bar_percentage_stacked':
-      return 'bar_horizontal_percentage_stacked';
-    default:
-      return 'bar_horizontal';
   }
 }
 
@@ -255,7 +238,7 @@ function getSuggestionsForLayer({
   // handles the simplest cases, acting as a chart switcher
   if (!currentState && changeType === 'unchanged') {
     // Chart switcher needs to include every chart type
-    return visualizationTypes
+    return visualizationSubtypes
       .map((visType) => {
         return {
           ...buildSuggestion({
@@ -337,7 +320,7 @@ function getSuggestionsForLayer({
 
   // Combine all pre-built suggestions with hidden suggestions for remaining chart types
   return sameStateSuggestions.concat(
-    visualizationTypes
+    visualizationSubtypes
       .filter((visType) => {
         return !sameStateSuggestions.find(
           (suggestion) => suggestion.state.preferredSeriesType === visType.id
@@ -598,7 +581,6 @@ function buildSuggestion({
     yRightTitle: currentState?.yRightTitle,
     hideEndzones: currentState?.hideEndzones,
     showCurrentTimeMarker: currentState?.showCurrentTimeMarker,
-    valuesInLegend: currentState?.valuesInLegend,
     yLeftExtent: currentState?.yLeftExtent,
     yRightExtent: currentState?.yRightExtent,
     yLeftScale: currentState?.yLeftScale,
@@ -662,7 +644,7 @@ function getScore(
       ? 0.5
       : 1;
   // chart with multiple y values and split series will have a score of 1, single y value and no split series reduce score
-  return (((yValues.length > 1 ? 2 : 1) + (splitBy ? 1 : 0)) / 3) * changeFactor;
+  return (((yValues.length > 1 ? 3 : 2) + (splitBy ? 1 : 0)) / 4) * changeFactor;
 }
 
 function getExistingLayer(currentState: XYState | undefined, layerId: string) {

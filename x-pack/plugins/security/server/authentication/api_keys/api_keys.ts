@@ -20,6 +20,7 @@ import type {
   InvalidateAPIKeysParams,
   ValidateAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
+import { isCreateRestAPIKeyParams } from '@kbn/security-plugin-types-server';
 
 import { getFakeKibanaRequest } from './fake_kibana_request';
 import type { SecurityLicense } from '../../../common';
@@ -96,7 +97,6 @@ export class APIKeys implements APIKeysType {
     this.logger.debug(
       `Testing if API Keys are enabled by attempting to invalidate a non-existant key: ${id}`
     );
-
     try {
       await this.clusterClient.asInternalUser.security.invalidateApiKey({
         body: {
@@ -113,7 +113,7 @@ export class APIKeys implements APIKeysType {
   }
 
   /**
-   * Determines if Cross-Cluster API Keys are enabled in Elasticsearch.
+   * Determines if cross-cluster API Keys are enabled in Elasticsearch.
    */
   async areCrossClusterAPIKeysEnabled(): Promise<boolean> {
     if (!this.license.isEnabled()) {
@@ -123,14 +123,13 @@ export class APIKeys implements APIKeysType {
     const id = 'kibana-api-key-service-test';
 
     this.logger.debug(
-      `Testing if Cross-Cluster API Keys are enabled by attempting to update a non-existant key: ${id}`
+      `Testing if cross-cluster API Keys are enabled by attempting to update a non-existant key: ${id}`
     );
-
     try {
       await this.clusterClient.asInternalUser.transport.request({
         method: 'PUT',
         path: `/_security/cross_cluster/api_key/${id}`,
-        body: {}, // We are sending an empty request body and expect a validation error if Update Cross-Cluster API key endpoint is available.
+        body: {}, // We are sending an empty request body and expect a validation error if Update cross-cluster API key endpoint is available.
       });
       return false;
     } catch (error) {
@@ -143,7 +142,7 @@ export class APIKeys implements APIKeysType {
    *
    * Returns newly created API key or `null` if API keys are disabled.
    *
-   * User needs `manage_api_key` privilege to create REST API keys and `manage_security` for Cross-Cluster API keys.
+   * User needs `manage_api_key` privilege to create REST API keys and `manage_security` for cross-cluster API keys.
    *
    * @param request Request instance.
    * @param createParams The params to create an API key
@@ -155,13 +154,13 @@ export class APIKeys implements APIKeysType {
     if (!this.license.isEnabled()) {
       return null;
     }
-
     const { type, expiration, name, metadata } = createParams;
     const scopedClusterClient = this.clusterClient.asScoped(request);
 
     this.logger.debug('Trying to create an API key');
 
     let result: CreateAPIKeyResult;
+
     try {
       if (type === 'cross_cluster') {
         result = await scopedClusterClient.asCurrentUser.transport.request<CreateAPIKeyResult>({
@@ -175,13 +174,13 @@ export class APIKeys implements APIKeysType {
             name,
             expiration,
             metadata,
-            role_descriptors:
-              'role_descriptors' in createParams
-                ? createParams.role_descriptors
-                : this.parseRoleDescriptorsWithKibanaPrivileges(
-                    createParams.kibana_role_descriptors,
-                    false
-                  ),
+            role_descriptors: isCreateRestAPIKeyParams(createParams)
+              ? createParams.role_descriptors
+              : this.parseRoleDescriptorsWithKibanaPrivileges(
+                  createParams.kibana_role_descriptors,
+                  this.kibanaFeatures,
+                  false
+                ),
           },
         });
       }
@@ -199,7 +198,7 @@ export class APIKeys implements APIKeysType {
    *
    * Returns `updated`, `true` if the update was successful, `false` if there was nothing to update
    *
-   * User needs `manage_api_key` privilege to update REST API keys and `manage_security` for Cross-Cluster API keys.
+   * User needs `manage_api_key` privilege to update REST API keys and `manage_security` for cross-cluster API keys.
    *
    * @param request Request instance.
    * @param updateParams The params to edit an API key
@@ -234,6 +233,7 @@ export class APIKeys implements APIKeysType {
               ? updateParams.role_descriptors
               : this.parseRoleDescriptorsWithKibanaPrivileges(
                   updateParams.kibana_role_descriptors,
+                  this.kibanaFeatures,
                   true
                 ),
         });
@@ -279,12 +279,12 @@ export class APIKeys implements APIKeysType {
     );
 
     const { expiration, metadata, name } = createParams;
-
     const roleDescriptors =
       'role_descriptors' in createParams
         ? createParams.role_descriptors
         : this.parseRoleDescriptorsWithKibanaPrivileges(
             createParams.kibana_role_descriptors,
+            this.kibanaFeatures,
             false
           );
 
@@ -293,7 +293,6 @@ export class APIKeys implements APIKeysType {
       authorizationHeader,
       clientAuthorizationHeader
     );
-
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
@@ -318,7 +317,6 @@ export class APIKeys implements APIKeysType {
     }
 
     this.logger.debug(`Trying to invalidate ${params.ids.length} an API key as current user`);
-
     let result: InvalidateAPIKeyResult;
     try {
       // User needs `manage_api_key` privilege to use this API
@@ -354,6 +352,7 @@ export class APIKeys implements APIKeysType {
     this.logger.debug(`Trying to invalidate ${params.ids.length} API keys`);
 
     let result: InvalidateAPIKeyResult;
+
     try {
       // Internal user needs `cluster:admin/xpack/security/api_key/invalidate` privilege to use this API
       result = await this.clusterClient.asInternalUser.security.invalidateApiKey({
@@ -384,7 +383,6 @@ export class APIKeys implements APIKeysType {
     const fakeRequest = getFakeKibanaRequest(apiKeyPrams);
 
     this.logger.debug(`Trying to validate an API key`);
-
     try {
       await this.clusterClient.asScoped(fakeRequest).asCurrentUser.security.authenticate();
       this.logger.debug(`API key was validated successfully`);
@@ -445,6 +443,7 @@ export class APIKeys implements APIKeysType {
 
   private parseRoleDescriptorsWithKibanaPrivileges(
     kibanaRoleDescriptors: CreateRestAPIKeyWithKibanaPrivilegesParams['kibana_role_descriptors'],
+    features: KibanaFeature[],
     isEdit: boolean
   ) {
     const roleDescriptors = Object.create(null);
@@ -452,10 +451,7 @@ export class APIKeys implements APIKeysType {
     const allValidationErrors: string[] = [];
     if (kibanaRoleDescriptors) {
       Object.entries(kibanaRoleDescriptors).forEach(([roleKey, roleDescriptor]) => {
-        const { validationErrors } = validateKibanaPrivileges(
-          this.kibanaFeatures,
-          roleDescriptor.kibana
-        );
+        const { validationErrors } = validateKibanaPrivileges(features, roleDescriptor.kibana);
         allValidationErrors.push(...validationErrors);
 
         const applications = transformPrivilegesToElasticsearchPrivileges(

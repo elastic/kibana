@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
 import type { History as HistoryPackageHistoryInterface } from 'history';
 import { createMemoryHistory } from 'history';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
@@ -48,22 +49,25 @@ describe(`Resolver: when analyzing a tree with 0 ancestors, 2 children, 2 relate
       panelParameters: { nodeID: 'origin' },
       panelView: 'nodeDetail',
     });
-
-    memoryHistory.push({
-      search: queryStringWithOriginSelected,
+    act(() => {
+      memoryHistory.push({
+        search: queryStringWithOriginSelected,
+      });
     });
   });
 
   describe('when the primary button for the first child is selected', () => {
     beforeEach(async () => {
-      const firstChildPrimaryButton = await simulator.resolveWrapper(() =>
-        simulator.processNodePrimaryButton(entityIDs.firstChild)
-      );
+      await act(async () => {
+        const firstChildPrimaryButton = await simulator.resolveWrapper(() =>
+          simulator.processNodePrimaryButton(entityIDs.firstChild)
+        );
 
-      if (firstChildPrimaryButton) {
-        firstChildPrimaryButton.simulate('click', { button: 0 });
-        simulator.runAnimationFramesTimeFromNow(panAnimationDuration);
-      }
+        if (firstChildPrimaryButton) {
+          firstChildPrimaryButton.simulate('click', { button: 0 });
+          simulator.runAnimationFramesTimeFromNow(panAnimationDuration);
+        }
+      });
     });
 
     it('should show the first child as the active and selected node', async () => {
@@ -84,8 +88,10 @@ describe(`Resolver: when analyzing a tree with 0 ancestors, 2 children, 2 relate
 
     describe('when the browser is returned to the previous url where the origin was selected by triggering the back button', () => {
       beforeEach(async () => {
-        memoryHistory.goBack();
-        simulator.runAnimationFramesTimeFromNow(panAnimationDuration);
+        await act(async () => {
+          memoryHistory.goBack();
+          simulator.runAnimationFramesTimeFromNow(panAnimationDuration);
+        });
       });
 
       it('should show the origin node as the selected node', async () => {
@@ -108,13 +114,15 @@ describe(`Resolver: when analyzing a tree with 0 ancestors, 2 children, 2 relate
 
     describe('when the browser forward button is triggered after the back button is triggered to return to the first child being selected', () => {
       beforeEach(async () => {
-        // Return back to the origin being selected
-        memoryHistory.goBack();
-        simulator.runAnimationFramesTimeFromNow(panAnimationDuration);
+        await act(async () => {
+          // Return back to the origin being selected
+          memoryHistory.goBack();
+          simulator.runAnimationFramesTimeFromNow(panAnimationDuration);
 
-        // Then hit the 'forward' button to return back to the first child being selected
-        memoryHistory.goForward();
-        simulator.runAnimationFramesTimeFromNow(panAnimationDuration);
+          // Then hit the 'forward' button to return back to the first child being selected
+          memoryHistory.goForward();
+          simulator.runAnimationFramesTimeFromNow(panAnimationDuration);
+        });
       });
 
       it('should show the firstChild node as the selected node', async () => {

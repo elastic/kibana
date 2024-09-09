@@ -8,12 +8,14 @@ import semverValid from 'semver/functions/valid';
 import semverCompare from 'semver/functions/compare';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../benchmarks/benchmarks';
 import { getBenchmarkFromPackagePolicy } from '../../../../common/utils/helpers';
 
-import type { CspBenchmarkRule } from '../../../../common/types/latest';
-
-export const getSortedCspBenchmarkRulesTemplates = (cspBenchmarkRules: CspBenchmarkRule[]) => {
+export const getSortedCspBenchmarkRulesTemplates = (
+  cspBenchmarkRules: CspBenchmarkRule[],
+  sortDirection: 'asc' | 'desc'
+) => {
   return cspBenchmarkRules.slice().sort((a, b) => {
     const ruleNumberA = a?.metadata?.benchmark?.rule_number;
     const ruleNumberB = b?.metadata?.benchmark?.rule_number;
@@ -22,9 +24,19 @@ export const getSortedCspBenchmarkRulesTemplates = (cspBenchmarkRules: CspBenchm
     const versionB = semverValid(ruleNumberB);
 
     if (versionA !== null && versionB !== null) {
-      return semverCompare(versionA, versionB);
+      return sortDirection === 'asc'
+        ? semverCompare(versionA, versionB)
+        : semverCompare(versionB, versionA);
     } else {
-      return String(ruleNumberA).localeCompare(String(ruleNumberB));
+      return sortDirection === 'asc'
+        ? String(ruleNumberA).localeCompare(String(ruleNumberB), undefined, {
+            numeric: true,
+            sensitivity: 'base',
+          })
+        : String(ruleNumberB).localeCompare(String(ruleNumberA), undefined, {
+            numeric: true,
+            sensitivity: 'base',
+          });
     }
   });
 };

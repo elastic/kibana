@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
@@ -70,6 +71,10 @@ export interface VisualizeEmbeddableFactoryDeps {
   >;
 }
 
+/** @deprecated
+ * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
+ * used within the visualize editor.
+ */
 export class VisualizeEmbeddableFactory
   implements
     EmbeddableFactoryDefinition<
@@ -128,12 +133,12 @@ export class VisualizeEmbeddableFactory
   }
 
   public async getCurrentAppId() {
-    return await this.deps.start().core.application.currentAppId$.pipe(first()).toPromise();
+    return this.deps.start().core.application.currentAppId$.pipe(first()).toPromise();
   }
 
   private async getAttributeService() {
     if (!this.attributeService) {
-      this.attributeService = await this.deps
+      this.attributeService = this.deps
         .start()
         .plugins.embeddable.getAttributeService<
           VisualizeSavedObjectAttributes,
@@ -152,7 +157,7 @@ export class VisualizeEmbeddableFactory
     input: Partial<VisualizeInput> & { id: string },
     parent?: IContainer
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable> {
-    const startDeps = await this.deps.start();
+    const startDeps = this.deps.start();
 
     try {
       const savedObject = await getSavedVisualization(
@@ -161,6 +166,7 @@ export class VisualizeEmbeddableFactory
           dataViews: startDeps.plugins.data.dataViews,
           spaces: startDeps.plugins.spaces,
           savedObjectsTagging: startDeps.plugins.savedObjectsTaggingOss?.getTaggingApi(),
+          ...startDeps.core,
         },
         savedObjectId
       );
@@ -239,10 +245,10 @@ export class VisualizeEmbeddableFactory
       if (visObj) {
         savedVis.uiStateJSON = visObj?.uiState.toString();
       }
-      const { core, plugins } = await this.deps.start();
+      const { core, plugins } = this.deps.start();
       const id = await saveVisualization(savedVis, saveOptions, {
-        overlays: core.overlays,
         savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
+        ...core,
       });
       if (!id || id === '') {
         throw new Error(
@@ -259,7 +265,7 @@ export class VisualizeEmbeddableFactory
   }
 
   public async checkTitle(props: OnSaveProps): Promise<boolean> {
-    const overlays = await this.deps.start().core.overlays;
+    const { core } = this.deps.start();
 
     return checkForDuplicateTitle(
       {
@@ -270,9 +276,7 @@ export class VisualizeEmbeddableFactory
       false,
       props.isTitleDuplicateConfirmed,
       props.onTitleDuplicate,
-      {
-        overlays,
-      }
+      core
     );
   }
 

@@ -16,7 +16,9 @@ import { asHttpRequestExecutionSource } from '../../lib/action_execution_source'
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: { description: 'An identifier for the connector.' },
+  }),
 });
 
 const bodySchema = schema.object({
@@ -31,9 +33,22 @@ export const executeActionRoute = (
   router.post(
     {
       path: `${BASE_ACTION_API_PATH}/action/{id}/_execute`,
+      options: {
+        access: 'public',
+        summary: `Run a connector`,
+        deprecated: true,
+        tags: ['oas-tag:connectors'],
+      },
       validate: {
-        body: bodySchema,
-        params: paramSchema,
+        request: {
+          body: bodySchema,
+          params: paramSchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {

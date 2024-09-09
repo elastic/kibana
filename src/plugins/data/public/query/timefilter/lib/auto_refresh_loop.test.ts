@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createAutoRefreshLoop, AutoRefreshDoneFn } from './auto_refresh_loop';
@@ -202,4 +203,40 @@ test('calling older done() is ignored', () => {
   expect(fn1).toHaveBeenCalledTimes(2);
   jest.advanceTimersByTime(501);
   expect(fn1).toHaveBeenCalledTimes(2);
+});
+
+test('pauses if page is not visible', () => {
+  let mockPageVisibility: DocumentVisibilityState = 'visible';
+  jest.spyOn(document, 'visibilityState', 'get').mockImplementation(() => mockPageVisibility);
+
+  const { loop$, start, stop } = createAutoRefreshLoop();
+
+  const fn = jest.fn((done) => done());
+  loop$.subscribe(fn);
+
+  jest.advanceTimersByTime(5000);
+  expect(fn).not.toBeCalled();
+
+  start(1000);
+
+  jest.advanceTimersByTime(1001);
+  expect(fn).toHaveBeenCalledTimes(1);
+
+  mockPageVisibility = 'hidden';
+  document.dispatchEvent(new Event('visibilitychange'));
+
+  jest.advanceTimersByTime(1001);
+  expect(fn).toHaveBeenCalledTimes(1);
+
+  mockPageVisibility = 'visible';
+  document.dispatchEvent(new Event('visibilitychange'));
+  expect(fn).toHaveBeenCalledTimes(2);
+
+  jest.advanceTimersByTime(1001);
+  expect(fn).toHaveBeenCalledTimes(3);
+
+  stop();
+
+  jest.advanceTimersByTime(5000);
+  expect(fn).toHaveBeenCalledTimes(3);
 });

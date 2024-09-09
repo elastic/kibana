@@ -61,5 +61,6 @@ export default function ({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./es_geo_grid_source'));
     loadTestFile(require.resolve('./adhoc_data_view'));
     loadTestFile(require.resolve('./embeddable'));
+    loadTestFile(require.resolve('./multiple_data_views'));
   });
 }

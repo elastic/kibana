@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { tabifyAggResponse } from './tabify';
@@ -12,14 +13,18 @@ import { AggConfigs, BucketAggParam, IAggConfig, IAggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from './fixtures/fake_hierarchical_data';
 import { isSamplingEnabled } from '../aggs/utils/sampler';
+import { timeOffsetFiltersWithZeroDocCountResponse } from './fixtures/fake_timeoffset_data';
 
 describe('tabifyAggResponse Integration', () => {
   const typesRegistry = mockAggTypesRegistry();
 
   for (const probability of [1, 0.5, undefined]) {
     function getTitlePostfix() {
-      if (!isSamplingEnabled(probability)) {
+      if (probability == null) {
         return '';
+      }
+      if (probability === 1) {
+        return ` - with no sampling (probability = 1)`;
       }
       return ` - with sampling (probability = ${probability})`;
     }
@@ -147,7 +152,7 @@ describe('tabifyAggResponse Integration', () => {
 
       function getTopAggregations(
         rawResp: typeof threeTermBuckets
-      ): typeof threeTermBuckets['aggregations'] {
+      ): (typeof threeTermBuckets)['aggregations'] {
         return !isSamplingEnabled(probability)
           ? rawResp.aggregations!
           : // @ts-ignore
@@ -184,9 +189,9 @@ describe('tabifyAggResponse Integration', () => {
       ) {
         expect(typeof row).toBe('object');
 
-        asserts.forEach((assert, i: number) => {
+        asserts.forEach((a, i: number) => {
           if (row[`col-${i}`]) {
-            assert(row[`col-${i}`]);
+            a(row[`col-${i}`]);
           }
         });
       }
@@ -210,7 +215,7 @@ describe('tabifyAggResponse Integration', () => {
       // check for something like an average bytes result
       function expectAvgBytes(val: string | number) {
         expect(typeof val).toBe('number');
-        expect(val === 0 || val > 1000).toBeDefined();
+        expect(val === 0 || +val > 1000).toBe(true);
       }
 
       test('for non-hierarchical vis', () => {
@@ -241,6 +246,21 @@ describe('tabifyAggResponse Integration', () => {
             expectAvgBytes,
           ]);
         });
+      });
+    });
+
+    describe(`edge cases${getTitlePostfix()}`, () => {
+      test('it should correctly report zero doc count for unshifted bucket', () => {
+        const aggConfigs = createAggConfigs([
+          mockAggConfig({ type: 'count', schema: 'metric' }),
+          mockAggConfig({ type: 'count', schema: 'metric', params: { timeShift: '1d' } }),
+        ]);
+
+        // no need to wrap with sampling as count is not affected by it
+        const tabbed = tabifyAggResponse(aggConfigs, timeOffsetFiltersWithZeroDocCountResponse, {
+          metricsAtAllLevels: false,
+        });
+        expect(tabbed.rows[0]).toEqual({ 'col-0-1': 0, 'col-1-2': 234 });
       });
     });
   }

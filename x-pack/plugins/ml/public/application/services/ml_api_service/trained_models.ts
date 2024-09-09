@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { useMemo } from 'react';
@@ -17,7 +17,7 @@ import type {
 } from '@kbn/ml-trained-models-utils';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
-import { HttpService } from '../http_service';
+import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 import type {
   TrainedModelConfigResponse,
@@ -25,8 +25,8 @@ import type {
   TrainedModelStat,
   NodesOverviewResponse,
   MemoryUsageInfo,
+  ModelDownloadState,
 } from '../../../../common/types/trained_models';
-
 export interface InferenceQueryParams {
   decompress_definition?: boolean;
   from?: number;
@@ -57,7 +57,7 @@ export interface InferenceStatsResponse {
 }
 
 /**
- * Service with APIs calls to perform inference operations.
+ * Service with APIs calls to perform operations with trained models.
  * @param httpService
  */
 export function trainedModelsApiProvider(httpService: HttpService) {
@@ -177,6 +177,18 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
+    /**
+     * Gets model config based on the cluster OS and CPU architecture.
+     */
+    getCuratedModelConfig(modelName: string, options?: GetModelDownloadConfigOptions) {
+      return httpService.http<ModelDefinitionResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/curated_model_config/${modelName}`,
+        method: 'GET',
+        ...(options ? { query: options as HttpFetchQuery } : {}),
+        version: '1',
+      });
+    },
+
     getTrainedModelsNodesOverview() {
       return httpService.http<NodesOverviewResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/model_management/nodes_overview`,
@@ -286,6 +298,14 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       return httpService.http<estypes.MlPutTrainedModelResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/install_elastic_trained_model/${modelId}`,
         method: 'POST',
+        version: '1',
+      });
+    },
+
+    getModelsDownloadStatus() {
+      return httpService.http<Record<string, ModelDownloadState>>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/download_status`,
+        method: 'GET',
         version: '1',
       });
     },

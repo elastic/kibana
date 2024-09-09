@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiDescriptionList, EuiText } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
+import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { getHumanizedDuration } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
@@ -19,7 +20,7 @@ interface IntervalProps {
 
 const Interval = ({ interval }: IntervalProps) => (
   <EuiText size="s" data-test-subj="intervalPropertyValue">
-    {interval}
+    <IntervalAbbrScreenReader interval={interval} />
   </EuiText>
 );
 
@@ -30,7 +31,7 @@ interface FromProps {
 
 const From = ({ from, interval }: FromProps) => (
   <EuiText size="s" data-test-subj={`fromPropertyValue-${from}`}>
-    {getHumanizedDuration(from, interval)}
+    <IntervalAbbrScreenReader interval={getHumanizedDuration(from, interval)} />
   </EuiText>
 );
 

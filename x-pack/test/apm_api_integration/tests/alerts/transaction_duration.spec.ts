@@ -31,7 +31,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const logger = getService('log');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const ruleParams = {
     threshold: 3000,
@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   };
 
   registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
-    before(async () => {
+    before(() => {
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -68,11 +68,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .success(),
           ];
         });
-      await synthtraceEsClient.index(events);
+      return apmSynthtraceEsClient.index(events);
     });
 
     after(async () => {
-      await synthtraceEsClient.clean();
+      await apmSynthtraceEsClient.clean();
     });
 
     describe('create rule for opbeans-java without kql filter', () => {

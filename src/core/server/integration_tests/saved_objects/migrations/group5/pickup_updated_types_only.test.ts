@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -11,16 +12,14 @@ import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   clearLog,
   createBaseline,
-  currentVersion,
   defaultKibanaIndex,
-  defaultLogFilePath,
   getCompatibleMappingsMigrator,
+  getIdenticalMappingsMigrator,
   getIncompatibleMappingsMigrator,
   startElasticsearch,
 } from '../kibana_migrator_test_kit';
 import '../jest_matchers';
 import { delay, parseLogFile } from '../test_utils';
-import { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 
 export const logFilePath = Path.join(__dirname, 'pickup_updated_types_only.test.log');
 
@@ -33,57 +32,56 @@ describe('pickupUpdatedMappings', () => {
 
   beforeEach(async () => {
     await createBaseline();
-    await clearLog();
+    await clearLog(logFilePath);
   });
 
   describe('when performing a reindexing migration', () => {
     it('should pickup all documents from the index', async () => {
-      const { runMigrations } = await getIncompatibleMappingsMigrator();
+      const { runMigrations } = await getIncompatibleMappingsMigrator({ logFilePath });
 
       await runMigrations();
 
-      const logs = await parseLogFile(defaultLogFilePath);
+      const logs = await parseLogFile(logFilePath);
 
+      expect(logs).not.toContainLogEntry('Documents of the following SO types will be updated');
       expect(logs).not.toContainLogEntry(
-        'Kibana is performing a compatible upgrade and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings'
+        'There are no changes in the mappings of any of the SO types, skipping UPDATE_TARGET_MAPPINGS steps.'
       );
     });
   });
 
   describe('when performing a compatible migration', () => {
     it('should pickup only the types that have been updated', async () => {
-      const { runMigrations } = await getCompatibleMappingsMigrator();
+      const { runMigrations } = await getCompatibleMappingsMigrator({ logFilePath });
 
       await runMigrations();
 
-      const logs = await parseLogFile(defaultLogFilePath);
+      const logs = await parseLogFile(logFilePath);
 
       expect(logs).toContainLogEntry(
-        'Kibana is performing a compatible upgrade and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: complex.'
+        'Documents of the following SO types will be updated, so that ES can pickup the updated mappings: complex.'
       );
     });
 
-    it('should pickup ALL documents if any root fields have been updated', async () => {
-      const { runMigrations, client } = await getCompatibleMappingsMigrator();
+    it('should NOT pickup any documents if only root fields have been updated', async () => {
+      const { runMigrations, client } = await getIdenticalMappingsMigrator({ logFilePath });
 
       // we tamper the baseline mappings to simulate some root fields changes
       const baselineMappings = await client.indices.getMapping({ index: defaultKibanaIndex });
-      const _meta = baselineMappings[`${defaultKibanaIndex}_${currentVersion}_001`].mappings
-        ._meta as IndexMappingMeta;
-      _meta.migrationMappingPropertyHashes!.namespace =
-        _meta.migrationMappingPropertyHashes!.namespace + '_tampered';
-      await client.indices.putMapping({ index: defaultKibanaIndex, _meta });
+      const properties = Object.values(baselineMappings)[0].mappings.properties!;
+      (properties.references as any).properties.description = {
+        type: 'text',
+      };
+      await client.indices.putMapping({ index: defaultKibanaIndex, properties });
 
       await runMigrations();
 
-      const logs = await parseLogFile(defaultLogFilePath);
+      const logs = await parseLogFile(logFilePath);
 
       expect(logs).toContainLogEntry(
-        'Kibana is performing a compatible upgrade and the mappings of some root fields have been changed. For Elasticsearch to pickup these mappings, all saved objects need to be updated. Updated root fields: namespace.'
+        'There are no changes in the mappings of any of the SO types, skipping UPDATE_TARGET_MAPPINGS steps.'
       );
-      expect(logs).not.toContainLogEntry(
-        'Kibana is performing a compatible upgrade and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings'
-      );
+      expect(logs).not.toContainLogEntry('Documents of the following SO types will be updated');
     });
   });
 

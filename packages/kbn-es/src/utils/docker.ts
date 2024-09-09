@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import chalk from 'chalk';
 import execa from 'execa';
 import fs from 'fs';
 import Fsp from 'fs/promises';
+import pRetry from 'p-retry';
 import { resolve, basename, join } from 'path';
 import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
 
@@ -24,8 +27,9 @@ import {
   MOCK_IDP_ATTRIBUTE_NAME,
   ensureSAMLRoleMapping,
   createMockIdpMetadata,
-} from '@kbn/mock-idp-plugin/common';
+} from '@kbn/mock-idp-utils';
 
+import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
@@ -37,6 +41,7 @@ import {
   SERVERLESS_CONFIG_PATH,
   SERVERLESS_FILES_PATH,
   SERVERLESS_SECRETS_SSL_PATH,
+  SERVERLESS_ROLES_ROOT_PATH,
 } from '../paths';
 import {
   ELASTIC_SERVERLESS_SUPERUSER,
@@ -58,6 +63,13 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
+export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security']);
+export const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
+  return serverlessProjectTypes.has(value);
+};
+
+export type ServerlessProjectType = 'es' | 'oblt' | 'security';
+
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
 }
@@ -65,10 +77,14 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   /** Publish ES docker container on additional host IP */
   host?: string;
+  /**  Serverless project type */
+  projectType: ServerlessProjectType;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
-  /** Path to the directory where the ES cluster will store data */
+  /** Full path where the ES cluster will store data */
   basePath: string;
+  /** Directory in basePath where the ES cluster will store data */
+  dataPath?: string;
   /** If this process exits, leave the ES cluster running in the background */
   skipTeardown?: boolean;
   /** Start the ES cluster in the background instead of remaining attached: useful for running tests */
@@ -157,9 +173,6 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--env',
   'stateless.object_store.type=fs',
-
-  '--env',
-  'stateless.object_store.bucket=stateless',
 ];
 
 // only allow certain ES args to be overwrote by options
@@ -371,6 +384,12 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
   log.indent(-4);
 }
 
+const RETRYABLE_DOCKER_PULL_ERROR_MESSAGES = [
+  'connection refused',
+  'i/o timeout',
+  'Client.Timeout',
+];
+
 /**
  *
  * Pull a Docker image if needed. Ensures latest image.
@@ -380,17 +399,48 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
 export async function maybePullDockerImage(log: ToolingLog, image: string) {
   log.info(chalk.bold(`Checking for image: ${image}`));
 
-  await execa('docker', ['pull', image], {
-    // inherit is required to show Docker pull output
-    stdio: ['ignore', 'inherit', 'pipe'],
-  }).catch(({ message }) => {
-    throw createCliError(
-      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.
+  await pRetry(
+    async () => {
+      await execa('docker', ['pull', image], {
+        // inherit is required to show Docker pull output
+        stdio: ['ignore', 'inherit', 'pipe'],
+      }).catch(({ message }) => {
+        const errorMessage = `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.
 Visit ${chalk.bold.cyan('https://docker-auth.elastic.co/github_auth')} to login.
 
-${message}`
-    );
-  });
+${message}`;
+        throw createCliError(errorMessage);
+      });
+    },
+    {
+      retries: 2,
+      onFailedAttempt: (error) => {
+        // Only retry if retryable error messages are found in the error message.
+        if (
+          RETRYABLE_DOCKER_PULL_ERROR_MESSAGES.every(
+            (msg) => !error?.message?.includes('connection refused')
+          )
+        ) {
+          throw error;
+        }
+      },
+    }
+  );
+}
+
+/**
+ * When we're working with :latest or :latest-verified, it is useful to expand what version they refer to
+ */
+export async function printESImageInfo(log: ToolingLog, image: string) {
+  let imageFullName = image;
+  if (image.includes('serverless')) {
+    const imageTag = (await getServerlessImageTag(image)) ?? image.split(':').pop() ?? '';
+    const imageBase = image.replace(/:.*/, '');
+    imageFullName = `${imageBase}:${imageTag}`;
+  }
+
+  const revisionUrl = await getCommitUrl(image);
+  log.info(`Using ES image: ${imageFullName} (${revisionUrl})`);
 }
 
 export async function detectRunningNodes(
@@ -436,6 +486,7 @@ async function setupDocker({
   await detectRunningNodes(log, options);
   await maybeCreateDockerNetwork(log);
   await maybePullDockerImage(log, image);
+  await printESImageInfo(log, image);
 }
 
 /**
@@ -476,6 +527,10 @@ export function resolveEsArgs(
     esArgs.get('xpack.security.enabled') !== 'false'
   ) {
     const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
+
+    // The mock IDP setup requires a custom role mapping, but since native role mappings are disabled by default in
+    // Serverless, we have to re-enable them explicitly here.
+    esArgs.set('xpack.security.authc.native_role_mappings.enabled', 'true');
 
     esArgs.set(`xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order`, '0');
     esArgs.set(
@@ -536,8 +591,17 @@ export function getDockerFileMountPath(hostPath: string) {
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const { basePath, clean, ssl, kibanaUrl, files, resources } = options;
-  const objectStorePath = resolve(basePath, 'stateless');
+  const {
+    basePath,
+    clean,
+    ssl,
+    kibanaUrl,
+    files,
+    resources,
+    projectType,
+    dataPath = 'stateless',
+  } = options;
+  const objectStorePath = resolve(basePath, dataPath);
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
   log.indent(4);
@@ -569,7 +633,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   log.indent(-4);
 
-  const volumeCmds = ['--volume', `${basePath}:/objectstore:z`];
+  const volumeCmds = [
+    '--volume',
+    `${basePath}:/objectstore:z`,
+    '--env',
+    `stateless.object_store.bucket=${dataPath}`,
+  ];
 
   if (files) {
     const _files = typeof files === 'string' ? [files] : files;
@@ -589,7 +658,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
       }, {} as Record<string, string>)
     : {};
 
-  const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
+  // Read roles for the specified projectType
+  const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml');
+
+  const resourcesPaths = [...SERVERLESS_RESOURCES_PATHS, rolesResourcePath];
+
+  const serverlessResources = resourcesPaths.reduce<string[]>((acc, path) => {
     const fileName = basename(path);
     let localFilePath = path;
 
@@ -608,9 +682,9 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     throw new Error(
       `Unsupported ES serverless --resources value(s):\n  ${Object.values(
         resourceFileOverrides
-      ).join('  \n')}\n\nValid resources: ${SERVERLESS_RESOURCES_PATHS.map((filePath) =>
-        basename(filePath)
-      ).join(' | ')}`
+      ).join('  \n')}\n\nValid resources: ${resourcesPaths
+        .map((filePath) => basename(filePath))
+        .join(' | ')}`
     );
   }
 
@@ -719,14 +793,9 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   Login with username ${chalk.bold.cyan(ELASTIC_SERVERLESS_SUPERUSER)} or ${chalk.bold.cyan(
     SYSTEM_INDICES_SUPERUSER
   )} and password ${chalk.bold.magenta(ELASTIC_SERVERLESS_SUPERUSER_PASSWORD)}
+  See packages/kbn-es/src/serverless_resources/README.md for additional information on authentication.
   Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
     `);
-
-  if (options.ssl) {
-    log.warning(`SSL has been enabled for ES. Kibana should be started with the SSL flag so that it can authenticate with ES.
-  See packages/kbn-es/src/serverless_resources/README.md for additional information on authentication.
-    `);
-  }
 
   if (!options.skipTeardown) {
     // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)

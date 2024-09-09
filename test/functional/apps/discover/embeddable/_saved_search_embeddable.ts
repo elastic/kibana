@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -12,8 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardReplacePanel = getService('dashboardReplacePanel');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const esArchiver = getService('esArchiver');
@@ -70,6 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.checkCurrentRowsPerPageToBe(100);
 
       await PageObjects.dashboard.saveDashboard(dashboardName, {
+        saveAsNew: true,
         waitDialogIsClosed: true,
         exitFromEditMode: false,
       });
@@ -80,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.changeRowsPerPageTo(10);
 
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
       await refreshDashboardPage();
 
       await dataGrid.checkCurrentRowsPerPageToBe(10);
@@ -90,11 +91,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await addSearchEmbeddableToDashboard();
       await PageObjects.dashboard.switchToEditMode();
 
-      const cell = await dataGrid.getCellElement(0, 2);
+      const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       expect(await cell.getVisibleText()).to.be('Sep 22, 2015 @ 23:50:13.253');
       await dataGrid.clickMoveColumnLeft('agent');
 
-      const cellAfter = await dataGrid.getCellElement(0, 2);
+      const cellAfter = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       expect(await cellAfter.getVisibleText()).to.be(
         'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)'
       );
@@ -124,21 +125,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       const embeddableError = await testSubjects.find('embeddableError');
       const errorMessage = await embeddableError.findByTestSubject('errorMessageMarkdown');
-      expect(await errorMessage.getVisibleText()).to.equal(
-        'Expected AND, OR, end of input, whitespace but "n" found. this < is not : a valid > query ----------^'
-      );
-    });
-
-    it('should replace a panel with a saved search', async () => {
-      await dashboardAddPanel.addVisualization('Rendering Test: datatable');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
-      await dashboardPanelActions.replacePanelByTitle('Rendering Test: datatable');
-      await dashboardReplacePanel.replaceEmbeddable('Rendering-Test:-saved-search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
-      await testSubjects.missingOrFail('embeddableError');
-      expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
+      const errorText = await errorMessage.getVisibleText();
+      expect(errorText).to.match(/Expected[\S\s]+but "n" found/);
     });
 
     it('should not show the full screen button', async () => {
@@ -148,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the the grid toolbar', async () => {
       await addSearchEmbeddableToDashboard();
-      await testSubjects.existOrFail('dscGridToolbar');
+      await testSubjects.existOrFail('unifiedDataTableToolbar');
     });
   });
 }

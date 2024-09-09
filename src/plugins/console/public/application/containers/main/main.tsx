@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -29,7 +30,11 @@ import { getTopNavConfig } from './get_top_nav';
 import type { SenseEditor } from '../../models/sense_editor';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
-export function Main() {
+export interface MainProps {
+  hideWelcome?: boolean;
+}
+
+export function Main({ hideWelcome = false }: MainProps) {
   const {
     services: { storage },
   } = useServicesContext();
@@ -42,7 +47,7 @@ export function Main() {
   } = useRequestReadContext();
 
   const [showWelcome, setShowWelcomePanel] = useState(
-    () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
+    () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION' && !hideWelcome
   );
 
   const [showingHistory, setShowHistory] = useState(false);

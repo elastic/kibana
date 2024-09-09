@@ -9,7 +9,11 @@ import type {
   RuleCreateProps,
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import type {
+  AgentPolicy,
+  CreatePackagePolicyResponse,
+  PackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import type { Case } from '@kbn/cases-plugin/common';
 import { API_VERSIONS } from '../../common/constants';
 import type { SavedQuerySOFormData } from '../../public/saved_queries/form/use_saved_query_form';
@@ -108,6 +112,39 @@ export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
     url: `/s/${space}/api/osquery/packs`,
   }).then((response) => response.body.data);
 
+export const createPack = (payload: Partial<PackItem> = {}) =>
+  request<{ data: PackSavedObject; message?: string }>({
+    method: 'POST',
+    failOnStatusCode: false,
+    body: {
+      ...payload,
+      name: generateRandomStringName(1)[0],
+      shards: {},
+      queries: {
+        test: {
+          ecs_mapping: {},
+          interval: 3600,
+          query: 'select * from uptime;',
+        },
+      },
+      enabled: true,
+    },
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
+
+    url: `/s/default/api/osquery/packs`,
+  });
+
+export const getPack = (packId: string) =>
+  request<{ data: PackItem }>({
+    method: 'GET',
+    url: `/api/osquery/packs/${packId}`,
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
+  });
+
 export const cleanupPack = (id: string, space = 'default') => {
   request({
     method: 'DELETE',
@@ -138,7 +175,7 @@ export const loadLiveQuery = (
   }).then((response) => response.body.data);
 
 export const loadRule = (includeResponseActions = false) => {
-  cy.login(ServerlessRoleName.SOC_MANAGER);
+  cy.login(ServerlessRoleName.SOC_MANAGER, false);
 
   return request<RuleResponse>({
     method: 'POST',
@@ -303,6 +340,45 @@ export const loadAgentPolicy = () =>
     },
     url: '/api/fleet/agent_policies',
   }).then((response) => response.body.item);
+
+export const getInstalledOsqueryIntegrationVersion = () =>
+  request<{ item: PackagePolicy }>({
+    method: 'GET',
+    url: `/api/fleet/epm/packages/osquery_manager`,
+    headers: {
+      'x-elastic-internal-product': 'security-solution',
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
+  }).then((response) => response.body.item);
+
+export const addOsqueryToAgentPolicy = (
+  agentPolicyId: string,
+  agentPolicyName: string,
+  integrationVersion?: string
+) =>
+  request<CreatePackagePolicyResponse>({
+    method: 'POST',
+    url: '/api/fleet/package_policies',
+    headers: {
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
+    body: {
+      policy_id: agentPolicyId,
+      package: {
+        name: 'osquery_manager',
+        version: integrationVersion,
+      },
+      name: `Policy for ${agentPolicyName}`,
+      description: '',
+      namespace: 'default',
+      inputs: {
+        'osquery_manager-osquery': {
+          enabled: true,
+          streams: {},
+        },
+      },
+    },
+  });
 
 export const cleanupAgentPolicy = (agentPolicyId: string) =>
   request({

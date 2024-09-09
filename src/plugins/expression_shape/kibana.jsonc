@@ -11,9 +11,7 @@
       "expressions",
       "presentationUtil"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
+    "requiredBundles": [],
     "extraPublicDirs": [
       "common"
     ]

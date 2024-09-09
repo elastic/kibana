@@ -1,22 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { I18nService } from '@kbn/core-i18n-browser-internal';
+import type { I18nService } from '@kbn/core-i18n-browser-internal';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-
-const PassThroughComponent = ({ children }: { children: React.ReactNode }) => children;
+import { I18nProviderMock } from './i18n_context_mock';
 
 const createStartContractMock = () => {
   const setupContract: jest.Mocked<I18nStart> = {
-    // By default mock the Context component so it simply renders all children
-    Context: jest.fn().mockImplementation(PassThroughComponent),
+    // Stubbed provider returning the default message or id
+    Context: jest.fn().mockImplementation(I18nProviderMock),
   };
   return setupContract;
 };

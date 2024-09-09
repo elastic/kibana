@@ -133,6 +133,8 @@ export const serverReturnedNodeEventsInCategory = actionCreator<{
    * The category that `events` have in common.
    */
   readonly eventCategory: string;
+
+  readonly agentId: string;
 }>('SERVER_RETURNED_NODE_EVENTS_IN_CATEGORY');
 
 /**
@@ -190,6 +192,16 @@ export const userReloadedResolverNode = actionCreator<{
    */
   readonly nodeID: string;
 }>('USER_RELOADED_RESOLVER_NODE');
+
+export const userOverrodeDateRange = actionCreator<{
+  readonly id: string;
+  readonly timeRange: TimeFilters;
+}>('USER_OVERRODE_DATE_RANGE');
+
+export const userOverrodeSourcererSelection = actionCreator<{
+  readonly id: string;
+  readonly indices: string[];
+}>('USER_OVERRODE_SOURCERER_SELECTION');
 
 /**
  * When the server returns an error after the app requests node data for a set of nodes.

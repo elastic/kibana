@@ -6,7 +6,6 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { MaintenanceWindowFindResponse } from '../../pages/maintenance_windows/types';
 import { findMaintenanceWindows } from './find';
 import { MaintenanceWindowStatus } from '../../../common';
 
@@ -39,14 +38,13 @@ describe('findMaintenanceWindows', () => {
           updated_by: null,
           created_at: '2023-03-23T19:16:21.293Z',
           updated_at: '2023-03-23T19:16:21.293Z',
-          total: 1000,
         },
       ],
       total: 1,
     };
     http.get.mockResolvedValueOnce(apiResponse);
 
-    const maintenanceWindow: MaintenanceWindowFindResponse[] = [
+    const maintenanceWindow = [
       {
         id: '1',
         title: 'test',
@@ -68,7 +66,6 @@ describe('findMaintenanceWindows', () => {
         updatedBy: null,
         createdAt: '2023-03-23T19:16:21.293Z',
         updatedAt: '2023-03-23T19:16:21.293Z',
-        total: 1000,
       },
     ];
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, Subscription } from 'rxjs';
@@ -52,7 +53,7 @@ describe('AggsService - public', () => {
     test('registers default agg types', () => {
       service.setup(setupDeps);
       const start = service.start(startDeps);
-      expect(start.types.getAll().buckets.length).toBe(16);
+      expect(start.types.getAll().buckets.length).toBe(17);
       expect(start.types.getAll().metrics.length).toBe(27);
     });
 
@@ -68,7 +69,7 @@ describe('AggsService - public', () => {
       );
 
       const start = service.start(startDeps);
-      expect(start.types.getAll().buckets.length).toBe(17);
+      expect(start.types.getAll().buckets.length).toBe(18);
       expect(start.types.getAll().buckets.some(({ name }) => name === 'foo')).toBe(true);
       expect(start.types.getAll().metrics.length).toBe(28);
       expect(start.types.getAll().metrics.some(({ name }) => name === 'bar')).toBe(true);

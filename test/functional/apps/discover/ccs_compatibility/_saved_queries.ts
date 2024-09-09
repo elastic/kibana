@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -21,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
   const config = getService('config');
+  const dataViews = getService('dataViews');
   const localArchiveDirectories = {
     nested: 'test/functional/fixtures/kbn_archiver/date_nested.json',
     discover: 'test/functional/fixtures/kbn_archiver/discover.json',
@@ -54,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('set up a query with filters to save');
     await PageObjects.common.setTime({ from, to });
     await PageObjects.common.navigateToApp('discover');
-    await PageObjects.discover.selectIndexPattern(logstashIndexPatternString);
+    await dataViews.switchToAndValidate(logstashIndexPatternString);
     await retry.try(async function tryingForTime() {
       const hitCount = await PageObjects.discover.getHitCount();
       expect(hitCount).to.be('4,731');
@@ -120,14 +122,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern(dateNestedIndexPattern);
+        await dataViews.switchToAndValidate(dateNestedIndexPattern);
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern(logstashIndexPatternString);
-        const currentDataView = await PageObjects.discover.getCurrentlySelectedDataView();
-        expect(currentDataView).to.be(logstashIndexPatternString);
+        await dataViews.switchToAndValidate(logstashIndexPatternString);
         await retry.try(async function tryingForTime() {
           const hitCount = await PageObjects.discover.getHitCount();
           expect(hitCount).to.be('4,731');

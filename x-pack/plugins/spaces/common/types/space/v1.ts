@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { OnBoardingDefaultSolution } from '@kbn/cloud-plugin/common';
+
+export type SolutionView = OnBoardingDefaultSolution | 'classic';
+
 /**
  * A Space.
  */
@@ -58,6 +62,11 @@ export interface Space {
    * @private
    */
   _reserved?: boolean;
+
+  /**
+   * Solution selected for this space.
+   */
+  solution?: SolutionView;
 }
 
 /**

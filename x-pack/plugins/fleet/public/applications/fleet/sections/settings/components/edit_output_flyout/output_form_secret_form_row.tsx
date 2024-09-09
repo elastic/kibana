@@ -7,23 +7,27 @@
 
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  type EuiFormRowProps,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 export const SecretFormRow: React.FC<{
   fullWidth?: boolean;
-  children: ConstructorParameters<typeof EuiFormRow>[0]['children'];
+  children: EuiFormRowProps['children'];
   useSecretsStorage: boolean;
+  isConvertedToSecret?: boolean;
   onToggleSecretStorage: (secretEnabled: boolean) => void;
   error?: string[];
   isInvalid?: boolean;
@@ -32,6 +36,7 @@ export const SecretFormRow: React.FC<{
   initialValue?: any;
   cancelEdit?: () => void;
   label?: JSX.Element;
+  disabled?: boolean;
 }> = ({
   fullWidth,
   error,
@@ -43,37 +48,53 @@ export const SecretFormRow: React.FC<{
   onToggleSecretStorage,
   cancelEdit,
   useSecretsStorage,
+  isConvertedToSecret = false,
   label,
+  disabled,
 }) => {
   const hasInitialValue = !!initialValue;
-  const [editMode, setEditMode] = useState(!initialValue);
+  const [editMode, setEditMode] = useState(isConvertedToSecret || !initialValue);
   const valueHiddenPanel = (
     <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
-      <EuiText size="s" color="subdued">
-        <FormattedMessage
-          id="xpack.fleet.outputForm.secretValueHiddenMessage"
-          defaultMessage="The saved {varName} is hidden. You can only replace the {varName}."
-          values={{
-            varName: title,
-          }}
-        />
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiButtonEmpty
-        onClick={() => setEditMode(true)}
-        color="primary"
-        iconType="refresh"
-        iconSide="left"
-        size="xs"
-      >
-        <FormattedMessage
-          id="xpack.fleet.outputForm.editSecretValue"
-          defaultMessage="Replace {varName}"
-          values={{
-            varName: title,
-          }}
-        />
-      </EuiButtonEmpty>
+      {disabled ? (
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="xpack.fleet.outputForm.secretValueHiddenAndDisabledMessage"
+            defaultMessage="The saved {varName} is hidden."
+            values={{
+              varName: title,
+            }}
+          />
+        </EuiText>
+      ) : (
+        <>
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.fleet.outputForm.secretValueHiddenMessage"
+              defaultMessage="The saved {varName} is hidden. You can only replace the {varName}."
+              values={{
+                varName: title,
+              }}
+            />
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            onClick={() => setEditMode(true)}
+            color="primary"
+            iconType="refresh"
+            iconSide="left"
+            size="xs"
+          >
+            <FormattedMessage
+              id="xpack.fleet.outputForm.editSecretValue"
+              defaultMessage="Replace {varName}"
+              values={{
+                varName: title,
+              }}
+            />
+          </EuiButtonEmpty>
+        </>
+      )}
     </EuiPanel>
   );
 
@@ -101,7 +122,7 @@ export const SecretFormRow: React.FC<{
   const editValue = (
     <>
       {children}
-      {hasInitialValue && (
+      {hasInitialValue && !isConvertedToSecret && (
         <EuiFlexGroup justifyContent="flexEnd" data-test-subj="secretCancelChangeBtn">
           <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>
         </EuiFlexGroup>
@@ -110,7 +131,7 @@ export const SecretFormRow: React.FC<{
   );
 
   const secretLabel = (
-    <span>
+    <>
       <EuiIcon type="lock" data-test-subj="lockIcon" />
       &nbsp;
       {title}
@@ -123,38 +144,63 @@ export const SecretFormRow: React.FC<{
       >
         <EuiIcon type="questionInCircle" />
       </EuiToolTip>
-    </span>
+    </>
   );
 
-  const helpText = !initialValue ? (
-    <FormattedMessage
-      id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputCalloutTitle"
-      defaultMessage="This field uses secret storage and requires Fleet Server v8.12.0 and above. {revertLink}"
-      values={{
-        revertLink: (
-          <EuiButtonEmpty onClick={() => onToggleSecretStorage(false)} color="primary" size="xs">
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.revertToPlaintextLink"
-              defaultMessage="Click to use plain text storage instead"
-            />
-          </EuiButtonEmpty>
-        ),
-      }}
-    />
-  ) : undefined;
+  const helpText = useMemo(() => {
+    if (disabled) return null;
+    if (isConvertedToSecret)
+      return (
+        <EuiCallOut size="s" color="warning">
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle"
+            defaultMessage="This field will be re-saved using secret storage from plain text storage. Secrets storage requires Fleet Server v8.12.0 and above. {revertLink}"
+            values={{
+              revertLink: (
+                <EuiLink onClick={() => onToggleSecretStorage(false)} color="primary">
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.revertToPlaintextLink"
+                    defaultMessage="Click to use plain text storage instead"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiCallOut>
+      );
 
-  const plainTextHelp = (
+    if (!initialValue)
+      return (
+        <FormattedMessage
+          id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputCalloutTitle"
+          defaultMessage="This field uses secret storage and requires Fleet Server v8.12.0 and above. {revertLink}"
+          values={{
+            revertLink: (
+              <EuiLink onClick={() => onToggleSecretStorage(false)} color="primary">
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.revertToPlaintextLink"
+                  defaultMessage="Click to use plain text storage instead"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    return undefined;
+  }, [disabled, initialValue, isConvertedToSecret, onToggleSecretStorage]);
+
+  const plainTextHelp = disabled ? null : (
     <FormattedMessage
       id="xpack.fleet.settings.editOutputFlyout.secretInputCalloutTitle"
       defaultMessage="This field should be stored as a secret, currently it is set to be stored as plain text. {enableSecretLink}"
       values={{
         enableSecretLink: (
-          <EuiButtonEmpty onClick={() => onToggleSecretStorage(true)} color="primary" size="xs">
+          <EuiLink onClick={() => onToggleSecretStorage(true)} color="primary">
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.revertToSecretStorageLink"
               defaultMessage="Click to use secret storage instead"
             />
-          </EuiButtonEmpty>
+          </EuiLink>
         ),
       }}
     />

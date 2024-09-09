@@ -8,30 +8,34 @@
 import React from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import type { RiskSeverity } from '../../../common/search_strategy';
 import { RiskScoreLevel } from './severity/common';
 
 import { HostDetailsLink, UserDetailsLink } from '../../common/components/links';
-import {
-  RiskScoreEntity,
-  type RiskScore as IRiskScore,
-} from '../../../common/entity_analytics/risk_engine';
+import { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
 
-type RiskScoreColumn = EuiBasicTableColumn<IRiskScore> & {
-  field: keyof IRiskScore;
+type RiskScoreColumn = EuiBasicTableColumn<EntityRiskScoreRecord> & {
+  field: keyof EntityRiskScoreRecord;
 };
 
 export const RiskScorePreviewTable = ({
   items,
   type,
 }: {
-  items: IRiskScore[];
+  items: EntityRiskScoreRecord[];
   type: RiskScoreEntity;
 }) => {
   const columns: RiskScoreColumn[] = [
     {
       field: 'id_value',
-      name: 'Name',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.riskScore.previewTable.nameColumnTitle"
+          defaultMessage="Name"
+        />
+      ),
       render: (itemName: string) => {
         return type === RiskScoreEntity.host ? (
           <HostDetailsLink hostName={itemName} />
@@ -42,7 +46,13 @@ export const RiskScorePreviewTable = ({
     },
     {
       field: 'calculated_level',
-      name: 'Level',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.riskScore.previewTable.levelColumnTitle"
+          defaultMessage="Level"
+        />
+      ),
+
       render: (risk: RiskSeverity | null) => {
         if (risk != null) {
           return <RiskScoreLevel severity={risk} />;
@@ -53,8 +63,12 @@ export const RiskScorePreviewTable = ({
     },
     {
       field: 'calculated_score_norm',
-      // align: 'right',
-      name: 'Score norm',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.riskScore.previewTable.scoreNormColumnTitle"
+          defaultMessage="Score norm"
+        />
+      ),
       render: (scoreNorm: number | null) => {
         if (scoreNorm != null) {
           return Math.round(scoreNorm * 100) / 100;
@@ -65,14 +79,13 @@ export const RiskScorePreviewTable = ({
   ];
 
   return (
-    <EuiInMemoryTable<IRiskScore>
+    <EuiInMemoryTable<EntityRiskScoreRecord>
       data-test-subj={
         type === RiskScoreEntity.host ? 'host-risk-preview-table' : 'user-risk-preview-table'
       }
-      responsive={false}
+      responsiveBreakpoint={false}
       items={items}
       columns={columns}
-      loading={false}
     />
   );
 };

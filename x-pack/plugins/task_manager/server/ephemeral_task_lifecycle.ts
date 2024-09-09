@@ -6,7 +6,7 @@
  */
 
 import { Subject, Observable, Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 import { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Result, asErr, asOk } from './lib/result_type';
@@ -143,13 +143,13 @@ export class EphemeralTaskLifecycle {
     taskType && this.definitions.get(taskType)?.maxConcurrency
       ? Math.max(
           Math.min(
-            this.pool.availableWorkers,
+            this.pool.availableCapacity(),
             this.definitions.get(taskType)!.maxConcurrency! -
-              this.pool.getOccupiedWorkersByType(taskType)
+              this.pool.getUsedCapacityByType(taskType)
           ),
           0
         )
-      : this.pool.availableWorkers;
+      : this.pool.availableCapacity();
 
   private emitEvent = (event: TaskLifecycleEvent) => {
     this.events$.next(event);

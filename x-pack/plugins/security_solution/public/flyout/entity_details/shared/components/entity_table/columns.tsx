@@ -7,11 +7,10 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { euiLightVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/field_renderers';
+import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/default_renderer';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
-import { getSourcererScopeId } from '../../../../../helpers';
 import type { BasicEntityData, EntityTableColumns } from './types';
 
 export const getEntityTableColumns = <T extends BasicEntityData>(
@@ -32,8 +31,8 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
       <span
         data-test-subj="entity-table-label"
         css={css`
-          font-weight: ${euiLightVars.euiFontWeightMedium};
-          color: ${euiLightVars.euiTitleColor};
+          font-weight: ${euiThemeVars.euiFontWeightMedium};
+          color: ${euiThemeVars.euiTitleColor};
         `}
       >
         {label ?? field}
@@ -58,7 +57,7 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
             attrName={field}
             idPrefix={contextID ? `entityTable-${contextID}` : 'entityTable'}
             isDraggable={isDraggable}
-            sourcererScopeId={getSourcererScopeId(scopeId)}
+            scopeId={scopeId}
             render={renderField}
             data-test-subj="entity-table-value"
           />

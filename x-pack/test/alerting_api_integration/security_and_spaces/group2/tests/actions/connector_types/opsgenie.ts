@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import {
   OpsgenieSimulator,
@@ -13,11 +14,13 @@ import {
 } from '@kbn/actions-simulators-plugin/server/opsgenie_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function opsgenieTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
+  const retry = getService('retry');
 
   describe('Opsgenie', () => {
     describe('action creation', () => {
@@ -191,7 +194,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.USER,
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message: `Sub action "invalidAction" is not registered. Connector id: ${opsgenieActionId}. Connector name: Opsgenie. Connector type: .opsgenie`,
           });
         });
@@ -236,7 +239,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('optional parameters', async () => {
+        describe('optional parameters', () => {
           describe('responders', () => {
             it('should fail to create an alert when the responders is an invalid type', async () => {
               const { body } = await supertest
@@ -535,6 +538,23 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               connector_id: opsgenieActionId,
               data: opsgenieSuccessResponse,
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: opsgenieActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(21);
           });
 
           it('should preserve the alias when it is 512 characters when creating an alert', async () => {
@@ -697,7 +717,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: opsgenieActionId,
-              errorSource: TaskErrorSource.USER,
+              errorSource: TaskErrorSource.FRAMEWORK,
               service_message:
                 'Status code: 422. Message: Request failed with status code 422: {"message":"failed"}',
             });
@@ -721,7 +741,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: opsgenieActionId,
-              errorSource: TaskErrorSource.USER,
+              errorSource: TaskErrorSource.FRAMEWORK,
               service_message:
                 'Status code: 422. Message: Request failed with status code 422: {"message":"failed"}',
             });

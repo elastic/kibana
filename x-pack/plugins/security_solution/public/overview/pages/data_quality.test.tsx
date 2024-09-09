@@ -12,12 +12,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../common/mock';
 import { DataQuality } from './data_quality';
-import { HOT, WARM, UNMANAGED } from './translations';
 import { useKibana } from '../../common/lib/kibana';
 
 const mockedUseKibana = mockUseKibana();
 
-jest.mock('../../common/components/landing_page');
+jest.mock('../../common/components/empty_prompt');
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
@@ -42,7 +41,7 @@ const defaultUseSourcererReturn = {
   selectedPatterns: ['auditbeat-*', 'logs-*', 'packetbeat-*'],
 };
 const mockUseSourcererDataView = jest.fn(() => defaultUseSourcererReturn);
-jest.mock('../../common/containers/sourcerer', () => ({
+jest.mock('../../sourcerer/containers', () => ({
   useSourcererDataView: () => mockUseSourcererDataView(),
 }));
 
@@ -56,7 +55,7 @@ jest.mock('../../detections/containers/detection_engine/alerts/use_signal_index'
 }));
 
 describe('DataQuality', () => {
-  const defaultIlmPhases = `${HOT}${WARM}${UNMANAGED}`;
+  const defaultIlmPhases = 'hotwarmunmanaged';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -117,7 +116,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 
@@ -149,7 +148,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 
@@ -181,7 +180,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 
@@ -218,7 +217,7 @@ describe('DataQuality', () => {
     });
 
     test('it renders the landing page', () => {
-      expect(screen.getByTestId('siem-landing-page')).toBeInTheDocument();
+      expect(screen.getByTestId('empty-prompt')).toBeInTheDocument();
     });
   });
 
@@ -255,7 +254,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 
@@ -292,7 +291,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 

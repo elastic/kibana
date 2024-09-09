@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiPageHeader,
@@ -24,9 +24,10 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
@@ -58,9 +59,8 @@ import {
   rulesWarningReasonTranslationsMapping,
 } from '../../rules_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ruleReducer } from '../../rule_form/rule_reducer';
+import { getRuleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
-import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 import { runRule } from '../../../lib/run_rule';
 import {
   getConfirmDeletionButtonText,
@@ -70,6 +70,7 @@ import {
 } from '../../rules_list/translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { RefreshToken } from './types';
+import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -89,12 +90,9 @@ const ruleDetailStyle = {
 export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
   ruleType,
-  actionTypes,
   bulkDisableRules,
   bulkEnableRules,
   bulkDeleteRules,
-  snoozeRule,
-  unsnoozeRule,
   requestRefresh,
   refreshToken,
 }) => {
@@ -106,8 +104,11 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     setBreadcrumbs,
     chrome,
     http,
+    i18n: i18nStart,
+    theme,
     notifications: { toasts },
   } = useKibana().services;
+  const ruleReducer = useMemo(() => getRuleReducer(actionTypeRegistry), [actionTypeRegistry]);
   const [{}, dispatch] = useReducer(ruleReducer, { rule });
   const setInitialRule = (value: Rule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -115,6 +116,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
+  const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
 
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
     useState<boolean>(false);
@@ -139,7 +141,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     (async () => {
       let loadedConnectors: ActionConnector[] = [];
       try {
-        loadedConnectors = await loadConnectors({ http });
+        loadedConnectors = await loadConnectors({ http, includeSystemActions: true });
       } catch (err) {
         loadedConnectors = [];
       }
@@ -215,12 +217,20 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}
-            </>
+            </>,
+            { i18n: i18nStart, theme }
           ),
         });
       }
     }
-  }, [rule.schedule.interval, config.minimumScheduleInterval, toasts, hasEditButton]);
+  }, [
+    i18nStart,
+    theme,
+    rule.schedule.interval,
+    config.minimumScheduleInterval,
+    toasts,
+    hasEditButton,
+  ]);
 
   const setRule = async () => {
     history.push(getRuleDetailsRoute(rule.id));
@@ -288,9 +298,37 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     setRulesToDelete([]);
     goToRulesList();
   };
+
   const onDeleteCancel = () => {
     setIsDeleteModalVisibility(false);
     setRulesToDelete([]);
+  };
+
+  const onDisableModalOpen = () => {
+    setIsUntrackAlertsModalOpen(true);
+  };
+
+  const onDisableModalClose = () => {
+    setIsUntrackAlertsModalOpen(false);
+  };
+
+  const onEnable = async () => {
+    await bulkEnableRules({ ids: [rule.id] });
+    requestRefresh();
+  };
+
+  const onDisable = async (untrack: boolean) => {
+    onDisableModalClose();
+    await bulkDisableRules({ ids: [rule.id], untrack });
+    requestRefresh();
+  };
+
+  const onEnableDisable = (enable: boolean) => {
+    if (enable) {
+      onEnable();
+    } else {
+      onDisableModalOpen();
+    }
   };
 
   return (
@@ -310,6 +348,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             MULTIPLE_RULE_TITLE
           )}
         />
+      )}
+      {isUntrackAlertsModalOpen && (
+        <UntrackAlertsModal onCancel={onDisableModalClose} onConfirm={onDisable} />
       )}
       <UpdateApiKeyModalConfirmation
         onCancel={() => {
@@ -400,14 +441,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             onApiKeyUpdate={(ruleId) => {
               setRulesToUpdateAPIKey([ruleId]);
             }}
-            onEnableDisable={async (enable) => {
-              if (enable) {
-                await bulkEnableRules({ ids: [rule.id] });
-              } else {
-                await bulkDisableRules({ ids: [rule.id] });
-              }
-              requestRefresh();
-            }}
+            onEnableDisable={onEnableDisable}
             onRunRule={onRunRule}
           />,
           editButton,
@@ -431,24 +465,25 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License ? (
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiCallOut color="danger" data-test-subj="ruleErrorBanner" size="s" iconType="rule">
-                <p>
-                  <EuiIcon color="danger" type="warning" />
-                  &nbsp;
-                  <b>{getRuleStatusErrorReasonText()}</b>&#44;&nbsp;
-                  {rule.executionStatus.error?.message}
-                  &nbsp;
-                  <EuiLink
-                    href={`${http.basePath.get()}/app/management/stack/license_management`}
-                    color="primary"
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
-                      defaultMessage="Manage license"
-                    />
-                  </EuiLink>
-                </p>
+              <EuiCallOut
+                color="danger"
+                data-test-subj="ruleErrorBanner"
+                size="s"
+                iconType="error"
+                title={getRuleStatusErrorReasonText()}
+              >
+                <EuiText size="xs">{rule.executionStatus.error?.message}</EuiText>
+                <EuiSpacer size="s" />
+                <EuiLink
+                  href={`${http.basePath.get()}/app/management/stack/license_management`}
+                  color="primary"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
+                    defaultMessage="Manage license"
+                  />
+                </EuiLink>
               </EuiCallOut>
             </EuiFlexItem>
           </EuiFlexGroup>

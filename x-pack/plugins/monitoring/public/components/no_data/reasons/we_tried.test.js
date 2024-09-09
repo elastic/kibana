@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { WeTried } from '.';
 
 describe('WeTried', () => {
   test('should render "we tried" message', () => {
-    const component = renderWithIntl(<WeTried />);
+    const component = renderWithI18nProvider(<WeTried />);
     expect(component).toMatchSnapshot();
   });
 });

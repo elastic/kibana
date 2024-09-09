@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Option from 'fp-ts/Option';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import type {
+import {
+  getLatestMappingsVirtualVersionMap,
   IndexMapping,
   IndexTypesMap,
   SavedObjectsMigrationConfigType,
@@ -28,8 +30,10 @@ export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
   mustRelocateDocuments: boolean;
+  indexTypes: string[];
   indexTypesMap: IndexTypesMap;
-  targetMappings: IndexMapping;
+  hashToVersionMap: Record<string, string>;
+  targetIndexMappings: IndexMapping;
   preMigrationScript?: string;
   indexPrefix: string;
   migrationsConfig: SavedObjectsMigrationConfigType;
@@ -39,6 +43,16 @@ export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
   esCapabilities: ElasticsearchCapabilities;
 }
 
+const TEMP_INDEX_MAPPINGS: IndexMapping = {
+  dynamic: false,
+  properties: {
+    type: { type: 'keyword' },
+    typeMigrationVersion: {
+      type: 'version',
+    },
+  },
+};
+
 /**
  * Construct the initial state for the model
  */
@@ -46,8 +60,10 @@ export const createInitialState = ({
   kibanaVersion,
   waitForMigrationCompletion,
   mustRelocateDocuments,
+  indexTypes,
   indexTypesMap,
-  targetMappings,
+  hashToVersionMap,
+  targetIndexMappings,
   preMigrationScript,
   coreMigrationVersionPerType,
   migrationVersionPerType,
@@ -62,16 +78,6 @@ export const createInitialState = ({
     coreMigrationVersionPerType,
     migrationVersionPerType,
   });
-
-  const reindexTargetMappings: IndexMapping = {
-    dynamic: false,
-    properties: {
-      type: { type: 'keyword' },
-      typeMigrationVersion: {
-        type: 'version',
-      },
-    },
-  };
 
   const knownTypes = typeRegistry.getAllTypes().map((type) => type.name);
   const excludeFilterHooks = Object.fromEntries(
@@ -101,19 +107,13 @@ export const createInitialState = ({
     );
   }
 
-  const targetIndexMappings: IndexMapping = {
-    ...targetMappings,
-    _meta: {
-      ...targetMappings._meta,
-      indexTypesMap,
-    },
-  };
-
   return {
     controlState: 'INIT',
     waitForMigrationCompletion,
     mustRelocateDocuments,
+    indexTypes,
     indexTypesMap,
+    hashToVersionMap,
     indexPrefix,
     legacyIndex: indexPrefix,
     currentAlias: indexPrefix,
@@ -124,7 +124,7 @@ export const createInitialState = ({
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
     targetIndexMappings,
-    tempIndexMappings: reindexTargetMappings,
+    tempIndexMappings: TEMP_INDEX_MAPPINGS,
     outdatedDocumentsQuery,
     retryCount: 0,
     retryDelay: 0,
@@ -138,6 +138,7 @@ export const createInitialState = ({
     logs: [],
     excludeOnUpgradeQuery: excludeUnusedTypesQuery,
     knownTypes,
+    latestMappingsVersions: getLatestMappingsVirtualVersionMap(typeRegistry.getAllTypes()),
     excludeFromUpgradeFilterHooks: excludeFilterHooks,
     migrationDocLinks,
     esCapabilities,

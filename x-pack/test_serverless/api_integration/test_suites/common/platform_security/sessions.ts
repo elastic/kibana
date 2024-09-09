@@ -7,18 +7,27 @@
 
 import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertest');
-
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
   describe('security/sessions', function () {
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
+    });
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
     describe('route access', () => {
       describe('disabled', () => {
         it('invalidate', async () => {
-          const { body, status } = await supertest
+          const { body, status } = await supertestWithoutAuth
             .post('/api/security/session/_invalidate')
             .set(svlCommonApi.getInternalRequestHeader())
+            .set(roleAuthc.apiKeyHeader)
             .send({ match: 'all' });
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -29,9 +38,11 @@ export default function ({ getService }: FtrProviderContext) {
           let body: any;
           let status: number;
 
-          ({ body, status } = await supertest
+          ({ body, status } = await supertestWithoutAuth
             .get('/internal/security/session')
+            .set(roleAuthc.apiKeyHeader)
             .set(svlCommonApi.getCommonRequestHeader()));
+
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
             statusCode: 400,
@@ -42,8 +53,9 @@ export default function ({ getService }: FtrProviderContext) {
           });
           expect(status).toBe(400);
 
-          ({ body, status } = await supertest
+          ({ body, status } = await supertestWithoutAuth
             .get('/internal/security/session')
+            .set(roleAuthc.apiKeyHeader)
             .set(svlCommonApi.getInternalRequestHeader()));
           // expect 204 because there is no session
           expect(status).toBe(204);
@@ -53,8 +65,9 @@ export default function ({ getService }: FtrProviderContext) {
           let body: any;
           let status: number;
 
-          ({ body, status } = await supertest
+          ({ body, status } = await supertestWithoutAuth
             .post('/internal/security/session')
+            .set(roleAuthc.apiKeyHeader)
             .set(svlCommonApi.getCommonRequestHeader()));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
@@ -66,8 +79,9 @@ export default function ({ getService }: FtrProviderContext) {
           });
           expect(status).toBe(400);
 
-          ({ body, status } = await supertest
+          ({ body, status } = await supertestWithoutAuth
             .post('/internal/security/session')
+            .set(roleAuthc.apiKeyHeader)
             .set(svlCommonApi.getInternalRequestHeader()));
           // expect redirect
           expect(status).toBe(302);

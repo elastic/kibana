@@ -54,7 +54,7 @@ export const RuleConditions = <ConditionProps extends any, ActionGroupIds extend
     includeBuiltInActionGroups
       ? actionGroups
       : actionGroups.filter(({ id }) => !BUILT_IN_ACTION_GROUPS.has(id)),
-    (actionGroup) => actionGroup.hasOwnProperty('conditions')
+    (actionGroup) => Object.hasOwn(actionGroup, 'conditions')
   );
 
   return (
@@ -89,6 +89,7 @@ export const RuleConditions = <ConditionProps extends any, ActionGroupIds extend
                   React.Children.only(children),
                   onResetConditionsFor
                     ? {
+                        // @ts-expect-error upgrade typescript v4.9.5
                         actionGroup,
                         onResetConditionsFor,
                       }

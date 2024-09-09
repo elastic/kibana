@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
@@ -24,21 +25,9 @@ export interface PerformGetParams {
 
 export const performGet = async <T>(
   { type, id, options }: PerformGetParams,
-  {
-    registry,
-    helpers,
-    allowedTypes,
-    client,
-    migrator,
-    serializer,
-    extensions = {},
-  }: ApiExecutionContext
+  { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
-  const {
-    common: commonHelper,
-    encryption: encryptionHelper,
-    migration: migrationHelper,
-  } = helpers;
+  const { common: commonHelper, migration: migrationHelper } = helpers;
   const { securityExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
@@ -84,18 +73,8 @@ export const performGet = async <T>(
     migrationVersionCompatibility,
   });
 
-  let migrated: SavedObject<T>;
-  try {
-    migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
-  } catch (error) {
-    throw SavedObjectsErrorHelpers.decorateGeneralError(
-      error,
-      'Failed to migrate document to the latest version.'
-    );
-  }
-
-  return encryptionHelper.optionallyDecryptAndRedactSingleResult(
-    migrated,
-    authorizationResult?.typeMap
-  );
+  return await migrationHelper.migrateAndDecryptStorageDocument({
+    document,
+    typeMap: authorizationResult?.typeMap,
+  });
 };

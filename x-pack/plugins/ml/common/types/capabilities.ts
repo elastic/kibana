@@ -84,6 +84,8 @@ export const adminMlCapabilities = {
   canCreateTrainedModels: false,
   canDeleteTrainedModels: false,
   canStartStopTrainedModels: false,
+  // Inference models
+  canCreateInferenceEndpoint: false,
 };
 
 export type FeatureMlCapabilities = typeof featureMlCapabilities;
@@ -130,7 +132,7 @@ export function getPluginPrivileges() {
     app: [PLUGIN_ID, 'kibana'],
     excludeFromBasePrivileges: false,
     management: {
-      insightsAndAlerting: ['jobsListLink'],
+      insightsAndAlerting: ['jobsListLink', 'triggersActions'],
     },
     catalogue: [PLUGIN_ID],
   };
@@ -161,7 +163,7 @@ export function getPluginPrivileges() {
         ...[...featureMlCapabilitiesKeys, ...userMlCapabilitiesKeys].map((k) => `ml:${k}`),
       ],
       catalogue: [PLUGIN_ID],
-      management: { insightsAndAlerting: [] },
+      management: { insightsAndAlerting: ['triggersActions'] },
       ui: [...featureMlCapabilitiesKeys, ...userMlCapabilitiesKeys],
       savedObject: {
         all: [],
@@ -243,5 +245,6 @@ export const featureCapabilities: FeatureCapabilities = {
     'canCreateTrainedModels',
     'canDeleteTrainedModels',
     'canStartStopTrainedModels',
+    'canCreateInferenceEndpoint',
   ],
 };

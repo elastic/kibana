@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export { IconCircle, IconTriangle } from './annotation_icons';
@@ -38,6 +39,17 @@ export { GlobeIllustration } from './globe_illustration';
 export { EuiIconLegend } from './legend';
 export { IconRegionMap } from './region_map';
 export { IconChartHeatmap } from './chart_heatmap';
+export { IconChartGauge } from './chart_gauge';
 export { IconChartHorizontalBullet } from './chart_horizontal_bullet';
 export { IconChartVerticalBullet } from './chart_vertical_bullet';
+export { IconChartGaugeSemiCircle } from './chart_gauge_semi_circle';
+export { IconChartGaugeArc } from './chart_gauge_arc';
+export { IconChartGaugeCircle } from './chart_gauge_circle';
+export { IconDonutHoleSmall, IconDonutHoleMedium, IconDonutHoleLarge } from './donut_hole_icons';
+export {
+  IconChartLinearSimple,
+  IconChartGaugeSemiCircleSimple,
+  IconChartGaugeArcSimple,
+  IconChartGaugeCircleSimple,
+} from './chart_gauge_simple_icons';
 export { IconChartTagcloud } from './chart_tagcloud';

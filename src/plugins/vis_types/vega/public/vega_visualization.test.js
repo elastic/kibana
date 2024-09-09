@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import 'jest-canvas-mock';
-
-import $ from 'jquery';
 
 import { createVegaVisualization } from './vega_visualization';
 
@@ -32,9 +31,8 @@ describe('VegaVisualizations', () => {
   let VegaVisualization;
   let vegaVisualizationDependencies;
 
-  let mockWidth;
+  let mockGetBoundingClientRect;
   let mockedWidthValue;
-  let mockHeight;
   let mockedHeightValue;
 
   const coreStart = coreMock.createStart();
@@ -46,8 +44,9 @@ describe('VegaVisualizations', () => {
     mockedHeightValue = height;
     domNode = document.createElement('div');
 
-    mockWidth = jest.spyOn($.prototype, 'width').mockImplementation(() => mockedWidthValue);
-    mockHeight = jest.spyOn($.prototype, 'height').mockImplementation(() => mockedHeightValue);
+    mockGetBoundingClientRect = jest
+      .spyOn(Element.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => ({ width: mockedWidthValue, height: mockedHeightValue }));
   };
 
   const mockGetServiceSettings = () => {
@@ -78,8 +77,7 @@ describe('VegaVisualizations', () => {
     });
 
     afterEach(() => {
-      mockWidth.mockRestore();
-      mockHeight.mockRestore();
+      mockGetBoundingClientRect.mockRestore();
     });
 
     test('should show vegalite graph and update on resize (may fail in dev env)', async () => {

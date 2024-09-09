@@ -6,22 +6,27 @@
  */
 
 import { TimelineTabs } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import {
+  TimelineTypeEnum,
+  TimelineStatusEnum,
+  RowRendererIdEnum,
+} from '../../../common/api/timeline';
 
 import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import type { SubsetTimelineModel, TimelineModel } from './model';
+import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
 
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
 export const timelineDefaults: SubsetTimelineModel &
-  Pick<TimelineModel, 'eqlOptions' | 'resolveTimelineConfig'> = {
+  Pick<TimelineModel, 'eqlOptions' | 'resolveTimelineConfig' | 'sampleSize' | 'rowHeight'> = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.query,
-  columns: defaultHeaders,
+  columns: defaultUdtHeaders,
   documentType: '',
-  defaultColumns: defaultHeaders,
+  defaultColumns: defaultUdtHeaders,
   dataProviders: [],
   dataViewId: null,
   dateRange: { start, end },
@@ -35,8 +40,26 @@ export const timelineDefaults: SubsetTimelineModel &
   },
   eventType: 'all',
   eventIdToNoteIds: {},
-  excludedRowRendererIds: [],
-  expandedDetail: {},
+  excludedRowRendererIds: [
+    RowRendererIdEnum.alert,
+    RowRendererIdEnum.alerts,
+    RowRendererIdEnum.auditd,
+    RowRendererIdEnum.auditd_file,
+    RowRendererIdEnum.library,
+    RowRendererIdEnum.netflow,
+    RowRendererIdEnum.plain,
+    RowRendererIdEnum.registry,
+    RowRendererIdEnum.suricata,
+    RowRendererIdEnum.system,
+    RowRendererIdEnum.system_dns,
+    RowRendererIdEnum.system_endgame_process,
+    RowRendererIdEnum.system_file,
+    RowRendererIdEnum.system_fim,
+    RowRendererIdEnum.system_security_event,
+    RowRendererIdEnum.system_socket,
+    RowRendererIdEnum.threat_match,
+    RowRendererIdEnum.zeek,
+  ],
   highlightedDropAndProviderId: '',
   historyIds: [],
   indexNames: [],
@@ -54,7 +77,7 @@ export const timelineDefaults: SubsetTimelineModel &
   resolveTimelineConfig: undefined,
   queryFields: [],
   title: '',
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   templateTimelineId: null,
   templateTimelineVersion: null,
   noteIds: [],
@@ -72,7 +95,7 @@ export const timelineDefaults: SubsetTimelineModel &
       sortDirection: 'desc',
     },
   ],
-  status: TimelineStatus.draft,
+  status: TimelineStatusEnum.draft,
   version: null,
   deletedEventIds: [],
   selectedEventIds: {},
@@ -80,8 +103,9 @@ export const timelineDefaults: SubsetTimelineModel &
   filters: [],
   savedSearchId: null,
   savedSearch: null,
-  isDiscoverSavedSearchLoaded: false,
   isDataProviderVisible: false,
+  sampleSize: 500,
+  rowHeight: 3,
 };
 
 export const getTimelineManageDefaults = (id: string) => ({

@@ -11,17 +11,23 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 
 import { AssistantSettingsButton } from './assistant_settings_button';
 import { welcomeConvo } from '../../mock/conversation';
-import { CONVERSATIONS_TAB } from './assistant_settings';
+import { CONVERSATIONS_TAB } from './const';
 
 const setIsSettingsModalVisible = jest.fn();
-const setSelectedConversationId = jest.fn();
+const onConversationSelected = jest.fn();
+
 const testProps = {
   defaultConnectorId: '123',
   defaultProvider: OpenAiProviderType.OpenAi,
   isSettingsModalVisible: false,
   selectedConversation: welcomeConvo,
   setIsSettingsModalVisible,
-  setSelectedConversationId,
+  onConversationSelected,
+  conversations: {},
+  conversationsLoaded: true,
+  refetchCurrentUserConversations: jest.fn(),
+  anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
+  refetchAnonymizationFieldsResults: jest.fn(),
 };
 const setSelectedSettingsTab = jest.fn();
 const mockUseAssistantContext = {
@@ -58,7 +64,7 @@ describe('AssistantSettingsButton', () => {
     expect(setIsSettingsModalVisible).toHaveBeenCalledWith(true);
   });
 
-  it('Settings modal is visble and calls correct actions per click', () => {
+  it('Settings modal is visible and calls correct actions per click', () => {
     const { getByTestId } = render(
       <AssistantSettingsButton {...testProps} isSettingsModalVisible />
     );

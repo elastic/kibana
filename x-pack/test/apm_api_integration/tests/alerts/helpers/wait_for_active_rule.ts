@@ -17,7 +17,7 @@ export async function waitForActiveRule({
   logger,
 }: {
   ruleId: string;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   logger?: ToolingLog;
 }): Promise<Record<string, any>> {
   return pRetry(

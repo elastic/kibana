@@ -5,6 +5,8 @@ get:
   responses:
     '400':
       $ref: ../components/responses/error.yaml
+    '200':
+      description: OK
   operationId: get-inputs-template
   security:
     - basicAuth: []
@@ -32,4 +34,9 @@ parameters:
       type: boolean
     name: prerelease
     description: 'Specify if version is prerelease'
+    in: query
+  - schema:
+      type: boolean
+    name: ignoreUnverified
+    description: 'Ignore if the package is fails signature verification'
     in: query

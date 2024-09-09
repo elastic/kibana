@@ -107,16 +107,8 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
   }
   intl={
     Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
+      "$t": [Function],
+      "defaultFormats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -150,22 +142,22 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
         },
         "relative": Object {
           "days": Object {
-            "units": "day",
+            "style": "long",
           },
           "hours": Object {
-            "units": "hour",
+            "style": "long",
           },
           "minutes": Object {
-            "units": "minute",
+            "style": "long",
           },
           "months": Object {
-            "units": "month",
+            "style": "long",
           },
           "seconds": Object {
-            "units": "second",
+            "style": "long",
           },
           "years": Object {
-            "units": "year",
+            "style": "long",
           },
         },
         "time": Object {
@@ -192,19 +184,36 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
           },
         },
       },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "onWarn": [Function],
+      "timeZone": undefined,
     }
   }
 >
@@ -214,7 +223,6 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
     <EuiScreenReaderOnly>
       <div
         css="unknown styles"
-        key="null"
         tabIndex={-1}
       >
         <Insertion
@@ -222,7 +230,7 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
             Object {
               "insert": [Function],
               "inserted": Object {
-                "1w7kmys-euiScreenReaderOnly": true,
+                "gb1zbv-euiScreenReaderOnly": true,
               },
               "key": "css",
               "nonce": undefined,
@@ -266,7 +274,7 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
           serialized={
             Object {
               "map": undefined,
-              "name": "1w7kmys-euiScreenReaderOnly",
+              "name": "gb1zbv-euiScreenReaderOnly",
               "next": undefined,
               "styles": ";
   /* Take the element out of the layout */
@@ -287,7 +295,7 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
   overflow: hidden;
   /* Chrome requires the negative margin to not cause overflows of parent containers */
   margin: -1px;
-;label:euiScreenReaderOnly;;;;",
+;label:euiScreenReaderOnly;;;",
               "toString": [Function],
             }
           }
@@ -318,7 +326,7 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
 
 exports[`SkipToMainContent renders 1`] = `
 <button
-  class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
+  class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly-showOnFocus"
   tabindex="0"
   type="button"
 >

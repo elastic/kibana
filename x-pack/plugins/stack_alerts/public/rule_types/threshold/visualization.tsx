@@ -33,7 +33,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AggregationType, Comparator } from '@kbn/triggers-actions-ui-plugin/public';
+import { AggregationType } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Comparator } from '@kbn/alerting-comparators';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { i18n } from '@kbn/i18n';
 import {
@@ -222,7 +223,6 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
             <FormattedMessage
               id="xpack.stackAlerts.threshold.ui.visualization.errorLoadingAlertVisualizationTitle"
               defaultMessage="Cannot load alert visualization"
-              values={{}}
             />
           }
           color="danger"
@@ -269,7 +269,6 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
               baseTheme={chartsBaseTheme}
               xDomain={domain}
               showLegend={!!termField}
-              showLegendExtra
               legendPosition={Position.Bottom}
               locale={i18n.getLocale()}
             />

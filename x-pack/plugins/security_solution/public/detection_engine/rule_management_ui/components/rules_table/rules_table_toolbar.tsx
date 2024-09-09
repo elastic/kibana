@@ -78,7 +78,7 @@ export const RulesTableToolbar = React.memo(() => {
   );
 
   // Assistant integration for using selected rules as prompt context
-  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
   const {
     state: { rules, selectedRuleIds },
   } = useRulesTableContext();
@@ -105,6 +105,7 @@ export const RulesTableToolbar = React.memo(() => {
             getPromptContext={getPromptContext}
             suggestedUserPrompt={i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS}
             tooltip={i18nAssistant.RULE_MANAGEMENT_CONTEXT_TOOLTIP}
+            isAssistantEnabled={isAssistantEnabled}
           />
         )}
       </EuiFlexItem>

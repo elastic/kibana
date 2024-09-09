@@ -79,6 +79,8 @@ post:
               - items
     '400':
       $ref: ../components/responses/error.yaml
+    '429':
+      $ref: ../components/responses/error.yaml
   operationId: install-package-by-upload
   description: ''
   parameters:
@@ -94,7 +96,7 @@ post:
       schema:
         type: boolean
         default: false
-      description: skip data stream rollover during index template mapping or settings update
+      description: Skip data stream rollover during index template mapping or settings update
   requestBody:
     content:
       application/zip:

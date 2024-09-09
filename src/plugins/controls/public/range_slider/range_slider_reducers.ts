@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { WritableDraft } from 'immer/dist/types/types-external';
@@ -24,7 +25,15 @@ export const rangeSliderReducers = {
     state: WritableDraft<RangeSliderReduxState>,
     action: PayloadAction<RangeValue>
   ) => {
-    state.explicitInput.value = action.payload;
+    const [minSelection, maxSelection]: RangeValue = action.payload;
+    if (
+      minSelection === String(state.componentState.min) &&
+      maxSelection === String(state.componentState.max)
+    ) {
+      state.explicitInput.value = undefined;
+    } else {
+      state.explicitInput.value = action.payload;
+    }
   },
   setField: (
     state: WritableDraft<RangeSliderReduxState>,

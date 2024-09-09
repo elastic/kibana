@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, take } from 'rxjs/operators';
+import { filter, take } from 'rxjs';
 import pMap from 'p-map';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
@@ -390,8 +390,8 @@ export class TaskScheduling {
             (taskInstance: OkResultOf<TaskLifecycleEvent>) => {
               // resolve if the task has run sucessfully
               if (isTaskRunEvent(taskEvent)) {
-                subscription.unsubscribe();
                 resolve(pick((taskInstance as RanTask).task, ['id', 'state']));
+                subscription.unsubscribe();
               }
             },
             async (errorResult: ErrResultOf<TaskLifecycleEvent>) => {
@@ -414,9 +414,11 @@ export class TaskScheduling {
       });
 
       if (cancel) {
-        cancel.then(() => {
-          subscription.unsubscribe();
-        });
+        cancel
+          .then(() => {
+            subscription.unsubscribe();
+          })
+          .catch(() => {});
       }
     });
   }

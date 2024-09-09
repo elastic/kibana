@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -61,6 +62,10 @@ export const strings = {
     i18n.translate('expressionPartitionVis.reusable.function.args.truncateLegendHelpText', {
       defaultMessage: 'Defines if the legend items will be truncated or not',
     }),
+  getLegendStatsArgHelp: () =>
+    i18n.translate('expressionPartitionVis.reusable.function.args.legendStatsArgHelp', {
+      defaultMessage: 'Defines the legend stats',
+    }),
   getMaxLegendLinesArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.maxLegendLinesHelpText', {
       defaultMessage: 'Defines the number of lines per legend item',
@@ -96,10 +101,6 @@ export const strings = {
   getLabelsArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.labelsHelpText', {
       defaultMessage: 'Pie labels config',
-    }),
-  getShowValuesInLegendArgHelp: () =>
-    i18n.translate('expressionPartitionVis.waffle.function.args.showValuesInLegendHelpText', {
-      defaultMessage: 'Show values in legend',
     }),
   getAriaLabelHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.functions.args.ariaLabelHelpText', {

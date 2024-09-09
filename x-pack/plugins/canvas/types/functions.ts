@@ -72,6 +72,7 @@ import type { initFunctions as initClientFunctions } from '../public/functions';
  */
 // prettier-ignore
 export type ExpressionFunctionFactory<Name extends string, Input, Arguments, Output> =
+  // @ts-expect-error upgrade typescript v4.9.5
   () => ExpressionFunctionDefinition<Name, Input, Arguments, Output>
 
 /**
@@ -83,12 +84,13 @@ export type ExpressionFunctionFactory<Name extends string, Input, Arguments, Out
 // prettier-ignore
 export type FunctionFactory<FnFactory> =
   FnFactory extends ExpressionFunctionFactory<infer Name, infer Input, infer Arguments, infer Output> ?
+    // @ts-expect-error upgrade typescript v4.9.5
     ExpressionFunctionDefinition<Name, Input, Arguments, Awaited<Output>> :
     never;
 
-type CommonFunction = FunctionFactory<typeof commonFunctions[number]>;
-type BrowserFunction = FunctionFactory<typeof browserFunctions[number]>;
-type ServerFunction = FunctionFactory<typeof serverFunctions[number]>;
+type CommonFunction = FunctionFactory<(typeof commonFunctions)[number]>;
+type BrowserFunction = FunctionFactory<(typeof browserFunctions)[number]>;
+type ServerFunction = FunctionFactory<(typeof serverFunctions)[number]>;
 type ExternalFunction = FunctionFactory<
   ReturnType<typeof initExternalFunctions> extends Array<infer U> ? U : never
 >;

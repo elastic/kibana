@@ -1,0 +1,260 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { shallow } from 'enzyme';
+import React from 'react';
+import useResizeObserver from 'use-resize-observer/polyfilled';
+import type { Dispatch } from 'redux';
+
+import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
+import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
+import { TestProviders } from '../../../../../common/mock/test_providers';
+
+import type { Props as QueryTabContentComponentProps } from '.';
+import { QueryTabContentComponent } from '.';
+import { defaultRowRenderers } from '../../body/renderers';
+import type { Sort } from '../../body/sort';
+import { mockDataProviders } from '../../data_providers/mock/mock_data_providers';
+import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
+import { useTimelineEvents } from '../../../../containers';
+import { useTimelineEventsDetails } from '../../../../containers/details';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
+import { Direction } from '../../../../../../common/search_strategy';
+import * as helpers from '../../../../../common/lib/kuery';
+import { waitFor } from '@testing-library/react';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import { allowedExperimentalValues } from '../../../../../../common';
+
+jest.mock('../../../../containers', () => ({
+  useTimelineEvents: jest.fn(),
+}));
+jest.mock('../../../../containers/details', () => ({
+  useTimelineEventsDetails: jest.fn(),
+}));
+jest.mock('../../../fields_browser', () => ({
+  useFieldBrowserOptions: jest.fn(),
+}));
+jest.mock('../../body/events', () => ({
+  Events: () => <></>,
+}));
+
+jest.mock('../../../../../sourcerer/containers');
+jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
+  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
+}));
+
+jest.mock('../../../../../common/lib/kuery');
+
+const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
+jest.mock('use-resize-observer/polyfilled');
+mockUseResizeObserver.mockImplementation(() => ({}));
+
+jest.mock('../../../../../common/lib/kibana');
+
+jest.mock('../../../../containers/use_timeline_data_filters', () => ({
+  useTimelineDataFilters: jest.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
+}));
+
+jest.mock('../../../../../common/hooks/use_experimental_features');
+
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+
+describe('Timeline', () => {
+  let props = {} as QueryTabContentComponentProps;
+  const sort: Sort[] = [
+    {
+      columnId: '@timestamp',
+      columnType: 'date',
+      esTypes: ['date'],
+      sortDirection: Direction.desc,
+    },
+  ];
+  const startDate = '2018-03-23T18:49:23.132Z';
+  const endDate = '2018-03-24T03:33:52.253Z';
+
+  const mount = useMountAppended();
+  const getWrapper = async (childrenComponent: JSX.Element) => {
+    const wrapper = mount(childrenComponent);
+    await waitFor(() => wrapper.find('[data-test-subj="timelineHeader"]').exists());
+    return wrapper;
+  };
+  beforeEach(() => {
+    (useTimelineEvents as jest.Mock).mockReturnValue([
+      false,
+      {
+        events: mockTimelineData,
+        pageInfo: {
+          activePage: 0,
+          totalPages: 10,
+        },
+      },
+    ]);
+    (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
+
+    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
+
+    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
+      (feature: keyof ExperimentalFeatures) => {
+        if (feature === 'unifiedComponentsInTimelineDisabled') {
+          return true;
+        }
+        return allowedExperimentalValues[feature];
+      }
+    );
+
+    props = {
+      dispatch: {} as Dispatch,
+      columns: defaultHeaders,
+      dataProviders: mockDataProviders,
+      end: endDate,
+      filters: [],
+      timelineId: TimelineId.test,
+      isLive: false,
+      itemsPerPage: 5,
+      itemsPerPageOptions: [5, 10, 20],
+      kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
+      kqlQueryExpression: ' ',
+      kqlQueryLanguage: 'kuery',
+      renderCellValue: DefaultCellRenderer,
+      rowRenderers: defaultRowRenderers,
+      showCallOutUnauthorizedMsg: false,
+      sort,
+      start: startDate,
+      status: TimelineStatusEnum.active,
+      timerangeKind: 'absolute',
+      activeTab: TimelineTabs.query,
+      show: true,
+      pinnedEventIds: {},
+      eventIdToNoteIds: {},
+    };
+  });
+
+  describe('rendering', () => {
+    let spyCombineQueries: jest.SpyInstance;
+
+    beforeEach(() => {
+      spyCombineQueries = jest.spyOn(helpers, 'combineQueries');
+    });
+    afterEach(() => {
+      spyCombineQueries.mockClear();
+    });
+
+    test('should trim kqlQueryExpression', async () => {
+      await getWrapper(
+        <TestProviders>
+          <QueryTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(spyCombineQueries.mock.calls[0][0].kqlQuery.query).toEqual(
+        props.kqlQueryExpression.trim()
+      );
+    });
+
+    test('renders correctly against snapshot', () => {
+      const wrapper = shallow(
+        <TestProviders>
+          <QueryTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('QueryTabContentComponent')).toMatchSnapshot();
+    });
+
+    test('it renders the timeline header', async () => {
+      const wrapper = await getWrapper(
+        <TestProviders>
+          <QueryTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
+    });
+
+    test('it renders the timeline table', async () => {
+      const wrapper = await getWrapper(
+        <TestProviders>
+          <QueryTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
+    });
+
+    test('it does NOT render the timeline table when start is empty', async () => {
+      const wrapper = await getWrapper(
+        <TestProviders>
+          <QueryTabContentComponent {...props} start={''} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
+      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
+    });
+
+    test('it does NOT render the timeline table when end is empty', async () => {
+      const wrapper = await getWrapper(
+        <TestProviders>
+          <QueryTabContentComponent {...props} end={''} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
+      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
+    });
+
+    test('it does NOT render the paging footer when you do NOT have any data providers', async () => {
+      const wrapper = await getWrapper(
+        <TestProviders>
+          <QueryTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
+    });
+
+    it('it shows the timeline footer', async () => {
+      const wrapper = await getWrapper(
+        <TestProviders>
+          <QueryTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(true);
+    });
+
+    test('it does render the timeline table when the source is loading with no events', async () => {
+      (useSourcererDataView as jest.Mock).mockReturnValue({
+        browserFields: {},
+        loading: true,
+        indexPattern: {},
+        selectedPatterns: [],
+        missingPatterns: [],
+      });
+      const wrapper = await getWrapper(
+        <TestProviders>
+          <QueryTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
+      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
+    });
+  });
+});

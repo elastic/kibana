@@ -1,0 +1,21 @@
+{
+  "connector.update_service_type": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_connector/{connector_id}/_service_type"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/update-connector-service-type-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

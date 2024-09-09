@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { FormBasedPersistedState, FormulaPublicApi } from '@kbn/lens-plugin/public';
@@ -21,6 +22,7 @@ import {
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
+  mapToFormula,
 } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
@@ -50,18 +52,11 @@ function buildFormulaLayer(
   layer: LensRegionMapConfig,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'][0] {
   const layers = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(
-        ACCESSOR,
-        {
-          value: layer.value,
-        },
-        dataView,
-        formulaAPI
-      ),
+      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
     },
   };
 

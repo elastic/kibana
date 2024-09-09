@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../../../common/types';
-import {
-  getDataBounds,
-  validateAxisDomain,
-  validateZeroInclusivityExtent,
-} from '../../shared_components';
+import { getDataBounds } from '../../shared_components';
 import { XYDataLayerConfig } from './types';
 
 interface FormattedMetric {
@@ -22,12 +17,12 @@ interface FormattedMetric {
   fieldFormat: SerializedFieldFormat;
 }
 
-export type GroupsConfiguration = Array<{
+export interface AxisGroupConfiguration {
   groupId: string;
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
   series: Array<{ layer: string; accessor: string }>;
-}>;
+}
 
 export function isFormatterCompatible(
   formatter1: SerializedFieldFormat,
@@ -123,10 +118,10 @@ export function getAxesConfiguration(
   shouldRotate: boolean,
   tables?: Record<string, Datatable>,
   formatFactory?: FormatFactory
-): GroupsConfiguration {
+): AxisGroupConfiguration[] {
   const series = groupAxesByType(layers, tables);
 
-  const axisGroups: GroupsConfiguration = [];
+  const axisGroups: AxisGroupConfiguration[] = [];
 
   if (series.left.length > 0) {
     axisGroups.push({
@@ -147,11 +142,4 @@ export function getAxesConfiguration(
   }
 
   return axisGroups;
-}
-
-export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
-  return {
-    inclusiveZeroError: hasBarOrArea && !validateZeroInclusivityExtent(extent),
-    boundaryError: !validateAxisDomain(extent),
-  };
 }

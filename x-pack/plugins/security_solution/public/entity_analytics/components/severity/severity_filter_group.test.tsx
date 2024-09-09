@@ -28,16 +28,16 @@ describe('SeverityFilterGroup', () => {
   });
 
   it('preserves sort order when severityCount is out of order', () => {
-    const { getByTestId, getAllByTestId } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <SeverityFilterGroup
           selectedSeverities={[]}
           severityCount={{
-            [RiskSeverity.high]: 0,
-            [RiskSeverity.low]: 0,
-            [RiskSeverity.critical]: 0,
-            [RiskSeverity.moderate]: 0,
-            [RiskSeverity.unknown]: 0,
+            [RiskSeverity.High]: 0,
+            [RiskSeverity.Low]: 0,
+            [RiskSeverity.Critical]: 0,
+            [RiskSeverity.Moderate]: 0,
+            [RiskSeverity.Unknown]: 0,
           }}
           onSelect={jest.fn()}
           riskEntity={RiskScoreEntity.user}
@@ -47,26 +47,22 @@ describe('SeverityFilterGroup', () => {
 
     fireEvent.click(getByTestId('risk-filter-button'));
 
-    expect(getAllByTestId('risk-score').map((ele) => ele.textContent)).toEqual([
-      'Unknown',
-      'Low',
-      'Moderate',
-      'High',
-      'Critical',
-    ]);
+    expect(getByTestId('risk-filter-selectable').textContent).toEqual(
+      ['Unknown', 'Low', 'Moderate', 'High', 'Critical'].join('')
+    );
   });
 
   it('sends telemetry when selecting a classification', () => {
-    const { getByTestId, getAllByTestId } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <SeverityFilterGroup
           selectedSeverities={[]}
           severityCount={{
-            [RiskSeverity.high]: 0,
-            [RiskSeverity.low]: 0,
-            [RiskSeverity.critical]: 0,
-            [RiskSeverity.moderate]: 0,
-            [RiskSeverity.unknown]: 0,
+            [RiskSeverity.High]: 0,
+            [RiskSeverity.Low]: 0,
+            [RiskSeverity.Critical]: 0,
+            [RiskSeverity.Moderate]: 0,
+            [RiskSeverity.Unknown]: 0,
           }}
           onSelect={jest.fn()}
           riskEntity={RiskScoreEntity.user}
@@ -76,27 +72,27 @@ describe('SeverityFilterGroup', () => {
 
     fireEvent.click(getByTestId('risk-filter-button'));
 
-    fireEvent.click(getAllByTestId('risk-score').at(0)!);
+    fireEvent.click(getByTestId('risk-filter-item-Unknown'));
     expect(mockedTelemetry.reportEntityRiskFiltered).toHaveBeenCalledTimes(1);
   });
 
   it('does not send telemetry when deselecting a classification', () => {
-    const { getByTestId, getAllByTestId } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <SeverityFilterGroup
           selectedSeverities={[
-            RiskSeverity.critical,
-            RiskSeverity.high,
-            RiskSeverity.moderate,
-            RiskSeverity.low,
-            RiskSeverity.unknown,
+            RiskSeverity.Critical,
+            RiskSeverity.High,
+            RiskSeverity.Moderate,
+            RiskSeverity.Low,
+            RiskSeverity.Unknown,
           ]}
           severityCount={{
-            [RiskSeverity.high]: 0,
-            [RiskSeverity.low]: 0,
-            [RiskSeverity.critical]: 0,
-            [RiskSeverity.moderate]: 0,
-            [RiskSeverity.unknown]: 0,
+            [RiskSeverity.High]: 0,
+            [RiskSeverity.Low]: 0,
+            [RiskSeverity.Critical]: 0,
+            [RiskSeverity.Moderate]: 0,
+            [RiskSeverity.Unknown]: 0,
           }}
           onSelect={jest.fn()}
           riskEntity={RiskScoreEntity.user}
@@ -106,7 +102,7 @@ describe('SeverityFilterGroup', () => {
 
     fireEvent.click(getByTestId('risk-filter-button'));
 
-    fireEvent.click(getAllByTestId('risk-score').at(0)!);
+    fireEvent.click(getByTestId('risk-filter-item-Unknown'));
     expect(mockedTelemetry.reportEntityRiskFiltered).toHaveBeenCalledTimes(0);
   });
 });

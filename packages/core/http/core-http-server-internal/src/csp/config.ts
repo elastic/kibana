@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { TypeOf, schema } from '@kbn/config-schema';
@@ -83,6 +84,14 @@ const configSchema = schema.object(
     report_to: schema.arrayOf(schema.string(), {
       defaultValue: [],
     }),
+    report_only: schema.maybe(
+      schema.object({
+        form_action: schema.arrayOf(schema.string(), {
+          defaultValue: [],
+          validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
+        }),
+      })
+    ),
     strict: schema.boolean({ defaultValue: true }),
     warnLegacyBrowsers: schema.boolean({ defaultValue: true }),
     disableEmbedding: schema.oneOf([schema.literal<boolean>(false)], { defaultValue: false }),

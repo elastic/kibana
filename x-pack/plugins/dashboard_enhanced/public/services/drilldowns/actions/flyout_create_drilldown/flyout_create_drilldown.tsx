@@ -5,20 +5,40 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
-import { Action } from '@kbn/ui-actions-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { CONTEXT_MENU_TRIGGER, EmbeddableContext, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  isEnhancedEmbeddable,
-  embeddableEnhancedDrilldownGrouping,
+  apiHasDynamicActions,
+  type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import {
+  tracksOverlays,
+  type PresentationContainer,
+  type TracksOverlays,
+} from '@kbn/presentation-containers';
+import {
+  apiCanAccessViewMode,
+  apiHasParentApi,
+  apiHasSupportedTriggers,
+  apiIsOfType,
+  getInheritedViewMode,
+  type CanAccessViewMode,
+  type EmbeddableApiContext,
+  type HasUniqueId,
+  type HasParentApi,
+  type HasSupportedTriggers,
+  type HasType,
+} from '@kbn/presentation-publishing';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import React from 'react';
 import { StartDependencies } from '../../../../plugin';
-import { ensureNestedTriggers, createDrilldownTemplatesFromSiblings } from '../drilldown_shared';
+import {
+  createDrilldownTemplatesFromSiblings,
+  DRILLDOWN_MAX_WIDTH,
+  ensureNestedTriggers,
+} from '../drilldown_shared';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
@@ -26,11 +46,22 @@ export interface OpenFlyoutAddDrilldownParams {
   start: StartServicesGetter<Pick<StartDependencies, 'uiActionsEnhanced'>>;
 }
 
-export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
+export type FlyoutCreateDrilldownActionApi = CanAccessViewMode &
+  Required<HasDynamicActions> &
+  HasParentApi<HasType & Partial<PresentationContainer & TracksOverlays>> &
+  HasSupportedTriggers &
+  Partial<HasUniqueId>;
+
+const isApiCompatible = (api: unknown | null): api is FlyoutCreateDrilldownActionApi =>
+  apiHasDynamicActions(api) &&
+  apiHasParentApi(api) &&
+  apiCanAccessViewMode(api) &&
+  apiHasSupportedTriggers(api);
+
+export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext> {
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
   public order = 12;
-  public grouping = embeddableEnhancedDrilldownGrouping;
 
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 
@@ -44,13 +75,15 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     return 'plusInCircle';
   }
 
-  private isEmbeddableCompatible(context: EmbeddableContext): boolean {
-    if (!isEnhancedEmbeddable(context.embeddable)) return false;
-    if (context.embeddable.getRoot().type !== 'dashboard') return false;
-    const supportedTriggers = [
-      CONTEXT_MENU_TRIGGER,
-      ...(context.embeddable.supportedTriggers() || []),
-    ];
+  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) return false;
+    if (
+      getInheritedViewMode(embeddable) !== 'edit' ||
+      !apiIsOfType(embeddable.parentApi, 'dashboard')
+    )
+      return false;
+
+    const supportedTriggers = [CONTEXT_MENU_TRIGGER, ...embeddable.supportedTriggers()];
 
     /**
      * Check if there is an intersection between all registered drilldowns possible triggers that they could be attached to
@@ -67,35 +100,22 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     );
   }
 
-  public async isCompatible(context: EmbeddableContext) {
-    const isEditMode = context.embeddable.getInput().viewMode === 'edit';
-    return isEditMode && this.isEmbeddableCompatible(context);
-  }
-
-  public async execute(context: EmbeddableContext) {
+  public async execute({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     const { core, plugins } = this.params.start();
-    const { embeddable } = context;
-
-    if (!isEnhancedEmbeddable(embeddable)) {
-      throw new Error(
-        'Need embeddable to be EnhancedEmbeddable to execute FlyoutCreateDrilldownAction.'
-      );
-    }
 
     const templates = createDrilldownTemplatesFromSiblings(embeddable);
-    const closed$ = new Subject<true>();
+    const overlayTracker = tracksOverlays(embeddable.parentApi) ? embeddable.parentApi : undefined;
     const close = () => {
-      closed$.next(true);
+      if (overlayTracker) overlayTracker.clearOverlays();
       handle.close();
-    };
-    const closeFlyout = () => {
-      close();
     };
 
     const triggers = [
       ...ensureNestedTriggers(embeddable.supportedTriggers()),
       CONTEXT_MENU_TRIGGER,
     ];
+
     const handle = core.overlays.openFlyout(
       toMountPoint(
         <plugins.uiActionsEnhanced.DrilldownManager
@@ -107,29 +127,18 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
           templates={templates}
           onClose={close}
         />,
-        { theme$: core.theme.theme$ }
+        core
       ),
       {
+        maxWidth: DRILLDOWN_MAX_WIDTH,
         ownFocus: true,
         'data-test-subj': 'createDrilldownFlyout',
+        onClose: () => {
+          close();
+        },
       }
     );
 
-    // Close flyout on application change.
-    core.application.currentAppId$
-      .pipe(takeUntil(closed$), skip(1), take(1))
-      .subscribe(closeFlyout);
-
-    // Close flyout on dashboard switch to "view" mode or on embeddable destroy.
-    embeddable
-      .getInput$()
-      .pipe(
-        takeUntil(closed$),
-        map((input) => input.viewMode),
-        distinctUntilChanged(),
-        filter((mode) => mode !== ViewMode.EDIT),
-        take(1)
-      )
-      .subscribe({ next: closeFlyout, complete: closeFlyout });
+    overlayTracker?.openOverlay(handle);
   }
 }

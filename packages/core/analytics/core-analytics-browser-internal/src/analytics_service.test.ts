@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom, Observable } from 'rxjs';
@@ -23,10 +24,22 @@ function findRegisteredEventTypeByName(eventTypeName: string) {
     ([{ eventType }]) => eventType === eventTypeName
   )!;
 }
+interface MockEntryList {
+  getEntries: () => [object];
+}
+type ObsCallback = (_entries: MockEntryList, _obs: object) => undefined;
 
 describe('AnalyticsService', () => {
   let analyticsService: AnalyticsService;
   beforeEach(() => {
+    const mockObs = { observe: jest.fn, disconnect: jest.fn };
+    const mockPerformanceObserver = function (callback: ObsCallback) {
+      callback({ getEntries: () => [{}] }, mockObs);
+      return mockObs;
+    };
+
+    (global.PerformanceObserver as unknown) = mockPerformanceObserver;
+
     jest.clearAllMocks();
     analyticsService = new AnalyticsService(coreContextMock.create());
   });
@@ -115,6 +128,34 @@ describe('AnalyticsService', () => {
               },
               "type": "keyword",
             },
+            "key6": Object {
+              "_meta": Object {
+                "description": "Performance metric label 6",
+                "optional": true,
+              },
+              "type": "keyword",
+            },
+            "key7": Object {
+              "_meta": Object {
+                "description": "Performance metric label 7",
+                "optional": true,
+              },
+              "type": "keyword",
+            },
+            "key8": Object {
+              "_meta": Object {
+                "description": "Performance metric label 8",
+                "optional": true,
+              },
+              "type": "keyword",
+            },
+            "key9": Object {
+              "_meta": Object {
+                "description": "Performance metric label 9",
+                "optional": true,
+              },
+              "type": "keyword",
+            },
             "meta": Object {
               "_meta": Object {
                 "description": "Meta data that is searchable but not aggregatable",
@@ -153,6 +194,34 @@ describe('AnalyticsService', () => {
             "value5": Object {
               "_meta": Object {
                 "description": "Performance metric value 5",
+                "optional": true,
+              },
+              "type": "long",
+            },
+            "value6": Object {
+              "_meta": Object {
+                "description": "Performance metric value 6",
+                "optional": true,
+              },
+              "type": "long",
+            },
+            "value7": Object {
+              "_meta": Object {
+                "description": "Performance metric value 7",
+                "optional": true,
+              },
+              "type": "long",
+            },
+            "value8": Object {
+              "_meta": Object {
+                "description": "Performance metric value 8",
+                "optional": true,
+              },
+              "type": "long",
+            },
+            "value9": Object {
+              "_meta": Object {
+                "description": "Performance metric value 9",
                 "optional": true,
               },
               "type": "long",

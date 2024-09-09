@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 
 export function createFilebeatConfig(
   index: string,
   results: FindFileStructureResponse,
-  ingestPipelineId: string,
+  pipelineId: string,
   username: string | null
 ) {
   return [
@@ -27,7 +27,7 @@ export function createFilebeatConfig(
     '  hosts: ["<es_url>"]',
     ...getUserDetails(username),
     `  index: "${index}"`,
-    `  pipeline: "${ingestPipelineId}"`,
+    `  pipeline: "${pipelineId}"`,
     '',
     'setup:',
     '  template.enabled: false',

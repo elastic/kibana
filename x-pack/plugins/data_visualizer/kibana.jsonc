@@ -12,12 +12,12 @@
       "usageCollection",
       "embeddable",
       "share",
-      "discover",
       "fileUpload",
       "uiActions",
       "charts",
       "unifiedSearch",
-      "savedSearch"
+      "savedSearch",
+      "fieldFormats"
     ],
     "optionalPlugins": [
       "security",
@@ -29,13 +29,16 @@
       "cloud"
     ],
     "requiredBundles": [
+      "dataViews",
       "kibanaReact",
       "kibanaUtils",
       "maps",
       "esUiShared",
       "fieldFormats",
       "uiActions",
-      "lens"
+      "lens",
+      "esql",
+      "visualizations"
     ]
   }
 }

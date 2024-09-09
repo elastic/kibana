@@ -8,7 +8,6 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
-  const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboard = getPageObject('dashboard');
@@ -16,14 +15,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
+  const settings = getPageObject('settings');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('persistable attachment', () => {
     before(async () => {
-      await svlCommonPage.login();
-    });
-
-    after(async () => {
-      await svlCommonPage.forceLogout();
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     describe('lens visualization', () => {
@@ -32,6 +29,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
+
+        await settings.refreshDataViewFieldList('default:all-data', { ignoreMissing: true });
 
         await svlSearchNavigation.navigateToLandingPage();
 
@@ -50,10 +49,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('does not show actions to add lens visualization to case', async () => {
-        await testSubjects.click('embeddablePanelToggleMenuIcon');
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.missingOrFail('embeddablePanelAction-embeddable_addToNewCase');
-        await testSubjects.missingOrFail('embeddablePanelAction-embeddable_addToExistingCase');
+        await dashboardPanelActions.expectMissingPanelAction(
+          'embeddablePanelAction-embeddable_addToExistingCase'
+        );
       });
     });
   });

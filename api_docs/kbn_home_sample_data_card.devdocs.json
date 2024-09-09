@@ -198,7 +198,7 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<",
+          "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/home-sample-data-card",
             "scope": "common",
@@ -206,7 +206,7 @@
             "section": "def-common.KibanaDependencies",
             "text": "KibanaDependencies"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/home/sample_data_card/src/services.tsx",
         "deprecated": false,
@@ -220,7 +220,7 @@
             "label": "{\n  children,\n  ...dependencies\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/home-sample-data-card",
                 "scope": "common",
@@ -228,7 +228,7 @@
                 "section": "def-common.KibanaDependencies",
                 "text": "KibanaDependencies"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
@@ -249,7 +249,7 @@
           "\nA Context Provider that provides services to the component and its dependencies."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/home-sample-data-card",
             "scope": "common",
@@ -257,7 +257,7 @@
             "section": "def-common.Services",
             "text": "Services"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/home/sample_data_card/src/services.tsx",
         "deprecated": false,
@@ -268,10 +268,10 @@
             "id": "def-common.SampleDataCardProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, ...services }",
+            "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/home-sample-data-card",
                 "scope": "common",
@@ -279,7 +279,7 @@
                 "section": "def-common.Services",
                 "text": "Services"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,

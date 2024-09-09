@@ -5,31 +5,49 @@
  * 2.0.
  */
 
-import { ChainTool } from 'langchain/tools';
+import { DynamicStructuredTool } from '@langchain/core/tools';
+import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { APP_UI_ID } from '../../../../common';
 
 export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
-export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
+const toolDetails = {
+  description:
+    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text. Your answer will be parsed as JSON, so never use quotes within the output and instead use backticks. Do not add any additional text to describe your output.',
   id: 'esql-knowledge-base-tool',
   name: 'ESQLKnowledgeBaseTool',
-  description:
-    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
+};
+export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
+  ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is EsqlKnowledgeBaseToolParams => {
-    const { isEnabledKnowledgeBase, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists;
+    const { chain, isEnabledKnowledgeBase, modelExists } = params;
+    return isEnabledKnowledgeBase && modelExists && chain != null;
   },
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
+
     const { chain } = params as EsqlKnowledgeBaseToolParams;
-    return new ChainTool({
-      name: 'ESQLKnowledgeBaseTool',
-      description:
-        'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
-      chain,
+    if (chain == null) return null;
+
+    return new DynamicStructuredTool({
+      name: toolDetails.name,
+      description: toolDetails.description,
+      schema: z.object({
+        question: z.string().describe(`The user's exact question about ESQL`),
+      }),
+      func: async (input, _, cbManager) => {
+        const result = await chain.invoke(
+          {
+            query: input.question,
+          },
+          cbManager
+        );
+        return result.text;
+      },
       tags: ['esql', 'query-generation', 'knowledge-base'],
-    });
+      // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
+    }) as unknown as DynamicStructuredTool;
   },
 };

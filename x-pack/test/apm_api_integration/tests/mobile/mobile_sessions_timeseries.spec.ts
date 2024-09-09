@@ -13,7 +13,7 @@ import { generateMobileData } from './generate_mobile_data';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const registry = getService('registry');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T02:00:00.000Z').getTime();
@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when('without data loaded', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('without data loaded', { config: 'basic', archives: [] }, () => {
     describe('when no data', () => {
       it('handles empty state', async () => {
         const response = await getSessionsChart({ serviceName: 'foo' });
@@ -58,16 +58,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('with data loaded', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177393
+  registry.when.skip('with data loaded', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateMobileData({
-        synthtraceEsClient,
+        apmSynthtraceEsClient,
         start,
         end,
       });
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('when data is loaded', () => {
       it('returns timeseries for sessions chart', async () => {

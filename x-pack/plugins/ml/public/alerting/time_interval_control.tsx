@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiFormRow, EuiFieldTextProps } from '@elastic/eui';
-import React, { FC, ReactNode, useMemo } from 'react';
+import type { EuiFieldTextProps } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import type { FC, ReactNode } from 'react';
+import React, { useMemo } from 'react';
 import { invalidTimeIntervalMessage } from '../application/jobs/new_job/common/job_validator/util';
 import { composeValidators } from '../../common';
 import { timeIntervalInputValidator } from '../../common/util/validators';
@@ -35,6 +37,7 @@ export const TimeIntervalControl: FC<TimeIntervalControlProps> = ({
       label={label}
       isInvalid={isInvalid}
       error={invalidTimeIntervalMessage(value ?? undefined)}
+      data-test-subj={'mlAnomalyAlertAdvancedSettingsLookbackInterval'}
     >
       <EuiFieldText
         {...fieldTextProps}

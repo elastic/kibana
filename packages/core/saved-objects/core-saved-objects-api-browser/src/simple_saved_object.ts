@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-common';
@@ -42,8 +43,12 @@ export interface SimpleSavedObject<T = unknown> {
   references: SavedObjectType<T>['references'];
   /** The date this object was last updated */
   updatedAt: SavedObjectType<T>['updated_at'];
+  /** The user that last updated this object */
+  updatedBy: SavedObjectType<T>['updated_by'];
   /** The date this object was created */
   createdAt: SavedObjectType<T>['created_at'];
+  /** The user that created this object */
+  createdBy: SavedObjectType<T>['created_by'];
   /**
    * Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with
    * `namespaceType: 'agnostic'`.

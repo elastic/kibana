@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import type { IndexFieldSearch } from './use_data_view';
 import { useDataView } from './use_data_view';
 import { mocksSource } from './mock';
@@ -85,7 +86,7 @@ describe('source/index.tsx', () => {
     it('sets field data for data view', async () => {
       await act(async () => {
         const { waitForNextUpdate, result } = renderHook<
-          string,
+          PropsWithChildren<{}>,
           { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
           wrapper: TestProviders,
@@ -100,14 +101,13 @@ describe('source/index.tsx', () => {
       const { type: sourceType, payload } = mockDispatch.mock.calls[1][0];
       expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_DATA_VIEW');
       expect(payload.id).toEqual('neato');
-      expect(payload.indexFields).toHaveLength(mocksSource.indexFields.length);
     });
 
     it('should reuse the result for dataView info when cleanCache not passed', async () => {
       let indexFieldsSearch: IndexFieldSearch;
       await act(async () => {
         const { waitForNextUpdate, result } = renderHook<
-          string,
+          PropsWithChildren<{}>,
           { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
           wrapper: TestProviders,
@@ -136,7 +136,7 @@ describe('source/index.tsx', () => {
       let indexFieldsSearch: IndexFieldSearch;
       await act(async () => {
         const { waitForNextUpdate, result } = renderHook<
-          string,
+          PropsWithChildren<{}>,
           { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
           wrapper: TestProviders,

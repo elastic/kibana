@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
 import { EmbeddableInput, IEmbeddable } from './i_embeddable';
 import { EmbeddableRoot } from './embeddable_root';
 import { EmbeddableFactory } from './embeddable_factory';
-import { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
+import { ErrorEmbeddable } from './error_embeddable';
+import { isErrorEmbeddable } from './is_error_embeddable';
 
 /**
  * This type is a publicly exposed props of {@link EmbeddableRenderer}

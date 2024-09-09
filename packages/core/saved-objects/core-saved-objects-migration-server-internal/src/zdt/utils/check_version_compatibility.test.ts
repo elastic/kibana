@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
   compareVirtualVersionsMock,
   getVirtualVersionMapMock,
   getVirtualVersionsFromMappingsMock,
+  getUpdatedRootFieldsMock,
 } from './check_version_compatibility.test.mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type {
@@ -30,6 +32,7 @@ describe('checkVersionCompatibility', () => {
     compareVirtualVersionsMock.mockReset().mockReturnValue({});
     getVirtualVersionMapMock.mockReset().mockReturnValue({});
     getVirtualVersionsFromMappingsMock.mockReset().mockReturnValue({ status: 'equal' });
+    getUpdatedRootFieldsMock.mockReset().mockReturnValue([]);
 
     types = [createType({ name: 'foo' }), createType({ name: 'bar' })];
 
@@ -88,24 +91,112 @@ describe('checkVersionCompatibility', () => {
     });
   });
 
-  it('returns the result of the compareModelVersions call', () => {
-    const expected: CompareModelVersionResult = {
-      status: 'lesser',
-      details: {
-        greater: [],
-        lesser: [],
-        equal: [],
-      },
-    };
-    compareVirtualVersionsMock.mockReturnValue(expected);
-
-    const result = checkVersionCompatibility({
+  it('calls getUpdatedRootFields with the correct parameters', () => {
+    checkVersionCompatibility({
       types,
       mappings,
       source: 'mappingVersions',
       deletedTypes,
     });
 
-    expect(result).toEqual(expected);
+    expect(getUpdatedRootFieldsMock).toHaveBeenCalledTimes(1);
+    expect(getUpdatedRootFieldsMock).toHaveBeenCalledWith(mappings);
+  });
+
+  describe('without updated root fields', () => {
+    it('returns the result of the compareModelVersions call', () => {
+      const expected: CompareModelVersionResult = {
+        status: 'lesser',
+        details: { greater: [], lesser: [], equal: [] },
+      };
+      compareVirtualVersionsMock.mockReturnValue(expected);
+
+      const result = checkVersionCompatibility({
+        types,
+        mappings,
+        source: 'mappingVersions',
+        deletedTypes,
+      });
+
+      expect(result).toEqual({
+        status: expected.status,
+        versionDetails: expected.details,
+        updatedRootFields: [],
+      });
+    });
+  });
+
+  describe('with updated root fields', () => {
+    beforeEach(() => {
+      getUpdatedRootFieldsMock.mockReturnValue(['rootA']);
+    });
+
+    it('returns the correct status for `greater` version status check', () => {
+      const expected: CompareModelVersionResult = {
+        status: 'greater',
+        details: { greater: [], lesser: [], equal: [] },
+      };
+      compareVirtualVersionsMock.mockReturnValue(expected);
+
+      const result = checkVersionCompatibility({
+        types,
+        mappings,
+        source: 'mappingVersions',
+        deletedTypes,
+      });
+
+      expect(result.status).toEqual('greater');
+    });
+
+    it('returns the correct status for `lesser` version status check', () => {
+      const expected: CompareModelVersionResult = {
+        status: 'lesser',
+        details: { greater: [], lesser: [], equal: [] },
+      };
+      compareVirtualVersionsMock.mockReturnValue(expected);
+
+      const result = checkVersionCompatibility({
+        types,
+        mappings,
+        source: 'mappingVersions',
+        deletedTypes,
+      });
+
+      expect(result.status).toEqual('conflict');
+    });
+
+    it('returns the correct status for `equal` version status check', () => {
+      const expected: CompareModelVersionResult = {
+        status: 'equal',
+        details: { greater: [], lesser: [], equal: [] },
+      };
+      compareVirtualVersionsMock.mockReturnValue(expected);
+
+      const result = checkVersionCompatibility({
+        types,
+        mappings,
+        source: 'mappingVersions',
+        deletedTypes,
+      });
+
+      expect(result.status).toEqual('greater');
+    });
+
+    it('returns the correct status for `conflict` version status check', () => {
+      const expected: CompareModelVersionResult = {
+        status: 'conflict',
+        details: { greater: [], lesser: [], equal: [] },
+      };
+      compareVirtualVersionsMock.mockReturnValue(expected);
+
+      const result = checkVersionCompatibility({
+        types,
+        mappings,
+        source: 'mappingVersions',
+        deletedTypes,
+      });
+
+      expect(result.status).toEqual('conflict');
+    });
   });
 });

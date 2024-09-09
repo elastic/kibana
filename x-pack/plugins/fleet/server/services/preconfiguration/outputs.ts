@@ -129,9 +129,9 @@ export async function createOrUpdatePreconfiguredOutputs(
           });
           // Bump revision of all policies using that output
           if (outputData.is_default || outputData.is_default_monitoring) {
-            await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+            await agentPolicyService.bumpAllAgentPolicies(esClient);
           } else {
-            await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);
+            await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id);
           }
         }
       }
@@ -324,6 +324,7 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       isDifferent(existingOutput.random, preconfiguredOutput.random) ||
       isDifferent(existingOutput.round_robin, preconfiguredOutput.round_robin) ||
       isDifferent(existingOutput.hash, preconfiguredOutput.hash) ||
+      isDifferent(existingOutput.topic, preconfiguredOutput.topic) ||
       isDifferent(existingOutput.topics, preconfiguredOutput.topics) ||
       isDifferent(existingOutput.headers, preconfiguredOutput.headers) ||
       isDifferent(existingOutput.timeout, preconfiguredOutput.timeout) ||
@@ -387,6 +388,7 @@ async function isPreconfiguredOutputDifferentFromCurrent(
     isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
     (preconfiguredOutput.preset &&
       isDifferent(existingOutput.preset, preconfiguredOutput.preset)) ||
+    isDifferent(existingOutput.is_internal, preconfiguredOutput.is_internal) ||
     (await kafkaFieldsAreDifferent()) ||
     (await logstashFieldsAreDifferent()) ||
     (await remoteESFieldsAreDifferent())

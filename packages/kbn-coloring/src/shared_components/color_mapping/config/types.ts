@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -28,6 +29,13 @@ export interface CategoricalColor {
  */
 export interface GradientColor {
   type: 'gradient';
+}
+
+/**
+ * An index specified categorical color, coming from paletteId
+ */
+export interface LoopColor {
+  type: 'loop';
 }
 
 /**
@@ -134,14 +142,13 @@ export interface GradientColorMode {
 export interface Config {
   paletteId: string;
   colorMode: CategoricalColorMode | GradientColorMode;
-  assignmentMode: 'auto' | 'manual';
   assignments: Array<
     Assignment<
       RuleAuto | RuleMatchExactly | RuleMatchExactlyCI | RuleRange | RuleRegExp,
       CategoricalColor | ColorCode | GradientColor
     >
   >;
-  specialAssignments: Array<Assignment<RuleOthers, CategoricalColor | ColorCode>>;
+  specialAssignments: Array<Assignment<RuleOthers, CategoricalColor | ColorCode | LoopColor>>;
 }
 
 export interface CategoricalPalette {
@@ -149,5 +156,5 @@ export interface CategoricalPalette {
   name: string;
   type: 'categorical';
   colorCount: number;
-  getColor: (valueInRange: number, isDarkMode: boolean) => string;
+  getColor: (valueInRange: number, isDarkMode: boolean, loop: boolean) => string;
 }

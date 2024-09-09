@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -19,18 +20,19 @@ import { track } from './track';
 import { replaceVariables } from '../../../lib/utils';
 import { StorageKeys } from '../../../services';
 import { DEFAULT_VARIABLES } from '../../../../common/constants';
+import { SenseEditor } from '../../models';
 
 export const useSendCurrentRequest = () => {
   const {
     services: { history, settings, notifications, trackUiMetric, http, autocompleteInfo, storage },
-    theme$,
+    ...startServices
   } = useServicesContext();
 
   const dispatch = useRequestActionContext();
 
   return useCallback(async () => {
     try {
-      const editor = registry.getInputEditor();
+      const editor = registry.getInputEditor() as SenseEditor;
       const variables = storage.get(StorageKeys.VARIABLES, DEFAULT_VARIABLES);
       let requests = await editor.getRequestsInRange();
       requests = replaceVariables(requests, variables);
@@ -47,7 +49,7 @@ export const useSendCurrentRequest = () => {
       dispatch({ type: 'sendRequest', payload: undefined });
 
       // Fire and forget
-      setTimeout(() => track(requests, editor, trackUiMetric), 0);
+      setTimeout(() => track(requests, editor as SenseEditor, trackUiMetric), 0);
 
       const results = await sendRequest({ http, requests });
 
@@ -88,7 +90,7 @@ export const useSendCurrentRequest = () => {
                   notifications.toasts.remove(toast);
                 },
               }),
-              { theme$ }
+              startServices
             ),
           });
         } else {
@@ -140,7 +142,7 @@ export const useSendCurrentRequest = () => {
     notifications.toasts,
     trackUiMetric,
     history,
-    theme$,
     autocompleteInfo,
+    startServices,
   ]);
 };

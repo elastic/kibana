@@ -7,23 +7,16 @@ exports[`should render EMS UI when left source is BOUNDARIES_SOURCE.EMS 1`] = `
       size="xs"
     >
       <h5>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Boundaries source"
           id="xpack.maps.choropleth.boundariesLabel"
-          values={Object {}}
         />
       </h5>
     </EuiTitle>
     <EuiSpacer
       size="m"
     />
-    <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      labelType="label"
-    >
+    <EuiFormRow>
       <EuiRadioGroup
         idSelected="EMS"
         onChange={[Function]}
@@ -59,23 +52,16 @@ exports[`should render elasticsearch UI when left source is BOUNDARIES_SOURCE.EL
       size="xs"
     >
       <h5>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Boundaries source"
           id="xpack.maps.choropleth.boundariesLabel"
-          values={Object {}}
         />
       </h5>
     </EuiTitle>
     <EuiSpacer
       size="m"
     />
-    <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      labelType="label"
-    >
+    <EuiFormRow>
       <EuiRadioGroup
         idSelected="ELASTICSEARCH"
         onChange={[Function]}

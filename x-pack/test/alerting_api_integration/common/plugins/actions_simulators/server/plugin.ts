@@ -10,7 +10,7 @@ import https from 'https';
 import { Plugin, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
@@ -45,6 +45,8 @@ export enum ExternalServiceSimulator {
   XMATTERS = 'xmatters',
   TORQ = 'torq',
   TINES = 'tines',
+  SENTINELONE = 'sentinelone',
+  CROWDSTRIKE = 'crowdstrike',
 }
 
 export function getExternalServiceSimulatorPath(service: ExternalServiceSimulator): string {
@@ -63,6 +65,8 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/1234567/oauth2/v2.0/token`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/oauth_token.do`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/webhook/path/secret`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SENTINELONE}/web/api/v2.1/`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.CROWDSTRIKE}`);
   return allPaths;
 }
 

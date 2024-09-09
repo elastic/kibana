@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { FeatureKibanaPrivilegesReference } from './feature_kibana_privileges_reference';
+
 /**
  * Feature privilege definition
  */
@@ -263,4 +265,11 @@ export interface FeatureKibanaPrivileges {
    * @see UICapabilities
    */
   ui: readonly string[];
+
+  /**
+   * An optional list of other registered feature or sub-feature privileges that this privilege is composed of. When
+   * privilege is registered with Elasticsearch, it will be expanded to grant everything that referenced privileges
+   * grant. This property can only be set in the feature configuration overrides.
+   */
+  composedOf?: readonly FeatureKibanaPrivilegesReference[];
 }

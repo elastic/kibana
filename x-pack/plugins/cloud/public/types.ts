@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import type { OnBoardingDefaultSolution } from '../common';
 
 export interface CloudStart {
   /**
    * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
    */
-  CloudContextProvider: FC<{}>;
+  CloudContextProvider: FC<PropsWithChildren<unknown>>;
   /**
    * `true` when Kibana is running on Elastic Cloud.
    */
@@ -20,6 +21,12 @@ export interface CloudStart {
    * Cloud ID. Undefined if not running on Cloud.
    */
   cloudId?: string;
+  /**
+   * This is the path to the Cloud deployments management page. The value is already prepended with `baseUrl`.
+   *
+   * @example `{baseUrl}/deployments`
+   */
+  deploymentsUrl?: string;
   /**
    * This is the path to the Cloud deployment management page for the deployment to which the Kibana instance belongs. The value is already prepended with `baseUrl`.
    *
@@ -90,6 +97,10 @@ export interface CloudSetup {
    * Cloud ID. Undefined if not running on Cloud.
    */
   cloudId?: string;
+  /**
+   * The Elastic Cloud Organization that owns this deployment/project.
+   */
+  organizationId?: string;
   /**
    * The deployment's ID. Only available when running on Elastic Cloud.
    */
@@ -169,6 +180,15 @@ export interface CloudSetup {
    */
   registerCloudService: (contextProvider: FC) => void;
   /**
+   * Onboarding configuration
+   */
+  onboarding: {
+    /**
+     * The default solution selected during onboarding.
+     */
+    defaultSolution?: OnBoardingDefaultSolution;
+  };
+  /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
    */
@@ -192,5 +212,10 @@ export interface CloudSetup {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     projectType?: string;
+    /**
+     * The serverless orchestrator target. The potential values are `canary` or `non-canary`
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    orchestratorTarget?: string;
   };
 }

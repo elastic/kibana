@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
@@ -73,7 +73,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
     [comments, editAction, incident, index]
   );
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       return editAction(
         'subActionParams',
         {
@@ -110,12 +110,17 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
         error={errors['subActionParams.incident.title']}
         isInvalid={
           errors['subActionParams.incident.title'] !== undefined &&
-          errors['subActionParams.incident.title'].length > 0 &&
+          Number(errors['subActionParams.incident.title'].length) > 0 &&
           incident.title !== undefined
         }
         label={i18n.translate('xpack.stackConnectors.components.casesWebhook.titleFieldLabel', {
-          defaultMessage: 'Summary (required)',
+          defaultMessage: 'Summary',
         })}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            Required
+          </EuiText>
+        }
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -202,7 +207,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
         error={errors['subActionParams.incident.id']}
         isInvalid={
           errors['subActionParams.incident.id'] !== undefined &&
-          errors['subActionParams.incident.id'].length > 0 &&
+          Number(errors['subActionParams.incident.id'].length) > 0 &&
           incident.id !== undefined
         }
         label={i18n.translate('xpack.stackConnectors.components.casesWebhook.idFieldLabel', {

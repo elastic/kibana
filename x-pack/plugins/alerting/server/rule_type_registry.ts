@@ -14,6 +14,7 @@ import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { stateSchemaByVersion } from '@kbn/alerting-state-types';
+import { TaskCost } from '@kbn/task-manager-plugin/server/task';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
@@ -39,8 +40,10 @@ import { AlertingRulesConfig } from '.';
 import { AlertsService } from './alerts_service/alerts_service';
 import { getRuleTypeIdValidLegacyConsumers } from './rule_type_registry_deprecated_consumers';
 import { AlertingConfig } from './config';
-import { rawRuleSchemaV1 } from './saved_objects/schemas/raw_rule';
 
+const RULE_TYPES_WITH_CUSTOM_COST: Record<string, TaskCost> = {
+  'siem.indicatorRule': TaskCost.ExtraLarge,
+};
 export interface ConstructorOptions {
   config: AlertingConfig;
   logger: Logger;
@@ -51,7 +54,6 @@ export interface ConstructorOptions {
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   inMemoryMetrics: InMemoryMetrics;
   alertsService: AlertsService | null;
-  latestRuleVersion: number;
 }
 
 export interface RegistryRuleType
@@ -161,7 +163,6 @@ export class RuleTypeRegistry {
   private readonly licensing: LicensingPluginSetup;
   private readonly inMemoryMetrics: InMemoryMetrics;
   private readonly alertsService: AlertsService | null;
-  private readonly latestRuleVersion: number;
 
   constructor({
     config,
@@ -173,7 +174,6 @@ export class RuleTypeRegistry {
     minimumScheduleInterval,
     inMemoryMetrics,
     alertsService,
-    latestRuleVersion,
   }: ConstructorOptions) {
     this.config = config;
     this.logger = logger;
@@ -184,7 +184,6 @@ export class RuleTypeRegistry {
     this.minimumScheduleInterval = minimumScheduleInterval;
     this.inMemoryMetrics = inMemoryMetrics;
     this.alertsService = alertsService;
-    this.latestRuleVersion = latestRuleVersion;
   }
 
   public has(id: string) {
@@ -294,6 +293,8 @@ export class RuleTypeRegistry {
       normalizedRuleType as unknown as UntypedNormalizedRuleType
     );
 
+    const taskCost: TaskCost | undefined = RULE_TYPES_WITH_CUSTOM_COST[ruleType.id];
+
     this.taskManager.registerTaskDefinitions({
       [`alerting:${ruleType.id}`]: {
         title: ruleType.name,
@@ -315,7 +316,7 @@ export class RuleTypeRegistry {
           spaceId: schema.string(),
           consumer: schema.maybe(schema.string()),
         }),
-        indirectParamsSchema: rawRuleSchemaV1,
+        ...(taskCost ? { cost: taskCost } : {}),
       },
     });
 
@@ -438,10 +439,6 @@ export class RuleTypeRegistry {
   public getAllTypes(): string[] {
     return [...this.ruleTypes.keys()];
   }
-
-  public getLatestRuleVersion() {
-    return this.latestRuleVersion;
-  }
 }
 
 function normalizedActionVariables(actionVariables: RuleType['actionVariables']) {
@@ -517,6 +514,27 @@ function augmentActionGroupsWithReserved<
       })
     );
   }
+
+  const activeActionGroupSeverities = new Set<number>();
+  actionGroups.forEach((actionGroup) => {
+    if (!!actionGroup.severity) {
+      if (activeActionGroupSeverities.has(actionGroup.severity.level)) {
+        throw new Error(
+          i18n.translate(
+            'xpack.alerting.ruleTypeRegistry.register.duplicateActionGroupSeverityError',
+            {
+              defaultMessage:
+                'Rule type [id="{id}"] cannot be registered. Action group definitions cannot contain duplicate severity levels.',
+              values: {
+                id,
+              },
+            }
+          )
+        );
+      }
+      activeActionGroupSeverities.add(actionGroup.severity.level);
+    }
+  });
 
   return {
     ...ruleType,

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -86,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows a warning on create new, and restores panels if continue is selected', async () => {
-      await PageObjects.dashboard.clickNewDashboardExpectWarning(true);
+      await PageObjects.dashboard.clickNewDashboard({ continueEditing: true, expectWarning: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.dashboard.getPanelCount()).to.eql(2);
       await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -94,7 +95,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows a warning on create new, and clears unsaved panels if discard is selected', async () => {
-      await PageObjects.dashboard.clickNewDashboardExpectWarning();
+      await PageObjects.dashboard.clickNewDashboard({
+        continueEditing: false,
+        expectWarning: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.dashboard.getPanelCount()).to.eql(0);
       await PageObjects.dashboard.gotoDashboardLandingPage();

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { debounce } from 'lodash';
@@ -20,9 +21,8 @@ import {
   EuiFlexGroup,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { DashboardItem } from '../../embeddable/types';
+import { DashboardItem } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { fetchDashboard, fetchDashboards } from './dashboard_link_tools';
 
@@ -31,19 +31,17 @@ type DashboardComboBoxOption = EuiComboBoxOptionOption<DashboardItem>;
 export const DashboardLinkDestinationPicker = ({
   onDestinationPicked,
   initialSelection,
-  parentDashboard,
+  parentDashboardId,
   onUnmount,
   ...other
 }: {
   initialSelection?: string;
-  parentDashboard?: DashboardContainer;
+  parentDashboardId?: string;
   onUnmount: (dashboardId?: string) => void;
   onDestinationPicked: (selectedDashboard?: DashboardItem) => void;
 }) => {
   const [searchString, setSearchString] = useState<string>('');
   const [selectedOption, setSelectedOption] = useState<DashboardComboBoxOption[]>([]);
-
-  const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
 
   const getDashboardItem = useCallback((dashboard: DashboardItem) => {
     return {
@@ -97,7 +95,7 @@ export const DashboardLinkDestinationPicker = ({
   );
 
   const renderOption = useCallback(
-    (option, searchValue, contentClassName) => {
+    (option: DashboardComboBoxOption, searchValue: string, contentClassName: string) => {
       const { label, key: dashboardId } = option;
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" className={contentClassName}>
@@ -106,7 +104,7 @@ export const DashboardLinkDestinationPicker = ({
               <EuiBadge>{DashboardLinkStrings.getCurrentDashboardLabel()}</EuiBadge>
             </EuiFlexItem>
           )}
-          <EuiFlexItem className={'linksPanelLinkText'}>
+          <EuiFlexItem className={'linksPanelEditorLinkText'}>
             <EuiHighlight search={searchValue} className={'wrapText'}>
               {label}
             </EuiHighlight>

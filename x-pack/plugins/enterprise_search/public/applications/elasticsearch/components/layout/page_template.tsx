@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { ELASTICSEARCH_PLUGIN } from '../../../../../common/constants';
+import { SEARCH_PRODUCT_NAME } from '../../../../../common/constants';
 import { SetElasticsearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchNav } from '../../../shared/layout';
@@ -24,7 +24,7 @@ export const EnterpriseSearchElasticsearchPageTemplate: React.FC<PageTemplatePro
       {...pageTemplateProps}
       restrictWidth
       solutionNav={{
-        name: ELASTICSEARCH_PLUGIN.NAME,
+        name: SEARCH_PRODUCT_NAME,
         items: useEnterpriseSearchNav(),
       }}
       setPageChrome={pageChrome && <SetElasticsearchChrome trail={pageChrome} />}

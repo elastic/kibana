@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
-
 import { FtrConfigProviderContext } from '@kbn/test';
-
+import { resolve } from 'path';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
@@ -38,7 +36,6 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ],
       },
       testFiles: options.testFiles,
-
       uiSettings: {
         defaults: {
           'accessibility:disableAnimations': true,
@@ -60,8 +57,11 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         observability: {
           pathname: '/app/observability',
         },
-        observabilityLogExplorer: {
-          pathname: '/app/observability-log-explorer',
+        observabilityLogsExplorer: {
+          pathname: '/app/observability-logs-explorer',
+        },
+        observabilityOnboarding: {
+          pathname: '/app/observabilityOnboarding',
         },
         management: {
           pathname: '/app/management',
@@ -107,10 +107,22 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           pathname: '/app/dev_tools',
           hash: '/searchprofiler',
         },
+        maintenanceWindows: {
+          pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
+        },
+        fleet: {
+          pathname: '/app/fleet',
+        },
+        integrations: {
+          pathname: '/app/integrations',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {
         directory: resolve(__dirname, 'screenshots'),
+      },
+      failureDebugging: {
+        htmlDirectory: resolve(__dirname, 'failure_debug', 'html'),
       },
       junit: options.junit,
       suiteTags: options.suiteTags,

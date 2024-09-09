@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,14 +20,17 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import type { MapApi } from '@kbn/maps-plugin/public';
 import {
   type LayerResult,
   QuickGeoJobCreator,
   redirectToGeoJobWizard,
 } from '../../../../../application/jobs/new_job/job_from_map';
 import { useMlFromLensKibanaContext } from '../../../common/context';
-import { JobDetails, CreateADJobParams } from '../../../common/job_details';
+import type { CreateADJobParams } from '../../../common/job_details';
+import { JobDetails } from '../../../common/job_details';
+import { mlJobServiceFactory } from '../../../../../application/services/job_service';
+import { toastNotificationServiceProvider } from '../../../../../application/services/toast_notification_service';
 
 interface DropDownLabel {
   label: string;
@@ -34,7 +38,7 @@ interface DropDownLabel {
 }
 
 interface Props {
-  embeddable: MapEmbeddable;
+  embeddable: MapApi;
   layer: LayerResult;
   layerIndex: number;
 }
@@ -49,17 +53,22 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
       share,
       uiSettings,
       dashboardService,
-      mlServices: { mlApiServices },
+      notifications: { toasts },
+      mlServices: { mlApi },
     },
   } = useMlFromLensKibanaContext();
+  const toastNotificationService = toastNotificationServiceProvider(toasts);
+  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApi);
 
   const quickJobCreator = useMemo(
     () =>
       new QuickGeoJobCreator(
+        data.dataViews,
         uiSettings,
         data.query.timefilter.timefilter,
         dashboardService,
-        mlApiServices
+        mlApi,
+        mlJobService
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, uiSettings]
@@ -78,18 +87,12 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
   }, [layer?.dataView?.id, embeddable, selectedSplitField]);
 
   const createGeoJob = useCallback(
-    async ({
-      jobId,
-      bucketSpan,
-      embeddable: mapEmbeddable,
-      startJob,
-      runInRealTime,
-    }: CreateADJobParams) => {
+    async ({ jobId, bucketSpan, startJob, runInRealTime }: CreateADJobParams) => {
       try {
         const result = await quickJobCreator.createAndSaveGeoJob({
           jobId,
           bucketSpan,
-          embeddable: mapEmbeddable as MapEmbeddable,
+          embeddable,
           startJob,
           runInRealTime,
           sourceDataView: layer.dataView,
@@ -146,8 +149,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
         layerIndex={layerIndex}
         createADJob={createGeoJob}
         createADJobInWizard={createGeoJobInWizard}
-        embeddable={embeddable}
-        timeRange={embeddable.getInput().timeRange}
+        timeRange={embeddable.timeRange$?.value}
         incomingCreateError={createError}
       >
         <>

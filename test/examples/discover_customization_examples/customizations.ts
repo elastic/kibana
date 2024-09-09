@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -20,6 +21,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
+  const retry = getService('retry');
   const defaultSettings = { defaultIndex: 'logstash-*' };
 
   describe('Customizations', () => {
@@ -61,13 +63,17 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await testSubjects.click('logsViewSelectorButton');
       await testSubjects.click('logsViewSelectorOption-ASavedSearch');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
-      const expected = {
-        title: 'A Saved Search',
-        description: 'A Saved Search Description',
-      };
-      expect(title).to.eql(expected.title);
-      expect(description).to.eql(expected.description);
+      await retry.try(async () => {
+        const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
+        const expected = {
+          title: 'A Saved Search',
+          description: 'A Saved Search Description',
+        };
+        expect(title).to.eql(expected.title);
+        expect(description).to.eql(expected.description);
+      });
+      await browser.goBack();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('Search bar Prepend Filters exists and should apply filter properly', async () => {

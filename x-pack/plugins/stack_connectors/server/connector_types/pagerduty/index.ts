@@ -82,7 +82,7 @@ const PayloadSeveritySchema = schema.oneOf([
 const LinksSchema = schema.arrayOf(schema.object({ href: schema.string(), text: schema.string() }));
 const customDetailsSchema = schema.recordOf(schema.string(), schema.any());
 
-const ParamsSchema = schema.object(
+export const ParamsSchema = schema.object(
   {
     eventAction: schema.maybe(EventActionSchema),
     dedupKey: schema.maybe(schema.string({ maxLength: 255 })),
@@ -198,8 +198,16 @@ function getPagerDutyApiUrl(config: ConnectorTypeConfigType): string {
 async function executor(
   execOptions: PagerDutyConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, config, secrets, params, services, configurationUtilities, logger } =
-    execOptions;
+  const {
+    actionId,
+    config,
+    secrets,
+    params,
+    services,
+    configurationUtilities,
+    logger,
+    connectorUsageCollector,
+  } = execOptions;
 
   const apiUrl = getPagerDutyApiUrl(config);
   const headers = {
@@ -213,7 +221,8 @@ async function executor(
     response = await postPagerduty(
       { apiUrl, data, headers, services },
       logger,
-      configurationUtilities
+      configurationUtilities,
+      connectorUsageCollector
     );
   } catch (err) {
     const message = i18n.translate('xpack.stackConnectors.pagerduty.postingErrorMessage', {

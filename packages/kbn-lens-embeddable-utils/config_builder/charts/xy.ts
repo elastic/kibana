@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -12,6 +13,7 @@ import type {
   XYState,
   XYReferenceLineLayerConfig,
   XYDataLayerConfig,
+  PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
@@ -22,6 +24,7 @@ import {
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
+  mapToFormula,
 } from '../utils';
 import {
   BuildDependencies,
@@ -36,17 +39,24 @@ const ACCESSOR = 'metric_formula_accessor';
 
 function buildVisualizationState(config: LensXYConfig): XYState {
   return {
-    legend: {
-      isVisible: config.legend?.show || true,
-      position: config.legend?.position || 'left',
+    axisTitlesVisibilitySettings: {
+      x: config.axisTitleVisibility?.showXAxisTitle ?? true,
+      yLeft: config.axisTitleVisibility?.showYAxisTitle ?? true,
+      yRight: true,
     },
+    legend: {
+      isVisible: config.legend?.show ?? true,
+      position: config.legend?.position ?? 'left',
+    },
+    hideEndzones: true,
     preferredSeriesType: 'line',
     valueLabels: 'hide',
-    fittingFunction: 'None',
-    axisTitlesVisibilitySettings: {
-      x: true,
-      yLeft: true,
-      yRight: true,
+    emphasizeFitting: config?.emphasizeFitting ?? false,
+    fittingFunction: config?.fittingFunction ?? 'None',
+    yLeftExtent: {
+      mode: config.yBounds?.mode ?? 'full',
+      lowerBound: config.yBounds?.lowerBound,
+      upperBound: config.yBounds?.upperBound,
     },
     tickLabelsVisibilitySettings: {
       x: true,
@@ -107,25 +117,24 @@ function buildVisualizationState(config: LensXYConfig): XYState {
           return {
             layerId: `layer_${i}`,
             layerType: 'referenceLine',
-            accessors: [`${ACCESSOR}${i}`],
-            yConfig: [
-              {
-                forAccessor: `${ACCESSOR}${i}`,
-                axisMode: 'left',
-              },
-            ],
+            accessors: layer.yAxis.map((_, index) => `${ACCESSOR}${i}_${index}`),
+            yConfig: layer.yAxis.map((yAxis, index) => ({
+              forAccessor: `${ACCESSOR}${i}_${index}`,
+              axisMode: 'left',
+              color: yAxis.seriesColor,
+            })),
           } as XYReferenceLineLayerConfig;
         case 'series':
           return {
             layerId: `layer_${i}`,
             layerType: 'data',
-            xAccessor: `${ACCESSOR}${i}_x`,
+            xAccessor: `x_${ACCESSOR}${i}`,
             ...(layer.breakdown
               ? {
-                  splitAccessor: `${ACCESSOR}${i}_y}`,
+                  splitAccessor: `y_${ACCESSOR}${i}`,
                 }
               : {}),
-            accessors: [`${ACCESSOR}${i}`],
+            accessors: layer.yAxis.map((_, index) => `${ACCESSOR}${i}_${index}`),
             seriesType: layer.seriesType || 'line',
           } as XYDataLayerConfig;
       }
@@ -144,31 +153,42 @@ function getValueColumns(layer: LensSeriesLayer, i: number) {
     ...(layer.breakdown
       ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
       : []),
-    getValueColumn(`${ACCESSOR}${i}_x`, layer.xAxis as string),
-    getValueColumn(`${ACCESSOR}${i}`, layer.value, 'number'),
+    getValueColumn(`x_${ACCESSOR}${i}`, layer.xAxis as string),
+    ...layer.yAxis.map((yAxis, index) => ({
+      ...getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number'),
+    })),
   ];
+}
+
+function buildAllFormulasInLayer(
+  layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
+  i: number,
+  dataView: DataView,
+  formulaAPI?: FormulaPublicApi
+): PersistedIndexPatternLayer {
+  return layer.yAxis.reduce((acc, curr, valueIndex) => {
+    const formulaColumn = getFormulaColumn(
+      `${ACCESSOR}${i}_${valueIndex}`,
+      mapToFormula(curr),
+      dataView,
+      formulaAPI,
+      valueIndex > 0 ? acc : undefined
+    );
+    return { ...acc, ...formulaColumn };
+  }, {} as PersistedIndexPatternLayer);
 }
 
 function buildFormulaLayer(
   layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'][0] {
   if (layer.type === 'series') {
-    const resultLayer = {
-      ...getFormulaColumn(
-        `${ACCESSOR}${i}`,
-        {
-          value: layer.value,
-        },
-        dataView,
-        formulaAPI
-      ),
-    };
+    const resultLayer = buildAllFormulasInLayer(layer, i, dataView, formulaAPI);
 
     if (layer.xAxis) {
-      const columnName = `${ACCESSOR}${i}_x`;
+      const columnName = `x_${ACCESSOR}${i}`;
       const breakdownColumn = getBreakdownColumn({
         options: layer.xAxis,
         dataView,
@@ -177,7 +197,7 @@ function buildFormulaLayer(
     }
 
     if (layer.breakdown) {
-      const columnName = `${ACCESSOR}${i}_y`;
+      const columnName = `y_${ACCESSOR}${i}`;
       const breakdownColumn = getBreakdownColumn({
         options: layer.breakdown,
         dataView,
@@ -189,16 +209,7 @@ function buildFormulaLayer(
   } else if (layer.type === 'annotation') {
     // nothing ?
   } else if (layer.type === 'reference') {
-    return {
-      ...getFormulaColumn(
-        `${ACCESSOR}${i}`,
-        {
-          value: layer.value,
-        },
-        dataView,
-        formulaAPI
-      ),
-    };
+    return buildAllFormulasInLayer(layer, i, dataView, formulaAPI);
   }
 
   return {

@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { subj } from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/tooling-log';
-import { Page } from 'playwright';
+import { ElementHandle, Page } from 'playwright';
 import { Retry } from '..';
 
 interface WaitForRenderArgs {
   expectedItemsCount: number;
+  parentLocator?: string;
   itemLocator: string;
   checkAttribute: string;
   timeout: number;
@@ -36,25 +38,45 @@ export class KibanaPage {
     });
   }
 
+  async waitForListViewTable() {
+    await this.page.waitForSelector(subj('table-is-ready'), { state: 'visible' });
+  }
+
   async backToDashboardListing() {
     await this.page.click(subj('breadcrumb dashboardListingBreadcrumb first'));
   }
 
   async waitForRender({
     expectedItemsCount,
+    parentLocator,
     itemLocator,
     checkAttribute,
     timeout,
   }: WaitForRenderArgs) {
     // we can't use `page.waitForFunction` because of CSP while testing on Cloud
     await this.retry.waitForWithTimeout(
-      `rendering of ${expectedItemsCount} elements with selector ${itemLocator} is completed`,
+      `rendering of ${expectedItemsCount} elements with selector ${itemLocator} ${
+        parentLocator ? `and ${parentLocator} parent selector` : ''
+      } is completed`,
       timeout,
       async () => {
-        const renderingItems = await this.page.$$(itemLocator);
-        if (renderingItems.length === expectedItemsCount) {
+        const loadingItems: ElementHandle[] = [];
+        if (parentLocator) {
+          const parentElement = await this.page.$(parentLocator);
+          if (parentElement) {
+            loadingItems.push(...(await parentElement.$$(itemLocator)));
+          } else {
+            this.log.debug(`waitForRender: Can't locate ${parentLocator} element`);
+            return false;
+          }
+        } else {
+          loadingItems.push(...(await this.page.$$(itemLocator)));
+        }
+        // check if loading items count is matching the input
+        if (loadingItems.length === expectedItemsCount) {
+          // check if all loaded items are rendered
           const renderStatuses = await Promise.all(
-            renderingItems.map(async (item) => {
+            loadingItems.map(async (item) => {
               return (await item.getAttribute(checkAttribute)) === 'true';
             })
           );
@@ -66,7 +88,7 @@ export class KibanaPage {
         } else {
           // not all components are loaded yet
           this.log.debug(
-            `waitForRender: ${renderingItems.length} out of ${expectedItemsCount} are loaded...`
+            `waitForRender: ${loadingItems.length} out of ${expectedItemsCount} are loaded...`
           );
           return false;
         }
@@ -90,15 +112,18 @@ export class KibanaPage {
   }
 
   async waitForCharts({
+    parentLocator,
     count,
     timeout = this.defaultTimeout,
   }: {
+    parentLocator?: string;
     count: number;
     timeout?: number;
   }) {
     await this.waitForRender({
       expectedItemsCount: count,
-      itemLocator: '.echChartStatus',
+      parentLocator,
+      itemLocator: 'div.echChartStatus',
       checkAttribute: 'data-ech-render-complete',
       timeout,
     });

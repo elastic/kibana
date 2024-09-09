@@ -397,7 +397,7 @@ export const WatchListPage = () => {
                     aria-label={i18n.translate(
                       'xpack.watcher.sections.watchList.watchTable.actionEditAriaLabel',
                       {
-                        defaultMessage: "Edit watch '{name}'",
+                        defaultMessage: "Edit watch ''{name}''",
                         values: { name: watch.name },
                       }
                     )}
@@ -423,7 +423,7 @@ export const WatchListPage = () => {
                     aria-label={i18n.translate(
                       'xpack.watcher.sections.watchList.watchTable.actionDeleteAriaLabel',
                       {
-                        defaultMessage: "Delete watch '{name}'",
+                        defaultMessage: "Delete watch ''{name}''",
                         values: { name: watch.name },
                       }
                     )}
@@ -515,7 +515,6 @@ export const WatchListPage = () => {
             },
           }}
           selection={selectionConfig}
-          isSelectable={true}
           childrenBetween={
             queryError && (
               <>

@@ -59,14 +59,17 @@ describe('config schema', () => {
             "apisToRedactInLogs": Array [],
             "compression": false,
             "customHeaders": Object {},
+            "dnsCacheTtl": "P0D",
             "healthCheck": Object {
               "delay": "PT2.5S",
+              "startupDelay": "PT0.5S",
             },
             "idleSocketTimeout": "PT1M",
             "ignoreVersionMismatch": false,
             "logFetchCount": 10,
             "logQueries": false,
             "maxIdleSockets": 256,
+            "maxResponseSize": false,
             "maxSockets": 800,
             "pingTimeout": "PT30S",
             "requestHeadersWhitelist": Array [

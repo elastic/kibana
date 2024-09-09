@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import type { ComponentType, ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiText } from '@elastic/eui';
 
-import '../../common/mock/match_media';
 import type { ConfigureCaseButtonProps, CaseDetailsLinkProps } from '.';
 import { ConfigureCaseButton, CaseDetailsLink } from '.';
 import { TestProviders } from '../../common/mock';
@@ -30,7 +29,9 @@ describe('Configuration button', () => {
   };
 
   beforeAll(() => {
-    wrapper = mount(<ConfigureCaseButton {...props} />, { wrappingComponent: TestProviders });
+    wrapper = mount(<ConfigureCaseButton {...props} />, {
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
+    });
   });
 
   test('it renders without the tooltip', () => {
@@ -60,7 +61,7 @@ describe('Configuration button', () => {
         msgTooltip={msgTooltip}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 
@@ -86,7 +87,7 @@ describe('Configuration button', () => {
         msgTooltip={<>{msgTooltip}</>}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 

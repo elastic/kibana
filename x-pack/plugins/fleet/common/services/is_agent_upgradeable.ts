@@ -8,12 +8,14 @@
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import semverGt from 'semver/functions/gt';
+import semverGte from 'semver/functions/gte';
 import semverEq from 'semver/functions/eq';
 import moment from 'moment';
 
 import type { Agent } from '../types';
 
 export const AGENT_UPGRADE_COOLDOWN_IN_MIN = 10;
+export const AGENT_UPGARDE_DETAILS_SUPPORTED_VERSION = '8.12.0';
 
 // Error messages for agent not upgradeable
 export const VERSION_MISSING_ERROR = `agent version is missing.`;
@@ -29,7 +31,7 @@ export const LATEST_VERSION_NOT_VALID_ERROR = 'latest version is not valid.';
 export const AGENT_ALREADY_ON_LATEST_ERROR = `agent is already running on the latest available version.`;
 export const AGENT_ON_GREATER_VERSION_ERROR = `agent is running on a version greater than the latest available version.`;
 
-export function isAgentUpgradeAvailable(agent: Agent, latestAgentVersion?: string) {
+export function isAgentUpgradeAvailable(agent: Agent, latestAgentVersion?: string): boolean {
   return (
     latestAgentVersion &&
     isAgentUpgradeable(agent) &&
@@ -38,7 +40,7 @@ export function isAgentUpgradeAvailable(agent: Agent, latestAgentVersion?: strin
   );
 }
 
-export function isAgentUpgradeable(agent: Agent) {
+export function isAgentUpgradeable(agent: Agent): boolean {
   if (agent.unenrollment_started_at || agent.unenrolled_at) {
     return false;
   }
@@ -48,13 +50,16 @@ export function isAgentUpgradeable(agent: Agent) {
   if (isAgentUpgrading(agent)) {
     return false;
   }
+  if (isAgentInWatchingState(agent)) {
+    return false;
+  }
   if (getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) {
     return false;
   }
   return true;
 }
 
-export function isAgentUpgradeableToVersion(agent: Agent, versionToUpgrade?: string) {
+export function isAgentUpgradeableToVersion(agent: Agent, versionToUpgrade?: string): boolean {
   const isAgentUpgradeableCheck = isAgentUpgradeable(agent);
   if (!isAgentUpgradeableCheck) return false;
   let agentVersion: string;
@@ -69,7 +74,10 @@ export function isAgentUpgradeableToVersion(agent: Agent, versionToUpgrade?: str
   return isNotDowngrade(agentVersion, versionToUpgrade);
 }
 
-export const isAgentVersionLessThanLatest = (agentVersion: string, latestAgentVersion: string) => {
+export const isAgentVersionLessThanLatest = (
+  agentVersion: string,
+  latestAgentVersion: string
+): boolean => {
   // make sure versions are only the number before comparison
   const agentVersionNumber = semverCoerce(agentVersion);
   if (!agentVersionNumber) throw new Error(`${INVALID_VERSION_ERROR}`);
@@ -84,7 +92,7 @@ export const getNotUpgradeableMessage = (
   agent: Agent,
   latestAgentVersion?: string,
   versionToUpgrade?: string
-) => {
+): string | undefined => {
   let agentVersion: string;
   if (typeof agent?.local_metadata?.elastic?.agent?.version === 'string') {
     agentVersion = agent.local_metadata.elastic.agent.version;
@@ -132,11 +140,19 @@ export const getNotUpgradeableMessage = (
   return undefined;
 };
 
-const isNotDowngrade = (agentVersion: string, versionToUpgrade: string) => {
-  const agentVersionNumber = semverCoerce(agentVersion);
+const isNotDowngrade = (agentVersion: string, versionToUpgrade: string): boolean => {
+  const agentVersionNumber = semverCoerce(agentVersion, { includePrerelease: true });
   if (!agentVersionNumber) throw new Error(`${INVALID_VERSION_ERROR}`);
-  const versionToUpgradeNumber = semverCoerce(versionToUpgrade);
-  if (!versionToUpgradeNumber) throw new Error(`${SELECTED_VERSION_ERROR}`);
+
+  const versionToUpgradeNumber = semverCoerce(versionToUpgrade, { includePrerelease: true });
+  if (!versionToUpgradeNumber) return true;
+
+  // If the versions are equal, allow upgrading to newer build versions
+  if (semverEq(agentVersionNumber, versionToUpgradeNumber)) {
+    const isUpgradeToBuildVersion = versionToUpgradeNumber.compareBuild(agentVersionNumber) === 1;
+
+    return isUpgradeToBuildVersion;
+  }
 
   return semverGt(versionToUpgradeNumber, agentVersionNumber);
 };
@@ -147,7 +163,12 @@ export function getRecentUpgradeInfoForAgent(agent: Agent): {
   elapsedMinsSinceUpgrade: number;
   timeToWaitMins: number;
 } {
-  if (!agent.upgraded_at) {
+  // no need for 10m wait if agent has upgrade details watching state
+  const agentHasUpgradeDetailsSupport = semverGte(
+    agent.local_metadata.elastic.agent.version,
+    AGENT_UPGARDE_DETAILS_SUPPORTED_VERSION
+  );
+  if (!agent.upgraded_at || agentHasUpgradeDetailsSupport) {
     return {
       hasBeenUpgradedRecently: false,
       timeToWaitMs: 0,
@@ -167,9 +188,26 @@ export function getRecentUpgradeInfoForAgent(agent: Agent): {
   return { hasBeenUpgradedRecently, timeToWaitMs, elapsedMinsSinceUpgrade, timeToWaitMins };
 }
 
+export function isAgentInWatchingState(agent: Agent) {
+  return agent.upgrade_details?.state === 'UPG_WATCHING';
+}
+
 export function isAgentUpgrading(agent: Agent) {
   if (agent.upgrade_details) {
     return agent.upgrade_details.state !== 'UPG_FAILED';
   }
   return agent.upgrade_started_at && !agent.upgraded_at;
 }
+
+export const differsOnlyInPatch = (
+  versionA: string,
+  versionB: string,
+  allowEqualPatch: boolean = true
+): boolean => {
+  const [majorA, minorA, patchA] = versionA.split('.');
+  const [majorB, minorB, patchB] = versionB.split('.');
+
+  return (
+    majorA === majorB && minorA === minorB && (allowEqualPatch ? patchA >= patchB : patchA > patchB)
+  );
+};

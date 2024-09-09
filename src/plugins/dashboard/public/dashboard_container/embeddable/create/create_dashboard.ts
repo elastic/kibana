@@ -1,42 +1,75 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { v4 } from 'uuid';
-import { Subject } from 'rxjs';
-import { cloneDeep, identity, pickBy } from 'lodash';
 
 import {
   ControlGroupInput,
   CONTROL_GROUP_TYPE,
   getDefaultControlGroupInput,
+  getDefaultControlGroupPersistableInput,
 } from '@kbn/controls-plugin/common';
-import { TimeRange } from '@kbn/es-query';
-import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { type ControlGroupContainer, ControlGroupOutput } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupContainerFactory,
+  ControlGroupOutput,
+  type ControlGroupContainer,
+} from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-
-import { DashboardContainer } from '../dashboard_container';
-import { pluginServices } from '../../../services/plugin_services';
-import { DashboardCreationOptions } from '../dashboard_container_factory';
-import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
-import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
-import { LoadDashboardReturn } from '../../../services/dashboard_content_management/types';
-import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
-import { panelPlacementStrategies } from '../../component/panel_placement/place_new_panel_strategies';
+import { EmbeddableFactory, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import {
+  AggregateQuery,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import deepEqual from 'fast-deep-equal';
+import { cloneDeep, identity, omit, pickBy } from 'lodash';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  map,
+  startWith,
+  Subject,
+} from 'rxjs';
+import { v4 } from 'uuid';
+import {
+  DashboardContainerInput,
+  DashboardPanelMap,
+  DashboardPanelState,
+} from '../../../../common';
 import {
   DEFAULT_DASHBOARD_INPUT,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
   GLOBAL_STATE_STORAGE_KEY,
+  PanelPlacementStrategy,
 } from '../../../dashboard_constants';
-import { startSyncingDashboardControlGroup } from './controls/dashboard_control_group_integration';
+import {
+  LoadDashboardReturn,
+  SavedDashboardInput,
+} from '../../../services/dashboard_content_management/types';
+import { pluginServices } from '../../../services/plugin_services';
+import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
+import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
+import { DashboardPublicState, UnsavedPanelState } from '../../types';
+import { DashboardContainer } from '../dashboard_container';
+import { DashboardCreationOptions } from '../dashboard_container_factory';
+import {
+  combineDashboardFiltersWithControlGroupFilters,
+  startSyncingDashboardControlGroup,
+} from './controls/dashboard_control_group_integration';
+import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
+import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
-import { DashboardPublicState } from '../../types';
+import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -70,15 +103,11 @@ export const createDashboard = async (
   const defaultDataViewExistsPromise = dataViews.defaultDataViewExists();
   const dashboardSavedObjectPromise = loadDashboardState({ id: savedObjectId });
 
-  const [reduxEmbeddablePackage, savedObjectResult, defaultDataView] = await Promise.all([
+  const [reduxEmbeddablePackage, savedObjectResult] = await Promise.all([
     reduxEmbeddablePackagePromise,
     dashboardSavedObjectPromise,
-    defaultDataViewExistsPromise,
+    defaultDataViewExistsPromise /* the result is not used, but the side effect of setting the default data view is needed. */,
   ]);
-
-  if (!defaultDataView) {
-    throw new Error('Dashboard requires at least one data view before it can be initialized.');
-  }
 
   // --------------------------------------------------------------------------------------
   // Initialize Dashboard integrations
@@ -92,10 +121,10 @@ export const createDashboard = async (
   const { input, searchSessionId } = initializeResult;
 
   // --------------------------------------------------------------------------------------
-  // Build and return the dashboard container.
+  // Build the dashboard container.
   // --------------------------------------------------------------------------------------
   const initialComponentState: DashboardPublicState = {
-    lastSavedInput: savedObjectResult?.dashboardInput ?? {
+    lastSavedInput: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
       ...DEFAULT_DASHBOARD_INPUT,
       id: input.id,
     },
@@ -116,6 +145,14 @@ export const createDashboard = async (
     creationOptions,
     initialComponentState
   );
+
+  // --------------------------------------------------------------------------------------
+  // Start the diffing integration after all other integrations are set up.
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((container) => {
+    startDiffingDashboardState.bind(container)(creationOptions);
+  });
+
   dashboardContainerReady$.next(dashboardContainer);
   return dashboardContainer;
 };
@@ -138,10 +175,12 @@ export const initializeDashboard = async ({
     dashboardBackup,
     embeddable: { getEmbeddableFactory },
     dashboardCapabilities: { showWriteControls },
+    embeddable: { reactEmbeddableRegistryHasKey },
     data: {
       query: queryService,
       search: { session },
     },
+    dashboardContentInsights,
   } = pluginServices.getServices();
   const {
     queryString,
@@ -171,16 +210,17 @@ export const initializeDashboard = async ({
   }
 
   // --------------------------------------------------------------------------------------
-  // Gather input from session storage and local storage if integration is used.
+  // Combine input from saved object, and session storage
   // --------------------------------------------------------------------------------------
-  const sessionStorageInput = ((): Partial<DashboardContainerInput> | undefined => {
-    if (!useSessionStorageIntegration) return;
-    return dashboardBackup.getState(loadDashboardReturn.dashboardId);
-  })();
+  const dashboardBackupState = dashboardBackup.getState(loadDashboardReturn.dashboardId);
+  const runtimePanelsToRestore: UnsavedPanelState = useSessionStorageIntegration
+    ? dashboardBackupState?.panels ?? {}
+    : {};
 
-  // --------------------------------------------------------------------------------------
-  // Combine input from saved object, session storage, & passed input to create initial input.
-  // --------------------------------------------------------------------------------------
+  const sessionStorageInput = ((): Partial<SavedDashboardInput> | undefined => {
+    if (!useSessionStorageIntegration) return;
+    return dashboardBackupState?.dashboardState;
+  })();
   const initialViewMode = (() => {
     if (loadDashboardReturn.managed || !showWriteControls) return ViewMode.VIEW;
     if (
@@ -193,25 +233,88 @@ export const initializeDashboard = async ({
     return dashboardBackup.getViewMode();
   })();
 
-  const overrideInput = getInitialInput?.();
-  const initialInput: DashboardContainerInput = cloneDeep({
+  const combinedSessionInput: DashboardContainerInput = {
     ...DEFAULT_DASHBOARD_INPUT,
     ...(loadDashboardReturn?.dashboardInput ?? {}),
     ...sessionStorageInput,
+  };
 
+  // --------------------------------------------------------------------------------------
+  // Combine input with overrides.
+  // --------------------------------------------------------------------------------------
+  const overrideInput = getInitialInput?.();
+  if (overrideInput?.panels) {
+    /**
+     * react embeddables and legacy embeddables share state very differently, so we need different
+     * treatment here. TODO remove this distinction when we remove the legacy embeddable system.
+     */
+    const overridePanels: DashboardPanelMap = {};
+
+    for (const panel of Object.values(overrideInput?.panels)) {
+      if (reactEmbeddableRegistryHasKey(panel.type)) {
+        overridePanels[panel.explicitInput.id] = {
+          ...panel,
+
+          /**
+           * here we need to keep the state of the panel that was already in the Dashboard if one exists.
+           * This is because this state will become the "last saved state" for this panel.
+           */
+          ...(combinedSessionInput.panels[panel.explicitInput.id] ?? []),
+        };
+        /**
+         * We also need to add the state of this react embeddable into the runtime state to be restored.
+         */
+        runtimePanelsToRestore[panel.explicitInput.id] = panel.explicitInput;
+      } else {
+        /**
+         * if this is a legacy embeddable, the override state needs to completely overwrite the existing
+         * state for this panel.
+         */
+        overridePanels[panel.explicitInput.id] = panel;
+      }
+    }
+
+    /**
+     * If this is a React embeddable, we leave the "panel" state as-is and add this state to the
+     * runtime state to be restored on dashboard load.
+     */
+    overrideInput.panels = overridePanels;
+  }
+  const combinedOverrideInput: DashboardContainerInput = {
+    ...combinedSessionInput,
     ...(initialViewMode ? { viewMode: initialViewMode } : {}),
     ...overrideInput,
-  });
+  };
+
+  // --------------------------------------------------------------------------------------
+  // Combine input from saved object, session storage, & passed input to create initial input.
+  // --------------------------------------------------------------------------------------
+  const initialDashboardInput: DashboardContainerInput = omit(
+    cloneDeep(combinedOverrideInput),
+    'controlGroupInput'
+  );
+  const initialControlGroupInput: ControlGroupInput | {} = {
+    ...(loadDashboardReturn?.dashboardInput?.controlGroupInput ?? {}),
+    ...(sessionStorageInput?.controlGroupInput ?? {}),
+    ...(overrideInput?.controlGroupInput ?? {}),
+  };
 
   // Back up any view mode passed in explicitly.
   if (overrideInput?.viewMode) {
     dashboardBackup.storeViewMode(overrideInput?.viewMode);
   }
 
-  initialInput.executionContext = {
+  initialDashboardInput.executionContext = {
     type: 'dashboard',
-    description: initialInput.title,
+    description: initialDashboardInput.title,
   };
+
+  // --------------------------------------------------------------------------------------
+  // Track references
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboard) => {
+    dashboard.savedObjectReferences = loadDashboardReturn?.references;
+  });
 
   // --------------------------------------------------------------------------------------
   // Set up unified search integration.
@@ -223,7 +326,7 @@ export const initializeDashboard = async ({
       timeRestore,
       timeRange: savedTimeRange,
       refreshInterval: savedRefreshInterval,
-    } = initialInput;
+    } = initialDashboardInput;
     const { kbnUrlStateStorage } = unifiedSearchSettings;
 
     // apply filters and query to the query service
@@ -245,7 +348,7 @@ export const initializeDashboard = async ({
       // otherwise fall back to the time range from the timefilterService.
       return timefilterService.getTime();
     })();
-    initialInput.timeRange = initialTimeRange;
+    initialDashboardInput.timeRange = initialTimeRange;
     if (timeRestore) {
       if (savedTimeRange) timefilterService.setTime(savedTimeRange);
       if (savedRefreshInterval) timefilterService.setRefreshInterval(savedRefreshInterval);
@@ -277,17 +380,17 @@ export const initializeDashboard = async ({
       container.setHighlightPanelId(id);
     };
 
-    initialInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
+    initialDashboardInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
     if (
       incomingEmbeddable.embeddableId &&
-      Boolean(initialInput.panels[incomingEmbeddable.embeddableId])
+      Boolean(initialDashboardInput.panels[incomingEmbeddable.embeddableId])
     ) {
       // this embeddable already exists, we will update the explicit input.
-      const panelToUpdate = initialInput.panels[incomingEmbeddable.embeddableId];
+      const panelToUpdate = initialDashboardInput.panels[incomingEmbeddable.embeddableId];
       const sameType = panelToUpdate.type === incomingEmbeddable.type;
 
       panelToUpdate.type = incomingEmbeddable.type;
-      panelToUpdate.explicitInput = {
+      const nextRuntimeState = {
         // if the incoming panel is the same type as what was there before we can safely spread the old panel's explicit input
         ...(sameType ? panelToUpdate.explicitInput : {}),
 
@@ -297,6 +400,13 @@ export const initializeDashboard = async ({
         // maintain hide panel titles setting.
         hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
       };
+      if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
+        panelToUpdate.explicitInput = { id: panelToUpdate.explicitInput.id };
+        runtimePanelsToRestore[incomingEmbeddable.embeddableId] = nextRuntimeState;
+      } else {
+        panelToUpdate.explicitInput = nextRuntimeState;
+      }
+
       untilDashboardReady().then((container) =>
         scrolltoIncomingEmbeddable(container, incomingEmbeddable.embeddableId as string)
       );
@@ -307,30 +417,45 @@ export const initializeDashboard = async ({
         const createdEmbeddable = await (async () => {
           // if there is no width or height we can add the panel using the default behaviour.
           if (!incomingEmbeddable.size) {
-            return await container.addNewEmbeddable(
-              incomingEmbeddable.type,
-              incomingEmbeddable.input
-            );
+            return await container.addNewPanel<{ uuid: string }>({
+              panelType: incomingEmbeddable.type,
+              initialState: incomingEmbeddable.input,
+            });
           }
 
           // if the incoming embeddable has an explicit width or height we add the panel to the grid directly.
           const { width, height } = incomingEmbeddable.size;
           const currentPanels = container.getInput().panels;
           const embeddableId = incomingEmbeddable.embeddableId ?? v4();
-          const { findTopLeftMostOpenSpace } = panelPlacementStrategies;
-          const { newPanelPlacement } = findTopLeftMostOpenSpace({
-            width: width ?? DEFAULT_PANEL_WIDTH,
-            height: height ?? DEFAULT_PANEL_HEIGHT,
-            currentPanels,
-          });
-          const newPanelState: DashboardPanelState = {
-            explicitInput: { ...incomingEmbeddable.input, id: embeddableId },
-            type: incomingEmbeddable.type,
-            gridData: {
-              ...newPanelPlacement,
-              i: embeddableId,
-            },
-          };
+          const { newPanelPlacement } = runPanelPlacementStrategy(
+            PanelPlacementStrategy.findTopLeftMostOpenSpace,
+            {
+              width: width ?? DEFAULT_PANEL_WIDTH,
+              height: height ?? DEFAULT_PANEL_HEIGHT,
+              currentPanels,
+            }
+          );
+          const newPanelState: DashboardPanelState = (() => {
+            if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
+              runtimePanelsToRestore[embeddableId] = incomingEmbeddable.input;
+              return {
+                explicitInput: { id: embeddableId },
+                type: incomingEmbeddable.type,
+                gridData: {
+                  ...newPanelPlacement,
+                  i: embeddableId,
+                },
+              };
+            }
+            return {
+              explicitInput: { ...incomingEmbeddable.input, id: embeddableId },
+              type: incomingEmbeddable.type,
+              gridData: {
+                ...newPanelPlacement,
+                i: embeddableId,
+              },
+            };
+          })();
           container.updateInput({
             panels: {
               ...container.getInput().panels,
@@ -340,10 +465,151 @@ export const initializeDashboard = async ({
 
           return await container.untilEmbeddableLoaded(embeddableId);
         })();
-        scrolltoIncomingEmbeddable(container, createdEmbeddable.id);
+        if (createdEmbeddable) {
+          scrolltoIncomingEmbeddable(container, createdEmbeddable.uuid);
+        }
       });
     }
   }
+
+  // --------------------------------------------------------------------------------------
+  // Set restored runtime state for react embeddables.
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    for (const idWithRuntimeState of Object.keys(runtimePanelsToRestore)) {
+      const restoredRuntimeStateForChild = runtimePanelsToRestore[idWithRuntimeState];
+      if (!restoredRuntimeStateForChild) continue;
+      dashboardContainer.setRuntimeStateForChild(idWithRuntimeState, restoredRuntimeStateForChild);
+    }
+  });
+
+  // --------------------------------------------------------------------------------------
+  // Start the control group integration.
+  // --------------------------------------------------------------------------------------
+  if (useControlGroupIntegration) {
+    const controlsGroupFactory = getEmbeddableFactory<
+      ControlGroupInput,
+      ControlGroupOutput,
+      ControlGroupContainer
+    >(CONTROL_GROUP_TYPE) as EmbeddableFactory<
+      ControlGroupInput,
+      ControlGroupOutput,
+      ControlGroupContainer
+    > & {
+      create: ControlGroupContainerFactory['create'];
+    };
+    const { filters, query, timeRange, viewMode, id } = initialDashboardInput;
+    const fullControlGroupInput = {
+      id: `control_group_${id ?? 'new_dashboard'}`,
+      ...getDefaultControlGroupInput(),
+      ...pickBy(initialControlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
+      timeRange,
+      viewMode,
+      filters,
+      query,
+    };
+
+    if (controlGroup) {
+      controlGroup.updateInputAndReinitialize(fullControlGroupInput);
+    } else {
+      const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput, this, {
+        lastSavedInput:
+          loadDashboardReturn?.dashboardInput?.controlGroupInput ??
+          getDefaultControlGroupPersistableInput(),
+      });
+      if (!newControlGroup || isErrorEmbeddable(newControlGroup)) {
+        throw new Error('Error in control group startup');
+      }
+      controlGroup = newControlGroup;
+    }
+
+    untilDashboardReady().then((dashboardContainer) => {
+      dashboardContainer.controlGroup = controlGroup;
+      startSyncingDashboardControlGroup.bind(dashboardContainer)();
+    });
+  }
+
+  // --------------------------------------------------------------------------------------
+  // Start the data views integration.
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    dashboardContainer.integrationSubscriptions.add(
+      startSyncingDashboardDataViews.bind(dashboardContainer)()
+    );
+  });
+
+  // --------------------------------------------------------------------------------------
+  // Start performance tracker
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) =>
+    dashboardContainer.integrationSubscriptions.add(
+      startQueryPerformanceTracking(dashboardContainer)
+    )
+  );
+
+  // --------------------------------------------------------------------------------------
+  // Start animating panel transforms 500 ms after dashboard is created.
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboard) =>
+    setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
+  );
+
+  // --------------------------------------------------------------------------------------
+  // Set parentApi.filters$ to include dashboardContainer filters and control group filters
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    if (!dashboardContainer.controlGroup) {
+      return;
+    }
+
+    function getCombinedFilters() {
+      return combineDashboardFiltersWithControlGroupFilters(
+        dashboardContainer.getInput().filters ?? [],
+        dashboardContainer.controlGroup!
+      );
+    }
+
+    const filters$ = new BehaviorSubject<Filter[] | undefined>(getCombinedFilters());
+    dashboardContainer.filters$ = filters$;
+
+    const inputFilters$ = dashboardContainer.getInput$().pipe(
+      startWith(dashboardContainer.getInput()),
+      map((input) => input.filters),
+      distinctUntilChanged((previous, current) => {
+        return compareFilters(previous ?? [], current ?? [], COMPARE_ALL_OPTIONS);
+      })
+    );
+
+    // Can not use onFiltersPublished$ directly since it does not have an intial value and
+    // combineLatest will not emit until each observable emits at least one value
+    const controlGroupFilters$ = dashboardContainer.controlGroup.onFiltersPublished$.pipe(
+      startWith(dashboardContainer.controlGroup.getOutput().filters)
+    );
+
+    dashboardContainer.integrationSubscriptions.add(
+      combineLatest([inputFilters$, controlGroupFilters$]).subscribe(() => {
+        filters$.next(getCombinedFilters());
+      })
+    );
+  });
+
+  // --------------------------------------------------------------------------------------
+  // Set up parentApi.query$
+  // Can not use legacyEmbeddableToApi since query$ setting is delayed
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
+      dashboardContainer.getInput().query
+    );
+    dashboardContainer.query$ = query$;
+    dashboardContainer.integrationSubscriptions.add(
+      dashboardContainer.getInput$().subscribe((input) => {
+        if (!deepEqual(query$.getValue() ?? [], input.query)) {
+          query$.next(input.query);
+        }
+      })
+    );
+  });
 
   // --------------------------------------------------------------------------------------
   // Set up search sessions integration.
@@ -372,57 +638,13 @@ export const initializeDashboard = async ({
     });
   }
 
-  // --------------------------------------------------------------------------------------
-  // Start the control group integration.
-  // --------------------------------------------------------------------------------------
-  if (useControlGroupIntegration) {
-    const controlsGroupFactory = getEmbeddableFactory<
-      ControlGroupInput,
-      ControlGroupOutput,
-      ControlGroupContainer
-    >(CONTROL_GROUP_TYPE);
-    const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
-    const fullControlGroupInput = {
-      id: `control_group_${id ?? 'new_dashboard'}`,
-      ...getDefaultControlGroupInput(),
-      ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
-      timeRange,
-      viewMode,
-      filters,
-      query,
-    };
-    if (controlGroup) {
-      controlGroup.updateInputAndReinitialize(fullControlGroupInput);
-    } else {
-      const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput);
-      if (!newControlGroup || isErrorEmbeddable(newControlGroup)) {
-        throw new Error('Error in control group startup');
-      }
-      controlGroup = newControlGroup;
-    }
-
-    untilDashboardReady().then((dashboardContainer) => {
-      dashboardContainer.controlGroup = controlGroup;
-      startSyncingDashboardControlGroup.bind(dashboardContainer)();
-    });
-    await controlGroup.untilInitialized();
+  if (loadDashboardReturn.dashboardId && !incomingEmbeddable) {
+    // We count a new view every time a user opens a dashboard, both in view or edit mode
+    // We don't count views when a user is editing a dashboard and is returning from an editor after saving
+    // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling
+    // TODO: this should be revisited by making embeddable transfer support canceling logic https://github.com/elastic/kibana/issues/190485
+    dashboardContentInsights.trackDashboardView(loadDashboardReturn.dashboardId);
   }
 
-  // --------------------------------------------------------------------------------------
-  // Start the data views integration.
-  // --------------------------------------------------------------------------------------
-  untilDashboardReady().then((dashboardContainer) => {
-    dashboardContainer.integrationSubscriptions.add(
-      startSyncingDashboardDataViews.bind(dashboardContainer)()
-    );
-  });
-
-  // --------------------------------------------------------------------------------------
-  // Start animating panel transforms 500 ms after dashboard is created.
-  // --------------------------------------------------------------------------------------
-  untilDashboardReady().then((dashboard) =>
-    setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
-  );
-
-  return { input: initialInput, searchSessionId: initialSearchSessionId };
+  return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };
 };

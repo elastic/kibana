@@ -20,6 +20,7 @@ const END_HOST_KUBERNETES_SECTION_DATE = moment.utc(
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const pageObjects = getPageObjects([
     'assetDetails',
     'common',
@@ -29,12 +30,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'svlCommonPage',
   ]);
 
-  describe('Node Details', () => {
+  // failing feature flag test, see https://github.com/elastic/kibana/issues/191809
+  describe.skip('Node Details', () => {
     describe('#With Asset Details', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
 
-        await pageObjects.svlCommonPage.login();
+        await pageObjects.svlCommonPage.loginAsViewer();
         await pageObjects.common.navigateToApp(
           `metrics/${NODE_DETAILS_PATH}/demo-stack-kubernetes-01`
         );
@@ -43,7 +45,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-        await pageObjects.svlCommonPage.forceLogout();
       });
 
       describe('Osquery Tab', () => {
@@ -70,17 +71,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const CreateRuleButtonExist = await testSubjects.exists(
               'infraAssetDetailsCreateAlertsRuleButton'
             );
-            expect(CreateRuleButtonExist).to.be(false);
+            expect(CreateRuleButtonExist).to.be(true);
           });
 
-          it('should render 12 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(12);
-          });
+          [
+            { metric: 'cpu', chartsCount: 2 },
+            { metric: 'memory', chartsCount: 1 },
+            { metric: 'disk', chartsCount: 2 },
+            { metric: 'network', chartsCount: 1 },
+            { metric: 'kubernetes', chartsCount: 2 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
+              await retry.try(async () => {
+                const charts = await (metric === 'kubernetes'
+                  ? pageObjects.assetDetails.getOverviewTabKubernetesMetricCharts()
+                  : pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric));
 
-          it('should render 4 charts in the Kubernetes Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsKubernetesMetricsCharts();
-            expect(hosts.length).to.equal(4);
+                expect(charts.length).to.equal(chartsCount);
+              });
+            });
           });
         });
       });

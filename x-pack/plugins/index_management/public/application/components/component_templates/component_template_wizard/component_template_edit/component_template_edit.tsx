@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { History } from 'history';
+import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { useComponentTemplatesContext } from '../../component_templates_context';
@@ -22,38 +20,13 @@ import {
   Error,
 } from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
-import type { WizardSection } from '../component_template_form';
 import { useRedirectPath } from '../../../../hooks/redirect_path';
-import { MANAGED_BY_FLEET } from '../../constants';
 
-import { MappingsDatastreamRolloverModal } from './mappings_datastreams_rollover_modal';
+import { useStepFromQueryString } from '../use_step_from_query_string';
+import { useDatastreamsRollover } from '../component_template_datastreams_rollover/use_datastreams_rollover';
 
 interface MatchParams {
   name: string;
-}
-
-export function useStepFromQueryString(history: History) {
-  const activeStep = useMemo(() => {
-    const params = new URLSearchParams(history.location.search);
-    if (params.has('step')) {
-      return params.get('step') as WizardSection;
-    }
-  }, [history.location.search]);
-
-  const updateStep = useCallback(
-    (stepId: string) => {
-      const params = new URLSearchParams(history.location.search);
-      if (params.has('step')) {
-        params.set('step', stepId);
-        history.push({
-          search: params.toString(),
-        });
-      }
-    },
-    [history]
-  );
-
-  return { activeStep, updateStep };
 }
 
 export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
@@ -62,7 +35,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { api, overlays } = useComponentTemplatesContext();
+  const { api } = useComponentTemplatesContext();
   const { activeStep: defaultActiveStep, updateStep } = useStepFromQueryString(history);
   const redirectTo = useRedirectPath(history);
 
@@ -74,6 +47,15 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   const { error, data: componentTemplate, isLoading } = api.useLoadComponentTemplate(decodedName);
   const { data: dataStreamResponse } = api.useLoadComponentTemplatesDatastream(decodedName);
   const dataStreams = useMemo(() => dataStreamResponse?.data_streams ?? [], [dataStreamResponse]);
+  // If the component template is referenced by an index template that is part of
+  // a package and is managed we can allow the user to roll it over if possible.
+  const { data: refIndexTemplate } = api.useLoadReferencedIndexTemplateMeta(decodedName);
+  const canRollover = useMemo(
+    () => Boolean(refIndexTemplate?.managed_by && refIndexTemplate?.package),
+    [refIndexTemplate]
+  );
+
+  const { showDatastreamRolloverModal } = useDatastreamsRollover();
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.componentTemplateEdit);
@@ -92,38 +74,13 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       return;
     }
 
-    if (updatedComponentTemplate._meta?.managed_by === MANAGED_BY_FLEET && dataStreams.length) {
-      const dataStreamsToRollover: string[] = [];
-      for (const dataStream of dataStreams) {
-        try {
-          const { error: applyMappingError } = await api.postDataStreamMappingsFromTemplate(
-            dataStream
-          );
-          if (applyMappingError) {
-            throw applyMappingError;
-          }
-        } catch (err) {
-          dataStreamsToRollover.push(dataStream);
-        }
-      }
-
-      if (dataStreamsToRollover.length) {
-        const ref = overlays.openModal(
-          toMountPoint(
-            <MappingsDatastreamRolloverModal
-              componentTemplatename={updatedComponentTemplate.name}
-              dataStreams={dataStreamsToRollover}
-              api={api}
-              onClose={() => {
-                ref.close();
-              }}
-            />
-          )
-        );
-
-        await ref.onClose;
-      }
+    // We only want to allow rolling over linked datastreams for either @custom templates
+    // or when the component template is referenced by an index template that is part of
+    // a package and is managed.
+    if (updatedComponentTemplate.name.endsWith('@custom') || canRollover) {
+      await showDatastreamRolloverModal(updatedComponentTemplate.name);
     }
+
     redirectTo({
       pathname: encodeURI(
         `/component_templates/${encodeURIComponent(updatedComponentTemplate.name)}`
@@ -168,7 +125,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
           <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateEdit.editPageTitle"
-              defaultMessage="Edit component template '{name}'"
+              defaultMessage="Edit component template ''{name}''"
               values={{ name: decodedName }}
             />
           </span>
@@ -178,9 +135,32 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
 
       <EuiSpacer size="l" />
 
+      {componentTemplate?.deprecated && (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningTitle"
+                defaultMessage="This component template is deprecated"
+              />
+            }
+            iconType="warning"
+            color="warning"
+            data-test-subj="deprecatedTemplateCallout"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningDescription"
+              defaultMessage="This component template is no longer supported and might be removed in a future release. Instead, use one of the other component templates available or create a new one."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </>
+      )}
+
       <ComponentTemplateForm
         defaultValue={componentTemplate!}
         dataStreams={dataStreams}
+        canRollover={canRollover}
         defaultActiveWizardSection={defaultActiveStep}
         onStepChange={updateStep}
         onSave={onSave}

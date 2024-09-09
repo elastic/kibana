@@ -16,6 +16,7 @@ import {
   addTableInStorage,
   migrateAlertTableStateToTriggerActionsState,
   migrateTriggerActionsVisibleColumnsAlertTable88xTo89,
+  addAssigneesSpecsToSecurityDataTableIfNeeded,
 } from '.';
 
 import { mockDataTableModel, createSecuritySolutionStorageMock } from '../../../common/mock';
@@ -470,7 +471,6 @@ describe('SiemLocalStorage', () => {
           'threat_match',
           'zeek',
         ],
-        expandedDetail: {},
         filters: [],
         kqlQuery: {
           filterQuery: null,
@@ -566,6 +566,12 @@ describe('SiemLocalStorage', () => {
           { columnHeaderType: 'not-filtered', id: 'file.name' },
           { columnHeaderType: 'not-filtered', id: 'source.ip' },
           { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Assignees',
+            id: 'kibana.alert.workflow_assignee_ids',
+            initialWidth: 190,
+          },
         ],
         defaultColumns: [
           { columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 },
@@ -600,6 +606,12 @@ describe('SiemLocalStorage', () => {
           { columnHeaderType: 'not-filtered', id: 'file.name' },
           { columnHeaderType: 'not-filtered', id: 'source.ip' },
           { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Assignees',
+            id: 'kibana.alert.workflow_assignee_ids',
+            initialWidth: 190,
+          },
         ],
         dataViewId: 'security-solution-default',
         deletedEventIds: [],
@@ -623,7 +635,6 @@ describe('SiemLocalStorage', () => {
           'threat_match',
           'zeek',
         ],
-        expandedDetail: {},
         filters: [],
         indexNames: ['.alerts-security.alerts-default'],
         isSelectAllChecked: false,
@@ -859,12 +870,6 @@ describe('SiemLocalStorage', () => {
         ],
         dataViewId: null,
         deletedEventIds: [],
-        expandedDetail: {
-          query: {
-            params: { hostName: 'Host-riizqhdnoy' },
-            panelView: 'hostDetail',
-          },
-        },
         filters: [],
         indexNames: [],
         isSelectAllChecked: false,
@@ -979,7 +984,6 @@ describe('SiemLocalStorage', () => {
         ],
         dataViewId: 'security-solution-default',
         deletedEventIds: [],
-        expandedDetail: {},
         filters: [],
         indexNames: ['logs-*'],
         isSelectAllChecked: false,
@@ -1095,7 +1099,6 @@ describe('SiemLocalStorage', () => {
         ],
         dataViewId: null,
         deletedEventIds: [],
-        expandedDetail: {},
         filters: [],
         indexNames: [],
         isSelectAllChecked: false,
@@ -1525,6 +1528,89 @@ describe('SiemLocalStorage', () => {
       expect(
         storage.get('detection-engine-alert-table-securitySolution-rule-details-gridView')
       ).toBeNull();
+    });
+  });
+
+  describe('addMissingColumnsToSecurityDataTable', () => {
+    it('should add missing "Assignees" column specs', () => {
+      const dataTableState: DataTableState['dataTable']['tableById'] = {
+        'alerts-page': {
+          columns: [{ columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 }],
+          defaultColumns: [
+            { columnHeaderType: 'not-filtered', id: 'host.name' },
+            { columnHeaderType: 'not-filtered', id: 'user.name' },
+            { columnHeaderType: 'not-filtered', id: 'process.name' },
+          ],
+          isLoading: false,
+          queryFields: [],
+          dataViewId: 'security-solution-default',
+          deletedEventIds: [],
+          filters: [],
+          indexNames: ['.alerts-security.alerts-default'],
+          isSelectAllChecked: false,
+          itemsPerPage: 25,
+          itemsPerPageOptions: [10, 25, 50, 100],
+          loadingEventIds: [],
+          showCheckboxes: true,
+          sort: [
+            {
+              columnId: '@timestamp',
+              columnType: 'date',
+              esTypes: ['date'],
+              sortDirection: 'desc',
+            },
+          ],
+          graphEventId: undefined,
+          selectedEventIds: {},
+          sessionViewConfig: null,
+          selectAll: false,
+          id: 'alerts-page',
+          title: '',
+          initialized: true,
+          updated: 1665943295913,
+          totalCount: 0,
+          viewMode: VIEW_SELECTION.gridView,
+          additionalFilters: {
+            showBuildingBlockAlerts: false,
+            showOnlyThreatIndicatorAlerts: false,
+          },
+        },
+      };
+      storage.set(LOCAL_STORAGE_TABLE_KEY, dataTableState);
+      migrateAlertTableStateToTriggerActionsState(storage, dataTableState);
+      migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
+
+      const expectedColumns = [
+        { columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 },
+        {
+          columnHeaderType: 'not-filtered',
+          displayAsText: 'Assignees',
+          id: 'kibana.alert.workflow_assignee_ids',
+          initialWidth: 190,
+        },
+      ];
+      const expectedDefaultColumns = [
+        { columnHeaderType: 'not-filtered', id: 'host.name' },
+        { columnHeaderType: 'not-filtered', id: 'user.name' },
+        { columnHeaderType: 'not-filtered', id: 'process.name' },
+        {
+          columnHeaderType: 'not-filtered',
+          displayAsText: 'Assignees',
+          id: 'kibana.alert.workflow_assignee_ids',
+          initialWidth: 190,
+        },
+      ];
+
+      addAssigneesSpecsToSecurityDataTableIfNeeded(storage, dataTableState);
+
+      expect(dataTableState['alerts-page'].columns).toMatchObject(expectedColumns);
+      expect(dataTableState['alerts-page'].defaultColumns).toMatchObject(expectedDefaultColumns);
+
+      const tableKey = 'detection-engine-alert-table-securitySolution-alerts-page-gridView';
+      expect(storage.get(tableKey)).toMatchObject({
+        columns: expectedColumns,
+        visibleColumns: expectedColumns.map((col) => col.id),
+      });
     });
   });
 });

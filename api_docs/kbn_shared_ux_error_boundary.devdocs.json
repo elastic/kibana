@@ -66,9 +66,9 @@
           "\nProvider that uses dependencies to give context to the KibanaErrorBoundary component\nThis provider is aware if services were already created from a higher level of the component tree"
         ],
         "signature": [
-          "({ children, analytics, }: React.PropsWithChildren<",
+          "({ children, analytics }: React.PropsWithChildren<React.PropsWithChildren<",
           "KibanaErrorBoundaryProviderDeps",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
         "deprecated": false,
@@ -79,12 +79,12 @@
             "id": "def-common.KibanaErrorBoundaryProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  analytics,\n}",
+            "label": "{ children, analytics }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "KibanaErrorBoundaryProviderDeps",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
             "deprecated": false,

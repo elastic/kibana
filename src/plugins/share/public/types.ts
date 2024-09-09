@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComponentType } from 'react';
+import type { ComponentType, ReactElement } from 'react';
+import type { InjectedIntl } from '@kbn/i18n-react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { Capabilities } from '@kbn/core/public';
+import type { Capabilities, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
@@ -30,6 +32,12 @@ export type BrowserUrlService = UrlService<
  * */
 export interface ShareContext {
   objectType: string;
+  /**
+   * Allows for passing contextual information that each consumer can provide to customize the share menu
+   */
+  objectTypeMeta: {
+    title: string;
+  };
   objectId?: string;
   /**
    * Current url for sharing. This can be set in cases where `window.location.href`
@@ -40,17 +48,27 @@ export interface ShareContext {
    *
    * If not set it will default to `window.location.href`
    */
-  shareableUrl: string;
+  shareableUrl?: string;
+  /**
+   * @deprecated prefer {@link delegatedShareUrlHandler}
+   */
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<any>;
     params: any;
   };
+  /**
+   *
+   * @description allows a consumer to provide a custom method which when invoked
+   * handles providing a share url in the context of said consumer
+   */
+  delegatedShareUrlHandler?: () => string;
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
   onClose: () => void;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   disabledShareUrl?: boolean;
+  toasts: ToastsSetup;
 }
 
 /**
@@ -65,16 +83,50 @@ export interface ShareContextMenuPanelItem
   sortOrder?: number;
 }
 
+export type SupportedExportTypes =
+  | 'pngV2'
+  | 'printablePdfV2'
+  | 'csv_v2'
+  | 'csv_searchsource'
+  | 'lens_csv';
+
 /**
  * @public
- * Definition of a menu item rendered in the share menu. `shareMenuItem` is shown
- * directly in the context menu. If the item is clicked, the `panel` is shown.
+ * Definition of a menu item rendered in the share menu. In the redesign, the
+ * `shareMenuItem` is shown in a modal. However, Canvas
+ * uses the legacy panel implementation.
  * */
-export interface ShareMenuItem {
-  shareMenuItem: ShareContextMenuPanelItem;
-  panel: EuiContextMenuPanelDescriptor;
+
+interface ShareMenuItemBase {
+  shareMenuItem?: ShareContextMenuPanelItem;
+}
+interface ShareMenuItemLegacy extends ShareMenuItemBase {
+  panel?: EuiContextMenuPanelDescriptor;
 }
 
+export interface ShareMenuItemV2 extends ShareMenuItemBase {
+  // extended props to support share modal
+  label: 'PDF' | 'CSV' | 'PNG';
+  reportType?: SupportedExportTypes;
+  requiresSavedState?: boolean;
+  helpText?: ReactElement;
+  copyURLButton?: { id: string; dataTestSubj: string; label: string };
+  generateExportButton?: ReactElement;
+  generateExport: (args: {
+    intl: InjectedIntl;
+    optimizedForPrinting?: boolean;
+  }) => Promise<unknown>;
+  theme?: ThemeServiceSetup;
+  renderLayoutOptionSwitch?: boolean;
+  layoutOption?: 'print';
+  absoluteUrl?: string;
+  generateCopyUrl?: URL;
+  renderCopyURLButton?: boolean;
+}
+
+export type ShareMenuItem = ShareMenuItemLegacy | ShareMenuItemV2;
+
+type ShareMenuItemType = Omit<ShareMenuItem, 'intl'>;
 /**
  * @public
  * A source for additional menu items shown in the share context menu. Any provider
@@ -84,8 +136,7 @@ export interface ShareMenuItem {
  * */
 export interface ShareMenuProvider {
   readonly id: string;
-
-  getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
+  getShareMenuItems: (context: ShareContext) => ShareMenuItemType[];
 }
 
 interface UrlParamExtensionProps {
@@ -105,5 +156,9 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   embedUrlParamExtensions?: UrlParamExtension[];
   snapshotShareWarning?: string;
   onClose?: () => void;
-  objectTypeTitle?: string;
+  publicAPIEnabled?: boolean;
+}
+
+export interface ClientConfigType {
+  new_version: { enabled: boolean };
 }

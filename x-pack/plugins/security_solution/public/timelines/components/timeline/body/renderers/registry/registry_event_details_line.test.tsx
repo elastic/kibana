@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { TestProviders } from '../../../../../../common/mock';
-import '../../../../../../common/mock/match_media';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { RegistryEventDetailsLine } from './registry_event_details_line';
 import { MODIFIED_REGISTRY_KEY } from '../system/translations';

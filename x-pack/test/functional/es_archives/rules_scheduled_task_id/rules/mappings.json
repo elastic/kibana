@@ -172,6 +172,9 @@
             },
             "updatedBy": {
               "type": "keyword"
+            },
+            "updatedAt": {
+              "type": "date"
             }
           }
         },

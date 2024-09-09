@@ -15,7 +15,6 @@ import { TestProviders } from '../../../../common/mock';
 import type { RulePreviewProps } from '.';
 import { RulePreview, REASONABLE_INVOCATION_COUNT } from '.';
 import { usePreviewRoute } from './use_preview_route';
-import { usePreviewHistogram } from './use_preview_histogram';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   getStepScheduleDefaultValue,
@@ -26,7 +25,6 @@ import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_preview_route');
-jest.mock('./use_preview_histogram');
 jest.mock('../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',
@@ -88,17 +86,6 @@ const defaultProps: RulePreviewProps = {
 
 describe('PreviewQuery', () => {
   beforeEach(() => {
-    (usePreviewHistogram as jest.Mock).mockReturnValue([
-      false,
-      {
-        inspect: { dsl: [], response: [] },
-        totalCount: 1,
-        refetch: jest.fn(),
-        data: [],
-        buckets: [],
-      },
-    ]);
-
     (usePreviewRoute as jest.Mock).mockReturnValue({
       hasNoiseWarning: false,
       addNoiseWarning: jest.fn(),

@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { handleErrors } from '../util/handle_errors';
-import { fieldSpecSchema } from '../../../../common/schemas';
+import { fieldSpecSchema } from '../../../schemas';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
@@ -70,7 +71,7 @@ export const registerPutScriptedFieldRoute = (
             throw new Error('Only scripted fields can be put.');
           }
 
-          const indexPattern = await indexPatternsService.get(id);
+          const indexPattern = await indexPatternsService.getDataViewLazy(id);
           indexPattern.upsertScriptedField({
             ...field,
             runtimeField: undefined, // make sure not creating runttime field with scripted field endpoint
@@ -80,12 +81,12 @@ export const registerPutScriptedFieldRoute = (
 
           await indexPatternsService.updateSavedObject(indexPattern);
 
-          const fieldObject = indexPattern.fields.getByName(field.name);
+          const fieldObject = await indexPattern.getFieldByName(field.name);
           if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
 
           const body: IndexPatternsRuntimeResponseType = {
             field: fieldObject.toSpec(),
-            index_pattern: indexPattern.toSpec(),
+            index_pattern: await indexPattern.toSpec({ fieldParams: { fieldName: ['*'] } }),
           };
 
           return res.ok({

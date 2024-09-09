@@ -24,6 +24,10 @@ describe('FilePreview', () => {
     appMockRender = createAppMockRenderer();
   });
 
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('FilePreview rendered correctly', async () => {
     appMockRender.render(<FilePreview closePreview={jest.fn()} selectedFile={basicFileMock} />);
 

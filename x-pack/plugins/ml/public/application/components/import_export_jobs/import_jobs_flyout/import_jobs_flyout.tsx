@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
 import {
@@ -42,10 +43,12 @@ import { useValidateIds } from './validate';
 import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
 import { useEnabledFeatures } from '../../../contexts/ml';
 
-interface Props {
+export interface Props {
   isDisabled: boolean;
+  onImportComplete: (() => void) | null;
 }
-export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
+
+export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) => {
   const {
     services: {
       data: {
@@ -54,7 +57,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       notifications: { toasts },
       mlServices: {
         mlUsageCollection,
-        mlApiServices: {
+        mlApi: {
           jobs: { bulkCreateJobs },
           dataFrameAnalytics: { createDataFrameAnalytics },
           filters: { filters: getFilters },
@@ -202,6 +205,9 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
 
     setImporting(false);
     setShowFlyout(false);
+    if (typeof onImportComplete === 'function') {
+      onImportComplete();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobType, jobIdObjects, adJobs, dfaJobs]);
 

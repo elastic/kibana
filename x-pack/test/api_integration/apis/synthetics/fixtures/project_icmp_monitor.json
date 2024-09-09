@@ -6,7 +6,7 @@
   "keep_stale": true,
   "monitors": [
     {
-      "locations": [ "localhost" ],
+      "locations": [ "dev" ],
       "type": "icmp",
       "id": "Cloudflare-DNS",
       "name": "Cloudflare DNS",
@@ -18,7 +18,7 @@
       "hash": "ekrjelkjrelkjre"
     },
     {
-      "locations": [ "localhost" ],
+      "locations": [ "dev" ],
       "type": "icmp",
       "id": "Cloudflare-DNS-2",
       "name": "Cloudflare DNS 2",
@@ -30,7 +30,7 @@
       "hash": "ekrjelkjrelkjre"
     },
     {
-      "locations": [ "localhost" ],
+      "locations": [ "dev" ],
       "type": "icmp",
       "id": "Cloudflare-DNS-3",
       "name": "Cloudflare DNS 3",

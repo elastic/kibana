@@ -6,7 +6,7 @@
  */
 
 import { ActionType } from '@kbn/actions-plugin/common';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { AIConnector } from '../connectorland/connector_selector';
 
 export const mockActionTypes = [
   {
@@ -29,9 +29,19 @@ export const mockActionTypes = [
     isSystemActionType: true,
     supportedFeatureIds: ['generativeAI'],
   } as ActionType,
+  {
+    id: '.gemini',
+    name: 'Gemini',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+    minimumLicenseRequired: 'basic',
+    isSystemActionType: true,
+    supportedFeatureIds: ['generativeAI'],
+  } as ActionType,
 ];
 
-export const mockConnectors: ActionConnector[] = [
+export const mockConnectors: AIConnector[] = [
   {
     id: 'connectorId',
     name: 'Captain Connector',

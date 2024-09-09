@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Readable } from 'stream';
@@ -36,6 +37,11 @@ export const registerImportRoute = (
     {
       path: '/_import',
       options: {
+        summary: `Import saved objects`,
+        tags: ['oas-tag:saved objects'],
+        access: 'public',
+        description:
+          'Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.',
         body: {
           maxBytes: maxImportPayloadBytes,
           output: 'stream',
@@ -66,31 +72,31 @@ export const registerImportRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
-      const { overwrite, createNewCopies, compatibilityMode } = req.query;
+    catchAndReturnBoomErrors(async (context, request, response) => {
+      const { overwrite, createNewCopies, compatibilityMode } = request.query;
       const { getClient, getImporter, typeRegistry } = (await context.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
         .incrementSavedObjectsImport({
-          request: req,
+          request,
           createNewCopies,
           overwrite,
           compatibilityMode,
         })
         .catch(() => {});
 
-      const file = req.body.file as FileStream;
+      const file = request.body.file as FileStream;
       const fileExtension = extname(file.hapi.filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
-        return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
+        return response.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
 
       let readStream: Readable;
       try {
         readStream = await createSavedObjectsStreamFromNdJson(file);
       } catch (e) {
-        return res.badRequest({
+        return response.badRequest({
           body: e,
         });
       }
@@ -112,10 +118,10 @@ export const registerImportRoute = (
           compatibilityMode,
         });
 
-        return res.ok({ body: result });
+        return response.ok({ body: result });
       } catch (e) {
         if (e instanceof SavedObjectsImportError) {
-          return res.badRequest({
+          return response.badRequest({
             body: {
               message: e.message,
               attributes: e.attributes,

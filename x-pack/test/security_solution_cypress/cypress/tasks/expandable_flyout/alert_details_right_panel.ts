@@ -29,7 +29,6 @@ import { TOASTER_CLOSE_ICON } from '../../screens/alerts_detection_rules';
  * Expand the left section of the document details expandable flyout by clicking on the expand icon button
  */
 export const expandDocumentDetailsExpandableFlyoutLeftSection = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON).scrollIntoView();
   cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON).click();
 };
 
@@ -37,31 +36,27 @@ export const expandDocumentDetailsExpandableFlyoutLeftSection = () => {
  * Expand the left section of the document details expandable flyout by clicking on the collapse icon button
  */
 export const collapseDocumentDetailsExpandableFlyoutLeftSection = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON).scrollIntoView();
   cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON).click();
 };
 
 /**
  * Open the Table tab in the document details expandable flyout right section
  */
-export const openTableTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).click();
+export const openTableTab = (index = 0) => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).eq(index).click();
 };
 
 /**
  * Open the Json tab in the document details expandable flyout right section
  */
-export const openJsonTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).click();
+export const openJsonTab = (index = 0) => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).eq(index).click();
 };
 
 /**
  * Close document details flyout
  */
 export const closeFlyout = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_CLOSE_BUTTON).scrollIntoView();
   cy.get(DOCUMENT_DETAILS_FLYOUT_CLOSE_BUTTON).click();
 };
 
@@ -79,7 +74,6 @@ export const openTakeActionButtonAndSelectItem = (option: string) => {
  * Scroll down to the flyout footer's take action button and open its dropdown
  */
 export const openTakeActionButton = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
   cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).within(() =>
     cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).click()
   );
@@ -89,9 +83,9 @@ export const openTakeActionButton = () => {
  * Click on the item within the flyout's footer take action button dropdown
  */
 export const selectTakeActionItem = (option: string) => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN)
-    .should('be.visible')
-    .within(() => cy.get(option).should('be.visible').click());
+  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN).within(() =>
+    cy.get(option).click()
+  );
 };
 
 /**
@@ -104,5 +98,5 @@ export const fillOutFormToCreateNewCase = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON).click();
 
   cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible');
-  cy.get(TOASTER_CLOSE_ICON).should('be.visible').click();
+  cy.get(TOASTER_CLOSE_ICON).click();
 };

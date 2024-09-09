@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { PREVALENCE_TEST_ID } from './test_ids';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
@@ -21,9 +20,10 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_LOADING_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '@kbn/security-solution-common';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
+import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../shared/hooks/use_prevalence');
 
@@ -36,20 +36,24 @@ const NO_DATA_MESSAGE = 'No prevalence data available.';
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
-} as unknown as ExpandableFlyoutContextValue;
+} as unknown as ExpandableFlyoutApi;
 
-const renderPrevalenceOverview = (contextValue: RightPanelContext = mockContextValue) =>
+jest.mock('@kbn/expandable-flyout');
+
+const renderPrevalenceOverview = (contextValue: DocumentDetailsContext = mockContextValue) =>
   render(
     <TestProviders>
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-        <RightPanelContext.Provider value={contextValue}>
-          <PrevalenceOverview />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+      <DocumentDetailsContext.Provider value={contextValue}>
+        <PrevalenceOverview />
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
 describe('<PrevalenceOverview />', () => {
+  beforeAll(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+  });
+
   it('should render wrapper component', () => {
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
@@ -63,6 +67,23 @@ describe('<PrevalenceOverview />', () => {
     expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Prevalence');
     expect(getByTestId(TITLE_ICON_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should not render link and icon if isPreviewMode is true', () => {
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+
+    const { getByTestId, queryByTestId } = renderPrevalenceOverview({
+      ...mockContextValue,
+      isPreviewMode: true,
+    });
+    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render loading', () => {

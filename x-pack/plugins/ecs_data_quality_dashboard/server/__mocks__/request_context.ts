@@ -28,7 +28,7 @@ export const createMockClients = () => {
 
 type MockClients = ReturnType<typeof createMockClients>;
 
-const convertRequestContextMock = <T>(context: T) => {
+const convertRequestContextMock = <T extends Record<string, unknown>>(context: T) => {
   return coreMock.createCustomRequestHandlerContext(context);
 };
 
@@ -39,6 +39,9 @@ const createAppClientMock = () => ({});
 const createRequestContextMock = (clients: MockClients = createMockClients()) => {
   return {
     core: clients.core,
+    dataQualityDashboard: {
+      getResultsIndexName: jest.fn(() => Promise.resolve('mock_results_index_name')),
+    },
   };
 };
 

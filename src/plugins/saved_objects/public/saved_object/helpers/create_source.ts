@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectAttributes } from '@kbn/core/public';
-import { SavedObject, SavedObjectKibanaServices } from '../../types';
+import { SavedObject, SavedObjectKibanaServices, StartServices } from '../../types';
 import { OVERWRITE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
@@ -33,7 +34,8 @@ export async function createSource(
   savedObject: SavedObject,
   esType: string,
   options = {},
-  services: SavedObjectKibanaServices
+  services: SavedObjectKibanaServices,
+  startServices: StartServices
 ) {
   const { savedObjectsClient, overlays } = services;
   try {
@@ -57,7 +59,7 @@ export async function createSource(
         defaultMessage: 'Overwrite',
       });
 
-      return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
+      return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays, startServices)
         .then(() =>
           savedObjectsClient.create(
             esType,

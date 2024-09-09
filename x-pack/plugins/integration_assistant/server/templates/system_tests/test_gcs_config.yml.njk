@@ -1,0 +1,10 @@
+service: {{package_name}}-{{data_stream_name}}-gcs
+input: gcs
+data_stream:
+  vars:
+    project_id: testproject
+    alternative_host: "http://{% raw %}{{Hostname}}:{{Port}}{% endraw %}"
+    buckets: |
+      - name: testbucket
+        poll: true
+        poll_interval: 15s

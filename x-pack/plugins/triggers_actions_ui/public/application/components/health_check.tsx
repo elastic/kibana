@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { Option, none, some, fold, isSome } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,13 +15,13 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { DocLinksStart, HttpSetup } from '@kbn/core/public';
-import { AlertingFrameworkHealth } from '@kbn/alerting-plugin/common';
+import { AlertingFrameworkHealth } from '@kbn/alerting-types';
 import './health_check.scss';
+import { fetchUiHealthStatus as triggersActionsUiHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status';
+import { fetchAlertingFrameworkHealth as alertingFrameworkHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health';
 import { useHealthContext } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
 import { CenterJustifiedSpinner } from './center_justified_spinner';
-import { triggersActionsUiHealth } from '../../common/lib/health_api';
-import { alertingFrameworkHealth } from '../lib/rule_api/health';
 
 interface Props {
   inFlyout?: boolean;
@@ -34,7 +34,7 @@ interface HealthStatus {
   hasPermanentEncryptionKey: boolean;
 }
 
-export const HealthCheck: React.FunctionComponent<Props> = ({
+export const HealthCheck: FC<PropsWithChildren<Props>> = ({
   children,
   waitForCheck,
   inFlyout = false,

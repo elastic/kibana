@@ -21,7 +21,7 @@ import {
 } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
-export default function createAlertsAsDataInstallResourcesTest({ getService }: FtrProviderContext) {
+export default function createAlertsAsDataFlappingTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
   const supertest = getService('supertest');
@@ -39,7 +39,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         query: { match_all: {} },
         conflicts: 'proceed',
       });
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
     });
 
     // These are the same tests from x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group1/event_log.ts
@@ -406,10 +406,13 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await retry.try(async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+            .set('kbn-xsrf', 'foo');
+          expect(response.status).to.eql(204);
+        });
+
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 

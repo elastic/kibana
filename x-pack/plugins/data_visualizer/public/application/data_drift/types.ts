@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Filter, Query } from '@kbn/es-query';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { Histogram } from '@kbn/ml-chi2test';
 
 import { DATA_COMPARISON_TYPE } from './constants';
@@ -136,4 +137,4 @@ export const isCategoricalDriftData = (arg: any): arg is CategoricalDriftData =>
   return isPopulatedObject(arg, ['type']) && arg.type === DATA_COMPARISON_TYPE.CATEGORICAL;
 };
 
-export type DataComparisonType = typeof DATA_COMPARISON_TYPE[keyof typeof DATA_COMPARISON_TYPE];
+export type DataComparisonType = (typeof DATA_COMPARISON_TYPE)[keyof typeof DATA_COMPARISON_TYPE];

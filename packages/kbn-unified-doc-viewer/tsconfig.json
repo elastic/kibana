@@ -24,5 +24,6 @@
     "@kbn/i18n",
     "@kbn/react-field",
     "@kbn/field-utils",
+    "@kbn/expressions-plugin",
   ]
 }

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { join } from 'path';
-import { readdir, unlink, access } from 'fs/promises';
+import { readdir, access } from 'fs/promises';
 import { getFileNameMatcher, getRollingFileName } from './pattern_matcher';
 import { moveFile } from './utils';
 
@@ -45,16 +46,6 @@ export const getOrderedRolledFiles = async ({
     .filter(({ index }) => index !== undefined)
     .sort((a, b) => a.index! - b.index!)
     .map(({ fileName }) => fileName);
-};
-
-export const deleteFiles = async ({
-  logFileFolder,
-  filesToDelete,
-}: {
-  logFileFolder: string;
-  filesToDelete: string[];
-}) => {
-  await Promise.all(filesToDelete.map((fileToDelete) => unlink(join(logFileFolder, fileToDelete))));
 };
 
 export const rollPreviousFilesInOrder = async ({

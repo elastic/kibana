@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { XJsonMode } from '@kbn/ace';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { StepDefineExposedState } from '../common';
+import type { StepDefineExposedState } from '../common';
 
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();

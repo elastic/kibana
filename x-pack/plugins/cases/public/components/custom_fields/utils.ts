@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-export const addOrReplaceCustomField = <T extends { key: string }>(
-  customFields: T[],
-  customFieldToAdd: T
-): T[] => {
-  const foundCustomFieldIndex = customFields.findIndex(
-    (customField) => customField.key === customFieldToAdd.key
-  );
+import { isEmptyString } from '@kbn/es-ui-shared-plugin/static/validators/string';
+import { isString } from 'lodash';
+import type { CustomFieldConfiguration } from '../../../common/types/domain';
 
-  if (foundCustomFieldIndex === -1) {
-    return [...customFields, customFieldToAdd];
+export const customFieldSerializer = (
+  field: CustomFieldConfiguration
+): CustomFieldConfiguration => {
+  const { defaultValue, ...otherProperties } = field;
+
+  if (defaultValue === undefined || (isString(defaultValue) && isEmptyString(defaultValue))) {
+    return otherProperties;
   }
 
-  return customFields.map((customField) => {
-    if (customField.key !== customFieldToAdd.key) {
-      return customField;
-    }
-
-    return customFieldToAdd;
-  });
+  return field;
 };

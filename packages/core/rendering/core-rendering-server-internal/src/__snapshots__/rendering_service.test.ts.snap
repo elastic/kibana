@@ -3,6 +3,9 @@
 exports[`RenderingService preboot() render() renders "core" CDN url injected 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "http://foo.bar:1773",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -24,6 +27,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -36,7 +40,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -56,14 +60,24 @@ Object {
       },
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -71,6 +85,9 @@ Object {
 exports[`RenderingService preboot() render() renders "core" page 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -92,6 +109,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -104,7 +122,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -120,14 +138,24 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -135,6 +163,9 @@ Object {
 exports[`RenderingService preboot() render() renders "core" page driven by settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -156,6 +187,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -168,7 +200,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -188,14 +220,24 @@ Object {
       },
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -203,6 +245,9 @@ Object {
 exports[`RenderingService preboot() render() renders "core" page for blank basepath 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "",
   "branch": Any<String>,
@@ -224,6 +269,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -236,7 +282,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -252,14 +298,24 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -267,6 +323,9 @@ Object {
 exports[`RenderingService preboot() render() renders "core" page for unauthenticated requests 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -288,6 +347,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -300,7 +360,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -316,14 +376,24 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -331,6 +401,9 @@ Object {
 exports[`RenderingService preboot() render() renders "core" page with global settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -352,6 +425,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -364,7 +438,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -384,14 +458,24 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -399,6 +483,9 @@ Object {
 exports[`RenderingService preboot() render() renders "core" with excluded global user settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -420,6 +507,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -432,7 +520,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -448,14 +536,24 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -463,6 +561,9 @@ Object {
 exports[`RenderingService preboot() render() renders "core" with excluded user settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -484,6 +585,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -496,7 +598,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -512,14 +614,24 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -527,6 +639,9 @@ Object {
 exports[`RenderingService setup() render() renders "core" CDN url injected 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -553,6 +668,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -565,7 +681,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -585,14 +701,24 @@ Object {
       },
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -600,6 +726,9 @@ Object {
 exports[`RenderingService setup() render() renders "core" page 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -621,6 +750,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -633,7 +763,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -649,14 +779,24 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -664,6 +804,9 @@ Object {
 exports[`RenderingService setup() render() renders "core" page driven by settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -690,6 +833,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -702,7 +846,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -722,14 +866,24 @@ Object {
       },
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -737,6 +891,9 @@ Object {
 exports[`RenderingService setup() render() renders "core" page for blank basepath 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "",
   "branch": Any<String>,
@@ -763,6 +920,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -775,7 +933,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -791,14 +949,24 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -806,6 +974,9 @@ Object {
 exports[`RenderingService setup() render() renders "core" page for unauthenticated requests 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -827,6 +998,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -839,7 +1011,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -855,14 +1027,24 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -870,6 +1052,9 @@ Object {
 exports[`RenderingService setup() render() renders "core" page with global settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -896,6 +1081,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -908,7 +1094,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -928,14 +1114,24 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -943,6 +1139,9 @@ Object {
 exports[`RenderingService setup() render() renders "core" with excluded global user settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -969,6 +1168,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -981,7 +1181,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -997,14 +1197,24 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;
@@ -1012,6 +1222,9 @@ Object {
 exports[`RenderingService setup() render() renders "core" with excluded user settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
   "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -1038,6 +1251,7 @@ Object {
       "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
       "dist": Any<Boolean>,
       "version": Any<String>,
     },
@@ -1050,7 +1264,7 @@ Object {
     ],
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/en.json",
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1066,14 +1280,24 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
-  "vars": Object {},
   "version": Any<String>,
 }
 `;

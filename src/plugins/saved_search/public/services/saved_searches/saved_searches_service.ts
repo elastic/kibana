@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { getSavedSearch, saveSavedSearch, SaveSavedSearchOptions, getNewSavedSearch } from '.';
-import type { SavedSearchCrudTypes } from '../../../common/content_management';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { getNewSavedSearch, getSavedSearch, saveSavedSearch, SaveSavedSearchOptions } from '.';
 import { SavedSearchType } from '../../../common';
-import type { SavedSearch } from '../../../common/types';
+import type { SavedSearchCrudTypes } from '../../../common/content_management';
+import type { SavedSearch, SerializableSavedSearch } from '../../../common/types';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 
 export interface SavedSearchesServiceDeps {
@@ -26,8 +27,11 @@ export interface SavedSearchesServiceDeps {
 export class SavedSearchesService {
   constructor(private deps: SavedSearchesServiceDeps) {}
 
-  get = (savedSearchId: string) => {
-    return getSavedSearch(savedSearchId, createGetSavedSearchDeps(this.deps));
+  get = <Serialized extends boolean = false>(
+    savedSearchId: string,
+    serialized?: Serialized
+  ): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> => {
+    return getSavedSearch(savedSearchId, createGetSavedSearchDeps(this.deps), serialized);
   };
   getAll = async () => {
     const { contentManagement } = this.deps;

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -33,6 +34,14 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.control.excludeExists', {
         defaultMessage: 'DOES NOT',
       }),
+    getInvalidSelectionWarningLabel: (invalidSelectionCount: number) =>
+      i18n.translate('controls.optionsList.control.invalidSelectionWarningLabel', {
+        defaultMessage:
+          '{invalidSelectionCount} {invalidSelectionCount, plural, one {selection returns} other {selections return}} no results.',
+        values: {
+          invalidSelectionCount,
+        },
+      }),
   },
   editor: {
     getSelectionOptionsTitle: () =>
@@ -43,7 +52,7 @@ export const OptionsListStrings = {
       multi: {
         getLabel: () =>
           i18n.translate('controls.optionsList.editor.multiSelectLabel', {
-            defaultMessage: 'Allow  multiple selections',
+            defaultMessage: 'Allow multiple selections',
           }),
       },
       single: {
@@ -139,6 +148,10 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.selectionsEmpty', {
         defaultMessage: 'You have no selections',
       }),
+    getInvalidSelectionMessage: () =>
+      i18n.translate('controls.optionsList.popover.selectionError', {
+        defaultMessage: 'There was an error when making your selection',
+      }),
     getInvalidSearchMessage: (fieldType: string) => {
       switch (fieldType) {
         case 'ip': {
@@ -195,19 +208,19 @@ export const OptionsListStrings = {
     getInvalidSelectionsSectionAriaLabel: (fieldName: string, invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsAriaLabel', {
         defaultMessage:
-          'Ignored {invalidSelectionCount, plural, one {selection} other {selections}} for {fieldName}',
+          'Invalid {invalidSelectionCount, plural, one {selection} other {selections}} for {fieldName}',
         values: { fieldName, invalidSelectionCount },
       }),
     getInvalidSelectionsSectionTitle: (invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsSectionTitle', {
         defaultMessage:
-          'Ignored {invalidSelectionCount, plural, one {selection} other {selections}}',
+          'Invalid {invalidSelectionCount, plural, one {selection} other {selections}}',
         values: { invalidSelectionCount },
       }),
     getInvalidSelectionsLabel: (selectedOptions: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsLabel', {
         defaultMessage:
-          '{selectedOptions} {selectedOptions, plural, one {selection} other {selections}} ignored',
+          '{selectedOptions} {selectedOptions, plural, one {selection} other {selections}} invalid',
         values: { selectedOptions },
       }),
     getInvalidSelectionScreenReaderText: () =>

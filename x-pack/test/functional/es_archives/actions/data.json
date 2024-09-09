@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_alerting_cases",
     "id": "action:uuid-actionId",
     "source": {
       "type": "action",
@@ -18,7 +18,7 @@
   "type": "doc",
   "value": {
     "id": "action:791a2ab1-784a-46ea-aa68-04c837e5da2d",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId": ".jira",
@@ -61,7 +61,7 @@
   "type": "doc",
   "value": {
     "id": "action:949f909b-20a0-46e3-aadb-6a4d117bb592",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId": ".webhook",
@@ -73,11 +73,9 @@
         "name": "A webhook with auth",
         "secrets": "LUqlrITACjqPmcWGlbl+H4RsGGOlw8LM0Urq8r7y6jNT7Igv3J7FjKJ2NXfNTaghVBO7e9x3wZOtiycwyoAdviTyYm1pspni24vH+OT70xaSuXcDoxfGwiLEcaG04INDnUJX4dtmRerxqR9ChktC70LNtOU3sqjYI2tWt2vOqGeq"
       },
-      "migrationVersion": {
-        "action": "7.10.0"
-      },
       "references": [
       ],
+      "typeMigrationVersion": "7.10.0",
       "type": "action",
       "updated_at": "2020-10-26T21:29:47.380Z"
     }
@@ -88,7 +86,7 @@
   "type": "doc",
   "value": {
     "id": "action:7434121e-045a-47d6-a0a6-0b6da752397a",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId": ".webhook",
@@ -100,11 +98,9 @@
         "name": "A webhook with no auth",
         "secrets": "tOwFq20hbUrcp3FX7stKB5aJaQQdLNQwomSNym8BgnFaBBafPOASv5T0tGdGsTr/CA7VK+N/wYBHQPzt0apF8Z/UYl63ZXqck5tSoFDnQW77zv1VVQ5wEwN1qkAQQcfrXTXU2wYVAYZNSuHkbeRjcasfG0ty1K+J7A=="
       },
-      "migrationVersion": {
-        "action": "7.10.0"
-      },
       "references": [
       ],
+      "typeMigrationVersion": "7.10.0",
       "type": "action",
       "updated_at": "2020-10-26T21:30:35.146Z"
     }
@@ -115,7 +111,7 @@
   "type": "doc",
   "value": {
     "id": "action:0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7c",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId" : ".email",
@@ -131,9 +127,7 @@
         },
         "secrets" : "V2EJEtTv3yTFi1kdglhNahnKYWCS+J7aWCJQU+eEqGPZEz6n7G1NsBWoh7IY0FteLTilTteQXyY/Eg3k/7bb0G8Mz+WBZ1mRvUggGTFqgoOptyUsvHoBhv0R/1bCTCabN3Pe88AfnC+VDXqwuMifpmgKEEsKF3H8VONv7TYO02FW"
       },
-      "migrationVersion": {
-        "action": "7.14.0"
-      },
+      "typeMigrationVersion": "7.14.0",
       "coreMigrationVersion" : "7.15.0",
       "references": [
       ],
@@ -147,7 +141,7 @@
   "type": "doc",
   "value": {
     "id": "action:1e0824a0-0a59-11ec-9a7c-fd0c2b83ff7c",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId" : ".email",
@@ -163,9 +157,7 @@
         },
         "secrets" : "iw/bRTXZQXOV0ODocb6FQnHR6AyeVyD91We03llNStyTNFwuHVWdFl6ZdiEEeDOadBMeJomvp/dAfQevGpbwWdclcu9F87x3CfeGqV9DtBy0dXRbx9PzKBwgJdK3ucHQDFAs8ZXQbefvCOFjCHGAsJDPhTKj5rTUyg=="
       },
-      "migrationVersion": {
-        "action": "7.14.0"
-      },
+      "typeMigrationVersion": "7.14.0",
       "coreMigrationVersion" : "7.15.0",
       "references": [
       ],
@@ -179,7 +171,7 @@
   "type": "doc",
   "value": {
     "id": "action:0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7d",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId" : ".email",
@@ -195,9 +187,7 @@
         },
         "secrets" : "V2EJEtTv3yTFi1kdglhNahasdfnKYWCS+J7aWCJQU+eEqGPZEz6n7G1NsBWoh7IY0FteLTilTteQXyY/Eg3k/7bb0G8Mz+WBZ1mRvUggGTFqgoOptyUsvHoBhv0R/1bCTCabN3Pe88AfnC+VDXqwuMifpmgKEEsKF3H8VONv7TYO02FW"
       },
-      "migrationVersion": {
-        "action": "7.14.0"
-      },
+      "typeMigrationVersion": "7.14.0",
       "coreMigrationVersion" : "7.15.0",
       "references": [
       ],
@@ -211,7 +201,7 @@
   "type": "doc",
   "value": {
     "id": "action:7d04bc30-c4c0-11ec-ae29-917aa31a5b75",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId" : ".servicenow-sir",
@@ -223,9 +213,7 @@
         },
         "secrets" : "kPp4tl4ueQ2ZNWSfATR3dFrbxd+NNBo4MY8izS6GJf358Lmeg/YaYjb2rIymrbPktR6HnPBRaVyXWlRTvBGstRicJc0LJHZbx3wNJlTRIj4UFlVqZLGQWQ/GcSqFLSZ1JQbKwgAvyfLtF6BhjAhGYEovK3/OLUNzGc3gvUOOHBiPWjiAY8A="
       },
-      "migrationVersion": {
-        "action": "8.0.0"
-      },
+      "typeMigrationVersion": "8.0.0",
       "coreMigrationVersion" : "8.2.0",
       "references": [
       ],
@@ -242,7 +230,7 @@
   "type": "doc",
   "value": {
     "id": "action:8a9331b0-c4c0-11ec-ae29-917aa31a5b75",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId" : ".servicenow-itom",
@@ -253,9 +241,7 @@
         },
         "secrets" : "yYThM4vbrSTIg5IjKWE+eMDrxzL7UO0JQIyh6FvEMgqoNREUxRrIavSo25v+DXQIX1DyfsvjjKg97pNPlZhvS3siCwDZZafSFrwkCKDl+S4KHORgIMX+slilcQeuEnzwit7bFxcY7Y/AcNF8Ks6jO0Gs1UR58ibSPUALXoK2VOlJnHSgtvE="
       },
-      "migrationVersion": {
-        "action": "8.0.0"
-      },
+      "typeMigrationVersion": "8.0.0",
       "coreMigrationVersion" : "8.2.0",
       "references": [
       ],
@@ -272,7 +258,7 @@
   "type": "doc",
   "value": {
     "id": "action:6d3a1250-c4c0-11ec-ae29-917aa31a5b75",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId" : ".servicenow",
@@ -284,9 +270,7 @@
         },
         "secrets" : "zfXUDtG0CyJkJUKnQ8rSqo75hb6ZhbRUWkV1NiFEjApM87b72Rcqz3Fv+sbm8eBDOO1Fdd9CVyK+Bfly4ZwVCgL2lR0qIbPzz34q36r267dnGVsaERyJIVv2WPy+EGdiRZKgfpy4XFbMNT1R3gyIsUkd4TT+McqGfVTont2XTFIpMW2A9y8="
       },
-      "migrationVersion": {
-        "action": "8.0.0"
-      },
+      "typeMigrationVersion": "8.0.0",
       "coreMigrationVersion" : "8.2.0",
       "references": [
       ],

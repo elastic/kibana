@@ -13,15 +13,18 @@ import { validateTimeRange, TIME_FORMAT } from '@kbn/ml-date-utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 
 import { isWebUrl } from '../util/url_utils';
+import { useMlApi } from '../contexts/kibana';
 
-import { ml } from './ml_api_service';
-import { getToastNotificationService } from './toast_notification_service';
+import { useToastNotificationService } from './toast_notification_service';
 
 let jobs = [];
 let datafeedIds = {};
 
 class JobService {
-  constructor() {
+  constructor(toastNotificationService, ml) {
+    this.toastNotificationService = toastNotificationService;
+    this.ml = ml;
+
     // tempJobCloningObjects -> used to pass a job object between the job management page and
     // and the advanced wizard.
     // if populated when loading the advanced wizard, the job is used for cloning.
@@ -52,12 +55,14 @@ class JobService {
     return new Promise((resolve, reject) => {
       jobs = [];
       datafeedIds = {};
-      ml.getJobs()
+      this.ml
+        .getJobs()
         .then((resp) => {
           jobs = resp.jobs;
 
           // load jobs stats
-          ml.getJobStats()
+          this.ml
+            .getJobStats()
             .then((statsResp) => {
               // merge jobs stats into jobs
               for (let i = 0; i < jobs.length; i++) {
@@ -107,7 +112,7 @@ class JobService {
 
       function error(err) {
         console.log('jobService error getting list of jobs:', err);
-        getToastNotificationService().displayErrorToast(err);
+        this.toastNotificationService.displayErrorToast(err);
         reject({ jobs, err });
       }
     });
@@ -127,13 +132,15 @@ class JobService {
 
   refreshJob(jobId) {
     return new Promise((resolve, reject) => {
-      ml.getJobs({ jobId })
+      this.ml
+        .getJobs({ jobId })
         .then((resp) => {
           if (resp.jobs && resp.jobs.length) {
             const newJob = resp.jobs[0];
 
             // load jobs stats
-            ml.getJobStats({ jobId })
+            this.ml
+              .getJobStats({ jobId })
               .then((statsResp) => {
                 // merge jobs stats into jobs
                 for (let j = 0; j < statsResp.jobs.length; j++) {
@@ -188,7 +195,7 @@ class JobService {
 
       function error(err) {
         console.log('JobService error getting list of jobs:', err);
-        getToastNotificationService().displayErrorToast(err);
+        this.toastNotificationService.displayErrorToast(err);
         reject({ jobs, err });
       }
     });
@@ -198,12 +205,14 @@ class JobService {
     return new Promise((resolve, reject) => {
       const sId = datafeedId !== undefined ? { datafeed_id: datafeedId } : undefined;
 
-      ml.getDatafeeds(sId)
+      this.ml
+        .getDatafeeds(sId)
         .then((resp) => {
           const datafeeds = resp.datafeeds;
 
           // load datafeeds stats
-          ml.getDatafeedStats()
+          this.ml
+            .getDatafeedStats()
             .then((statsResp) => {
               // merge datafeeds stats into datafeeds
               for (let i = 0; i < datafeeds.length; i++) {
@@ -226,7 +235,7 @@ class JobService {
 
       function error(err) {
         console.log('loadDatafeeds error getting list of datafeeds:', err);
-        getToastNotificationService().displayErrorToast(err);
+        this.toastNotificationService.displayErrorToast(err);
         reject({ jobs, err });
       }
     });
@@ -236,7 +245,8 @@ class JobService {
     return new Promise((resolve, reject) => {
       const datafeedId = this.getDatafeedId(jobId);
 
-      ml.getDatafeedStats({ datafeedId })
+      this.ml
+        .getDatafeedStats({ datafeedId })
         .then((resp) => {
           // console.log('updateSingleJobCounts controller query response:', resp);
           const datafeeds = resp.datafeeds;
@@ -261,7 +271,7 @@ class JobService {
     }
 
     // return the promise chain
-    return ml.addJob({ jobId: job.job_id, job }).then(func).catch(func);
+    return this.ml.addJob({ jobId: job.job_id, job }).then(func).catch(func);
   }
 
   cloneDatafeed(datafeed) {
@@ -285,18 +295,18 @@ class JobService {
   }
 
   openJob(jobId) {
-    return ml.openJob({ jobId });
+    return this.ml.openJob({ jobId });
   }
 
   closeJob(jobId) {
-    return ml.closeJob({ jobId });
+    return this.ml.closeJob({ jobId });
   }
 
   saveNewDatafeed(datafeedConfig, jobId) {
     const datafeedId = `datafeed-${jobId}`;
     datafeedConfig.job_id = jobId;
 
-    return ml.addDatafeed({
+    return this.ml.addDatafeed({
       datafeedId,
       datafeedConfig,
     });
@@ -312,11 +322,12 @@ class JobService {
         end++;
       }
 
-      ml.startDatafeed({
-        datafeedId,
-        start,
-        end,
-      })
+      this.ml
+        .startDatafeed({
+          datafeedId,
+          start,
+          end,
+        })
         .then((resp) => {
           resolve(resp);
         })
@@ -328,29 +339,30 @@ class JobService {
   }
 
   forceStartDatafeeds(dIds, start, end) {
-    return ml.jobs.forceStartDatafeeds(dIds, start, end);
+    return this.ml.jobs.forceStartDatafeeds(dIds, start, end);
   }
 
   stopDatafeeds(dIds) {
-    return ml.jobs.stopDatafeeds(dIds);
+    return this.ml.jobs.stopDatafeeds(dIds);
   }
 
-  deleteJobs(jIds, deleteUserAnnotations) {
-    return ml.jobs.deleteJobs(jIds, deleteUserAnnotations);
+  deleteJobs(jIds, deleteUserAnnotations, deleteAlertingRules) {
+    return this.ml.jobs.deleteJobs(jIds, deleteUserAnnotations, deleteAlertingRules);
   }
 
   closeJobs(jIds) {
-    return ml.jobs.closeJobs(jIds);
+    return this.ml.jobs.closeJobs(jIds);
   }
 
   resetJobs(jIds, deleteUserAnnotations) {
-    return ml.jobs.resetJobs(jIds, deleteUserAnnotations);
+    return this.ml.jobs.resetJobs(jIds, deleteUserAnnotations);
   }
 
   validateDetector(detector) {
     return new Promise((resolve, reject) => {
       if (detector) {
-        ml.validateDetector({ detector })
+        this.ml
+          .validateDetector({ detector })
           .then((resp) => {
             resolve(resp);
           })
@@ -402,13 +414,33 @@ class JobService {
 
   async getJobAndGroupIds() {
     try {
-      return await ml.jobs.getAllJobAndGroupIds();
+      return await this.ml.jobs.getAllJobAndGroupIds();
     } catch (error) {
       return {
         jobIds: [],
         groupIds: [],
       };
     }
+  }
+
+  stashJobForCloning(jobCreator, skipTimeRangeStep, includeTimeRange, autoSetTimeRange) {
+    const tempJobCloningObjects = {
+      job: jobCreator.jobConfig,
+      datafeed: jobCreator.datafeedConfig,
+      createdBy: jobCreator.createdBy ?? undefined,
+      // skip over the time picker step of the wizard
+      skipTimeRangeStep,
+      calendars: jobCreator.calendars,
+      ...(includeTimeRange === true && autoSetTimeRange === false
+        ? // auto select the start and end dates of the time picker
+          {
+            start: jobCreator.start,
+            end: jobCreator.end,
+          }
+        : { autoSetTimeRange: true }),
+    };
+
+    this.tempJobCloningObjects = tempJobCloningObjects;
   }
 }
 
@@ -562,4 +594,17 @@ function createResultsUrl(jobIds, start, end, resultsPage, mode = 'absolute') {
   return path;
 }
 
-export const mlJobService = new JobService();
+// This is to retain the singleton behavior of the previous direct instantiation and export.
+let mlJobService;
+export const mlJobServiceFactory = (toastNotificationService, mlApi) => {
+  if (mlJobService) return mlJobService;
+
+  mlJobService = new JobService(toastNotificationService, mlApi);
+  return mlJobService;
+};
+
+export const useMlJobService = () => {
+  const toastNotificationService = useToastNotificationService();
+  const mlApi = useMlApi();
+  return mlJobServiceFactory(toastNotificationService, mlApi);
+};

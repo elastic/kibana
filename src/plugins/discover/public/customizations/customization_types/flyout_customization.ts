@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { EuiFlyoutProps } from '@elastic/eui';
+
+import { EuiFlyoutProps, IconType } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { type ComponentType } from 'react';
+import React, { type ComponentType, MouseEventHandler } from 'react';
 
 export interface FlyoutDefaultActionItem {
   disabled?: boolean;
@@ -21,8 +23,13 @@ export interface FlyoutDefaultActions {
 
 export interface FlyoutActionItem {
   id: string;
-  Content: React.ElementType;
   enabled: boolean;
+  label: string;
+  helpText?: string;
+  iconType: IconType;
+  onClick: (() => void) | MouseEventHandler;
+  href?: string;
+  dataTestSubj?: string;
 }
 
 export interface FlyoutContentProps {

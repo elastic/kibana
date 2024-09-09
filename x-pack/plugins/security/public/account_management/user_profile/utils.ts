@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { IMAGE_FILE_TYPES } from '../../../common/constants';
 
-export const IMAGE_FILE_TYPES = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
 export const MAX_IMAGE_SIZE = 64;
 
 export function readFile(data: File) {
@@ -62,6 +62,8 @@ export function createImageHandler(callback: (imageUrl: string | undefined) => v
       const imageUrl = await readFile(file);
       const resizedImageUrl = await resizeImage(imageUrl, MAX_IMAGE_SIZE);
       callback(resizedImageUrl);
+    } else {
+      callback(undefined);
     }
   };
 }

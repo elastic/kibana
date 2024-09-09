@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
-import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
+import type { EuiButtonGroupProps } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { useUrlState } from '@kbn/ml-url-state';
@@ -51,7 +53,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId, selectedJobs }) 
             : i18n.translate('xpack.ml.anomalyResultsViewSelector.singleMetricViewerLabel', {
                 defaultMessage: 'View results in the Single Metric Viewer',
               }),
-        iconType: 'visLine',
+        iconType: 'singleMetricViewer',
         value: ML_PAGES.SINGLE_METRIC_VIEWER,
         'data-test-subj': 'mlAnomalyResultsViewSelectorSingleMetricViewer',
         isDisabled: viewId === 'explorer' && isSingleMetricViewerDisabled,

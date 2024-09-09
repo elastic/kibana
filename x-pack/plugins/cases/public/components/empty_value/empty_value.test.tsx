@@ -7,7 +7,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
+import { ThemeProvider } from '@emotion/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import {

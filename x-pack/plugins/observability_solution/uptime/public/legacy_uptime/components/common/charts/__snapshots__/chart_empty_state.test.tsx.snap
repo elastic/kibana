@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ChartEmptyState renders JSX values 1`] = `
+<EuiEmptyPrompt
+  body={
+    <p>
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="This is the default with a {val} included"
+        id="test.body"
+        values={
+          Object {
+            "val": <strong>
+              down
+            </strong>,
+          }
+        }
+      />
+    </p>
+  }
+  title={
+    <EuiTitle>
+      <h5>
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="The title"
+          id="test.title"
+        />
+      </h5>
+    </EuiTitle>
+  }
+/>
+`;
+
+exports[`ChartEmptyState renders string values 1`] = `
+<EuiEmptyPrompt
+  body={
+    <p>
+      This is the body
+    </p>
+  }
+  title={
+    <EuiTitle>
+      <h5>
+        This is the title
+      </h5>
+    </EuiTitle>
+  }
+/>
+`;

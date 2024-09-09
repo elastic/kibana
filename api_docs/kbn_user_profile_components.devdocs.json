@@ -182,7 +182,7 @@
           "\nKibana-specific Provider that maps to known dependency types."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -190,7 +190,7 @@
             "section": "def-common.UserProfilesKibanaDependencies",
             "text": "UserProfilesKibanaDependencies"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/kbn-user-profile-components/src/services.tsx",
         "deprecated": false,
@@ -204,7 +204,7 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/user-profile-components",
                 "scope": "common",
@@ -212,7 +212,7 @@
                 "section": "def-common.UserProfilesKibanaDependencies",
                 "text": "UserProfilesKibanaDependencies"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/kbn-user-profile-components/src/services.tsx",
             "deprecated": false,
@@ -291,9 +291,9 @@
           "\nAbstract external service Provider."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "Services",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/kbn-user-profile-components/src/services.tsx",
         "deprecated": false,
@@ -304,12 +304,12 @@
             "id": "def-common.UserProfilesProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, ...services }",
+            "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "Services",
-              ">"
+              ">>"
             ],
             "path": "packages/kbn-user-profile-components/src/services.tsx",
             "deprecated": false,
@@ -338,7 +338,7 @@
             "section": "def-common.UserProfileWithAvatar",
             "text": "UserProfileWithAvatar"
           },
-          " | null>({ selectedOptions, defaultOptions, options, onChange, onSearchChange, isLoading, singleSelection, limit, height, loadingMessage, noMatchesMessage, emptyMessage, errorMessage, searchPlaceholder, searchInputId, selectedStatusMessage, limitReachedMessage, nullOptionLabel, defaultOptionsLabel, clearButtonLabel, }: ",
+          " | null>({ selectedOptions, defaultOptions, options, onChange, onSearchChange, isLoading, singleSelection, limit, height, loadingMessage, noMatchesMessage, emptyMessage, errorMessage, searchPlaceholder, searchInputId, selectedStatusMessage, limitReachedMessage, nullOptionLabel, nullOptionProps, defaultOptionsLabel, clearButtonLabel, ...props }: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -357,7 +357,7 @@
             "id": "def-common.UserProfilesSelectable.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  selectedOptions,\n  defaultOptions,\n  options,\n  onChange,\n  onSearchChange,\n  isLoading = false,\n  singleSelection = false,\n  limit,\n  height,\n  loadingMessage,\n  noMatchesMessage,\n  emptyMessage,\n  errorMessage,\n  searchPlaceholder,\n  searchInputId,\n  selectedStatusMessage,\n  limitReachedMessage,\n  nullOptionLabel,\n  defaultOptionsLabel,\n  clearButtonLabel,\n}",
+            "label": "{\n  selectedOptions,\n  defaultOptions,\n  options,\n  onChange,\n  onSearchChange,\n  isLoading = false,\n  singleSelection = false,\n  limit,\n  height,\n  loadingMessage,\n  noMatchesMessage,\n  emptyMessage,\n  errorMessage,\n  searchPlaceholder,\n  searchInputId,\n  selectedStatusMessage,\n  limitReachedMessage,\n  nullOptionLabel,\n  nullOptionProps,\n  defaultOptionsLabel,\n  clearButtonLabel,\n  ...props\n}",
             "description": [],
             "signature": [
               {
@@ -437,7 +437,7 @@
         "label": "useUpdateUserProfile",
         "description": [],
         "signature": [
-          "({ notificationSuccess, pageReloadChecker, }?: Props) => { update: <D extends ",
+          "({ notificationSuccess, pageReloadChecker, }?: Props) => { update: <D extends Partial<",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -445,7 +445,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          ">(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
+          ">>(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -453,7 +453,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          " | null | undefined; isLoading: boolean; }"
+          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; }"
         ],
         "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
         "deprecated": false,
@@ -865,18 +865,26 @@
               "{ notifications: ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsStart",
+                "section": "def-public.NotificationsStart",
                 "text": "NotificationsStart"
               },
               "; theme: ",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceSetup",
+                "section": "def-public.ThemeServiceSetup",
                 "text": "ThemeServiceSetup"
+              },
+              "; i18n: ",
+              {
+                "pluginId": "@kbn/core-i18n-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreI18nBrowserPluginApi",
+                "section": "def-public.I18nStart",
+                "text": "I18nStart"
               },
               "; }"
             ],
@@ -907,17 +915,23 @@
             "tags": [],
             "label": "toMountPoint",
             "description": [
-              "\nHandler from the '@kbn/kibana-react-plugin/public' Plugin\n\n```\nimport { toMountPoint } from '@kbn/kibana-react-plugin/public';\n```"
+              "\nHandler from the '@kbn/react-kibana-mount' Package\n\n```\nimport { toMountPoint } from '@kbn/react-kibana-mount';\n```"
             ],
             "signature": [
-              "(node: React.ReactNode, options?: { theme$: ",
-              "Observable",
-              "<{ readonly darkMode: boolean; }>; } | undefined) => ",
+              "(node: React.ReactNode, params: ",
+              {
+                "pluginId": "@kbn/react-kibana-mount",
+                "scope": "common",
+                "docId": "kibKbnReactKibanaMountPluginApi",
+                "section": "def-common.ToMountPointParams",
+                "text": "ToMountPointParams"
+              },
+              ") => ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement>"
@@ -925,6 +939,7 @@
             "path": "packages/kbn-user-profile-components/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/user-profile-components",
@@ -934,43 +949,51 @@
                 "label": "node",
                 "description": [],
                 "signature": [
-                  "React.ReactNode"
+                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
                 ],
-                "path": "packages/kbn-user-profile-components/src/services.tsx",
+                "path": "packages/react/kibana_mount/to_mount_point.tsx",
                 "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/user-profile-components",
                 "id": "def-common.UserProfilesKibanaDependencies.toMountPoint.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "options",
+                "label": "params",
                 "description": [],
-                "path": "packages/kbn-user-profile-components/src/services.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
+                "signature": [
+                  "{ i18n: ",
                   {
-                    "parentPluginId": "@kbn/user-profile-components",
-                    "id": "def-common.UserProfilesKibanaDependencies.toMountPoint.$2.theme$",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "theme$",
-                    "description": [],
-                    "signature": [
-                      "Observable",
-                      "<{ readonly darkMode: boolean; }>"
-                    ],
-                    "path": "packages/kbn-user-profile-components/src/services.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
+                    "pluginId": "@kbn/core-i18n-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreI18nBrowserPluginApi",
+                    "section": "def-public.I18nStart",
+                    "text": "I18nStart"
+                  },
+                  "; analytics?: Pick<",
+                  {
+                    "pluginId": "@kbn/core-analytics-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                    "section": "def-public.AnalyticsServiceStart",
+                    "text": "AnalyticsServiceStart"
+                  },
+                  ", \"reportEvent\"> | undefined; theme: ",
+                  {
+                    "pluginId": "@kbn/react-kibana-context-common",
+                    "scope": "public",
+                    "docId": "kibKbnReactKibanaContextCommonPluginApi",
+                    "section": "def-public.ThemeServiceStart",
+                    "text": "ThemeServiceStart"
+                  },
+                  "; }"
+                ],
+                "path": "packages/react/kibana_mount/to_mount_point.tsx",
+                "deprecated": false,
+                "trackAdoption": false
               }
-            ],
-            "returnComment": []
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1064,7 +1087,7 @@
           },
           "<Option> extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"singleSelection\" | \"height\" | \"errorMessage\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
+          "<{}>, \"singleSelection\" | \"data-test-subj\" | \"height\" | \"errorMessage\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,
@@ -1360,6 +1383,42 @@
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserProfilesSelectableProps.nullOptionProps",
+            "type": "Object",
+            "tags": [],
+            "label": "nullOptionProps",
+            "description": [
+              "\nAdditional props for \"no users\" option."
+            ],
+            "signature": [
+              "Partial<Pick<(",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableGroupLabelOption",
+              "<{}>, ",
+              "EuiSelectableLIOption",
+              "<{}>> & ",
+              "CommonProps",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"on\" | \"off\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              "EuiTextTruncateProps",
+              ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+              "EuiToolTipProps",
+              ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableLIOption",
+              "<{}>, ",
+              "EuiSelectableGroupLabelOption",
+              "<{}>> & Omit<",
+              "EuiSelectableOptionBase",
+              ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; }), \"append\">> | undefined"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
             "id": "def-common.UserProfilesSelectableProps.defaultOptionsLabel",
             "type": "string",
             "tags": [],
@@ -1471,6 +1530,20 @@
             "path": "packages/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserSettingsData.solutionNavOptOut",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "solutionNavOptOut",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-user-profile-components/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1574,7 +1647,7 @@
         "label": "UpdateUserProfileHook",
         "description": [],
         "signature": [
-          "({ notificationSuccess, pageReloadChecker, }?: Props) => { update: <D extends ",
+          "({ notificationSuccess, pageReloadChecker, }?: Props) => { update: <D extends Partial<",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -1582,7 +1655,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          ">(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
+          ">>(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -1590,7 +1663,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          " | null | undefined; isLoading: boolean; }"
+          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; }"
         ],
         "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
         "deprecated": false,

@@ -7,13 +7,14 @@
 
 import type {
   ChromeProjectBreadcrumb,
-  ChromeProjectNavigation,
   ChromeSetProjectBreadcrumbsParams,
   SideNavComponent,
-  ChromeProjectNavigationNode,
+  NavigationTreeDefinition,
 } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { Observable } from 'rxjs';
+import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
+import { CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessPluginSetup {}
@@ -23,10 +24,23 @@ export interface ServerlessPluginStart {
     breadcrumbs: ChromeProjectBreadcrumb | ChromeProjectBreadcrumb[],
     params?: Partial<ChromeSetProjectBreadcrumbsParams>
   ) => void;
-  setNavigation(projectNavigation: ChromeProjectNavigation): void;
   setProjectHome(homeHref: string): void;
-  setSideNavComponent: (navigation: SideNavComponent) => void;
-  getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
+  initNavigation(
+    id: string,
+    navigationTree$: Observable<NavigationTreeDefinition>,
+    config?: {
+      dataTestSubj?: string;
+      panelContentProvider?: PanelContentProvider;
+    }
+  ): void;
+  /**
+   * @deprecated Use {@link ServerlessPluginStart.initNavigation} instead.
+   */
+  setSideNavComponentDeprecated: (navigation: SideNavComponent) => void;
+  getNavigationCards(
+    roleManagementEnabled?: boolean,
+    extendCardNavDefinitions?: Record<string, CardNavExtensionDefinition>
+  ): Record<string, CardNavExtensionDefinition> | undefined;
 }
 
 export interface ServerlessPluginSetupDependencies {

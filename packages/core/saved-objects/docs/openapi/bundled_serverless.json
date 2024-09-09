@@ -1,0 +1,361 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Serverless saved objects",
+    "description": "OpenAPI schema for serverless saved object endpoints",
+    "version": "0.1",
+    "contact": {
+      "name": "Kibana Core Team"
+    },
+    "license": {
+      "name": "Elastic License 2.0",
+      "url": "https://www.elastic.co/licensing/elastic-license"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://{kibana_url}",
+      "variables": {
+        "kibana_url": {
+          "default": "localhost:5601"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "saved objects",
+      "x-displayName": "Saved objects",
+      "description": "Export sets of saved objects that you want to import into {kib}, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.\n\nTo manage a specific type of saved object, use the corresponding APIs.\nFor example, use:\n\n[Data views](../group/endpoint-data-views)\n\nWarning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.\n"
+    }
+  ],
+  "paths": {
+    "/api/saved_objects/_export": {
+      "post": {
+        "summary": "Export saved objects",
+        "operationId": "exportSavedObjectsDefault",
+        "description": "Retrieve sets of saved objects that you want to import into Kibana.\nYou must include `type` or `objects` in the request body.\n\nExported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "tags": [
+          "saved objects"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "excludeExportDetails": {
+                    "description": "Do not add export details entry at the end of the stream.",
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "includeReferencesDeep": {
+                    "description": "Includes all of the referenced objects in the exported objects.",
+                    "type": "boolean"
+                  },
+                  "objects": {
+                    "description": "A list of objects to export.",
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "type": {
+                    "description": "The saved object types to include in the export. Use `*` to export all the types.",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "examples": {
+                "exportSavedObjectsRequest": {
+                  "$ref": "#/components/examples/export_objects_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "examples": {
+                  "exportSavedObjectsResponse": {
+                    "$ref": "#/components/examples/export_objects_response"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/saved_objects/_import": {
+      "post": {
+        "summary": "Import saved objects",
+        "operationId": "importSavedObjectsDefault",
+        "description": "Create sets of Kibana saved objects from a file created by the export API.\nSaved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "tags": [
+          "saved objects"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "in": "query",
+            "name": "createNewCopies",
+            "schema": {
+              "type": "boolean"
+            },
+            "required": false,
+            "description": "Creates copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict errors are avoided. NOTE: This option cannot be used with the `overwrite` and `compatibilityMode` options.\n"
+          },
+          {
+            "in": "query",
+            "name": "overwrite",
+            "schema": {
+              "type": "boolean"
+            },
+            "required": false,
+            "description": "Overwrites saved objects when they already exist. When used, potential conflict errors are automatically resolved by overwriting the destination object. NOTE: This option cannot be used with the `createNewCopies` option.\n"
+          },
+          {
+            "in": "query",
+            "name": "compatibilityMode",
+            "schema": {
+              "type": "boolean"
+            },
+            "required": false,
+            "description": "Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. Use this option only if you encounter issues with imported saved objects. NOTE: This option cannot be used with the `createNewCopies` option.\n"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "description": "A file exported using the export API. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be included in this file. Similarly, the `savedObjects.maxImportPayloadBytes` setting limits the overall size of the file that can be imported.\n"
+                  }
+                }
+              },
+              "examples": {
+                "importObjectsRequest": {
+                  "$ref": "#/components/examples/import_objects_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indicates when the import was successfully completed. When set to false, some objects may not have been created. For additional information, refer to the `errors` and `successResults` properties.\n"
+                    },
+                    "successCount": {
+                      "type": "integer",
+                      "description": "Indicates the number of successfully imported records."
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "description": "Indicates the import was unsuccessful and specifies the objects that failed to import.\n\nNOTE: One object may result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and conflict error.\n"
+                    },
+                    "successResults": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "description": "Indicates the objects that are successfully imported, with any metadata if applicable.\n\nNOTE: Objects are created only when all resolvable errors are addressed, including conflicts and missing references. If objects are created as new copies, each entry in the `successResults` array includes a `destinationId` attribute.\n"
+                    }
+                  }
+                },
+                "examples": {
+                  "importObjectsResponse": {
+                    "$ref": "#/components/examples/import_objects_response"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "cURL",
+            "label": "Import with createNewCopies",
+            "source": "curl \\\n  -X POST api/saved_objects/_import?createNewCopies=true\n  -H \"kbn-xsrf: true\"\n  --form file=@file.ndjson\n"
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "kbn_xsrf": {
+        "schema": {
+          "type": "string"
+        },
+        "in": "header",
+        "name": "kbn-xsrf",
+        "description": "Cross-site request forgery protection",
+        "required": true
+      }
+    },
+    "examples": {
+      "export_objects_request": {
+        "summary": "Export a specific saved object.",
+        "value": {
+          "objects": [
+            {
+              "type": "map",
+              "id": "de71f4f0-1902-11e9-919b-ffe5949a18d2"
+            }
+          ],
+          "includeReferencesDeep": false,
+          "excludeExportDetails": true
+        }
+      },
+      "export_objects_response": {
+        "summary": "The export objects API response contains a JSON record for each exported object.",
+        "value": {
+          "attributes": {
+            "description": "",
+            "layerListJSON": "[{\"id\":\"0hmz5\",\"alpha\":1,\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"isAutoSelect\":true,\"lightModeDefault\":\"road_map_desaturated\"},\"visible\":true,\"style\":{},\"type\":\"EMS_VECTOR_TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"edh66\",\"label\":\"Total Requests by Destination\",\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.5,\"sourceDescriptor\":{\"type\":\"EMS_FILE\",\"id\":\"world_countries\",\"tooltipProperties\":[\"name\",\"iso2\"]},\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"name\":\"__kbnjoin__count__673ff994-fc75-4c67-909b-69fcb0e1060e\",\"origin\":\"join\"},\"color\":\"Greys\",\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}}}},\"type\":\"GEOJSON_VECTOR\",\"joins\":[{\"leftField\":\"iso2\",\"right\":{\"type\":\"ES_TERM_SOURCE\",\"id\":\"673ff994-fc75-4c67-909b-69fcb0e1060e\",\"indexPatternTitle\":\"kibana_sample_data_logs\",\"term\":\"geo.dest\",\"indexPatternRefName\":\"layer_1_join_0_index_pattern\",\"metrics\":[{\"type\":\"count\",\"label\":\"web logs count\"}],\"applyGlobalQuery\":true}}]},{\"id\":\"gaxya\",\"label\":\"Actual Requests\",\"minZoom\":9,\"maxZoom\":24,\"alpha\":1,\"sourceDescriptor\":{\"id\":\"b7486535-171b-4d3b-bb2e-33c1a0a2854c\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"tooltipProperties\":[\"clientip\",\"timestamp\",\"host\",\"request\",\"response\",\"machine.os\",\"agent\",\"bytes\"],\"indexPatternRefName\":\"layer_2_source_index_pattern\",\"applyGlobalQuery\":true,\"scalingType\":\"LIMIT\"},\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#2200ff\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":2}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"name\":\"bytes\",\"origin\":\"source\"},\"minSize\":1,\"maxSize\":23,\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}}}},\"type\":\"GEOJSON_VECTOR\"},{\"id\":\"tfi3f\",\"label\":\"Total Requests and Bytes\",\"minZoom\":0,\"maxZoom\":9,\"alpha\":1,\"sourceDescriptor\":{\"type\":\"ES_GEO_GRID\",\"resolution\":\"COARSE\",\"id\":\"8aaa65b5-a4e9-448b-9560-c98cb1c5ac5b\",\"geoField\":\"geo.coordinates\",\"requestType\":\"point\",\"metrics\":[{\"type\":\"count\",\"label\":\"web logs count\"},{\"type\":\"sum\",\"field\":\"bytes\"}],\"indexPatternRefName\":\"layer_3_source_index_pattern\",\"applyGlobalQuery\":true},\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"name\":\"doc_count\",\"origin\":\"source\"},\"color\":\"Blues\",\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"name\":\"sum_of_bytes\",\"origin\":\"source\"},\"minSize\":7,\"maxSize\":25,\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}},\"labelText\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"name\":\"doc_count\",\"origin\":\"source\"},\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}},\"labelSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":12,\"maxSize\":24,\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}}}},\"type\":\"GEOJSON_VECTOR\"}]",
+            "mapStateJSON": "{\"zoom\":3.64,\"center\":{\"lon\":-88.92107,\"lat\":42.16337},\"timeFilters\":{\"from\":\"now-7d\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":0},\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"settings\":{\"autoFitToDataBounds\":false}}",
+            "title": "[Logs] Total Requests and Bytes",
+            "uiStateJSON": "{\"isDarkMode\":false}"
+          },
+          "coreMigrationVersion": "8.8.0",
+          "created_at": "2023-08-23T20:03:32.204Z",
+          "id": "de71f4f0-1902-11e9-919b-ffe5949a18d2",
+          "managed": false,
+          "references": [
+            {
+              "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+              "name": "layer_1_join_0_index_pattern",
+              "type": "index-pattern"
+            },
+            {
+              "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+              "name": "layer_2_source_index_pattern",
+              "type": "index-pattern"
+            },
+            {
+              "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+              "name": "layer_3_source_index_pattern",
+              "type": "index-pattern"
+            }
+          ],
+          "type": "map",
+          "typeMigrationVersion": "8.4.0",
+          "updated_at": "2023-08-23T20:03:32.204Z",
+          "version": "WzEzLDFd"
+        }
+      },
+      "import_objects_request": {
+        "value": {
+          "file": "file.ndjson"
+        }
+      },
+      "import_objects_response": {
+        "summary": "The import objects API response indicates a successful import and the objects are created. Since these objects are created as new copies, each entry in the successResults array includes a destinationId attribute.",
+        "value": {
+          "successCount": 1,
+          "success": true,
+          "successResults": [
+            {
+              "type": "index-pattern",
+              "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+              "meta": {
+                "title": "Kibana Sample Data Logs",
+                "icon": "indexPatternApp"
+              },
+              "managed": false,
+              "destinationId": "82d2760c-468f-49cf-83aa-b9a35b6a8943"
+            }
+          ]
+        }
+      }
+    },
+    "schemas": {
+      "400_response": {
+        "title": "Bad request",
+        "type": "object",
+        "required": [
+          "error",
+          "message",
+          "statusCode"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": [
+              "Bad Request"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "statusCode": {
+            "type": "integer",
+            "enum": [
+              400
+            ]
+          }
+        }
+      }
+    }
+  }
+}

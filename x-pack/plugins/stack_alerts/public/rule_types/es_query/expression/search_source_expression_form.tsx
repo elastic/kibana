@@ -12,7 +12,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
+import type { SearchBarProps, StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters, getTime } from '@kbn/data-plugin/public';
 import type { SavedQuery, ISearchSource } from '@kbn/data-plugin/public';
@@ -34,7 +34,7 @@ import {
   SearchType,
   SourceField,
 } from '../types';
-import { DEFAULT_VALUES } from '../constants';
+import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { useTriggerUiActionServices, convertFieldSpecToFieldOption } from '../util';
@@ -82,7 +82,7 @@ const isSearchSourceParam = (action: LocalStateAction): action is SearchSourcePa
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
   const services = useTriggerUiActionServices();
   const unifiedSearch = services.unifiedSearch;
-  const { dataViews, dataViewEditor } = useTriggerUiActionServices();
+  const { dataViews, dataViewEditor, isServerless } = useTriggerUiActionServices();
   const { searchSource, errors, initialSavedQuery, setParam, ruleParams } = props;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
 
@@ -115,7 +115,11 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       groupBy: ruleParams.groupBy ?? DEFAULT_VALUES.GROUP_BY,
       termSize: ruleParams.termSize ?? DEFAULT_VALUES.TERM_SIZE,
       termField: ruleParams.termField,
-      size: ruleParams.size ?? DEFAULT_VALUES.SIZE,
+      size: ruleParams.size
+        ? ruleParams.size
+        : isServerless
+        ? SERVERLESS_DEFAULT_VALUES.SIZE
+        : DEFAULT_VALUES.SIZE,
       excludeHitsFromPreviousRun:
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
       sourceFields: ruleParams.sourceFields,
@@ -135,9 +139,12 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));
   }, []);
 
-  const onUpdateFilters = useCallback((newFilters) => {
-    dispatch({ type: 'filter', payload: mapAndFlattenFilters(newFilters) });
-  }, []);
+  const onUpdateFilters = useCallback<NonNullable<StatefulSearchBarProps['onFiltersUpdated']>>(
+    (newFilters) => {
+      dispatch({ type: 'filter', payload: mapAndFlattenFilters(newFilters) });
+    },
+    []
+  );
 
   const onChangeQuery = useCallback(
     ({ query: newQuery }: { query?: Query }) => {
@@ -381,7 +388,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onChangeWindowUnit={onChangeWindowUnit}
         onChangeSizeValue={onChangeSizeValue}
         errors={errors}
-        hasValidationErrors={hasExpressionValidationErrors(props.ruleParams)}
+        hasValidationErrors={hasExpressionValidationErrors(props.ruleParams, isServerless)}
         onTestFetch={onTestFetch}
         onCopyQuery={onCopyQuery}
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}

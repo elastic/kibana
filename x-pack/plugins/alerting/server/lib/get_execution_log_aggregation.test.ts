@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression } from '@kbn/es-query';
 import {
   getNumExecutions,
@@ -73,7 +74,7 @@ describe('getNumExecutions', () => {
         new Date('2020-12-02T00:00:00.000Z'),
         '1s'
       )
-    ).toEqual(1000);
+    ).toEqual(10000);
   });
 });
 
@@ -146,38 +147,48 @@ describe('getExecutionLogAggregation', () => {
         },
         aggs: {
           executionUuidCardinality: {
-            aggs: {
-              executionUuidCardinality: {
-                cardinality: { field: 'kibana.alert.rule.execution.uuid' },
-              },
+            sum_bucket: {
+              buckets_path: 'executionUuidCardinalityBuckets>ruleExecution._count',
             },
-            filter: {
-              bool: {
-                must: [
-                  {
-                    bool: {
-                      must: [
-                        {
-                          match: {
-                            'event.action': 'execute',
-                          },
+          },
+          executionUuidCardinalityBuckets: {
+            terms: {
+              field: 'kibana.alert.rule.execution.uuid',
+              size: 10000,
+              order: [{ 'ruleExecution>executeStartTime': 'desc' }],
+            },
+            aggs: {
+              ruleExecution: {
+                filter: {
+                  bool: {
+                    must: [
+                      {
+                        bool: {
+                          must: [
+                            {
+                              match: {
+                                'event.action': 'execute',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.provider': 'alerting',
+                              },
+                            },
+                          ],
                         },
-                        {
-                          match: {
-                            'event.provider': 'alerting',
-                          },
-                        },
-                      ],
-                    },
+                      },
+                    ],
                   },
-                ],
+                },
+                aggs: { executeStartTime: { min: { field: 'event.start' } } },
               },
             },
           },
           executionUuid: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
-              size: 1000,
+              size: 10000,
               order: [
                 { 'ruleExecution>executeStartTime': 'asc' },
                 { 'ruleExecution>executionDuration': 'desc' },
@@ -330,50 +341,60 @@ describe('getExecutionLogAggregation', () => {
         },
         aggs: {
           executionUuidCardinality: {
-            aggs: {
-              executionUuidCardinality: {
-                cardinality: { field: 'kibana.alert.rule.execution.uuid' },
-              },
+            sum_bucket: {
+              buckets_path: 'executionUuidCardinalityBuckets>ruleExecution._count',
             },
-            filter: {
-              bool: {
+          },
+          executionUuidCardinalityBuckets: {
+            terms: {
+              field: 'kibana.alert.rule.execution.uuid',
+              size: 10000,
+              order: [{ 'ruleExecution>executeStartTime': 'desc' }],
+            },
+            aggs: {
+              ruleExecution: {
                 filter: {
                   bool: {
-                    minimum_should_match: 1,
-                    should: [
+                    filter: {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              test: 'test',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    must: [
                       {
-                        match: {
-                          test: 'test',
+                        bool: {
+                          must: [
+                            {
+                              match: {
+                                'event.action': 'execute',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.provider': 'alerting',
+                              },
+                            },
+                          ],
                         },
                       },
                     ],
                   },
                 },
-                must: [
-                  {
-                    bool: {
-                      must: [
-                        {
-                          match: {
-                            'event.action': 'execute',
-                          },
-                        },
-                        {
-                          match: {
-                            'event.provider': 'alerting',
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
+                aggs: { executeStartTime: { min: { field: 'event.start' } } },
               },
             },
           },
           executionUuid: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
-              size: 1000,
+              size: 10000,
               order: [
                 { 'ruleExecution>executeStartTime': 'asc' },
                 { 'ruleExecution>executionDuration': 'desc' },
@@ -538,50 +559,60 @@ describe('getExecutionLogAggregation', () => {
         },
         aggs: {
           executionUuidCardinality: {
-            aggs: {
-              executionUuidCardinality: {
-                cardinality: { field: 'kibana.alert.rule.execution.uuid' },
-              },
+            sum_bucket: {
+              buckets_path: 'executionUuidCardinalityBuckets>ruleExecution._count',
             },
-            filter: {
-              bool: {
+          },
+          executionUuidCardinalityBuckets: {
+            terms: {
+              field: 'kibana.alert.rule.execution.uuid',
+              size: 10000,
+              order: [{ 'ruleExecution>executeStartTime': 'desc' }],
+            },
+            aggs: {
+              ruleExecution: {
                 filter: {
                   bool: {
-                    minimum_should_match: 1,
-                    should: [
+                    filter: {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              test: 'test',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    must: [
                       {
-                        match: {
-                          test: 'test',
+                        bool: {
+                          must: [
+                            {
+                              match: {
+                                'event.action': 'execute',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.provider': 'alerting',
+                              },
+                            },
+                          ],
                         },
                       },
                     ],
                   },
                 },
-                must: [
-                  {
-                    bool: {
-                      must: [
-                        {
-                          match: {
-                            'event.action': 'execute',
-                          },
-                        },
-                        {
-                          match: {
-                            'event.provider': 'alerting',
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
+                aggs: { executeStartTime: { min: { field: 'event.start' } } },
               },
             },
           },
           executionUuid: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
-              size: 1000,
+              size: 10000,
               order: [
                 { 'ruleExecution>executeStartTime': 'asc' },
                 { 'ruleExecution>executionDuration': 'desc' },
@@ -726,7 +757,12 @@ describe('getExecutionLogAggregation', () => {
 
 describe('formatExecutionLogResult', () => {
   test('should return empty results if aggregations are undefined', () => {
-    expect(formatExecutionLogResult({ aggregations: undefined })).toEqual({
+    expect(
+      formatExecutionLogResult({
+        aggregations: undefined,
+        hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+      })
+    ).toEqual({
       total: 0,
       data: [],
     });
@@ -735,6 +771,7 @@ describe('formatExecutionLogResult', () => {
     expect(
       formatExecutionLogResult({
         aggregations: { excludeExecuteStart: undefined as unknown as ExecutionUuidAggResult },
+        hits: { total: { value: 0, relation: 'eq' }, hits: [] },
       })
     ).toEqual({
       total: 0,
@@ -932,12 +969,14 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            executionUuidCardinality: {
-              value: 374,
-            },
+            value: 374,
           },
         },
       },
+      hits: {
+        total: { value: 875, relation: 'eq' },
+        hits: [],
+      } as estypes.SearchHitsMetadata<unknown>,
     };
     expect(formatExecutionLogResult(results)).toEqual({
       total: 374,
@@ -1188,12 +1227,14 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            executionUuidCardinality: {
-              value: 374,
-            },
+            value: 374,
           },
         },
       },
+      hits: {
+        total: { value: 875, relation: 'eq' },
+        hits: [],
+      } as estypes.SearchHitsMetadata<unknown>,
     };
     expect(formatExecutionLogResult(results)).toEqual({
       total: 374,
@@ -1436,12 +1477,14 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            executionUuidCardinality: {
-              value: 374,
-            },
+            value: 374,
           },
         },
       },
+      hits: {
+        total: { value: 875, relation: 'eq' },
+        hits: [],
+      } as estypes.SearchHitsMetadata<unknown>,
     };
     expect(formatExecutionLogResult(results)).toEqual({
       total: 374,
@@ -1689,12 +1732,14 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            executionUuidCardinality: {
-              value: 417,
-            },
+            value: 417,
           },
         },
       },
+      hits: {
+        total: { value: 875, relation: 'eq' },
+        hits: [],
+      } as estypes.SearchHitsMetadata<unknown>,
     };
     expect(formatExecutionLogResult(results)).toEqual({
       total: 417,
@@ -1749,6 +1794,211 @@ describe('formatExecutionLogResult', () => {
         },
       ],
     });
+  });
+
+  test('should throw an error when document is above 10,000', () => {
+    const results = {
+      aggregations: {
+        excludeExecuteStart: {
+          meta: {},
+          doc_count: 875,
+          executionUuid: {
+            meta: {},
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'ecf7ac4c-1c15-4a1d-818a-cacbf57f6158',
+                doc_count: 32,
+                timeoutMessage: {
+                  meta: {},
+                  doc_count: 0,
+                },
+                ruleExecution: {
+                  meta: {},
+                  doc_count: 1,
+                  numTriggeredActions: {
+                    value: 5.0,
+                  },
+                  numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
+                    value: 5.0,
+                  },
+                  outcomeMessageAndMaintenanceWindow: {
+                    hits: {
+                      total: {
+                        value: 1,
+                        relation: 'eq',
+                      },
+                      max_score: 1.0,
+                      hits: [
+                        {
+                          _index: '.kibana-event-log-8.2.0-000001',
+                          _id: '7xKcb38BcntAq5ycFwiu',
+                          _score: 1.0,
+                          _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
+                            event: {
+                              outcome: 'success',
+                            },
+                            kibana: {
+                              version: '8.2.0',
+                              alerting: {
+                                outcome: 'success',
+                              },
+                            },
+                            message:
+                              "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  scheduleDelay: {
+                    value: 3.126e9,
+                  },
+                  totalSearchDuration: {
+                    value: 0.0,
+                  },
+                  esSearchDuration: {
+                    value: 0.0,
+                  },
+                  executionDuration: {
+                    value: 1.374e9,
+                  },
+                  executeStartTime: {
+                    value: 1.646844973039e12,
+                    value_as_string: '2022-03-09T16:56:13.039Z',
+                  },
+                },
+                actionExecution: {
+                  meta: {},
+                  doc_count: 5,
+                  actionOutcomes: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      {
+                        key: 'failure',
+                        doc_count: 5,
+                      },
+                    ],
+                  },
+                },
+              },
+              {
+                key: '61bb867b-661a-471f-bf92-23471afa10b3',
+                doc_count: 32,
+                timeoutMessage: {
+                  meta: {},
+                  doc_count: 0,
+                },
+                ruleExecution: {
+                  meta: {},
+                  doc_count: 1,
+                  numTriggeredActions: {
+                    value: 5.0,
+                  },
+                  numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
+                    value: 5.0,
+                  },
+                  outcomeMessageAndMaintenanceWindow: {
+                    hits: {
+                      total: {
+                        value: 1,
+                        relation: 'eq',
+                      },
+                      max_score: 1.0,
+                      hits: [
+                        {
+                          _index: '.kibana-event-log-8.2.0-000001',
+                          _id: 'zRKbb38BcntAq5ycOwgk',
+                          _score: 1.0,
+                          _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
+                            event: {
+                              outcome: 'success',
+                            },
+                            kibana: {
+                              version: '8.2.0',
+                              alert: {
+                                maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
+                              },
+                              alerting: {
+                                outcome: 'success',
+                              },
+                            },
+                            message:
+                              "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  scheduleDelay: {
+                    value: 3.133e9,
+                  },
+                  totalSearchDuration: {
+                    value: 0.0,
+                  },
+                  esSearchDuration: {
+                    value: 0.0,
+                  },
+                  executionDuration: {
+                    value: 4.18e8,
+                  },
+                  executeStartTime: {
+                    value: 1.646844917518e12,
+                    value_as_string: '2022-03-09T16:55:17.518Z',
+                  },
+                },
+                actionExecution: {
+                  meta: {},
+                  doc_count: 5,
+                  actionOutcomes: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      {
+                        key: 'success',
+                        doc_count: 5,
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+          executionUuidCardinality: {
+            value: 417,
+          },
+        },
+      },
+      hits: {
+        total: { value: 10000, relation: 'gte' },
+        hits: [],
+      } as estypes.SearchHitsMetadata<unknown>,
+    };
+    expect(() => formatExecutionLogResult(results)).toThrowErrorMatchingInlineSnapshot(
+      `"Results are limited to 10,000 documents, refine your search to see others."`
+    );
   });
 });
 
@@ -2254,6 +2504,10 @@ describe('formatExecutionKPIAggBuckets', () => {
     expect(
       formatExecutionKPIResult({
         aggregations: undefined,
+        hits: {
+          total: { value: 875, relation: 'eq' },
+          hits: [],
+        } as estypes.SearchHitsMetadata<unknown>,
       })
     ).toEqual({
       activeAlerts: 0,
@@ -2375,6 +2629,10 @@ describe('formatExecutionKPIAggBuckets', () => {
           },
         },
       },
+      hits: {
+        total: { value: 875, relation: 'eq' },
+        hits: [],
+      } as estypes.SearchHitsMetadata<unknown>,
     };
 
     expect(formatExecutionKPIResult(results)).toEqual({
@@ -2497,6 +2755,10 @@ describe('formatExecutionKPIAggBuckets', () => {
           },
         },
       },
+      hits: {
+        total: { value: 875, relation: 'eq' },
+        hits: [],
+      } as estypes.SearchHitsMetadata<unknown>,
     };
 
     expect(formatExecutionKPIResult(results)).toEqual({
@@ -2510,5 +2772,210 @@ describe('formatExecutionKPIAggBuckets', () => {
       erroredActions: 3,
       triggeredActions: 10,
     });
+  });
+
+  test('should throw an error when document is above 10,000', () => {
+    const results = {
+      aggregations: {
+        excludeExecuteStart: {
+          meta: {},
+          doc_count: 875,
+          executionUuid: {
+            meta: {},
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'ecf7ac4c-1c15-4a1d-818a-cacbf57f6158',
+                doc_count: 32,
+                timeoutMessage: {
+                  meta: {},
+                  doc_count: 0,
+                },
+                ruleExecution: {
+                  meta: {},
+                  doc_count: 1,
+                  numTriggeredActions: {
+                    value: 5.0,
+                  },
+                  numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
+                    value: 5.0,
+                  },
+                  outcomeMessageAndMaintenanceWindow: {
+                    hits: {
+                      total: {
+                        value: 1,
+                        relation: 'eq',
+                      },
+                      max_score: 1.0,
+                      hits: [
+                        {
+                          _index: '.kibana-event-log-8.2.0-000001',
+                          _id: '7xKcb38BcntAq5ycFwiu',
+                          _score: 1.0,
+                          _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
+                            event: {
+                              outcome: 'success',
+                            },
+                            kibana: {
+                              version: '8.2.0',
+                              alerting: {
+                                outcome: 'success',
+                              },
+                            },
+                            message:
+                              "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  scheduleDelay: {
+                    value: 3.126e9,
+                  },
+                  totalSearchDuration: {
+                    value: 0.0,
+                  },
+                  esSearchDuration: {
+                    value: 0.0,
+                  },
+                  executionDuration: {
+                    value: 1.374e9,
+                  },
+                  executeStartTime: {
+                    value: 1.646844973039e12,
+                    value_as_string: '2022-03-09T16:56:13.039Z',
+                  },
+                },
+                actionExecution: {
+                  meta: {},
+                  doc_count: 5,
+                  actionOutcomes: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      {
+                        key: 'failure',
+                        doc_count: 5,
+                      },
+                    ],
+                  },
+                },
+              },
+              {
+                key: '61bb867b-661a-471f-bf92-23471afa10b3',
+                doc_count: 32,
+                timeoutMessage: {
+                  meta: {},
+                  doc_count: 0,
+                },
+                ruleExecution: {
+                  meta: {},
+                  doc_count: 1,
+                  numTriggeredActions: {
+                    value: 5.0,
+                  },
+                  numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
+                    value: 5.0,
+                  },
+                  outcomeMessageAndMaintenanceWindow: {
+                    hits: {
+                      total: {
+                        value: 1,
+                        relation: 'eq',
+                      },
+                      max_score: 1.0,
+                      hits: [
+                        {
+                          _index: '.kibana-event-log-8.2.0-000001',
+                          _id: 'zRKbb38BcntAq5ycOwgk',
+                          _score: 1.0,
+                          _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
+                            event: {
+                              outcome: 'success',
+                            },
+                            kibana: {
+                              version: '8.2.0',
+                              alert: {
+                                maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
+                              },
+                              alerting: {
+                                outcome: 'success',
+                              },
+                            },
+                            message:
+                              "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  scheduleDelay: {
+                    value: 3.133e9,
+                  },
+                  totalSearchDuration: {
+                    value: 0.0,
+                  },
+                  esSearchDuration: {
+                    value: 0.0,
+                  },
+                  executionDuration: {
+                    value: 4.18e8,
+                  },
+                  executeStartTime: {
+                    value: 1.646844917518e12,
+                    value_as_string: '2022-03-09T16:55:17.518Z',
+                  },
+                },
+                actionExecution: {
+                  meta: {},
+                  doc_count: 5,
+                  actionOutcomes: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      {
+                        key: 'success',
+                        doc_count: 5,
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+          executionUuidCardinality: {
+            value: 417,
+          },
+        },
+      },
+      hits: {
+        total: { value: 10000, relation: 'gte' },
+        hits: [],
+      } as estypes.SearchHitsMetadata<unknown>,
+    };
+    expect(() => formatExecutionKPIResult(results)).toThrowErrorMatchingInlineSnapshot(
+      `"Results are limited to 10,000 documents, refine your search to see others."`
+    );
   });
 });

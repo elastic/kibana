@@ -13,7 +13,7 @@ import { startOsqueryCypress } from './runner';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const securitySolutionCypressConfig = await readConfigFile(
     require.resolve(
-      '../../test_serverless/functional/test_suites/security/cypress/security_config.base.ts'
+      '@kbn/test-suites-serverless/functional/test_suites/security/cypress/security_config.base'
     )
   );
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const mockKeystoreData =
@@ -30,19 +31,19 @@ describe('Kibana keystore', () => {
       sandbox.restore();
     });
 
-    it('removes key', () => {
+    it('removes key', async () => {
       const keystore = new Keystore('/data/test.keystore');
 
-      remove(keystore, 'a2');
+      await remove(keystore, 'a2');
 
       expect(keystore.data).toEqual({ 'a1.b2.c3': 'foo' });
     });
 
-    it('persists the keystore', () => {
+    it('persists the keystore', async () => {
       const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');
 
-      remove(keystore, 'a2');
+      await remove(keystore, 'a2');
 
       sinon.assert.calledOnce(keystore.save);
     });

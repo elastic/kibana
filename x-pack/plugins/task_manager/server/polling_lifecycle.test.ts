@@ -20,6 +20,11 @@ import { asOk, Err, isErr, isOk, Result } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { ElasticsearchResponseError } from './lib/identify_es_error';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { TaskCost } from './task';
+import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
+import { TaskPartitioner } from './lib/task_partitioner';
+import { KibanaDiscoveryService } from './kibana_discovery_service';
+import { TaskEventType } from './task_events';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -41,8 +46,12 @@ describe('TaskPollingLifecycle', () => {
   const mockTaskStore = taskStoreMock.create({});
   const taskManagerOpts = {
     config: {
+      discovery: {
+        active_nodes_lookback: '30s',
+        interval: 10000,
+      },
+      kibanas_per_partition: 2,
       enabled: true,
-      max_workers: 10,
       index: 'foo',
       max_attempts: 9,
       poll_interval: 6000000,
@@ -77,22 +86,27 @@ describe('TaskPollingLifecycle', () => {
         warn_threshold: 5000,
       },
       worker_utilization_running_average_window: 5,
-      requeue_invalid_tasks: {
-        enabled: false,
-        delay: 3000,
-        max_attempts: 20,
-      },
       metrics_reset_interval: 3000,
       claim_strategy: 'default',
+      request_timeouts: {
+        update_by_query: 1000,
+      },
     },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
     unusedTypes: [],
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
-    maxWorkersConfiguration$: of(100),
+    startingCapacity: 20,
+    capacityConfiguration$: of(20),
     pollIntervalConfiguration$: of(100),
     executionContext,
+    taskPartitioner: new TaskPartitioner({
+      logger: taskManagerLogger,
+      podName: 'test',
+      kibanaDiscoveryService: {} as KibanaDiscoveryService,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+    }),
   };
 
   beforeEach(() => {
@@ -104,12 +118,23 @@ describe('TaskPollingLifecycle', () => {
   afterEach(() => clock.restore());
 
   describe('start', () => {
+    taskManagerOpts.definitions.registerTaskDefinitions({
+      report: {
+        title: 'report',
+        maxConcurrency: 1,
+        cost: TaskCost.ExtraLarge,
+        createTaskRunner: jest.fn(),
+      },
+      quickReport: {
+        title: 'quickReport',
+        maxConcurrency: 5,
+        createTaskRunner: jest.fn(),
+      },
+    });
+
     test('begins polling once the ES and SavedObjects services are available', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      new TaskPollingLifecycle({
-        ...taskManagerOpts,
-        elasticsearchAndSOAvailability$,
-      });
+      new TaskPollingLifecycle({ ...taskManagerOpts, elasticsearchAndSOAvailability$ });
 
       clock.tick(150);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
@@ -120,55 +145,70 @@ describe('TaskPollingLifecycle', () => {
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
     });
 
-    test('provides TaskClaiming with the capacity available', () => {
+    test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_UPDATE_BY_QUERY', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      const maxWorkers$ = new Subject<number>();
-      taskManagerOpts.definitions.registerTaskDefinitions({
-        report: {
-          title: 'report',
-          maxConcurrency: 1,
-          createTaskRunner: jest.fn(),
-        },
-        quickReport: {
-          title: 'quickReport',
-          maxConcurrency: 5,
-          createTaskRunner: jest.fn(),
-        },
-      });
+      const capacity$ = new Subject<number>();
 
       new TaskPollingLifecycle({
         ...taskManagerOpts,
         elasticsearchAndSOAvailability$,
-        maxWorkersConfiguration$: maxWorkers$,
+        capacityConfiguration$: capacity$,
       });
 
       const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock
-        .calls[0][0].getCapacity;
+        .calls[0][0].getAvailableCapacity;
 
-      maxWorkers$.next(20);
-      expect(taskClaimingGetCapacity()).toEqual(20);
+      capacity$.next(40);
+      expect(taskClaimingGetCapacity()).toEqual(40);
       expect(taskClaimingGetCapacity('report')).toEqual(1);
       expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
 
-      maxWorkers$.next(30);
-      expect(taskClaimingGetCapacity()).toEqual(30);
+      capacity$.next(60);
+      expect(taskClaimingGetCapacity()).toEqual(60);
       expect(taskClaimingGetCapacity('report')).toEqual(1);
       expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
 
-      maxWorkers$.next(2);
-      expect(taskClaimingGetCapacity()).toEqual(2);
+      capacity$.next(4);
+      expect(taskClaimingGetCapacity()).toEqual(4);
       expect(taskClaimingGetCapacity('report')).toEqual(1);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(2);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(4);
+    });
+
+    test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_MGET', () => {
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const capacity$ = new Subject<number>();
+
+      new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        config: { ...taskManagerOpts.config, claim_strategy: CLAIM_STRATEGY_MGET },
+        elasticsearchAndSOAvailability$,
+        capacityConfiguration$: capacity$,
+      });
+
+      const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock
+        .calls[0][0].getAvailableCapacity;
+
+      capacity$.next(40);
+      expect(taskClaimingGetCapacity()).toEqual(80);
+      expect(taskClaimingGetCapacity('report')).toEqual(10);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
+
+      capacity$.next(60);
+      expect(taskClaimingGetCapacity()).toEqual(120);
+      expect(taskClaimingGetCapacity('report')).toEqual(10);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
+
+      capacity$.next(4);
+      expect(taskClaimingGetCapacity()).toEqual(8);
+      expect(taskClaimingGetCapacity('report')).toEqual(8);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(8);
     });
   });
 
   describe('stop', () => {
     test('stops polling once the ES and SavedObjects services become unavailable', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      new TaskPollingLifecycle({
-        elasticsearchAndSOAvailability$,
-        ...taskManagerOpts,
-      });
+      new TaskPollingLifecycle({ elasticsearchAndSOAvailability$, ...taskManagerOpts });
 
       elasticsearchAndSOAvailability$.next(true);
 
@@ -215,7 +255,7 @@ describe('TaskPollingLifecycle', () => {
         of(
           asOk({
             docs: [],
-            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0, tasksRejected: 0 },
+            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
           })
         )
       );
@@ -297,7 +337,7 @@ describe('TaskPollingLifecycle', () => {
         of(
           asOk({
             docs: [],
-            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0, tasksRejected: 0 },
+            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
           })
         )
       );
@@ -319,6 +359,55 @@ describe('TaskPollingLifecycle', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
         );
+      });
+
+      const workerUtilizationEvent = emittedEvents.find(
+        (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
+      );
+      expect(workerUtilizationEvent).toEqual({
+        id: 'workerUtilization',
+        type: 'TASK_MANAGER_STAT',
+        event: { tag: 'ok', value: 0 },
+      });
+    });
+
+    test('should set utilization to max when capacity is not fully reached but there are tasks left unclaimed', async () => {
+      clock.restore();
+      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() =>
+        of(
+          asOk({
+            docs: [],
+            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0, tasksLeftUnclaimed: 2 },
+          })
+        )
+      );
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const taskPollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const emittedEvents: TaskLifecycleEvent[] = [];
+
+      taskPollingLifecycle.events.subscribe((event: TaskLifecycleEvent) =>
+        emittedEvents.push(event)
+      );
+
+      elasticsearchAndSOAvailability$.next(true);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil('workerUtilizationEvent emitted', () => {
+        return !!emittedEvents.find(
+          (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
+        );
+      });
+
+      const workerUtilizationEvent = emittedEvents.find(
+        (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
+      );
+      expect(workerUtilizationEvent).toEqual({
+        id: 'workerUtilization',
+        type: 'TASK_MANAGER_STAT',
+        event: { tag: 'ok', value: 100 },
       });
     });
 
@@ -345,6 +434,130 @@ describe('TaskPollingLifecycle', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
         );
+      });
+    });
+  });
+
+  describe('pollingLifecycleEvents events', () => {
+    test('should emit success event when polling is successful', async () => {
+      clock.restore();
+      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() =>
+        of(
+          asOk({
+            docs: [],
+            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
+          })
+        )
+      );
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const taskPollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const emittedEvents: TaskLifecycleEvent[] = [];
+
+      taskPollingLifecycle.events.subscribe((event: TaskLifecycleEvent) =>
+        emittedEvents.push(event)
+      );
+
+      elasticsearchAndSOAvailability$.next(true);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil('pollingCycleEvent emitted', () => {
+        return !!emittedEvents.find(
+          (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
+        );
+      });
+
+      const pollingCycleEvent = emittedEvents.find(
+        (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
+      );
+
+      expect(pollingCycleEvent!.event).toEqual({
+        tag: 'ok',
+        value: {
+          result: 'NoTasksClaimed',
+          stats: {
+            tasksUpdated: 0,
+            tasksConflicted: 0,
+            tasksClaimed: 0,
+          },
+        },
+      });
+    });
+
+    test('should emit failure event when polling error occurs', async () => {
+      clock.restore();
+      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() => {
+        throw new Error('booo');
+      });
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const taskPollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const emittedEvents: TaskLifecycleEvent[] = [];
+
+      taskPollingLifecycle.events.subscribe((event: TaskLifecycleEvent) =>
+        emittedEvents.push(event)
+      );
+
+      elasticsearchAndSOAvailability$.next(true);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil('pollingCycleEvent emitted', () => {
+        return !!emittedEvents.find(
+          (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
+        );
+      });
+
+      const pollingCycleEvent = emittedEvents.find(
+        (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
+      );
+
+      expect(pollingCycleEvent!.event).toEqual({
+        tag: 'err',
+        error: new Error(`Failed to poll for work: Error: booo`),
+      });
+    });
+
+    test('should emit failure event when polling is successful but individual task errors reported', async () => {
+      clock.restore();
+      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() =>
+        of(
+          asOk({
+            docs: [],
+            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0, tasksErrors: 2 },
+          })
+        )
+      );
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const taskPollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const emittedEvents: TaskLifecycleEvent[] = [];
+
+      taskPollingLifecycle.events.subscribe((event: TaskLifecycleEvent) =>
+        emittedEvents.push(event)
+      );
+
+      elasticsearchAndSOAvailability$.next(true);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil('pollingCycleEvent emitted', () => {
+        return !!emittedEvents.find(
+          (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
+        );
+      });
+
+      const pollingCycleEvent = emittedEvents.find(
+        (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
+      );
+
+      expect(pollingCycleEvent!.event).toEqual({
+        tag: 'err',
+        error: new Error(`Partially failed to poll for work: some tasks could not be claimed.`),
       });
     });
   });

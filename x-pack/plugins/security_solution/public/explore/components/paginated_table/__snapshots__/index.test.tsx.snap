@@ -9,6 +9,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
     loading={false}
   >
     <HeaderSectionComponent
+      inspectMultiple={true}
       subtitle="Showing: 1 Test Unit"
       title="Hosts"
       toggleQuery={[Function]}
@@ -91,8 +92,12 @@ exports[`Paginated Table Component rendering it renders the default load more ta
       }
       onChange={[Function]}
     />
-    <FooterAction>
-      <EuiFlexItem>
+    <FooterAction
+      justifyContent="space-between"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
         <EuiPopover
           anchorPosition="downCenter"
           button={

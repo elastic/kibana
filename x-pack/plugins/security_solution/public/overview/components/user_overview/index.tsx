@@ -10,12 +10,15 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
+import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/default_renderer';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -35,12 +38,11 @@ import { OverviewDescriptionList } from '../../../common/components/overview_des
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_onboarding/risk_score_header_title';
-import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { RiskScoreDocTooltip } from '../common';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
-  sourcererScopeId?: SourcererScopeName;
+  scopeId?: string;
   data: UserItem;
   id: string;
   isDraggable?: boolean;
@@ -61,11 +63,13 @@ const UserRiskOverviewWrapper = styled(EuiFlexGroup)`
   width: ${({ $width }: { $width: string }) => $width};
 `;
 
+export const USER_OVERVIEW_RISK_SCORE_QUERY_ID = 'riskInputsTabQuery';
+
 export const UserOverview = React.memo<UserSummaryProps>(
   ({
     anomaliesData,
     contextID,
-    sourcererScopeId,
+    scopeId,
     data,
     id,
     isDraggable = false,
@@ -86,11 +90,29 @@ export const UserOverview = React.memo<UserSummaryProps>(
       () => (userName ? buildUserNamesFilter([userName]) : undefined),
       [userName]
     );
+    const { deleteQuery, setQuery } = useGlobalTime();
 
-    const { data: userRisk, isAuthorized } = useRiskScore({
+    const {
+      data: userRisk,
+      isAuthorized,
+      inspect: inspectRiskScore,
+      loading: loadingRiskScore,
+      refetch: refetchRiskScore,
+    } = useRiskScore({
       filterQuery,
       skip: userName == null,
       riskEntity: RiskScoreEntity.user,
+      onlyLatest: false,
+      pagination: FIRST_RECORD_PAGINATION,
+    });
+
+    useQueryInspector({
+      deleteQuery,
+      inspect: inspectRiskScore,
+      loading: loadingRiskScore,
+      queryId: USER_OVERVIEW_RISK_SCORE_QUERY_ID,
+      refetch: refetchRiskScore,
+      setQuery,
     });
 
     const getDefaultRenderer = useCallback(
@@ -100,10 +122,10 @@ export const UserOverview = React.memo<UserSummaryProps>(
           attrName={fieldName}
           idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
           isDraggable={isDraggable}
-          sourcererScopeId={sourcererScopeId}
+          scopeId={scopeId}
         />
       ),
-      [contextID, isDraggable, sourcererScopeId]
+      [contextID, isDraggable, scopeId]
     );
 
     const [userRiskScore, userRiskLevel] = useMemo(() => {
@@ -134,7 +156,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.user} />
+                <RiskScoreDocTooltip anchorPosition="upCenter" />
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
@@ -245,7 +267,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 rowItems={getOr([], 'host.ip', data)}
                 attrName={'host.ip'}
                 idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
-                sourcererScopeId={sourcererScopeId}
+                scopeId={scopeId}
                 isDraggable={isDraggable}
                 render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
               />
@@ -258,7 +280,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
         indexPatterns,
         getDefaultRenderer,
         contextID,
-        sourcererScopeId,
+        scopeId,
         isDraggable,
         userName,
         firstColumn,

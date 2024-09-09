@@ -34,7 +34,6 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
       ]
     }
     data-test-subj="mlCalendarTable loaded"
-    isSelectable={true}
     itemId="calendar_id"
     items={
       Array [
@@ -66,7 +65,6 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         ],
       }
     }
-    responsive={true}
     rowProps={[Function]}
     search={
       Object {
@@ -80,10 +78,9 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
             isDisabled={false}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="New"
               id="xpack.ml.calendarsList.table.newButtonLabel"
-              values={Object {}}
             />
           </EuiButton>,
           <EuiButton
@@ -94,10 +91,9 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Delete"
               id="xpack.ml.calendarsList.table.deleteButtonLabel"
-              values={Object {}}
             />
           </EuiButton>,
         ],

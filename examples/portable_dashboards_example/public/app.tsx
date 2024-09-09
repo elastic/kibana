@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import ReactDOM from 'react-dom';
@@ -17,7 +18,7 @@ import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { DualReduxExample } from './dual_redux_example';
-import { PortableDashboardsExampleStartDeps } from './plugin';
+import { StartDeps } from './plugin';
 import { StaticByValueExample } from './static_by_value_example';
 import { StaticByReferenceExample } from './static_by_reference_example';
 import { DynamicByReferenceExample } from './dynamically_add_panels_example';
@@ -27,7 +28,7 @@ const DASHBOARD_DEMO_PATH = '/dashboardDemo';
 const DASHBOARD_LIST_PATH = '/listingDemo';
 
 export const renderApp = async (
-  { data, dashboard }: PortableDashboardsExampleStartDeps,
+  { data, dashboard }: StartDeps,
   { element, history }: AppMountParameters
 ) => {
   ReactDOM.render(
@@ -42,8 +43,8 @@ const PortableDashboardsDemos = ({
   dashboard,
   history,
 }: {
-  data: PortableDashboardsExampleStartDeps['data'];
-  dashboard: PortableDashboardsExampleStartDeps['dashboard'];
+  data: StartDeps['data'];
+  dashboard: StartDeps['dashboard'];
   history: AppMountParameters['history'];
 }) => {
   return (
@@ -69,8 +70,8 @@ const DashboardsDemo = ({
   dashboard,
 }: {
   history: AppMountParameters['history'];
-  data: PortableDashboardsExampleStartDeps['data'];
-  dashboard: PortableDashboardsExampleStartDeps['dashboard'];
+  data: StartDeps['data'];
+  dashboard: StartDeps['dashboard'];
 }) => {
   const { loading, value: dataviewResults } = useAsync(async () => {
     const dataViews = await data.dataViews.find('kibana_sample_data_logs');

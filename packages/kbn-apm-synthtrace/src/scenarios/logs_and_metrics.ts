@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import {
   LogDocument,
   log,
@@ -16,29 +18,29 @@ import {
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
+import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
+import { getCluster, getCloudRegion, getCloudProvider } from './helpers/logs_mock_data';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
+// Logs Data logic
+const MESSAGE_LOG_LEVELS = [
+  { message: 'A simple log', level: 'info' },
+  { message: 'Yet another debug log', level: 'debug' },
+  { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
+];
+
 const scenario: Scenario<LogDocument> = async (runOptions) => {
+  const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
+
   return {
+    bootstrap: async ({ logsEsClient }) => {
+      if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
+    },
     generate: ({ range, clients: { logsEsClient, apmEsClient } }) => {
       const { numServices = 3 } = runOptions.scenarioOpts || {};
       const { logger } = runOptions;
-
-      // Logs Data logic
-      const MESSAGE_LOG_LEVELS = [
-        { message: 'A simple log', level: 'info' },
-        { message: 'Yet another debug log', level: 'debug' },
-        { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
-      ];
-      const CLOUD_PROVIDERS = ['gcp', 'aws', 'azure'];
-      const CLOUD_REGION = ['eu-central-1', 'us-east-1', 'area-51'];
-
-      const CLUSTER = [
-        { clusterId: generateShortId(), clusterName: 'synth-cluster-1' },
-        { clusterId: generateShortId(), clusterName: 'synth-cluster-2' },
-        { clusterId: generateShortId(), clusterName: 'synth-cluster-3' },
-      ];
 
       const SERVICE_NAMES = Array(3)
         .fill(null)
@@ -52,20 +54,22 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             .fill(0)
             .map(() => {
               const index = Math.floor(Math.random() * 3);
+              const { clusterId, clusterName } = getCluster(index);
+              const cloudRegion = getCloudRegion(index);
               return log
-                .create()
+                .create({ isLogsDb })
                 .message(MESSAGE_LOG_LEVELS[index].message)
                 .logLevel(MESSAGE_LOG_LEVELS[index].level)
                 .service(SERVICE_NAMES[index])
                 .defaults({
                   'trace.id': generateShortId(),
                   'agent.name': 'synth-agent',
-                  'orchestrator.cluster.name': CLUSTER[index].clusterName,
-                  'orchestrator.cluster.id': CLUSTER[index].clusterId,
+                  'orchestrator.cluster.name': clusterName,
+                  'orchestrator.cluster.id': clusterId,
                   'orchestrator.resource.id': generateShortId(),
-                  'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
-                  'cloud.region': CLOUD_REGION[index],
-                  'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
+                  'cloud.provider': getCloudProvider(),
+                  'cloud.region': cloudRegion,
+                  'cloud.availability_zone': `${cloudRegion}a`,
                   'cloud.project.id': generateShortId(),
                   'cloud.instance.id': generateShortId(),
                   'log.file.path': `/logs/${generateLongId()}/error.txt`,
@@ -120,7 +124,10 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             .failure()
             .errors(
               instance
-                .error({ message: '[ResponseError] index_not_found_exception' })
+                .error({
+                  message: '[ResponseError] index_not_found_exception',
+                  type: 'ResponseError',
+                })
                 .timestamp(timestamp + 50)
             )
         );

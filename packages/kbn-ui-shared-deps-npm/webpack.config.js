@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const Path = require('path');
@@ -58,11 +59,12 @@ module.exports = (_, argv) => {
         '@babel/runtime/helpers/wrapNativeSuper',
 
         // modules from npm
+        '@elastic/apm-rum-core',
         '@elastic/charts',
         '@elastic/eui',
+        '@elastic/eui/optimize/es/components/provider/nested',
         '@elastic/eui/optimize/es/services',
         '@elastic/eui/optimize/es/services/format',
-        '@elastic/eui/dist/eui_charts_theme',
         '@elastic/eui/dist/eui_theme_light.json',
         '@elastic/eui/dist/eui_theme_dark.json',
         '@elastic/numeral',
@@ -77,6 +79,7 @@ module.exports = (_, argv) => {
         '@tanstack/react-query-devtools',
         'classnames',
         'fflate',
+        'fastest-levenshtein',
         'history',
         'io-ts',
         'jquery',
@@ -94,7 +97,6 @@ module.exports = (_, argv) => {
         'react',
         'reselect',
         'rxjs',
-        'rxjs/operators',
         'styled-components',
         'tslib',
         'uuid',

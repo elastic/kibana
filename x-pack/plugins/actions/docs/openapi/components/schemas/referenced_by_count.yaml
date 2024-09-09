@@ -3,5 +3,4 @@ description: >
   Indicates the number of saved objects that reference the connector.
   If `is_preconfigured` is true, this value is not calculated.
   This property is returned only by the get all connectors API.
-examples:
-  - 2
+example: 2

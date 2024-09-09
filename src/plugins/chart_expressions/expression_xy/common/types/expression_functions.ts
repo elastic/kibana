@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { type AxisProps, HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
@@ -14,9 +15,13 @@ import type {
   DatatableColumnMeta,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import {
+  LegendSize,
+  XYLegendValue,
+  LegendLayout,
+  ExpressionValueVisDimension,
+} from '@kbn/visualizations-plugin/common';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
 import { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
 import {
@@ -214,6 +219,14 @@ export interface LegendConfig {
    * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
    */
   legendSize?: LegendSize;
+  /**
+   * metrics to display in the legend
+   */
+
+  legendStats?: XYLegendValue[];
+  layout?: LegendLayout;
+  title?: string;
+  isTitleVisible?: boolean;
 }
 
 // Arguments to XY chart expression, with computed properties
@@ -226,7 +239,6 @@ export interface XYArgs extends DataLayerArgs {
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
-  valuesInLegend?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
   xAxisConfig?: XAxisConfigResult;
@@ -277,7 +289,6 @@ export interface LayeredXYArgs {
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
-  valuesInLegend?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
   xAxisConfig?: XAxisConfigResult;
@@ -302,7 +313,6 @@ export interface XYProps {
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
-  valuesInLegend?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
   xAxisConfig?: XAxisConfigResult;

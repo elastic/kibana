@@ -10,12 +10,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const es = getService('es');
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const uninstallPackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -29,7 +29,7 @@ export default function (providerContext: FtrProviderContext) {
       .expect(200);
   };
 
-  describe('datastreams', async () => {
+  describe('datastreams', () => {
     describe('standard integration', () => {
       const pkgName = 'datastreams';
       const pkgVersion = '0.1.0';
@@ -39,45 +39,51 @@ export default function (providerContext: FtrProviderContext) {
       const namespaces = ['default', 'foo', 'bar'];
 
       skipIfNoDockerRegistry(providerContext);
-      setupFleetAndAgents(providerContext);
 
+      before(async () => {
+        await fleetAndAgents.setup();
+      });
+
+      const writeMetricsDoc = (namespace: string) =>
+        es.transport.request(
+          {
+            method: 'POST',
+            path: `/${metricsTemplateName}-${namespace}/_doc?refresh=true`,
+            body: {
+              '@timestamp': new Date().toISOString(),
+              logs_test_name: 'test',
+              data_stream: {
+                dataset: `${pkgName}.test_metrics`,
+                namespace,
+                type: 'metrics',
+              },
+            },
+          },
+          { meta: true }
+        );
+
+      const writeLogsDoc = (namespace: string) =>
+        es.transport.request(
+          {
+            method: 'POST',
+            path: `/${logsTemplateName}-${namespace}/_doc?refresh=true`,
+            body: {
+              '@timestamp': new Date().toISOString(),
+              logs_test_name: 'test',
+              data_stream: {
+                dataset: `${pkgName}.test_logs`,
+                namespace,
+                type: 'logs',
+              },
+            },
+          },
+          { meta: true }
+        );
       beforeEach(async () => {
         await installPackage(pkgName, pkgVersion);
         await Promise.all(
           namespaces.map(async (namespace) => {
-            const createLogsRequest = es.transport.request(
-              {
-                method: 'POST',
-                path: `/${logsTemplateName}-${namespace}/_doc`,
-                body: {
-                  '@timestamp': '2015-01-01',
-                  logs_test_name: 'test',
-                  data_stream: {
-                    dataset: `${pkgName}.test_logs`,
-                    namespace,
-                    type: 'logs',
-                  },
-                },
-              },
-              { meta: true }
-            );
-            const createMetricsRequest = es.transport.request(
-              {
-                method: 'POST',
-                path: `/${metricsTemplateName}-${namespace}/_doc`,
-                body: {
-                  '@timestamp': '2015-01-01',
-                  logs_test_name: 'test',
-                  data_stream: {
-                    dataset: `${pkgName}.test_metrics`,
-                    namespace,
-                    type: 'metrics',
-                  },
-                },
-              },
-              { meta: true }
-            );
-            return Promise.all([createLogsRequest, createMetricsRequest]);
+            return Promise.all([writeLogsDoc(namespace), writeMetricsDoc(namespace)]);
           })
         );
       });
@@ -141,7 +147,11 @@ export default function (providerContext: FtrProviderContext) {
 
       it('after update, it should have rolled over logs datastream because mappings are not compatible and not metrics', async function () {
         await installPackage(pkgName, pkgUpdateVersion);
+
         await asyncForEach(namespaces, async (namespace) => {
+          // write doc as rollover is lazy
+          await writeLogsDoc(namespace);
+          await writeMetricsDoc(namespace);
           const resLogsDatastream = await es.transport.request<any>(
             {
               method: 'GET',
@@ -266,6 +276,8 @@ export default function (providerContext: FtrProviderContext) {
             })
             .expect(200);
 
+          // Write a doc to trigger lazy rollover
+          await writeLogsDoc('default');
           // Datastream should have been rolled over
           expect(await getLogsDefaultBackingIndicesLength()).to.be(2);
         });
@@ -301,28 +313,34 @@ export default function (providerContext: FtrProviderContext) {
       const namespace = 'default';
 
       skipIfNoDockerRegistry(providerContext);
-      setupFleetAndAgents(providerContext);
 
-      beforeEach(async () => {
-        await installPackage(pkgName, pkgVersion);
+      before(async () => {
+        await fleetAndAgents.setup();
+      });
 
-        // Create a sample document so the data stream is created
-        await es.transport.request(
+      const writeMetricDoc = (body: any = {}) =>
+        es.transport.request(
           {
             method: 'POST',
-            path: `/${metricsTemplateName}-${namespace}/_doc`,
+            path: `/${metricsTemplateName}-${namespace}/_doc?refresh=true`,
             body: {
-              '@timestamp': '2015-01-01',
+              '@timestamp': new Date().toISOString(),
               logs_test_name: 'test',
               data_stream: {
                 dataset: `${pkgName}.test_logs`,
                 namespace,
                 type: 'logs',
               },
+              ...body,
             },
           },
           { meta: true }
         );
+      beforeEach(async () => {
+        await installPackage(pkgName, pkgVersion);
+
+        // Create a sample document so the data stream is created
+        await writeMetricDoc();
       });
 
       afterEach(async () => {
@@ -340,6 +358,10 @@ export default function (providerContext: FtrProviderContext) {
       it('rolls over data stream when index_mode: time_series is set in the updated package version', async () => {
         await installPackage(pkgName, pkgUpdateVersion);
 
+        // Write a doc so lazy rollover can happen
+        await writeMetricDoc({
+          some_field: 'test',
+        });
         const resMetricsDatastream = await es.transport.request<any>(
           {
             method: 'GET',
@@ -349,6 +371,63 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         expect(resMetricsDatastream.body.data_streams[0].indices.length).equal(2);
+      });
+    });
+
+    describe('dynamic template dimension', () => {
+      const writeMetricDoc = (body: any = {}) =>
+        es.transport.request(
+          {
+            method: 'POST',
+            path: `/metrics-prometheus.remote_write-default/_doc?refresh=true`,
+            body: {
+              '@timestamp': new Date().toISOString(),
+              prometheus: { labels: { test: 'label1' } },
+              agent: {
+                id: 'agent1',
+              },
+              cloud: {
+                account: {
+                  id: '1234',
+                },
+                availability_zone: 'eu',
+                instance: {
+                  id: '1234',
+                },
+                provider: 'aws',
+                region: 'eu',
+              },
+            },
+          },
+          { meta: true }
+        );
+
+      async function getMetricsDefaultBackingIndicesLength() {
+        const resLogsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/metrics-prometheus.remote_write-default`,
+          },
+          { meta: true }
+        );
+
+        return resLogsDatastream.body.data_streams[0].indices.length;
+      }
+
+      it('should rollover datastream if dynamic template dimension mappings changed', async () => {
+        await installPackage('prometheus', '1.16.0');
+        await writeMetricDoc();
+
+        expect(await getMetricsDefaultBackingIndicesLength()).to.be(1);
+
+        await installPackage('prometheus', '1.17.0');
+
+        await writeMetricDoc();
+        expect(await getMetricsDefaultBackingIndicesLength()).to.be(2);
+      });
+
+      afterEach(async () => {
+        await uninstallPackage('prometheus', '1.17.0');
       });
     });
   });

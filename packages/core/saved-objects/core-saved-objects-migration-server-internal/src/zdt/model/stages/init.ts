@@ -1,23 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { cloneDeep } from 'lodash';
 import * as Either from 'fp-ts/lib/Either';
-import { delayRetryState } from '../../../model/retry_state';
-import { throwBadResponse } from '../../../model/helpers';
 import type { MigrationLog } from '../../../types';
-import { isTypeof } from '../../actions';
 import { getAliases } from '../../../model/helpers';
 import {
   getCurrentIndex,
   checkVersionCompatibility,
   buildIndexMappings,
   getAliasActions,
+  getCreationAliases,
   generateAdditiveMappingDiff,
   checkIndexCurrentAlgorithm,
   removePropertiesFromV2,
@@ -32,16 +31,6 @@ export const init: ModelStage<
   | 'INDEX_STATE_UPDATE_DONE'
   | 'FATAL'
 > = (state, res, context) => {
-  if (Either.isLeft(res)) {
-    const left = res.left;
-    if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
-      const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${context.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
-      return delayRetryState(state, retryErrorMessage, context.maxRetryAttempts);
-    } else {
-      return throwBadResponse(state, left);
-    }
-  }
-
   const types = context.types.map((type) => context.typeRegistry.getType(type)!);
   const logs: MigrationLog[] = [...state.logs];
 
@@ -73,6 +62,10 @@ export const init: ModelStage<
       controlState: 'CREATE_TARGET_INDEX',
       currentIndex: `${context.indexPrefix}_1`,
       indexMappings: buildIndexMappings({ types }),
+      creationAliases: getCreationAliases({
+        indexPrefix: context.indexPrefix,
+        kibanaVersion: context.kibanaVersion,
+      }),
     };
   }
 
@@ -116,7 +109,7 @@ export const init: ModelStage<
   });
   // cloning as we may be mutating it in later stages.
   let currentIndexMeta = cloneDeep(currentMappings._meta!);
-  if (currentAlgo === 'v2-compatible') {
+  if (currentAlgo === 'v2-compatible' || currentAlgo === 'v2-partially-migrated') {
     currentIndexMeta = removePropertiesFromV2(currentIndexMeta);
   }
 
@@ -164,7 +157,7 @@ export const init: ModelStage<
     case 'greater':
       const additiveMappingChanges = generateAdditiveMappingDiff({
         types,
-        meta: currentMappings._meta ?? {},
+        mapping: currentMappings,
         deletedTypes: context.deletedTypes,
       });
       return {

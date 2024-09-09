@@ -1,0 +1,59 @@
+{
+  "id": "assetsDataAccess",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "assetsDataAccess",
+        "id": "def-server.AssetsDataAccessPluginStart",
+        "type": "Type",
+        "tags": [],
+        "label": "AssetsDataAccessPluginStart",
+        "description": [],
+        "signature": [
+          "{ services: {}; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/assets_data_access/server/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "assetsDataAccess",
+      "id": "def-server.AssetsDataAccessPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "AssetsDataAccessPluginSetup",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/plugins/observability_solution/assets_data_access/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

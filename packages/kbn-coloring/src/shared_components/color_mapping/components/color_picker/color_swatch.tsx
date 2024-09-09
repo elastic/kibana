@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -29,11 +30,8 @@ import { getValidColor } from '../../color/color_math';
 
 interface ColorPickerSwatchProps {
   colorMode: ColorMapping.Config['colorMode'];
-  assignmentColor:
-    | ColorMapping.Config['assignments'][number]['color']
-    | ColorMapping.Config['specialAssignments'][number]['color'];
+  assignmentColor: ColorMapping.Config['assignments'][number]['color'];
   getPaletteFn: ReturnType<typeof getPalette>;
-  canPickColor: boolean;
   index: number;
   total: number;
   palette: ColorMapping.CategoricalPalette;
@@ -46,7 +44,6 @@ export const ColorSwatch = ({
   colorMode,
   assignmentColor,
   getPaletteFn,
-  canPickColor,
   index,
   total,
   palette,
@@ -71,7 +68,7 @@ export const ColorSwatch = ({
   );
   const colorIsDark = isColorDark(...getValidColor(colorHex).rgb());
   const euiTheme = useEuiTheme();
-  return canPickColor && assignmentColor.type !== 'gradient' ? (
+  return assignmentColor.type !== 'gradient' ? (
     <EuiPopover
       panelPaddingSize="none"
       isOpen={colorPickerVisible}
@@ -98,10 +95,10 @@ export const ColorSwatch = ({
               height: 16px;
               border-radius: 50%;
               top: 8px;
-              border: 3px solid white;
+              border: 3px solid ${euiTheme.euiTheme.colors.emptyShade};
               ${euiShadowSmall(euiTheme)};
               backgroundcolor: ${colorHex};
-              cursor: ${canPickColor ? 'pointer' : 'not-allowed'};
+              cursor: pointer;
             `}
           />
         ) : (
@@ -121,22 +118,21 @@ export const ColorSwatch = ({
             style={{
               // the color swatch can't pickup colors written in rgb/css standard
               backgroundColor: colorHex,
-              cursor: canPickColor ? 'pointer' : 'not-allowed',
+              cursor: 'pointer',
               width: 32,
               height: 32,
             }}
             css={css`
               &::after {
                 content: '';
-                width: 0;
-                height: 0;
-                border-left: 3px solid transparent;
-                border-right: 3px solid transparent;
-                border-top: 4px solid ${colorIsDark ? 'white' : 'black'};
-                margin: 0;
-                bottom: 2px;
+                background-color: ${colorIsDark ? 'white' : 'black'};
+                // custom arrowDown svg
+                mask-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3IiBoZWlnaHQ9IjQiIHZpZXdCb3g9IjAgMCA3IDQiPgogIDxwYXRoIGQ9Ik0uMTQ2LjE0N2EuNS41IDAgMCAxIC43MDggMEwzLjUgMi43OTQgNi4xNDYuMTQ3YS41LjUgMCAxIDEgLjcwOC43MDhsLTMgM2EuNS41IDAgMCAxLS43MDggMGwtMy0zYS41LjUgMCAwIDEgMC0uNzA4WiIvPgo8L3N2Zz4K');
+                height: 4px;
+                width: 7px;
+                bottom: 6px;
+                right: 4px;
                 position: absolute;
-                right: 2px;
               }
             `}
           />

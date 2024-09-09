@@ -6,10 +6,10 @@
  */
 
 import { get } from 'lodash';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { type AggFieldNamePair, EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
+import type { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 const OVER_FIELD_EXAMPLES_COUNT = 40;
@@ -75,7 +75,7 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
 function processSearchResults(resp: any, fields: string[]): ProcessedResults {
   const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);
 
-  const tempResults: Record<DtrIndex, Result[]> = {};
+  const tempResults: Record<DtrIndex, Result[]> = Object.create(null);
   fields.forEach((f, i) => (tempResults[i] = []));
 
   aggregationsByTime.forEach((dataForTime: any) => {
@@ -188,7 +188,7 @@ function getPopulationSearchJsonFromConfig(
 
   json.body.query = query;
 
-  const aggs: any = {};
+  const aggs: any = Object.create(null);
 
   aggFieldNamePairs.forEach(({ agg, field, by }, i) => {
     if (field === EVENT_RATE_FIELD_ID) {

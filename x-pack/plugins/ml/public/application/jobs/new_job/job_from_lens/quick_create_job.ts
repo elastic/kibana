@@ -8,19 +8,19 @@
 import { i18n } from '@kbn/i18n';
 import type {
   ChartInfo,
-  Embeddable,
   LensPublicStart,
   LensSavedObjectAttributes,
 } from '@kbn/lens-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-
+import type { LensApi } from '@kbn/lens-plugin/public';
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
-import { stashJobForCloning } from '../common/job_creator/util/general';
-import type { MlApiServices } from '../../../services/ml_api_service';
+import type { MlApi } from '../../../services/ml_api_service';
+import type { MlJobService } from '../../../services/job_service';
 import {
   CREATED_BY_LABEL,
   DEFAULT_BUCKET_SPAN,
@@ -38,18 +38,20 @@ import { QuickJobCreatorBase, type CreateState } from '../job_from_dashboard';
 export class QuickLensJobCreator extends QuickJobCreatorBase {
   constructor(
     private readonly lens: LensPublicStart,
+    dataViews: DataViewsContract,
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
     dashboardService: DashboardStart,
-    mlApiServices: MlApiServices
+    mlApi: MlApi,
+    mlJobService: MlJobService
   ) {
-    super(kibanaConfig, timeFilter, dashboardService, mlApiServices);
+    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApi, mlJobService);
   }
 
   public async createAndSaveJob(
     jobId: string,
     bucketSpan: string,
-    embeddable: Embeddable,
+    embeddable: LensApi,
     startJob: boolean,
     runInRealTime: boolean,
     layerIndex: number
@@ -114,7 +116,7 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
       // add job config and start and end dates to the
       // job cloning stash, so they can be used
       // by the new job wizards
-      stashJobForCloning(
+      this.mlJobService.stashJobForCloning(
         {
           jobConfig,
           datafeedConfig,

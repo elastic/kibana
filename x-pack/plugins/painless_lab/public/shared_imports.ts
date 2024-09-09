@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { createKibanaReactContext, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+export { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+
+export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

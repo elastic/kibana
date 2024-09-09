@@ -14,17 +14,17 @@ import {
   DEFAULT_TO,
 } from '../../../../../../common/constants';
 import { KibanaServices } from '../../../../lib/kibana';
-import { licenseService } from '../../../../hooks/use_license';
 import type { DefaultTimeRangeSetting } from '../../../../utils/default_date_settings';
 import { plugin, renderer as Renderer } from '.';
-import type { InvestigateInTimelineButtonProps } from '../../../event_details/table/investigate_in_timeline_button';
+import type { InvestigateInTimelineButtonProps } from '../../../event_details/investigate_in_timeline_button';
+import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 
 jest.mock('../../../../lib/kibana');
 const mockGetServices = KibanaServices.get as jest.Mock;
 
-jest.mock('../../../event_details/table/investigate_in_timeline_button', () => {
+jest.mock('../../../event_details/investigate_in_timeline_button', () => {
   const originalModule = jest.requireActual(
-    '../../../event_details/table/investigate_in_timeline_button'
+    '../../../event_details/investigate_in_timeline_button'
   );
   return {
     ...originalModule,
@@ -59,24 +59,12 @@ const mockTimeRange = (
   }));
 };
 
-jest.mock('../../../../hooks/use_license', () => {
-  const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
-    isEnterprise: jest.fn(() => true),
-  };
-  return {
-    licenseService: licenseServiceInstance,
-    useLicense: () => {
-      return licenseServiceInstance;
-    },
-  };
-});
-const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+jest.mock('../../../../hooks/use_upselling');
 
 describe('insight component renderer', () => {
-  describe('when license is at least platinum plus', () => {
+  describe('when there is no upselling message', () => {
     beforeAll(() => {
-      licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+      (useUpsellingMessage as jest.Mock).mockReturnValue(null);
       mockTimeRange(null);
     });
     it('renders correctly with valid date strings with no timestamp from results', () => {
@@ -106,9 +94,9 @@ describe('insight component renderer', () => {
     });
   });
 
-  describe('when license is not at least platinum plus', () => {
+  describe('when there is an upselling message', () => {
     beforeAll(() => {
-      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+      (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
       mockTimeRange(null);
     });
     it('renders a disabled eui button with label', () => {

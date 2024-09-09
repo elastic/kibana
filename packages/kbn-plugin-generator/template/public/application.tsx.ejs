@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreStart } from '<%= importFromRoot('src/core/public') %>';
-import { AppPluginStartDependencies } from './types';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppPluginStartDependencies } from './types';
 import { <%= upperCamelCase(name) %>App } from './components/app';
 
 

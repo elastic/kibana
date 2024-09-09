@@ -7,18 +7,9 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
-  const svlCommonPage = getPageObject('svlCommonPage');
-
-  // FLAKY: https://github.com/elastic/kibana/issues/168985
-  describe.skip('Visualizations - Group 2', function () {
-    before(async () => {
-      await svlCommonPage.login();
-    });
-
-    after(async () => {
-      await svlCommonPage.forceLogout();
-    });
+export default ({ loadTestFile }: FtrProviderContext) => {
+  describe('Visualizations - Group 2', function () {
+    this.tags(['esGate']);
 
     loadTestFile(require.resolve('./open_in_lens/agg_based'));
   });

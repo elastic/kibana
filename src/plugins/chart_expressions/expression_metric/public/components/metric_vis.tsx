@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -29,7 +30,6 @@ import type {
   DatatableColumn,
   DatatableRow,
   IInterpreterRenderHandlers,
-  RenderMode,
 } from '@kbn/expressions-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import {
@@ -41,13 +41,13 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
 import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
 import { getPaletteService, getThemeService, getFormatService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
 
-export const defaultColor = euiThemeVars.euiColorLightestShade;
+export const defaultColor = euiThemeVars.euiColorEmptyShade;
 
 function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
   const formatId = serializedFieldFormat?.id || 'number';
@@ -140,7 +140,6 @@ export interface MetricVisComponentProps {
   config: Pick<VisParams, 'metric' | 'dimensions'>;
   renderComplete: IInterpreterRenderHandlers['done'];
   fireEvent: IInterpreterRenderHandlers['event'];
-  renderMode: RenderMode;
   filterable: boolean;
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
@@ -150,10 +149,11 @@ export const MetricVis = ({
   config,
   renderComplete,
   fireEvent,
-  renderMode,
   filterable,
   overrides,
 }: MetricVisComponentProps) => {
+  const grid = useRef<MetricSpec['data']>([[]]);
+
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
       if (isRendered) {
@@ -162,6 +162,20 @@ export const MetricVis = ({
     },
     [renderComplete]
   );
+
+  const onWillRender = useCallback(() => {
+    const maxTileSideLength = grid.current.length * grid.current[0]?.length > 1 ? 200 : 300;
+    const event: ChartSizeEvent = {
+      name: 'chartSize',
+      data: {
+        maxDimensions: {
+          y: { value: grid.current.length * maxTileSideLength, unit: 'pixels' },
+          x: { value: grid.current[0]?.length * maxTileSideLength, unit: 'pixels' },
+        },
+      },
+    };
+    fireEvent(event);
+  }, [fireEvent, grid]);
 
   const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -184,8 +198,15 @@ export const MetricVis = ({
     ? getColumnByAccessor(config.dimensions.max, data.columns)?.id
     : undefined;
 
+  // For a sigle tile configuration, either no breakdown or with a collapse by, provide
+  // a fallback in case of missing data. Make sure to provide an exact "null" value to render a N/A metric.
+  // For reference, undefined will render as - instead of N/A and it is used in a breakdown scenario
+  const firstRowForNonBreakdown = (
+    data.rows.length ? data.rows : [{ [primaryMetricColumn.id]: null }]
+  ).slice(0, 1);
+
   const metricConfigs: MetricSpec['data'][number] = (
-    breakdownByColumn ? data.rows : data.rows.slice(0, 1)
+    breakdownByColumn ? data.rows : firstRowForNonBreakdown
   ).map((row, rowIdx) => {
     const value: number | string =
       row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
@@ -195,15 +216,16 @@ export const MetricVis = ({
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
     if (typeof value !== 'number') {
-      const nonNumericMetric: MetricWText = {
-        value: formatPrimaryMetric(value),
+      const nonNumericMetricBase: Omit<MetricWText, 'value'> = {
         title: String(title),
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
         extra: renderSecondaryMetric(data.columns, row, config),
         color: config.metric.color ?? defaultColor,
       };
-      return nonNumericMetric;
+      return Array.isArray(value)
+        ? { ...nonNumericMetricBase, value: value.map((v) => formatPrimaryMetric(v)) }
+        : { ...nonNumericMetricBase, value: formatPrimaryMetric(value) };
     }
 
     const baseMetric: MetricWNumber = {
@@ -289,28 +311,19 @@ export const MetricVis = ({
     'settings'
   ) as Partial<SettingsProps>;
 
-  const grid: MetricSpec['data'] = [];
+  const newGrid: MetricSpec['data'] = [];
   for (let i = 0; i < metricConfigs.length; i += maxCols) {
-    grid.push(metricConfigs.slice(i, i + maxCols));
+    newGrid.push(metricConfigs.slice(i, i + maxCols));
   }
 
-  let pixelHeight;
-  let pixelWidth;
-  if (renderMode === 'edit') {
-    // In the editor, we constrain the maximum size of the tiles for aesthetic reasons
-    const maxTileSideLength = metricConfigs.flat().length > 1 ? 200 : 300;
-    pixelHeight = grid.length * maxTileSideLength;
-    pixelWidth = grid[0]?.length * maxTileSideLength;
-  }
+  grid.current = newGrid;
 
   return (
     <div
       ref={scrollContainerRef}
       css={css`
-        height: ${pixelHeight ? `${pixelHeight}px` : '100%'};
-        width: ${pixelWidth ? `${pixelWidth}px` : '100%'};
-        max-height: 100%;
-        max-width: 100%;
+        height: 100%;
+        width: 100%;
         overflow-y: auto;
         ${useEuiScrollBar()}
       `}
@@ -322,6 +335,7 @@ export const MetricVis = ({
       >
         <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
+            onWillRender={onWillRender}
             locale={i18n.getLocale()}
             theme={[
               {
@@ -330,6 +344,10 @@ export const MetricVis = ({
                   barBackground: euiThemeVars.euiColorLightShade,
                   emptyBackground: euiThemeVars.euiColorEmptyShade,
                   blendingBackground: euiThemeVars.euiColorEmptyShade,
+                  titlesTextAlign: config.metric.titlesTextAlign,
+                  valuesTextAlign: config.metric.valuesTextAlign,
+                  iconAlign: config.metric.iconAlign,
+                  valueFontSize: config.metric.valueFontSize,
                 },
               },
               ...(Array.isArray(settingsThemeOverrides)
@@ -342,7 +360,7 @@ export const MetricVis = ({
               filterable
                 ? (events) => {
                     const colRef = breakdownByColumn ?? primaryMetricColumn;
-                    const rowLength = grid[0].length;
+                    const rowLength = grid.current[0].length;
                     events.forEach((event) => {
                       if (isMetricElementEvent(event)) {
                         const colIdx = data.columns.findIndex((col) => col === colRef);
@@ -360,7 +378,7 @@ export const MetricVis = ({
             }
             {...settingsOverrides}
           />
-          <Metric id="metric" data={grid} />
+          <Metric id="metric" data={grid.current} />
         </Chart>
       </div>
     </div>

@@ -21,9 +21,10 @@ import type { EndpointCapabilities } from '../../../../../../common/endpoint/ser
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type {
   ActionDetailsApiResponse,
-  KillProcessActionOutputContent,
+  SuspendProcessActionOutputContent,
 } from '../../../../../../common/endpoint/types';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
 
 jest.mock('../../../../../common/experimental_features_service');
 
@@ -50,6 +51,7 @@ describe('When using the suspend-process action from response actions console', 
               consoleProps: {
                 'data-test-subj': 'test',
                 commands: getEndpointConsoleCommands({
+                  agentType: 'endpoint',
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities: [...capabilities],
                   endpointPrivileges: {
@@ -80,7 +82,7 @@ describe('When using the suspend-process action from response actions console', 
     enterConsoleCommand(renderResult, 'suspend-process --pid 123');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
+      UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'suspend-process')
     );
   });
 
@@ -218,8 +220,17 @@ describe('When using the suspend-process action from response actions console', 
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/1.2.3',
     });
+    pendingDetailResponse.data.command = 'suspend-process';
     pendingDetailResponse.data.wasSuccessful = false;
     pendingDetailResponse.data.errors = ['error one', 'error two'];
+    pendingDetailResponse.data.agentState = {
+      'agent-a': {
+        isCompleted: true,
+        wasSuccessful: false,
+        errors: ['error one', 'error two'],
+        completedAt: new Date().toISOString(),
+      },
+    };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
     enterConsoleCommand(renderResult, 'suspend-process --pid 123');
@@ -231,7 +242,7 @@ describe('When using the suspend-process action from response actions console', 
     });
   });
 
-  it('should show error if kill-process API fails', async () => {
+  it('should show error if suspend-process API fails', async () => {
     apiMocks.responseProvider.suspendProcess.mockRejectedValueOnce({
       status: 500,
       message: 'this is an error',
@@ -251,18 +262,28 @@ describe('When using the suspend-process action from response actions console', 
     async (outputCode) => {
       const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
         path: '/api/endpoint/action/a.b.c',
-      }) as ActionDetailsApiResponse<KillProcessActionOutputContent>;
-      pendingDetailResponse.data.agents = ['a.b.c'];
+      }) as ActionDetailsApiResponse<SuspendProcessActionOutputContent>;
+
+      pendingDetailResponse.data.command = 'suspend-process';
       pendingDetailResponse.data.wasSuccessful = false;
-      pendingDetailResponse.data.errors = ['not found'];
+      pendingDetailResponse.data.errors = ['error one', 'error two'];
+      pendingDetailResponse.data.agentState = {
+        'agent-a': {
+          isCompleted: true,
+          wasSuccessful: false,
+          errors: ['error one', 'error two'],
+          completedAt: new Date().toISOString(),
+        },
+      };
       pendingDetailResponse.data.outputs = {
-        'a.b.c': {
+        'agent-a': {
           type: 'json',
           content: {
             code: outputCode,
           },
         },
       };
+
       apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
       await render();
       enterConsoleCommand(renderResult, 'suspend-process --pid 123');

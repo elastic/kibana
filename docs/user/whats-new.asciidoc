@@ -1,246 +1,175 @@
 [[whats-new]]
-== What's new in {minor-version}
+== What's new in 8.15
 
-Here are the highlights of what's new and improved in {minor-version}.
+Here are the highlights of what's new and improved in 8.15.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
-| {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
+Previous versions: {kibana-ref-all}/8.14/whats-new.html[8.14] | {kibana-ref-all}/8.13/whats-new.html[8.13] | {kibana-ref-all}/8.12/whats-new.html[8.12] | {kibana-ref-all}/8.11/whats-new.html[8.11] | {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
+
+[discrete]
+=== ES|QL
+
+[discrete]
+==== Filter UX improvements in ES|QL
+
+We're thrilled to unveil a complete overhaul of filtering in the ES|QL UX. Now, you can seamlessly filter data by browsing a time series chart, allowing for quick and intuitive time-based filtering. Interactive chart filtering lets you refine your data directly by clicking on any chart, while creating WHERE clause filters from the Discover table or sidebar has never been easier. These enhancements streamline data exploration and analysis, making your ES|QL experience more efficient and user-friendly than ever.
+
+*Filter by clicking a chart:*
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt965a5190f246f7c8/669a7d41e5f7c84793b031cb/filter-by-clicking-chart.gif[Filter by clicking a chart]
+
+*Filter by browsing a time series chart:*
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blta20c9a93dded707c/669a7d40843f93a02fe51013/filter-by-brushing-time-series.gif[Filter by browsing a time series chart]
+
+*Create WHERE clause filters from Discover table or sidebar:*
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt50ac35ab3af29ff8/669a7d4006a6fafe4c7cb39d/create-where-clause-filters-from-sidebar.gif[Create WHERE clause filters from Discover table or sidebar]
+
+
+[discrete]
+==== Field statistics in ES|QL
+
+Field statistics are now available in ES|QL. This feature is designed to provide comprehensive insights for each data field. With this enhancement, you can access detailed statistics such as distributions, averages, and other key metrics, helping you quickly understand your data. This makes data exploration and quality assessment more efficient, providing deeper insights and streamlining the analysis of field-level data in ES|QL.
+
+image::images/field-statistics-esql.png[Field statistics in ES|QL]
+
+[discrete]
+==== Integrations support in the ES|QL editor when using FROM command.
+
+We're excited to announce enhanced support for integrations in the ES|QL editor with the *FROM* command. Previously, you could only access indices, but now you can also view a list of installed integrations directly within the editor. This improvement streamlines your workflow, making it easier to manage and utilize various integrations while working with your data.
+
+image::images/integrations-in-esql.png[Accessing an integration from ES|QL]
+
+
+[discrete]
+=== Dashboards
+
+[discrete]
+==== Field statistics in Dashboards
+
+It's now easier than ever to include your field statistics view from **Discover** into **Dashboards**. While running investigations, it is very common that you need to see some field information, such as unique values and their distribution, to make sense of the data. Select the fields that you want with your ES|QL query and get the document count, values, and distribution in your dashboard so you don't have to navigate back and forth to **Discover** to see this information.
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt9bc52ff7851acc52/669a4f6a490fbc64fa22f279/field-statistics.gif[Showing field statistics panel in Dashboards]
+
+[discrete]
+==== Statistics in legends
+
+Accelerate time to insights by summarizing the values of your charts using average, minimum, maximum, median, and variance, among many others. You can add these statistics for **Lens** and ES|QL visualizations. It is important to note that these statistics are computed using the data points from the chart considering the aggregation used and not the raw data. In the following example, the chart shows the median memory per host, so the Max = 15.3KB for the first series (artifacts.elastic.co) is the maximum value of the median memory per host. 
+
+image::images/statistics-in-legends.png[Statistics in legends]
+
+You can find the option to select statistics for your legends along with an explanation for each calculation when editing your visualization, as shown in the following image.
+
+image::images/statistics-in-legends2.png[Select statistics in legends]
+
+
+[discrete]
+==== View dashboard creator and last editor
+
+You can now see who created and who last updated a dashboard. 
+
+You can find the creator information right from the dashboard list. 
+
+image::images/dashboard-creator.png[Dashboard creator column in dashboard list]
+
+Quickly find all dashboards created by the same user with a simple filter. 
+
+image::images/dashboard-creator-filter.png[Filtering dashboards by creator]
+
+Note that the creator information will be visible only for dashboards created on or after version 8.14. 
+
+You can also see who last updated a dashboard by clicking the dashboard information icon from the dashboard list. The creator is also visible next to it. This information is immutable and cannot be changed.
+
+image::images/dashboard-last-editor.png[Dashboard details panel with the name of the last editor]
 
 [discrete]
 === Discover
 
 [discrete]
-==== {esql} in Discover
+==== Push flyout for Discover document viewer
 
-preview:[] In 8.11 we are introducing link:https://www.elastic.co/guide/en/elasticsearch/reference/master/esql.html[{es} Query Language ({esql})], Elastic’s new piped language for data exploration and investigation. {esql} transforms, enriches, and simplifies your data exploration process. 
+You can now seamlessly view document details and the main table simultaneously in **Discover** with the new _push_ flyout. You can adjust the width of the flyout to suit your needs and explore your data much more easily.
 
-[role="screenshot"]
-image::images/esql-demo.gif[A short video demo of {esql}]
-
-Here is what you can expect: 
-
-* *Easy start:* To begin using {esql} in **Discover**, select **Try {esql}** from the data view menu.
-* *Efficient and easy query building:* {esql} in Discover offers auto-complete and in-app documentation, making it easy to craft powerful queries right from the query bar. 
-* *Comprehensive and powerful data exploration:* Conduct ad-hoc data exploration within **Discover**. Create aggregations, transform data, enrich datasets, and more directly from the query builder. Results are presented in a tabular format or as visualizations. It depends on the query you are executing. 
-* *Contextual visualizations:* When writing {esql} queries in **Discover**, you’ll receive visual representations powered by the **Lens** suggestion engine. Your query’s nature determines the type of visualization you get, such as a metric, histogram, heatmap, and so on. 
-* *Enrichment:* Use the enrich command to enhance your query dataset with fields from another dataset, complete with in-context suggestions for the selected policy, such as hinting the matching field and enriched columns.
-* *In-line visualization editing:* Edit {esql} visualizations directly within **Discover** and dashboards. No need to navigate to **Lens** for quick edits, so you can make changes seamlessly. 
-* *Dashboard integration:* Save your {esql} visualizations to a dashboard directly from **Discover** once you’re satisfied with the results. 
-* *Alerting:* Use {esql} for Observability and Security alerts, setting aggregated values as thresholds. Enhance detection accuracy and receive actionable notifications by emphasizing meaningful trends over isolated incidents, reducing false positives. 
-
-{esql} in **Discover** brings efficiency and power to your data investigations, streamlining your path to insights. 
-
-Learn more about {esql}’s capabilities in the link:{ref-bare}/master/esql.html[{es} {esql} documentation]. 
-
-
-[role="screenshot"]
-image::images/obvs.png[An example of {esql}]
-
-[role="screenshot"]
-image::images/obv-use-case.png[An example using {esql} in an {observability} use case]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltb40a408acf4ab688/669a58ea9fecd85219d58ed2/discover-push-flyout.gif[Resizable push flyout in Discover]
 
 
 [discrete]
-=== Dashboard 
+=== Alerting, cases, and connectors
 
 [discrete]
-==== Lens inline editing in dashboards
+==== Case templates
 
-You can now edit a **Lens** visualization without leaving the dashboard instead of navigating back and forth to the **Lens** editor. Open the panel menu and select **Edit visualization**. A flyout will be open in the dashboard where you can perform any edits to your **Lens** panels. Once happy with your edits, click **Apply and close**. This new editing experience is more convenient and will save you time since the dashboard will not need to reload when saving your changes. 
-
-[role="screenshot"]
-image::images/lens-inline-editing.gif[An example of inline editing in Lens]
-
-[discrete]
-==== Links panel
-
-You can now easily navigate from one dashboard to another using the links panel. Better organize your dashboards and make them more performant by chunking them in multiple dashboards with fewer visualizations and linking them together. You can carry over your filters, query, and time range when navigating to other related dashboards. Display your links horizontally or vertically as it better suits your dashboard layout. You can also use the links panel to include external links in your dashboards, such as to your wiki page or other applications. Decide whether you want to open the links in the same browser tab or in a new one.
-
-[role="screenshot"]
-image::images/links-panel.gif[An example of the new links panel]
-
-[role="screenshot"]
-image::images/edit-links-panel.png[An example of the edit links panel flyout]
-
-[role="screenshot"]
-image::images/edit-links.png[An example of how to edit links using the panel flyout]
+{kib} cases offer a new powerful capability to enhance the efficiency of your analyst teams with <<case-templates,templates>>. 
+You can manage multiple templates, each of which can be used to auto-populate values in a case with pre-defined knowledge.
+This streamlines the investigative process and significantly reduces time to resolution.
 
 [discrete]
-==== Color mapping for enhanced data visualization
+==== Case custom fields are GA
 
-Color is a fundamental visual element, alongside position and shape, that plays a crucial role in conveying information effectively. 
-
-[role="screenshot"]
-image::images/color-mapping.png[An example of the new color mapping feature]
-
-Here’s what our new color mapping feature offers:
-
-* *Effortless categorization:* Easily assign one or more field categories to specific colors. This makes it simpler than ever to organize and understand your data. 
-* *Guided color selection:* Our intuitive color chooser provides you with predefined palettes that ensure your charts not only look great, but also align seamlessly with different {kib} themes. 
-* *Enhanced color palettes:* We’ve reintroduced a clear concept of color palettes, making it easier for you to select and apply gradients, improving the overall aesthetics of your visualizations. 
-
-Whether you’re working with cartesian, partition, or tag clouds charts, these enhancements are designed to help you make the most of your data. With this feature, you can expect an improved ability to categorize, differentiate, and emphasize data points on your charts, ultimately leading to better insights and more visually appealing dashboards.
+In 8.11, <<case-custom-fields,custom fields>> were added to cases and they are now moving from technical preview to general availability.
+You can set custom field values in your templates to enhance consistency across cases.
 
 [discrete]
-==== {ccs-cap} ({ccs-init}) query inspector
+==== {sn} additional fields
 
-Customers querying data from multiple clusters link:{ref}/modules-cross-cluster-search.html[({ccs-init} queries)] will get more information about each of the cluster's responses. For each of the visualizations in a dashboard as well as in **Discover**, you can look at response times per cluster and shard failures. This is especially important when one or more clusters are not able to provide all the data, so you know that you are looking at partial results and why they fail.
-
-[role="screenshot"]
-image::images/ccs-query-inspector.png[An example of the new {ccs} query inspector, width=50%]
+You can now create enriched {sn} tickets based on detected alerts with a more comprehensive structure that matches the {sn} ticket scheme.
+A new JSON field is now available as part of the {sn} action, which enables you to send any field from {kib} alerts to {sn} tickets. 
 
 [discrete]
-==== Individual annotation editing from the library
+==== {webhook-cm} SSL auth support
 
-We've introduced full annotation group editing in the **Visualize Library**. Now, you can easily edit shared annotation groups without leaving Lens. No more searching for consuming visualizations.
+It's common for organizations to integrate with third parties using secured authentication.
+Currently, most of the available case connectors use basic authentication (user and passwords or tokens), which might not be sufficient to meet organization security policies.
+With this release, the <<cases-webhook-action-type,{webhook-cm} connector>> now supports client certification, which enables you to leverage the connector for secured integration with third parties.
 
-[role="screenshot"]
-image::images/annotation-editing.png[An example of annotation editing]
+The {webhook-cm} connector also moves from technical preview to general availability in this release.
 
 [discrete]
 === Machine Learning
- 
-[discrete]
-==== ELSER is improved and is now generally available
-
-In 8.8, we introduced Elastic Learned Sparse Encoder in technical preview. ELSER is Elastic’s text expansion language model for AI search. It offers superior relevance out of the box, without the need for retraining on in-domain data or any other ML or MLOps effort. Deploy it with a couple of clicks from Elastic’s UI and start leveraging the power of AI with your search. 
-
-In 8.11, we're releasing a generally available second version. ELSER model-2 comes in two versions:
-
-* The optimized model, which runs on the linux-x86_64 platform
-* The cross-platform model 
-
-Both ELSER model-2 versions, platform-optimized and cross-platform, show improved relevance compared to the original ELSER release, as measured against the BEIR benchmarks. Importantly, the optimized version also shows significantly improved performance (reduced inference latency). The {ecloud} supports the optimized version and so {ecloud} users will benefit from the materially improved performance of the optimized ELSER model-2.
-
-[role="screenshot"]
-image::images/elser-model-2.png[An example of ELSER model 2, width=60%]
-
-NOTE: The original version of ELSER (the model available prior to 8.11) will remain in technical preview. 
 
 [discrete]
-==== Inference APIs
+==== Improved UX for Log Pattern Analysis in Discover 
 
-preview:[] We are working to introduce a unified inference API that abstracts away the complexity of performing inference on different models that are trained for different tasks. The API introduces a simple, intuitive syntax of the form:
+Analyze large volumes of logs efficiently, in very short times with Log Pattern Analysis in **Discover**. In 8.15, we redesigned the Log Pattern Analysis user flow in **Discover** to make it easier to use. Discover log patterns with one click for the message field (and other applicable text fields) and easily filter in and out logs to drastically reduce MTTR.
 
-[source,bash]
-----
-POST /_inference/<task_type>/<model_id>
-----
-
-In 8.11, we're'releasing a contained first link:{ref}/inference-apis.html[MVP iteration of this framework], which initially only supports ELSER. This link:{ref}/semantic-search-elser.html#inference-ingest-pipeline[greatly simplifies the syntax] for creating an inference pipeline.
-
-More importantly, in the future the new inference API will support both internal and external models and will integrate with the LLM ecosystem for our users to have the most powerful AI effortlessly and seamlessly at their fingertips, through a unified, self-explanatory API.
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt7e63d7e764ab183e/669a807bd316c7015db35458/ml-log-pattern-analysis.gif[New log pattern analysis interface]
 
 [discrete]
-==== AIOps: Log rate analysis supports text fields 
+==== Log Rate Analysis contextual insights in serverless Observability
 
-preview:[] Continuing enhancing log analysis capabilities with smart AIOps tools for drastically shorter mean time to repair. We now support detection of log rate changes that are due to text fields, for example the common **message** log field. Previously log rate change was limited to detecting spikes and dips caused by keyword fields. By adding text fields, we've incorporated pattern analysis into log rate analysis. That has significantly reduced the time it takes to detect and diagnose events that used to go unnoticed for periods of time. 
+You can now see insights in natural language, for example for the root cause of a log rate change or threshold alert, in Log Rate Analysis. This feature is currently only available for Observability serverless projects.
 
-[role="screenshot"]
-image::images/text-field-support.png[An example of log rate analysis supporting text fields]
-
-[discrete]
-==== Data drift workflows
- 
-preview:[] In 8.10, we introduced the **Data comparison** view to help you detect data drift. In 8.11, we have renamed it to **Data drift** and we have enhanced it to include workflows that help you visualize changes in the model input data and detect potential model performance degradation over time.
-
-[role="screenshot"]
-image::images/data-drift.png[An example of data drift workflows]
+image::images/obs-log-rate-analysis-insigths.png[Log Rate Analysis contextual insights in serverless Observability]
 
 [discrete]
-==== Improvements in anomaly detection embeddability and data frame analytics pipelines
+==== Inference API improvements
 
-We have improved the UX for attaching anomaly swim lanes and anomaly charts to dashboards. It is now more friendly and consistent with the same functionality from Lens. In addition, you can now attach these ML charts to new dashboards (previously this was only able to be done for existing ones). 
+The inference API provides a seamless, intuitive interface to perform inference and other tasks against proprietary, hosted, and integrated external services. In 8.15, we're extending it with the following capabilities:
 
-In **Data Frame Analytics**, we previously added the ability to link directly to **Discover** and **Dashboards** from the results data grid filtering for the row’s field/values for all visible columns. For improved usability, you can now do this during the job creation as well. We have also made UX improvements for the deployment of trained models from Data Frame Analytics jobs, including an option to reindex your data at the end of the ingest pipeline creation.
-
-[discrete]
-=== ResponseOps
-
-[discrete]
-==== New {esql} rule type
-
-A new {esql} alerting rule type is now available under the existing {es} rule type. This rule type brings all the new functionalities that are available within the new and powerful language, {esql}, to {kib} Alerting to allow and unlock new alerting use cases.
-
-With the new type, users will be able to generate a single alert based on defined {esql} query and preview the query result before saving the rule. When the query returns an empty result no alerts will be generated.
-
-[role="screenshot"]
-image::images/esql-rule-type.gif[An example of creating a rule type using {esql}]
-
-[discrete]
-==== {kib} cases custom field
-
-A new functionality is now available in {kib} cases. Users will be able to add custom fields to the case structure, so they can use it for better classification and case enrichment. As a first step, those fields will be available in the case view only. In the next step, we’re planning to have more field types, dedicated privileges, support filters, and search capabilities in the case table.
-
-[role="screenshot"]
-image::images/custom-field.gif[An example of creating a custom case field in {kib}]
-
-[discrete]
-==== Supporting multi levels of term aggregations in {es} rule type 
-
-The existing {es} alerting rule is now supported by multiple selection when grouping by alert fields, which allows you to define multiple layers of term aggregations.
-
-[role="screenshot"]
-image::images/term-aggs.png[An example of creating multiple layers of term aggregations]
-
-[discrete]
-==== Slack connector - allow List
-
-The Slack connector supports a new allow list, so customers will be able to manage the available Slack channels within the alert actions. 
-
-[discrete]
-=== {observability}
-
-[discrete]
-==== {es} alerting rule now available in {observability}
-
-The {es} alerting rule is now available in {observability}. Before this update, {observability} customers who leverage the {es} rule were required to move between **{stack-manage-app}** and **{observability}** to manage their alerts.
-To manage the {observability} roles properly, we added a new field to determine which role can maintain the created rule and its generated alerts. 
-
-[role="screenshot"]
-image::images/alerting-rule.png[An example of creating an altering rule in {observability}]
-
-[discrete]
-=== Global Experience 
-
-[discrete]
-==== Create and manage {esql} enrichment index policies
-
-In support of our new {esql} capabilities, we have added link:{ref}/ingest-enriching-data.html[enrich policies] to our **Index Management** experience. Users can now create their enrichment policies right from here and get started using it right away. Once configured, all enrich policies are available in the **Enrich Policies** tab.
-
-Example of an ES|QL Query using an enrich policy with enrich:
-
-[role="screenshot"]
-image::images/esql-enrich.png[An example of an {esql} query using an enrich policy]
-
-Example of the enrich policies shown in the UI:
-
-[role="screenshot"]
-image::images/enrich-ui.png[An example of where to add an enrich policy in the UI]
-
-[role="screenshot"]
-image::images/enrich-index-management.png[An example of where an enrich policy lives in the UI]
+* Support for Anthropic's chat completion API.
+* Ability to host cross encoder models and perform the reranking task.
 
 
 [discrete]
-==== Start Discover {esql} from global search
-
-**Discover** searches are powered by KQL by default. You can easily switch to {esql} mode within **Discover** and search your data with this new query language. You can also access {esql} in **Discover** from the global search bar within Elastic. With just a few keystrokes, simply type in “ESQL” and you can access **Discover** with {esql} enabled for you.
-
-[role="screenshot"]
-image::images/start-esql-in-discover.gif[An example of using ES|QL in Discover]
+=== Managing {kib} users and objects
 
 [discrete]
-==== Access {es} connection details
+==== Sharing improvements
 
-You can now view your {es} endpoint, link:https://www.elastic.co/guide/en/cloud/current/ec-cloud-id.html[Cloud ID], and even manage your API keys from many areas in Elastic such as integrations. You can also access the connection details on any page in Elastic using the help menu from the header bar.
+You can now share a dashboard, search, or Lens object in one click. When sharing an object, the most common actions are directly presented to you, and a short link is automatically generated, making it simpler than ever to share your work.
 
-[role="screenshot"]
-image::images/endpoints.png[An example of where to find the endpoints in the UI, width=40%]
+image::images/share-modal.png[New object share modal, width=50%]
 
 [discrete]
-==== AWS CloudFormation template updates
+==== Quick API key creation
 
-When subscribing to Elastic using the link:https://aws.amazon.com/marketplace/pp/prodview-voru33wi6xs7k[AWS Marketplace], users have the option to quickly get set up with an AWS CloudFormation Template. This step allows you to create an Elastic deployment in the AWS region of your choice. We’ve updated the AWS CloudFormation Template with bug fixes and stability improvements to better help you get started.
+Many API keys don’t require custom settings, so we made it simple to generate a standard key. From the **Endpoints & API keys** top menu in Search, you can create a key in seconds. 
+
+image::images/create-simple-api-key.png[Shortcut to create an API key, width=60%]
+
+[discrete]
+==== Filtering by User in Kibana Audit Logs
+
+We are pleased to share that ignoring events by user in Kibana audit logs is now possible. This enhancement will give you more flexibility to reduce the overall number of events logged by the Kibana audit logs service and to control the volume of data being generated in audit logs. While we currently offer a number of ways to do this using the `xpack.security.audit.ignore_filters.[]` configuration setting, there wasn't an easy option to filter by user. With this addition, you can configure Kibana audit logs to ignore events based on values from the following fields: users, spaces, outcomes, categories, types and actions. 

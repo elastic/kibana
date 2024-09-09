@@ -1,0 +1,41 @@
+Map results = new HashMap();
+results['notes'] = [];
+results['category_1_score'] = 0.0;
+results['category_1_count'] = 0;
+results['risk_inputs'] = [];
+results['score'] = 0.0;
+
+def inputs = states[0].inputs;
+
+// Currently the alerts index only has one shard so there will only be one state
+// If there are multiple shards we will need these lines
+// List inputs = [];
+// for (state in states) {
+//  inputs.addAll(state.inputs)
+// }
+
+// sorting is needed even though we sort in the parent query because the scripted metric
+// agg does not guarantee order.
+Collections.sort(inputs, (a, b) -> b.get('score').compareTo(a.get('score')));
+
+for (int i = 0; i < inputs.length; i++) {
+  double current_score = inputs[i].score / Math.pow(i + 1, params.p);
+
+  if (i < 10) {
+    inputs[i]['contribution'] = current_score / params.risk_cap;
+    results['risk_inputs'].add(inputs[i]);
+  }
+
+// every input is of type signal at the moment
+// if (inputs[i].category == 'signal') {
+    results['category_1_score'] += current_score;
+    results['category_1_count'] += 1;
+// }
+
+  results['score'] += current_score;
+}
+
+results['score'] *= params.global_identifier_type_weight;
+results['normalized_score'] = results['score'] / params.risk_cap;
+
+return results;

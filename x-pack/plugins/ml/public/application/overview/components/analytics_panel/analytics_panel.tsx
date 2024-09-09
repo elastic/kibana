@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -16,14 +17,11 @@ import {
   OverviewStatsBar,
   type StatEntry,
 } from '../../../components/collapsible_panel/collapsible_panel';
-import {
-  ML_OVERVIEW_PANELS,
-  MlStorageKey,
-  TMlStorageMapped,
-} from '../../../../../common/types/storage';
+import type { MlStorageKey, TMlStorageMapped } from '../../../../../common/types/storage';
+import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
 import { AnalyticsTable } from './table';
-import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
-import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { useGetAnalytics } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
+import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { useMlLink } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useRefresh } from '../../../routing/use_refresh';
@@ -62,7 +60,7 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
     setAnalyticsStats(result);
   }, []);
 
-  const getAnalytics = getAnalyticsFactory(
+  const getAnalytics = useGetAnalytics(
     setAnalytics,
     setAnalyticsStatsCustom,
     setErrorMessage,

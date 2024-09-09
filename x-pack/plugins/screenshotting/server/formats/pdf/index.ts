@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-// FIXME: Once/if we have the ability to get page count directly from Chrome/puppeteer
-// we should get rid of this lib.
-import * as PDFJS from 'pdfjs-dist/legacy/build/pdf.js';
-
 import type { PackageInfo } from '@kbn/core/server';
 import { groupBy } from 'lodash';
 import type { LayoutParams, LayoutType } from '../../../common';
@@ -50,12 +46,7 @@ export interface PdfScreenshotOptions extends CaptureOptions {
   layout?: PdfLayoutParams;
 }
 
-export interface PdfScreenshotMetrics extends Partial<CaptureMetrics> {
-  /**
-   * A number of emitted pages in the generated PDF report.
-   */
-  pages: number;
-}
+export type PdfScreenshotMetrics = Partial<CaptureMetrics>; // TODO: add page count metric, if it becomes possible
 
 /**
  * Final, formatted PDF result
@@ -100,12 +91,11 @@ export async function toPdf(
   { metrics, results }: CaptureResult
 ): Promise<PdfScreenshotResult> {
   let buffer: Buffer;
-  let pages: number;
   const shouldConvertPngsToPdf = layout.id !== 'print';
   if (shouldConvertPngsToPdf) {
     const timeRange = getTimeRange(results);
     try {
-      ({ buffer, pages } = await pngsToPdf({
+      ({ buffer } = await pngsToPdf({
         title: title ? `${title}${timeRange ? ` - ${timeRange}` : ''}` : undefined,
         results,
         layout,
@@ -115,10 +105,7 @@ export async function toPdf(
       }));
 
       return {
-        metrics: {
-          ...(metrics ?? {}),
-          pages,
-        },
+        metrics: metrics ?? {},
         data: buffer,
         errors: results.flatMap(({ error }) => (error ? [error] : [])),
         renderErrors: results.flatMap(({ renderErrors }) => renderErrors ?? []),
@@ -130,18 +117,10 @@ export async function toPdf(
     }
   } else {
     buffer = results[0].screenshots[0].data; // This buffer is already the PDF
-    pages = await PDFJS.getDocument({ data: buffer }).promise.then((doc) => {
-      const numPages = doc.numPages;
-      doc.destroy();
-      return numPages;
-    });
   }
 
   return {
-    metrics: {
-      ...(metrics ?? {}),
-      pages,
-    },
+    metrics: metrics ?? {},
     data: buffer,
     errors: results.flatMap(({ error }) => (error ? [error] : [])),
     renderErrors: results.flatMap(({ renderErrors }) => renderErrors ?? []),

@@ -258,7 +258,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"active\" | \"complete\" | \"inactive\" | \"in_progress\" | \"ready_to_complete\""
+              "\"complete\" | \"active\" | \"inactive\" | \"in_progress\" | \"ready_to_complete\""
             ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
@@ -549,7 +549,7 @@
           "\nAllowed states for each step in a guide:\n inactive: Step has not started\n active: Step is ready to start (i.e., the guide has been started)\n in_progress: Step has been started and is in progress\n ready_to_complete: Step can be manually completed\n complete: Step has been completed"
         ],
         "signature": [
-          "\"active\" | \"complete\" | \"inactive\" | \"in_progress\" | \"ready_to_complete\""
+          "\"complete\" | \"active\" | \"inactive\" | \"in_progress\" | \"ready_to_complete\""
         ],
         "path": "packages/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,

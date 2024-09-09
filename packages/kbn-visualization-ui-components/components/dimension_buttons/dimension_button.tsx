@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -14,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiFontSize,
+  useEuiShadow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -42,7 +44,7 @@ export interface DimensionButtonProps {
   message?: Message;
 }
 
-export function DimensionButton({
+function DimensionButtonImpl({
   groupLabel,
   children,
   onClick,
@@ -56,6 +58,7 @@ export function DimensionButton({
     <div
       {...otherProps}
       css={css`
+        ${useEuiShadow('xs')}
         ${useEuiFontSize('s')}
         border-radius: ${euiThemeVars.euiBorderRadius};
         position: relative;
@@ -66,6 +69,7 @@ export function DimensionButton({
         gap: ${euiThemeVars.euiSizeS};
         min-height: ${euiThemeVars.euiSizeXL};
         padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeS};
+        background: ${euiThemeVars.euiColorEmptyShade};
       `}
     >
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
@@ -119,8 +123,8 @@ export function DimensionButton({
           transition-property: color, opacity, background-color, transform;
           opacity: 0;
 
-          .domDragDrop:hover &,
-          .domDragDrop:focus-within & {
+          .domDraggable:hover &,
+          .domDraggable:focus-within & {
             opacity: 1;
           }
           &:hover,
@@ -133,3 +137,5 @@ export function DimensionButton({
     </div>
   );
 }
+
+export const DimensionButton = React.memo(DimensionButtonImpl);

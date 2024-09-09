@@ -8,13 +8,14 @@
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { isAnnotationsFeatureAvailable } from '../lib/check_annotations';
 import { annotationServiceProvider } from '../models/annotation_service';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import {
+  annotationsResponseSchema,
   deleteAnnotationSchema,
   getAnnotationsSchema,
   indexAnnotationSchema,
@@ -40,15 +41,6 @@ export function annotationRoutes(
 ) {
   /**
    * @apiGroup Annotations
-   *
-   * @api {post} /internal/ml/annotations Gets annotations
-   * @apiName GetAnnotations
-   * @apiDescription Gets annotations.
-   *
-   * @apiSchema (body) getAnnotationsSchema
-   *
-   * @apiSuccess {Boolean} success
-   * @apiSuccess {Object} annotations
    */
   router.versioned
     .post({
@@ -57,12 +49,17 @@ export function annotationRoutes(
       options: {
         tags: ['access:ml:canGetAnnotations'],
       },
+      summary: 'Gets annotations',
+      description: 'Gets annotations.',
     })
     .addVersion(
       {
         version: '1',
         validate: {
           request: { body: getAnnotationsSchema },
+          response: {
+            200: { body: annotationsResponseSchema, description: 'Get annotations response' },
+          },
         },
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
@@ -81,12 +78,6 @@ export function annotationRoutes(
 
   /**
    * @apiGroup Annotations
-   *
-   * @api {put} /internal/ml/annotations/index Index annotation
-   * @apiName IndexAnnotations
-   * @apiDescription Index the annotation.
-   *
-   * @apiSchema (body) indexAnnotationSchema
    */
   router.versioned
     .put({
@@ -95,6 +86,8 @@ export function annotationRoutes(
       options: {
         tags: ['access:ml:canCreateAnnotation'],
       },
+      summary: 'Indexes annotation',
+      description: 'Indexes the annotation.',
     })
     .addVersion(
       {
@@ -129,12 +122,6 @@ export function annotationRoutes(
 
   /**
    * @apiGroup Annotations
-   *
-   * @api {delete} /internal/ml/annotations/delete/:annotationId Deletes annotation
-   * @apiName DeleteAnnotation
-   * @apiDescription Deletes specified annotation
-   *
-   * @apiSchema (params) deleteAnnotationSchema
    */
   router.versioned
     .delete({
@@ -143,6 +130,8 @@ export function annotationRoutes(
       options: {
         tags: ['access:ml:canDeleteAnnotation'],
       },
+      summary: 'Deletes annotation',
+      description: 'Deletes the specified annotation.',
     })
     .addVersion(
       {

@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import {
+  DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '@kbn/security-solution-plugin/common/constants';
@@ -17,6 +18,7 @@ import type {
 import type { FetchRulesResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { internalAlertingSnoozeRule } from '../../urls/routes';
 import { rootRequest } from './common';
+import { getSpaceUrl } from '../space';
 
 export const findAllRules = () => {
   return rootRequest<FetchRulesResponse>({
@@ -27,12 +29,14 @@ export const findAllRules = () => {
 export const createRule = (
   rule: RuleCreateProps
 ): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
-  return rootRequest<RuleResponse>({
-    method: 'POST',
-    url: DETECTION_ENGINE_RULES_URL,
-    body: rule,
-    failOnStatusCode: false,
-  });
+  return cy.currentSpace().then((spaceId) =>
+    rootRequest<RuleResponse>({
+      method: 'POST',
+      url: spaceId ? getSpaceUrl(spaceId, DETECTION_ENGINE_RULES_URL) : DETECTION_ENGINE_RULES_URL,
+      body: rule,
+      failOnStatusCode: false,
+    })
+  );
 };
 
 /**
@@ -109,3 +113,28 @@ export const waitForRulesToFinishExecution = (ruleIds: string[], afterDate?: Dat
       }),
     { interval: 500, timeout: 12000 }
   );
+
+type EnableRulesParameters =
+  | {
+      names: string[];
+      ids?: undefined;
+    }
+  | {
+      names?: undefined;
+      ids: string[];
+    };
+
+export const enableRules = ({ names, ids }: EnableRulesParameters): Cypress.Chainable => {
+  const query = names?.map((name) => `alert.attributes.name: "${name}"`).join(' OR ');
+
+  return rootRequest({
+    method: 'POST',
+    url: DETECTION_ENGINE_RULES_BULK_ACTION,
+    body: {
+      action: 'enable',
+      query,
+      ids,
+    },
+    failOnStatusCode: false,
+  });
+};

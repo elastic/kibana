@@ -10,21 +10,16 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { NOTE_URL } from '../../../../../common/constants';
 
-import type { SetupPlugins } from '../../../../plugin';
-import { buildRouteValidationWithExcess } from '../../../../utils/build_validation/route_validation';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../..';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { persistNoteSchema } from '../../../../../common/api/timeline';
+import { persistNoteWithoutRefSchema } from '../../../../../common/api/timeline';
 import { persistNote } from '../../saved_object/notes';
 
-export const persistNoteRoute = (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const persistNoteRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
   router.versioned
     .patch({
       path: NOTE_URL,
@@ -36,7 +31,7 @@ export const persistNoteRoute = (
     .addVersion(
       {
         validate: {
-          request: { body: buildRouteValidationWithExcess(persistNoteSchema) },
+          request: { body: buildRouteValidation(persistNoteWithoutRefSchema) },
         },
         version: '2023-10-31',
       },
@@ -44,17 +39,14 @@ export const persistNoteRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const { note } = request.body;
           const noteId = request.body?.noteId ?? null;
 
           const res = await persistNote({
             request: frameworkRequest,
             noteId,
-            note: {
-              ...note,
-              timelineId: note.timelineId || null,
-            },
+            note,
             overrideOwner: true,
           });
 

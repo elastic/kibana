@@ -12,7 +12,7 @@ import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
-import { Rule } from '../../../common';
+import { Rule, RuleSystemAction } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const rulesClient = rulesClientMock.create();
@@ -67,6 +67,15 @@ describe('getAlertRoute', () => {
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
     revision: 0,
+  };
+
+  const systemAction: RuleSystemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
   };
 
   it('gets an alert with proper parameters', async () => {
@@ -142,7 +151,7 @@ describe('getAlertRoute', () => {
       ['ok']
     );
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
@@ -155,10 +164,41 @@ describe('getAlertRoute', () => {
 
     getAlertRoute(router, licenseState, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];
+
+    rulesClient.get.mockResolvedValueOnce(mockedAlert);
+
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: '1' } }, [
       'ok',
     ]);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('get', mockUsageCounter);
+  });
+
+  it('does not return system actions', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAlertRoute(router, licenseState);
+    const [config, handler] = router.get.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
+
+    rulesClient.get.mockResolvedValueOnce({ ...mockedAlert, systemActions: [systemAction] });
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: { id: '1' },
+      },
+      ['ok']
+    );
+    await handler(context, req, res);
+
+    expect(rulesClient.get).toHaveBeenCalledTimes(1);
+    expect(rulesClient.get.mock.calls[0][0].id).toEqual('1');
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: mockedAlert,
+    });
   });
 });

@@ -5,39 +5,43 @@
  * 2.0.
  */
 
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   formatDate,
   EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  SearchFilterConfig,
   EuiBadge,
   useEuiTheme,
   EuiButton,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { MaintenanceWindowFindResponse, SortDirection } from '../types';
+import { SortDirection } from '../types';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
-import { MaintenanceWindowStatus, MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../common';
+import {
+  MaintenanceWindowStatus,
+  MAINTENANCE_WINDOW_DATE_FORMAT,
+  MaintenanceWindow,
+} from '../../../../common';
 import { StatusFilter } from './status_filter';
-import { TableActionsPopover } from './table_actions_popover';
+import { TableActionsPopover, TableActionsPopoverProps } from './table_actions_popover';
 import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenance_window';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
 import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_and_archive_maintenance_window';
 
 interface MaintenanceWindowsListProps {
-  loading: boolean;
-  items: MaintenanceWindowFindResponse[];
+  isLoading: boolean;
+  items: MaintenanceWindow[];
   readOnly: boolean;
   refreshData: () => void;
 }
 
-const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
+const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
   {
     field: 'title',
     name: i18n.NAME,
@@ -58,7 +62,7 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
     field: 'eventStartTime',
     name: i18n.TABLE_START_TIME,
     dataType: 'date',
-    render: (startDate: string, item: MaintenanceWindowFindResponse) => {
+    render: (startDate: string, item: MaintenanceWindow) => {
       return (
         <EuiFlexGroup responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
@@ -89,40 +93,29 @@ const sorting = {
   },
 };
 
-const rowProps = (item: MaintenanceWindowFindResponse) => ({
+const rowProps = (item: MaintenanceWindow) => ({
   className: item.status,
   'data-test-subj': 'list-item',
 });
 
 export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
-  ({ loading, items, readOnly, refreshData }) => {
-    const search: { filters: SearchFilterConfig[]; toolsRight: ReactElement } = {
-      filters: [
-        {
-          type: 'custom_component',
-          component: StatusFilter,
-        },
-      ],
-      toolsRight: (
-        <EuiButton data-test-subj="refresh-button" iconType="refresh" onClick={refreshData}>
-          {i18n.REFRESH}
-        </EuiButton>
-      ),
-    };
+  ({ isLoading, items, readOnly, refreshData }) => {
     const { euiTheme } = useEuiTheme();
+
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
-    const onEdit = useCallback(
+    const onEdit = useCallback<TableActionsPopoverProps['onEdit']>(
       (id) => navigateToEditMaintenanceWindows(id),
       [navigateToEditMaintenanceWindows]
     );
     const { mutate: finishMaintenanceWindow, isLoading: isLoadingFinish } =
       useFinishMaintenanceWindow();
-    const onCancel = useCallback(
+    const onCancel = useCallback<TableActionsPopoverProps['onCancel']>(
       (id) => finishMaintenanceWindow(id, { onSuccess: () => refreshData() }),
       [finishMaintenanceWindow, refreshData]
     );
     const { mutate: archiveMaintenanceWindow, isLoading: isLoadingArchive } =
       useArchiveMaintenanceWindow();
+
     const onArchive = useCallback(
       (id: string, archive: boolean) =>
         archiveMaintenanceWindow(
@@ -133,10 +126,15 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     );
     const { mutate: finishAndArchiveMaintenanceWindow, isLoading: isLoadingFinishAndArchive } =
       useFinishAndArchiveMaintenanceWindow();
+
     const onCancelAndArchive = useCallback(
       (id: string) => finishAndArchiveMaintenanceWindow(id, { onSuccess: () => refreshData() }),
       [finishAndArchiveMaintenanceWindow, refreshData]
     );
+
+    const isMutatingOrLoading = useMemo(() => {
+      return isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive || isLoading;
+    }, [isLoadingFinish, isLoadingArchive, isLoadingFinishAndArchive, isLoading]);
 
     const tableCss = useMemo(() => {
       return css`
@@ -148,7 +146,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       `;
     }, [euiTheme.colors.highlight]);
 
-    const actions: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = useMemo(
+    const actions: Array<EuiBasicTableColumn<MaintenanceWindow>> = useMemo(
       () => [
         {
           name: '',
@@ -156,6 +154,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
             return (
               <TableActionsPopover
                 id={id}
+                isLoading={isMutatingOrLoading}
                 status={status}
                 onEdit={onEdit}
                 onCancel={onCancel}
@@ -166,7 +165,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
           },
         },
       ],
-      [onArchive, onCancel, onCancelAndArchive, onEdit]
+      [isMutatingOrLoading, onArchive, onCancel, onCancelAndArchive, onEdit]
     );
 
     const columns = useMemo(
@@ -174,12 +173,35 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       [actions, readOnly]
     );
 
+    const search: EuiSearchBarProps = useMemo(
+      () => ({
+        filters: [
+          {
+            type: 'custom_component',
+            component: StatusFilter,
+          },
+        ],
+        toolsRight: (
+          <EuiButton
+            data-test-subj="refresh-button"
+            iconType="refresh"
+            onClick={refreshData}
+            isLoading={isMutatingOrLoading}
+            isDisabled={isMutatingOrLoading}
+          >
+            {i18n.REFRESH}
+          </EuiButton>
+        ),
+      }),
+      [isMutatingOrLoading, refreshData]
+    );
+
     return (
       <EuiInMemoryTable
         data-test-subj="maintenance-windows-table"
         css={tableCss}
         itemId="id"
-        loading={loading || isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive}
+        loading={isMutatingOrLoading}
         tableCaption="Maintenance Windows List"
         items={items}
         columns={columns}
@@ -187,7 +209,6 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         sorting={sorting}
         rowProps={rowProps}
         search={search}
-        hasActions={true}
       />
     );
   }

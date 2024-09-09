@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers } from './helpers';
@@ -47,6 +48,12 @@ describe('<PipelinesEdit />', () => {
     expect(nameInput.props().disabled).toEqual(true);
   });
 
+  it('should show deprecated callout', () => {
+    const { exists } = testBed;
+
+    expect(exists('deprecatedPipelineCallout')).toBe(true);
+  });
+
   describe('form submission', () => {
     it('should send the correct payload with changed values', async () => {
       const UPDATED_DESCRIPTION = 'updated pipeline description';
@@ -62,7 +69,7 @@ describe('<PipelinesEdit />', () => {
         `${API_BASE_PATH}/${name}`,
         expect.objectContaining({
           body: JSON.stringify({
-            ...pipelineDefinition,
+            ...omit(pipelineDefinition, 'deprecated'),
             description: UPDATED_DESCRIPTION,
           }),
         })

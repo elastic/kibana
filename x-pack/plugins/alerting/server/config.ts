@@ -38,7 +38,7 @@ const rulesSchema = schema.object({
     }),
     enforce: schema.boolean({ defaultValue: false }), // if enforce is false, only warnings will be shown
   }),
-  maxScheduledPerMinute: schema.number({ defaultValue: 10000, max: 10000, min: 0 }),
+  maxScheduledPerMinute: schema.number({ defaultValue: 32000, max: 32000, min: 0 }),
   overwriteProducer: schema.maybe(
     schema.oneOf([
       schema.literal('observability'),
@@ -80,7 +80,7 @@ export type AlertingConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type AlertingRulesConfig = Pick<
   AlertingConfig['rules'],
-  'minimumScheduleInterval' | 'maxScheduledPerMinute'
+  'minimumScheduleInterval' | 'maxScheduledPerMinute' | 'run'
 > & {
   isUsingSecurity: boolean;
 };

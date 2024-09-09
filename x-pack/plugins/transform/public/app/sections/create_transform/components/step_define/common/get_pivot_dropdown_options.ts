@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isCounterTimeSeriesMetric, TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
@@ -13,13 +13,12 @@ import { getNestedProperty } from '@kbn/ml-nested-property';
 
 import { removeKeywordPostfix } from '../../../../../../../common/utils/field_utils';
 
-import {
+import type {
   DropDownOption,
   PivotAggsConfigWithUiSupportDict,
-  pivotAggsFieldSupport,
   PivotGroupByConfigWithUiSupportDict,
-  pivotGroupByFieldSupport,
 } from '../../../../../common';
+import { pivotAggsFieldSupport, pivotGroupByFieldSupport } from '../../../../../common';
 
 import { getDefaultAggregationConfig } from './get_default_aggregation_config';
 import { getDefaultGroupByConfig } from './get_default_group_by_config';
@@ -70,7 +69,7 @@ export function getPivotDropdownOptions(
   const aggOptions: DropDownOptionWithField[] = [];
   const aggOptionsData: PivotAggsConfigWithUiSupportDict = {};
 
-  const ignoreFieldNames = ['_id', '_index', '_type'];
+  const ignoreFieldNames = ['_id', '_index', '_type', '_ignored'];
   const dataViewFields = dataView.fields
     .filter(
       (field) =>

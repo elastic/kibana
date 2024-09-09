@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import type { FilterItemObj } from '../../public/common/components/filter_group/types';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 
-export const formatPageFilterSearchParam = (filters: FilterItemObj[]) => {
+export const formatPageFilterSearchParam = (filters: FilterControlConfig[]) => {
   return filters.map(
-    ({ title, fieldName, selectedOptions = [], existsSelected = false, exclude = false }) => ({
+    ({
+      title,
+      fieldName,
+      selectedOptions = [],
+      existsSelected = false,
+      exclude = false,
+      hideActionBar = false,
+    }) => ({
       title: title ?? fieldName,
       selectedOptions,
       fieldName,
       existsSelected,
       exclude,
+      hideActionBar,
     })
   );
 };

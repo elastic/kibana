@@ -125,7 +125,7 @@ To use the API service, you need to know a guide ID (currently one of `appSearch
 The guided onboarding exposes a function `registerGuideConfig(guideId: GuideId, guideConfig: GuideConfig)` function in its setup contract. This function allows consumers to register a guide config for a specified guide ID. The function throws an error if a config already exists for the guide ID. See code examples in following plugins:
 
 - enterprise search: `x-pack/plugins/enterprise_search/server/plugin.ts`
-- observability: `x-pack/plugins/observability/server/plugin.ts`
+- observability: `x-pack/plugins/observability_solution/observability/server/plugin.ts`
 - security solution: `x-pack/plugins/security_solution/server/plugin.ts`
 
 ## Adding a new guide

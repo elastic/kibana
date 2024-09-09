@@ -20,12 +20,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
     'discover',
     'unifiedFieldList',
+    'share',
   ]);
   const elasticChart = getService('elasticChart');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const dataViews = getService('dataViews');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   const expectedData = [
     { x: '97.220.3.248', y: 19755 },
@@ -48,17 +51,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.visualize.navigateToNewVisualization();
     await PageObjects.visualize.clickVisType('lens');
     await elasticChart.setNewChartUiDebugFlag(true);
-    await PageObjects.lens.createAdHocDataView('*stash*');
-    retry.try(async () => {
-      const selectedPattern = await PageObjects.lens.getDataPanelIndexPattern();
-      expect(selectedPattern).to.eql('*stash*');
-    });
+    await dataViews.createFromSearchBar({ name: '*stash*', adHoc: true });
+    await dataViews.waitForSwitcherToBe('*stash*');
   }
 
   const checkDiscoverNavigationResult = async () => {
-    await testSubjects.click('embeddablePanelToggleMenuIcon');
-    await testSubjects.click('embeddablePanelMore-mainMenu');
-    await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+    await dashboardPanelActions.clickContextMenuItem(
+      'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER'
+    );
 
     const [, discoverHandle] = await browser.getAllWindowHandles();
     await browser.switchToWindow(discoverHandle);
@@ -69,9 +69,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ).getVisibleText();
     expect(actualIndexPattern).to.be('*stash*');
 
-    const actualDiscoverQueryHits = await testSubjects.getVisibleText('unifiedHistogramQueryHits');
+    const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
     expect(actualDiscoverQueryHits).to.be('14,005');
-    expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);
+    expect(await dataViews.isAdHoc()).to.be(true);
+  };
+
+  const waitForPageReady = async () => {
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await retry.waitFor('page ready after refresh', async () => {
+      const queryBarVisible = await testSubjects.exists('globalQueryBar');
+      return queryBarVisible;
+    });
   };
 
   describe('lens ad hoc data view tests', () => {
@@ -96,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow adding and using a field', async () => {
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await retry.try(async () => {
-        await PageObjects.lens.clickAddField();
+        await dataViews.clickAddFieldFromSearchBar();
         await fieldEditor.setName('runtimefield');
         await fieldEditor.enableValue();
         await fieldEditor.typeScript("emit('abc')");
@@ -115,9 +123,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow switching to another data view and back', async () => {
-      await PageObjects.lens.switchDataPanelIndexPattern('logstash-*');
+      await dataViews.switchTo('logstash-*');
       await PageObjects.lens.waitForFieldMissing('runtimefield');
-      await PageObjects.lens.switchDataPanelIndexPattern('*stash*');
+      await dataViews.switchTo('*stash*');
       await PageObjects.lens.waitForField('runtimefield');
     });
 
@@ -171,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be possible to share a URL of a visualization with adhoc dataViews', async () => {
-      const url = await PageObjects.lens.getUrl('snapshot');
+      const url = await PageObjects.lens.getUrl();
       await browser.openNewTab();
 
       const [lensWindowHandler] = await browser.getAllWindowHandles();
@@ -208,9 +216,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ).getVisibleText();
       expect(actualIndexPattern).to.be('*stash*');
 
-      const actualDiscoverQueryHits = await testSubjects.getVisibleText(
-        'unifiedHistogramQueryHits'
-      );
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
       expect(actualDiscoverQueryHits).to.be('14,005');
 
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
@@ -222,11 +228,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(newDataViewId).not.to.equal(prevDataViewId);
-      expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);
+      expect(await dataViews.isAdHoc()).to.be(true);
 
       await browser.closeCurrentWindow();
+      const [lensHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(lensHandle);
     });
-
     it('should navigate to discover from embeddable correctly', async () => {
       const [lensHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(lensHandle);
@@ -247,6 +254,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'new'
       );
 
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await checkDiscoverNavigationResult();
 
       await browser.closeCurrentWindow();
@@ -256,6 +264,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // adhoc data view should be persisted after refresh
       await browser.refresh();
+      await waitForPageReady();
       await checkDiscoverNavigationResult();
 
       await browser.closeCurrentWindow();

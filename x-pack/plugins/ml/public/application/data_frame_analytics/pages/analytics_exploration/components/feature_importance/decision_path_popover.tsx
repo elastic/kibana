@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { EuiLink, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -107,7 +108,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
           <EuiText size={'xs'} color="subdued" style={{ paddingTop: 5 }}>
             <FormattedMessage
               id="xpack.ml.dataframe.analytics.explorationResults.decisionPathPlotHelpText"
-              defaultMessage="SHAP decision plots use {linkedFeatureImportanceValues} to show how models arrive at the predicted value for '{predictionFieldName}'."
+              defaultMessage="SHAP decision plots use {linkedFeatureImportanceValues} to show how models arrive at the predicted value for ''{predictionFieldName}''."
               values={{
                 predictionFieldName,
                 linkedFeatureImportanceValues: (

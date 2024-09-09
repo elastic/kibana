@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import chalk from 'chalk';
 import crypto from 'crypto';
 
 import type { Logger } from '@kbn/core/server';
+import { unsafeConsole } from '@kbn/security-hardening';
 
 import { VERIFICATION_CODE_LENGTH } from '../common';
 
@@ -37,8 +39,8 @@ export class VerificationCode {
     );
 
     if (code === undefined) {
-      // eslint-disable-next-line no-console
-      console.log(`
+      // eslint-disable-next-line @kbn/eslint/no_unsafe_console
+      unsafeConsole.log(`
 
 Your verification code is: ${highlightedCode}
 
@@ -51,8 +53,8 @@ Your verification code is: ${highlightedCode}
       this.logger.error(
         `Invalid verification code '${code}' provided. ${this.remainingAttempts} attempts left.`
       );
-      // eslint-disable-next-line no-console
-      console.log(`
+      // eslint-disable-next-line @kbn/eslint/no_unsafe_console
+      unsafeConsole.log(`
 
 Your verification code is: ${highlightedCode}
 
@@ -68,20 +70,24 @@ Your verification code is: ${highlightedCode}
 
   /**
    * Returns a cryptographically secure and random 6-digit code.
-   *
-   * Implementation notes: `secureRandomNumber` returns a random number like `0.05505769583xxxx`. To
-   * turn that into a 6 digit code we multiply it by `10^6` and result is `055057`.
    */
   private static generate(length: number) {
-    return Math.floor(secureRandomNumber() * Math.pow(10, length))
-      .toString()
-      .padStart(length, '0');
+    return secureRandomNumber(length).join('');
   }
 }
 
 /**
  * Cryptographically secure equivalent of `Math.random()`.
  */
-function secureRandomNumber() {
-  return crypto.randomBytes(4).readUInt32LE() / 0x100000000;
+function secureRandomNumber(length: number) {
+  const digits = [];
+  while (digits.length < length) {
+    const byte = crypto.randomBytes(1)[0];
+    if (byte >= 250) {
+      continue;
+    }
+    digits.push(byte % 10);
+  }
+
+  return digits;
 }

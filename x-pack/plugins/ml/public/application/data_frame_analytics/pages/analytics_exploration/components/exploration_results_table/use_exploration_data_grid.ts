@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { useDataGrid, INIT_MAX_COLUMNS } from '@kbn/ml-data-grid';
 import {
@@ -36,20 +36,20 @@ export const useExplorationDataGrid = (
     }),
     [pageUrlState.pageSize, pageUrlState.pageIndex]
   );
-  dataGrid.setPagination = useCallback(
+  dataGrid.setPagination = useCallback<typeof dataGrid.setPagination>(
     (u) => {
       setPageUrlState({ ...u });
     },
     [setPageUrlState]
   );
   dataGrid.onChangePage = useCallback(
-    (pageIndex) => {
+    (pageIndex: number) => {
       setPageUrlState({ pageIndex });
     },
     [setPageUrlState]
   );
   dataGrid.onChangeItemsPerPage = useCallback(
-    (pageSize) => {
+    (pageSize: number) => {
       setPageUrlState({ pageSize });
     },
     [setPageUrlState]

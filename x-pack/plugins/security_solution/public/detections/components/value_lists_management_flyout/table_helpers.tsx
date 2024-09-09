@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ShowValueListModal } from '../../../value_list/components/show_value_list_modal';
 import { FormattedDate } from '../../../common/components/formatted_date';
 import * as i18n from './translations';
 import type { TableItemCallback, TableProps } from './types';
@@ -28,6 +29,11 @@ export const buildColumns = (
     field: 'name',
     name: i18n.COLUMN_FILE_NAME,
     truncateText: false,
+    render: (name: ListSchema['name'], item: ListSchema) => (
+      <ShowValueListModal shouldShowContentIfModalNotAvailable listId={item.id}>
+        {name}
+      </ShowValueListModal>
+    ),
   },
   {
     field: 'type',
@@ -82,6 +88,7 @@ export const buildColumns = (
                 aria-label={i18n.ACTION_DELETE_DESCRIPTION}
                 data-test-subj={`action-delete-value-list-${item.name}`}
                 iconType="trash"
+                color="danger"
                 onClick={() => onDelete(item)}
               />
             )}

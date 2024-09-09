@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 
 import {
   FieldCategoryKibanaProvider,
   FieldCategoryProvider,
 } from '@kbn/management-settings-components-field-category';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import type { FormServices, FormKibanaDependencies, Services } from './types';
 import { reloadPageToast } from './reload_page_toast';
 
@@ -40,13 +42,17 @@ export const FormProvider = ({ children, ...services }: FormProviderProps) => {
 /**
  * Kibana-specific Provider that maps Kibana plugins and services to a {@link FormProvider}.
  */
-export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...deps }) => {
+export const FormKibanaProvider: FC<PropsWithChildren<FormKibanaDependencies>> = ({
+  children,
+  ...deps
+}) => {
   const { settings, notifications, docLinks, theme, i18n } = deps;
 
   const services: Services = {
-    saveChanges: (changes) => {
+    saveChanges: (changes, scope: UiSettingsScope) => {
+      const scopeClient = scope === 'namespace' ? settings.client : settings.globalClient;
       const arr = Object.entries(changes).map(([key, value]) =>
-        settings.client.set(key, value.unsavedValue)
+        scopeClient.set(key, value.unsavedValue)
       );
       return Promise.all(arr);
     },

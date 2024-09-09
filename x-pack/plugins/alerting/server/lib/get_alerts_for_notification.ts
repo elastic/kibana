@@ -17,23 +17,49 @@ export function getAlertsForNotification<
   RecoveryActionGroupId extends string
 >(
   flappingSettings: RulesSettingsFlappingProperties,
-  notifyOnActionGroupChange: boolean,
   actionGroupId: string,
+  alertDelay: number,
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
-  currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
+  currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
+  startedAt?: string | null
 ) {
   const currentActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
+  let delayedAlertsCount = 0;
 
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
+    alert.incrementActiveCount();
     alert.resetPendingRecoveredCount();
-    currentActiveAlerts[id] = alert;
+    // do not trigger an action notification if the number of consecutive
+    // active alerts is less than the rule alertDelay threshold
+    if (alert.getActiveCount() < alertDelay) {
+      // remove from new alerts
+      delete newAlerts[id];
+      delayedAlertsCount += 1;
+    } else {
+      currentActiveAlerts[id] = alert;
+      // if the active count is equal to the alertDelay it is considered a new alert
+      if (alert.getActiveCount() === alertDelay) {
+        const currentTime = startedAt ?? new Date().toISOString();
+        const state = alert.getState();
+        // keep the state and update the start time and duration
+        alert.replaceState({ ...state, start: currentTime, duration: '0' });
+        newAlerts[id] = alert;
+      }
+    }
   }
 
   for (const id of keys(currentRecoveredAlerts)) {
     const alert = recoveredAlerts[id];
+    // if alert has not reached the alertDelay threshold don't recover the alert
+    if (alert.getActiveCount() < alertDelay) {
+      // remove from recovered alerts
+      delete recoveredAlerts[id];
+      delete currentRecoveredAlerts[id];
+    }
+    alert.resetActiveCount();
     if (flappingSettings.enabled) {
       const flapping = alert.getFlapping();
       if (flapping) {
@@ -56,12 +82,7 @@ export function getAlertsForNotification<
             context
           );
           activeAlerts[id] = newAlert;
-
-          // rule with "on status change" or rule with at least one
-          // action with "on status change" should return notifications
-          if (notifyOnActionGroupChange) {
-            currentActiveAlerts[id] = newAlert;
-          }
+          currentActiveAlerts[id] = newAlert;
 
           // remove from recovered alerts
           delete recoveredAlerts[id];
@@ -81,5 +102,6 @@ export function getAlertsForNotification<
     currentActiveAlerts,
     recoveredAlerts,
     currentRecoveredAlerts,
+    delayedAlertsCount,
   };
 }

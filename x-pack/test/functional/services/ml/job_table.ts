@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
-
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import {
   TimeRangeType,
   TIME_RANGE_TYPE,
@@ -40,6 +40,12 @@ export interface OtherUrlConfig {
   url: string;
 }
 
+export enum QuickFilterButtonTypes {
+  Opened = 'Opened',
+  Closed = 'Closed',
+  Started = 'Started',
+  Stopped = 'Stopped',
+}
 export function MachineLearningJobTableProvider(
   { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
@@ -50,6 +56,75 @@ export function MachineLearningJobTableProvider(
   const retry = getService('retry');
 
   return new (class MlJobTable {
+    public async selectAllJobs(): Promise<void> {
+      await testSubjects.click('checkboxSelectAll');
+    }
+
+    public async assertJobsInTable(expectedJobIds: string[]) {
+      const sortedExpectedIds = expectedJobIds.sort();
+      const sortedActualJobIds = (await this.parseJobTable()).map((row) => row.id).sort();
+      expect(sortedActualJobIds).to.eql(
+        sortedExpectedIds,
+        `Expected jobs in table to be [${sortedExpectedIds}], got [${sortedActualJobIds}]`
+      );
+    }
+
+    public async filterByState(quickFilterButton: QuickFilterButtonTypes): Promise<void> {
+      const searchBar: WebElementWrapper = await testSubjects.find('mlJobListSearchBar');
+      const quickFilter: WebElementWrapper = await searchBar.findByCssSelector(
+        `span[data-text="${quickFilterButton}"]`
+      );
+      await quickFilter.click();
+
+      const searchBarButtons = await searchBar.findAllByTagName('button');
+      let pressedBttnText: string = '';
+      for await (const button of searchBarButtons)
+        if ((await button.getAttribute('aria-pressed')) === 'true')
+          pressedBttnText = await button.getVisibleText();
+
+      expect(pressedBttnText).to.eql(
+        quickFilterButton,
+        `Expected visible text of pressed quick filter button to equal [${quickFilterButton}], but got [${pressedBttnText}]`
+      );
+    }
+
+    public async clickJobRowCalendarWithAssertion(
+      jobId: string,
+      calendarId: string
+    ): Promise<void> {
+      await this.ensureDetailsOpen(jobId);
+      const calendarSelector = `mlJobDetailsCalendar-${calendarId}`;
+      await testSubjects.existOrFail(calendarSelector, {
+        timeout: 3_000,
+      });
+      await testSubjects.click(calendarSelector, 3_000);
+      await testSubjects.existOrFail('mlPageCalendarEdit > mlCalendarFormEdit', {
+        timeout: 3_000,
+      });
+      const calendarTitleVisibleText = await testSubjects.getVisibleText('mlCalendarTitle');
+      expect(calendarTitleVisibleText).to.contain(
+        calendarId,
+        `Calendar page title should contain [${calendarId}], got [${calendarTitleVisibleText}]`
+      );
+    }
+
+    public async assertJobRowCalendars(
+      jobId: string,
+      expectedCalendars: string[],
+      checkForExists: boolean = true
+    ): Promise<void> {
+      await this.withDetailsOpen(jobId, async function verifyJobRowCalendars(): Promise<void> {
+        for await (const expectedCalendar of expectedCalendars) {
+          const calendarSelector = `mlJobDetailsCalendar-${expectedCalendar}`;
+          await testSubjects[checkForExists ? 'existOrFail' : 'missingOrFail'](calendarSelector, {
+            timeout: 3_000,
+          });
+          if (checkForExists)
+            expect(await testSubjects.getVisibleText(calendarSelector)).to.be(expectedCalendar);
+        }
+      });
+    }
+
     public async parseJobTable(
       tableEnvironment: 'mlAnomalyDetection' | 'stackMgmtJobList' = 'mlAnomalyDetection'
     ) {

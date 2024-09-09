@@ -1,0 +1,25 @@
+type: object
+properties:
+  success:
+    type: boolean
+    description: |
+      Indicates when the import was successfully completed. When set to false, some objects may not have been created. For additional information, refer to the `errors` and `successResults` properties.
+  successCount:
+    type: integer
+    description: Indicates the number of successfully imported records.
+  errors:
+    type: array
+    items:
+      type: object
+    description: |
+      Indicates the import was unsuccessful and specifies the objects that failed to import.
+
+      NOTE: One object may result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and conflict error.
+  successResults:
+    type: array
+    items:
+      type: object
+    description: |
+      Indicates the objects that are successfully imported, with any metadata if applicable.
+
+      NOTE: Objects are created only when all resolvable errors are addressed, including conflicts and missing references. If objects are created as new copies, each entry in the `successResults` array includes a `destinationId` attribute.

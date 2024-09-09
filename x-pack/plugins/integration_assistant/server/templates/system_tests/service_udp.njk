@@ -1,0 +1,6 @@
+{{package_name}}-{{data_stream_name}}-udp:
+    image: docker.elastic.co/observability/stream:{{stream_version}}
+    volumes:
+      - ./sample_logs:/sample_logs:ro
+    entrypoint: /bin/bash
+    command: -c "/stream log --start-signal=SIGHUP --delay=5s --addr elastic-agent:9025 -p=udp /sample_logs/{{package_name}}.log"

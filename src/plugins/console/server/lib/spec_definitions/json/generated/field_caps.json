@@ -17,7 +17,8 @@
       "ignore_unavailable": "__flag__",
       "include_unmapped": "__flag__",
       "filters": "",
-      "types": ""
+      "types": "",
+      "include_empty_fields": "__flag__"
     },
     "methods": [
       "GET",

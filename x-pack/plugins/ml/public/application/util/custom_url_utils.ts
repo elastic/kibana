@@ -10,7 +10,7 @@
 import { get, flow } from 'lodash';
 import moment from 'moment';
 import rison, { type RisonValue } from '@kbn/rison';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import type {
   MlAnomalyRecordDoc,
   MlUrlConfig,
@@ -141,8 +141,7 @@ function isKibanaUrl(urlConfig: MlUrlConfig) {
     urlValue.startsWith('apm#/') ||
     // BrowserRouter based plugins
     urlValue.startsWith('metrics/') ||
-    urlValue.startsWith('security/') ||
-    // Legacy links
+    urlValue.startsWith('security/') || // Legacy links
     urlValue.startsWith('siem#/')
   );
 }
@@ -308,7 +307,7 @@ function buildKibanaUrl(
 
         const q = rison.decode(queryDef);
 
-        if (isRisonObject(q) && q.hasOwnProperty('query')) {
+        if (isRisonObject(q) && Object.hasOwn(q, 'query')) {
           const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
           const resultQuery = getQueryStringResult(
             resultPrefix,

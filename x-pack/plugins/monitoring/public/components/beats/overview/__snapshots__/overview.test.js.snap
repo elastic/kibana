@@ -5,10 +5,9 @@ exports[`Overview that overview page renders normally 1`] = `
   <EuiPageBody>
     <EuiScreenReaderOnly>
       <h1>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Beats Overview"
           id="xpack.monitoring.beats.overview.heading"
-          values={Object {}}
         />
       </h1>
     </EuiScreenReaderOnly>
@@ -29,10 +28,9 @@ exports[`Overview that overview page renders normally 1`] = `
             size="s"
           >
             <h2>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Active Beats in last day"
                 id="xpack.monitoring.beats.overview.activeBeatsInLastDayTitle"
-                values={Object {}}
               />
             </h2>
           </EuiTitle>
@@ -71,10 +69,9 @@ exports[`Overview that overview page renders normally 1`] = `
             size="s"
           >
             <h2>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Top 5 Beat Types in last day"
                 id="xpack.monitoring.beats.overview.top5BeatTypesInLastDayTitle"
-                values={Object {}}
               />
             </h2>
           </EuiTitle>
@@ -105,10 +102,9 @@ exports[`Overview that overview page renders normally 1`] = `
             size="s"
           >
             <h2>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Top 5 Versions in last day"
                 id="xpack.monitoring.beats.overview.top5VersionsInLastDayTitle"
-                values={Object {}}
               />
             </h2>
           </EuiTitle>
@@ -206,10 +202,9 @@ exports[`Overview that overview page shows a message if there is no beats data 1
   <EuiPageBody>
     <EuiScreenReaderOnly>
       <h1>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Beats Overview"
           id="xpack.monitoring.beats.overview.heading"
-          values={Object {}}
         />
       </h1>
     </EuiScreenReaderOnly>

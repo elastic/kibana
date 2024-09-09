@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { once, debounce } from 'lodash';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { IEsSearchResponse, ISearchOptions } from '../../../../common';
+import { ISearchOptions, IEsSearchResponse } from '@kbn/search-types';
 import { isRunningResponse } from '../../../../common';
 import { CollectedUsage } from './register';
 
@@ -88,11 +89,11 @@ export function searchUsageObserver(
     next(response: IEsSearchResponse) {
       if (isRestore || isRunningResponse(response)) return;
       logger.debug(`trackSearchStatus:success, took:${response.rawResponse.took}`);
-      usage?.trackSuccess(response.rawResponse.took);
+      void usage?.trackSuccess(response.rawResponse.took);
     },
     error(e: Error) {
       logger.debug(`trackSearchStatus:error, ${e}`);
-      usage?.trackError();
+      void usage?.trackError();
     },
   };
 }

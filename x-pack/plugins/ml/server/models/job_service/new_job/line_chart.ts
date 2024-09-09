@@ -6,10 +6,10 @@
  */
 
 import { get } from 'lodash';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { type AggFieldNamePair, EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
+import type { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 type DtrIndex = number;
@@ -69,7 +69,7 @@ export function newJobLineChartProvider({ asCurrentUser }: IScopedClusterClient)
 function processSearchResults(resp: any, fields: string[]): ProcessedResults {
   const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);
 
-  const tempResults: Record<DtrIndex, Result[]> = {};
+  const tempResults: Record<DtrIndex, Result[]> = Object.create(null);
   fields.forEach((f, i) => (tempResults[i] = []));
 
   aggregationsByTime.forEach((dataForTime: any) => {
@@ -166,7 +166,10 @@ function getSearchJsonFromConfig(
 
   json.body.query = query;
 
-  const aggs: Record<number, Record<string, { field: string; percents?: string[] }>> = {};
+  const aggs: Record<
+    number,
+    Record<string, { field: string; percents?: string[] }>
+  > = Object.create(null);
 
   aggFieldNamePairs.forEach(({ agg, field }, i) => {
     if (field !== null && field !== EVENT_RATE_FIELD_ID) {

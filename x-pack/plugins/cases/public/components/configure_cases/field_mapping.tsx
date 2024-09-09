@@ -6,18 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiFlexItem, EuiFlexGroup, EuiFormLabel, useEuiFontSize } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { FieldMappingRowStatic } from './field_mapping_row_static';
 import * as i18n from './translations';
 
 import type { CaseConnectorMapping } from '../../containers/configure/types';
-
-const FieldRowWrapper = styled.div`
-  margin: 10px 0;
-  font-size: 14px;
-`;
 
 export interface FieldMappingProps {
   actionTypeName: string;
@@ -30,24 +25,31 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
   isLoading,
   mappings,
 }) => {
+  const sFontSize = useEuiFontSize('s').fontSize;
   return mappings.length ? (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
         {' '}
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem>
-            <span className="euiFormLabel">{i18n.FIELD_MAPPING_FIRST_COL}</span>
+            <EuiFormLabel>{i18n.FIELD_MAPPING_FIRST_COL}</EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="case-configure-field-mappings-second-col-label">
-            <span className="euiFormLabel">{i18n.FIELD_MAPPING_SECOND_COL(actionTypeName)}</span>
+            <EuiFormLabel>{i18n.FIELD_MAPPING_SECOND_COL(actionTypeName)}</EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <span className="euiFormLabel">{i18n.FIELD_MAPPING_THIRD_COL}</span>
+            <EuiFormLabel>{i18n.FIELD_MAPPING_THIRD_COL}</EuiFormLabel>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <FieldRowWrapper data-test-subj="case-configure-field-mappings-row-wrapper">
+        <div
+          data-test-subj="case-configure-field-mappings-row-wrapper"
+          css={css`
+            margin: 10px 0;
+            font-size: ${sFontSize};
+          `}
+        >
           {mappings.map((item) => (
             <FieldMappingRowStatic
               key={`${item.source}`}
@@ -57,7 +59,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
               selectedThirdParty={item.target ?? 'not_mapped'}
             />
           ))}
-        </FieldRowWrapper>
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : null;

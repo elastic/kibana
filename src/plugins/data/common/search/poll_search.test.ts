@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pollSearch } from './poll_search';
@@ -69,6 +70,25 @@ describe('pollSearch', () => {
   test('Throws AbortError and cancels on abort', async () => {
     const searchFn = getMockedSearch$(20);
     const cancelFn = jest.fn();
+    const abortController = new AbortController();
+    const poll = pollSearch(searchFn, cancelFn, {
+      abortSignal: abortController.signal,
+    }).toPromise();
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    abortController.abort();
+
+    await expect(poll).rejects.toThrow(AbortError);
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    expect(searchFn).toBeCalledTimes(1);
+    expect(cancelFn).toBeCalledTimes(1);
+  });
+
+  test('Does not leak unresolved promises on cancel', async () => {
+    const searchFn = getMockedSearch$(20);
+    const cancelFn = jest.fn().mockRejectedValueOnce({ error: 'Oh no!' });
     const abortController = new AbortController();
     const poll = pollSearch(searchFn, cancelFn, {
       abortSignal: abortController.signal,

@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import apm from 'elastic-apm-node';
 
@@ -25,6 +26,10 @@ import type {
 import type { PreconfigurationError } from '../../common/constants';
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common/constants';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
+import {
+  type SimplifiedPackagePolicy,
+  simplifiedPackagePolicytoNewPackagePolicy,
+} from '../../common/services/simplified_package_policy_helper';
 
 import { FleetError } from '../errors';
 
@@ -34,10 +39,11 @@ import { getInstallation, getPackageInfo } from './epm/packages';
 import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
-import type { InputsOverride } from './package_policy';
+import { type InputsOverride, packagePolicyService } from './package_policy';
 import { preconfigurePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
-import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
+import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';
+import { isDefaultAgentlessPolicyEnabled } from './utils/agentless';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
@@ -46,7 +52,7 @@ interface PreconfigurationResult {
 }
 
 export async function ensurePreconfiguredPackagesAndPolicies(
-  soClient: SavedObjectsClientContract,
+  defaultSoClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   policies: PreconfiguredAgentPolicy[] = [],
   packages: PreconfiguredPackage[] = [],
@@ -91,10 +97,11 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
-    savedObjectsClient: soClient,
+    savedObjectsClient: defaultSoClient,
     esClient,
     packagesToInstall,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
+    skipIfInstalled: true, // force flag alone would reinstall packages that are already installed
     spaceId,
   });
 
@@ -122,7 +129,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   // will occur between upgrading the package and reinstalling the previously failed package.
   // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
   // packages that are stuck in the installing state.
-  await ensurePackagesCompletedInstall(soClient, esClient);
+  await ensurePackagesCompletedInstall(defaultSoClient, esClient);
 
   // Create policies specified in Kibana config
   logger.debug(`Creating preconfigured policies`);
@@ -135,7 +142,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           searchFields: ['id'],
           search: escapeSearchQueryPhrase(preconfigurationId),
         };
-        const deletionRecords = await soClient.find({
+        const deletionRecords = await defaultSoClient.find({
           type: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
           ...searchParams,
         });
@@ -156,14 +163,31 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
       }
 
+      if (
+        !isDefaultAgentlessPolicyEnabled() &&
+        preconfiguredAgentPolicy?.supports_agentless !== undefined
+      ) {
+        throw new FleetError(
+          i18n.translate('xpack.fleet.preconfiguration.support_agentless', {
+            defaultMessage:
+              '`supports_agentless` is only allowed in serverless environments that support the agentless feature',
+          })
+        );
+      }
+
+      const namespacedSoClient = preconfiguredAgentPolicy.space_id
+        ? appContextService.getInternalUserSOClientForSpaceId(preconfiguredAgentPolicy.space_id)
+        : appContextService.getInternalUserSOClientForSpaceId(DEFAULT_NAMESPACE_STRING);
+
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
-        soClient,
+        namespacedSoClient,
         esClient,
-        omit(preconfiguredAgentPolicy, 'is_managed') // Don't add `is_managed` until the policy has been fully configured
+        omit(preconfiguredAgentPolicy, 'is_managed', 'space_id') // Don't add `is_managed` until the policy has been fully configured and not persist space_id
       );
 
       if (!created) {
-        if (!policy?.is_managed) return { created, policy };
+        if (!policy) return { created, policy, namespacedSoClient };
+        if (!policy.is_managed && !preconfiguredAgentPolicy.is_managed) return { created, policy };
         const { hasChanged, fields } = comparePreconfiguredPolicyToCurrent(
           preconfiguredAgentPolicy,
           policy
@@ -175,7 +199,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         };
         if (hasChanged) {
           const updatedPolicy = await agentPolicyService.update(
-            soClient,
+            namespacedSoClient,
             esClient,
             String(preconfiguredAgentPolicy.id),
             newFields,
@@ -183,14 +207,15 @@ export async function ensurePreconfiguredPackagesAndPolicies(
               force: true,
             }
           );
-          return { created, policy: updatedPolicy };
+          return { created, policy: updatedPolicy, namespacedSoClient };
         }
-        return { created, policy };
+        return { created, policy, namespacedSoClient };
       }
 
       return {
         created,
         policy,
+        namespacedSoClient,
         shouldAddIsManagedFlag: preconfiguredAgentPolicy.is_managed,
       };
     })
@@ -208,20 +233,25 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       continue;
     }
     fulfilledPolicies.push(policyResult.value);
-    const { created, policy, shouldAddIsManagedFlag } = policyResult.value;
+    const { created, policy, shouldAddIsManagedFlag, namespacedSoClient } = policyResult.value;
+
     if (created || policies[i].is_managed) {
+      if (!namespacedSoClient) {
+        throw new Error('No soClient created for that policy');
+      }
       const preconfiguredAgentPolicy = policies[i];
       const { package_policies: packagePolicies } = preconfiguredAgentPolicy;
 
       const agentPolicyWithPackagePolicies = await agentPolicyService.get(
-        soClient,
+        namespacedSoClient,
         policy!.id,
         true
       );
       const installedPackagePolicies = await Promise.all(
-        packagePolicies.map(async ({ package: pkg, name, ...newPackagePolicy }) => {
+        packagePolicies.map(async (preconfiguredPackagePolicy) => {
+          const { package: pkg, ...newPackagePolicy } = preconfiguredPackagePolicy;
           const installedPackage = await getInstallation({
-            savedObjectsClient: soClient,
+            savedObjectsClient: defaultSoClient,
             pkgName: pkg.name,
           });
           if (!installedPackage) {
@@ -245,28 +275,36 @@ export async function ensurePreconfiguredPackagesAndPolicies(
                   '[{agentPolicyName}] could not be added. [{pkgName}] is not installed, add [{pkgName}] to [{packagesConfigValue}] or remove it from [{packagePolicyName}].',
                 values: {
                   agentPolicyName: preconfiguredAgentPolicy.name,
-                  packagePolicyName: name,
+                  packagePolicyName: newPackagePolicy.name,
                   pkgName: pkg.name,
                   packagesConfigValue: 'xpack.fleet.packages',
                 },
               })
             );
           }
-          return { name, installedPackage, ...newPackagePolicy };
+          return { installedPackage, packagePolicy: newPackagePolicy, namespacedSoClient };
         })
       );
 
       const packagePoliciesToAdd = installedPackagePolicies.filter((installablePackagePolicy) => {
         return !(agentPolicyWithPackagePolicies?.package_policies as PackagePolicy[]).some(
           (packagePolicy) =>
-            (packagePolicy.id !== undefined && packagePolicy.id === installablePackagePolicy.id) ||
-            packagePolicy.name === installablePackagePolicy.name
+            (packagePolicy.id !== undefined &&
+              packagePolicy.id === installablePackagePolicy.packagePolicy.id) ||
+            packagePolicy.name === installablePackagePolicy.packagePolicy.name
         );
       });
-      logger.debug(`Adding preconfigured package policies ${packagePoliciesToAdd}`);
+      logger.debug(
+        () =>
+          `Adding preconfigured package policies ${JSON.stringify(
+            packagePoliciesToAdd.map((pol) => ({
+              name: pol.packagePolicy.name,
+              package: pol.installedPackage.name,
+            }))
+          )}`
+      );
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
       await addPreconfiguredPolicyPackages(
-        soClient,
         esClient,
         policy!,
         packagePoliciesToAdd!,
@@ -278,7 +316,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       // Add the is_managed flag after configuring package policies to avoid errors
       if (shouldAddIsManagedFlag) {
         await agentPolicyService.update(
-          soClient,
+          namespacedSoClient,
           esClient,
           policy!.id,
           { is_managed: true },
@@ -305,6 +343,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             }),
           }
     ),
+    // @ts-expect-error upgrade typescript v4.9.5
     packages: fulfilledPackages.map((pkg) => ('version' in pkg ? pkgToPkgKey(pkg) : pkg.name)),
     nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
   };
@@ -316,7 +355,13 @@ export function comparePreconfiguredPolicyToCurrent(
 ) {
   // Namespace is omitted from being compared because even for managed policies, we still
   // want users to be able to pick their own namespace: https://github.com/elastic/kibana/issues/110533
-  const configTopLevelFields = omit(policyFromConfig, 'package_policies', 'id', 'namespace');
+  const configTopLevelFields = omit(
+    policyFromConfig,
+    'package_policies',
+    'id',
+    'namespace',
+    'space_id'
+  );
   const currentTopLevelFields = pick(currentPolicy, ...Object.keys(configTopLevelFields));
 
   return {
@@ -326,17 +371,19 @@ export function comparePreconfiguredPolicyToCurrent(
 }
 
 async function addPreconfiguredPolicyPackages(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentPolicy: AgentPolicy,
-  installedPackagePolicies: Array<
-    Partial<Omit<NewPackagePolicy, 'inputs'>> & {
-      id?: string | number;
-      name: string;
-      installedPackage: Installation;
-      inputs?: InputsOverride[];
-    }
-  >,
+  installedPackagePolicies: Array<{
+    installedPackage: Installation;
+    namespacedSoClient: SavedObjectsClientContract;
+    packagePolicy:
+      | (Partial<Omit<NewPackagePolicy, 'inputs'>> & {
+          id?: string | number;
+          name: string;
+          inputs?: InputsOverride[];
+        })
+      | (Omit<SimplifiedPackagePolicy, 'package' | 'policy_id'> & { id: string });
+  }>,
   defaultOutput: Output,
   bumpAgentPolicyRevison = false
 ) {
@@ -345,31 +392,56 @@ async function addPreconfiguredPolicyPackages(
   const packageInfoMap = new Map<string, PackageInfo>();
 
   // Add packages synchronously to avoid overwriting
-  for (const { installedPackage, id, name, description, inputs } of installedPackagePolicies) {
+  for (const { installedPackage, packagePolicy, namespacedSoClient } of installedPackagePolicies) {
     let packageInfo: PackageInfo;
-
     if (packageInfoMap.has(installedPackage.name)) {
       packageInfo = packageInfoMap.get(installedPackage.name)!;
     } else {
       packageInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
+        savedObjectsClient: namespacedSoClient,
         pkgName: installedPackage.name,
         pkgVersion: installedPackage.version,
       });
     }
 
-    await addPackageToAgentPolicy(
-      soClient,
-      esClient,
-      installedPackage,
-      agentPolicy,
-      defaultOutput,
-      packageInfo,
-      name,
-      id,
-      description,
-      (policy) => preconfigurePackageInputs(policy, packageInfo, inputs),
-      bumpAgentPolicyRevison
-    );
+    if (Array.isArray(packagePolicy.inputs)) {
+      const { id, name, description, inputs } = packagePolicy;
+      await addPackageToAgentPolicy(
+        namespacedSoClient,
+        esClient,
+        agentPolicy,
+        packageInfo,
+        name,
+        id,
+        description,
+        (policy) => preconfigurePackageInputs(policy, packageInfo, inputs),
+        bumpAgentPolicyRevison
+      );
+    } else {
+      const simplifiedPackagePolicy = packagePolicy as SimplifiedPackagePolicy;
+      const id = simplifiedPackagePolicy.id?.toString();
+      // Simplified package policy
+      const newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          ...(simplifiedPackagePolicy as SimplifiedPackagePolicy),
+          id,
+          policy_id: agentPolicy.id,
+          policy_ids: [agentPolicy.id],
+          namespace: packagePolicy.namespace || agentPolicy.namespace,
+        },
+        packageInfo,
+        {}
+      );
+
+      await packagePolicyService.create(namespacedSoClient, esClient, newPackagePolicy, {
+        id,
+        bumpRevision: bumpAgentPolicyRevison,
+        skipEnsureInstalled: true,
+        skipUniqueNameVerification: true,
+        overwrite: true,
+        force: true, // To add package to managed policy we need the force flag
+        packageInfo,
+      });
+    }
   }
 }

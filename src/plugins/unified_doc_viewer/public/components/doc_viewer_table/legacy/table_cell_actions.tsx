@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -20,7 +21,7 @@ interface TableActionsProps {
   flattenedField: unknown;
   fieldMapping?: DataViewField;
   onFilter: DocViewFilterFn;
-  onToggleColumn: (field: string) => void;
+  onToggleColumn: ((field: string) => void) | undefined;
   ignoredValue: boolean;
 }
 
@@ -35,24 +36,32 @@ export const TableActions = ({
 }: TableActionsProps) => {
   return (
     <div className="kbnDocViewer__buttons">
-      <DocViewTableRowBtnFilterAdd
-        disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue || !onFilter}
-        onClick={() => onFilter(fieldMapping, flattenedField, '+')}
-      />
-      <DocViewTableRowBtnFilterRemove
-        disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue || !onFilter}
-        onClick={() => onFilter(fieldMapping, flattenedField, '-')}
-      />
-      <DocViewTableRowBtnToggleColumn
-        active={isActive}
-        fieldname={field}
-        onClick={() => onToggleColumn(field)}
-      />
-      <DocViewTableRowBtnFilterExists
-        disabled={!fieldMapping || !fieldMapping.filterable || !onFilter}
-        onClick={() => onFilter('_exists_', field, '+')}
-        scripted={fieldMapping && fieldMapping.scripted}
-      />
+      {onFilter && (
+        <DocViewTableRowBtnFilterAdd
+          disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue}
+          onClick={() => onFilter(fieldMapping, flattenedField, '+')}
+        />
+      )}
+      {onFilter && (
+        <DocViewTableRowBtnFilterRemove
+          disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue}
+          onClick={() => onFilter(fieldMapping, flattenedField, '-')}
+        />
+      )}
+      {onToggleColumn && (
+        <DocViewTableRowBtnToggleColumn
+          active={isActive}
+          fieldname={field}
+          onClick={() => onToggleColumn(field)}
+        />
+      )}
+      {onFilter && (
+        <DocViewTableRowBtnFilterExists
+          disabled={!fieldMapping || !fieldMapping.filterable}
+          onClick={() => onFilter('_exists_', field, '+')}
+          scripted={fieldMapping && fieldMapping.scripted}
+        />
+      )}
     </div>
   );
 };

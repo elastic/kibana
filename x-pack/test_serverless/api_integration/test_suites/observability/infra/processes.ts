@@ -10,34 +10,40 @@ import {
   ProcessListAPIRequestRT,
   ProcessListAPIResponseRT,
 } from '@kbn/infra-plugin/common/http_api/host_details/process_list';
-import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
-import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import type { RoleCredentials } from '../../../../shared/services';
+
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES, ARCHIVE_NAME } from './constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   describe('API /metrics/process_list', () => {
-    const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username || '';
-    const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password || '';
-
-    before(() => esArchiver.load(ARCHIVE_NAME));
-    after(() => esArchiver.unload(ARCHIVE_NAME));
+    let roleAuthc: RoleCredentials;
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      await esArchiver.load(ARCHIVE_NAME);
+    });
+    after(async () => {
+      await esArchiver.unload(ARCHIVE_NAME);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
 
     it('works', async () => {
-      const response = await supertest
+      const response = await supertestWithoutAuth
         .post('/api/metrics/process_list')
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
-        .auth(username, password)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .send(
           ProcessListAPIRequestRT.encode({
             hostTerm: {
               'host.name': 'serverless-host',
             },
-            indexPattern: 'metrics-*,metricbeat-*',
+            sourceId: 'default',
             to: DATES.serverlessTestingHost.max,
             sortBy: {
               name: 'cpu',

@@ -1,0 +1,45 @@
+openapi: 3.0.0
+info:
+  title: Get Capabilities API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/capabilities:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetCapabilities
+      description: Get Elastic Assistant capabilities for the requesting plugin
+      summary: Get Elastic Assistant capabilities
+      tags:
+        - Capabilities API
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assistantBedrockChat:
+                    type: boolean
+                  assistantKnowledgeBaseByDefault:
+                    type: boolean
+                  assistantModelEvaluation:
+                    type: boolean
+                required:
+                  - assistantBedrockChat
+                  - assistantKnowledgeBaseByDefault
+                  - assistantModelEvaluation
+        '400':
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string

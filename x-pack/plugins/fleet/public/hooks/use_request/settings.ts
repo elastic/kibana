@@ -8,7 +8,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { settingsRoutesService } from '../../services';
-import type { PutSettingsResponse, PutSettingsRequest, GetSettingsResponse } from '../../types';
+import type {
+  PutSettingsResponse,
+  PutSettingsRequest,
+  GetSettingsResponse,
+  GetEnrollmentSettingsRequest,
+  GetEnrollmentSettingsResponse,
+  GetSpaceSettingsResponse,
+} from '../../types';
 
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -33,6 +40,19 @@ export function useGetSettings() {
     method: 'get',
     path: settingsRoutesService.getInfoPath(),
     version: API_VERSIONS.public.v1,
+  });
+}
+
+export function useGetSpaceSettings({ enabled }: { enabled?: boolean }) {
+  return useQuery<GetSpaceSettingsResponse, RequestError>({
+    queryKey: ['space_settings'],
+    enabled,
+    queryFn: () =>
+      sendRequestForRq<GetSpaceSettingsResponse>({
+        method: 'get',
+        path: settingsRoutesService.getSpaceInfoPath(),
+        version: API_VERSIONS.public.v1,
+      }),
   });
 }
 
@@ -61,5 +81,23 @@ export function sendPutSettings(body: PutSettingsRequest['body']) {
     path: settingsRoutesService.getUpdatePath(),
     version: API_VERSIONS.public.v1,
     body,
+  });
+}
+
+export function useGetEnrollmentSettings(query?: GetEnrollmentSettingsRequest['query']) {
+  return useRequest<GetEnrollmentSettingsResponse>({
+    method: 'get',
+    path: settingsRoutesService.getEnrollmentInfoPath(),
+    version: API_VERSIONS.public.v1,
+    query,
+  });
+}
+
+export function sendGetEnrollmentSettings(query?: GetEnrollmentSettingsRequest['query']) {
+  return sendRequest<GetEnrollmentSettingsResponse>({
+    method: 'get',
+    path: settingsRoutesService.getEnrollmentInfoPath(),
+    version: API_VERSIONS.public.v1,
+    query,
   });
 }

@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import _ from 'lodash';
-import { first } from 'rxjs/operators';
+import _, { omit } from 'lodash';
+import { first } from 'rxjs';
 
 import {
   TaskInstance,
@@ -18,13 +18,14 @@ import {
   SerializedConcreteTaskInstance,
 } from './task';
 import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import { TaskStore, SearchOpts, AggregationOpts } from './task_store';
+import { TaskStore, SearchOpts, AggregationOpts, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr } from './lib/result_type';
+import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const mockGetValidatedTaskInstanceFromReading = jest.fn();
 const mockGetValidatedTaskInstanceForUpdating = jest.fn();
@@ -108,6 +109,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -156,6 +160,7 @@ describe('TaskStore', () => {
           taskType: 'report',
           user: undefined,
           traceparent: 'apmTraceparent',
+          partition: 225,
         },
         {
           id: 'id',
@@ -179,6 +184,7 @@ describe('TaskStore', () => {
         user: undefined,
         version: '123',
         traceparent: 'apmTraceparent',
+        partition: 225,
       });
     });
 
@@ -280,15 +286,22 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
-    async function testFetch(opts?: SearchOpts, hits: Array<estypes.SearchHit<unknown>> = []) {
+    async function testFetch(
+      opts?: SearchOpts,
+      hits: Array<estypes.SearchHit<unknown>> = [],
+      limitResponse: boolean = false
+    ) {
       childEsClient.search.mockResponse({
         hits: { hits, total: hits.length },
       } as estypes.SearchResponse);
 
-      const result = await store.fetch(opts);
+      const result = await store.fetch(opts, limitResponse);
 
       expect(childEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -333,6 +346,153 @@ describe('TaskStore', () => {
       await expect(store.fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
+
+    test('excludes state and params from source when excludeState is true', async () => {
+      const { args } = await testFetch({}, [], true);
+      expect(args).toMatchObject({
+        index: 'tasky',
+        body: {
+          sort: [{ 'task.runAt': 'asc' }],
+          query: { term: { type: 'task' } },
+        },
+        _source_excludes: ['task.state', 'task.params'],
+      });
+    });
+  });
+
+  describe('msearch', () => {
+    let store: TaskStore;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let childEsClient: ReturnType<
+      typeof elasticsearchServiceMock.createClusterClient
+    >['asInternalUser'];
+
+    beforeAll(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.child.mockReturnValue(childEsClient as unknown as Client);
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+      });
+    });
+
+    async function testMsearch(
+      optsArray: SearchOpts[],
+      hitsArray: Array<estypes.SearchHitsMetadata<unknown>> = []
+    ) {
+      childEsClient.msearch.mockResponse({
+        took: 0,
+        responses: hitsArray.map((hits) => ({
+          hits,
+          took: 0,
+          _shards: {
+            failed: 0,
+            successful: 1,
+            total: 1,
+          },
+          timed_out: false,
+          status: 200,
+        })),
+      });
+
+      const result = await store.msearch(optsArray);
+
+      expect(childEsClient.msearch).toHaveBeenCalledTimes(1);
+
+      return {
+        result,
+        args: childEsClient.msearch.mock.calls[0][0],
+      };
+    }
+
+    test('empty call filters by type, sorts by runAt and id', async () => {
+      const { args } = await testMsearch([{}], []);
+      expect(args).toMatchObject({
+        index: 'tasky',
+        body: [
+          {},
+          {
+            sort: [{ 'task.runAt': 'asc' }],
+            query: { term: { type: 'task' } },
+          },
+        ],
+      });
+    });
+
+    test('allows multiple custom queries', async () => {
+      const { args } = await testMsearch(
+        [
+          {
+            query: {
+              term: { 'task.taskType': 'foo' },
+            },
+          },
+          {
+            query: {
+              term: { 'task.taskType': 'bar' },
+            },
+          },
+        ],
+        []
+      );
+
+      expect(args).toMatchObject({
+        body: [
+          {},
+          {
+            query: {
+              bool: {
+                must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'foo' } }],
+              },
+            },
+          },
+          {},
+          {
+            query: {
+              bool: {
+                must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'bar' } }],
+              },
+            },
+          },
+        ],
+      });
+    });
+
+    test('pushes error from call cluster to errors$', async () => {
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      childEsClient.msearch.mockResponse({
+        took: 0,
+        responses: [
+          {
+            took: 0,
+            _shards: {
+              failed: 0,
+              successful: 1,
+              total: 1,
+            },
+            timed_out: false,
+            status: 429,
+          },
+        ],
+      } as estypes.MsearchResponse);
+      await expect(store.msearch([{}])).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unexpected status code from taskStore::msearch: 429"`
+      );
+      expect(await firstErrorPromise).toMatchInlineSnapshot(
+        `[Error: Unexpected status code from taskStore::msearch: 429]`
+      );
+    });
   });
 
   describe('aggregate', () => {
@@ -351,6 +511,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -459,6 +622,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -477,6 +643,7 @@ describe('TaskStore', () => {
         version: '123',
         ownerId: null,
         traceparent: 'myTraceparent',
+        partition: 99,
       };
 
       savedObjectsClient.update.mockImplementation(
@@ -519,6 +686,7 @@ describe('TaskStore', () => {
           user: undefined,
           ownerId: null,
           traceparent: 'myTraceparent',
+          partition: 99,
         },
         { version: '123', refresh: false }
       );
@@ -598,10 +766,11 @@ describe('TaskStore', () => {
 
   describe('bulkUpdate', () => {
     let store: TaskStore;
+    const logger = mockLogger();
 
     beforeAll(() => {
       store = new TaskStore({
-        logger: mockLogger(),
+        logger,
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -610,6 +779,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -651,6 +823,125 @@ describe('TaskStore', () => {
       expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
         validate: false,
       });
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: task.id,
+            type: 'task',
+            version: task.version,
+            attributes: taskInstanceToAttributes(task, task.id),
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test(`validates whenever validate:true is passed-in`, async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: '',
+      };
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...task,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([task], { validate: true });
+
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+        validate: true,
+      });
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: task.id,
+            type: 'task',
+            version: task.version,
+            attributes: taskInstanceToAttributes(task, task.id),
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test(`logs warning and doesn't validate whenever excludeLargeFields option is passed-in`, async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: '',
+      };
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...task,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([task], { validate: true, excludeLargeFields: true });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Skipping validation for bulk update because excludeLargeFields=true.`
+      );
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+        validate: false,
+      });
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: task.id,
+            type: 'task',
+            version: task.version,
+            attributes: omit(taskInstanceToAttributes(task, task.id), ['state', 'params']),
+          },
+        ],
+        { refresh: false }
+      );
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -693,6 +984,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -729,6 +1023,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -768,6 +1065,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -828,6 +1128,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -882,7 +1185,7 @@ describe('TaskStore', () => {
 
   describe('getLifecycle', () => {
     test('returns the task status if the task exists ', async () => {
-      expect.assertions(6);
+      expect.assertions(7);
       return Promise.all(
         Object.values(TaskStatus).map(async (status) => {
           const task = {
@@ -923,6 +1226,9 @@ describe('TaskStore', () => {
             savedObjectsRepository: savedObjectsClient,
             adHocTaskCounter,
             allowReadingInvalidState: false,
+            requestTimeouts: {
+              update_by_query: 1000,
+            },
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -945,6 +1251,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -965,6 +1274,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -985,6 +1297,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
     });
 
@@ -1010,6 +1325,7 @@ describe('TaskStore', () => {
               status: 'idle',
               taskType: 'report',
               traceparent: 'apmTraceparent',
+              partition: 225,
             },
             references: [],
             version: '123',
@@ -1049,6 +1365,7 @@ describe('TaskStore', () => {
               status: 'idle',
               taskType: 'report',
               traceparent: 'apmTraceparent',
+              partition: 225,
             },
           },
         ],
@@ -1073,6 +1390,7 @@ describe('TaskStore', () => {
           user: undefined,
           version: '123',
           traceparent: 'apmTraceparent',
+          partition: 225,
         },
       ]);
     });
@@ -1155,6 +1473,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
 
       expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
@@ -1177,6 +1498,9 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: true,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
       });
 
       expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
@@ -1184,6 +1508,240 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         allowReadingInvalidState: true,
       });
+    });
+  });
+
+  describe('updateByQuery', () => {
+    let store: TaskStore;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let childEsClient: ReturnType<
+      typeof elasticsearchServiceMock.createClusterClient
+    >['asInternalUser'];
+
+    beforeAll(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.child.mockReturnValue(childEsClient as unknown as Client);
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+      });
+    });
+    test('should pass requestTimeout', async () => {
+      childEsClient.updateByQuery.mockResponse({
+        hits: { hits: [], total: 0, updated: 100, version_conflicts: 0 },
+      } as UpdateByQueryResponse);
+      await store.updateByQuery({ script: { source: '' } }, { max_docs: 10 });
+      expect(childEsClient.updateByQuery).toHaveBeenCalledWith(expect.any(Object), {
+        requestTimeout: 1000,
+      });
+    });
+  });
+
+  describe('bulkGetVersions', () => {
+    let store: TaskStore;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let childEsClient: ReturnType<
+      typeof elasticsearchServiceMock.createClusterClient
+    >['asInternalUser'];
+
+    beforeAll(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.child.mockReturnValue(childEsClient as unknown as Client);
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+      });
+    });
+
+    test('should return the version of the tasks when found', async () => {
+      childEsClient.mget.mockResponse({
+        docs: [
+          {
+            _index: 'ignored-1',
+            _id: 'task:some-task-a',
+            _version: 424242,
+            _seq_no: 123,
+            _primary_term: 1,
+            found: true,
+          },
+          {
+            _index: 'ignored-2',
+            _id: 'task:some-task-b',
+            _version: 31415,
+            _seq_no: 456,
+            _primary_term: 2,
+            found: true,
+          },
+        ],
+      });
+
+      const result = await store.bulkGetVersions(['task:some-task-a', 'task:some-task-b']);
+      expect(result).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "esId": "task:some-task-a",
+            "primaryTerm": 1,
+            "seqNo": 123,
+          },
+          Object {
+            "esId": "task:some-task-b",
+            "primaryTerm": 2,
+            "seqNo": 456,
+          },
+        ]
+      `);
+    });
+
+    test('should handle errors and missing tasks', async () => {
+      childEsClient.mget.mockResponse({
+        docs: [
+          {
+            _index: 'ignored-1',
+            _id: 'task:some-task-a',
+            _version: 424242,
+            _seq_no: 123,
+            _primary_term: 1,
+            found: true,
+          },
+          {
+            _index: 'ignored-2',
+            _id: 'task:some-task-b',
+            found: false,
+          },
+          {
+            _index: 'ignored-3',
+            _id: 'task:some-task-c',
+            error: {
+              type: 'index_not_found_exception',
+              reason: 'no such index "ignored-4"',
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkGetVersions([
+        'task:some-task-a',
+        'task:some-task-b',
+        'task:some-task-c',
+      ]);
+      expect(result).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "esId": "task:some-task-a",
+            "primaryTerm": 1,
+            "seqNo": 123,
+          },
+          Object {
+            "error": "task \\"task:some-task-b\\" not found",
+            "esId": "task:some-task-b",
+          },
+          Object {
+            "error": "error getting version for task:some-task-c: index_not_found_exception: no such index \\"ignored-4\\"",
+            "esId": "task:some-task-c",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('getDocVersions', () => {
+    let store: TaskStore;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let childEsClient: ReturnType<
+      typeof elasticsearchServiceMock.createClusterClient
+    >['asInternalUser'];
+
+    beforeAll(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.child.mockReturnValue(childEsClient as unknown as Client);
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+      });
+    });
+
+    test('should return the version as expected, with errors included', async () => {
+      childEsClient.mget.mockResponse({
+        docs: [
+          {
+            _index: 'ignored-1',
+            _id: 'task:some-task-a',
+            _version: 424242,
+            _seq_no: 123,
+            _primary_term: 1,
+            found: true,
+          },
+          {
+            _index: 'ignored-2',
+            _id: 'task:some-task-b',
+            found: false,
+          },
+          {
+            _index: 'ignored-3',
+            _id: 'task:some-task-c',
+            error: {
+              type: 'index_not_found_exception',
+              reason: 'no such index "ignored-4"',
+            },
+          },
+        ],
+      });
+
+      const result = await store.getDocVersions([
+        'task:some-task-a',
+        'task:some-task-b',
+        'task:some-task-c',
+      ]);
+      expect(result).toMatchInlineSnapshot(`
+        Map {
+          "task:some-task-a" => Object {
+            "esId": "task:some-task-a",
+            "primaryTerm": 1,
+            "seqNo": 123,
+          },
+          "task:some-task-b" => Object {
+            "error": "task \\"task:some-task-b\\" not found",
+            "esId": "task:some-task-b",
+          },
+          "task:some-task-c" => Object {
+            "error": "error getting version for task:some-task-c: index_not_found_exception: no such index \\"ignored-4\\"",
+            "esId": "task:some-task-c",
+          },
+        }
+      `);
     });
   });
 });

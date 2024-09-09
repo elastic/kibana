@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { CoreSetup, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { MAX_FILE_SIZE_BYTES } from '../common/constants';
+import { MAX_FILE_SIZE_BYTES, MAX_TIKA_FILE_SIZE_BYTES } from '../common/constants';
 import type { IngestPipelineWrapper, InputData } from '../common/types';
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
@@ -26,8 +26,10 @@ import {
   analyzeFileQuerySchema,
   runtimeMappingsSchema,
 } from './schemas';
-import { StartDeps } from './types';
+import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
+import { previewIndexTimeRange } from './preview_index_time_range';
+import { previewTikaContents } from './preview_tika_contents';
 
 function importData(
   client: IScopedClusterClient,
@@ -269,6 +271,94 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             query,
             runtimeMappings
           );
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/preview_index_time_range Predict the time range for an index using example documents
+   * @apiName PreviewIndexTimeRange
+   * @apiDescription Predict the time range for an index using example documents
+   */
+  router.versioned
+    .post({
+      path: '/internal/file_upload/preview_index_time_range',
+      access: 'internal',
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              docs: schema.arrayOf(schema.any()),
+              pipeline: schema.any(),
+              timeField: schema.string(),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { docs, pipeline, timeField } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+          const resp = await previewIndexTimeRange(esClient, timeField, pipeline, docs);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/preview_tika_contents Returns the contents of a file using the attachment ingest processor
+   * @apiName PreviewTikaContents
+   * @apiDescription Preview the contents of a file using the attachment ingest processor
+   */
+  router.versioned
+    .post({
+      path: '/internal/file_upload/preview_tika_contents',
+      access: 'internal',
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+        body: {
+          accepts: ['application/json'],
+          maxBytes: MAX_TIKA_FILE_SIZE_BYTES,
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              base64File: schema.string(),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { base64File } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+          const resp = await previewTikaContents(esClient, base64File);
 
           return response.ok({
             body: resp,

@@ -16,6 +16,12 @@ export interface EndpointAuthz {
   canReadSecuritySolution: boolean;
   /** If the user has permissions to access Fleet */
   canAccessFleet: boolean;
+  /** If the user has permissions to access Fleet Agent policies */
+  canReadFleetAgentPolicies: boolean;
+  /** If the user has permissions to read Fleet Agents */
+  canReadFleetAgents: boolean;
+  /** If the user has permissions to write Fleet Agents */
+  canWriteFleetAgents: boolean;
   /** If the user has permissions to access Endpoint management (includes check to ensure they also have access to fleet) */
   canAccessEndpointManagement: boolean;
   /** If the user has permissions to access Actions Log management and also has a platinum license (used for endpoint details flyout) */
@@ -50,6 +56,8 @@ export interface EndpointAuthz {
   canWriteExecuteOperations: boolean;
   /** If the user has write permissions to use file operations */
   canWriteFileOperations: boolean;
+  /** If user has write permission to use scan file path operations */
+  canWriteScanOperations: boolean;
   /** If the user has write permissions for trusted applications */
   canWriteTrustedApplications: boolean;
   /** If the user has read permissions for trusted applications */

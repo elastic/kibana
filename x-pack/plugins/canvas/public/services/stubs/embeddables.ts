@@ -13,6 +13,8 @@ type EmbeddablesServiceFactory = PluginServiceFactory<CanvasEmbeddablesService>;
 const noop = (..._args: any[]): any => {};
 
 export const embeddablesServiceFactory: EmbeddablesServiceFactory = () => ({
+  reactEmbeddableRegistryHasKey: noop,
+  getReactEmbeddableSavedObjects: noop,
   getEmbeddableFactories: noop,
   getStateTransfer: noop,
 });

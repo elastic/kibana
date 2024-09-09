@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './field_picker.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { FieldIcon } from '@kbn/field-utils/src/components/field_icon';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import type { FieldOptionValue, FieldOption } from './types';
@@ -18,7 +20,7 @@ import type { FieldOptionValue, FieldOption } from './types';
 export interface FieldPickerProps<T extends FieldOptionValue>
   extends EuiComboBoxProps<FieldOption<T>['value']> {
   options: Array<FieldOption<T>>;
-  selectedField?: string;
+  activeField: EuiComboBoxOptionOption<FieldOption<T>['value']> | undefined;
   onChoose: (choice: T | undefined) => void;
   onDelete?: () => void;
   fieldIsInvalid: boolean;
@@ -32,7 +34,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
   props: FieldPickerProps<T>
 ) {
   const {
-    selectedOptions,
+    activeField,
     options,
     onChoose,
     onDelete,
@@ -40,6 +42,9 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
     ['data-test-subj']: dataTestSub,
     ...rest
   } = props;
+
+  const [selectedOption, setSelectedOption] = React.useState(activeField);
+
   let maxLabelLength = 0;
   const styledOptions = options?.map(({ compatible, exists, ...otherAttr }) => {
     if (otherAttr.options) {
@@ -88,21 +93,35 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
       placeholder={i18n.translate('visualizationUiComponents.fieldPicker.fieldPlaceholder', {
         defaultMessage: 'Select a field',
       })}
+      optionMatcher={comboBoxFieldOptionMatcher}
       options={styledOptions}
       isInvalid={fieldIsInvalid}
-      selectedOptions={selectedOptions}
+      selectedOptions={selectedOption ? [selectedOption] : []}
       singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
       truncationProps={MIDDLE_TRUNCATION_PROPS}
       inputPopoverProps={{
         panelMinWidth: calculateWidthFromCharCount(maxLabelLength),
         anchorPosition: 'downRight',
       }}
+      onBlur={() => {
+        if (!selectedOption) {
+          setSelectedOption(activeField);
+        }
+      }}
       onChange={(choices) => {
-        if (choices.length === 0) {
+        const firstChoice = choices.at(0);
+        if (!firstChoice) {
+          setSelectedOption(undefined);
           onDelete?.();
           return;
         }
-        onChoose(choices[0].value);
+        if (firstChoice.value !== activeField?.value) {
+          setSelectedOption({
+            label: firstChoice.label,
+            value: firstChoice.value,
+          });
+        }
+        onChoose(firstChoice.value);
       }}
       {...rest}
     />

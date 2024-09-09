@@ -16,20 +16,25 @@ type EndpointPolicyAgentSummary = GetAgentStatusResponse['results'];
 
 export const useFetchAgentByAgentPolicySummary = (
   /**
-   * The Fleet Agent Policy ID (NOT the endpoint policy id)
+   * The Fleet Agent Policy IDs (NOT the endpoint policy id)
    */
-  agentPolicyId: string,
+  agentPolicyIds: string[],
   options: Omit<UseQueryOptions<EndpointPolicyAgentSummary, IHttpFetchError>, 'queryFn'> = {}
 ): UseQueryResult<EndpointPolicyAgentSummary, IHttpFetchError> => {
   const http = useHttp();
 
   return useQuery<EndpointPolicyAgentSummary, IHttpFetchError>({
-    queryKey: ['get-policy-agent-summary', agentPolicyId],
+    queryKey: ['get-policy-agent-summary', agentPolicyIds],
     ...options,
     queryFn: async () => {
       return (
         await http.get<GetAgentStatusResponse>(agentRouteService.getStatusPath(), {
-          query: { policyId: agentPolicyId },
+          query:
+            agentPolicyIds.length === 1
+              ? { policyId: agentPolicyIds[0] }
+              : {
+                  kuery: agentPolicyIds.map((id) => `policy_id:${id}`).join(' OR '),
+                },
           version: API_VERSIONS.public.v1,
         })
       ).results;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import { Agent as HttpsAgent } from 'https';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
@@ -21,6 +21,7 @@ import {
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
+import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 
 const TestUrl = 'https://elastic.co/foo/bar/baz';
 
@@ -77,6 +78,80 @@ describe('request', () => {
       headers: { 'content-type': 'application/json' },
       data: { incidentId: '123' },
     });
+  });
+
+  test('adds request body bytes from request header on a successful request when connectorUsageCollector is provided', async () => {
+    const contentLength = 12;
+    axiosMock.mockImplementation(() => ({
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+      data: { incidentId: '123' },
+      request: {
+        headers: { 'Content-Length': contentLength },
+        getHeader: () => contentLength,
+      },
+    }));
+    const connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
+    await request({
+      axios,
+      url: '/test',
+      logger,
+      data: { test: 12345 },
+      configurationUtilities,
+      connectorUsageCollector,
+    });
+
+    expect(connectorUsageCollector.getRequestBodyByte()).toBe(contentLength);
+  });
+
+  test('adds request body bytes from request header on a failed', async () => {
+    const contentLength = 12;
+    axiosMock.mockImplementation(
+      () =>
+        new AxiosError('failed', '500', undefined, {
+          headers: { 'Content-Length': contentLength },
+        })
+    );
+    const connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
+
+    try {
+      await request({
+        axios,
+        url: '/test',
+        logger,
+        configurationUtilities,
+        connectorUsageCollector,
+      });
+    } catch (e) {
+      expect(connectorUsageCollector.getRequestBodyByte()).toBe(contentLength);
+    }
+  });
+
+  test('adds request body bytes from data when request header does not exist', async () => {
+    const connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
+    const data = { test: 12345 };
+
+    await request({
+      axios,
+      url: '/test',
+      logger,
+      data,
+      configurationUtilities,
+      connectorUsageCollector,
+    });
+
+    expect(connectorUsageCollector.getRequestBodyByte()).toBe(
+      Buffer.byteLength(JSON.stringify(data), 'utf8')
+    );
   });
 
   test('it have been called with proper proxy agent for a valid url', async () => {
@@ -338,6 +413,55 @@ describe('request', () => {
     }).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Do not use \\"baseURL\\" in the creation of your axios instance because you will mostly break proxy"`
     );
+  });
+
+  test('it converts the auth property to basic auth header', async () => {
+    await request({
+      axios,
+      url: '/test',
+      logger,
+      configurationUtilities,
+      auth: { username: 'username', password: 'password' },
+    });
+
+    expect(axiosMock).toHaveBeenCalledWith('/test', {
+      method: 'get',
+      httpAgent: undefined,
+      httpsAgent: expect.any(HttpsAgent),
+      proxy: false,
+      maxContentLength: 1000000,
+      timeout: 360000,
+      headers: { Authorization: `Basic ${Buffer.from('username:password').toString('base64')}` },
+    });
+  });
+
+  test('it does not override an authorization header if provided', async () => {
+    await request({
+      axios,
+      url: '/test',
+      logger,
+      configurationUtilities,
+      auth: { username: 'username', password: 'password' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Test-Header': 'test',
+        Authorization: 'Bearer my_token',
+      },
+    });
+
+    expect(axiosMock).toHaveBeenCalledWith('/test', {
+      method: 'get',
+      httpAgent: undefined,
+      httpsAgent: expect.any(HttpsAgent),
+      proxy: false,
+      maxContentLength: 1000000,
+      timeout: 360000,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Test-Header': 'test',
+        Authorization: 'Bearer my_token',
+      },
+    });
   });
 });
 

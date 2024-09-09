@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { renderHook } from '@testing-library/react-hooks';
@@ -125,6 +126,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     expect(hookReader.result.current.getFieldsExistenceStatus(dataViewId)).toBe(
       ExistenceFetchStatus.succeeded
     );
+    expect(hookReader.result.current.getNewFields(dataViewId)).toStrictEqual([]);
 
     // does not have existence info => works less restrictive
     const anotherDataViewId = 'test-id';
@@ -140,6 +142,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     expect(hookReader.result.current.getFieldsExistenceStatus(anotherDataViewId)).toBe(
       ExistenceFetchStatus.unknown
     );
+    expect(hookReader.result.current.getNewFields(dataViewId)).toStrictEqual([]);
   });
 
   it('should work correctly with multiple readers', async () => {
@@ -217,6 +220,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     expect(currentResult.isFieldsExistenceInfoUnavailable(dataViewId)).toBe(true);
     expect(currentResult.hasFieldData(dataViewId, dataView.fields[0].name)).toBe(true);
     expect(currentResult.getFieldsExistenceStatus(dataViewId)).toBe(ExistenceFetchStatus.failed);
+    expect(currentResult.getNewFields(dataViewId)).toStrictEqual([]);
   });
 
   it('should work correctly for multiple data views', async () => {
@@ -532,5 +536,50 @@ describe('UnifiedFieldList useExistingFields', () => {
     );
 
     expect(params.onNoData).toHaveBeenCalledTimes(1); // still 1 time
+  });
+
+  it('should include newFields', async () => {
+    const newFields = [{ name: 'test', type: 'keyword', searchable: true, aggregatable: true }];
+
+    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(
+      async ({ dataView: currentDataView }) => {
+        return {
+          existingFieldNames: [currentDataView.fields[0].name],
+          newFields,
+        };
+      }
+    );
+
+    const params: ExistingFieldsFetcherParams = {
+      dataViews: [dataView],
+      services: mockedServices,
+      fromDate: '2019-01-01',
+      toDate: '2020-01-01',
+      query: { query: '', language: 'lucene' },
+      filters: [],
+    };
+    const hookFetcher = renderHook(useExistingFieldsFetcher, {
+      initialProps: params,
+    });
+
+    const hookReader = renderHook(useExistingFieldsReader);
+    await hookFetcher.waitForNextUpdate();
+
+    expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fromDate: '2019-01-01',
+        toDate: '2020-01-01',
+        dslQuery,
+        dataView,
+        timeFieldName: dataView.timeFieldName,
+      })
+    );
+
+    expect(hookReader.result.current.getFieldsExistenceStatus(dataView.id!)).toBe(
+      ExistenceFetchStatus.succeeded
+    );
+
+    expect(hookReader.result.current.getNewFields(dataView.id!)).toBe(newFields);
+    expect(hookReader.result.current.getNewFields('another-id')).toStrictEqual([]);
   });
 });

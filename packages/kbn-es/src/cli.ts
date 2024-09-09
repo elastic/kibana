@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import chalk from 'chalk';
@@ -29,6 +30,12 @@ function help() {
 
       ${availableCommands.join('\n      ')}
 
+    To start a serverless instance use the 'serverless' command with
+    '--projectType' flag or use the '--serverless=<ProjectType>'
+    shortcut, for example:
+
+      es --serverless=es
+
     Global options:
 
       --help
@@ -46,7 +53,16 @@ export async function run(defaults = {}) {
       default: defaults,
     });
     const args = options._;
-    const commandName = args[0];
+    let commandName = args[0];
+
+    // Converting --serverless flag to command
+    // `es --serverless=<projectType>` is just a shortcut for
+    // `es serverless --projectType=<projectType>`
+    if (options.serverless) {
+      const projectType: string = options.serverless;
+      commandName = 'serverless';
+      args.push('--projectType', projectType);
+    }
 
     if (args.length === 0 || (!commandName && options.help)) {
       help();

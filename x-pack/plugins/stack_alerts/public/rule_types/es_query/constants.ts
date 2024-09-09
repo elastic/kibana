@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { COMPARATORS } from '@kbn/triggers-actions-ui-plugin/public';
-
+import { COMPARATORS } from '@kbn/alerting-comparators';
 export const DEFAULT_VALUES = {
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
   QUERY: `{
@@ -23,7 +22,9 @@ export const DEFAULT_VALUES = {
   GROUP_BY: 'all',
   EXCLUDE_PREVIOUS_HITS: false,
   CAN_SELECT_MULTI_TERMS: true,
-  SOURCE_FIELDS: [],
+};
+export const SERVERLESS_DEFAULT_VALUES = {
+  SIZE: 10,
 };
 
 export const COMMON_EXPRESSION_ERRORS = {

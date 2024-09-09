@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -15,7 +16,7 @@ import {
   type MigrationResult,
   SavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { KibanaMigrator } from './kibana_migrator';
+import { KibanaMigrator, type KibanaMigratorOptions } from './kibana_migrator';
 import { DocumentMigrator } from './document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
@@ -235,7 +236,7 @@ describe('KibanaMigrator', () => {
   });
 });
 
-const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2') => {
+const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2'): KibanaMigratorOptions => {
   const mockedClient = elasticsearchClientMock.createElasticsearchClient();
   (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
 
@@ -251,6 +252,7 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2') => {
       // are moved over to their new index (.my_index)
       '.my_complementary_index': ['testtype3'],
     },
+    hashToVersionMap: {},
     typeRegistry: createRegistry([
       // typeRegistry depicts an updated index map:
       //   .my_index: ['testtype', 'testtype3'],

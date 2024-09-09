@@ -325,6 +325,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_cluster: undefined,
                 remote_indices: undefined,
                 run_as: [],
                 applications: [],
@@ -464,6 +465,7 @@ describe('PUT role', () => {
     putRoleTest(`creates role with everything`, {
       name: 'foo-role',
       payload: {
+        description: 'test description',
         metadata: {
           foo: 'test-metadata',
         },
@@ -540,6 +542,7 @@ describe('PUT role', () => {
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
+                description: 'test description',
                 indices: [
                   {
                     field_security: {
@@ -923,6 +926,60 @@ describe('PUT role', () => {
                     application: 'kibana-.kibana',
                     privileges: ['feature_unknown_feature.sub_feature_privilege_1'],
                     resources: ['*'],
+                  },
+                ],
+                metadata: undefined,
+              },
+            },
+          ],
+        },
+        statusCode: 204,
+        result: undefined,
+      },
+    });
+
+    putRoleTest(`creates role with remote_cluster privileges`, {
+      name: 'foo-role-remote-cluster',
+      payload: {
+        kibana: [],
+        elasticsearch: {
+          remote_cluster: [
+            {
+              clusters: ['cluster1', 'cluster2'],
+              privileges: ['monitor_enrich'],
+            },
+            {
+              clusters: ['cluster3', 'cluster4'],
+              privileges: ['monitor_enrich'],
+            },
+          ],
+        },
+      },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
+      asserts: {
+        recordSubFeaturePrivilegeUsage: false,
+        apiArguments: {
+          get: [{ name: 'foo-role-remote-cluster' }, { ignore: [404] }],
+          put: [
+            {
+              name: 'foo-role-remote-cluster',
+              body: {
+                applications: [],
+                cluster: [],
+                indices: [],
+                remote_indices: undefined,
+                run_as: [],
+                remote_cluster: [
+                  {
+                    clusters: ['cluster1', 'cluster2'],
+                    privileges: ['monitor_enrich'],
+                  },
+                  {
+                    clusters: ['cluster3', 'cluster4'],
+                    privileges: ['monitor_enrich'],
                   },
                 ],
                 metadata: undefined,

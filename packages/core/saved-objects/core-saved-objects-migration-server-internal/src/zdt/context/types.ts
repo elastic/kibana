@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -18,9 +19,9 @@ import type {
 import type {
   VirtualVersionMap,
   SavedObjectsMigrationConfigType,
+  IDocumentMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { DocLinks } from '@kbn/doc-links';
-import { VersionedTransformer } from '../../document_migrator';
 
 /**
  * The set of static, precomputed values and services used by the ZDT migration
@@ -45,7 +46,7 @@ export interface MigratorContext {
   /** SO serializer to use for migration */
   readonly serializer: ISavedObjectsSerializer;
   /** The doc migrator to use */
-  readonly documentMigrator: VersionedTransformer;
+  readonly documentMigrator: IDocumentMigrator;
   /** The SO type registry to use for the migration */
   readonly typeRegistry: ISavedObjectTypeRegistry;
   /** List of types that are no longer registered */

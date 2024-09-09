@@ -17,9 +17,12 @@ import { isEqual, reduce, each, get } from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
+import { EuiPopover } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { getFormattedSeverityScore, getSeverityWithLow } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+import { context } from '@kbn/kibana-react-plugin/public';
 
 import { formatValue } from '../../../formatters/format_value';
 import {
@@ -34,12 +37,11 @@ import {
   showMultiBucketAnomalyTooltip,
   getMultiBucketImpactTooltipValue,
 } from '../../../util/chart_utils';
-import { getTimeBucketsFromCache } from '../../../util/time_buckets';
+import { timeBucketsServiceFactory } from '../../../util/time_buckets_service';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
-import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
+import { timeSeriesExplorerServiceFactory } from '../../../util/time_series_explorer_service';
 import { mlEscape } from '../../../util/string_utils';
-import { mlFieldFormatService } from '../../../services/field_format_service';
 import {
   ANNOTATION_MASK_ID,
   getAnnotationBrush,
@@ -52,6 +54,12 @@ import {
 } from './timeseries_chart_annotations';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
+import { LinksMenuUI } from '../../../components/anomalies_table/links_menu';
+import { RuleEditorFlyout } from '../../../components/rule_editor';
+
+const percentFocusChartHeight = 0.634;
+const minSvgHeight = 350;
+
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
 const focusHeight = focusZoomPanelHeight + focusChartHeight;
@@ -60,6 +68,7 @@ const contextChartLineTopMargin = 3;
 const chartSpacing = 25;
 const swimlaneHeight = 30;
 const ctxAnnotationMargin = 2;
+const popoverMenuOffset = 28;
 const annotationHeight = ANNOTATION_SYMBOL_HEIGHT + ctxAnnotationMargin * 2;
 const margin = { top: 10, right: 10, bottom: 15, left: 40 };
 
@@ -84,10 +93,27 @@ const anomalyGrayScale = d3.scale
   .domain([3, 25, 50, 75, 100])
   .range(['#dce7ed', '#b0c5d6', '#b1a34e', '#b17f4e', '#c88686']);
 
-function getSvgHeight(showAnnotations) {
+function getChartHeights(height) {
+  const actualHeight = height < minSvgHeight ? minSvgHeight : height;
+  const focusChartHeight = Math.round(actualHeight * percentFocusChartHeight);
+
+  const heights = {
+    focusChartHeight,
+    focusHeight: focusZoomPanelHeight + focusChartHeight,
+  };
+  return heights;
+}
+
+function getSvgHeight(showAnnotations, incomingHeight) {
   const adjustedAnnotationHeight = showAnnotations ? annotationHeight : 0;
+  const incomingHeightActual =
+    incomingHeight && incomingHeight < minSvgHeight ? minSvgHeight : incomingHeight;
+  const { focusHeight: focusHeightIncoming } = incomingHeight
+    ? getChartHeights(incomingHeightActual)
+    : {};
+
   return (
-    focusHeight +
+    (focusHeightIncoming ?? focusHeight) +
     contextChartHeight +
     swimlaneHeight +
     adjustedAnnotationHeight +
@@ -107,6 +133,7 @@ class TimeseriesChartIntl extends Component {
     contextForecastData: PropTypes.array,
     contextChartSelected: PropTypes.func.isRequired,
     detectorIndex: PropTypes.number,
+    embeddableMode: PropTypes.bool,
     focusAggregationInterval: PropTypes.object,
     focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
@@ -123,10 +150,30 @@ class TimeseriesChartIntl extends Component {
     zoomFromFocusLoaded: PropTypes.object,
     zoomToFocusLoaded: PropTypes.object,
     tooltipService: PropTypes.object.isRequired,
+    tableData: PropTypes.object,
+    sourceIndicesWithGeoFields: PropTypes.object.isRequired,
   };
+
+  static contextType = context;
+  getTimeBuckets;
+  mlTimeSeriesExplorer;
 
   rowMouseenterSubscriber = null;
   rowMouseleaveSubscriber = null;
+
+  constructor(props, constructorContext) {
+    super(props);
+    this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
+
+    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
+      constructorContext.services.uiSettings,
+      constructorContext.services.mlServices.mlApi,
+      constructorContext.services.mlServices.mlResultsService
+    );
+    this.getTimeBuckets = timeBucketsServiceFactory(
+      constructorContext.services.uiSettings
+    ).getTimeBuckets;
+  }
 
   componentWillUnmount() {
     const element = d3.select(this.rootNode);
@@ -141,13 +188,18 @@ class TimeseriesChartIntl extends Component {
   }
 
   componentDidMount() {
-    const { svgWidth } = this.props;
+    const { svgWidth, svgHeight } = this.props;
+    const { focusHeight: focusHeightIncoming, focusChartHeight: focusChartIncoming } = svgHeight
+      ? getChartHeights(svgHeight)
+      : {};
 
     this.vizWidth = svgWidth - margin.left - margin.right;
     const vizWidth = this.vizWidth;
 
     this.focusXScale = d3.time.scale().range([0, vizWidth]);
-    this.focusYScale = d3.scale.linear().range([focusHeight, focusZoomPanelHeight]);
+    this.focusYScale = d3.scale
+      .linear()
+      .range([focusHeightIncoming ?? focusHeight, focusZoomPanelHeight]);
     const focusXScale = this.focusXScale;
     const focusYScale = this.focusYScale;
 
@@ -155,7 +207,7 @@ class TimeseriesChartIntl extends Component {
       .axis()
       .scale(focusXScale)
       .orient('bottom')
-      .innerTickSize(-focusChartHeight)
+      .innerTickSize(-(focusChartIncoming ?? focusChartHeight))
       .outerTickSize(0)
       .tickPadding(10);
     this.focusYAxis = d3.svg
@@ -206,7 +258,10 @@ class TimeseriesChartIntl extends Component {
     const highlightFocusChartAnomaly = this.highlightFocusChartAnomaly.bind(this);
     const boundHighlightFocusChartAnnotation = highlightFocusChartAnnotation.bind(this);
     function tableRecordMousenterListener({ record, type = 'anomaly' }) {
-      if (type === 'anomaly') {
+      // do not display tooltips if the action popover is active
+      if (this.state.popoverData !== null) {
+        return;
+      } else if (type === 'anomaly') {
         highlightFocusChartAnomaly(record);
       } else if (type === 'annotation') {
         boundHighlightFocusChartAnnotation(record);
@@ -217,14 +272,14 @@ class TimeseriesChartIntl extends Component {
     const boundUnhighlightFocusChartAnnotation = unhighlightFocusChartAnnotation.bind(this);
     function tableRecordMouseleaveListener({ record, type = 'anomaly' }) {
       if (type === 'anomaly') {
-        unhighlightFocusChartAnomaly(record);
+        unhighlightFocusChartAnomaly();
       } else {
         boundUnhighlightFocusChartAnnotation(record);
       }
     }
 
     this.rowMouseenterSubscriber = mlTableService.rowMouseenter$.subscribe(
-      tableRecordMousenterListener
+      tableRecordMousenterListener.bind(this)
     );
     this.rowMouseleaveSubscriber = mlTableService.rowMouseleave$.subscribe(
       tableRecordMouseleaveListener
@@ -262,6 +317,7 @@ class TimeseriesChartIntl extends Component {
       modelPlotEnabled,
       selectedJob,
       svgWidth,
+      svgHeight: incomingSvgHeight,
       showAnnotations,
     } = this.props;
 
@@ -271,7 +327,10 @@ class TimeseriesChartIntl extends Component {
     const focusYAxis = this.focusYAxis;
     const focusYScale = this.focusYScale;
 
-    const svgHeight = getSvgHeight(showAnnotations);
+    const svgHeight = getSvgHeight(showAnnotations, incomingSvgHeight);
+    const { focusHeight: focusHeightIncoming } = incomingSvgHeight
+      ? getChartHeights(incomingSvgHeight)
+      : {};
 
     // Clear any existing elements from the visualization,
     // then build the svg elements for the bubble chart.
@@ -279,7 +338,10 @@ class TimeseriesChartIntl extends Component {
     chartElement.selectAll('*').remove();
 
     if (typeof selectedJob !== 'undefined') {
-      this.fieldFormat = mlFieldFormatService.getFieldFormat(selectedJob.job_id, detectorIndex);
+      this.fieldFormat = this.context.services.mlServices.mlFieldFormatService.getFieldFormat(
+        selectedJob.job_id,
+        detectorIndex
+      );
     } else {
       return;
     }
@@ -351,12 +413,16 @@ class TimeseriesChartIntl extends Component {
         );
       })
       .remove();
-    d3.select('.temp-axis-label').remove();
+    chartElement.select('.temp-axis-label').remove();
 
     margin.left = Math.max(maxYAxisLabelWidth, 40);
     this.vizWidth = Math.max(svgWidth - margin.left - margin.right, 0);
     focusXScale.range([0, this.vizWidth]);
     focusYAxis.innerTickSize(-this.vizWidth);
+
+    if (focusHeightIncoming !== undefined) {
+      focusYScale.range([focusHeightIncoming, focusZoomPanelHeight]);
+    }
 
     const focus = svg
       .append('g')
@@ -368,7 +434,11 @@ class TimeseriesChartIntl extends Component {
       .attr('class', 'context-chart')
       .attr(
         'transform',
-        'translate(' + margin.left + ',' + (focusHeight + margin.top + chartSpacing) + ')'
+        'translate(' +
+          margin.left +
+          ',' +
+          ((focusHeightIncoming ?? focusHeight) + margin.top + chartSpacing) +
+          ')'
       );
 
     // Mask to hide annotations overflow
@@ -379,11 +449,11 @@ class TimeseriesChartIntl extends Component {
       .attr('x', 0)
       .attr('y', 0)
       .attr('width', this.vizWidth)
-      .attr('height', focusHeight)
+      .attr('height', focusHeightIncoming ?? focusHeight)
       .style('fill', 'white');
 
     // Draw each of the component elements.
-    createFocusChart(focus, this.vizWidth, focusHeight);
+    createFocusChart(focus, this.vizWidth, focusHeightIncoming ?? focusHeight);
     drawContextElements(
       context,
       this.vizWidth,
@@ -458,6 +528,9 @@ class TimeseriesChartIntl extends Component {
     // as we want to re-render the paths and points when the zoom area changes.
 
     const { contextForecastData } = this.props;
+    const { focusChartHeight: focusChartIncoming } = this.props.svgHeight
+      ? getChartHeights(this.props.svgHeight)
+      : {};
 
     // Add a group at the top to display info on the chart aggregation interval
     // and links to set the brush span to 1h, 1d, 1w etc.
@@ -491,7 +564,7 @@ class TimeseriesChartIntl extends Component {
       .attr('x', brushX)
       .attr('y', focusZoomPanelHeight)
       .attr('width', brushWidth)
-      .attr('height', focusChartHeight);
+      .attr('height', focusChartIncoming ?? focusChartHeight);
 
     fcsGroup.append('g').classed('mlAnnotations', true);
 
@@ -501,7 +574,7 @@ class TimeseriesChartIntl extends Component {
       .attr('x', 0)
       .attr('y', focusZoomPanelHeight)
       .attr('width', fcsWidth)
-      .attr('height', focusChartHeight)
+      .attr('height', focusChartIncoming ?? focusChartHeight)
       .attr('class', 'chart-border');
 
     // Add background for x axis.
@@ -570,6 +643,7 @@ class TimeseriesChartIntl extends Component {
 
   renderFocusChart() {
     const {
+      embeddableMode,
       focusAggregationInterval,
       focusAnnotationData: focusAnnotationDataOriginalPropValue,
       focusChartData,
@@ -594,16 +668,16 @@ class TimeseriesChartIntl extends Component {
     const data = focusChartData;
 
     const contextYScale = this.contextYScale;
+    const showAnomalyPopover = this.showAnomalyPopover.bind(this);
     const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);
-
     const hideFocusChartTooltip = this.props.tooltipService.hide.bind(this.props.tooltipService);
 
-    const focusChart = d3.select('.focus-chart');
+    const chartElement = d3.select(this.rootNode);
+    const focusChart = chartElement.select('.focus-chart');
 
     // Update the plot interval labels.
     const focusAggInt = focusAggregationInterval.expression;
     const bucketSpan = selectedJob.analysis_config.bucket_span;
-    const chartElement = d3.select(this.rootNode);
     chartElement.select('.zoom-aggregation-interval').text(
       i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.zoomAggregationIntervalLabel', {
         defaultMessage: '(aggregation interval: {focusAggInt}, bucket span: {bucketSpan})',
@@ -710,7 +784,7 @@ class TimeseriesChartIntl extends Component {
     }
 
     // Get the scaled date format to use for x axis tick labels.
-    const timeBuckets = getTimeBucketsFromCache();
+    const timeBuckets = this.getTimeBuckets();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
@@ -733,11 +807,16 @@ class TimeseriesChartIntl extends Component {
         .classed('hidden', !showModelBounds);
     }
 
+    const { focusChartHeight: focusChartIncoming, focusHeight: focusHeightIncoming } = this.props
+      .svgHeight
+      ? getChartHeights(this.props.svgHeight)
+      : {};
+
     renderAnnotations(
       focusChart,
       focusAnnotationData,
       focusZoomPanelHeight,
-      focusChartHeight,
+      focusChartIncoming ?? focusChartHeight,
       this.focusXScale,
       showAnnotations,
       showFocusChartTooltip,
@@ -745,8 +824,10 @@ class TimeseriesChartIntl extends Component {
       this.props.annotationUpdatesService
     );
 
-    // disable brushing (creation of annotations) when annotations aren't shown
-    focusChart.select('.mlAnnotationBrush').style('display', showAnnotations ? null : 'none');
+    // disable brushing (creation of annotations) when annotations aren't shown or when in embeddable mode
+    focusChart
+      .select('.mlAnnotationBrush')
+      .style('display', !showAnnotations || embeddableMode ? 'none' : null);
 
     focusChart.select('.values-line').attr('d', this.focusValuesLine(data));
     drawLineChartDots(data, focusChart, this.focusValuesLine);
@@ -755,7 +836,7 @@ class TimeseriesChartIntl extends Component {
     // These are used for displaying tooltips on mouseover.
     // Don't render dots where value=null (data gaps, with no anomalies)
     // or for multi-bucket anomalies.
-    const dots = d3
+    const dots = chartElement
       .select('.focus-chart-markers')
       .selectAll('.metric-value')
       .data(
@@ -766,6 +847,8 @@ class TimeseriesChartIntl extends Component {
         )
       );
 
+    const that = this;
+
     // Remove dots that are no longer needed i.e. if number of chart points has decreased.
     dots.exit().remove();
     // Create any new dots that are needed i.e. if number of chart points has increased.
@@ -773,8 +856,16 @@ class TimeseriesChartIntl extends Component {
       .enter()
       .append('circle')
       .attr('r', LINE_CHART_ANOMALY_RADIUS)
+      .on('click', function (d) {
+        d3.event.preventDefault();
+        if (d.anomalyScore === undefined) return;
+        showAnomalyPopover(d, this);
+      })
       .on('mouseover', function (d) {
-        showFocusChartTooltip(d, this);
+        // Show the tooltip only if the actions menu isn't active
+        if (that.state.popoverData === null) {
+          showFocusChartTooltip(d, this);
+        }
       })
       .on('mouseout', () => this.props.tooltipService.hide());
 
@@ -786,6 +877,7 @@ class TimeseriesChartIntl extends Component {
       .attr('cy', (d) => {
         return this.focusYScale(d.value);
       })
+      .attr('data-test-subj', (d) => (d.anomalyScore !== undefined ? 'mlAnomalyMarker' : undefined))
       .attr('class', (d) => {
         let markerClass = 'metric-value';
         if (d.anomalyScore !== undefined) {
@@ -795,7 +887,7 @@ class TimeseriesChartIntl extends Component {
       });
 
     // Render cross symbols for any multi-bucket anomalies.
-    const multiBucketMarkers = d3
+    const multiBucketMarkers = chartElement
       .select('.focus-chart-markers')
       .selectAll('.multi-bucket')
       .data(
@@ -810,6 +902,11 @@ class TimeseriesChartIntl extends Component {
       .enter()
       .append('path')
       .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
+      .on('click', function (d) {
+        d3.event.preventDefault();
+        if (d.anomalyScore === undefined) return;
+        showAnomalyPopover(d, this);
+      })
       .on('mouseover', function (d) {
         showFocusChartTooltip(d, this);
       })
@@ -821,10 +918,11 @@ class TimeseriesChartIntl extends Component {
         'transform',
         (d) => `translate(${this.focusXScale(d.date)}, ${this.focusYScale(d.value)})`
       )
+      .attr('data-test-subj', 'mlAnomalyMarker')
       .attr('class', (d) => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`);
 
     // Add rectangular markers for any scheduled events.
-    const scheduledEventMarkers = d3
+    const scheduledEventMarkers = chartElement
       .select('.focus-chart-markers')
       .selectAll('.scheduled-event-marker')
       .data(data.filter((d) => d.scheduledEvents !== undefined));
@@ -851,7 +949,7 @@ class TimeseriesChartIntl extends Component {
       .attr('x', (d) => this.focusXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
       .attr('y', (d) => {
         const focusYValue = this.focusYScale(d.value);
-        return isNaN(focusYValue) ? -focusHeight - 3 : focusYValue - 3;
+        return isNaN(focusYValue) ? -(focusHeightIncoming ?? focusHeight) - 3 : focusYValue - 3;
       });
 
     // Plot any forecast data in scope.
@@ -865,7 +963,7 @@ class TimeseriesChartIntl extends Component {
         .attr('d', this.focusValuesLine(focusForecastData))
         .classed('hidden', !showForecast);
 
-      const forecastDots = d3
+      const forecastDots = chartElement
         .select('.focus-chart-markers.forecast')
         .selectAll('.metric-value')
         .data(focusForecastData);
@@ -974,7 +1072,7 @@ class TimeseriesChartIntl extends Component {
     const chartElement = d3.select(this.rootNode);
     chartElement.selectAll('.focus-zoom a').on('click', function () {
       d3.event.preventDefault();
-      setZoomInterval(d3.select(this).attr('data-ms'));
+      setZoomInterval(this.getAttribute('data-ms'));
     });
   }
 
@@ -1096,7 +1194,7 @@ class TimeseriesChartIntl extends Component {
       .attr('y2', brushChartHeight);
 
     // Add x axis.
-    const timeBuckets = getTimeBucketsFromCache();
+    const timeBuckets = this.getTimeBuckets();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
@@ -1295,6 +1393,7 @@ class TimeseriesChartIntl extends Component {
           </svg>
         </div>`);
 
+    const that = this;
     function brushing() {
       const brushExtent = brush.extent();
       mask.reveal(brushExtent);
@@ -1312,11 +1411,11 @@ class TimeseriesChartIntl extends Component {
       topBorder.attr('width', topBorderWidth);
 
       const isEmpty = brush.empty();
-      d3.selectAll('.brush-handle').style('visibility', isEmpty ? 'hidden' : 'visible');
+      const chartElement = d3.select(that.rootNode);
+      chartElement.selectAll('.brush-handle').style('visibility', isEmpty ? 'hidden' : 'visible');
     }
     brushing();
 
-    const that = this;
     function brushed() {
       const isEmpty = brush.empty();
       const selectedBounds = isEmpty ? contextXScale.domain() : brush.extent();
@@ -1445,18 +1544,19 @@ class TimeseriesChartIntl extends Component {
   // Sets the extent of the brush on the context chart to the
   // supplied from and to Date objects.
   setContextBrushExtent = (from, to) => {
+    const chartElement = d3.select(this.rootNode);
     const brush = this.brush;
     const brushExtent = brush.extent();
 
     const newExtent = [from, to];
     brush.extent(newExtent);
-    brush(d3.select('.brush'));
+    brush(chartElement.select('.brush'));
 
     if (
       newExtent[0].getTime() !== brushExtent[0].getTime() ||
       newExtent[1].getTime() !== brushExtent[1].getTime()
     ) {
-      brush.event(d3.select('.brush'));
+      brush.event(chartElement.select('.brush'));
     }
   };
 
@@ -1477,6 +1577,37 @@ class TimeseriesChartIntl extends Component {
     }
 
     this.setContextBrushExtent(new Date(from), new Date(to));
+  }
+
+  showAnomalyPopover(marker, circle) {
+    const anomalyTime = marker.date.getTime();
+
+    // The table items could be aggregated, so we have to find the item
+    // that has the closest timestamp to the selected anomaly from the chart.
+    const tableItem = this.props.tableData.anomalies.reduce((closestItem, currentItem) => {
+      const closestItemDelta = Math.abs(anomalyTime - closestItem.source.timestamp);
+      const currentItemDelta = Math.abs(anomalyTime - currentItem.source.timestamp);
+      return currentItemDelta < closestItemDelta ? currentItem : closestItem;
+    }, this.props.tableData.anomalies[0]);
+
+    if (tableItem) {
+      // Overwrite the timestamp of the possibly aggregated table item with the
+      // timestamp of the anomaly clicked in the chart so we're able to pick
+      // the right baseline and deviation time ranges for Log Rate Analysis.
+      tableItem.source.timestamp = anomalyTime;
+
+      // Calculate the relative coordinates of the clicked anomaly marker
+      // so we're able to position the popover actions menu above it.
+      const dotRect = circle.getBoundingClientRect();
+      const rootRect = this.rootNode.getBoundingClientRect();
+      const x = Math.round(dotRect.x + dotRect.width / 2 - rootRect.x);
+      const y = Math.round(dotRect.y + dotRect.height / 2 - rootRect.y) - popoverMenuOffset;
+
+      // Hide any active tooltip
+      this.props.tooltipService.hide();
+      // Set the popover state to enable the actions menu
+      this.setState({ popoverData: tableItem, popoverCoords: [x, y] });
+    }
   }
 
   showFocusChartTooltip(marker, circle) {
@@ -1798,17 +1929,18 @@ class TimeseriesChartIntl extends Component {
     // Depending on the way the chart is aggregated, there may not be
     // a point at exactly the same time as the record being highlighted.
     const anomalyTime = record.source.timestamp;
-    const markerToSelect = findChartPointForAnomalyTime(
+    const markerToSelect = this.mlTimeSeriesExplorer.findChartPointForAnomalyTime(
       focusChartData,
       anomalyTime,
       focusAggregationInterval
     );
+    const chartElement = d3.select(this.rootNode);
 
     // Render an additional highlighted anomaly marker on the focus chart.
     // TODO - plot anomaly markers for cases where there is an anomaly due
     // to the absence of data and model plot is enabled.
     if (markerToSelect !== undefined) {
-      const selectedMarker = d3
+      const selectedMarker = chartElement
         .select('.focus-chart-markers')
         .selectAll('.focus-chart-highlighted-marker')
         .data([markerToSelect]);
@@ -1818,6 +1950,7 @@ class TimeseriesChartIntl extends Component {
           .append('path')
           .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
           .attr('transform', (d) => `translate(${focusXScale(d.date)}, ${focusYScale(d.value)})`)
+          .attr('data-test-subj', 'mlAnomalyMarker')
           .attr(
             'class',
             (d) =>
@@ -1830,6 +1963,7 @@ class TimeseriesChartIntl extends Component {
           .attr('r', LINE_CHART_ANOMALY_RADIUS)
           .attr('cx', (d) => focusXScale(d.date))
           .attr('cy', (d) => focusYScale(d.value))
+          .attr('data-test-subj', 'mlAnomalyMarker')
           .attr(
             'class',
             (d) =>
@@ -1839,7 +1973,6 @@ class TimeseriesChartIntl extends Component {
 
       // Display the chart tooltip for this marker.
       // Note the values of the record and marker may differ depending on the levels of aggregation.
-      const chartElement = d3.select(this.rootNode);
       const anomalyMarker = chartElement.selectAll(
         '.focus-chart-markers .anomaly-marker.highlighted'
       );
@@ -1850,7 +1983,8 @@ class TimeseriesChartIntl extends Component {
   }
 
   unhighlightFocusChartAnomaly() {
-    d3.select('.focus-chart-markers').selectAll('.anomaly-marker.highlighted').remove();
+    const chartElement = d3.select(this.rootNode);
+    chartElement.select('.focus-chart-markers').selectAll('.anomaly-marker.highlighted').remove();
     this.props.tooltipService.hide();
   }
 
@@ -1862,8 +1996,62 @@ class TimeseriesChartIntl extends Component {
     this.rootNode = componentNode;
   }
 
+  closePopover() {
+    this.setState({ popoverData: null, popoverCoords: [0, 0] });
+  }
+
+  setShowRuleEditorFlyoutFunction = (func) => {
+    this.setState({
+      showRuleEditorFlyout: func,
+    });
+  };
+
+  unsetShowRuleEditorFlyoutFunction = () => {
+    this.setState({
+      showRuleEditorFlyout: () => {},
+    });
+  };
+
   render() {
-    return <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />;
+    return (
+      <>
+        <RuleEditorFlyout
+          selectedJob={this.props.selectedJob}
+          setShowFunction={this.setShowRuleEditorFlyoutFunction}
+          unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+        />
+        {this.state.popoverData !== null && (
+          <div
+            style={{
+              position: 'absolute',
+              marginLeft: this.state.popoverCoords[0],
+              marginTop: this.state.popoverCoords[1],
+            }}
+          >
+            <EuiPopover
+              isOpen={true}
+              closePopover={() => this.closePopover()}
+              panelPaddingSize="none"
+              anchorPosition="upLeft"
+            >
+              <LinksMenuUI
+                anomaly={this.state.popoverData}
+                selectedJob={this.props.selectedJob}
+                bounds={this.props.bounds}
+                showMapsLink={false}
+                showViewSeriesLink={false}
+                isAggregatedData={this.props.tableData.interval !== 'second'}
+                interval={this.props.tableData.interval}
+                showRuleEditorFlyout={this.state.showRuleEditorFlyout}
+                onItemClick={() => this.closePopover()}
+                sourceIndicesWithGeoFields={this.props.sourceIndicesWithGeoFields}
+              />
+            </EuiPopover>
+          </div>
+        )}
+        <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
+      </>
+    );
   }
 }
 
@@ -1874,6 +2062,7 @@ export const TimeseriesChart = (props) => {
   if (annotationProp === undefined) {
     return null;
   }
+
   return (
     <TimeseriesChartIntl
       annotation={annotationProp}

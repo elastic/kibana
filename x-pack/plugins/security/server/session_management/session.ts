@@ -468,9 +468,10 @@ export class Session {
       invalidateIndexValueFilter = filter;
     } else {
       sessionLogger.debug(
-        `Invalidating sessions that match query: ${JSON.stringify(
-          filter.query.username ? { ...filter.query, username: '[REDACTED]' } : filter.query
-        )}.`
+        () =>
+          `Invalidating sessions that match query: ${JSON.stringify(
+            filter.query.username ? { ...filter.query, username: '[REDACTED]' } : filter.query
+          )}.`
       );
       invalidateIndexValueFilter = filter.query.username
         ? {

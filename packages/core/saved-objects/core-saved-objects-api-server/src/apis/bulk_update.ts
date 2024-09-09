@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
@@ -29,6 +30,13 @@ export interface SavedObjectsBulkUpdateObject<T = unknown>
    * Note: the default namespace's string representation is `'default'`, and its ID representation is `undefined`.
    **/
   namespace?: string;
+  /**
+   * By default, update will merge the provided attributes with the ones present on the document
+   * (performing a standard partial update). Setting this option to `false` will change the behavior, performing
+   * a "full" update instead, where the provided attributes will fully replace the existing ones.
+   * Defaults to `true`.
+   */
+  mergeAttributes?: boolean;
 }
 
 /**

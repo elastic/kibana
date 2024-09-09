@@ -62,6 +62,7 @@ describe('getActiveMaintenanceWindowsRoute', () => {
 
     expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalled();
     expect(res.ok).toHaveBeenLastCalledWith({
+      // @ts-expect-error upgrade typescript v5.1.6
       body: mockMaintenanceWindows.map((data) => rewriteMaintenanceWindowRes(data)),
     });
   });
@@ -92,7 +93,7 @@ describe('getActiveMaintenanceWindowsRoute', () => {
     });
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 
   test('ensures only platinum license can access API', async () => {

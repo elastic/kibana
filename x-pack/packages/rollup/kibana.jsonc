@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/rollup",
+  "owner": "@elastic/kibana-management"
+}

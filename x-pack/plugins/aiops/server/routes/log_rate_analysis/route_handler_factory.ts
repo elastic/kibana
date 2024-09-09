@@ -12,25 +12,22 @@ import type {
   RequestHandler,
   KibanaResponseFactory,
 } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 import type { Logger } from '@kbn/logging';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
+import { AIOPS_TELEMETRY_ID, AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../common/api/log_rate_analysis/schema';
-import { AIOPS_API_ENDPOINT } from '../../../common/api';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
+import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
-import { PLUGIN_ID } from '../../../common';
-
-import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 
 import { responseStreamFactory } from './response_stream_factory';
-import { PROGRESS_STEP_HISTOGRAMS_GROUPS } from './response_stream_utils/constants';
 
 /**
  * The log rate analysis route handler sets up `responseStreamFactory`
@@ -61,14 +58,14 @@ export function routeHandlerFactory<T extends ApiVersion>(
       return response.forbidden();
     }
 
-    const client = (await context.core).elasticsearch.client.asCurrentUser;
-    const executionContext = createExecutionContext(coreStart, PLUGIN_ID, request.route.path);
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const executionContext = createExecutionContext(coreStart, AIOPS_PLUGIN_ID, request.route.path);
 
     return await coreStart.executionContext.withContext(executionContext, () => {
       const { analysis, logDebugMessage, stateHandler, responseStream, responseWithHeaders } =
         responseStreamFactory<T>({
           version,
-          client,
+          esClient,
           requestBody: request.body,
           events: request.events,
           headers: request.headers,
@@ -84,8 +81,11 @@ export function routeHandlerFactory<T extends ApiVersion>(
           analysis.overridesHandler();
           responseStream.pushPingWithTimeout();
 
-          // Step 1: Index Info: Field candidates, total doc count, sample probability
-          const indexInfo = await analysis.indexInfoHandler();
+          // Step 1: Index Info: Field candidates and zero docs fallback flag
+          const indexInfo = await withSpan(
+            { name: 'fetch_index_info', type: 'aiops-log-rate-analysis' },
+            () => analysis.indexInfoHandler()
+          );
 
           if (!indexInfo) {
             return;
@@ -93,8 +93,13 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
           // Step 2: Significant categories and terms
           const significantItemsObj = indexInfo.zeroDocsFallback
-            ? await analysis.topItemsHandler(indexInfo)
-            : await analysis.significantItemsHandler(indexInfo);
+            ? await withSpan({ name: 'fetch_top_items', type: 'aiops-log-rate-analysis' }, () =>
+                analysis.topItemsHandler(indexInfo)
+              )
+            : await withSpan(
+                { name: 'fetch_significant_items', type: 'aiops-log-rate-analysis' },
+                () => analysis.significantItemsHandler(indexInfo)
+              );
 
           if (!significantItemsObj) {
             return;
@@ -104,26 +109,31 @@ export function routeHandlerFactory<T extends ApiVersion>(
             significantItemsObj;
 
           // Step 3: Fetch overall histogram
-          const overallTimeSeries = await analysis.overallHistogramHandler();
+          const overallTimeSeries = await withSpan(
+            { name: 'fetch_overall_timeseries', type: 'aiops-log-rate-analysis' },
+            () => analysis.overallHistogramHandler()
+          );
 
-          // Step 4: Smart gropuing
+          // Step 4: Histograms
+          await withSpan(
+            { name: 'significant-item-histograms', type: 'aiops-log-rate-analysis' },
+            () =>
+              analysis.histogramHandler(
+                fieldValuePairsCount,
+                significantCategories,
+                significantTerms,
+                overallTimeSeries
+              )
+          );
+
+          // Step 5: Smart grouping
           if (stateHandler.groupingEnabled()) {
-            await analysis.groupingHandler(
-              significantCategories,
-              significantTerms,
-              overallTimeSeries
+            await withSpan(
+              { name: 'grouping-with-histograms', type: 'aiops-log-rate-analysis' },
+              () =>
+                analysis.groupingHandler(significantCategories, significantTerms, overallTimeSeries)
             );
           }
-
-          stateHandler.loaded(PROGRESS_STEP_HISTOGRAMS_GROUPS, false);
-
-          // Step 5: Histograms
-          await analysis.histogramHandler(
-            fieldValuePairsCount,
-            significantCategories,
-            significantTerms,
-            overallTimeSeries
-          );
 
           responseStream.endWithUpdatedLoadingState();
         } catch (e) {
@@ -136,7 +146,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
       }
 
       // Do not call this using `await` so it will run asynchronously while we return the stream already.
-      runAnalysis();
+      void runAnalysis();
 
       return response.ok(responseWithHeaders);
     });

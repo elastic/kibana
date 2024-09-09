@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
   createRollingStrategyMock,
   createTriggeringPolicyMock,
+  createRetentionPolicyMock,
   LayoutsMock,
   resetAllMocks,
   RollingFileContextMock,
@@ -37,6 +39,9 @@ const config: RollingFileAppenderConfig = {
     type: 'numeric',
     max: 5,
     pattern: '-%i',
+  },
+  retention: {
+    maxFiles: 7,
   },
 };
 
@@ -72,6 +77,7 @@ describe('RollingFileAppender', () => {
   let layout: ReturnType<typeof rollingFileAppenderMocks.createLayout>;
   let strategy: ReturnType<typeof rollingFileAppenderMocks.createStrategy>;
   let policy: ReturnType<typeof rollingFileAppenderMocks.createPolicy>;
+  let retention: ReturnType<typeof rollingFileAppenderMocks.createRetentionPolicy>;
   let context: ReturnType<typeof rollingFileAppenderMocks.createContext>;
   let fileManager: ReturnType<typeof rollingFileAppenderMocks.createFileManager>;
 
@@ -84,6 +90,9 @@ describe('RollingFileAppender', () => {
 
     strategy = rollingFileAppenderMocks.createStrategy();
     createRollingStrategyMock.mockReturnValue(strategy);
+
+    retention = rollingFileAppenderMocks.createRetentionPolicy();
+    createRetentionPolicyMock.mockReturnValue(retention);
 
     context = rollingFileAppenderMocks.createContext('file-path');
     RollingFileContextMock.mockImplementation(() => context);
@@ -110,6 +119,9 @@ describe('RollingFileAppender', () => {
 
     expect(createTriggeringPolicyMock).toHaveBeenCalledTimes(1);
     expect(createTriggeringPolicyMock).toHaveBeenCalledWith(config.policy, context);
+
+    expect(createRetentionPolicyMock).toHaveBeenCalledTimes(1);
+    expect(createRetentionPolicyMock).toHaveBeenCalledWith(config.retention, context);
 
     expect(createRollingStrategyMock).toHaveBeenCalledTimes(1);
     expect(createRollingStrategyMock).toHaveBeenCalledWith(config.strategy, context);
@@ -187,6 +199,21 @@ describe('RollingFileAppender', () => {
         await nextTick();
 
         expect(fileManager.closeStream).toHaveBeenCalledTimes(1);
+      });
+
+      it('triggers the retention policy once the rollout is complete', async () => {
+        const { promise, resolve } = createPromiseResolver();
+        strategy.rollout.mockReturnValue(promise);
+
+        const log = createLogRecord({ message: '1' });
+        appender.append(log);
+
+        expect(retention.apply).not.toHaveBeenCalled();
+
+        resolve();
+        await nextTick();
+
+        expect(retention.apply).toHaveBeenCalledTimes(1);
       });
 
       it('logs the event once the rollout is complete', async () => {

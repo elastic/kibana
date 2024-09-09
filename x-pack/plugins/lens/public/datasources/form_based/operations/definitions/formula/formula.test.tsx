@@ -17,10 +17,11 @@ import { insertOrReplaceFormulaColumn } from './parse';
 import type { FormBasedLayer } from '../../../types';
 import { IndexPattern } from '../../../../../types';
 import { TermsIndexPatternColumn } from '../terms';
-import { MovingAverageIndexPatternColumn } from '../calculations';
+import type { MovingAverageIndexPatternColumn } from '../calculations';
 import { StaticValueIndexPatternColumn } from '../static_value';
 import { getFilter } from '../helpers';
 import { createOperationDefinitionMock } from './mocks/operation_mocks';
+import { FORMULA_LAYER_ONLY_STATIC_VALUES } from '../../../../../user_messages_ids';
 
 jest.mock('../../layer_helpers', () => {
   return {
@@ -43,6 +44,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   terms: createOperationDefinitionMock('terms', {}, { scale: 'ordinal' }),
   sum: createOperationDefinitionMock('sum', { filterable: true }),
   last_value: createOperationDefinitionMock('last_value', {
+    input: 'field',
     getPossibleOperationForField: jest.fn(({ type }) => ({
       scale: type === 'string' ? 'ordinal' : 'ratio',
       isBucketed: false,
@@ -54,12 +56,14 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     filterable: true,
     canReduceTimeRange: true,
   }),
-  derivative: createOperationDefinitionMock('derivative', { input: 'fullReference' }),
-  moving_average: createOperationDefinitionMock('moving_average', {
+  derivative: createOperationDefinitionMock('derivative', {
+    input: 'fullReference',
+  }),
+  moving_average: createOperationDefinitionMock<MovingAverageIndexPatternColumn>('moving_average', {
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
     filterable: true,
-    getErrorMessage: jest.fn(() => ['mock error']),
+    getErrorMessage: jest.fn(() => []),
     buildColumn: ({ referenceIds }, columnsParams) => ({
       label: 'moving_average',
       dataType: 'number',
@@ -72,7 +76,9 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       filter: getFilter(undefined, columnsParams),
     }),
   }),
-  cumulative_sum: createOperationDefinitionMock('cumulative_sum', { input: 'fullReference' }),
+  cumulative_sum: createOperationDefinitionMock('cumulative_sum', {
+    input: 'fullReference',
+  }),
   interval: createOperationDefinitionMock('interval', {
     input: 'managedReference',
     usedInMath: true,
@@ -901,6 +907,115 @@ describe('[Lens] formula', () => {
     });
   });
 
+  describe('toExpression', () => {
+    let indexPattern: IndexPattern;
+
+    beforeEach(() => {
+      indexPattern = createMockedIndexPattern();
+    });
+
+    it.each([true, false])(
+      '[isFormulaBroken: %s] should return the custom label when defined',
+      (isFormulaBroken) => {
+        const formula = 'average(bytes)';
+        expect(
+          formulaOperation.toExpression(
+            {
+              ...layer,
+              columns: {
+                ...layer.columns,
+                col2: {
+                  label: 'My custom formula',
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: { formula, isFormulaBroken },
+                  references: [],
+                } as FormulaIndexPatternColumn,
+              },
+            },
+            'col2',
+            indexPattern
+          )
+        ).toEqual([
+          expect.objectContaining({
+            arguments: expect.objectContaining({
+              name: ['My custom formula'],
+            }),
+          }),
+        ]);
+      }
+    );
+
+    it.each([true, false])(
+      '[isFormulaBroken: %s] should return the formula as label if defaultLabel is used',
+      (isFormulaBroken) => {
+        const formula = 'average(bytes)';
+        expect(
+          formulaOperation.toExpression(
+            {
+              ...layer,
+              columns: {
+                ...layer.columns,
+                col2: {
+                  label: 'Formula',
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: { formula, isFormulaBroken: false },
+                  references: [],
+                } as FormulaIndexPatternColumn,
+              },
+            },
+            'col2',
+            indexPattern
+          )
+        ).toEqual([
+          expect.objectContaining({
+            arguments: expect.objectContaining({
+              name: [formula],
+            }),
+          }),
+        ]);
+      }
+    );
+
+    it.each([true, false])(
+      '[isFormulaBroken: %s] should return the formula default label only on empty formula',
+      (isFormulaBroken) => {
+        expect(
+          formulaOperation.toExpression(
+            {
+              ...layer,
+              columns: {
+                ...layer.columns,
+                col2: {
+                  label: 'Formula',
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: { formula: '', isFormulaBroken },
+                  references: [],
+                } as FormulaIndexPatternColumn,
+              },
+            },
+            'col2',
+            indexPattern
+          )
+        ).toEqual([
+          expect.objectContaining({
+            arguments: expect.objectContaining({
+              name: ['Formula'],
+            }),
+          }),
+        ]);
+      }
+    );
+  });
+
   describe('getErrorMessage', () => {
     let indexPattern: IndexPattern;
 
@@ -930,7 +1045,7 @@ describe('[Lens] formula', () => {
       indexPattern = createMockedIndexPattern();
     });
 
-    it('returns undefined if count is passed without arguments', () => {
+    it('returns empty array if count is passed without arguments', () => {
       expect(
         formulaOperation.getErrorMessage!(
           getNewLayerWithFormula('count()'),
@@ -939,10 +1054,10 @@ describe('[Lens] formula', () => {
           undefined,
           operationDefinitionMap
         )
-      ).toEqual(undefined);
+      ).toHaveLength(0);
     });
 
-    it('returns undefined if count is passed with only a named argument', () => {
+    it('returns empty array if count is passed with only a named argument', () => {
       expect(
         formulaOperation.getErrorMessage!(
           getNewLayerWithFormula(`count(kql='*')`, false),
@@ -950,8 +1065,8 @@ describe('[Lens] formula', () => {
           indexPattern,
           undefined,
           operationDefinitionMap
-        )
-      ).toEqual(undefined);
+        ).map((e) => e.message)
+      ).toHaveLength(0);
     });
 
     it('returns a syntax error if the kql argument does not parse', () => {
@@ -962,7 +1077,7 @@ describe('[Lens] formula', () => {
           indexPattern,
           undefined,
           operationDefinitionMap
-        )
+        ).map((e) => e.message)
       ).toEqual([
         `Expected "(", "{", value, whitespace but """ found.
 invalid: "
@@ -970,7 +1085,7 @@ invalid: "
       ]);
     });
 
-    it('returns undefined if a field operation is passed with the correct first argument', () => {
+    it('returns empty array if a field operation is passed with the correct first argument', () => {
       expect(
         formulaOperation.getErrorMessage!(
           getNewLayerWithFormula('average(bytes)'),
@@ -979,7 +1094,7 @@ invalid: "
           undefined,
           operationDefinitionMap
         )
-      ).toEqual(undefined);
+      ).toHaveLength(0);
       // note that field names can be wrapped in quotes as well
       expect(
         formulaOperation.getErrorMessage!(
@@ -989,10 +1104,10 @@ invalid: "
           undefined,
           operationDefinitionMap
         )
-      ).toEqual(undefined);
+      ).toHaveLength(0);
     });
 
-    it('returns undefined if a fullReference operation is passed with the correct first argument', () => {
+    it('returns empty array if a fullReference operation is passed with the correct first argument', () => {
       expect(
         formulaOperation.getErrorMessage!(
           getNewLayerWithFormula('derivative(average(bytes))'),
@@ -1001,7 +1116,7 @@ invalid: "
           undefined,
           operationDefinitionMap
         )
-      ).toEqual(undefined);
+      ).toHaveLength(0);
 
       expect(
         formulaOperation.getErrorMessage!(
@@ -1011,10 +1126,10 @@ invalid: "
           undefined,
           operationDefinitionMap
         )
-      ).toEqual(undefined);
+      ).toHaveLength(0);
     });
 
-    it('returns undefined if a fullReference operation is passed with the arguments', () => {
+    it('returns empty array if a fullReference operation is passed with the arguments', () => {
       expect(
         formulaOperation.getErrorMessage!(
           getNewLayerWithFormula('moving_average(average(bytes), window=7)'),
@@ -1023,7 +1138,7 @@ invalid: "
           undefined,
           operationDefinitionMap
         )
-      ).toEqual(undefined);
+      ).toHaveLength(0);
     });
 
     it('returns an error if field is used with no Lens wrapping operation', () => {
@@ -1034,7 +1149,7 @@ invalid: "
           indexPattern,
           undefined,
           operationDefinitionMap
-        )
+        ).map((e) => e.message)
       ).toEqual([`The field bytes cannot be used without operation`]);
 
       expect(
@@ -1044,7 +1159,7 @@ invalid: "
           indexPattern,
           undefined,
           operationDefinitionMap
-        )
+        ).map((e) => e.message)
       ).toEqual([`The operation add does not accept any field as argument`]);
     });
 
@@ -1066,7 +1181,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual([`The Formula ${formula} cannot be parsed`]);
       }
     });
@@ -1119,7 +1234,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual(['Operation noFn not found']);
       }
 
@@ -1133,7 +1248,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual(['Operations noFn, noFnTwo not found']);
       }
     });
@@ -1149,7 +1264,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual(['Operation formula not found']);
       }
 
@@ -1163,7 +1278,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual(['Operation math not found']);
       }
     });
@@ -1187,7 +1302,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual(
           // some formulas may contain more errors
           expect.arrayContaining([
@@ -1207,8 +1322,8 @@ invalid: "
           indexPattern,
           undefined,
           operationDefinitionMap
-        )
-      ).toEqual(undefined);
+        ).map((e) => e.message)
+      ).toHaveLength(0);
     });
 
     it('returns an error if an operation with required parameters does not receive them', () => {
@@ -1219,7 +1334,7 @@ invalid: "
           indexPattern,
           undefined,
           operationDefinitionMap
-        )
+        ).map((e) => e.message)
       ).toEqual([
         'The operation moving_average in the Formula is missing the following parameters: window',
       ]);
@@ -1231,7 +1346,7 @@ invalid: "
           indexPattern,
           undefined,
           operationDefinitionMap
-        )
+        ).map((e) => e.message)
       ).toEqual([
         'The operation moving_average in the Formula is missing the following parameters: window',
       ]);
@@ -1245,7 +1360,7 @@ invalid: "
           indexPattern,
           undefined,
           operationDefinitionMap
-        )
+        ).map((e) => e.message)
       ).toEqual(['The operation average does not accept any parameter']);
     });
 
@@ -1266,7 +1381,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual(
           expect.arrayContaining([
             expect.stringMatching(
@@ -1297,7 +1412,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual(
           expect.arrayContaining([
             expect.stringMatching(
@@ -1316,7 +1431,7 @@ invalid: "
           indexPattern,
           undefined,
           operationDefinitionMap
-        )
+        ).map((e) => e.message)
       ).toEqual([
         'The parameters for the operation moving_average in the Formula are of the wrong type: window',
       ]);
@@ -1337,7 +1452,7 @@ invalid: "
           undefined,
           operationDefinitionMap
         )
-      ).toEqual(undefined);
+      ).toHaveLength(0);
     });
 
     it('returns no error for a query edge case', () => {
@@ -1358,11 +1473,11 @@ invalid: "
             undefined,
             operationDefinitionMap
           )
-        ).toEqual(undefined);
+        ).toHaveLength(0);
       }
     });
 
-    it('returns an error for a query not wrapped in single quotes', () => {
+    it('returns an error for a query not wrapped in single quotes: %s', () => {
       const formulas = [
         `count(kql="")`,
         `count(kql='")`,
@@ -1396,7 +1511,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual(expect.arrayContaining([expect.stringMatching(`Single quotes are required`)]));
       }
     });
@@ -1427,7 +1542,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual([`The Formula ${formula} cannot be parsed`]);
       }
     });
@@ -1446,8 +1561,8 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
-        ).toEqual(undefined);
+          ).map((e) => e.message)
+        ).toHaveLength(0);
       }
     });
 
@@ -1459,7 +1574,7 @@ invalid: "
           indexPattern,
           undefined,
           operationDefinitionMap
-        )
+        ).map((e) => e.message)
       ).toEqual(['Use only one of kql= or lucene=, not both']);
     });
 
@@ -1472,7 +1587,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual([`The first argument for ${fn} should be a field name. Found no field`]);
       }
       expect(
@@ -1482,7 +1597,7 @@ invalid: "
           indexPattern,
           undefined,
           operationDefinitionMap
-        )
+        ).map((e) => e.message)
       ).toEqual([`The first argument for sum should be a field name. Found category.keyword: *`]);
     });
 
@@ -1495,7 +1610,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual([`The first argument for ${fn} should be a operation name. Found no operation`]);
       }
     });
@@ -1528,6 +1643,7 @@ invalid: "
         )
       ).toEqual([
         {
+          uniqueId: FORMULA_LAYER_ONLY_STATIC_VALUES,
           message:
             'A layer with only static values will not show results, use at least one dynamic metric',
         },
@@ -1543,7 +1659,7 @@ invalid: "
           undefined,
           operationDefinitionMap
         )
-      ).toEqual(undefined);
+      ).toHaveLength(0);
     });
 
     it('returns no error if the formula contains comparison operator within the ifelse operation', () => {
@@ -1560,7 +1676,7 @@ invalid: "
             undefined,
             operationDefinitionMap
           )
-        ).toEqual(undefined);
+        ).toHaveLength(0);
       }
     });
 
@@ -1579,7 +1695,7 @@ invalid: "
             undefined,
             operationDefinitionMap
           )
-        ).toEqual(undefined);
+        ).toHaveLength(0);
       }
     });
 
@@ -1598,7 +1714,7 @@ invalid: "
             undefined,
             operationDefinitionMap
           )
-        ).toEqual(undefined);
+        ).toHaveLength(0);
       }
     });
 
@@ -1620,7 +1736,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual([
           `The return value type of the operation ${
             errorFormula ?? formula
@@ -1694,7 +1810,7 @@ invalid: "
               indexPattern,
               undefined,
               operationDefinitionMap
-            )
+            ).map((e) => e.message)
           ).toContain(errors[i](fn));
         });
       });
@@ -1715,7 +1831,7 @@ invalid: "
                 indexPattern,
                 undefined,
                 operationDefinitionMap
-              )
+              ).map((e) => e.message)
             ).toEqual([
               `The return value type of the operation ${formula} is not supported in Formula`,
               `The operation ${fn} in the Formula is missing ${expectedCount} arguments: ${expectedArgs}`,
@@ -1760,7 +1876,7 @@ invalid: "
                 indexPattern,
                 undefined,
                 operationDefinitionMap
-              )
+              ).map((e) => e.message)
             ).toEqual(
               indexReverseMap[expectedFail].map((i) => {
                 const arg = tinymathFunctions[fn].positionalArguments[i];
@@ -1787,7 +1903,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual([errorsWithSuggestions[i]]);
       });
     });
@@ -1816,7 +1932,7 @@ invalid: "
             indexPattern,
             undefined,
             operationDefinitionMap
-          )
+          ).map((e) => e.message)
         ).toEqual([
           `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the ${operation} operation`,
         ]);
@@ -1837,7 +1953,7 @@ invalid: "
           indexPattern,
           undefined,
           operationDefinitionMap
-        )
+        ).map((e) => e.message)
       ).toEqual([
         `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the count operation`,
         `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the sum operation`,
@@ -1863,7 +1979,7 @@ invalid: "
             undefined,
             operationDefinitionMap
           )
-        ).toEqual(undefined);
+        ).toHaveLength(0);
       }
     });
 
@@ -1888,7 +2004,7 @@ invalid: "
           undefined,
           operationDefinitionMap
         )
-      ).toEqual(undefined);
+      ).toHaveLength(0);
 
       expect(
         formulaOperation.getErrorMessage!(
@@ -1897,7 +2013,7 @@ invalid: "
           indexPattern,
           undefined,
           operationDefinitionMap
-        )
+        ).map((e) => e.message)
       ).toEqual(['Operation operation_not_available not found']);
     });
   });

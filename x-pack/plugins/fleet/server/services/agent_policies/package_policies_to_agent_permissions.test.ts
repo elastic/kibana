@@ -101,7 +101,7 @@ packageInfoCache.set('osquery_manager-0.3.0', {
     {
       dataset: 'osquery_manager.result',
       package: 'osquery_manager',
-      ingest_pipeline: 'default',
+      ingest_pipeline: 'test',
       path: 'result',
       streams: [],
       title: 'Osquery Manager queries',
@@ -283,19 +283,19 @@ packageInfoCache.set('apm-8.9.0-preview', {
 
 describe('storedPackagePoliciesToAgentPermissions()', () => {
   it('Returns `undefined` if there are no package policies', async () => {
-    const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, []);
+    const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', []);
     expect(permissions).toBeUndefined();
   });
 
   it('Throw an error if package policies is not an array', () => {
-    expect(() => storedPackagePoliciesToAgentPermissions(packageInfoCache, undefined)).toThrow(
-      /storedPackagePoliciesToAgentPermissions should be called with a PackagePolicy/
-    );
+    expect(() =>
+      storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', undefined)
+    ).toThrow(/storedPackagePoliciesToAgentPermissions should be called with a PackagePolicy/);
   });
 
   it('Returns the default permissions if a package policy does not have a package', () => {
     expect(() =>
-      storedPackagePoliciesToAgentPermissions(packageInfoCache, [
+      storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
         { name: 'foo', package: undefined } as PackagePolicy,
       ])
     ).toThrow(/No package for package policy foo/);
@@ -339,11 +339,13 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 
     const permissions = await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
+      'test',
       packagePolicies
     );
     expect(permissions).toMatchObject({
@@ -386,11 +388,13 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 
     const permissions = await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
+      'test',
       packagePolicies
     );
     expect(permissions).toMatchObject({
@@ -438,11 +442,13 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 
     const permissions = await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
+      'test',
       packagePolicies
     );
     expect(permissions).toMatchObject({
@@ -486,11 +492,13 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 
     const permissions = await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
+      'test',
       packagePolicies
     );
     expect(permissions).toMatchObject({
@@ -526,11 +534,13 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 
     const permissions = await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
+      'test',
       packagePolicies
     );
 
@@ -566,11 +576,13 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 
     const permissions = await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
+      'test',
       packagePolicies
     );
 
@@ -607,11 +619,13 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
+        policy_ids: [''],
       },
     ];
 
     const permissions = await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
+      'test',
       packagePolicies
     );
 

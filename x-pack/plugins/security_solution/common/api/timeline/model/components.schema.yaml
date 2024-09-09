@@ -1,0 +1,606 @@
+openapi: 3.0.0
+info:
+  title: Shared Timeline Components
+  version: 'not applicable'
+paths: {}
+components:
+  schemas:
+    TimelineType:
+      type: string
+      enum:
+        - default
+        - template
+      # enum default value is temporarily unsupported by the code generator
+      # default: default
+      description: The type of timeline to create. Valid values are `default` and `template`.
+    DataProviderType:
+      type: string
+      enum:
+        - default
+        - template
+      # enum default value is temporarily unsupported by the code generator
+      # default: default
+      description: The type of data provider to create. Valid values are `default` and `template`.
+    TemplateTimelineType:
+      type: string
+      enum:
+        - elastic
+        - custom
+      description: The type of the timeline template.
+    SavedTimeline:
+      type: object
+      properties:
+        columns:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/ColumnHeaderResult'
+        created:
+          type: number
+          nullable: true
+        createdBy:
+          type: string
+          nullable: true
+        dataProviders:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/DataProviderResult'
+        dataViewId:
+          type: string
+          nullable: true
+        dateRange:
+          type: object
+          nullable: true
+          properties:
+            end:
+              oneOf:
+                - type: string
+                - type: number
+            start:
+              oneOf:
+                - type: string
+                - type: number
+        description:
+          type: string
+          nullable: true
+        eqlOptions:
+          type: object
+          nullable: true
+          properties:
+            eventCategoryField:
+              type: string
+              nullable: true
+            query:
+              type: string
+              nullable: true
+            size:
+              oneOf:
+                - type: string
+                  nullable: true
+                - type: number
+                  nullable: true
+            tiebreakerField:
+              type: string
+              nullable: true
+            timestampField:
+              type: string
+              nullable: true
+        eventType:
+          type: string
+          nullable: true
+        excludedRowRendererIds:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/RowRendererId'
+        favorite:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/FavoriteTimelineResult'
+        filters:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/FilterTimelineResult'
+        kqlMode:
+          type: string
+          nullable: true
+        kqlQuery:
+          nullable: true
+          $ref: '#/components/schemas/SerializedFilterQueryResult'
+        indexNames:
+          type: array
+          nullable: true
+          items:
+            type: string
+        savedSearchId:
+          type: string
+          nullable: true
+        savedQueryId:
+          type: string
+          nullable: true
+        sort:
+          nullable: true
+          $ref: '#/components/schemas/Sort'
+        status:
+          type: string
+          nullable: true
+          enum:
+            - active
+            - draft
+            - immutable
+        title:
+          type: string
+          nullable: true
+        templateTimelineId:
+          type: string
+          nullable: true
+        templateTimelineVersion:
+          type: number
+          nullable: true
+        timelineType:
+          nullable: true
+          $ref: '#/components/schemas/TimelineType'
+        updated:
+          type: number
+          nullable: true
+        updatedBy:
+          type: string
+          nullable: true
+    TimelineResponse:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - type: object
+          required:
+            - savedObjectId
+            - version
+          properties:
+            eventIdToNoteIds:
+              type: array
+              items:
+                $ref: '#/components/schemas/Note'
+            notes:
+              type: array
+              items:
+                $ref: '#/components/schemas/Note'
+            noteIds:
+              type: array
+              items:
+                type: string
+            pinnedEventIds:
+              type: array
+              items:
+                type: string
+            pinnedEventsSaveObject:
+              type: array
+              items:
+                $ref: '#/components/schemas/PinnedEvent'
+            savedObjectId:
+              type: string
+            version:
+              type: string
+    FavoriteTimelineResponse:
+      type: object
+      required:
+        - savedObjectId
+        - version
+      properties:
+        savedObjectId:
+          type: string
+        version:
+          type: string
+        code:
+          type: number
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        templateTimelineId:
+          type: string
+          nullable: true
+        templateTimelineVersion:
+          type: number
+          nullable: true
+        timelineType:
+          $ref: '#/components/schemas/TimelineType'
+        favorite:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavoriteTimelineResult'
+    ColumnHeaderResult:
+      type: object
+      properties:
+        aggregatable:
+          type: boolean
+        category:
+          type: string
+        columnHeaderType:
+          type: string
+        description:
+          type: string
+        example:
+          oneOf:
+            - type: string
+            - type: number
+        indexes:
+          type: array
+          items:
+            type: string
+        id:
+          type: string
+        name:
+          type: string
+        placeholder:
+          type: string
+        searchable:
+          type: boolean
+        type:
+          type: string
+    QueryMatchResult:
+      type: object
+      properties:
+        field:
+          type: string
+          nullable: true
+        displayField:
+          type: string
+          nullable: true
+        value:
+          type: string
+          nullable: true
+        displayValue:
+          type: string
+          nullable: true
+        operator:
+          type: string
+          nullable: true
+    DataProviderResult:
+      type: object
+      properties:
+        and:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/DataProviderQueryMatch'
+        enabled:
+          type: boolean
+          nullable: true
+        excluded:
+          type: boolean
+          nullable: true
+        id:
+          type: string
+          nullable: true
+        kqlQuery:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        queryMatch:
+          $ref: '#/components/schemas/QueryMatchResult'
+          nullable: true
+        type:
+          $ref: '#/components/schemas/DataProviderType'
+          nullable: true
+    DataProviderQueryMatch:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          nullable: true
+        excluded:
+          type: boolean
+          nullable: true
+        id:
+          type: string
+          nullable: true
+        kqlQuery:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        queryMatch:
+          $ref: '#/components/schemas/QueryMatchResult'
+    BareNote:
+      type: object
+      required: [timelineId]
+      properties:
+        eventId:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        timelineId:
+          type: string
+          nullable: true
+        created:
+          type: number
+          nullable: true
+        createdBy:
+          type: string
+          nullable: true
+        updated:
+          type: number
+          nullable: true
+        updatedBy:
+          type: string
+          nullable: true
+    Note:
+      allOf:
+        - $ref: '#/components/schemas/BareNote'
+        - type: object
+          properties:
+            noteId:
+              type: string
+            version:
+              type: string
+    GlobalNote:
+      type: object
+      properties:
+        noteId:
+          type: string
+        version:
+          type: string
+        note:
+          type: string
+        timelineId:
+          type: string
+        created:
+          type: number
+        createdBy:
+          type: string
+        updated:
+          type: number
+        updatedBy:
+          type: string
+    RowRendererId:
+      type: string
+      enum:
+        - alert
+        - alerts
+        - auditd
+        - auditd_file
+        - library
+        - netflow
+        - plain
+        - registry
+        - suricata
+        - system
+        - system_dns
+        - system_endgame_process
+        - system_file
+        - system_fim
+        - system_security_event
+        - system_socket
+        - threat_match
+        - zeek
+    FavoriteTimelineResult:
+      type: object
+      properties:
+        fullName:
+          type: string
+          nullable: true
+        userName:
+          type: string
+          nullable: true
+        favoriteDate:
+          type: number
+          nullable: true
+    FilterTimelineResult:
+      type: object
+      properties:
+        exists:
+          type: boolean
+        meta:
+          type: object
+          properties:
+            alias:
+              type: string
+            controlledBy:
+              type: string
+            disabled:
+              type: boolean
+            field:
+              type: string
+            formattedValue:
+              type: string
+            index:
+              type: string
+            key:
+              type: string
+            negate:
+              type: boolean
+            params:
+              type: string
+            type:
+              type: string
+            value:
+              type: string
+        match_all:
+          type: string
+        missing:
+          type: string
+        query:
+          type: string
+        range:
+          type: string
+        script:
+          type: string
+    SerializedFilterQueryResult:
+      type: object
+      properties:
+        filterQuery:
+          type: object
+          nullable: true
+          properties:
+            kuery:
+              type: object
+              nullable: true
+              properties:
+                kind:
+                  type: string
+                  nullable: true
+                expression:
+                  type: string
+                  nullable: true
+            serializedQuery:
+              type: string
+              nullable: true
+    PinnedEvent:
+      type: object
+      required: [eventId, pinnedEventId, timelineId, version]
+      properties:
+        pinnedEventId:
+          type: string
+        eventId:
+          type: string
+        timelineId:
+          type: string
+        created:
+          type: number
+          nullable: true
+        createdBy:
+          type: string
+          nullable: true
+        updated:
+          type: number
+          nullable: true
+        updatedBy:
+          type: string
+          nullable: true
+        version:
+          type: string
+    Sort:
+      oneOf:
+        - $ref: '#/components/schemas/SortObject'
+        - type: array
+          items:
+            $ref: '#/components/schemas/SortObject'
+    SortObject:
+      type: object
+      properties:
+        columnId:
+          type: string
+          nullable: true
+        columnType:
+          type: string
+          nullable: true
+        sortDirection:
+          type: string
+          nullable: true
+    SortFieldTimeline:
+      type: string
+      description: The field to sort the timelines by.
+      enum:
+        - title
+        - description
+        - updated
+        - created
+    TimelineStatus:
+      type: string
+      enum:
+        - active
+        - draft
+        - immutable
+      # enum default value is temporarily unsupported by the code generator
+      # default: draft
+      description: The status of the timeline. Valid values are `active`, `draft`, and `immutable`.
+    ImportTimelines:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - type: object
+          properties:
+            savedObjectId:
+              type: string
+              nullable: true
+            version:
+              type: string
+              nullable: true
+            globalNotes:
+              nullable: true
+              type: array
+              items:
+                $ref: '#/components/schemas/BareNote'
+            eventNotes:
+              nullable: true
+              type: array
+              items:
+                $ref: '#/components/schemas/BareNote'
+            pinnedEventIds:
+              nullable: true
+              type: array
+              items:
+                type: string
+    ImportTimelineResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        success_count:
+          type: number
+        timelines_installed:
+          type: number
+        timelines_updated:
+          type: number
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              error:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status_code:
+                    type: number
+    ExportedTimelines:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - type: object
+          properties:
+            globalNotes:
+              type: array
+              items:
+                $ref: '#/components/schemas/Note'
+            eventNotes:
+              type: array
+              items:
+                $ref: '#/components/schemas/Note'
+            pinnedEventIds:
+              type: array
+              items:
+                type: string
+    Readable:
+      type: object
+      properties:
+        _maxListeners:
+          type: object
+          additionalProperties: true
+        _readableState:
+          type: object
+          additionalProperties: true
+        _read:
+          type: object
+          additionalProperties: true
+        readable:
+          type: boolean
+        _events:
+          type: object
+          additionalProperties: true
+        _eventsCount:
+          type: number
+        _data:
+          type: object
+          additionalProperties: true
+        _position:
+          type: number
+        _encoding:
+          type: string

@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { CommonProps } from '@elastic/eui';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import classNames from 'classnames';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { ConsoleText } from './console_text';
@@ -18,6 +19,10 @@ import { ConsoleText } from './console_text';
 const COMMAND_EXECUTION_RESULT_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.commandExecutionResult.successTitle',
   { defaultMessage: 'Action completed.' }
+);
+const COMMAND_EXECUTION_SUBMIT_RESULT_SUCCESS_TITLE = i18n.translate(
+  'xpack.securitySolution.commandExecutionSubmitResult.successTitle',
+  { defaultMessage: 'Action successfully submitted.' }
 );
 const COMMAND_EXECUTION_RESULT_FAILURE_TITLE = i18n.translate(
   'xpack.securitySolution.commandExecutionResult.failureTitle',
@@ -47,6 +52,8 @@ export type CommandExecutionResultProps = PropsWithChildren<{
 
   className?: CommonProps['className'];
 
+  agentType?: ResponseActionAgentType;
+
   'data-test-subj'?: string;
 }>;
 
@@ -63,6 +70,7 @@ export const CommandExecutionResult = memo<CommandExecutionResultProps>(
     'data-test-subj': dataTestSubj,
     className,
     children,
+    agentType,
   }) => {
     const consoleDataTestSubj = useDataTestSubj();
     const getTestId = useTestIdGenerator(dataTestSubj ?? consoleDataTestSubj);
@@ -75,6 +83,19 @@ export const CommandExecutionResult = memo<CommandExecutionResultProps>(
         [className || '_']: Boolean(className),
       });
     }, [className, showAs]);
+
+    const titleMessage = useMemo(() => {
+      if (title) {
+        return title;
+      }
+      if (showAs === 'success') {
+        return agentType === 'crowdstrike'
+          ? COMMAND_EXECUTION_SUBMIT_RESULT_SUCCESS_TITLE
+          : COMMAND_EXECUTION_RESULT_SUCCESS_TITLE;
+      } else {
+        return COMMAND_EXECUTION_RESULT_FAILURE_TITLE;
+      }
+    }, [agentType, showAs, title]);
 
     return (
       <EuiPanel
@@ -92,11 +113,7 @@ export const CommandExecutionResult = memo<CommandExecutionResultProps>(
             {showTitle && (
               <>
                 <ConsoleText color={showAs === 'success' ? 'success' : 'danger'}>
-                  {title
-                    ? title
-                    : showAs === 'success'
-                    ? COMMAND_EXECUTION_RESULT_SUCCESS_TITLE
-                    : COMMAND_EXECUTION_RESULT_FAILURE_TITLE}
+                  {titleMessage}
                 </ConsoleText>
 
                 <EuiSpacer size="s" />

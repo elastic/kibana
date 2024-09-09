@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -51,12 +52,12 @@ export async function savePrsToCsv(
     'GET /search/issues',
     { q, per_page: perPage },
     (response) =>
-      response.data.map((item: Octokit.SearchIssuesAndPullRequestsResponseItemsItem) => {
+      response.data.map((item) => {
         return {
           title: item.title,
           url: item.html_url,
           releaseLabel: item.labels
-            .filter((label) => label.name.trim().startsWith('release_note'))
+            .filter((label) => label.name?.trim().startsWith('release_note'))
             .map((label) => label.name)
             .join(','),
         } as PR;

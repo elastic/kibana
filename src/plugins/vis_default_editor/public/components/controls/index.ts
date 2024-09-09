@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export { DateRangesParamEditor } from './date_ranges';
@@ -13,6 +14,7 @@ export { FieldParamEditor } from './field';
 export { FiltersParamEditor } from './filters';
 export { HasExtendedBoundsParamEditor } from './has_extended_bounds';
 export { IncludeExcludeParamEditor } from './include_exclude';
+export { IpPrefixParamEditor } from './ip_prefix';
 export { IpRangesParamEditor } from './ip_ranges';
 export { IpRangeTypeParamEditor } from './ip_range_type';
 export { MetricAggParamEditor } from './metric_agg';

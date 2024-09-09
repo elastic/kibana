@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
+import { useUiSettings } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { MultiMetricJobCreator } from '../../../../../common/job_creator';
-import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
-import { LineChartData } from '../../../../../common/chart_loader';
+import type { MultiMetricJobCreator } from '../../../../../common/job_creator';
+import type { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
+import type { LineChartData } from '../../../../../common/chart_loader';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { ChartGrid } from './chart_grid';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 export const MultiMetricDetectorsSummary: FC = () => {
+  const uiSettings = useUiSettings();
   const {
     jobCreator: jc,
     chartLoader,
     resultsLoader,
     chartInterval,
   } = useContext(JobCreatorContext);
-
   const jobCreator = jc as MultiMetricJobCreator;
+  const toastNotificationService = useToastNotificationService();
 
   const [lineChartsData, setLineChartsData] = useState<LineChartData>({});
   const [loadingData, setLoadingData] = useState(false);
@@ -51,7 +54,7 @@ export const MultiMetricDetectorsSummary: FC = () => {
           );
           setFieldValues(tempFieldValues);
         } catch (error) {
-          getToastNotificationService().displayErrorToast(error);
+          toastNotificationService.displayErrorToast(error);
         }
       }
     })();
@@ -59,6 +62,8 @@ export const MultiMetricDetectorsSummary: FC = () => {
     return () => {
       subscription.unsubscribe();
     };
+    // skip toastNotificationService from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartLoader, resultsLoader, jobCreator]);
 
   useEffect(() => {
@@ -72,7 +77,7 @@ export const MultiMetricDetectorsSummary: FC = () => {
     if (allDataReady()) {
       setLoadingData(true);
       try {
-        const cs = getChartSettings(jobCreator, chartInterval);
+        const cs = getChartSettings(uiSettings, jobCreator, chartInterval);
         setChartSettings(cs);
         const resp: LineChartData = await chartLoader.loadLineCharts(
           jobCreator.start,
@@ -86,7 +91,7 @@ export const MultiMetricDetectorsSummary: FC = () => {
         );
         setLineChartsData(resp);
       } catch (error) {
-        getToastNotificationService().displayErrorToast(error);
+        toastNotificationService.displayErrorToast(error);
         setLineChartsData({});
       }
       setLoadingData(false);

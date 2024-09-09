@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPopoverTitle,
   EuiText,
   EuiListGroupItem,
@@ -19,6 +20,7 @@ import {
   EuiFieldSearch,
   EuiHighlight,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 import { elementToString } from '../utils/element_to_string';
 
@@ -38,9 +40,16 @@ interface DocumentationProps {
   sections?: LanguageDocumentationSections;
   // if sets to true, allows searching in the markdown description
   searchInDescription?: boolean;
+  // if set, a link will appear on the top right corner
+  linkToDocumentation?: string;
 }
 
-function DocumentationContent({ language, sections, searchInDescription }: DocumentationProps) {
+function DocumentationContent({
+  language,
+  sections,
+  searchInDescription,
+  linkToDocumentation,
+}: DocumentationProps) {
   const [selectedSection, setSelectedSection] = useState<string | undefined>();
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
 
@@ -83,10 +92,28 @@ function DocumentationContent({ language, sections, searchInDescription }: Docum
         paddingSize="m"
         data-test-subj="language-documentation-title"
       >
-        {i18n.translate('languageDocumentationPopover.header', {
-          defaultMessage: '{language} reference',
-          values: { language },
-        })}
+        <EuiFlexGroup
+          gutterSize="none"
+          responsive={false}
+          alignItems="center"
+          justifyContent="spaceBetween"
+        >
+          <EuiFlexItem grow={false}>
+            {i18n.translate('languageDocumentationPopover.header', {
+              defaultMessage: '{language} reference',
+              values: { language },
+            })}
+          </EuiFlexItem>
+          {linkToDocumentation && (
+            <EuiFlexItem grow={false}>
+              <EuiLink external href={linkToDocumentation} target="_blank">
+                {i18n.translate('languageDocumentationPopover.documentationLinkLabel', {
+                  defaultMessage: 'View full documentation',
+                })}
+              </EuiLink>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiPopoverTitle>
       <EuiFlexGroup
         className="documentation__docsContent"

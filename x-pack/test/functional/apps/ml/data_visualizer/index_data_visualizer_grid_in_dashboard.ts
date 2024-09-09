@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
   const ml = getService('ml');
+  const dataViews = getService('dataViews');
   const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
@@ -45,9 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);
           });
         } else {
-          await ml.dashboardEmbeddables.selectDiscoverIndexPattern(
-            testData.sourceIndexOrSavedSearch
-          );
+          await dataViews.switchToAndValidate(testData.sourceIndexOrSavedSearch);
         }
         await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
 
@@ -107,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.discover.assertFieldStatsTableNotExists();
-        await PageObjects.dashboard.saveDashboard(dashboardTitle);
+        await PageObjects.dashboard.saveDashboard(dashboardTitle, { saveAsNew: false });
       });
     });
   }

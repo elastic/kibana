@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, {
@@ -63,10 +64,13 @@ function hasAutoscaleProps<T>(props: T): props is T & AutoScaleProps {
   return false;
 }
 
-function getWrappedComponentProps<T>(props: T) {
+function getWrappedComponentProps<T>(props: T): T {
   if (hasAutoscaleProps(props)) {
-    const { autoScaleParams, renderComplete, ...rest } = props;
-    return rest;
+    return {
+      ...props,
+      autoScaleParams: undefined,
+      renderComplete: undefined,
+    };
   }
 
   return props;
@@ -132,7 +136,7 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
               : {}),
           }}
         >
-          <WrappedComponent {...(restProps as T)} />
+          <WrappedComponent {...restProps} />
         </div>
       </div>
     );

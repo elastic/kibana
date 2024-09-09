@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { ILM_POLICY_NAME } from '@kbn/reporting-common/constants';
-import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -42,7 +42,8 @@ export default function ({ getService }: FtrProviderContext) {
           cluster: ['manage_ilm'],
           indices: [
             { names: ['ecommerce'], privileges: ['read'], allow_restricted_indices: false },
-            { names: ['.reporting-*'], privileges: ['all'], allow_restricted_indices: true },
+            { names: ['.reporting-*'], privileges: ['all'], allow_restricted_indices: true }, // plain indices (from old version)
+            { names: ['.kibana-reporting'], privileges: ['all'], allow_restricted_indices: true }, // data stream
           ],
           run_as: [],
         },
@@ -198,13 +199,29 @@ export default function ({ getService }: FtrProviderContext) {
           .put(INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY)
           .auth(UNAUTHZD_TEST_USERNAME, UNAUTHZD_TEST_USER_PASSWORD)
           .set('kbn-xsrf', 'xxx')
-          .expect(404);
+          .expect(403)
+          .then(({ body }: any) => {
+            expect(body).to.eql({
+              statusCode: 403,
+              error: 'Forbidden',
+              message:
+                'The current user requires "manage" privilege on the ".reporting-*,.kibana-reporting*" indices.',
+            });
+          });
 
         await supertestWithoutAuth
           .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
           .auth(UNAUTHZD_TEST_USERNAME, UNAUTHZD_TEST_USER_PASSWORD)
           .set('kbn-xsrf', 'xxx')
-          .expect(404);
+          .expect(403)
+          .then(({ body }: any) => {
+            expect(body).to.eql({
+              statusCode: 403,
+              error: 'Forbidden',
+              message:
+                'The current user requires "manage" privilege on the ".reporting-*,.kibana-reporting*" indices.',
+            });
+          });
       } finally {
         await security.user.delete(UNAUTHZD_TEST_USERNAME);
       }

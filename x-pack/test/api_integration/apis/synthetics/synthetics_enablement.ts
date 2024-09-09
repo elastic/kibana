@@ -10,14 +10,14 @@ import {
   syntheticsApiKeyID,
   syntheticsApiKeyObjectType,
 } from '@kbn/synthetics-plugin/server/saved_objects/service_api_key';
-import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
+import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const correctPrivileges = {
     applications: [],
-    cluster: ['monitor', 'read_ilm', 'read_pipeline'],
+    cluster: ['monitor', 'read_pipeline', 'read_ilm'],
     indices: [
       {
         allow_restricted_indices: false,
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               elasticsearch: {
                 cluster: [privilege],
-                indices: serviceApiKeyPrivileges.indices,
+                indices: getServiceApiKeyPrivileges(false).indices,
               },
             });
 
@@ -96,6 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
               canEnable: false,
               isEnabled: false,
               isValidApiKey: false,
+              isServiceAllowed: true,
             });
           } finally {
             await security.user.delete(username);
@@ -119,8 +120,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: serviceApiKeyPrivileges.cluster,
-              indices: serviceApiKeyPrivileges.indices,
+              cluster: getServiceApiKeyPrivileges(false).cluster,
+              indices: getServiceApiKeyPrivileges(false).indices,
             },
           });
 
@@ -142,6 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
           const validApiKeys = await getApiKeys();
           expect(validApiKeys.length).eql(1);
@@ -167,8 +169,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: serviceApiKeyPrivileges.cluster,
-              indices: serviceApiKeyPrivileges.indices,
+              cluster: getServiceApiKeyPrivileges(false).cluster,
+              indices: getServiceApiKeyPrivileges(false).indices,
             },
           });
 
@@ -190,6 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           const validApiKeys = await getApiKeys();
@@ -209,6 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           const validApiKeys2 = await getApiKeys();
@@ -233,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
               expiration: '1d',
               role_descriptors: {
                 'role-a': {
-                  cluster: serviceApiKeyPrivileges.cluster,
+                  cluster: getServiceApiKeyPrivileges(false).cluster,
                   indices: [
                     {
                       names: ['synthetics-*'],
@@ -244,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          kibanaServer.savedObjects.create({
+          await kibanaServer.savedObjects.create({
             id: syntheticsApiKeyID,
             type: syntheticsApiKeyObjectType,
             overwrite: true,
@@ -269,8 +273,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: serviceApiKeyPrivileges.cluster,
-              indices: serviceApiKeyPrivileges.indices,
+              cluster: getServiceApiKeyPrivileges(false).cluster,
+              indices: getServiceApiKeyPrivileges(false).indices,
             },
           });
 
@@ -292,6 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           const validApiKeys2 = await getApiKeys();
@@ -318,8 +323,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: serviceApiKeyPrivileges.cluster,
-              indices: serviceApiKeyPrivileges.indices,
+              cluster: getServiceApiKeyPrivileges(false).cluster,
+              indices: getServiceApiKeyPrivileges(false).indices,
             },
           });
 
@@ -341,6 +346,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           const validApiKeys = await getApiKeys();
@@ -371,6 +377,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           const validApiKeys2 = await getApiKeys();
@@ -417,6 +424,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: false,
             isEnabled: false,
             isValidApiKey: false,
+            isServiceAllowed: true,
           });
         } finally {
           await security.role.delete(roleName);
@@ -449,8 +457,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: serviceApiKeyPrivileges.cluster,
-              indices: serviceApiKeyPrivileges.indices,
+              cluster: getServiceApiKeyPrivileges(false).cluster,
+              indices: getServiceApiKeyPrivileges(false).indices,
             },
           });
 
@@ -483,6 +491,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
         } finally {
           await security.user.delete(username);
@@ -533,6 +542,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: false,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
         } finally {
           await supertestWithAuth
@@ -562,8 +572,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: serviceApiKeyPrivileges.cluster,
-              indices: serviceApiKeyPrivileges.indices,
+              cluster: getServiceApiKeyPrivileges(false).cluster,
+              indices: getServiceApiKeyPrivileges(false).indices,
             },
           });
 
@@ -586,6 +596,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           await supertest
@@ -610,6 +621,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           // can disable synthetics in non default space when enabled in default space
@@ -635,6 +647,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
         } finally {
           await security.user.delete(username);

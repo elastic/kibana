@@ -8,8 +8,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { mlTimefilterRefresh$, Refresh } from '@kbn/ml-date-picker';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Refresh } from '@kbn/ml-date-picker';
+import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 export interface DataVisualizerDataViewManagementProps {
@@ -47,8 +48,8 @@ export function DataVisualizerDataViewManagement(props: DataVisualizerDataViewMa
     return null;
   }
 
-  const addField = () => {
-    closeFieldEditor.current = dataViewFieldEditor.openEditor({
+  const addField = async () => {
+    closeFieldEditor.current = await dataViewFieldEditor.openEditor({
       ctx: {
         dataView: currentDataView,
       },

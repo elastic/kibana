@@ -5,16 +5,74 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type {
-  AfterKey,
   AfterKeys,
-  IdentifierType,
-  RiskWeights,
-  Range,
-  RiskEngineStatus,
-  RiskScore,
-} from '../../../common/entity_analytics/risk_engine';
+  EntityAfterKey,
+  RiskScoreWeights,
+} from '../../../common/api/entity_analytics/common';
+import type { IdentifierType, Range } from '../../../common/entity_analytics/risk_engine';
+import type { ConfigType } from '../../config';
+import type { StartPlugins } from '../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../types';
+export type EntityAnalyticsConfig = ConfigType['entityAnalytics'];
+
+export interface EntityAnalyticsRoutesDeps {
+  router: SecuritySolutionPluginRouter;
+  logger: Logger;
+  config: ConfigType;
+  getStartServices: StartServicesAccessor<StartPlugins>;
+}
+
+export interface CalculateRiskScoreAggregations {
+  user?: {
+    after_key: EntityAfterKey;
+    buckets: RiskScoreBucket[];
+  };
+  host?: {
+    after_key: EntityAfterKey;
+    buckets: RiskScoreBucket[];
+  };
+}
+
+export interface SearchHitRiskInput {
+  id: string;
+  index: string;
+  rule_name?: string;
+  time?: string;
+  score?: number;
+  contribution?: number;
+}
+
+export interface RiskScoreBucket {
+  key: { [identifierField: string]: string };
+  doc_count: number;
+  top_inputs: {
+    doc_count: number;
+    risk_details: {
+      value: {
+        score: number;
+        normalized_score: number;
+        notes: string[];
+        category_1_score: number;
+        category_1_count: number;
+        risk_inputs: SearchHitRiskInput[];
+      };
+    };
+  };
+}
+
+export interface RiskEngineConfiguration {
+  dataViewId: string;
+  enabled: boolean;
+  filter: unknown;
+  identifierType: IdentifierType | undefined;
+  interval: string;
+  pageSize: number;
+  range: Range;
+  alertSampleSizePerShard?: number;
+}
 
 export interface CalculateScoresParams {
   afterKeys: AfterKeys;
@@ -25,7 +83,8 @@ export interface CalculateScoresParams {
   pageSize: number;
   range: { start: string; end: string };
   runtimeMappings: MappingRuntimeFields;
-  weights?: RiskWeights;
+  weights?: RiskScoreWeights;
+  alertSampleSizePerShard?: number;
 }
 
 export interface CalculateAndPersistScoresParams {
@@ -37,99 +96,8 @@ export interface CalculateAndPersistScoresParams {
   pageSize: number;
   range: Range;
   runtimeMappings: MappingRuntimeFields;
-  weights?: RiskWeights;
-}
-
-export interface CalculateAndPersistScoresResponse {
-  after_keys: AfterKeys;
-  errors: string[];
-  scores_written: number;
-}
-
-export interface CalculateScoresResponse {
-  debug?: {
-    request: unknown;
-    response: unknown;
-  };
-  after_keys: AfterKeys;
-  scores: {
-    host?: RiskScore[];
-    user?: RiskScore[];
-  };
-}
-
-export interface GetRiskEngineStatusResponse {
-  legacy_risk_engine_status: RiskEngineStatus;
-  risk_engine_status: RiskEngineStatus;
-  is_max_amount_of_risk_engines_reached: boolean;
-}
-
-export interface InitRiskEngineResultResponse {
-  risk_engine_enabled: boolean;
-  risk_engine_resources_installed: boolean;
-  risk_engine_configuration_created: boolean;
-  legacy_risk_engine_disabled: boolean;
-  errors: string[];
-}
-
-export interface InitRiskEngineResponse {
-  result: InitRiskEngineResultResponse;
-}
-
-export interface InitRiskEngineError {
-  body: {
-    message: string;
-    full_error: InitRiskEngineResultResponse | undefined;
-  };
-}
-
-export interface EnableDisableRiskEngineErrorResponse {
-  body: {
-    message: string;
-    full_error: string;
-  };
-}
-
-export interface EnableRiskEngineResponse {
-  success: boolean;
-}
-
-export interface DisableRiskEngineResponse {
-  success: boolean;
-}
-
-export interface CalculateRiskScoreAggregations {
-  user?: {
-    after_key: AfterKey;
-    buckets: RiskScoreBucket[];
-  };
-  host?: {
-    after_key: AfterKey;
-    buckets: RiskScoreBucket[];
-  };
-}
-
-export interface RiskScoreBucket {
-  key: { [identifierField: string]: string };
-  doc_count: number;
-  risk_details: {
-    value: {
-      score: number;
-      normalized_score: number;
-      notes: string[];
-      category_1_score: number;
-      category_1_count: number;
-    };
-  };
-  inputs: SearchResponse;
-}
-
-export interface RiskEngineConfiguration {
-  dataViewId: string;
-  enabled: boolean;
-  filter: unknown;
-  identifierType: IdentifierType | undefined;
-  interval: string;
-  pageSize: number;
-  range: Range;
+  weights?: RiskScoreWeights;
+  alertSampleSizePerShard?: number;
+  returnScores?: boolean;
+  refresh?: 'wait_for';
 }

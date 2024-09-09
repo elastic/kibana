@@ -1,0 +1,5 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/core-user-profile-server",
+  "owner": "@elastic/kibana-core"
+}

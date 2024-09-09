@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Semver from 'semver';
@@ -64,6 +65,23 @@ export function validateTypeMigrations({
       if (type.switchToModelVersionAt && Semver.gte(version, type.switchToModelVersionAt)) {
         throw new Error(
           `Migration for type ${type.name} for version ${version} registered after switchToModelVersionAt (${type.switchToModelVersionAt})`
+        );
+      }
+    });
+  }
+
+  if (type.schemas) {
+    const schemaMap = typeof type.schemas === 'object' ? type.schemas : {};
+    assertObject(
+      schemaMap,
+      `Schemas map for type ${type.name} should be an object like { '2.0.0': {schema} }.`
+    );
+
+    Object.entries(schemaMap).forEach(([version, schema]) => {
+      assertValidSemver(kibanaVersion, version, type.name);
+      if (type.switchToModelVersionAt && Semver.gte(version, type.switchToModelVersionAt)) {
+        throw new Error(
+          `Schema for type ${type.name} for version ${version} registered after switchToModelVersionAt (${type.switchToModelVersionAt})`
         );
       }
     });

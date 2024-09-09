@@ -8,15 +8,16 @@
 import React, { Component } from 'react';
 
 import { EuiPanel } from '@elastic/eui';
-import { AnomalySourceDescriptor } from './anomaly_source';
+import type { AnomalySourceDescriptor } from './anomaly_source';
 import { AnomalyJobSelector } from './anomaly_job_selector';
 import { LayerSelector } from './layer_selector';
-import { ML_ANOMALY_LAYERS, MlAnomalyLayersType } from './util';
-import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlAnomalyLayersType } from './util';
+import { ML_ANOMALY_LAYERS } from './util';
+import type { MlApi } from '../application/services/ml_api_service';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<AnomalySourceDescriptor> | null) => void;
-  mlJobsService: MlApiServices['jobs'];
+  mlJobsService: MlApi['jobs'];
   jobsManagementPath?: string;
   canCreateJobs: boolean;
 }

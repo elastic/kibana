@@ -27,8 +27,8 @@ describe('search relevance insights routes', () => {
       });
     });
 
-    it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({
+    it('creates a request to enterprise search', async () => {
+      await mockRouter.callRoute({
         params: { engineName: 'some-engine' },
       });
 
@@ -51,8 +51,8 @@ describe('search relevance insights routes', () => {
       });
     });
 
-    it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({
+    it('creates a request to enterprise search', async () => {
+      await mockRouter.callRoute({
         params: { engineName: 'some-engine' },
         body: {
           query: 'some query',
@@ -80,8 +80,8 @@ describe('search relevance insights routes', () => {
       });
     });
 
-    it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({
+    it('creates a request to enterprise search', async () => {
+      await mockRouter.callRoute({
         params: { engineName: 'some-engine' },
       });
 
@@ -104,8 +104,8 @@ describe('search relevance insights routes', () => {
       });
     });
 
-    it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({
+    it('creates a request to enterprise search', async () => {
+      await mockRouter.callRoute({
         params: { engineName: 'some-engine' },
         body: { curation: { enabled: true } },
       });
@@ -129,8 +129,8 @@ describe('search relevance insights routes', () => {
       });
     });
 
-    it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({
+    it('creates a request to enterprise search', async () => {
+      await mockRouter.callRoute({
         params: { engineName: 'some-engine', query: 'foo' },
         query: { type: 'curation' },
       });

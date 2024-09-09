@@ -14,7 +14,9 @@ Object {
         data-eui="EuiFocusTrap"
       >
         <div
+          aria-modal="true"
           class="euiModal emotion-euiModal"
+          role="dialog"
           style="max-inline-size: 750px;"
           tabindex="0"
         >
@@ -48,7 +50,9 @@ Object {
               <div
                 class="euiText emotion-euiText-s"
               >
-                <h4>
+                <h4
+                  id="generated-id"
+                >
                   description
                 </h4>
               </div>
@@ -56,35 +60,32 @@ Object {
                 class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
               <div
-                class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
+                class="euiFilePicker emotion-euiFilePicker-fullWidth"
               >
+                <input
+                  accept=".ndjson"
+                  aria-describedby="rule-file-picker-filePicker__prompt"
+                  aria-labelledby="generated-id"
+                  class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+                  data-test-subj="rule-file-picker"
+                  id="rule-file-picker"
+                  type="file"
+                />
                 <div
-                  class="euiFilePicker__wrap"
+                  class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+                  id="rule-file-picker-filePicker__prompt"
                 >
-                  <input
-                    accept=".ndjson"
-                    aria-describedby="rule-file-picker-filePicker__prompt"
-                    class="euiFilePicker__input"
-                    data-test-subj="rule-file-picker"
-                    id="rule-file-picker"
-                    type="file"
+                  <span
+                    aria-hidden="true"
+                    class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+                    color="primary"
+                    data-euiicon-type="importAction"
                   />
-                  <div
-                    class="euiFilePicker__prompt"
-                    id="rule-file-picker-filePicker__prompt"
+                  <span
+                    class="euiFilePicker__promptText"
                   >
-                    <span
-                      aria-hidden="true"
-                      class="euiFilePicker__icon"
-                      color="primary"
-                      data-euiicon-type="importAction"
-                    />
-                    <div
-                      class="euiFilePicker__promptText"
-                    >
-                      subtitle
-                    </div>
-                  </div>
+                    subtitle
+                  </span>
                 </div>
               </div>
               <div
@@ -96,17 +97,22 @@ Object {
               <div
                 class="euiCheckbox emotion-euiCheckbox"
               >
-                <input
-                  class="euiCheckbox__input"
-                  data-test-subj="importDataModalCheckboxLabel"
-                  id="importDataModalCheckboxLabel"
-                  type="checkbox"
-                />
                 <div
-                  class="euiCheckbox__square"
-                />
+                  class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                >
+                  <span
+                    class="emotion-euiCheckbox__icon-check"
+                    data-euiicon-type="empty"
+                  />
+                  <input
+                    class="euiCheckbox__input emotion-euiCheckbox__input"
+                    data-test-subj="importDataModalCheckboxLabel"
+                    id="importDataModalCheckboxLabel"
+                    type="checkbox"
+                  />
+                </div>
                 <label
-                  class="euiCheckbox__label"
+                  class="euiCheckbox__label emotion-euiCheckbox__label"
                   for="importDataModalCheckboxLabel"
                 >
                   checkBoxLabel
@@ -221,7 +227,9 @@ Object {
         data-eui="EuiFocusTrap"
       >
         <div
+          aria-modal="true"
           class="euiModal emotion-euiModal"
+          role="dialog"
           style="max-inline-size: 750px;"
           tabindex="0"
         >
@@ -255,7 +263,9 @@ Object {
               <div
                 class="euiText emotion-euiText-s"
               >
-                <h4>
+                <h4
+                  id="generated-id"
+                >
                   description
                 </h4>
               </div>
@@ -263,50 +273,47 @@ Object {
                 class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
               <div
-                class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth euiFilePicker-hasFiles"
+                class="euiFilePicker euiFilePicker-hasFiles emotion-euiFilePicker-fullWidth-hasFiles"
               >
+                <input
+                  accept=".ndjson"
+                  aria-describedby="rule-file-picker-filePicker__prompt"
+                  aria-labelledby="generated-id"
+                  class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+                  data-test-subj="rule-file-picker"
+                  id="rule-file-picker"
+                  type="file"
+                />
                 <div
-                  class="euiFilePicker__wrap"
+                  class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+                  id="rule-file-picker-filePicker__prompt"
                 >
-                  <input
-                    accept=".ndjson"
-                    aria-describedby="rule-file-picker-filePicker__prompt"
-                    class="euiFilePicker__input"
-                    data-test-subj="rule-file-picker"
-                    id="rule-file-picker"
-                    type="file"
+                  <span
+                    aria-hidden="true"
+                    class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+                    color="primary"
+                    data-euiicon-type="importAction"
                   />
-                  <div
-                    class="euiFilePicker__prompt"
-                    id="rule-file-picker-filePicker__prompt"
+                  <span
+                    class="euiFilePicker__promptText"
+                  >
+                    subtitle
+                  </span>
+                  <button
+                    aria-label="Remove selected files"
+                    class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-euiFilePicker__clearButton"
+                    type="button"
                   >
                     <span
-                      aria-hidden="true"
-                      class="euiFilePicker__icon"
-                      color="primary"
-                      data-euiicon-type="importAction"
-                    />
-                    <div
-                      class="euiFilePicker__promptText"
-                    >
-                      subtitle
-                    </div>
-                    <button
-                      aria-label="Clear selected files"
-                      class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary"
-                      type="button"
+                      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                        class="eui-textTruncate euiButtonEmpty__text"
                       >
-                        <span
-                          class="eui-textTruncate euiButtonEmpty__text"
-                        >
-                          Remove
-                        </span>
+                        Remove
                       </span>
-                    </button>
-                  </div>
+                    </span>
+                  </button>
                 </div>
               </div>
               <div
@@ -382,17 +389,22 @@ Object {
               <div
                 class="euiCheckbox emotion-euiCheckbox"
               >
-                <input
-                  class="euiCheckbox__input"
-                  data-test-subj="importDataModalCheckboxLabel"
-                  id="importDataModalCheckboxLabel"
-                  type="checkbox"
-                />
                 <div
-                  class="euiCheckbox__square"
-                />
+                  class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                >
+                  <span
+                    class="emotion-euiCheckbox__icon-check"
+                    data-euiicon-type="empty"
+                  />
+                  <input
+                    class="euiCheckbox__input emotion-euiCheckbox__input"
+                    data-test-subj="importDataModalCheckboxLabel"
+                    id="importDataModalCheckboxLabel"
+                    type="checkbox"
+                  />
+                </div>
                 <label
-                  class="euiCheckbox__label"
+                  class="euiCheckbox__label emotion-euiCheckbox__label"
                   for="importDataModalCheckboxLabel"
                 >
                   checkBoxLabel
@@ -507,7 +519,9 @@ Object {
         data-eui="EuiFocusTrap"
       >
         <div
+          aria-modal="true"
           class="euiModal emotion-euiModal"
+          role="dialog"
           style="max-inline-size: 750px;"
           tabindex="0"
         >
@@ -541,7 +555,9 @@ Object {
               <div
                 class="euiText emotion-euiText-s"
               >
-                <h4>
+                <h4
+                  id="generated-id"
+                >
                   description
                 </h4>
               </div>
@@ -549,50 +565,47 @@ Object {
                 class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
               <div
-                class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth euiFilePicker-hasFiles"
+                class="euiFilePicker euiFilePicker-hasFiles emotion-euiFilePicker-fullWidth-hasFiles"
               >
+                <input
+                  accept=".ndjson"
+                  aria-describedby="rule-file-picker-filePicker__prompt"
+                  aria-labelledby="generated-id"
+                  class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+                  data-test-subj="rule-file-picker"
+                  id="rule-file-picker"
+                  type="file"
+                />
                 <div
-                  class="euiFilePicker__wrap"
+                  class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+                  id="rule-file-picker-filePicker__prompt"
                 >
-                  <input
-                    accept=".ndjson"
-                    aria-describedby="rule-file-picker-filePicker__prompt"
-                    class="euiFilePicker__input"
-                    data-test-subj="rule-file-picker"
-                    id="rule-file-picker"
-                    type="file"
+                  <span
+                    aria-hidden="true"
+                    class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+                    color="primary"
+                    data-euiicon-type="importAction"
                   />
-                  <div
-                    class="euiFilePicker__prompt"
-                    id="rule-file-picker-filePicker__prompt"
+                  <span
+                    class="euiFilePicker__promptText"
+                  >
+                    subtitle
+                  </span>
+                  <button
+                    aria-label="Remove selected files"
+                    class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-euiFilePicker__clearButton"
+                    type="button"
                   >
                     <span
-                      aria-hidden="true"
-                      class="euiFilePicker__icon"
-                      color="primary"
-                      data-euiicon-type="importAction"
-                    />
-                    <div
-                      class="euiFilePicker__promptText"
-                    >
-                      subtitle
-                    </div>
-                    <button
-                      aria-label="Clear selected files"
-                      class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary"
-                      type="button"
+                      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                        class="eui-textTruncate euiButtonEmpty__text"
                       >
-                        <span
-                          class="eui-textTruncate euiButtonEmpty__text"
-                        >
-                          Remove
-                        </span>
+                        Remove
                       </span>
-                    </button>
-                  </div>
+                    </span>
+                  </button>
                 </div>
               </div>
               <div
@@ -604,17 +617,22 @@ Object {
               <div
                 class="euiCheckbox emotion-euiCheckbox"
               >
-                <input
-                  class="euiCheckbox__input"
-                  data-test-subj="importDataModalCheckboxLabel"
-                  id="importDataModalCheckboxLabel"
-                  type="checkbox"
-                />
                 <div
-                  class="euiCheckbox__square"
-                />
+                  class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                >
+                  <span
+                    class="emotion-euiCheckbox__icon-check"
+                    data-euiicon-type="empty"
+                  />
+                  <input
+                    class="euiCheckbox__input emotion-euiCheckbox__input"
+                    data-test-subj="importDataModalCheckboxLabel"
+                    id="importDataModalCheckboxLabel"
+                    type="checkbox"
+                  />
+                </div>
                 <label
-                  class="euiCheckbox__label"
+                  class="euiCheckbox__label emotion-euiCheckbox__label"
                   for="importDataModalCheckboxLabel"
                 >
                   checkBoxLabel

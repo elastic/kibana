@@ -8,7 +8,12 @@
 import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
-
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import {
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+} from '../../common';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../action_type_registry';
 import { ActionsClient } from './actions_client';
 import { ExecutorType, ActionType } from '../types';
@@ -43,7 +48,7 @@ import { actionsAuthorizationMock } from '../authorization/actions_authorization
 import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { Logger, SavedObject } from '@kbn/core/server';
+import { SavedObject } from '@kbn/core/server';
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
@@ -51,6 +56,7 @@ import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_cr
 import { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
+import { estypes } from '@elastic/elasticsearch';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -103,7 +109,6 @@ const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditLoggerMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const mockTaskManager = taskManagerMock.createSetup();
 const configurationUtilities = actionsConfigMock.create();
 const eventLogClient = eventLogClientMock.create();
@@ -128,8 +133,11 @@ const actionTypeIdFromSavedObjectMock = (actionTypeId: string = 'my-action-type'
   } as SavedObject;
 };
 
+let logger: MockedLogger;
+
 beforeEach(() => {
   jest.resetAllMocks();
+  logger = loggerMock.create();
   mockedLicenseState = licenseStateMock.create();
   actionTypeRegistryParams = {
     licensing: licensingMock.createSetup(),
@@ -595,6 +603,9 @@ describe('create()', () => {
         proxyVerificationMode: 'full',
       },
       enableFooterInEmail: true,
+      microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+      microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+      microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
     });
 
     const localActionTypeRegistryParams = {
@@ -1845,9 +1856,13 @@ describe('getOAuthAccessToken()', () => {
       tokenUrl: 'https://testurl.service-now.com/oauth_token.do',
     });
     expect(getOAuthClientCredentialsAccessToken).not.toHaveBeenCalled();
-    expect(logger.debug).toHaveBeenCalledWith(
-      `Successfully retrieved access token using JWT OAuth with tokenUrl https://testurl.service-now.com/oauth_token.do and config {\"clientId\":\"abc\",\"jwtKeyId\":\"def\",\"userIdentifierValue\":\"userA\"}`
-    );
+    expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Successfully retrieved access token using JWT OAuth with tokenUrl https://testurl.service-now.com/oauth_token.do and config {\\"clientId\\":\\"abc\\",\\"jwtKeyId\\":\\"def\\",\\"userIdentifierValue\\":\\"userA\\"}",
+        ],
+      ]
+    `);
   });
 
   test('calls getOAuthClientCredentialsAccessToken when type="client"', async () => {
@@ -1884,9 +1899,13 @@ describe('getOAuthAccessToken()', () => {
       oAuthScope: 'https://graph.microsoft.com/.default',
     });
     expect(getOAuthJwtAccessToken).not.toHaveBeenCalled();
-    expect(logger.debug).toHaveBeenCalledWith(
-      `Successfully retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\"clientId\":\"abc\",\"tenantId\":\"def\"}`
-    );
+    expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Successfully retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\\"clientId\\":\\"abc\\",\\"tenantId\\":\\"def\\"}",
+        ],
+      ]
+    `);
   });
 
   test('throws when getOAuthJwtAccessToken throws error', async () => {
@@ -1911,9 +1930,13 @@ describe('getOAuthAccessToken()', () => {
     ).rejects.toMatchInlineSnapshot(`[Error: Failed to retrieve access token]`);
 
     expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalled();
-    expect(logger.debug).toHaveBeenCalledWith(
-      `Failed to retrieve access token using JWT OAuth with tokenUrl https://testurl.service-now.com/oauth_token.do and config {\"clientId\":\"abc\",\"jwtKeyId\":\"def\",\"userIdentifierValue\":\"userA\"} - Something went wrong!`
-    );
+    expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Failed to retrieve access token using JWT OAuth with tokenUrl https://testurl.service-now.com/oauth_token.do and config {\\"clientId\\":\\"abc\\",\\"jwtKeyId\\":\\"def\\",\\"userIdentifierValue\\":\\"userA\\"} - Something went wrong!",
+        ],
+      ]
+    `);
   });
 
   test('throws when getOAuthClientCredentialsAccessToken throws error', async () => {
@@ -1939,9 +1962,13 @@ describe('getOAuthAccessToken()', () => {
     ).rejects.toMatchInlineSnapshot(`[Error: Failed to retrieve access token]`);
 
     expect(getOAuthClientCredentialsAccessToken as jest.Mock).toHaveBeenCalled();
-    expect(logger.debug).toHaveBeenCalledWith(
-      `Failed to retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\"clientId\":\"abc\",\"tenantId\":\"def\"} - Something went wrong!`
-    );
+    expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Failed to retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\\"clientId\\":\\"abc\\",\\"tenantId\\":\\"def\\"} - Something went wrong!",
+        ],
+      ]
+    `);
   });
 });
 
@@ -2789,7 +2816,7 @@ describe('execute()', () => {
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: '.cases',
         operation: 'execute',
         additionalPrivileges: ['test/create'],
       });
@@ -2922,7 +2949,7 @@ describe('execute()', () => {
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: '.cases',
         operation: 'execute',
         additionalPrivileges: ['test/create'],
       });
@@ -3419,6 +3446,10 @@ describe('getGlobalExecutionLogWithAuth()', () => {
         executionUuidCardinality: { doc_count: 5, executionUuidCardinality: { value: 5 } },
       },
     },
+    hits: {
+      total: { value: 5, relation: 'eq' },
+      hits: [],
+    } as estypes.SearchHitsMetadata<unknown>,
   };
   describe('authorization', () => {
     test('ensures user is authorised to access logs', async () => {
@@ -3474,6 +3505,10 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
         },
       },
     },
+    hits: {
+      total: { value: 5, relation: 'eq' },
+      hits: [],
+    } as estypes.SearchHitsMetadata<unknown>,
   };
   describe('authorization', () => {
     test('ensures user is authorised to access kpi', async () => {

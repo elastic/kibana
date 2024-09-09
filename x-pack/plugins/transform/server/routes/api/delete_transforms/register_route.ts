@@ -8,7 +8,7 @@
 import {
   deleteTransformsRequestSchema,
   type DeleteTransformsRequestSchema,
-} from '../../../../common/api_schemas/delete_transforms';
+} from '../../api_schemas/delete_transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
@@ -16,7 +16,7 @@ import type { RouteDependencies } from '../../../types';
 import { routeHandlerFactory } from './route_handler_factory';
 
 export function registerRoute(routeDependencies: RouteDependencies) {
-  const { router, license } = routeDependencies;
+  const { router, getLicense } = routeDependencies;
   /**
    * @apiGroup Transforms
    *
@@ -40,8 +40,11 @@ export function registerRoute(routeDependencies: RouteDependencies) {
           },
         },
       },
-      license.guardApiRoute<undefined, undefined, DeleteTransformsRequestSchema>(
-        routeHandlerFactory(routeDependencies)
-      )
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<undefined, undefined, DeleteTransformsRequestSchema>(
+          routeHandlerFactory(routeDependencies)
+        )(ctx, request, response);
+      }
     );
 }

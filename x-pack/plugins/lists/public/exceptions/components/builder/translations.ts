@@ -19,6 +19,16 @@ export const VALUE = i18n.translate('xpack.lists.exceptions.builder.valueLabel',
   defaultMessage: 'Value',
 });
 
+export const EXCEPTION_ITEM_ARIA_LABEL = (
+  name: string,
+  groupIndex: number,
+  positionIndex: number
+): string =>
+  i18n.translate('xpack.lists.exceptions.item.ariaLabel', {
+    defaultMessage: '"{name}" in group {group}, position {position} ',
+    values: { group: groupIndex + 1, name, position: positionIndex + 1 },
+  });
+
 export const EXCEPTION_FIELD_VALUE_PLACEHOLDER = i18n.translate(
   'xpack.lists.exceptions.builder.exceptionFieldValuePlaceholder',
   {
@@ -97,3 +107,11 @@ export const CONFLICT_MULTIPLE_INDEX_DESCRIPTION = (name: string, count: number)
     defaultMessage: '{name} ({count} indices)',
     values: { count, name },
   });
+
+export const WILDCARD_WITH_IS_OPERATOR_TOOLTIP = i18n.translate(
+  'xpack.lists.exceptions.builder.exceptionIsOperator.warningmessage.tooltip',
+  {
+    defaultMessage:
+      'Using a wildcard with the "IS" operator can make an entry ineffective. Change the operator to "MATCHES" to ensure wildcards run properly.',
+  }
+);

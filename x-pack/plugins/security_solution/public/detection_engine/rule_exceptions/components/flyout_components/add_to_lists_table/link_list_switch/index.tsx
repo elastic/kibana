@@ -5,8 +5,11 @@
  * 2.0.
  */
 import React, { memo, useCallback, useMemo } from 'react';
+import type { EuiSwitchProps } from '@elastic/eui';
 import { EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import type { ExceptionListRuleReferencesSchema } from '../../../../../../../common/api/detection_engine/rule_exceptions';
+
+import * as i18n from './translations';
 
 export const LinkListSwitch = memo(
   ({
@@ -24,7 +27,7 @@ export const LinkListSwitch = memo(
       () => Boolean(linkedList.find((l) => l.id === list.id)),
       [linkedList, list.id]
     );
-    const onLinkOrUnlinkList = useCallback(
+    const onLinkOrUnlinkList = useCallback<EuiSwitchProps['onChange']>(
       ({ target: { checked } }) => {
         const newLinkedLists = !checked
           ? linkedList?.filter((item) => item.id !== list.id)
@@ -39,8 +42,9 @@ export const LinkListSwitch = memo(
         <EuiSwitch
           data-test-subj={dataTestSubj}
           onChange={onLinkOrUnlinkList}
-          label=""
           checked={isListLinked}
+          label={i18n.LINK_LIST_SWITCH_ARIA_LABEL(list.name)}
+          showLabel={false}
         />
       </EuiFlexItem>
     );

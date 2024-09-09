@@ -29,7 +29,7 @@
           "\nThe `KibanaRenderContextProvider` provides the necessary context for an out-of-current\nReact render, such as using `ReactDOM.render()`."
         ],
         "signature": [
-          "({ children, ...props }: React.PropsWithChildren<",
+          "({ children, ...props }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/react-kibana-context-render",
             "scope": "common",
@@ -37,7 +37,7 @@
             "section": "def-common.KibanaRenderContextProviderProps",
             "text": "KibanaRenderContextProviderProps"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/react/kibana_context/render/render_provider.tsx",
         "deprecated": false,
@@ -48,10 +48,10 @@
             "id": "def-common.KibanaRenderContextProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...props\n}",
+            "label": "{ children, ...props }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/react-kibana-context-render",
                 "scope": "common",
@@ -59,7 +59,7 @@
                 "section": "def-common.KibanaRenderContextProviderProps",
                 "text": "KibanaRenderContextProviderProps"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/react/kibana_context/render/render_provider.tsx",
             "deprecated": false,
@@ -87,25 +87,25 @@
           "{ i18n: ",
           {
             "pluginId": "@kbn/core-i18n-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreI18nBrowserPluginApi",
-            "section": "def-common.I18nStart",
+            "section": "def-public.I18nStart",
             "text": "I18nStart"
           },
-          "; analytics?: ",
+          "; analytics?: Pick<",
           {
             "pluginId": "@kbn/core-analytics-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-common.AnalyticsServiceStart",
+            "section": "def-public.AnalyticsServiceStart",
             "text": "AnalyticsServiceStart"
           },
-          " | undefined; theme: ",
+          ", \"reportEvent\"> | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-common.ThemeServiceStart",
+            "section": "def-public.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
           "; modify?: ",

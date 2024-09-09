@@ -7,10 +7,7 @@
     "id": "reporting",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "reporting"
-    ],
+    "configPath": ["xpack", "reporting"],
     "requiredPlugins": [
       "data",
       "discover",
@@ -24,17 +21,7 @@
       "share",
       "features"
     ],
-    "optionalPlugins": [
-      "security",
-      "spaces",
-      "usageCollection",
-      "screenshotting"
-    ],
-    "requiredBundles": [
-      "discover",
-      "embeddable",
-      "esUiShared",
-      "kibanaReact"
-    ]
+    "optionalPlugins": ["security", "spaces", "usageCollection", "screenshotting"],
+    "requiredBundles": ["embeddable", "esUiShared", "kibanaReact"]
   }
 }

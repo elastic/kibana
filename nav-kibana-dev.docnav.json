@@ -81,6 +81,10 @@
           "label": "Saved objects"
         },
         {
+          "id": "kibDevDocsEncryptedSavedObjectsIntro",
+          "label": "Encrypted Saved objects"
+        },
+        {
           "id": "kibDevDocsPersistableStateIntro"
         },
         {
@@ -115,7 +119,8 @@
       "label": "Tutorials",
       "items": [
         {
-          "id": "kibDevTutorialAddingCustomPerformanceMetrics"
+          "id": "kibDevTutorialAddingCustomPerformanceMetrics",
+          "label": "Adding Performance Metrics"
         },
         {
           "id": "kibDevTutorialSetupWindowsDevWSL"
@@ -133,6 +138,9 @@
         {
           "id": "kibDevTutorialVersioningInterfaces",
           "label": "Versioning interfaces"
+        },
+        {
+          "id": "kibDevTutorialGeneratingOASForHTTPAPIs"
         },
         {
           "id": "kibDevTutorialSubmitPullRequest"
@@ -166,6 +174,9 @@
         },
         {
           "id": "kibDevTutorialAdvancedSettings"
+        },
+        {
+          "id": "kibDevTutorialCcsSetup"
         }
       ]
     },
@@ -236,6 +247,66 @@
         {
           "id": "kibDevReactKibanaContext",
           "label": "Kibana React Contexts"
+        }
+      ]
+    },
+    {
+      "label": "Lens",
+      "pageId": "kibDevLensOverview",
+      "items": [
+        {
+          "label": "Lens Config API",
+          "id": "kibDevLensConfigAPI",
+          "items": [
+            {
+              "label": "Introduction",
+              "id": "kibDevLensConfigAPI"
+            },
+            {
+              "label": "Examples",
+              "id": "kibDevLensConfigAPIExamples"
+            },
+            {
+              "label": "Metric Chart",
+              "id": "kibDevLensConfigAPIMetric"
+            },
+            {
+              "label": "Gauge Chart",
+              "id": "kibDevLensConfigAPIGauge"
+            },
+            {
+              "label": "Pie Chart",
+              "id": "kibDevLensConfigAPIPie"
+            },
+            {
+              "label": "Mosaic Chart",
+              "id": "kibDevLensConfigAPIMosaic"
+            },
+            {
+              "label": "TreeMap Chart",
+              "id": "kibDevLensConfigAPITreeMap"
+            },
+            {
+              "label": "TagCloud Chart",
+              "id": "kibDevLensConfigAPITagCloud"
+            },
+            {
+              "label": "RegionMap Chart",
+              "id": "kibDevLensConfigAPIRegionMap"
+            },
+            {
+              "label": "Table Chart",
+              "id": "kibDevLensConfigAPITable"
+            },
+            {
+              "label": "Heatmap Chart",
+              "id": "kibDevLensConfigAPIHeatmap"
+            },
+            {
+              "label": "XY Chart",
+              "id": "kibDevLensConfigAPIXY"
+            }
+          ]
         }
       ]
     },

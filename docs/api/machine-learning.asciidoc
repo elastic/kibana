@@ -1,11 +1,4 @@
 [[machine-learning-api]]
 == {ml-cap} APIs
 
-//Manage {kib} saved objects, including dashboards, visualizations, and more.
-
-The following {ml} API is available: 
-
-* <<machine-learning-api-sync, Sync API>>
-//to retrieve a single {kib} saved object by ID
-
-include::machine-learning/sync.asciidoc[]
+For the latest details, refer to {api-kibana}/group/endpoint-ml[machine learning APIs].

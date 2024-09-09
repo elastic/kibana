@@ -9,11 +9,12 @@ required:
 properties:
   actions:
     $ref: 'actions.yaml'
+  alert_delay:
+    $ref: 'alert_delay.yaml'
   name:
     type: string
     description: The name of the rule.
-    examples:
-      - cluster_health_rule
+    example: cluster_health_rule
   notify_when:
     $ref: 'notify_when.yaml'
   params:

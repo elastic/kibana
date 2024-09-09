@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 const MLJobsAwaitingNodeWarningComponent = React.lazy(
   () => import('./new_job_awaiting_node_shared')

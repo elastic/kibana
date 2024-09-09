@@ -31,7 +31,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ReportingCore } from '..';
 
-import { ReportingInternalSetup, ReportingInternalStart } from '../core';
+import type { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
 
 export const createMockPluginSetup = (
@@ -50,12 +50,14 @@ export const createMockPluginSetup = (
   };
 };
 
+const coreSetupMock = coreMock.createSetup();
+const coreStartMock = coreMock.createStart();
 const logger = loggingSystemMock.createLogger();
 
 const createMockReportingStore = async (config: ReportingConfigType) => {
   const mockConfigSchema = createMockConfigSchema(config);
   const mockContext = coreMock.createPluginInitializerContext(mockConfigSchema);
-  const mockCore = new ReportingCore(coreMock.createSetup(), logger, mockContext);
+  const mockCore = new ReportingCore(coreSetupMock, logger, mockContext);
   return new ReportingStore(mockCore, logger);
 };
 
@@ -64,6 +66,7 @@ export const createMockPluginStart = async (
   config: ReportingConfigType
 ): Promise<ReportingInternalStart> => {
   return {
+    analytics: coreSetupMock.analytics,
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: { getScopedClient: jest.fn() },
     uiSettings: { asScopedToClient: () => ({ get: jest.fn() }) },
@@ -79,9 +82,10 @@ export const createMockPluginStart = async (
       ...licensingMock.createStart(),
       license$: new BehaviorSubject({ isAvailable: true, isActive: true, type: 'basic' }),
     },
+    securityService: coreStartMock.security, // we need authc from core.security start
     logger,
     screenshotting: createMockScreenshottingStart(),
-    ...startMock,
+    ...startMock, // allows to override with test instances
   };
 };
 

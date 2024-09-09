@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, FC, useContext } from 'react';
+import React, { createContext, FC, PropsWithChildren, useContext } from 'react';
 import { CustomIntegrationsFindService } from './find';
 import { CustomIntegrationsPlatformService } from './platform';
 
@@ -29,10 +30,9 @@ const CustomIntegrationsServicesContext = createContext<CustomIntegrationsServic
  * Within a plugin, you can  use the CustomIntegrations plugin and retrieve a fully-configured
  * context from the `start` contract.
  */
-export const CustomIntegrationsServicesProvider: FC<CustomIntegrationsServices> = ({
-  children,
-  ...services
-}) => (
+export const CustomIntegrationsServicesProvider: FC<
+  PropsWithChildren<CustomIntegrationsServices>
+> = ({ children, ...services }) => (
   <CustomIntegrationsServicesContext.Provider value={services}>
     {children}
   </CustomIntegrationsServicesContext.Provider>

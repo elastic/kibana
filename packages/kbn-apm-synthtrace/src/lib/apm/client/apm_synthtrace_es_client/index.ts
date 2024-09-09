@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Client, estypes } from '@elastic/elasticsearch';
@@ -65,7 +66,15 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields> {
     this.logger.info(`Updated component template: ${name}`);
   }
 
-  getDefaultPipeline(includeSerialization: boolean = true) {
-    return apmPipeline(this.logger, this.version, includeSerialization);
+  getDefaultPipeline(
+    {
+      includeSerialization,
+      versionOverride,
+    }: {
+      includeSerialization?: boolean;
+      versionOverride?: string;
+    } = { includeSerialization: true }
+  ) {
+    return apmPipeline(this.logger, versionOverride ?? this.version, includeSerialization);
   }
 }

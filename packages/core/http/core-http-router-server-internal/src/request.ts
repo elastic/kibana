@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { URL } from 'url';
@@ -11,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { inspect } from 'util';
 import type { Request, RouteOptions } from '@hapi/hapi';
 import { fromEvent, NEVER } from 'rxjs';
-import { shareReplay, first, filter } from 'rxjs/operators';
+import { shareReplay, first, filter } from 'rxjs';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
 import {
@@ -20,7 +21,7 @@ import {
   RouteMethod,
   validBodyOutput,
   IKibanaSocket,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
   KibanaRequestRoute,
   KibanaRequestEvents,
   KibanaRequestAuth,
@@ -29,6 +30,7 @@ import {
   KibanaRequestRouteOptions,
   RawRequest,
   FakeRawRequest,
+  HttpProtocol,
 } from '@kbn/core-http-server';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
@@ -66,7 +68,7 @@ export class CoreKibanaRequest<
     req: RawRequest,
     routeSchemas:
       | RouteValidator<P, Q, B>
-      | RouteValidatorFullConfig<P, Q, B>
+      | RouteValidatorFullConfigRequest<P, Q, B>
       | undefined = undefined,
     withoutSecretHeaders: boolean = true
   ) {
@@ -131,6 +133,10 @@ export class CoreKibanaRequest<
   public readonly isInternalApiRequest: boolean;
   /** {@inheritDoc KibanaRequest.rewrittenUrl} */
   public readonly rewrittenUrl?: URL;
+  /** {@inheritDoc KibanaRequest.httpVersion} */
+  public readonly httpVersion: string;
+  /** {@inheritDoc KibanaRequest.protocol} */
+  public readonly protocol: HttpProtocol;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
@@ -166,6 +172,9 @@ export class CoreKibanaRequest<
       value: request,
       enumerable: false,
     });
+
+    this.httpVersion = isRealReq ? request.raw.req.httpVersion : '1.0';
+    this.protocol = getProtocolFromHttpVersion(this.httpVersion);
 
     this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = isRealReq
@@ -257,7 +266,7 @@ export class CoreKibanaRequest<
             parse,
             maxBytes,
             accepts: allow,
-            output: output as typeof validBodyOutput[number], // We do not support all the HAPI-supported outputs and TS complains
+            output: output as (typeof validBodyOutput)[number], // We do not support all the HAPI-supported outputs and TS complains
           },
     } as unknown as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
 
@@ -364,4 +373,8 @@ function sanitizeRequest(req: Request): { query: unknown; params: unknown; body:
     params: req.params,
     body: req.payload,
   };
+}
+
+function getProtocolFromHttpVersion(httpVersion: string): HttpProtocol {
+  return httpVersion.split('.')[0] === '2' ? 'http2' : 'http1';
 }

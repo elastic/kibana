@@ -6,8 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
+  ByteSize,
+  DateTime,
   MlDatafeedState,
   MlJobState,
   MlJobStats,
@@ -16,10 +19,21 @@ import type {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
+  RecoveredActionGroupId,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
+import type { RuleExecutorOptions, IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import type { MlAnomalyDetectionHealthAlert } from '@kbn/alerts-as-data-utils';
+import type { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import {
+  ALERT_DATAFEED_RESULTS,
+  ALERT_DELAYED_DATA_RESULTS,
+  ALERT_JOB_ERRORS_RESULTS,
+  ALERT_MML_RESULTS,
+  ML_ALERT_TYPES,
+} from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import {
@@ -34,11 +48,21 @@ type ModelSizeStats = MlJobStats['model_size_stats'];
 export interface MmlTestResponse {
   job_id: string;
   memory_status: ModelSizeStats['memory_status'];
-  log_time: ModelSizeStats['log_time'];
+  log_time: string;
   model_bytes: string;
   model_bytes_memory_limit: string;
   peak_model_bytes: string;
   model_bytes_exceeded: string;
+}
+
+export interface MmlTestPayloadResponse {
+  job_id: string;
+  memory_status: ModelSizeStats['memory_status'];
+  log_time: ModelSizeStats['log_time'];
+  model_bytes: ByteSize;
+  model_bytes_memory_limit: ByteSize;
+  peak_model_bytes: ByteSize;
+  model_bytes_exceeded: ByteSize;
 }
 
 export interface NotStartedDatafeedResponse {
@@ -58,6 +82,15 @@ export interface DelayedDataResponse {
   end_timestamp: string;
 }
 
+export interface DelayedDataPayloadResponse {
+  job_id: string;
+  /** Annotation string */
+  annotation: string;
+  /** Number of missed documents */
+  missed_docs_count: number;
+  end_timestamp: DateTime;
+}
+
 export interface JobsErrorsResponse {
   job_id: string;
   errors: Array<Omit<JobMessage, 'timestamp'> & { timestamp: string }>;
@@ -73,6 +106,15 @@ export type AnomalyDetectionJobsHealthAlertContext = {
   results: AnomalyDetectionJobHealthResult[];
   message: string;
 } & AlertInstanceContext;
+
+export type AnomalyDetectionJobHealthAlertPayload = {
+  [ALERT_REASON]: string;
+} & (
+  | { [ALERT_MML_RESULTS]: MmlTestPayloadResponse[] }
+  | { [ALERT_DATAFEED_RESULTS]: NotStartedDatafeedResponse[] }
+  | { [ALERT_DELAYED_DATA_RESULTS]: DelayedDataPayloadResponse[] }
+  | { [ALERT_JOB_ERRORS_RESULTS]: JobsErrorsResponse[] }
+);
 
 export const ANOMALY_DETECTION_JOB_REALTIME_ISSUE = 'anomaly_detection_realtime_issue';
 
@@ -90,8 +132,69 @@ export type JobsHealthExecutorOptions = RuleExecutorOptions<
   Record<string, unknown>,
   Record<string, unknown>,
   AnomalyDetectionJobsHealthAlertContext,
-  AnomalyDetectionJobRealtimeIssue
+  AnomalyDetectionJobRealtimeIssue,
+  MlAnomalyDetectionHealthAlert
 >;
+
+export const ANOMALY_DETECTION_HEALTH_AAD_INDEX_NAME = 'ml.anomaly-detection-health';
+
+export const ANOMALY_DETECTION_HEALTH_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionHealthAlert> = {
+  context: ANOMALY_DETECTION_HEALTH_AAD_INDEX_NAME,
+  mappings: {
+    fieldMap: {
+      [ALERT_MML_RESULTS]: {
+        type: ES_FIELD_TYPES.OBJECT,
+        array: true,
+        required: false,
+        dynamic: false,
+        properties: {
+          job_id: { type: ES_FIELD_TYPES.KEYWORD },
+          memory_status: { type: ES_FIELD_TYPES.KEYWORD },
+          log_time: { type: ES_FIELD_TYPES.DATE },
+          model_bytes: { type: ES_FIELD_TYPES.LONG },
+          model_bytes_memory_limit: { type: ES_FIELD_TYPES.LONG },
+          peak_model_bytes: { type: ES_FIELD_TYPES.LONG },
+          model_bytes_exceeded: { type: ES_FIELD_TYPES.LONG },
+        },
+      },
+      [ALERT_DATAFEED_RESULTS]: {
+        type: ES_FIELD_TYPES.OBJECT,
+        array: true,
+        required: false,
+        dynamic: false,
+        properties: {
+          job_id: { type: ES_FIELD_TYPES.KEYWORD },
+          job_state: { type: ES_FIELD_TYPES.KEYWORD },
+          datafeed_id: { type: ES_FIELD_TYPES.KEYWORD },
+          datafeed_state: { type: ES_FIELD_TYPES.KEYWORD },
+        },
+      },
+      [ALERT_DELAYED_DATA_RESULTS]: {
+        type: ES_FIELD_TYPES.OBJECT,
+        array: true,
+        required: false,
+        dynamic: false,
+        properties: {
+          job_id: { type: ES_FIELD_TYPES.KEYWORD },
+          annotation: { type: ES_FIELD_TYPES.TEXT },
+          missed_docs_count: { type: ES_FIELD_TYPES.LONG },
+          end_timestamp: { type: ES_FIELD_TYPES.DATE },
+        },
+      },
+      [ALERT_JOB_ERRORS_RESULTS]: {
+        type: ES_FIELD_TYPES.OBJECT,
+        array: true,
+        required: false,
+        dynamic: false,
+        properties: {
+          job_id: { type: ES_FIELD_TYPES.KEYWORD },
+          errors: { type: ES_FIELD_TYPES.OBJECT },
+        },
+      },
+    },
+  },
+  shouldWrite: true,
+};
 
 export function registerJobsMonitoringRuleType({
   alerting,
@@ -104,7 +207,9 @@ export function registerJobsMonitoringRuleType({
     RuleTypeState,
     AlertInstanceState,
     AnomalyDetectionJobsHealthAlertContext,
-    AnomalyDetectionJobRealtimeIssue
+    AnomalyDetectionJobRealtimeIssue,
+    RecoveredActionGroupId,
+    MlAnomalyDetectionHealthAlert
   >({
     id: ML_ALERT_TYPES.AD_JOBS_HEALTH,
     name: i18n.translate('xpack.ml.jobsHealthAlertingRule.name', {
@@ -114,6 +219,12 @@ export function registerJobsMonitoringRuleType({
     defaultActionGroupId: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
     validate: {
       params: anomalyDetectionJobsHealthRuleParams,
+    },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: anomalyDetectionJobsHealthRuleParams,
+      },
     },
     actionVariables: {
       context: [
@@ -142,13 +253,20 @@ export function registerJobsMonitoringRuleType({
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
     doesSetRecoveryContext: true,
+    alerts: ANOMALY_DETECTION_HEALTH_AAD_CONFIG,
     async executor(options) {
       const {
         services,
         rule: { name },
       } = options;
 
-      const fakeRequest = {} as KibanaRequest;
+      const { alertsClient } = services;
+
+      if (!alertsClient) {
+        throw new AlertsClientError();
+      }
+
+      const fakeRequest = Object.create(null) as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
         services.savedObjectsClient,
         fakeRequest,
@@ -165,19 +283,28 @@ export function registerJobsMonitoringRuleType({
             .join(', ')}`
         );
 
-        unhealthyTests.forEach(({ name: alertInstanceName, context }) => {
-          const alertInstance = services.alertFactory.create(alertInstanceName);
-          alertInstance.scheduleActions(ANOMALY_DETECTION_JOB_REALTIME_ISSUE, context);
+        unhealthyTests.forEach(({ name: alertName, context, payload }) => {
+          alertsClient.report({
+            id: alertName,
+            actionGroup: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
+            context,
+            // @ts-expect-error type mismatch
+            payload,
+          });
         });
       }
 
       // Set context for recovered alerts
-      const { getRecoveredAlerts } = services.alertFactory.done();
-      for (const recoveredAlert of getRecoveredAlerts()) {
-        const recoveredAlertId = recoveredAlert.getId();
+      for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
+        const recoveredAlertId = recoveredAlert.alert.getId();
         const testResult = executionResult.find((v) => v.name === recoveredAlertId);
         if (testResult) {
-          recoveredAlert.setContext(testResult.context);
+          alertsClient.setAlertData({
+            id: recoveredAlertId,
+            context: testResult.context,
+            // @ts-expect-error type mismatch
+            payload: testResult.payload,
+          });
         }
       }
 

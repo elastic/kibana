@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { ConnectorSelector } from '.';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { mockActionTypes, mockConnectors } from '../../mock/connectors';
+import * as i18n from '../translations';
 
 const onConnectorSelectionChange = jest.fn();
 const setIsOpen = jest.fn();
@@ -63,14 +64,14 @@ describe('Connector selector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('renders empty selection if no selected connector is provided', () => {
+  it('renders add new connector button if no selected connector is provided', () => {
     const { getByTestId } = render(
       <TestProviders>
         <ConnectorSelector {...defaultProps} selectedConnectorId={undefined} />
       </TestProviders>
     );
-    expect(getByTestId('connector-selector')).toBeInTheDocument();
-    expect(getByTestId('connector-selector')).toHaveTextContent('');
+    fireEvent.click(getByTestId('connector-selector'));
+    expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
   });
   it('renders with provided selected connector', () => {
     const { getByTestId } = render(
@@ -90,10 +91,7 @@ describe('Connector selector', () => {
     expect(getByTestId('connector-selector')).toBeInTheDocument();
     fireEvent.click(getByTestId('connector-selector'));
     fireEvent.click(getByTestId(connectorTwo.id));
-    expect(onConnectorSelectionChange).toHaveBeenCalledWith({
-      ...connectorTwo,
-      connectorTypeTitle: 'OpenAI',
-    });
+    expect(onConnectorSelectionChange).toHaveBeenCalledWith(connectorTwo);
   });
   it('Calls onConnectorSelectionChange once new connector is saved', () => {
     const { getByTestId } = render(
@@ -106,11 +104,32 @@ describe('Connector selector', () => {
 
     fireEvent.click(getByTestId('modal-mock'));
 
-    expect(onConnectorSelectionChange).toHaveBeenCalledWith({
-      ...newConnector,
-      connectorTypeTitle: 'OpenAI',
-    });
+    expect(onConnectorSelectionChange).toHaveBeenCalledWith(newConnector);
     expect(mockRefetchConnectors).toHaveBeenCalled();
     expect(setIsOpen).toHaveBeenCalledWith(false);
+  });
+
+  it('renders the expected placeholder when selectedConnectorId is undefined', () => {
+    render(
+      <TestProviders>
+        <ConnectorSelector {...defaultProps} selectedConnectorId={undefined} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('connector-selector')).toHaveTextContent(
+      i18n.INLINE_CONNECTOR_PLACEHOLDER
+    );
+  });
+
+  it('does NOT render the placeholder when selectedConnectorId is defined', () => {
+    render(
+      <TestProviders>
+        <ConnectorSelector {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('connector-selector')).not.toHaveTextContent(
+      i18n.INLINE_CONNECTOR_PLACEHOLDER
+    );
   });
 });

@@ -76,6 +76,17 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       });
     },
 
+    async assertTotalCategoriesFoundDiscover(expectedMinimumCategoryCount: number) {
+      await retry.tryForTime(5000, async () => {
+        const actualText = await testSubjects.getVisibleText('dscViewModePatternAnalysisButton');
+        const actualCount = Number(actualText.match(/Patterns \((.+)\)/)![1]);
+        expect(actualCount + 1).to.greaterThan(
+          expectedMinimumCategoryCount,
+          `Expected patterns found count to be >= '${expectedMinimumCategoryCount}' (got '${actualCount}')`
+        );
+      });
+    },
+
     async assertCategoryTableRows(expectedMinimumCategoryCount: number) {
       await retry.tryForTime(5000, async () => {
         const tableListContainer = await testSubjects.find('aiopsLogPatternsTable');
@@ -105,11 +116,11 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
     },
 
     async clickFilterInButton(rowIndex: number) {
-      this.clickFilterButtons('in', rowIndex);
+      await this.clickFilterButtons('in', rowIndex);
     },
 
     async clickFilterOutButton(rowIndex: number) {
-      this.clickFilterButtons('out', rowIndex);
+      await this.clickFilterButtons('out', rowIndex);
     },
 
     async clickFilterButtons(buttonType: 'in' | 'out', rowIndex: number) {
@@ -120,7 +131,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
           ? 'aiopsLogPatternsActionFilterInButton'
           : 'aiopsLogPatternsActionFilterOutButton'
       );
-      button.click();
+      await button.click();
     },
 
     async getCategoryCountFromTable(rowIndex: number) {
@@ -128,22 +139,33 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       const rows = await tableListContainer.findAllByClassName('euiTableRow');
       const row = rows[rowIndex];
       const cells = await row.findAllByClassName('euiTableRowCell');
-      return Number(await cells[0].getVisibleText());
+      return Number(await cells[1].getVisibleText());
     },
 
     async assertDiscoverDocCountExists() {
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.existOrFail('unifiedHistogramQueryHits');
+        await testSubjects.existOrFail('discoverQueryHits');
       });
     },
 
     async assertDiscoverDocCount(expectedDocCount: number) {
       await retry.tryForTime(5000, async () => {
-        const docCount = await testSubjects.getVisibleText('unifiedHistogramQueryHits');
+        const docCount = await testSubjects.getVisibleText('discoverQueryHits');
         const formattedDocCount = docCount.replaceAll(',', '');
         expect(formattedDocCount).to.eql(
           expectedDocCount,
           `Expected discover document count to be '${expectedDocCount}' (got '${formattedDocCount}')`
+        );
+      });
+    },
+
+    async assertDiscoverDocCountGreaterThan(expectedDocCount: number) {
+      await retry.tryForTime(5000, async () => {
+        const docCount = await testSubjects.getVisibleText('discoverQueryHits');
+        const formattedDocCount = docCount.replaceAll(',', '');
+        expect(formattedDocCount).to.above(
+          expectedDocCount,
+          `Expected discover document count to be above '${expectedDocCount}' (got '${formattedDocCount}')`
         );
       });
     },
@@ -159,9 +181,19 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       });
     },
 
+    async clickPatternsTab() {
+      await testSubjects.click('dscViewModePatternAnalysisButton');
+    },
+
     async assertLogPatternAnalysisFlyoutExists() {
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail('mlJobSelectorFlyoutBody');
+      });
+    },
+
+    async assertLogPatternAnalysisTabContentsExists() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail('aiopsLogPatternsTable');
       });
     },
 
@@ -196,6 +228,24 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
         await testSubjects.click(option);
 
         await testSubjects.clickWhenNotDisabled('aiopsLogPatternAnalysisShowSamplingOptionsButton');
+        await testSubjects.missingOrFail('aiopsRandomSamplerOptionsFormRow', { timeout: 1000 });
+      });
+    },
+
+    async setRandomSamplingOptionDiscover(option: RandomSamplerOption) {
+      await retry.tryForTime(20000, async () => {
+        await testSubjects.existOrFail('aiopsEmbeddableMenuOptionsButton');
+        await testSubjects.clickWhenNotDisabled('aiopsEmbeddableMenuOptionsButton');
+
+        await testSubjects.clickWhenNotDisabled('aiopsRandomSamplerOptionsSelect');
+
+        await testSubjects.existOrFail('aiopsRandomSamplerOptionOff', { timeout: 1000 });
+        await testSubjects.existOrFail('aiopsRandomSamplerOptionOnManual', { timeout: 1000 });
+        await testSubjects.existOrFail('aiopsRandomSamplerOptionOnAutomatic', { timeout: 1000 });
+
+        await testSubjects.click(option);
+
+        await testSubjects.clickWhenNotDisabled('aiopsEmbeddableMenuOptionsButton');
         await testSubjects.missingOrFail('aiopsRandomSamplerOptionsFormRow', { timeout: 1000 });
       });
     },

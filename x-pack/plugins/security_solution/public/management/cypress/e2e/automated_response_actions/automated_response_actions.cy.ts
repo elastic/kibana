@@ -11,7 +11,7 @@ import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import { changeAlertsFilter } from '../../tasks/alerts';
@@ -23,14 +23,16 @@ import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 describe(
   'Automated Response Actions',
   {
-    tags: [
-      '@ess',
-      '@serverless',
-      // Not supported in serverless!
-      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-      // `internal/kibana/settings` is not accessible in serverless
-      '@brokenInServerless',
-    ],
+    tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'automatedProcessActionsEnabled',
+          ])}`,
+        ],
+      },
+    },
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
@@ -45,7 +47,7 @@ describe(
 
           return enableAllPolicyProtections(policy.id).then(() => {
             // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
+            return createEndpointHost(policy.policy_ids[0]).then((host) => {
               createdHost = host as CreateAndEnrollEndpointHostResponse;
             });
           });
@@ -67,16 +69,11 @@ describe(
       }
     });
 
-    const hostname = new URL(Cypress.env('FLEET_SERVER_URL')).port;
-    const fleetHostname = `dev-fleet-server.${hostname}`;
-
     beforeEach(() => {
       login();
-      disableExpandableFlyoutAdvancedSettings();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/169828
-    describe.skip('From alerts', () => {
+    describe('From alerts', () => {
       let ruleId: string;
       let ruleName: string;
 
@@ -102,18 +99,14 @@ describe(
         visitRuleAlerts(ruleName);
         closeAllToasts();
 
-        changeAlertsFilter('event.category: "file"');
+        changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
         cy.getByTestSubj('expand-event').first().click();
-        cy.getByTestSubj('responseActionsViewTab').click();
-        cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
+        cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
+        cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
 
-        cy.getByTestSubj(`response-results-${createdHost.hostname}-details-tray`)
-          .should('contain', 'isolate completed successfully')
-          .and('contain', createdHost.hostname);
-
-        cy.getByTestSubj(`response-results-${fleetHostname}-details-tray`)
-          .should('contain', 'The host does not have Elastic Defend integration installed')
-          .and('contain', 'dev-fleet-server');
+        cy.contains(/isolate is pending|isolate completed successfully/g);
+        cy.contains(/kill-process is pending|kill-process completed successfully/g);
+        cy.contains('The action was called with a non-existing event field name: entity_id');
       });
     });
   }

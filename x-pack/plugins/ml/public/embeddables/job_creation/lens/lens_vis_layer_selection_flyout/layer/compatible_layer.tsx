@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react'; // useCallback
+import type { FC } from 'react';
+import React, { useMemo } from 'react'; // useCallback
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Embeddable } from '@kbn/lens-plugin/public';
-
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-
+import type { LensApi } from '@kbn/lens-plugin/public';
 import {
   redirectToADJobWizards,
   QuickLensJobCreator,
@@ -18,12 +17,15 @@ import {
 import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_lens';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { useMlFromLensKibanaContext } from '../../../common/context';
-import { JobDetails, CreateADJobParams } from '../../../common/job_details';
+import type { CreateADJobParams } from '../../../common/job_details';
+import { JobDetails } from '../../../common/job_details';
+import { mlJobServiceFactory } from '../../../../../application/services/job_service';
+import { toastNotificationServiceProvider } from '../../../../../application/services/toast_notification_service';
 
 interface Props {
   layer: LayerResult;
   layerIndex: number;
-  embeddable: Embeddable;
+  embeddable: LensApi;
 }
 
 export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
@@ -32,20 +34,25 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
       data,
       share,
       uiSettings,
-      mlServices: { mlApiServices },
       lens,
       dashboardService,
+      notifications: { toasts },
+      mlServices: { mlApi },
     },
   } = useMlFromLensKibanaContext();
+  const toastNotificationService = toastNotificationServiceProvider(toasts);
+  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApi);
 
   const quickJobCreator = useMemo(
     () =>
       new QuickLensJobCreator(
         lens,
+        data.dataViews,
         uiSettings,
         data.query.timefilter.timefilter,
         dashboardService,
-        mlApiServices
+        mlApi,
+        mlJobService
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, uiSettings]
@@ -55,17 +62,11 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
     redirectToADJobWizards(embeddable, layerIndex, share, lens);
   }
 
-  async function createADJob({
-    jobId,
-    bucketSpan,
-    embeddable: lensEmbeddable,
-    startJob,
-    runInRealTime,
-  }: CreateADJobParams) {
+  async function createADJob({ jobId, bucketSpan, startJob, runInRealTime }: CreateADJobParams) {
     const result = await quickJobCreator.createAndSaveJob(
       jobId,
       bucketSpan,
-      lensEmbeddable as Embeddable,
+      embeddable,
       startJob,
       runInRealTime,
       layerIndex
@@ -78,8 +79,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
       <JobDetails
         createADJob={createADJob}
         createADJobInWizard={createADJobInWizard}
-        embeddable={embeddable}
-        timeRange={embeddable.getInput().timeRange}
+        timeRange={embeddable.timeRange$?.value}
         layer={layer}
         layerIndex={layerIndex}
       >

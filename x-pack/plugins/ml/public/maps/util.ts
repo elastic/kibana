@@ -5,27 +5,28 @@
  * 2.0.
  */
 
-import { FeatureCollection, Feature, Geometry } from 'geojson';
+import type { FeatureCollection, Feature, Geometry } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { htmlIdGenerator } from '@elastic/eui';
-import { FIELD_ORIGIN, STYLE_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
-import {
+import type { LayerDescriptor } from '@kbn/maps-plugin/common';
+import { FIELD_ORIGIN, STYLE_TYPE } from '@kbn/maps-plugin/common';
+import type {
   ESSearchSourceDescriptor,
   VectorStyleDescriptor,
 } from '@kbn/maps-plugin/common/descriptor_types';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
+import type { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common';
 import { type MLAnomalyDoc, ML_SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlApi } from '../application/services/ml_api_service';
 import { tabColor } from '../../common/util/group_color_utils';
 import { getIndexPattern } from '../application/explorer/reducers/explorer_reducer/get_index_pattern';
 import { AnomalySource } from './anomaly_source';
-import { SourceIndexGeoFields } from '../application/explorer/explorer_utils';
+import type { SourceIndexGeoFields } from '../application/explorer/explorer_utils';
 
 export const ML_ANOMALY_LAYERS = {
   TYPICAL: 'typical',
@@ -84,7 +85,7 @@ export const TYPICAL_STYLE = {
   },
 };
 
-export type MlAnomalyLayersType = typeof ML_ANOMALY_LAYERS[keyof typeof ML_ANOMALY_LAYERS];
+export type MlAnomalyLayersType = (typeof ML_ANOMALY_LAYERS)[keyof typeof ML_ANOMALY_LAYERS];
 
 // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
 function getCoordinates(latLonString: string): number[] {
@@ -97,7 +98,7 @@ function getCoordinates(latLonString: string): number[] {
 export function getInitialAnomaliesLayers(jobId: string) {
   const initialLayers = [];
   for (const layer in ML_ANOMALY_LAYERS) {
-    if (ML_ANOMALY_LAYERS.hasOwnProperty(layer)) {
+    if (Object.hasOwn(ML_ANOMALY_LAYERS, layer)) {
       initialLayers.push({
         id: htmlIdGenerator()(),
         type: LAYER_TYPE.GEOJSON_VECTOR,
@@ -118,7 +119,7 @@ export function getInitialAnomaliesLayers(jobId: string) {
 export function getInitialSourceIndexFieldLayers(sourceIndexWithGeoFields: SourceIndexGeoFields) {
   const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
   for (const index in sourceIndexWithGeoFields) {
-    if (sourceIndexWithGeoFields.hasOwnProperty(index)) {
+    if (Object.hasOwn(sourceIndexWithGeoFields, index)) {
       const { dataViewId, geoFields } = sourceIndexWithGeoFields[index];
 
       geoFields.forEach((geoField) => {
@@ -161,7 +162,7 @@ export function getInitialSourceIndexFieldLayers(sourceIndexWithGeoFields: Sourc
 }
 
 export async function getResultsForJobId(
-  mlResultsService: MlApiServices['results'],
+  mlResultsService: MlApi['results'],
   jobId: string,
   locationType: MlAnomalyLayersType,
   searchFilters: VectorSourceRequestMeta

@@ -13,6 +13,8 @@ import { ExternalService } from './types';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
@@ -134,8 +136,13 @@ const mockOldAPI = () =>
 
 describe('Jira service', () => {
   let service: ExternalService;
+  let connectorUsageCollector: ConnectorUsageCollector;
 
   beforeAll(() => {
+    connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
     service = createExternalService(
       {
         // The trailing slash at the end of the url is intended.
@@ -144,7 +151,8 @@ describe('Jira service', () => {
         secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
       },
       logger,
-      configurationUtilities
+      configurationUtilities,
+      connectorUsageCollector
     );
   });
 
@@ -161,7 +169,8 @@ describe('Jira service', () => {
             secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          connectorUsageCollector
         )
       ).toThrow();
     });
@@ -174,7 +183,8 @@ describe('Jira service', () => {
             secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          connectorUsageCollector
         )
       ).toThrow();
     });
@@ -187,7 +197,8 @@ describe('Jira service', () => {
             secrets: { apiToken: 'token' },
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          connectorUsageCollector
         )
       ).toThrow();
     });
@@ -200,9 +211,26 @@ describe('Jira service', () => {
             secrets: { email: 'elastic@elastic.com' },
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          connectorUsageCollector
         )
       ).toThrow();
+    });
+
+    test('uses the basic auth header for authentication', () => {
+      createExternalService(
+        {
+          config: { apiUrl: 'https://coolsite.net/', projectKey: 'CK' },
+          secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: getBasicAuthHeader({ username: 'elastic@elastic.com', password: 'token' }),
+      });
     });
   });
 
@@ -242,6 +270,7 @@ describe('Jira service', () => {
         url: 'https://coolsite.net/rest/api/2/issue/1',
         logger,
         configurationUtilities,
+        connectorUsageCollector,
       });
     });
 
@@ -284,6 +313,7 @@ describe('Jira service', () => {
         issueType: '10006',
         priority: 'High',
         parent: 'RJ-107',
+        otherFields: null,
       },
     };
 
@@ -357,6 +387,7 @@ describe('Jira service', () => {
           priority: 'High',
           issueType: null,
           parent: null,
+          otherFields: null,
         },
       });
 
@@ -383,6 +414,7 @@ describe('Jira service', () => {
             priority: { name: 'High' },
           },
         },
+        connectorUsageCollector,
       });
     });
 
@@ -421,6 +453,7 @@ describe('Jira service', () => {
           priority: 'High',
           issueType: null,
           parent: null,
+          otherFields: null,
         },
       });
 
@@ -440,6 +473,7 @@ describe('Jira service', () => {
             priority: { name: 'High' },
           },
         },
+        connectorUsageCollector,
       });
     });
 
@@ -473,6 +507,7 @@ describe('Jira service', () => {
             parent: { key: 'RJ-107' },
           },
         },
+        connectorUsageCollector,
       });
     });
 
@@ -505,6 +540,47 @@ describe('Jira service', () => {
         '[Action][Jira]: Unable to create incident. Error: Response is missing at least one of the expected fields: id. Reason: unknown: errorResponse was null'
       );
     });
+
+    describe('otherFields', () => {
+      test('it should call request with correct arguments', async () => {
+        const otherFields = { foo0: 'bar', foo1: true, foo2: 2 };
+
+        requestMock.mockImplementation(() =>
+          createAxiosResponse({
+            data: {
+              id: '1',
+              key: 'CK-1',
+              fields: { created: '2020-04-27T10:59:46.202Z' },
+            },
+          })
+        );
+
+        await service.createIncident({
+          incident: { ...incident.incident, otherFields },
+        });
+
+        expect(requestMock).toHaveBeenCalledWith({
+          axios,
+          url: 'https://coolsite.net/rest/api/2/issue',
+          logger,
+          method: 'post',
+          configurationUtilities,
+          data: {
+            fields: {
+              summary: 'title',
+              description: 'desc',
+              project: { key: 'CK' },
+              issuetype: { id: '10006' },
+              labels: [],
+              priority: { name: 'High' },
+              parent: { key: 'RJ-107' },
+              ...otherFields,
+            },
+          },
+          connectorUsageCollector,
+        });
+      });
+    });
   });
 
   describe('updateIncident', () => {
@@ -517,6 +593,7 @@ describe('Jira service', () => {
         issueType: '10006',
         priority: 'High',
         parent: 'RJ-107',
+        otherFields: null,
       },
     };
 
@@ -571,6 +648,7 @@ describe('Jira service', () => {
             parent: { key: 'RJ-107' },
           },
         },
+        connectorUsageCollector,
       });
     });
 
@@ -594,6 +672,48 @@ describe('Jira service', () => {
       await expect(service.updateIncident(incident)).rejects.toThrow(
         '[Action][Jira]: Unable to update incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
+    });
+
+    describe('otherFields', () => {
+      const otherFields = { foo0: 'bar', foo1: true, foo2: 2 };
+
+      test('it should call request with correct arguments', async () => {
+        requestMock.mockImplementation(() =>
+          createAxiosResponse({
+            data: {
+              id: '1',
+              key: 'CK-1',
+              fields: { updated: '2020-04-27T10:59:46.202Z' },
+            },
+          })
+        );
+
+        await service.updateIncident({
+          ...incident,
+          incident: { ...incident.incident, otherFields },
+        });
+
+        expect(requestMock).toHaveBeenCalledWith({
+          axios,
+          logger,
+          method: 'put',
+          configurationUtilities,
+          url: 'https://coolsite.net/rest/api/2/issue/1',
+          data: {
+            fields: {
+              summary: 'title',
+              description: 'desc',
+              labels: [],
+              priority: { name: 'High' },
+              issuetype: { id: '10006' },
+              project: { key: 'CK' },
+              parent: { key: 'RJ-107' },
+              ...otherFields,
+            },
+          },
+          connectorUsageCollector,
+        });
+      });
     });
   });
 
@@ -645,6 +765,7 @@ describe('Jira service', () => {
         configurationUtilities,
         url: 'https://coolsite.net/rest/api/2/issue/1/comment',
         data: { body: 'comment' },
+        connectorUsageCollector,
       });
     });
 
@@ -701,6 +822,7 @@ describe('Jira service', () => {
         method: 'get',
         configurationUtilities,
         url: 'https://coolsite.net/rest/capabilities',
+        connectorUsageCollector,
       });
     });
 
@@ -782,6 +904,7 @@ describe('Jira service', () => {
           method: 'get',
           configurationUtilities,
           url: 'https://coolsite.net/rest/api/2/issue/createmeta?projectKeys=CK&expand=projects.issuetypes.fields',
+          connectorUsageCollector,
         });
       });
 
@@ -856,6 +979,7 @@ describe('Jira service', () => {
           method: 'get',
           configurationUtilities,
           url: 'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes',
+          connectorUsageCollector,
         });
       });
 
@@ -931,6 +1055,7 @@ describe('Jira service', () => {
           method: 'get',
           configurationUtilities,
           url: 'https://coolsite.net/rest/api/2/issue/createmeta?projectKeys=CK&issuetypeIds=10006&expand=projects.issuetypes.fields',
+          connectorUsageCollector,
         });
       });
 
@@ -1139,6 +1264,7 @@ describe('Jira service', () => {
         method: 'get',
         configurationUtilities,
         url: `https://coolsite.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22Test%20title%22`,
+        connectorUsageCollector,
       });
     });
 
@@ -1165,6 +1291,7 @@ describe('Jira service', () => {
         method: 'get',
         configurationUtilities,
         url: `https://coolsite.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22%5C%5C%5Bth%5C%5C!s%5C%5C%5Eis%5C%5C(%5C%5C)a%5C%5C-te%5C%5C%2Bst%5C%5C-%5C%5C%7B%5C%5C~is%5C%5C*s%5C%5C%26ue%5C%5C%3For%5C%5C%7Cand%5C%5Cbye%5C%5C%3A%5C%5C%7D%5C%5C%5D%5C%5C%7D%5C%5C%5D%22`,
+        connectorUsageCollector,
       });
     });
 
@@ -1243,6 +1370,7 @@ describe('Jira service', () => {
         method: 'get',
         configurationUtilities,
         url: `https://coolsite.net/rest/api/2/issue/RJ-107`,
+        connectorUsageCollector,
       });
     });
 

@@ -37,7 +37,9 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
       await find.selectValue(`[aria-label*="Time unit"]`, timeUnit);
 
       // Apply
-      const applyButton = await quickMenuElement.findByClassName('euiQuickSelect__applyButton');
+      const applyButton = await quickMenuElement.findByTestSubject(
+        'superDatePickerQuickSelectApplyButton'
+      );
       const actualApplyButtonText = await applyButton.getVisibleText();
       expect(actualApplyButtonText).to.be('Apply');
 
@@ -47,6 +49,23 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
 
     async setTimeRange(fromTime: string, toTime: string) {
       await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    },
+
+    async assertUseFullDataButtonVisible(shouldBeVisible: boolean) {
+      const selector = 'mlDatePickerButtonUseFullData';
+      if (shouldBeVisible === true) {
+        await testSubjects.existOrFail(selector);
+      } else {
+        await testSubjects.missingOrFail(selector);
+      }
+    },
+    async assertDatePickerDataTierOptionsVisible(shouldBeVisible: boolean) {
+      const selector = 'mlDatePickerButtonDataTierOptions';
+      if (shouldBeVisible === true) {
+        await testSubjects.existOrFail(selector);
+      } else {
+        await testSubjects.missingOrFail(selector);
+      }
     },
 
     async clickUseFullDataButton(expectedTimeConfig: { start: string; end: string }) {

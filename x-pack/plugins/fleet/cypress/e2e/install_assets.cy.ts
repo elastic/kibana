@@ -46,6 +46,7 @@ describe('Install unverified package assets', () => {
         if (res.body?.item?.status) {
           res.body.item.status = 'not_installed';
         }
+        res.body.metadata = { has_policies: false };
       });
     });
   });

@@ -82,8 +82,14 @@ const appDependencies = {
     enableLegacyTemplates: true,
     enableIndexActions: true,
     enableIndexStats: true,
+    enableDataStreamStats: true,
     editableIndexSettings: 'all',
-    enableDataStreamsStorageColumn: true,
+    enableMappingsSourceFieldSection: true,
+    enableTogglingDataRetention: true,
+    enableSemanticText: true,
+  },
+  overlays: {
+    openConfirm: jest.fn(),
   },
 } as any;
 

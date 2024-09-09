@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { memo } from 'react';
@@ -14,6 +15,7 @@ import {
   AppMountParameters,
   ChromeBreadcrumb,
   ScopedHistory,
+  ThemeServiceStart,
 } from '@kbn/core/public';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { ManagementAppWrapper } from '../management_app_wrapper';
@@ -22,7 +24,7 @@ import { ManagementSection } from '../../utils';
 
 interface ManagementRouterProps {
   history: AppMountParameters['history'];
-  theme$: AppMountParameters['theme$'];
+  theme: ThemeServiceStart;
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], appHistory?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   sections: ManagementSection[];
@@ -35,7 +37,7 @@ export const ManagementRouter = memo(
     setBreadcrumbs,
     onAppMounted,
     sections,
-    theme$,
+    theme,
     analytics,
   }: ManagementRouterProps) => {
     return (
@@ -55,7 +57,7 @@ export const ManagementRouter = memo(
                           setBreadcrumbs={setBreadcrumbs}
                           onAppMounted={onAppMounted}
                           history={history}
-                          theme$={theme$}
+                          theme={theme}
                         />
                       )}
                     />

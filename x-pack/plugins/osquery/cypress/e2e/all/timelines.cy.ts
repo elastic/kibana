@@ -8,8 +8,9 @@
 import { initializeDataViews } from '../../tasks/login';
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
+import { disableNewFeaturesTours } from '../../tasks/navigation';
 
-describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
+describe('ALL - Timelines', { tags: ['@ess'] }, () => {
   before(() => {
     initializeDataViews();
   });
@@ -18,11 +19,17 @@ describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
   });
 
   it('should substitute osquery parameter on non-alert event take action', () => {
-    cy.visit('/app/security/timelines');
-    cy.getBySel('flyoutBottomBar').within(() => {
-      cy.getBySel('flyoutOverlay').click();
+    cy.visit('/app/security/timelines', {
+      onBeforeLoad: (win) => {
+        disableNewFeaturesTours(win);
+      },
     });
-    cy.getBySel('timelineQueryInput').type('NOT host.name: "dev-fleet-server.8220"{enter}');
+    cy.getBySel('timeline-bottom-bar').within(() => {
+      cy.getBySel('timeline-bottom-bar-title-button').click();
+    });
+    cy.getBySel('timelineQueryInput').type(
+      'NOT host.name: "dev-fleet-server*" and component.type: "osquery"{enter}'
+    );
     // Filter out alerts
     cy.getBySel('timeline-sourcerer-trigger').click();
     cy.getBySel('sourcerer-advanced-options-toggle').click();
@@ -34,16 +41,8 @@ describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
     });
     cy.getBySel('sourcerer-save').click();
 
-    cy.getBySel('event-actions-container')
-      .first()
-      .within(() => {
-        cy.getBySel('expand-event')
-          .first()
-          .within(() => {
-            cy.get(`[data-is-loading="true"]`).should('not.exist');
-          })
-          .click();
-      });
+    // Force true due to pointer-events: none on parent prevents user mouse interaction.
+    cy.getBySel('docTableExpandToggleColumn').first().click({ force: true });
     takeOsqueryActionWithParams();
   });
 });

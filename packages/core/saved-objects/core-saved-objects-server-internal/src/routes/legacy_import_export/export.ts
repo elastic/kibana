@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment from 'moment';
@@ -33,22 +34,24 @@ export const registerLegacyExportRoute = (
         tags: ['api'],
       },
     },
-    async (ctx, req, res) => {
+    async (context, request, response) => {
       logger.warn(
         "The export dashboard API '/api/kibana/dashboards/export' is deprecated. Use the saved objects export objects API '/api/saved_objects/_export' instead."
       );
 
-      const ids = Array.isArray(req.query.dashboard) ? req.query.dashboard : [req.query.dashboard];
-      const { client } = (await ctx.core).savedObjects;
+      const ids = Array.isArray(request.query.dashboard)
+        ? request.query.dashboard
+        : [request.query.dashboard];
+      const { client } = (await context.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementLegacyDashboardsExport({ request: req }).catch(() => {});
+      usageStatsClient.incrementLegacyDashboardsExport({ request }).catch(() => {});
 
       const exported = await exportDashboards(ids, client, kibanaVersion);
       const filename = `kibana-dashboards.${moment.utc().format('YYYY-MM-DD-HH-mm-ss')}.json`;
       const body = JSON.stringify(exported, null, '  ');
 
-      return res.ok({
+      return response.ok({
         body,
         headers: {
           'Content-Disposition': `attachment; filename="${filename}"`,

@@ -48,7 +48,7 @@ class AutoFollowPatternDeleteProviderUi extends PureComponent {
       ? i18n.translate(
           'xpack.crossClusterReplication.deleteAutoFollowPattern.confirmModal.deleteSingleTitle',
           {
-            defaultMessage: `Remove auto-follow pattern '{name}'?`,
+            defaultMessage: `Remove auto-follow pattern ''{name}''?`,
             values: { name: ids[0] },
           }
         )

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -31,18 +32,29 @@ const migrationsConfig = {
   maxReadBatchSizeBytes: ByteSizeValue.parse('500mb'),
 } as unknown as SavedObjectsMigrationConfigType;
 
+const indexTypesMap = {
+  '.kibana': ['typeA', 'typeB', 'typeC'],
+  '.kibana_task_manager': ['task'],
+  '.kibana_cases': ['typeD', 'typeE'],
+};
+
 const createInitialStateCommonParams = {
   kibanaVersion: '8.1.0',
   waitForMigrationCompletion: false,
   mustRelocateDocuments: true,
-  indexTypesMap: {
-    '.kibana': ['typeA', 'typeB', 'typeC'],
-    '.kibana_task_manager': ['task'],
-    '.kibana_cases': ['typeD', 'typeE'],
+  indexTypes: ['typeA', 'typeB', 'typeC'],
+  indexTypesMap,
+  hashToVersionMap: {
+    'typeA|someHash': '10.1.0',
+    'typeB|someHash': '10.1.0',
+    'typeC|someHash': '10.1.0',
   },
-  targetMappings: {
+  targetIndexMappings: {
     dynamic: 'strict',
     properties: { my_type: { properties: { title: { type: 'text' } } } },
+    _meta: {
+      indexTypesMap,
+    },
   } as IndexMapping,
   coreMigrationVersionPerType: {},
   migrationVersionPerType: {},
@@ -58,6 +70,37 @@ describe('createInitialState', () => {
 
   beforeEach(() => {
     typeRegistry = new SavedObjectTypeRegistry();
+    typeRegistry.registerType({
+      name: 'foo',
+      hidden: false,
+      mappings: {
+        properties: {},
+      },
+      namespaceType: 'single',
+      modelVersions: {
+        1: {
+          changes: [],
+        },
+      },
+      switchToModelVersionAt: '8.10.0',
+    });
+    typeRegistry.registerType({
+      name: 'bar',
+      hidden: false,
+      mappings: {
+        properties: {},
+      },
+      namespaceType: 'single',
+      modelVersions: {
+        1: {
+          changes: [],
+        },
+        2: {
+          changes: [{ type: 'mappings_addition', addedMappings: {} }],
+        },
+      },
+      switchToModelVersionAt: '8.10.0',
+    });
     docLinks = docLinksServiceMock.createSetupContract();
     logger = mockLogger.get();
     createInitialStateParams = {
@@ -204,7 +247,17 @@ describe('createInitialState', () => {
             ],
           },
         },
+        "hashToVersionMap": Object {
+          "typeA|someHash": "10.1.0",
+          "typeB|someHash": "10.1.0",
+          "typeC|someHash": "10.1.0",
+        },
         "indexPrefix": ".kibana_task_manager",
+        "indexTypes": Array [
+          "typeA",
+          "typeB",
+          "typeC",
+        ],
         "indexTypesMap": Object {
           ".kibana": Array [
             "typeA",
@@ -220,7 +273,14 @@ describe('createInitialState', () => {
           ],
         },
         "kibanaVersion": "8.1.0",
-        "knownTypes": Array [],
+        "knownTypes": Array [
+          "foo",
+          "bar",
+        ],
+        "latestMappingsVersions": Object {
+          "bar": "10.2.0",
+          "foo": "10.0.0",
+        },
         "legacyIndex": ".kibana_task_manager",
         "logs": Array [],
         "maxBatchSize": 1000,
@@ -299,19 +359,6 @@ describe('createInitialState', () => {
   });
 
   it('returns state with the correct `knownTypes`', () => {
-    typeRegistry.registerType({
-      name: 'foo',
-      namespaceType: 'single',
-      hidden: false,
-      mappings: { properties: {} },
-    });
-    typeRegistry.registerType({
-      name: 'bar',
-      namespaceType: 'multiple',
-      hidden: true,
-      mappings: { properties: {} },
-    });
-
     const initialState = createInitialState({
       ...createInitialStateParams,
       typeRegistry,
@@ -325,7 +372,7 @@ describe('createInitialState', () => {
   it('returns state with the correct `excludeFromUpgradeFilterHooks`', () => {
     const fooExcludeOnUpgradeHook = jest.fn();
     typeRegistry.registerType({
-      name: 'foo',
+      name: 'baz',
       namespaceType: 'single',
       hidden: false,
       mappings: { properties: {} },
@@ -333,7 +380,7 @@ describe('createInitialState', () => {
     });
 
     const initialState = createInitialState(createInitialStateParams);
-    expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ foo: fooExcludeOnUpgradeHook });
+    expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ baz: fooExcludeOnUpgradeHook });
   });
 
   it('returns state with a preMigration script', () => {

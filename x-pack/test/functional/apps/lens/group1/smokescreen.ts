@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await PageObjects.lens.removeDimension('lnsDatatable_rows');
-      await PageObjects.lens.switchToVisualization('bar_stacked');
+      await PageObjects.lens.switchToVisualization('area');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
@@ -125,6 +125,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
 
       await PageObjects.lens.switchToVisualization('line');
+
+      expect(await PageObjects.lens.getLayerType(0)).to.eql('Line');
+      // expect first layer to be line, second layer to be bar chart
+      expect(await PageObjects.lens.getLayerType(1)).to.eql('Bar');
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
@@ -133,14 +137,64 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'median',
-        field: 'bytes',
+        operation: 'average',
+        field: 'machine.ram',
       });
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
       await PageObjects.lens.removeLayer();
       await PageObjects.lens.removeLayer();
       await testSubjects.existOrFail('workspace-drag-drop-prompt');
+    });
+
+    it('should transition selected layer in a multi layer bar using layer chart switch', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.createLayer('data', undefined, 'bar');
+      expect(await PageObjects.lens.getLayerType(1)).to.eql('Bar');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'geo.src',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'machine.ram',
+      });
+
+      // only changes one layer for compatible chart
+      await PageObjects.lens.switchToVisualization('line', undefined, 1);
+      expect(await PageObjects.lens.getLayerType(0)).to.eql('Bar');
+      expect(await PageObjects.lens.getLayerType(1)).to.eql('Line');
+
+      // generates new one layer chart based on selected layer
+      await PageObjects.lens.switchToVisualization('pie', undefined, 1);
+      expect(await PageObjects.lens.getLayerType(0)).to.eql('Pie');
+      const sliceByText = await PageObjects.lens.getDimensionTriggerText(
+        'lnsPie_sliceByDimensionPanel'
+      );
+      const sizeByText = await PageObjects.lens.getDimensionTriggerText(
+        'lnsPie_sizeByDimensionPanel'
+      );
+      expect(sliceByText).to.be('Top 5 values of geo.src');
+      expect(sizeByText).to.be('Average of machine.ram');
     });
 
     it('should edit settings of xy line chart', async () => {
@@ -249,18 +303,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
-      await PageObjects.lens.openVisualOptions();
+      await PageObjects.lens.openTextOptions();
       await testSubjects.click('lns_valueLabels_inside');
 
       // check for value labels
-      let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-      expect(data?.bars?.[0].labels).not.to.eql(0);
-
-      // switch to stacked bar chart
-      await PageObjects.lens.switchToVisualization('bar_stacked');
-
-      // check for value labels
-      data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.bars?.[0].labels).not.to.eql(0);
     });
 
@@ -281,7 +328,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
     });
 
-    it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {
+    it('should transition from a multi-layer stacked bar to treemap chart using suggestions', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -313,10 +360,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.save('twolayerchart');
-      await testSubjects.click('lnsSuggestion-donut > lnsSuggestion');
+      await testSubjects.click('lnsSuggestion-treemap > lnsSuggestion');
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(1);
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel')).to.eql(
         'Top 5 values of geo.dest'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
@@ -324,13 +371,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should transition from line chart to donut chart and to bar chart', async () => {
+    it('should transition from line chart to pie chart and to bar chart', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
-      expect(await PageObjects.lens.hasChartSwitchWarning('donut')).to.eql(true);
-      await PageObjects.lens.switchToVisualization('donut');
+      expect(await PageObjects.lens.hasChartSwitchWarning('pie')).to.eql(true);
+      await PageObjects.lens.switchToVisualization('pie');
 
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
@@ -343,7 +390,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('bar')).to.eql(false);
       await PageObjects.lens.switchToVisualization('bar');
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
         'Top 3 values of ip'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
@@ -351,12 +398,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should transition from bar chart to line chart using layer chart switch', async () => {
+    it('should transition from bar chart to line chart', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchLayerSeriesType('line');
+      await PageObjects.lens.switchToVisualization('line');
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
         '@timestamp'
@@ -739,10 +786,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.removeFilter('extension.raw');
     });
 
-    it('should show visual options button group for a donut chart', async () => {
+    it('should show visual options button group for a pie chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.switchToVisualization('donut');
+      await PageObjects.lens.switchToVisualization('pie');
 
       const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
       expect(hasVisualOptionsButton).to.be(true);
@@ -751,15 +798,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await PageObjects.lens.hasEmptySizeRatioButtonGroup()).to.be(true);
       });
-    });
-
-    it('should not show visual options button group for a pie chart', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.switchToVisualization('pie');
-
-      const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
-      expect(hasVisualOptionsButton).to.be(false);
     });
 
     it('should allow edit meta-data for Lens chart on listing page', async () => {

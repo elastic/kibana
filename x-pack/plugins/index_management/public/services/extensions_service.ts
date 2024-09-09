@@ -6,45 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FunctionComponent } from 'react';
-import { ApplicationStart } from '@kbn/core-application-browser';
-import { EuiBadgeProps } from '@elastic/eui';
-import type { IndexDetailsTab } from '../../common/constants';
-import { Index } from '..';
-
-export interface IndexContent {
-  renderContent: (args: {
-    index: Index;
-    getUrlForApp: ApplicationStart['getUrlForApp'];
-  }) => ReturnType<FunctionComponent>;
-}
-
-export interface IndexBadge {
-  matchIndex: (index: Index) => boolean;
-  label: string;
-  // a parseable search bar filter expression, for example "isFollowerIndex:true"
-  filterExpression?: string;
-  color: EuiBadgeProps['color'];
-}
-
-export interface ExtensionsSetup {
-  // adds an option to the "manage index" menu
-  addAction(action: any): void;
-  // adds a banner to the indices list
-  addBanner(banner: any): void;
-  // adds a filter to the indices list
-  addFilter(filter: any): void;
-  // adds a badge to the index name
-  addBadge(badge: IndexBadge): void;
-  // adds a toggle to the indices list
-  addToggle(toggle: any): void;
-  // adds a tab to the index details page
-  addIndexDetailsTab(tab: IndexDetailsTab): void;
-  // sets content to render instead of the code block on the overview tab of the index page
-  setIndexOverviewContent(content: IndexContent): void;
-  // sets content to render below the docs link on the mappings tab of the index page
-  setIndexMappingsContent(content: IndexContent): void;
-}
+import {
+  IndexBadge,
+  IndexToggle,
+  IndicesListColumn,
+  EmptyListContent,
+  IndexContent,
+  ExtensionsSetup,
+} from '@kbn/index-management';
+import { IndexDetailsTab } from '../../common/constants';
 
 export class ExtensionsService {
   private _actions: any[] = [];
@@ -52,7 +22,7 @@ export class ExtensionsService {
   private _filters: any[] = [];
   private _badges: IndexBadge[] = [
     {
-      matchIndex: (index: { isFrozen: boolean }) => {
+      matchIndex: (index) => {
         return index.isFrozen;
       },
       label: i18n.translate('xpack.idxMgmt.frozenBadgeLabel', {
@@ -62,7 +32,19 @@ export class ExtensionsService {
       color: 'primary',
     },
   ];
-  private _toggles: any[] = [];
+  private _toggles: IndexToggle[] = [
+    {
+      matchIndex: (index) => {
+        return index.hidden;
+      },
+      label: i18n.translate('xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel', {
+        defaultMessage: 'Include hidden indices',
+      }),
+      name: 'includeHiddenIndices',
+    },
+  ];
+  private _columns: IndicesListColumn[] = [];
+  private _emptyListContent: EmptyListContent | null = null;
   private _indexDetailsTabs: IndexDetailsTab[] = [];
   private _indexOverviewContent: IndexContent | null = null;
   private _indexMappingsContent: IndexContent | null = null;
@@ -75,6 +57,8 @@ export class ExtensionsService {
       addBanner: this.addBanner.bind(this),
       addFilter: this.addFilter.bind(this),
       addToggle: this.addToggle.bind(this),
+      addColumn: this.addColumn.bind(this),
+      setEmptyListContent: this.setEmptyListContent.bind(this),
       addIndexDetailsTab: this.addIndexDetailsTab.bind(this),
       setIndexOverviewContent: this.setIndexOverviewContent.bind(this),
       setIndexMappingsContent: this.setIndexMappingsContent.bind(this),
@@ -101,6 +85,18 @@ export class ExtensionsService {
 
   private addToggle(toggle: any) {
     this._toggles.push(toggle);
+  }
+
+  private addColumn(column: IndicesListColumn) {
+    this._columns.push(column);
+  }
+
+  private setEmptyListContent(content: EmptyListContent) {
+    if (this._emptyListContent) {
+      throw new Error(`The empty list content has already been set.`);
+    } else {
+      this._emptyListContent = content;
+    }
   }
 
   private addIndexDetailsTab(tab: IndexDetailsTab) {
@@ -141,6 +137,14 @@ export class ExtensionsService {
 
   public get toggles() {
     return this._toggles;
+  }
+
+  public get columns() {
+    return this._columns;
+  }
+
+  public get emptyListContent() {
+    return this._emptyListContent;
   }
 
   public get indexDetailsTabs() {

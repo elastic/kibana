@@ -23,7 +23,7 @@ import { deleteExceptionList } from './delete_exception_list';
  * @param log The tooling logger
  */
 export const createExceptionList = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   exceptionList: CreateExceptionListSchema
 ): Promise<ExceptionListSchema> => {

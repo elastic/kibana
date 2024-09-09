@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -27,7 +28,8 @@ import {
 import { Pager } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
+import { INDEX_PATTERN_TYPE, MatchedItem, Tag } from '@kbn/data-views-plugin/public';
+import { RollupDeprecationTooltip } from '@kbn/rollup';
 
 export interface IndicesListProps {
   indices: MatchedItem[];
@@ -205,10 +207,18 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
           <EuiTableRowCell>{this.highlightIndexName(index.name, query)}</EuiTableRowCell>
           <EuiTableRowCell>
             {index.tags.map((tag: Tag) => {
-              return (
+              const badge = (
                 <EuiBadge key={`index_${key}_tag_${tag.key}`} color={tag.color}>
                   {tag.name}
                 </EuiBadge>
+              );
+
+              return tag.key === INDEX_PATTERN_TYPE.ROLLUP ? (
+                <>
+                  &nbsp;<RollupDeprecationTooltip>{badge}</RollupDeprecationTooltip>
+                </>
+              ) : (
+                badge
               );
             })}
           </EuiTableRowCell>
@@ -218,7 +228,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
 
     return (
       <div {...rest}>
-        <EuiTable responsive={false} tableLayout="auto">
+        <EuiTable responsiveBreakpoint={false} tableLayout="auto">
           <EuiTableBody>{rows}</EuiTableBody>
         </EuiTable>
         <EuiSpacer size="m" />

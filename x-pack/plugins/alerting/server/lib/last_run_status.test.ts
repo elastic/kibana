@@ -24,6 +24,7 @@ const getMetrics = ({
     numberOfNewAlerts: 12,
     numberOfRecoveredAlerts: 11,
     numberOfTriggeredActions: 5,
+    numberOfDelayedAlerts: 3,
     totalSearchDurationMs: 2,
     hasReachedAlertLimit,
     hasReachedQueuedActionsLimit,
@@ -38,7 +39,7 @@ const getRuleResultService = ({
   const ruleResultService = new RuleResultService();
   const { addLastRunError, addLastRunWarning, setLastRunOutcomeMessage } =
     ruleResultService.getLastRunSetters();
-  errors.forEach((error) => addLastRunError(error));
+  errors.forEach((error) => addLastRunError(error.message));
   warnings.forEach((warning) => addLastRunWarning(warning));
   setLastRunOutcomeMessage(outcomeMessage);
   return ruleResultService;
@@ -249,7 +250,7 @@ describe('lastRunFromState', () => {
         metrics: getMetrics({ hasReachedAlertLimit: true }),
       },
       getRuleResultService({
-        errors: ['MOCK_ERROR'],
+        errors: [{ message: 'MOCK_ERROR', userError: false }],
         outcomeMessage: 'Rule execution reported an error',
       })
     );

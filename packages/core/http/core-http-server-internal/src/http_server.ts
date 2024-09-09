@@ -1,32 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  createServer,
-  getListenerOptions,
-  getServerOptions,
-  setTlsConfig,
-  getRequestId,
-} from '@kbn/server-http-tools';
-
+import { createServer, getServerOptions, setTlsConfig, getRequestId } from '@kbn/server-http-tools';
 import type { Duration } from 'moment';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { take, pairwise } from 'rxjs/operators';
+import { Observable, Subscription, firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
 // @ts-expect-error no type definition
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { CoreVersionedRouter, isSafeMethod, Router } from '@kbn/core-http-router-server-internal';
 import type {
   IRouter,
   RouteConfigOptions,
@@ -48,6 +41,8 @@ import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
 import { identity } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import { Env } from '@kbn/config';
+import { CoreContext } from '@kbn/core-base-server-internal';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -166,6 +161,11 @@ export interface HttpServerSetupOptions {
   executionContext?: InternalExecutionContextSetup;
 }
 
+/** @internal */
+export interface GetRoutersOptions {
+  pluginId?: string;
+}
+
 export class HttpServer {
   private server?: Server;
   private config?: HttpConfig;
@@ -178,15 +178,20 @@ export class HttpServer {
   private stopped = false;
 
   private readonly log: Logger;
+  private readonly logger: LoggerFactory;
   private readonly authState: AuthStateStorage;
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
+  private readonly env: Env;
 
   constructor(
-    private readonly logger: LoggerFactory,
+    private readonly coreContext: CoreContext,
     private readonly name: string,
     private readonly shutdownTimeout$: Observable<Duration>
   ) {
+    const { logger, env } = this.coreContext;
+    this.logger = logger;
+    this.env = env;
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
     this.authResponseHeaders = new AuthHeadersStorage();
@@ -224,9 +229,8 @@ export class HttpServer {
     this.config = config;
 
     const serverOptions = getServerOptions(config);
-    const listenerOptions = getListenerOptions(config);
 
-    this.server = createServer(serverOptions, listenerOptions);
+    this.server = createServer(serverOptions);
     await this.server.register([HapiStaticFiles]);
     if (config.compression.brotli.enabled) {
       await this.server.register({
@@ -269,7 +273,11 @@ export class HttpServer {
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
 
-    const staticAssets = new StaticAssets(basePathService, config.cdn);
+    const staticAssets = new StaticAssets({
+      basePath: basePathService,
+      cdnConfig: config.cdn,
+      shaDigest: this.env.packageInfo.buildShaShort,
+    });
 
     return {
       registerRouter: this.registerRouter.bind(this),
@@ -281,8 +289,14 @@ export class HttpServer {
       registerAuth: this.registerAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
-      createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
-        this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
+      createCookieSessionStorageFactory: <T extends object>(
+        cookieOptions: SessionStorageCookieOptions<T>
+      ) =>
+        this.createCookieSessionStorageFactory(
+          cookieOptions,
+          config.csp.disableEmbedding,
+          config.basePath
+        ),
       basePath: basePathService,
       csp: config.csp,
       auth: {
@@ -543,8 +557,9 @@ export class HttpServer {
     this.server.ext('onPreResponse', adoptToHapiOnPreResponseFormat(fn, this.log));
   }
 
-  private async createCookieSessionStorageFactory<T>(
+  private async createCookieSessionStorageFactory<T extends object>(
     cookieOptions: SessionStorageCookieOptions<T>,
+    disableEmbedding: boolean,
     basePath?: string
   ) {
     if (this.server === undefined) {
@@ -561,6 +576,7 @@ export class HttpServer {
       this.logger.get('http', 'server', this.name, 'cookie-session-storage'),
       this.server,
       cookieOptions,
+      disableEmbedding,
       basePath
     );
     return sessionStorageFactory;
@@ -610,6 +626,38 @@ export class HttpServer {
       const authResponseHeaders = this.authResponseHeaders.get(request);
       return t.next({ headers: authResponseHeaders });
     });
+  }
+
+  public getRouters({ pluginId }: GetRoutersOptions = {}): {
+    routers: Router[];
+    versionedRouters: CoreVersionedRouter[];
+  } {
+    const routers: {
+      routers: Router[];
+      versionedRouters: CoreVersionedRouter[];
+    } = {
+      routers: [],
+      versionedRouters: [],
+    };
+    const pluginIdFilter = pluginId ? Symbol(pluginId).toString() : undefined;
+
+    for (const router of this.registeredRouters) {
+      const matchesIdFilter =
+        !pluginIdFilter || (router as Router).pluginId?.toString() === pluginIdFilter;
+
+      if (
+        matchesIdFilter &&
+        (router as Router).getRoutes({ excludeVersionedRoutes: true }).length > 0
+      ) {
+        routers.routers.push(router as Router);
+      }
+
+      const versionedRouter = router.versioned as CoreVersionedRouter;
+      if (matchesIdFilter && versionedRouter.getRoutes().length > 0) {
+        routers.versionedRouters.push(versionedRouter);
+      }
+    }
+    return routers;
   }
 
   private registerStaticDir(path: string, dirPath: string) {

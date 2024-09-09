@@ -8,6 +8,7 @@
     "server": false,
     "browser": true,
     "requiredBundles": ["kibanaUtils"],
-    "requiredPlugins": ["data", "fieldFormats"],
+    "requiredPlugins": ["data", "fieldFormats", "share"],
+    "optionalPlugins": ["fieldsMetadata"]
   }
 }

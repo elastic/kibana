@@ -1,23 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Version } from '@kbn/object-versioning';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { MSearchIn, MSearchQuery } from '../../../common';
-import { validate } from '../../utils';
+import { validate, disableTransformsCache } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
 import { MSearchService } from '../../core/msearch';
-import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 import { mSearch } from './msearch';
 
+disableTransformsCache();
 const storageContextGetTransforms = jest.fn();
 const spy = () => storageContextGetTransforms;
 
@@ -151,8 +151,6 @@ describe('RPC -> mSearch()', () => {
       const ctx: any = {
         contentRegistry,
         requestHandlerContext,
-        getTransformsFactory: (contentTypeId: string, version: Version) =>
-          getServiceObjectTransformFactory(contentTypeId, version, { cacheEnabled: false }),
         mSearchService,
       };
 
@@ -248,9 +246,9 @@ describe('RPC -> mSearch()', () => {
     });
 
     describe('validation', () => {
-      test('should validate that content type definition exist', () => {
+      test('should validate that content type definition exist', async () => {
         const { ctx } = setup();
-        expect(() =>
+        await expect(() =>
           fn(ctx, {
             contentTypes: [{ contentTypeId: 'unknown', version: 1 }],
             query: { text: 'Hello' },
@@ -258,9 +256,9 @@ describe('RPC -> mSearch()', () => {
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
       });
 
-      test('should throw if the request version is higher than the registered version', () => {
+      test('should throw if the request version is higher than the registered version', async () => {
         const { ctx } = setup();
-        expect(() =>
+        await expect(() =>
           fn(ctx, {
             contentTypes: [{ contentTypeId: 'foo', version: 7 }],
             query: { text: 'Hello' },

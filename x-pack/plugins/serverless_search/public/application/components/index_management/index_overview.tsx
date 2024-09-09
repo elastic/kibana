@@ -6,7 +6,6 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedPlural } from '@kbn/i18n-react';
 import {
@@ -15,7 +14,6 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiIcon,
   EuiI18nNumber,
   EuiText,
   EuiBadge,
@@ -185,76 +183,6 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
             </EuiFlexGroup>
           </IndexOverviewPanel>
         </EuiFlexItem>
-        {indexData.count > 0 && (
-          <EuiFlexItem>
-            <IndexOverviewPanel
-              title={
-                <FormattedMessage
-                  id="xpack.serverlessSearch.indexManagement.indexDetails.overview.storagePanel.title"
-                  defaultMessage="Storage"
-                />
-              }
-              footer={
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon size="s" type="documents" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText color="subdued" size="xs">
-                      <FormattedMessage
-                        id="xpack.serverlessSearch.indexManagement.indexDetails.overview.storagePanel.documentCount"
-                        defaultMessage="{documentCount} Documents / {deletedCount} Deleted"
-                        values={{
-                          documentCount: <EuiI18nNumber value={indexData.count} />,
-                          deletedCount: (
-                            <EuiI18nNumber value={indexData.stats?.total?.docs?.deleted ?? 0} />
-                          ),
-                        }}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-            >
-              <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <IndexOverviewPanelStat>
-                    {numeral(
-                      indexData.stats?.primaries?.store?.total_data_set_size_in_bytes ?? 0
-                    ).format('0 b')}
-                  </IndexOverviewPanelStat>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText color="subdued">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.serverlessSearch.indexManagement.indexDetails.overview.storagePanel.primaryLabel"
-                        defaultMessage="Primary"
-                      />
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <IndexOverviewPanelStat>
-                    {numeral(
-                      indexData.stats?.total?.store?.total_data_set_size_in_bytes ?? 0
-                    ).format('0 b')}
-                  </IndexOverviewPanelStat>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.serverlessSearch.indexManagement.indexDetails.overview.storagePanel.totalLabel"
-                        defaultMessage="Total"
-                      />
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </IndexOverviewPanel>
-          </EuiFlexItem>
-        )}
       </EuiFlexGrid>
       {indexData.count === 0 && (
         <>

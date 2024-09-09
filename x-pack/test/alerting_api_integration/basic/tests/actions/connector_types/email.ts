@@ -35,5 +35,24 @@ export default function emailTest({ getService }: FtrProviderContext) {
             'Action type .email is disabled because your basic license does not support it. Please upgrade your license.',
         });
     });
+
+    it('should not execute a pre-configured email connector because of license', async () => {
+      await supertest
+        .post('/api/actions/connector/my-test-email/_execute')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: 'someone@example.com',
+            subject: 'testing',
+            message: 'still testing',
+          },
+        })
+        .expect(403, {
+          error: 'Forbidden',
+          message:
+            'Action type .email is disabled because your basic license does not support it. Please upgrade your license.',
+          statusCode: 403,
+        });
+    });
   });
 }

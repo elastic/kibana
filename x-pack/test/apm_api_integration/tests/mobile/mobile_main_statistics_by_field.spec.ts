@@ -30,11 +30,11 @@ function calculateThroughput({ start, end }: { start: number; end: number }) {
 async function generateData({
   start,
   end,
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
 }: {
   start: number;
   end: number;
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
 }) {
   const galaxy10 = apm
     .mobileApp({
@@ -101,7 +101,7 @@ async function generateData({
       carrierMCC: '440',
     });
 
-  return await synthtraceEsClient.index([
+  return await apmSynthtraceEsClient.index([
     timerange(start, end)
       .interval('5m')
       .rate(1)
@@ -129,7 +129,7 @@ async function generateData({
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const registry = getService('registry');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -178,16 +178,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when('Mobile main statistics', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177395
+  registry.when.skip('Mobile main statistics', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateData({
-        synthtraceEsClient,
+        apmSynthtraceEsClient,
         start,
         end,
       });
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('when data is loaded', () => {
       const huaweiLatency = calculateLatency(HUAWEI_DURATION);

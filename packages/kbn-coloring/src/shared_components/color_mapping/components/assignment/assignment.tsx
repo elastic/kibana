@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -31,8 +32,6 @@ export function Assignment({
   disableDelete,
   index,
   total,
-  canPickColor,
-  editable,
   palette,
   colorMode,
   getPaletteFn,
@@ -48,8 +47,6 @@ export function Assignment({
   disableDelete: boolean;
   palette: ColorMapping.CategoricalPalette;
   getPaletteFn: ReturnType<typeof getPalette>;
-  canPickColor: boolean;
-  editable: boolean;
   isDarkMode: boolean;
   specialTokens: Map<string, string>;
   assignmentValuesCounter: Map<string | string[], number>;
@@ -57,18 +54,12 @@ export function Assignment({
   const dispatch = useDispatch();
 
   return (
-    <EuiFlexGroup
-      direction="row"
-      gutterSize="s"
-      alignItems="flexStart"
-      justifyContent="spaceBetween"
-    >
+    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="spaceBetween">
       <EuiFlexItem grow={0}>
         <ColorSwatch
           forType="assignment"
           isDarkMode={isDarkMode}
           swatchShape="square"
-          canPickColor={canPickColor}
           colorMode={colorMode}
           assignmentColor={assignment.color}
           getPaletteFn={getPaletteFn}
@@ -85,7 +76,6 @@ export function Assignment({
       assignment.rule.type === 'matchExactly' ||
       assignment.rule.type === 'matchExactlyCI' ? (
         <Match
-          editable={editable}
           index={index}
           rule={assignment.rule}
           options={data.type === 'categories' ? data.categories : []}
@@ -103,7 +93,6 @@ export function Assignment({
       ) : assignment.rule.type === 'range' ? (
         <Range
           rule={assignment.rule}
-          editable={editable}
           updateValue={(min, max, minInclusive, maxInclusive) => {
             const rule: ColorMapping.RuleRange = {
               type: 'range',
@@ -133,7 +122,7 @@ export function Assignment({
           css={
             !disableDelete
               ? css`
-                  color: ${euiThemeVars.euiTextSubduedColor};
+                  color: ${euiThemeVars.euiTextColor};
                   transition: ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
                   transition-property: color;
                   &:hover,

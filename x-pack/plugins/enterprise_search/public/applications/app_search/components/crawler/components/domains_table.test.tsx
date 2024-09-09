@@ -85,6 +85,7 @@ describe('DomainsTable', () => {
   });
 
   const getTableBody = () =>
+    // @ts-expect-error upgrade typescript v5.1.6
     wrapper.find(EuiBasicTable).dive().find('RenderWithEuiTheme').renderProp('children')();
 
   it('renders', () => {
@@ -143,6 +144,8 @@ describe('DomainsTable', () => {
       });
 
       describe('when the user can manage/delete engines', () => {
+        const simulatedClickEvent = { persist: () => {} }; // Required for EUI action clicks. Can be removed if switching away from Enzyme to RTL
+
         const getManageAction = () => getActionItems().at(0).dive().find(EuiButtonIcon);
         const getDeleteAction = () => getActionItems().at(1).dive().find(EuiButtonIcon);
 
@@ -159,7 +162,7 @@ describe('DomainsTable', () => {
           it('sends the user to the engine overview on click', () => {
             const { navigateToUrl } = mockKibanaValues;
 
-            getManageAction().simulate('click');
+            getManageAction().simulate('click', simulatedClickEvent);
 
             expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/crawler/domains/1234');
           });
@@ -169,7 +172,7 @@ describe('DomainsTable', () => {
           it('clicking the action and confirming deletes the domain', () => {
             jest.spyOn(global, 'confirm').mockReturnValueOnce(true);
 
-            getDeleteAction().simulate('click');
+            getDeleteAction().simulate('click', simulatedClickEvent);
 
             expect(actions.deleteDomain).toHaveBeenCalledWith(
               expect.objectContaining({ id: '1234' })
@@ -179,7 +182,7 @@ describe('DomainsTable', () => {
           it('clicking the action and not confirming does not delete the engine', () => {
             jest.spyOn(global, 'confirm').mockReturnValueOnce(false);
 
-            getDeleteAction().simulate('click');
+            getDeleteAction().simulate('click', simulatedClickEvent);
 
             expect(actions.deleteDomain).not.toHaveBeenCalled();
           });

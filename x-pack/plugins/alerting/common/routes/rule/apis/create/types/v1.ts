@@ -30,6 +30,7 @@ export interface CreateRuleRequestBody<Params extends RuleParamsV1 = never> {
   schedule: CreateBodySchema['schedule'];
   actions: CreateBodySchema['actions'];
   notify_when?: CreateBodySchema['notify_when'];
+  alert_delay?: CreateBodySchema['alert_delay'];
 }
 
 export interface CreateRuleResponse<Params extends RuleParamsV1 = never> {

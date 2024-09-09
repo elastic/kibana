@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+ {{> disclaimer}}
+
+import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { replaceParams } from '@kbn/openapi-common/shared';
+import { FtrProviderContext } from 'x-pack/test/api_integration/ftr_provider_context';
+
+{{#each operations}}
+import { 
+  {{operationId}}RequestQueryInput,
+  {{operationId}}RequestParamsInput,
+  {{operationId}}RequestBodyInput
+} from '{{replace sourcePath 'schema.yaml' 'gen'}}';
+{{/each}}
+
+export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+
+  return {
+  {{#each operations}}
+    {{#if description}}
+    /**
+      * {{{description}}}
+      */
+    {{/if}}
+    {{camelCase operationId}}({{#if (or requestQuery requestParams requestBody)}}props: {{operationId}}Props{{/if}}) {
+      return supertest
+        .{{method}}({{#if requestParams}}replaceParams('{{path}}', props.params){{else}}'{{path}}'{{/if}})
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '{{version}}')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        {{~#if requestBody}}.send(props.body as object){{/if}}
+        {{~#if requestQuery}}.query(props.query){{/if}}
+      },
+  {{/each}} 
+  }
+}
+
+{{#each operations}}
+{{#if (or requestQuery requestParams requestBody)}}
+export interface {{operationId}}Props {
+  {{~#if requestQuery}}query: {{operationId}}RequestQueryInput;{{/if}}
+  {{~#if requestParams}}params: {{operationId}}RequestParamsInput;{{/if}}
+  {{~#if requestBody}}body: {{operationId}}RequestBodyInput;{{/if}}
+}
+{{/if}}
+{{/each}}

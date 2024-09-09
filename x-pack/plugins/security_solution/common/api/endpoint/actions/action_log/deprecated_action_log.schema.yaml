@@ -1,0 +1,45 @@
+openapi: 3.0.0
+info:
+  title: Action Log Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action_log/{agent_id}:
+    get:
+      summary: Get an action request log
+      operationId: EndpointGetActionLog
+      description: Get an action request log for the specified agent ID.
+      deprecated: true
+      x-codegen-enabled: false
+      x-labels: [ess, serverless]
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentId'
+        - name: query
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/ActionLogRequestQuery'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+
+components:
+  schemas:
+    ActionLogRequestQuery:
+      type: object
+      properties:
+        page:
+          $ref: '../../model/schema/common.schema.yaml#/components/schemas/Page'
+        page_size:
+          $ref: '../../model/schema/common.schema.yaml#/components/schemas/PageSize'
+        start_date:
+          $ref: '../../model/schema/common.schema.yaml#/components/schemas/StartDate'
+        end_date:
+          $ref: '../../model/schema/common.schema.yaml#/components/schemas/EndDate'

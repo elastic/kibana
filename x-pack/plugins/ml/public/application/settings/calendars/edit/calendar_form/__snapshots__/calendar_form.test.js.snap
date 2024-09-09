@@ -7,31 +7,24 @@ exports[`CalendarForm Renders calendar form 1`] = `
   data-test-subj="mlCalendarFormNew"
 >
   <MlPageHeader>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Create new calendar"
       id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
-      values={Object {}}
     />
   </MlPageHeader>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
     error={
       Array [
         "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
       ]
     }
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={true}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Calendar ID"
         id="xpack.ml.calendarsEdit.calendarForm.calendarIdLabel"
-        values={Object {}}
       />
     }
-    labelType="label"
   >
     <EuiFieldText
       data-test-subj="mlCalendarIdInput"
@@ -42,18 +35,12 @@ exports[`CalendarForm Renders calendar form 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Description"
         id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
-        values={Object {}}
       />
     }
-    labelType="label"
   >
     <EuiFieldText
       data-test-subj="mlCalendarDescriptionInput"
@@ -71,10 +58,9 @@ exports[`CalendarForm Renders calendar form 1`] = `
     data-test-subj="mlCalendarApplyToAllJobsSwitch"
     disabled={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Apply calendar to all jobs"
         id="xpack.ml.calendarsEdit.calendarForm.allJobsLabel"
-        values={Object {}}
       />
     }
     name="switch"
@@ -83,18 +69,12 @@ exports[`CalendarForm Renders calendar form 1`] = `
     size="m"
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Jobs"
         id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
-        values={Object {}}
       />
     }
-    labelType="label"
   >
     <EuiComboBox
       async={false}
@@ -104,6 +84,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
       isClearable={true}
       isDisabled={false}
       onChange={[MockFunction]}
+      optionMatcher={[Function]}
       options={Array []}
       selectedOptions={Array []}
       singleSelection={false}
@@ -111,18 +92,12 @@ exports[`CalendarForm Renders calendar form 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Groups"
         id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
-        values={Object {}}
       />
     }
-    labelType="label"
   >
     <EuiComboBox
       async={false}
@@ -133,6 +108,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
       isDisabled={false}
       onChange={[MockFunction]}
       onCreateOption={[MockFunction]}
+      optionMatcher={[Function]}
       options={Array []}
       selectedOptions={Array []}
       singleSelection={false}
@@ -143,19 +119,13 @@ exports[`CalendarForm Renders calendar form 1`] = `
     size="xl"
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
     fullWidth={true}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Events"
         id="xpack.ml.calendarsEdit.calendarForm.eventsLabel"
-        values={Object {}}
       />
     }
-    labelType="label"
   >
     <EventsTable
       canCreateCalendar={true}
@@ -180,10 +150,9 @@ exports[`CalendarForm Renders calendar form 1`] = `
       <EuiButton
         isDisabled={false}
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Cancel"
           id="xpack.ml.calendarsEdit.calendarForm.cancelButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
@@ -196,10 +165,9 @@ exports[`CalendarForm Renders calendar form 1`] = `
         isDisabled={true}
         onClick={[MockFunction]}
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Save"
           id="xpack.ml.calendarsEdit.calendarForm.saveButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>

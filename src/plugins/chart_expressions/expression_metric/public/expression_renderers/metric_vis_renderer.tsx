@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { css } from '@emotion/react';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
@@ -85,7 +86,7 @@ export const getMetricVisRenderer = (
 
       const { MetricVis } = await import('../components/metric_vis');
       render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
+        <KibanaRenderContextProvider {...core}>
           <div
             data-test-subj="mtrVis"
             css={css`
@@ -101,12 +102,11 @@ export const getMetricVisRenderer = (
               config={visConfig}
               renderComplete={renderComplete}
               fireEvent={handlers.event}
-              renderMode={handlers.getRenderMode()}
               filterable={filterable}
               overrides={overrides}
             />
           </div>
-        </KibanaThemeProvider>,
+        </KibanaRenderContextProvider>,
         domNode
       );
     },

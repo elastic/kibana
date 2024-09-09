@@ -11,13 +11,13 @@ import { useDispatch } from 'react-redux';
 import { EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { SessionPreview } from './session_preview';
 import { useSessionPreview } from '../hooks/use_session_preview';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { setActiveTabTimeline } from '../../../../timelines/store/actions';
@@ -29,10 +29,11 @@ const timelineId = 'timeline-1';
  * Checks if the SessionView component is available, if so render it or else render an error message
  */
 export const SessionPreviewContainer: FC = () => {
-  const { dataAsNestedObject, getFieldsData, isPreview } = useRightPanelContext();
+  const { dataAsNestedObject, getFieldsData, isPreview, dataFormattedForFieldBrowser } =
+    useDocumentDetailsContext();
 
   // decide whether to show the session view or not
-  const sessionViewConfig = useSessionPreview({ getFieldsData });
+  const sessionViewConfig = useSessionPreview({ getFieldsData, dataFormattedForFieldBrowser });
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
@@ -43,9 +44,9 @@ export const SessionPreviewContainer: FC = () => {
     ecsRowData: dataAsNestedObject,
   });
 
-  const goToSessionViewTab = useCallback(() => {
+  const goToSessionViewTab = useCallback(async () => {
     // open timeline
-    investigateInTimelineAlertClick();
+    await investigateInTimelineAlertClick();
 
     // open session view tab
     startTransaction({ name: ALERTS_ACTIONS.OPEN_SESSION_VIEW });
@@ -129,7 +130,7 @@ export const SessionPreviewContainer: FC = () => {
               tooltip: (
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTooltip"
-                  defaultMessage="Show session viewer"
+                  defaultMessage="Investigate in timeline"
                 />
               ),
             },

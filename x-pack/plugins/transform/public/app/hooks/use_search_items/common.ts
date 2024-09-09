@@ -8,26 +8,10 @@
 import { buildEsQuery } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-
-import { matchAllQuery } from '../../common';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { matchAllQuery } from '@kbn/ml-query-utils';
 
 import { isDataView } from '../../../../common/types/data_view';
-
-export type SavedSearchQuery = object;
-
-let dataViewCache: DataView[] = [];
-
-export let refreshDataViews: () => Promise<unknown>;
-
-export async function loadDataViews(dataViewsContract: DataViewsContract) {
-  dataViewCache = await dataViewsContract.find('*', 10000);
-  return dataViewCache;
-}
-
-export function getDataViewIdByTitle(dataViewTitle: string): string | undefined {
-  return dataViewCache.find(({ title }) => title === dataViewTitle)?.id;
-}
 
 type CombinedQuery = Record<'bool', any> | object;
 

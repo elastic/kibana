@@ -8,16 +8,20 @@
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import type { MlApiServices } from '../../../services/ml_api_service';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { MlApi } from '../../../services/ml_api_service';
+import type { MlJobService } from '../../../services/job_service';
 import { QuickGeoJobCreator } from './quick_create_job';
 
 import { getDefaultQuery, getRisonValue } from '../utils/new_job_utils';
 
 interface Dependencies {
+  dataViews: DataViewsContract;
   kibanaConfig: IUiSettingsClient;
   timeFilter: TimefilterContract;
   dashboardService: DashboardStart;
-  mlApiServices: MlApiServices;
+  mlApi: MlApi;
+  mlJobService: MlJobService;
 }
 export async function resolver(
   deps: Dependencies,
@@ -30,7 +34,7 @@ export async function resolver(
   toRisonString: string,
   layerRisonString?: string
 ) {
-  const { kibanaConfig, timeFilter, dashboardService, mlApiServices } = deps;
+  const { dataViews, kibanaConfig, timeFilter, dashboardService, mlApi, mlJobService } = deps;
   const defaultLayer = { query: getDefaultQuery(), filters: [] };
 
   const dashboard = getRisonValue<typeof defaultLayer>(dashboardRisonString, defaultLayer);
@@ -49,10 +53,12 @@ export async function resolver(
   const to = getRisonValue<string>(toRisonString, '');
 
   const jobCreator = new QuickGeoJobCreator(
+    dataViews,
     kibanaConfig,
     timeFilter,
     dashboardService,
-    mlApiServices
+    mlApi,
+    mlJobService
   );
 
   await jobCreator.createAndStashGeoJob(

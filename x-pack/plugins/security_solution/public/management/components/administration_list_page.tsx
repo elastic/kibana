@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { PropsWithChildren } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import {
@@ -28,7 +28,9 @@ interface AdministrationListPageProps {
   headerBackComponent?: React.ReactNode;
 }
 
-export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
+export const AdministrationListPage = memo<
+  PropsWithChildren<AdministrationListPageProps & CommonProps>
+>(
   ({
     title,
     subtitle,

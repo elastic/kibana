@@ -10,16 +10,14 @@ import moment from 'moment';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { MaintenanceWindowsList } from './maintenance_windows_list';
-import { MaintenanceWindowFindResponse } from '../types';
-import { MaintenanceWindowStatus } from '../../../../common';
+import { MaintenanceWindowStatus, MaintenanceWindow } from '../../../../common';
 
 describe('MaintenanceWindowsList', () => {
   const date = moment('2023-04-05').toISOString();
   const endDate = moment('2023-04-05').add(1, 'month').toISOString();
-  const items: MaintenanceWindowFindResponse[] = [
+  const items: MaintenanceWindow[] = [
     {
       id: '1',
-      total: 100,
       title: 'Host maintenance',
       enabled: true,
       duration: 1,
@@ -36,7 +34,6 @@ describe('MaintenanceWindowsList', () => {
     },
     {
       id: '2',
-      total: 0,
       title: 'Server outage west coast',
       enabled: true,
       duration: 1,
@@ -53,7 +50,6 @@ describe('MaintenanceWindowsList', () => {
     },
     {
       id: '4',
-      total: 1000,
       title: 'Monthly maintenance window',
       enabled: true,
       duration: 1,
@@ -70,7 +66,6 @@ describe('MaintenanceWindowsList', () => {
     },
     {
       id: '5',
-      total: 200,
       title: 'Monthly maintenance window',
       enabled: true,
       duration: 1,
@@ -97,7 +92,7 @@ describe('MaintenanceWindowsList', () => {
     const result = appMockRenderer.render(
       <MaintenanceWindowsList
         refreshData={() => {}}
-        loading={false}
+        isLoading={false}
         items={items}
         readOnly={false}
       />
@@ -130,7 +125,7 @@ describe('MaintenanceWindowsList', () => {
     const result = appMockRenderer.render(
       <MaintenanceWindowsList
         refreshData={() => {}}
-        loading={false}
+        isLoading={false}
         items={items}
         readOnly={true}
       />
@@ -147,7 +142,7 @@ describe('MaintenanceWindowsList', () => {
     const result = appMockRenderer.render(
       <MaintenanceWindowsList
         refreshData={refreshData}
-        loading={false}
+        isLoading={false}
         items={items}
         readOnly={false}
       />

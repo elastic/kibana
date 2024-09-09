@@ -12,11 +12,10 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 
 import type { SetAlertAssigneesFunc } from './use_set_alert_assignees';
+import type { AssigneesApplyPanelProps } from '../../assignees/assignees_apply_panel';
 import { AssigneesApplyPanel } from '../../assignees/assignees_apply_panel';
-import type { AssigneesIdsSelection } from '../../assignees/types';
-import { removeNoAssigneesSelection } from '../../assignees/utils';
 
-interface BulkAlertAssigneesPanelComponentProps {
+export interface BulkAlertAssigneesPanelComponentProps {
   alertItems: TimelineItem[];
   setIsLoading: (isLoading: boolean) => void;
   refresh?: () => void;
@@ -32,6 +31,7 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
   closePopoverMenu,
   onSubmit,
 }) => {
+  const alertIds = useMemo(() => alertItems.map((item) => item._id), [alertItems]);
   const assignedUserIds = useMemo(
     () =>
       intersection(
@@ -43,38 +43,25 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
     [alertItems]
   );
 
-  const onAssigneesApply = useCallback(
-    async (assigneesIds: AssigneesIdsSelection[]) => {
-      const updatedIds = removeNoAssigneesSelection(assigneesIds);
-      const assigneesToAddArray = updatedIds.filter((uid) => uid && !assignedUserIds.includes(uid));
-      const assigneesToRemoveArray = assignedUserIds.filter(
-        (uid) => uid && !updatedIds.includes(uid)
-      );
-      if (assigneesToAddArray.length === 0 && assigneesToRemoveArray.length === 0) {
-        closePopoverMenu();
-        return;
-      }
+  const onSuccess = useCallback(() => {
+    if (refresh) refresh();
+    if (clearSelection) clearSelection();
+  }, [clearSelection, refresh]);
 
-      const ids = alertItems.map((item) => item._id);
-      const assignees = {
-        add: assigneesToAddArray,
-        remove: assigneesToRemoveArray,
-      };
-      const onSuccess = () => {
-        if (refresh) refresh();
-        if (clearSelection) clearSelection();
-      };
-      if (onSubmit != null) {
+  const handleApplyAssignees = useCallback<AssigneesApplyPanelProps['onApply']>(
+    async (assignees) => {
+      closePopoverMenu();
+      if (onSubmit) {
         closePopoverMenu();
-        await onSubmit(assignees, ids, onSuccess, setIsLoading);
+        await onSubmit(assignees, alertIds, onSuccess, setIsLoading);
       }
     },
-    [alertItems, assignedUserIds, clearSelection, closePopoverMenu, onSubmit, refresh, setIsLoading]
+    [alertIds, closePopoverMenu, onSubmit, onSuccess, setIsLoading]
   );
 
   return (
     <div data-test-subj="alert-assignees-selectable-menu">
-      <AssigneesApplyPanel assignedUserIds={assignedUserIds} onAssigneesApply={onAssigneesApply} />
+      <AssigneesApplyPanel assignedUserIds={assignedUserIds} onApply={handleApplyAssignees} />
     </div>
   );
 };

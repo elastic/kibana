@@ -24,11 +24,13 @@ export const untrackRuleAlerts = async (
 ) => {
   return withSpan({ name: 'untrackRuleAlerts', type: 'rules' }, async () => {
     if (!context.eventLogger || !attributes.scheduledTaskId) return;
+
     try {
       const taskInstance = taskInstanceToAlertTaskInstance(
         await context.taskManager.get(attributes.scheduledTaskId),
         attributes as unknown as SanitizedRule
       );
+
       const { state } = taskInstance;
 
       const untrackedAlerts = mapValues<Record<string, RawAlert>, Alert>(
@@ -87,7 +89,7 @@ export const untrackRuleAlerts = async (
     } catch (error) {
       // this should not block the rest of the disable process
       context.logger.warn(
-        `rulesClient.disable('${id}') - Could not write untrack events - ${error.message}`
+        `rulesClient.disableRule('${id}') - Could not write untrack events - ${error.message}`
       );
     }
   });

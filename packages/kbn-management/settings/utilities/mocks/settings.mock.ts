@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { KnownTypeToMetadata, SettingType } from '@kbn/management-settings-types';
@@ -15,6 +16,7 @@ type Settings = {
 /**
  * A utility function returning a representative set of UiSettings.
  * @param requiresPageReload The value of the `requirePageReload` param for all settings.
+ * @param readonly The value of the `readonly` param for all settings.
  */
 export const getSettingsMock = (
   requiresPageReload: boolean = false,
@@ -121,6 +123,41 @@ export const getSettingsMock = (
       userValue: null,
       value: undefined,
       category: ['notifications', 'search'],
+      ...defaults,
+    },
+  };
+};
+
+/**
+ * A utility function returning a set of global settings.
+ * @param requiresPageReload The value of the `requirePageReload` param for all settings.
+ * @param readonly The value of the `readonly` param for all settings.
+ */
+export const getGlobalSettingsMock = (
+  requiresPageReload: boolean = false,
+  readonly: boolean = false
+) => {
+  const defaults = {
+    requiresPageReload,
+    readonly,
+  };
+  return {
+    globalString: {
+      description: 'Description for a Global String test setting',
+      name: 'global:string:test:setting',
+      type: 'string',
+      userValue: null,
+      value: 'hello world',
+      category: ['custom branding'],
+      ...defaults,
+    },
+    globalBoolean: {
+      description: 'Description for a Global Boolean test setting',
+      name: 'global:boolean:test:setting',
+      type: 'boolean',
+      userValue: null,
+      value: true,
+      category: ['custom branding'],
       ...defaults,
     },
   };

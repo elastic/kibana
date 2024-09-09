@@ -1,15 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { estypes } from '@elastic/elasticsearch';
-import type { NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
+import type {
+  AnalyticsServiceStart,
+  NotificationsStart,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -26,6 +31,7 @@ import {
 } from './components/search_response_warnings/i18n_utils';
 
 interface Services {
+  analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   inspector: InspectorStart;
   notifications: NotificationsStart;
@@ -94,7 +100,7 @@ export function handleWarnings({
           {viewDetailsLabel}
         </EuiButtonEmpty>
       </>,
-      { theme: services.theme, i18n: services.i18n }
+      services
     ),
   });
 }

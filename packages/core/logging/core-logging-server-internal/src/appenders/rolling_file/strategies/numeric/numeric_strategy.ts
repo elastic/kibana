@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { basename, dirname } from 'path';
@@ -14,7 +15,6 @@ import { RollingFileContext } from '../../rolling_file_context';
 import {
   shouldSkipRollout,
   getOrderedRolledFiles,
-  deleteFiles,
   rollCurrentFile,
   rollPreviousFilesInOrder,
 } from './rolling_tasks';
@@ -46,7 +46,8 @@ export const numericRollingStrategyConfigSchema = schema.object({
  *       strategy:
  *         type: numeric
  *         pattern: "-%i"
- *         max: 2
+ *       retention:
+ *         maxFiles: 2
  * ```
  * - During the first rollover kibana.log is renamed to kibana-1.log. A new kibana.log file is created and starts
  *   being written to.
@@ -69,6 +70,15 @@ export class NumericRollingStrategy implements RollingStrategy {
     this.logFilePath = this.context.filePath;
     this.logFileBaseName = basename(this.context.filePath);
     this.logFileFolder = dirname(this.context.filePath);
+    context.setOrderedRolledFileFn(this.getOrderedRolledFiles.bind(this));
+  }
+
+  private async getOrderedRolledFiles() {
+    return await getOrderedRolledFiles({
+      logFileFolder: this.logFileFolder,
+      logFileBaseName: this.logFileBaseName,
+      pattern: this.config.pattern,
+    });
   }
 
   async rollout() {
@@ -82,20 +92,15 @@ export class NumericRollingStrategy implements RollingStrategy {
     }
 
     // get the files matching the pattern in the folder, and sort them by `%i` value
-    const orderedFiles = await getOrderedRolledFiles({
-      logFileFolder,
-      logFileBaseName,
-      pattern,
-    });
-    const filesToRoll = orderedFiles.slice(0, this.config.max - 1);
-    const filesToDelete = orderedFiles.slice(filesToRoll.length, orderedFiles.length);
+    const orderedFilesToRoll = await this.getOrderedRolledFiles();
 
-    if (filesToDelete.length > 0) {
-      await deleteFiles({ logFileFolder, filesToDelete });
-    }
-
-    if (filesToRoll.length > 0) {
-      await rollPreviousFilesInOrder({ filesToRoll, logFileFolder, logFileBaseName, pattern });
+    if (orderedFilesToRoll.length > 0) {
+      await rollPreviousFilesInOrder({
+        filesToRoll: orderedFilesToRoll,
+        logFileFolder,
+        logFileBaseName,
+        pattern,
+      });
     }
 
     await rollCurrentFile({ pattern, logFileBaseName, logFileFolder });

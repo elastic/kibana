@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pick } from 'lodash';
@@ -55,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickQuickSave();
     });
 
-    describe('Options List dashboard validation', async () => {
+    describe('Options List dashboard validation', () => {
       before(async () => {
         await dashboardControls.optionsListOpenPopover(controlId);
         await dashboardControls.optionsListPopoverSelectOption('meow');
@@ -111,12 +112,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
           invalidSelections: ['meow', 'bark'],
         });
-        // only valid selections are applied as filters.
-        expect(await pieChart.getPieSliceCount()).to.be(1);
+        // there are no valid selections, so no pie chart is rendered.
+        expect(await pieChart.expectEmptyPieChart());
       });
     });
 
-    describe('Options List dashboard no validation', async () => {
+    describe('Options List dashboard no validation', () => {
       before(async () => {
         await dashboardControls.optionsListOpenPopover(controlId);
         await dashboardControls.optionsListPopoverSelectOption('meow');
@@ -153,6 +154,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
           invalidSelections: [],
         });
+        // there are no valid selections, so no pie chart is rendered.
+        expect(await pieChart.expectEmptyPieChart());
       });
     });
   });

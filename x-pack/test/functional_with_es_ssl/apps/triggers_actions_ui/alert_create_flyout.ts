@@ -8,6 +8,9 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { omit } from 'lodash';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -18,8 +21,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
   const retry = getService('retry');
-  const browser = getService('browser');
   const rules = getService('rules');
+  const toasts = getService('toasts');
+  const esClient = getService('es');
+  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
 
   async function getAlertsByName(name: string) {
     const {
@@ -54,8 +59,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function defineEsQueryAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click(`.es-query-SelectOption`);
+    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click('queryFormType_esQuery');
     await testSubjects.click('selectIndexExpression');
     await comboBox.set('thresholdIndexesComboBox', 'k');
@@ -71,10 +76,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await nameInput.click();
   }
 
+  async function defineAPMErrorCountRule(ruleName: string) {
+    await pageObjects.triggersActionsUI.clickCreateAlertButton();
+    await testSubjects.click(`apm.error_rate-SelectOption`);
+    await testSubjects.setValue('ruleNameInput', ruleName);
+  }
+
   async function defineAlwaysFiringAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click('test.always-firing-SelectOption');
+    await testSubjects.setValue('ruleNameInput', alertName);
   }
 
   async function discardNewRuleCreation() {
@@ -82,6 +93,45 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   describe('create alert', function () {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    before(async () => {
+      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
+      apmSynthtraceEsClient = await getApmSynthtraceEsClient({
+        client: esClient,
+        packageVersion: version,
+      });
+      const opbeansJava = apm
+        .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
+        .instance('instance');
+
+      const opbeansNode = apm
+        .service({ name: 'opbeans-node', environment: 'production', agentName: 'node' })
+        .instance('instance');
+
+      const events = timerange('now-15m', 'now')
+        .ratePerMinute(1)
+        .generator((timestamp) => {
+          return [
+            opbeansJava
+              .transaction({ transactionName: 'tx-java' })
+              .timestamp(timestamp)
+              .duration(100)
+              .failure()
+              .errors(opbeansJava.error({ message: 'a java error' }).timestamp(timestamp + 50)),
+
+            opbeansNode
+              .transaction({ transactionName: 'tx-node' })
+              .timestamp(timestamp)
+              .duration(100)
+              .success(),
+          ];
+        });
+
+      return Promise.all([apmSynthtraceEsClient.index(events)]);
+    });
+
+    after(() => apmSynthtraceEsClient.clean());
+
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -143,7 +193,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('nameInput', slackConnectorName);
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
-      const createdConnectorToastTitle = await pageObjects.common.closeToast();
+      const createdConnectorToastTitle = await toasts.getTitleAndDismiss();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
@@ -163,7 +213,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        `Rule '{{rule.name}}' is active for group '{{context.group}}':
+        `Rule {{rule.name}} is active for group {{context.group}}:
 
 - Value: {{context.value}}
 - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
@@ -186,7 +236,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
 
       await testSubjects.click('saveRuleButton');
-      const toastTitle = await pageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
@@ -214,7 +264,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('nameInput', slackConnectorName);
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
-      const createdConnectorToastTitle = await pageObjects.common.closeToast();
+      const createdConnectorToastTitle = await toasts.getTitleAndDismiss();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
       await testSubjects.setValue('messageTextArea', 'test message ');
       await (
@@ -236,7 +286,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('addNewActionConnectorActionGroup-1-option-other');
 
       await testSubjects.click('saveRuleButton');
-      const toastTitle = await pageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
@@ -267,7 +317,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmRuleSaveModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('confirmRuleSaveModal');
 
-      const toastTitle = await pageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
@@ -286,10 +336,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should show discard confirmation before closing flyout without saving', async () => {
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.click(`.es-query-SelectOption`);
       await testSubjects.click('cancelSaveRuleButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
 
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.click(`.es-query-SelectOption`);
       await testSubjects.setValue('ruleNameInput', 'alertName');
       await testSubjects.click('cancelSaveRuleButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
@@ -319,6 +371,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await discardNewRuleCreation();
     });
 
+    // Related issue that this test is trying to prevent:
+    // https://github.com/elastic/kibana/issues/186969
+    it('should successfully show the APM error count rule flyout', async () => {
+      const ruleName = generateUniqueKey();
+      await defineAPMErrorCountRule(ruleName);
+
+      await testSubjects.existOrFail('apmServiceField');
+      await testSubjects.existOrFail('apmEnvironmentField');
+      await testSubjects.existOrFail('apmErrorGroupingKeyField');
+
+      await discardNewRuleCreation();
+    });
+
     it('should successfully test valid es_query alert', async () => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
@@ -339,25 +404,52 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await discardNewRuleCreation();
     });
 
-    it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
-      await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await testSubjects.setValue('ruleNameInput', 'alertName');
-      const ruleTypeSearchBox = await testSubjects.find('ruleSearchField');
-      await ruleTypeSearchBox.type('notexisting rule type');
-      await ruleTypeSearchBox.pressKeys(browser.keys.ENTER);
+    it('should not do a type override when adding a second action', async () => {
+      // create a new rule
+      const ruleName = generateUniqueKey();
+      await rules.common.defineIndexThresholdAlert(ruleName);
 
-      const ruleTypes = await find.allByCssSelector('.triggersActionsUI__ruleTypeNodeHeading');
-      expect(ruleTypes).to.have.length(0);
+      // add server log action
+      await testSubjects.click('.server-log-alerting-ActionTypeSelectOption');
+      expect(
+        await find.existsByCssSelector(
+          '[data-test-subj="comboBoxSearchInput"][value="Serverlog#xyz"]'
+        )
+      ).to.eql(true);
+      expect(
+        await find.existsByCssSelector(
+          '[data-test-subj="comboBoxSearchInput"][value="webhook-test"]'
+        )
+      ).to.eql(false);
 
-      const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
-      await searchClearButton.click();
+      // click on add new action
+      await testSubjects.click('addAlertActionButton');
+      await find.existsByCssSelector('[data-test-subj="Serverlog#xyz"]');
 
-      const ruleTypesClearFilter = await find.allByCssSelector(
-        '.triggersActionsUI__ruleTypeNodeHeading'
-      );
-      expect(ruleTypesClearFilter.length).to.above(0);
+      // create webhook connector
+      await testSubjects.click('.webhook-alerting-ActionTypeSelectOption');
+      await testSubjects.click('createActionConnectorButton-1');
+      await testSubjects.setValue('nameInput', 'webhook-test');
+      await testSubjects.setValue('webhookUrlText', 'https://test.test');
+      await testSubjects.setValue('webhookUserInput', 'fakeuser');
+      await testSubjects.setValue('webhookPasswordInput', 'fakepassword');
+      await testSubjects.click('saveActionButtonModal');
 
-      await discardNewRuleCreation();
+      // checking the new one first to avoid flakiness. If the value is checked before the new one is added
+      // it might return a false positive
+      expect(
+        await find.existsByCssSelector(
+          '[data-test-subj="comboBoxSearchInput"][value="webhook-test"]'
+        )
+      ).to.eql(true);
+      // If it was overridden, the value would change to be empty
+      expect(
+        await find.existsByCssSelector(
+          '[data-test-subj="comboBoxSearchInput"][value="Serverlog#xyz"]'
+        )
+      ).to.eql(true);
+
+      await deleteConnectorByName('webhook-test');
     });
   });
 };

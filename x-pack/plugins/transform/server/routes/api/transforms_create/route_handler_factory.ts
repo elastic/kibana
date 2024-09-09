@@ -11,11 +11,11 @@ import type { DataViewCreateQuerySchema } from '@kbn/ml-data-view-utils/schemas/
 import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type { TransformIdParamSchema } from '../../../../common/api_schemas/common';
+import type { TransformIdParamSchema } from '../../api_schemas/common';
 import type {
   PutTransformsRequestSchema,
   PutTransformsResponseSchema,
-} from '../../../../common/api_schemas/transforms';
+} from '../../api_schemas/transforms';
 import { isLatestTransform } from '../../../../common/types/transform';
 
 import type { RouteDependencies } from '../../../types';
@@ -31,7 +31,9 @@ export const routeHandlerFactory: (
   PutTransformsRequestSchema,
   TransformRequestHandlerContext
 > = (routeDependencies) => async (ctx, req, res) => {
-  const { coreStart, dataViews } = routeDependencies;
+  const { getCoreStart, getDataViewsStart } = routeDependencies;
+  const coreStart = await getCoreStart();
+  const dataViews = await getDataViewsStart();
   const { transformId } = req.params;
   const { createDataView, timeFieldName } = req.query;
 

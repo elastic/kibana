@@ -18,19 +18,20 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { TEST_IDS } from '../../../../constants';
-import { Prompt } from '../../../../../..';
 import * as i18n from './translations';
 import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../translations';
 
 export const SYSTEM_PROMPT_SELECTOR_CLASSNAME = 'systemPromptSelector';
 
 interface Props {
-  onSystemPromptDeleted: (systemPromptTitle: string) => void;
-  onSystemPromptSelectionChange: (systemPrompt?: Prompt | string) => void;
-  systemPrompts: Prompt[];
   autoFocus?: boolean;
-  selectedSystemPrompt?: Prompt;
+  onSystemPromptDeleted: (systemPromptTitle: string) => void;
+  onSystemPromptSelectionChange: (systemPrompt?: PromptResponse | string) => void;
+  systemPrompts: PromptResponse[];
+  selectedSystemPrompt?: PromptResponse;
+  resetSettings?: () => void;
 }
 
 export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{
@@ -44,10 +45,11 @@ export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{
 export const SystemPromptSelector: React.FC<Props> = React.memo(
   ({
     autoFocus = false,
-    systemPrompts,
     onSystemPromptDeleted,
     onSystemPromptSelectionChange,
+    resetSettings,
     selectedSystemPrompt,
+    systemPrompts,
   }) => {
     // Form options
     const [options, setOptions] = useState<SystemPromptSelectorOption[]>(
@@ -57,6 +59,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
           isNewConversationDefault: sp.isNewConversationDefault ?? false,
         },
         label: sp.name,
+        id: sp.id,
         'data-test-subj': `${TEST_IDS.SYSTEM_PROMPT_SELECTOR}-${sp.id}`,
       }))
     );
@@ -68,6 +71,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
                 isDefault: selectedSystemPrompt.isDefault ?? false,
                 isNewConversationDefault: selectedSystemPrompt.isNewConversationDefault ?? false,
               },
+              id: selectedSystemPrompt.id,
               label: selectedSystemPrompt.name,
             },
           ]
@@ -76,19 +80,23 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
 
     const handleSelectionChange = useCallback(
       (systemPromptSelectorOption: SystemPromptSelectorOption[]) => {
+        // Reset settings on every selection change to avoid option saved automatically on settings management page
+        resetSettings?.();
         const newSystemPrompt =
           systemPromptSelectorOption.length === 0
             ? undefined
             : systemPrompts.find((sp) => sp.name === systemPromptSelectorOption[0]?.label) ??
               systemPromptSelectorOption[0]?.label;
+
         onSystemPromptSelectionChange(newSystemPrompt);
       },
-      [onSystemPromptSelectionChange, systemPrompts]
+      [onSystemPromptSelectionChange, resetSettings, systemPrompts]
     );
 
     // Callback for when user types to create a new system prompt
     const onCreateOption = useCallback(
-      (searchValue, flattenedOptions = []) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (searchValue: any, flattenedOptions: any[] = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }
@@ -102,6 +110,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
 
         const newOption = {
           value: searchValue,
+          id: searchValue,
           label: searchValue,
         };
 
@@ -128,20 +137,20 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
     // Callback for when user deletes a quick prompt
     const onDelete = useCallback(
       (label: string) => {
+        const deleteId = options.find((o) => o.label === label)?.id;
         setOptions(options.filter((o) => o.label !== label));
         if (selectedOptions?.[0]?.label === label) {
           handleSelectionChange([]);
         }
-        onSystemPromptDeleted(label);
+        onSystemPromptDeleted(deleteId ?? label);
       },
       [handleSelectionChange, onSystemPromptDeleted, options, selectedOptions]
     );
 
     const renderOption: (
       option: SystemPromptSelectorOption,
-      searchValue: string,
-      OPTION_CONTENT_CLASSNAME: string
-    ) => React.ReactNode = (option, searchValue, contentClassName) => {
+      searchValue: string
+    ) => React.ReactNode = (option, searchValue) => {
       const { label, value } = option;
       return (
         <EuiFlexGroup

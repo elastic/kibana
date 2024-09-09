@@ -33,8 +33,8 @@ describe('legacy_get_rule_actions_saved_object', () => {
     });
   });
 
-  test('calls "savedObjectsClient.find" with the expected "hasReferences"', () => {
-    legacyGetRuleActionsSavedObject({ ruleAlertId: '123', savedObjectsClient, logger });
+  test('calls "savedObjectsClient.find" with the expected "hasReferences"', async () => {
+    await legacyGetRuleActionsSavedObject({ ruleAlertId: '123', savedObjectsClient, logger });
     const [[arg1]] = savedObjectsClient.find.mock.calls;
     expect(arg1).toEqual<SavedObjectsFindOptions>({
       hasReference: { id: '123', type: 'alert' },

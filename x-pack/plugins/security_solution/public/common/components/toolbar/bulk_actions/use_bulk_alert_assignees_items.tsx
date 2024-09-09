@@ -15,15 +15,18 @@ import type {
   RenderContentPanelProps,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 
+import { isEmpty } from 'lodash/fp';
 import { useLicense } from '../../../hooks/use_license';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { ASSIGNEES_PANEL_WIDTH } from '../../assignees/constants';
+import type { BulkAlertAssigneesPanelComponentProps } from './alert_bulk_assignees';
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import * as i18n from './translations';
 import { useSetAlertAssignees } from './use_set_alert_assignees';
 
 export interface UseBulkAlertAssigneesItemsProps {
   onAssigneesUpdate?: () => void;
+  alertAssignments?: string[];
 }
 
 export interface UseBulkAlertAssigneesPanel {
@@ -36,13 +39,16 @@ export interface UseBulkAlertAssigneesPanel {
 
 export const useBulkAlertAssigneesItems = ({
   onAssigneesUpdate,
+  alertAssignments,
 }: UseBulkAlertAssigneesItemsProps) => {
   const isPlatinumPlus = useLicense().isPlatinumPlus();
 
   const { hasIndexWrite } = useAlertsPrivileges();
   const setAlertAssignees = useSetAlertAssignees();
 
-  const handleOnAlertAssigneesSubmit = useCallback(
+  const handleOnAlertAssigneesSubmit = useCallback<
+    BulkAlertAssigneesPanelComponentProps['onSubmit']
+  >(
     async (assignees, ids, onSuccess, setIsLoading) => {
       if (setAlertAssignees) {
         await setAlertAssignees(assignees, ids, onSuccess, setIsLoading);
@@ -89,6 +95,7 @@ export const useBulkAlertAssigneesItems = ({
               panel: 2,
               label: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
               disableOnQuery: true,
+              disable: false,
             },
             {
               key: 'remove-all-alert-assignees',
@@ -97,10 +104,11 @@ export const useBulkAlertAssigneesItems = ({
               label: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
               disableOnQuery: true,
               onClick: onRemoveAllAssignees,
+              disable: alertAssignments ? isEmpty(alertAssignments) : false,
             },
           ]
         : [],
-    [hasIndexWrite, isPlatinumPlus, onRemoveAllAssignees]
+    [alertAssignments, hasIndexWrite, isPlatinumPlus, onRemoveAllAssignees]
   );
 
   const TitleContent = useMemo(
@@ -151,8 +159,10 @@ export const useBulkAlertAssigneesItems = ({
     [TitleContent, hasIndexWrite, isPlatinumPlus, renderContent]
   );
 
-  return {
-    alertAssigneesItems,
-    alertAssigneesPanels,
-  };
+  return useMemo(() => {
+    return {
+      alertAssigneesItems,
+      alertAssigneesPanels,
+    };
+  }, [alertAssigneesItems, alertAssigneesPanels]);
 };

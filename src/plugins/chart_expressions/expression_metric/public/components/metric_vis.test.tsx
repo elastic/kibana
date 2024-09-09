@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -22,9 +23,8 @@ import {
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { HtmlAttributes } from 'csstype';
 import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
-import { DimensionsVisParam } from '../../common';
+import { DimensionsVisParam, MetricVisParam } from '../../common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import faker from 'faker';
@@ -73,6 +73,15 @@ type Props = MetricVisComponentProps;
 const dayOfWeekColumnId = 'col-0-0';
 const basePriceColumnId = 'col-1-1';
 const minPriceColumnId = 'col-2-2';
+
+const defaultMetricParams: MetricVisParam = {
+  progressDirection: 'vertical',
+  maxCols: 5,
+  titlesTextAlign: 'left',
+  valuesTextAlign: 'right',
+  iconAlign: 'left',
+  valueFontSize: 'default',
+};
 
 const table: Datatable = {
   type: 'datatable',
@@ -208,7 +217,7 @@ const defaultProps = {
   filterable: true,
   renderMode: 'view',
   uiSettings: {} as unknown as IUiSettingsClient,
-} as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable' | 'renderMode'>;
+} as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable'>;
 
 describe('MetricVisComponent', function () {
   afterEach(() => {
@@ -218,8 +227,7 @@ describe('MetricVisComponent', function () {
   describe('single metric', () => {
     const config: Props['config'] = {
       metric: {
-        progressDirection: 'vertical',
-        maxCols: 5,
+        ...defaultMetricParams,
         icon: 'empty',
       },
       dimensions: {
@@ -239,7 +247,7 @@ describe('MetricVisComponent', function () {
 
       expect(visConfig).toMatchInlineSnapshot(`
         Object {
-          "color": "#f5f7fa",
+          "color": "#ffffff",
           "extra": <span />,
           "icon": [Function],
           "subtitle": undefined,
@@ -299,7 +307,7 @@ describe('MetricVisComponent', function () {
 
       expect(configWithPrefix).toMatchInlineSnapshot(`
         Object {
-          "color": "#f5f7fa",
+          "color": "#ffffff",
           "extra": <span>
             secondary prefix
              number-13.6328125
@@ -348,7 +356,7 @@ describe('MetricVisComponent', function () {
 
       expect(configWithProgress).toMatchInlineSnapshot(`
         Object {
-          "color": "#f5f7fa",
+          "color": "#ffffff",
           "domainMax": 28.984375,
           "extra": <span />,
           "icon": [Function],
@@ -398,13 +406,75 @@ describe('MetricVisComponent', function () {
       expect(tileConfig.trend).toEqual(trends[DEFAULT_TRENDLINE_NAME]);
       expect(tileConfig.trendShape).toEqual('area');
     });
+
+    it('should display multi-values non-numeric values formatted and without quotes', () => {
+      const newTable: Datatable = {
+        ...table,
+        // change the format id for the columns
+        columns: table.columns.map((column) =>
+          [basePriceColumnId, minPriceColumnId].includes(column.id)
+            ? {
+                ...column,
+                meta: { ...column.meta, params: { id: 'text' } },
+              }
+            : column
+        ),
+        rows: table.rows.map((row) => ({
+          ...row,
+          [basePriceColumnId]: [String(row[basePriceColumnId]), String(100)],
+          [minPriceColumnId]: [String(row[minPriceColumnId]), String(10)],
+        })),
+      };
+      const component = shallow(<MetricVis config={config} data={newTable} {...defaultProps} />);
+
+      const [[visConfig]] = component.find(Metric).props().data!;
+
+      expect(visConfig!.value).toMatchInlineSnapshot(`
+        Array [
+          "text-28.984375",
+          "text-100",
+        ]
+      `);
+    });
+
+    it('should display multi-values numeric values formatted and without quotes', () => {
+      const newTable = {
+        ...table,
+        rows: table.rows.map((row) => ({
+          ...row,
+          [basePriceColumnId]: [row[basePriceColumnId], 100],
+          [minPriceColumnId]: [row[minPriceColumnId], 10],
+        })),
+      };
+      const component = shallow(<MetricVis config={config} data={newTable} {...defaultProps} />);
+
+      const [[visConfig]] = component.find(Metric).props().data!;
+
+      expect(visConfig!.value).toMatchInlineSnapshot(`
+        Array [
+          "number-28.984375",
+          "number-100",
+        ]
+      `);
+    });
+
+    it('should display an empty tile if no data is provided', () => {
+      const newTable = {
+        ...table,
+        rows: [],
+      };
+      const component = shallow(<MetricVis config={config} data={newTable} {...defaultProps} />);
+
+      const [[visConfig]] = component.find(Metric).props().data!;
+
+      expect(visConfig!.value).toMatchInlineSnapshot(`NaN`);
+    });
   });
 
   describe('metric grid', () => {
     const config: Props['config'] = {
       metric: {
-        progressDirection: 'vertical',
-        maxCols: 5,
+        ...defaultMetricParams,
       },
       dimensions: {
         metric: basePriceColumnId,
@@ -425,7 +495,7 @@ describe('MetricVisComponent', function () {
       expect(visConfig).toMatchInlineSnapshot(`
         Array [
           Object {
-            "color": "#f5f7fa",
+            "color": "#ffffff",
             "extra": <span />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
@@ -434,7 +504,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#f5f7fa",
+            "color": "#ffffff",
             "extra": <span />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
@@ -443,7 +513,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#f5f7fa",
+            "color": "#ffffff",
             "extra": <span />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
@@ -452,7 +522,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#f5f7fa",
+            "color": "#ffffff",
             "extra": <span />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
@@ -461,7 +531,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#f5f7fa",
+            "color": "#ffffff",
             "extra": <span />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
@@ -590,7 +660,7 @@ describe('MetricVisComponent', function () {
         Array [
           Array [
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "extra": <span />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
@@ -599,7 +669,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "extra": <span />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
@@ -608,7 +678,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "extra": <span />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
@@ -617,7 +687,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "extra": <span />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
@@ -626,7 +696,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "extra": <span />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
@@ -637,7 +707,7 @@ describe('MetricVisComponent', function () {
           ],
           Array [
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "extra": <span />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
@@ -678,7 +748,7 @@ describe('MetricVisComponent', function () {
         Array [
           Array [
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "domainMax": 28.984375,
               "extra": <span />,
               "icon": undefined,
@@ -689,7 +759,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "domainMax": 28.984375,
               "extra": <span />,
               "icon": undefined,
@@ -700,7 +770,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "domainMax": 25.984375,
               "extra": <span />,
               "icon": undefined,
@@ -711,7 +781,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "domainMax": 25.784375,
               "extra": <span />,
               "icon": undefined,
@@ -722,7 +792,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "domainMax": 25.348011363636363,
               "extra": <span />,
               "icon": undefined,
@@ -735,7 +805,7 @@ describe('MetricVisComponent', function () {
           ],
           Array [
             Object {
-              "color": "#f5f7fa",
+              "color": "#ffffff",
               "domainMax": 24.984375,
               "extra": <span />,
               "icon": undefined,
@@ -849,124 +919,59 @@ describe('MetricVisComponent', function () {
     });
   });
 
-  describe('rendering with no data', () => {});
-
   it('should constrain dimensions in edit mode', () => {
-    const getContainerStyles = (editMode: boolean, multipleTiles: boolean) =>
-      (
-        shallow(
-          <MetricVis
-            data={table}
-            config={{
-              metric: {
-                progressDirection: 'vertical',
-                maxCols: 5,
-              },
-              dimensions: {
-                metric: basePriceColumnId,
-                breakdownBy: multipleTiles ? dayOfWeekColumnId : undefined,
-              },
-            }}
-            {...defaultProps}
-            renderMode={editMode ? 'edit' : 'view'}
-          />
-        )
-          .find('div')
-          .at(0)
-          .props() as HtmlAttributes & { css: { styles: string } }
-      ).css.styles;
+    const getDimensionsRequest = (multipleTiles: boolean) => {
+      const fireEvent = jest.fn();
+      const wrapper = shallow(
+        <MetricVis
+          data={table}
+          config={{
+            metric: {
+              ...defaultMetricParams,
+            },
+            dimensions: {
+              metric: basePriceColumnId,
+              breakdownBy: multipleTiles ? dayOfWeekColumnId : undefined,
+            },
+          }}
+          {...defaultProps}
+          fireEvent={fireEvent}
+        />
+      );
 
-    expect(getContainerStyles(false, false)).toMatchInlineSnapshot(`
-      "
-              height: 100%;
-              width: 100%;
-              max-height: 100%;
-              max-width: 100%;
-              overflow-y: auto;
-              scrollbar-width: thin;
+      wrapper.find(Settings).props().onWillRender!();
 
-          &::-webkit-scrollbar {
-            inline-size: 16px;
-            block-size: 16px;
-          }
+      return fireEvent.mock.calls[0][0].data;
+    };
 
-          &::-webkit-scrollbar-thumb {
-            background-color: rgba(105,112,125,0.5);
-            background-clip: content-box;
-            border-radius: 16px;
-            border: calc(8px * 0.75) solid transparent;
-          }
-
-          &::-webkit-scrollbar-corner,
-          &::-webkit-scrollbar-track {
-            background-color: transparent;
-          }
-
-          scrollbar-color: rgba(105,112,125,0.5) transparent;
-        
-            "
+    expect(getDimensionsRequest(false)).toMatchInlineSnapshot(`
+      Object {
+        "maxDimensions": Object {
+          "x": Object {
+            "unit": "pixels",
+            "value": 300,
+          },
+          "y": Object {
+            "unit": "pixels",
+            "value": 300,
+          },
+        },
+      }
     `);
 
-    expect(getContainerStyles(true, false)).toMatchInlineSnapshot(`
-      "
-              height: 300px;
-              width: 300px;
-              max-height: 100%;
-              max-width: 100%;
-              overflow-y: auto;
-              scrollbar-width: thin;
-
-          &::-webkit-scrollbar {
-            inline-size: 16px;
-            block-size: 16px;
-          }
-
-          &::-webkit-scrollbar-thumb {
-            background-color: rgba(105,112,125,0.5);
-            background-clip: content-box;
-            border-radius: 16px;
-            border: calc(8px * 0.75) solid transparent;
-          }
-
-          &::-webkit-scrollbar-corner,
-          &::-webkit-scrollbar-track {
-            background-color: transparent;
-          }
-
-          scrollbar-color: rgba(105,112,125,0.5) transparent;
-        
-            "
-    `);
-
-    expect(getContainerStyles(true, true)).toMatchInlineSnapshot(`
-      "
-              height: 400px;
-              width: 1000px;
-              max-height: 100%;
-              max-width: 100%;
-              overflow-y: auto;
-              scrollbar-width: thin;
-
-          &::-webkit-scrollbar {
-            inline-size: 16px;
-            block-size: 16px;
-          }
-
-          &::-webkit-scrollbar-thumb {
-            background-color: rgba(105,112,125,0.5);
-            background-clip: content-box;
-            border-radius: 16px;
-            border: calc(8px * 0.75) solid transparent;
-          }
-
-          &::-webkit-scrollbar-corner,
-          &::-webkit-scrollbar-track {
-            background-color: transparent;
-          }
-
-          scrollbar-color: rgba(105,112,125,0.5) transparent;
-        
-            "
+    expect(getDimensionsRequest(true)).toMatchInlineSnapshot(`
+      Object {
+        "maxDimensions": Object {
+          "x": Object {
+            "unit": "pixels",
+            "value": 1000,
+          },
+          "y": Object {
+            "unit": "pixels",
+            "value": 400,
+          },
+        },
+      }
     `);
   });
 
@@ -976,8 +981,7 @@ describe('MetricVisComponent', function () {
       <MetricVis
         config={{
           metric: {
-            progressDirection: 'vertical',
-            maxCols: 5,
+            ...defaultMetricParams,
           },
           dimensions: {
             metric: basePriceColumnId,
@@ -1018,8 +1022,7 @@ describe('MetricVisComponent', function () {
       <MetricVis
         config={{
           metric: {
-            progressDirection: 'vertical',
-            maxCols: 5,
+            ...defaultMetricParams,
           },
           dimensions: {
             metric: metricId,
@@ -1045,8 +1048,7 @@ describe('MetricVisComponent', function () {
         <MetricVis
           config={{
             metric: {
-              progressDirection: 'vertical',
-              maxCols: 5,
+              ...defaultMetricParams,
             },
             dimensions: {
               metric: basePriceColumnId,
@@ -1122,8 +1124,7 @@ describe('MetricVisComponent', function () {
         <MetricVis
           config={{
             metric: {
-              progressDirection: 'vertical',
-              maxCols: 5,
+              ...defaultMetricParams,
             },
             dimensions: {
               metric: basePriceColumnId,
@@ -1153,8 +1154,7 @@ describe('MetricVisComponent', function () {
                 metric: basePriceColumnId,
               },
               metric: {
-                progressDirection: 'vertical',
-                maxCols: 5,
+                ...defaultMetricParams,
                 // should be overridden
                 color: 'static-color',
                 palette: {
@@ -1206,9 +1206,8 @@ describe('MetricVisComponent', function () {
               config={{
                 dimensions,
                 metric: {
+                  ...defaultMetricParams,
                   palette,
-                  progressDirection: 'vertical',
-                  maxCols: 5,
                 },
               }}
               data={table}
@@ -1270,8 +1269,7 @@ describe('MetricVisComponent', function () {
                 metric: basePriceColumnId,
               },
               metric: {
-                progressDirection: 'vertical',
-                maxCols: 5,
+                ...defaultMetricParams,
                 color: staticColor,
                 palette: undefined,
               },
@@ -1295,8 +1293,7 @@ describe('MetricVisComponent', function () {
                 metric: basePriceColumnId,
               },
               metric: {
-                progressDirection: 'vertical',
-                maxCols: 5,
+                ...defaultMetricParams,
                 color: undefined,
                 palette: undefined,
               },
@@ -1308,7 +1305,7 @@ describe('MetricVisComponent', function () {
 
         const [[datum]] = component.find(Metric).props().data!;
 
-        expect(datum!.color).toBe(euiThemeVars.euiColorLightestShade);
+        expect(datum!.color).toBe(euiThemeVars.euiColorEmptyShade);
         expect(mockGetColorForValue).not.toHaveBeenCalled();
       });
     });
@@ -1325,8 +1322,7 @@ describe('MetricVisComponent', function () {
     ) => {
       const config: Props['config'] = {
         metric: {
-          progressDirection: 'vertical',
-          maxCols: 5,
+          ...defaultMetricParams,
         },
         dimensions: {
           metric: '1',
@@ -1481,8 +1477,7 @@ describe('MetricVisComponent', function () {
         <MetricVis
           config={{
             metric: {
-              progressDirection: 'vertical',
-              maxCols: 5,
+              ...defaultMetricParams,
             },
             dimensions: {
               metric: basePriceColumnId,

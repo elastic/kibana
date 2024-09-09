@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './app.scss';
@@ -18,6 +19,7 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { VisualizeServices } from './types';
 import {
   VisualizeEditor,
@@ -37,6 +39,7 @@ interface NoDataComponentProps {
   dataViewEditor: DataViewEditorStart;
   onDataViewCreated: (dataView: unknown) => void;
   noDataPage?: NoDataPagePluginStart;
+  share?: SharePluginStart;
 }
 
 const NoDataComponent = ({
@@ -45,12 +48,14 @@ const NoDataComponent = ({
   dataViewEditor,
   onDataViewCreated,
   noDataPage,
+  share,
 }: NoDataComponentProps) => {
   const analyticsServices = {
     coreStart: core,
     dataViews,
     dataViewEditor,
     noDataPage,
+    share,
   };
 
   const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
@@ -84,6 +89,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       kbnUrlStateStorage,
       dataViewEditor,
       noDataPage,
+      share,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -145,6 +151,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
         dataViews={dataViews}
         onDataViewCreated={onDataViewCreated}
         noDataPage={noDataPage}
+        share={share}
       />
     );
   }

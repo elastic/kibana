@@ -56,6 +56,11 @@ export const updateAlertRoute = (
         body: bodySchema,
         params: paramSchema,
       },
+      options: {
+        summary: 'Update an alert',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(async function (context, req, res) {
@@ -68,7 +73,7 @@ export const updateAlertRoute = (
         const { id } = req.params;
         const { name, actions, params, schedule, tags, throttle, notifyWhen } = req.body;
         try {
-          const alertRes = await rulesClient.update({
+          const { systemActions, ...alertRes } = await rulesClient.update({
             id,
             data: {
               name,

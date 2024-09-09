@@ -33,7 +33,7 @@ const AgentPolicyFormRow = styled(EuiFormRow)`
 `;
 
 type Props = {
-  agentPolicies: AgentPolicy[];
+  agentPolicies: Array<Pick<AgentPolicy, 'id' | 'name'>>;
   selectedPolicyId?: string;
   setSelectedPolicyId: (agentPolicyId?: string) => void;
   excludeFleetServer?: boolean;
@@ -62,7 +62,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
     isFleetServerPolicy,
   } = props;
 
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const authz = useAuthz();
 
   const onChangeCallback = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = event.target;
@@ -80,7 +80,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
         ) : (
           <FormattedMessage
             id="xpack.fleet.enrollmentStepAgentPolicy.createAgentPolicyText"
-            defaultMessage="Type of hosts are controlled by an {agentPolicy}. Choose an agent policy or create a new one."
+            defaultMessage="Settings for the monitored host are configured in the {agentPolicy}. Choose an agent policy or create a new one."
             values={{
               agentPolicy: (
                 <EuiLink href={docLinks.links.fleet.agentPolicy} target="_blank">
@@ -96,26 +96,26 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
       </EuiText>
       <EuiSpacer size="m" />
       <AgentPolicyFormRow
-        fullWidth={true}
+        fullWidth
         label={
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <div>
-                <EuiLink disabled={!hasFleetAllPrivileges} onClick={onClickCreatePolicy}>
+          authz.fleet.allAgentPolicies && (
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiLink onClick={onClickCreatePolicy}>
                   <FormattedMessage
                     id="xpack.fleet.enrollmentStepAgentPolicy.addPolicyButton"
                     defaultMessage="Create new agent policy"
                   />
                 </EuiLink>
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )
         }
       >
         <EuiSelect
           fullWidth
           isLoading={!agentPolicies}
-          options={agentPolicies.map((agentPolicy: AgentPolicy) => ({
+          options={agentPolicies.map((agentPolicy) => ({
             value: agentPolicy.id,
             text: agentPolicy.name,
           }))}
@@ -132,7 +132,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
           isInvalid={!selectedPolicyId}
         />
       </AgentPolicyFormRow>
-      {selectedPolicyId && !isFleetServerPolicy && (
+      {authz.fleet.readAgentPolicies && selectedPolicyId && !isFleetServerPolicy && (
         <>
           <EuiSpacer size="m" />
           <AgentPolicyPackageBadges

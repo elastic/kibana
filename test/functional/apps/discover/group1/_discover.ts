@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -114,10 +115,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show correct initial chart interval of Auto', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await testSubjects.click('unifiedHistogramQueryHits'); // to cancel out tooltips
+        await testSubjects.click('discoverQueryHits'); // to cancel out tooltips
         const actualInterval = await PageObjects.discover.getChartInterval();
 
-        const expectedInterval = 'Auto';
+        const expectedInterval = 'auto';
         expect(actualInterval).to.be(expectedInterval);
       });
 
@@ -171,7 +172,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show matches when time range is expanded', async () => {
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.try(async function () {
           expect(await PageObjects.discover.hasNoResults()).to.be(false);
           expect(await PageObjects.discover.getHitCountInt()).to.be.above(0);
@@ -217,8 +217,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await queryBar.clearQuery();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
 
         log.debug(
           'check that the newest doc timestamp is now -7 hours from the UTC time in the first test'

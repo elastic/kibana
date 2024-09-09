@@ -11,13 +11,10 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } from '@elastic/eui';
 
-import { AggName } from '../../../../../../common/types/aggregations';
+import type { AggName } from '../../../../../../common/types/aggregations';
 
-import {
-  isPivotAggsConfigWithUiBase,
-  PivotAggsConfig,
-  PivotAggsConfigWithUiSupportDict,
-} from '../../../../common';
+import type { PivotAggsConfig, PivotAggsConfigWithUiSupportDict } from '../../../../common';
+import { isPivotAggsConfigWithUiBase } from '../../../../common';
 
 import { PopoverForm } from './popover_form';
 import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';

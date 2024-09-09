@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable max-classes-per-file */
@@ -22,7 +23,12 @@ import {
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
-import { Execution, ExecutionParams, ExecutionResult } from '../execution/execution';
+import {
+  Execution,
+  ExecutionParams,
+  ExecutionResult,
+  FunctionCacheItem,
+} from '../execution/execution';
 import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
@@ -109,10 +115,17 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    */
   public readonly types: TypesRegistry;
 
-  constructor(private readonly logger?: Logger, state?: ExecutorState<Context>) {
+  private functionCache: Map<string, FunctionCacheItem>;
+
+  constructor(
+    private readonly logger?: Logger,
+    state?: ExecutorState<Context>,
+    functionCache: Map<string, FunctionCacheItem> = new Map()
+  ) {
     this.functions = new FunctionsRegistry(this as Executor);
     this.types = new TypesRegistry(this as Executor);
     this.container = createExecutorContainer<Context>(state);
+    this.functionCache = functionCache;
   }
 
   public get state(): ExecutorState<Context> {
@@ -189,12 +202,17 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     const executionParams = {
       params,
       executor: this,
+      functionCache: this.functionCache,
     } as ExecutionParams;
 
     if (typeof ast === 'string') executionParams.expression = ast;
     else executionParams.ast = ast;
 
-    const execution = new Execution<Input, Output>(executionParams, this.logger);
+    const execution = new Execution<Input, Output>(
+      executionParams,
+      this.logger,
+      this.functionCache
+    );
 
     return execution;
   }

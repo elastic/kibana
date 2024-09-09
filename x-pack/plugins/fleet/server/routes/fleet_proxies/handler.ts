@@ -22,7 +22,7 @@ import {
   updateFleetProxy,
   getFleetProxyRelatedSavedObjects,
 } from '../../services/fleet_proxies';
-import { defaultFleetErrorHandler, FleetProxyUnauthorizedError } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 import type {
   GetOneFleetProxyRequestSchema,
   PostFleetProxyRequestSchema,
@@ -31,7 +31,7 @@ import type {
   Output,
   DownloadSource,
 } from '../../types';
-import { agentPolicyService, appContextService } from '../../services';
+import { agentPolicyService } from '../../services';
 
 async function bumpRelatedPolicies(
   soClient: SavedObjectsClientContract,
@@ -44,11 +44,11 @@ async function bumpRelatedPolicies(
     fleetServerHosts.some((host) => host.is_default) ||
     outputs.some((output) => output.is_default || output.is_default_monitoring)
   ) {
-    await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    await agentPolicyService.bumpAllAgentPolicies(esClient);
   } else {
     await pMap(
       outputs,
-      (output) => agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id),
+      (output) => agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id),
       {
         concurrency: 20,
       }
@@ -56,11 +56,7 @@ async function bumpRelatedPolicies(
     await pMap(
       fleetServerHosts,
       (fleetServerHost) =>
-        agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(
-          soClient,
-          esClient,
-          fleetServerHost.id
-        ),
+        agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, fleetServerHost.id),
       {
         concurrency: 20,
       }
@@ -69,21 +65,11 @@ async function bumpRelatedPolicies(
     await pMap(
       downloadSources,
       (downloadSource) =>
-        agentPolicyService.bumpAllAgentPoliciesForDownloadSource(
-          soClient,
-          esClient,
-          downloadSource.id
-        ),
+        agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, downloadSource.id),
       {
         concurrency: 20,
       }
     );
-  }
-}
-
-function checkProxiesAvailable() {
-  if (appContextService.getConfig()?.internal?.disableProxies) {
-    throw new FleetProxyUnauthorizedError('Proxies write APIs are disabled');
   }
 }
 
@@ -95,7 +81,6 @@ export const postFleetProxyHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   try {
-    checkProxiesAvailable();
     const { id, ...data } = request.body;
     const proxy = await createFleetProxy(soClient, { ...data, is_preconfigured: false }, { id });
 
@@ -115,7 +100,6 @@ export const putFleetProxyHandler: RequestHandler<
   TypeOf<typeof PutFleetProxyRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    checkProxiesAvailable();
     const proxyId = request.params.itemId;
     const coreContext = await await context.core;
     const soClient = coreContext.savedObjects.client;
@@ -167,7 +151,6 @@ export const deleteFleetProxyHandler: RequestHandler<
   TypeOf<typeof GetOneFleetProxyRequestSchema.params>
 > = async (context, request, response) => {
   try {
-    checkProxiesAvailable();
     const proxyId = request.params.itemId;
     const coreContext = await context.core;
     const soClient = coreContext.savedObjects.client;

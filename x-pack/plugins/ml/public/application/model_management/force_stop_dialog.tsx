@@ -6,16 +6,11 @@
  */
 
 import React, { type FC, useState, useMemo, useCallback } from 'react';
-import {
-  EuiCallOut,
-  EuiCheckboxGroup,
-  EuiCheckboxGroupOption,
-  EuiConfirmModal,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiCheckboxGroupOption } from '@elastic/eui';
+import { EuiCallOut, EuiCheckboxGroup, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { I18nStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -40,15 +35,26 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
     {}
   );
 
+  const trainedModelDeployments = useMemo<string[]>(() => {
+    return (
+      model.deployment_ids
+        // Filter out deployments that are used by inference services
+        .filter((deploymentId) => {
+          if (!model.inference_apis) return true;
+          return !model.inference_apis.some((inference) => inference.inference_id === deploymentId);
+        })
+    );
+  }, [model]);
+
   const options: EuiCheckboxGroupOption[] = useMemo(
     () =>
-      model.deployment_ids.map((deploymentId) => {
+      trainedModelDeployments.map((deploymentId) => {
         return {
           id: deploymentId,
           label: deploymentId,
         };
       }),
-    [model.deployment_ids]
+    [trainedModelDeployments]
   );
 
   const onChange = useCallback((id: string) => {
@@ -62,10 +68,10 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
 
   const selectedDeploymentIds = useMemo(
     () =>
-      model.deployment_ids.length > 1
+      trainedModelDeployments.length > 1
         ? Object.keys(checkboxIdToSelectedMap).filter((id) => checkboxIdToSelectedMap[id])
-        : model.deployment_ids,
-    [model.deployment_ids, checkboxIdToSelectedMap]
+        : trainedModelDeployments,
+    [trainedModelDeployments, checkboxIdToSelectedMap]
   );
 
   const deploymentPipelinesMap = useMemo(() => {
@@ -86,7 +92,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
   }, [model.pipelines]);
 
   const pipelineWarning = useMemo<string[]>(() => {
-    if (model.deployment_ids.length === 1 && isPopulatedObject(model.pipelines)) {
+    if (trainedModelDeployments.length === 1 && isPopulatedObject(model.pipelines)) {
       return Object.keys(model.pipelines);
     }
     return [
@@ -96,14 +102,23 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
           .flatMap(([, pipelineNames]) => pipelineNames)
       ),
     ].sort();
-  }, [model, deploymentPipelinesMap, selectedDeploymentIds]);
+  }, [
+    trainedModelDeployments.length,
+    model.pipelines,
+    deploymentPipelinesMap,
+    selectedDeploymentIds,
+  ]);
+
+  const inferenceServiceIDs = useMemo<string[]>(() => {
+    return (model.inference_apis ?? []).map((inference) => inference.inference_id);
+  }, [model]);
 
   return (
     <EuiConfirmModal
       title={i18n.translate('xpack.ml.trainedModels.modelsList.forceStopDialog.title', {
         defaultMessage:
           'Stop {deploymentCount, plural, one {deployment} other {deployments}} of model {modelId}?',
-        values: { modelId: model.model_id, deploymentCount: model.deployment_ids.length },
+        values: { modelId: model.model_id, deploymentCount: trainedModelDeployments.length },
       })}
       onCancel={onCancel}
       onConfirm={onConfirm.bind(null, selectedDeploymentIds)}
@@ -116,9 +131,11 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
         { defaultMessage: 'Stop' }
       )}
       buttonColor="danger"
-      confirmButtonDisabled={model.deployment_ids.length > 1 && selectedDeploymentIds.length === 0}
+      confirmButtonDisabled={
+        trainedModelDeployments.length > 1 && selectedDeploymentIds.length === 0
+      }
     >
-      {model.deployment_ids.length > 1 ? (
+      {trainedModelDeployments.length > 1 ? (
         <>
           <EuiCheckboxGroup
             legend={{
@@ -160,12 +177,49 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
           </EuiCallOut>
         </>
       ) : null}
+
+      {model.hasInferenceServices && inferenceServiceIDs.length === 0 ? (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.forceStopDialog.hasInferenceServicesWarning"
+              defaultMessage="The model is used by the _inference API"
+            />
+          }
+          color="warning"
+          iconType="warning"
+        />
+      ) : null}
+
+      {inferenceServiceIDs.length > 0 ? (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.forceStopDialog.inferenceServicesWarning"
+                defaultMessage="The following {inferenceServicesCount, plural, one {deployment is} other {deployments are}} used by the _inference API and can not be stopped:"
+                values={{ inferenceServicesCount: inferenceServiceIDs.length }}
+              />
+            }
+            color="warning"
+            iconType="warning"
+          >
+            <div>
+              <ul>
+                {inferenceServiceIDs.map((deploymentId) => {
+                  return <li key={deploymentId}>{deploymentId}</li>;
+                })}
+              </ul>
+            </div>
+          </EuiCallOut>
+        </>
+      ) : null}
     </EuiConfirmModal>
   );
 };
 
 export const getUserConfirmationProvider =
-  (overlays: OverlayStart, theme: ThemeServiceStart, i18nStart: I18nStart) =>
+  (overlays: OverlayStart, startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>) =>
   async (forceStopModel: ModelItem): Promise<string[]> => {
     return new Promise(async (resolve, reject) => {
       try {
@@ -182,7 +236,7 @@ export const getUserConfirmationProvider =
                 resolve(deploymentIds);
               }}
             />,
-            { theme, i18n: i18nStart }
+            startServices
           )
         );
       } catch (e) {

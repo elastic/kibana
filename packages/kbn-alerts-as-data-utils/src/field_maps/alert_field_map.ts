@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -14,11 +15,14 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -27,6 +31,7 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -40,7 +45,9 @@ import {
   VERSION,
   EVENT_ACTION,
   EVENT_KIND,
+  EVENT_ORIGINAL,
   TAGS,
+  ALERT_INTENDED_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { MultiField } from './types';
 
@@ -80,6 +87,11 @@ export const alertFieldMap = {
     array: true,
     required: false,
   },
+  [ALERT_CONSECUTIVE_MATCHES]: {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   [ALERT_INSTANCE_ID]: {
     type: 'keyword',
     array: false,
@@ -89,6 +101,11 @@ export const alertFieldMap = {
     type: 'date',
     required: false,
     array: false,
+  },
+  [ALERT_PREVIOUS_ACTION_GROUP]: {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
   [ALERT_REASON]: {
     type: 'keyword',
@@ -111,6 +128,16 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+  },
+  [ALERT_RULE_EXECUTION_TIMESTAMP]: {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  [ALERT_INTENDED_TIMESTAMP]: {
+    type: 'date',
+    array: false,
+    required: false,
   },
   [ALERT_RULE_EXECUTION_UUID]: {
     type: 'keyword',
@@ -152,6 +179,11 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+  },
+  [ALERT_SEVERITY_IMPROVING]: {
+    type: 'boolean',
+    array: false,
+    required: false,
   },
   [ALERT_START]: {
     type: 'date',
@@ -200,11 +232,19 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
   },
   [EVENT_KIND]: {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
+  },
+  [EVENT_ORIGINAL]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+    ignore_above: 1024,
   },
   [SPACE_IDS]: {
     type: 'keyword',

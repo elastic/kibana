@@ -13,22 +13,23 @@ import { EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { LanguageDefinitionSnippetArguments } from '@kbn/search-api-panels';
-import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 
 import { FetchApiKeysAPILogic } from '../../../enterprise_search_overview/api/fetch_api_keys_logic';
 import { CreateApiKeyFlyout } from '../../../shared/api_key/create_api_key_flyout';
 import { useCloudDetails } from '../../../shared/cloud_details/cloud_details';
 import { GettingStarted } from '../../../shared/getting_started/getting_started';
+import { KibanaLogic } from '../../../shared/kibana';
 import { EnterpriseSearchElasticsearchPageTemplate } from '../layout';
 
 export const ElasticsearchGuide = () => {
   const cloudContext = useCloudDetails();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const { esConfig } = useValues(KibanaLogic);
 
   const codeArgs: LanguageDefinitionSnippetArguments = {
     apiKey: '',
     cloudId: cloudContext.cloudId,
-    url: cloudContext.elasticsearchUrl || ELASTICSEARCH_URL_PLACEHOLDER,
+    url: esConfig.elasticsearch_host,
   };
   const { makeRequest } = useActions(FetchApiKeysAPILogic);
   const { data } = useValues(FetchApiKeysAPILogic);

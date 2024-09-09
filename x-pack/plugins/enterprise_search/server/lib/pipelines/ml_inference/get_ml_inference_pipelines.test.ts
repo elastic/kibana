@@ -25,8 +25,8 @@ describe('getMlInferencePipelines', () => {
     jest.clearAllMocks();
   });
 
-  it('should throw an error if Machine Learning is disabled in the current space', () => {
-    expect(() =>
+  it('should throw an error if Machine Learning is disabled in the current space', async () => {
+    await expect(() =>
       getMlInferencePipelines(mockClient as unknown as ElasticsearchClient, undefined)
     ).rejects.toThrowError('Machine Learning is not enabled');
   });

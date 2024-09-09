@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { CaseConnector, ConfigurationAttributes } from '../../../common/types/domain';
-import { ConnectorTypes } from '../../../common/types/domain';
+import type {
+  CaseConnector,
+  CaseCustomFields,
+  ConfigurationAttributes,
+} from '../../../common/types/domain';
+import { CustomFieldTypes, ConnectorTypes, CaseSeverity } from '../../../common/types/domain';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
@@ -43,7 +47,56 @@ const basicConfigFields = {
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
-  customFields: [],
+  customFields: [
+    {
+      type: CustomFieldTypes.TOGGLE as const,
+      key: 'toggle_custom_field',
+      label: 'Toggle',
+      required: true,
+      defaultValue: true,
+    },
+    {
+      type: CustomFieldTypes.TEXT as const,
+      key: 'text_custom_field',
+      label: 'Text',
+      required: true,
+      defaultValue: 'foobar',
+    },
+  ],
+  templates: [
+    {
+      key: 'test_template_1',
+      name: 'First test template',
+      description: 'This is a first test template',
+      caseFields: null,
+    },
+    {
+      key: 'test_template_4',
+      name: 'Fourth test template',
+      description: 'This is a fourth test template',
+      caseFields: {
+        title: 'Case with sample template 4',
+        description: 'case desc',
+        severity: CaseSeverity.LOW,
+        category: null,
+        tags: ['sample-4'],
+        assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+        customFields: [
+          {
+            key: 'first_custom_field_key',
+            type: CustomFieldTypes.TEXT,
+            value: 'this is a text field value',
+          },
+        ] as CaseCustomFields,
+        connector: {
+          id: 'none',
+          name: 'My Connector',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+      },
+    },
+  ],
 };
 
 const createConfigUpdateParams = (connector?: CaseConnector): Partial<ConfigurationAttributes> => ({
@@ -172,8 +225,63 @@ describe('CaseConfigureService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
-            "customFields": Array [],
+            "customFields": Array [
+              Object {
+                "defaultValue": true,
+                "key": "toggle_custom_field",
+                "label": "Toggle",
+                "required": true,
+                "type": "toggle",
+              },
+              Object {
+                "defaultValue": "foobar",
+                "key": "text_custom_field",
+                "label": "Text",
+                "required": true,
+                "type": "text",
+              },
+            ],
             "owner": "securitySolution",
+            "templates": Array [
+              Object {
+                "caseFields": null,
+                "description": "This is a first test template",
+                "key": "test_template_1",
+                "name": "First test template",
+              },
+              Object {
+                "caseFields": Object {
+                  "assignees": Array [
+                    Object {
+                      "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+                    },
+                  ],
+                  "category": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "My Connector",
+                    "type": ".none",
+                  },
+                  "customFields": Array [
+                    Object {
+                      "key": "first_custom_field_key",
+                      "type": "text",
+                      "value": "this is a text field value",
+                    },
+                  ],
+                  "description": "case desc",
+                  "severity": "low",
+                  "tags": Array [
+                    "sample-4",
+                  ],
+                  "title": "Case with sample template 4",
+                },
+                "description": "This is a fourth test template",
+                "key": "test_template_4",
+                "name": "Fourth test template",
+              },
+            ],
             "updated_at": "2020-04-09T09:43:51.778Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -443,8 +551,63 @@ describe('CaseConfigureService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
-            "customFields": Array [],
+            "customFields": Array [
+              Object {
+                "defaultValue": true,
+                "key": "toggle_custom_field",
+                "label": "Toggle",
+                "required": true,
+                "type": "toggle",
+              },
+              Object {
+                "defaultValue": "foobar",
+                "key": "text_custom_field",
+                "label": "Text",
+                "required": true,
+                "type": "text",
+              },
+            ],
             "owner": "securitySolution",
+            "templates": Array [
+              Object {
+                "caseFields": null,
+                "description": "This is a first test template",
+                "key": "test_template_1",
+                "name": "First test template",
+              },
+              Object {
+                "caseFields": Object {
+                  "assignees": Array [
+                    Object {
+                      "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+                    },
+                  ],
+                  "category": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "My Connector",
+                    "type": ".none",
+                  },
+                  "customFields": Array [
+                    Object {
+                      "key": "first_custom_field_key",
+                      "type": "text",
+                      "value": "this is a text field value",
+                    },
+                  ],
+                  "description": "case desc",
+                  "severity": "low",
+                  "tags": Array [
+                    "sample-4",
+                  ],
+                  "title": "Case with sample template 4",
+                },
+                "description": "This is a fourth test template",
+                "key": "test_template_4",
+                "name": "Fourth test template",
+              },
+            ],
             "updated_at": "2020-04-09T09:43:51.778Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",

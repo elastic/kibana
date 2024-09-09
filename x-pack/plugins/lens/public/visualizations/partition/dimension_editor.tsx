@@ -13,21 +13,13 @@ import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   PaletteRegistry,
   ColorMapping,
-  SPECIAL_TOKENS_STRING_CONVERTION,
+  SPECIAL_TOKENS_STRING_CONVERSION,
   AVAILABLE_PALETTES,
   getColorsFromMapping,
 } from '@kbn/coloring';
-import { ColorPicker, useDebouncedValue } from '@kbn/visualization-ui-components';
-import {
-  EuiFormRow,
-  EuiButtonIcon,
-  EuiColorPaletteDisplay,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSwitch,
-  EuiText,
-  EuiBadge,
-} from '@elastic/eui';
+import { ColorPicker } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
+import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, EuiBadge } from '@elastic/eui';
 import { useState, useCallback } from 'react';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { PieVisualizationState } from '../../../common/types';
@@ -52,7 +44,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
       value: props.state,
       onChange: props.setState,
     });
-  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
   const currentLayer = localState.layers.find((layer) => layer.layerId === props.layerId);
 
@@ -60,7 +51,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const [useNewColorMapping, setUseNewColorMapping] = useState(canUseColorMapping);
 
   const setConfig = useCallback(
-    ({ color }) => {
+    ({ color }: { color?: string }) => {
       if (!currentLayer) {
         return;
       }
@@ -136,115 +127,82 @@ export function DimensionEditor(props: DimensionEditorProps) {
       {props.accessor === firstNonCollapsedColumnId && (
         <EuiFormRow
           display="columnCompressed"
-          label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionlabel', {
+          label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
             defaultMessage: 'Color mapping',
           })}
           style={{ alignItems: 'center' }}
           fullWidth
         >
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-            responsive={false}
-            className="lnsDynamicColoringClickable"
+          <PalettePanelContainer
+            palette={colors}
+            siblingRef={props.panelRef}
+            title={
+              useNewColorMapping
+                ? i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
+                    defaultMessage: 'Assign colors to terms',
+                  })
+                : i18n.translate('xpack.lens.colorMapping.editColorsTitle', {
+                    defaultMessage: 'Edit colors',
+                  })
+            }
+            isInlineEditing={props.isInlineEditing}
           >
-            <EuiFlexItem>
-              <EuiColorPaletteDisplay
-                data-test-subj="lns_dynamicColoring_edit"
-                palette={colors}
-                type={'fixed'}
-                onClick={() => {
-                  setIsPaletteOpen(!isPaletteOpen);
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="lns_colorEditing_trigger"
-                aria-label={i18n.translate('xpack.lens.colorMapping.editColorMappingButton', {
-                  defaultMessage: 'Edit palette',
-                })}
-                iconType="controlsHorizontal"
-                onClick={() => {
-                  setIsPaletteOpen(!isPaletteOpen);
-                }}
-                size="xs"
-              />
-              <PalettePanelContainer
-                siblingRef={props.panelRef}
-                isOpen={isPaletteOpen}
-                handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
-                title={
-                  useNewColorMapping
-                    ? i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
-                        defaultMessage: 'Edit colors by term mapping',
-                      })
-                    : i18n.translate('xpack.lens.colorMapping.editColorsTitle', {
-                        defaultMessage: 'Edit colors',
-                      })
-                }
-                isInlineEditing={props.isInlineEditing}
-              >
-                <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
-                  <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
-                    <EuiFlexItem>
-                      <EuiSwitch
-                        label={
-                          <EuiText size="xs">
-                            <span>
-                              {i18n.translate('xpack.lens.colorMapping.tryLabel', {
-                                defaultMessage: 'Use the new Color Mapping feature',
-                              })}{' '}
-                              <EuiBadge color="hollow">
-                                {i18n.translate('xpack.lens.colorMapping.techPreviewLabel', {
-                                  defaultMessage: 'Tech preview',
-                                })}
-                              </EuiBadge>
-                            </span>
-                          </EuiText>
-                        }
-                        data-test-subj="lns_colorMappingOrLegacyPalette_switch"
-                        compressed
-                        checked={useNewColorMapping}
-                        onChange={({ target: { checked } }) => {
-                          trackUiCounterEvents(
-                            `color_mapping_switch_${checked ? 'enabled' : 'disabled'}`
-                          );
-                          setColorMapping(
-                            checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined
-                          );
-                          setUseNewColorMapping(checked);
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      {canUseColorMapping || useNewColorMapping ? (
-                        <CategoricalColorMapping
-                          isDarkMode={props.isDarkMode}
-                          model={currentLayer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
-                          onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
-                          palettes={AVAILABLE_PALETTES}
-                          data={{
-                            type: 'categories',
-                            categories: splitCategories,
-                          }}
-                          specialTokens={SPECIAL_TOKENS_STRING_CONVERTION}
-                        />
-                      ) : (
-                        <PalettePicker
-                          palettes={props.paletteService}
-                          activePalette={props.state.palette}
-                          setPalette={(newPalette) => {
-                            setLocalState({ ...props.state, palette: newPalette });
-                          }}
-                        />
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </div>
-              </PalettePanelContainer>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
+              <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
+                <EuiFlexItem>
+                  <EuiSwitch
+                    label={
+                      <EuiText size="xs">
+                        <span>
+                          {i18n.translate('xpack.lens.colorMapping.tryLabel', {
+                            defaultMessage: 'Use the new Color Mapping feature',
+                          })}{' '}
+                          <EuiBadge color="hollow">
+                            {i18n.translate('xpack.lens.colorMapping.techPreviewLabel', {
+                              defaultMessage: 'Tech preview',
+                            })}
+                          </EuiBadge>
+                        </span>
+                      </EuiText>
+                    }
+                    data-test-subj="lns_colorMappingOrLegacyPalette_switch"
+                    compressed
+                    checked={useNewColorMapping}
+                    onChange={({ target: { checked } }) => {
+                      trackUiCounterEvents(
+                        `color_mapping_switch_${checked ? 'enabled' : 'disabled'}`
+                      );
+                      setColorMapping(checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined);
+                      setUseNewColorMapping(checked);
+                    }}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {canUseColorMapping || useNewColorMapping ? (
+                    <CategoricalColorMapping
+                      isDarkMode={props.isDarkMode}
+                      model={currentLayer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
+                      onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
+                      palettes={AVAILABLE_PALETTES}
+                      data={{
+                        type: 'categories',
+                        categories: splitCategories,
+                      }}
+                      specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
+                    />
+                  ) : (
+                    <PalettePicker
+                      palettes={props.paletteService}
+                      activePalette={props.state.palette}
+                      setPalette={(newPalette) => {
+                        setLocalState({ ...props.state, palette: newPalette });
+                      }}
+                    />
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          </PalettePanelContainer>
         </EuiFormRow>
       )}
       {/* TODO: understand how this works  */}

@@ -1,26 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+} from '@kbn/core/server';
 import { GetFieldsOptions, IDataViewsApiClient } from '../common/types';
 import { DataViewMissingIndices } from '../common/lib';
 import { IndexPatternsFetcher } from './fetcher';
 import { hasUserDataView } from './has_user_data_view';
 
 export class IndexPatternsApiServer implements IDataViewsApiClient {
-  esClient: ElasticsearchClient;
   constructor(
-    elasticsearchClient: ElasticsearchClient,
+    private readonly esClient: ElasticsearchClient,
     private readonly savedObjectsClient: SavedObjectsClientContract,
+    private readonly uiSettingsClient: IUiSettingsClient,
     private readonly rollupsEnabled: boolean
-  ) {
-    this.esClient = elasticsearchClient;
-  }
+  ) {}
   async getFieldsForWildcard({
     pattern,
     metaFields,
@@ -29,12 +32,13 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
     allowNoIndex,
     indexFilter,
     fields,
+    includeEmptyFields,
   }: GetFieldsOptions) {
-    const indexPatterns = new IndexPatternsFetcher(
-      this.esClient,
-      allowNoIndex,
-      this.rollupsEnabled
-    );
+    const indexPatterns = new IndexPatternsFetcher(this.esClient, {
+      uiSettingsClient: this.uiSettingsClient,
+      allowNoIndices: allowNoIndex,
+      rollupsEnabled: this.rollupsEnabled,
+    });
     return await indexPatterns
       .getFieldsForWildcard({
         pattern,
@@ -43,6 +47,7 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
         rollupIndex,
         indexFilter,
         fields,
+        includeEmptyFields,
       })
       .catch((err) => {
         if (

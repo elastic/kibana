@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable max-classes-per-file */
 
-import { skip, take } from 'rxjs/operators';
+import { skip, take } from 'rxjs';
 import { Embeddable } from './embeddable';
 import { EmbeddableOutput, EmbeddableInput } from './i_embeddable';
 import { ViewMode } from '../types';
@@ -40,6 +41,17 @@ class OutputTestEmbeddable extends Embeddable<EmbeddableInput, Output> {
     });
   }
 
+  reload() {}
+}
+
+class PhaseTestEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput> {
+  public readonly type = 'phaseTest';
+  constructor() {
+    super({ id: 'phaseTest', viewMode: ViewMode.VIEW }, {});
+  }
+  public reportsEmbeddableLoad(): boolean {
+    return true;
+  }
   reload() {}
 }
 
@@ -102,6 +114,21 @@ test('updating output state retains instance information', async () => {
   outputTest.updateInput({ viewMode: ViewMode.EDIT });
   expect(outputTest.getOutput().inputUpdatedTimes).toBe(2);
   expect(outputTest.getOutput().testClass).toBeInstanceOf(TestClass);
+});
+
+test('fires phase events when output changes', async () => {
+  const phaseEventTest = new PhaseTestEmbeddable();
+  let phaseEventCount = 0;
+  phaseEventTest.phase$.subscribe((event) => {
+    if (event) {
+      phaseEventCount++;
+    }
+  });
+  expect(phaseEventCount).toBe(1); // loading is true by default which fires an event.
+  phaseEventTest.updateOutput({ loading: false });
+  expect(phaseEventCount).toBe(2);
+  phaseEventTest.updateOutput({ rendered: true });
+  expect(phaseEventCount).toBe(3);
 });
 
 test('updated$ called after reload and batches input/output changes', async () => {

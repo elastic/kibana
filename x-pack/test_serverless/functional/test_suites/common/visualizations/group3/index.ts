@@ -11,12 +11,10 @@ export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('Visualizations - Group 3', function () {
-    before(async () => {
-      await svlCommonPage.login();
-    });
+    this.tags(['esGate']);
 
-    after(async () => {
-      await svlCommonPage.forceLogout();
+    before(async () => {
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     loadTestFile(require.resolve('./open_in_lens/tsvb'));

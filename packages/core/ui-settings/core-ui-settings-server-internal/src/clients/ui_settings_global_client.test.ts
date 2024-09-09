@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -107,6 +108,42 @@ describe('ui settings global client', () => {
         'Global setting settingZ is not registered. Global settings need to be registered before they can be set'
       );
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('does not throws if validateKeys option is set to "false"', async () => {
+      const { uiSettingsClient, savedObjectsClient } = setup();
+      const setSettings = async () => {
+        await uiSettingsClient.setMany(
+          { settingZ: 'cde', settingC: true },
+          { validateKeys: false }
+        );
+        return 'done';
+      };
+      expect(setSettings()).resolves.toBe('done');
+      expect(savedObjectsClient.update).toHaveBeenCalled();
+    });
+  });
+
+  describe('#remove many()', () => {
+    it('throws an error if any of the settings are not registered', async () => {
+      const { uiSettingsClient, savedObjectsClient } = setup();
+      const setSettings = async () => {
+        await uiSettingsClient.removeMany(['foo']);
+      };
+      expect(setSettings).rejects.toThrow(
+        'Global setting foo is not registered. Global settings need to be registered before they can be set'
+      );
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('does not throws if validateKeys option is set to "false"', async () => {
+      const { uiSettingsClient, savedObjectsClient } = setup();
+      const setSettings = async () => {
+        await uiSettingsClient.removeMany(['foo'], { validateKeys: false });
+        return 'done';
+      };
+      expect(setSettings()).resolves.toBe('done');
+      expect(savedObjectsClient.update).toHaveBeenCalled();
     });
   });
 });

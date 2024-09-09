@@ -26,7 +26,7 @@ import {
   CloudDetailsPanel,
 } from '@kbn/search-api-panels';
 
-import { ApiKey } from '@kbn/security-plugin/common';
+import { ApiKey } from '@kbn/security-plugin-types-common';
 
 import { PLUGIN_ID } from '../../../../common/constants';
 import { KibanaDeps } from '../../../../common/types';
@@ -74,9 +74,11 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
           elasticsearchClients: docLinks.clientsGuide,
           kibanaRunApiInConsole: docLinks.consoleGuide,
         }}
-        http={http}
         isPanelLeft={isPanelLeft}
         overviewPanelProps={{ color: 'plain', hasShadow: false }}
+        application={services.application}
+        sharePlugin={services.share}
+        consolePlugin={services.console}
       >
         {languageDefinitions.map((language, index) => (
           <EuiFlexItem key={`panelItem.${index}`}>

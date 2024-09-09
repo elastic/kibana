@@ -1,23 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { CONNECTORS_INDEX } from '..';
+import { errors } from '@elastic/elasticsearch';
 
 import { updateConnectorScheduling } from './update_connector_scheduling';
 
-describe('addConnector lib function', () => {
+describe('updateConnectorScheduling lib function', () => {
   const mockClient = {
-    get: jest.fn(),
-    index: jest.fn(),
-    indices: {
-      refresh: jest.fn(),
+    transport: {
+      request: jest.fn(),
     },
   };
 
@@ -26,36 +25,7 @@ describe('addConnector lib function', () => {
   });
 
   it('should update connector scheduling', async () => {
-    mockClient.get.mockImplementationOnce(() => {
-      return Promise.resolve({
-        _source: {
-          api_key_id: null,
-          configuration: {},
-          created_at: null,
-          custom_scheduling: {},
-          error: null,
-          index_name: 'index_name',
-          last_access_control_sync_error: null,
-          last_access_control_sync_scheduled_at: null,
-          last_access_control_sync_status: null,
-          last_seen: null,
-          last_sync_error: null,
-          last_sync_scheduled_at: null,
-          last_sync_status: null,
-          last_synced: null,
-          scheduling: {
-            access_control: { enabled: false, interval: '* * * * *' },
-            full: { enabled: false, interval: '* * * * *' },
-            incremental: { enabled: false, interval: '* * * * *' },
-          },
-          service_type: null,
-          status: 'not connected',
-          sync_now: false,
-        },
-        index: CONNECTORS_INDEX,
-      });
-    });
-    mockClient.index.mockImplementation(() => ({ _id: 'fakeId' }));
+    mockClient.transport.request.mockImplementation(() => ({ result: 'updated' }));
 
     await expect(
       updateConnectorScheduling(mockClient as unknown as ElasticsearchClient, 'connectorId', {
@@ -66,43 +36,32 @@ describe('addConnector lib function', () => {
         },
         incremental: { enabled: false, interval: '* * * * *' },
       })
-    ).resolves.toEqual({ _id: 'fakeId' });
-    expect(mockClient.index).toHaveBeenCalledWith({
-      document: {
-        api_key_id: null,
-        configuration: {},
-        created_at: null,
-        custom_scheduling: {},
-        error: null,
-        index_name: 'index_name',
-        last_access_control_sync_error: null,
-        last_access_control_sync_scheduled_at: null,
-        last_access_control_sync_status: null,
-        last_seen: null,
-        last_sync_error: null,
-        last_sync_scheduled_at: null,
-        last_sync_status: null,
-        last_synced: null,
+    ).resolves.toEqual({ result: 'updated' });
+    expect(mockClient.transport.request).toHaveBeenCalledWith({
+      body: {
         scheduling: {
           access_control: { enabled: false, interval: '* * * * *' },
           full: { enabled: true, interval: '1 2 3 4 5' },
           incremental: { enabled: false, interval: '* * * * *' },
         },
-        service_type: null,
-        status: 'not connected',
-        sync_now: false,
       },
-      id: 'connectorId',
-      index: CONNECTORS_INDEX,
-    });
-    expect(mockClient.indices.refresh).toHaveBeenCalledWith({
-      index: CONNECTORS_INDEX,
+      method: 'PUT',
+      path: '/_connector/connectorId/_scheduling',
     });
   });
 
   it('should not index document if there is no connector', async () => {
-    mockClient.get.mockImplementationOnce(() => {
-      return Promise.resolve({});
+    mockClient.transport.request.mockImplementationOnce(() => {
+      return Promise.reject(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: {
+            error: {
+              type: `document_missing_exception`,
+            },
+          },
+        } as any)
+      );
     });
     await expect(
       updateConnectorScheduling(mockClient as unknown as ElasticsearchClient, 'connectorId', {
@@ -114,6 +73,5 @@ describe('addConnector lib function', () => {
         incremental: { enabled: false, interval: '* * * * *' },
       })
     ).rejects.toEqual(new Error('Could not find document'));
-    expect(mockClient.index).not.toHaveBeenCalled();
   });
 });

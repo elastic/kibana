@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 import { bulkMarkApiKeysForInvalidation } from './bulk_mark_api_keys_for_invalidation';
 
 describe('bulkMarkApiKeysForInvalidation', () => {
@@ -26,10 +27,10 @@ describe('bulkMarkApiKeysForInvalidation', () => {
     expect(bulkCreateCallMock).toHaveLength(1);
 
     expect(savedObjects).toHaveLength(2);
-    expect(savedObjects[0]).toHaveProperty('type', 'api_key_pending_invalidation');
+    expect(savedObjects[0]).toHaveProperty('type', API_KEY_PENDING_INVALIDATION_TYPE);
     expect(savedObjects[0]).toHaveProperty('attributes.apiKeyId', '123');
     expect(savedObjects[0]).toHaveProperty('attributes.createdAt', expect.any(String));
-    expect(savedObjects[1]).toHaveProperty('type', 'api_key_pending_invalidation');
+    expect(savedObjects[1]).toHaveProperty('type', API_KEY_PENDING_INVALIDATION_TYPE);
     expect(savedObjects[1]).toHaveProperty('attributes.apiKeyId', '456');
     expect(savedObjects[1]).toHaveProperty('attributes.createdAt', expect.any(String));
   });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -105,6 +106,12 @@ describe('ContextAppContent test', () => {
   it('should render discover grid correctly', async () => {
     const component = await mountComponent({ isLegacy: false });
     expect(component.find(UnifiedDataTable).length).toBe(1);
-    expect(findTestSubject(component, 'dscGridToolbar').exists()).toBe(true);
+    expect(findTestSubject(component, 'unifiedDataTableToolbar').exists()).toBe(true);
+  });
+
+  it('should not show display options button', async () => {
+    const component = await mountComponent({ isLegacy: false });
+    expect(findTestSubject(component, 'unifiedDataTableToolbar').exists()).toBe(true);
+    expect(findTestSubject(component, 'dataGridDisplaySelectorButton').exists()).toBe(false);
   });
 });

@@ -1,16 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger, KibanaRequest } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { Version } from '@kbn/object-versioning';
+import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '@kbn/saved-objects-settings';
+
+import type { MSearchIn, MSearchOut } from '../../common';
+import {
+  getContentClientFactory,
+  getMSearchClientFactory,
+  IContentClient,
+} from '../content_client';
 import { EventStreamService } from '../event_stream';
 import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
+import { MSearchService } from './msearch';
+
+export interface GetContentClientForRequestDependencies {
+  requestHandlerContext: RequestHandlerContext;
+  request: KibanaRequest;
+}
 
 export interface CoreApi {
   /**
@@ -24,6 +41,14 @@ export interface CoreApi {
   crud: <T = unknown>(contentType: string) => ContentCrud<T>;
   /** Content management event bus */
   eventBus: EventBus;
+  /** Client getters to interact with registered content types. */
+  contentClient: {
+    /** Client getter to interact with registered content types for the current HTTP request. */
+    getForRequest(deps: GetContentClientForRequestDependencies): {
+      for: <T = unknown>(contentTypeId: string, version?: Version) => IContentClient<T>;
+      msearch(args: MSearchIn): Promise<MSearchOut>;
+    };
+  };
 }
 
 export interface CoreInitializerContext {
@@ -52,13 +77,18 @@ export class Core {
   setup(): CoreSetup {
     this.setupEventStream();
 
+    const coreApi: CoreApi = {
+      register: this.contentRegistry.register.bind(this.contentRegistry),
+      crud: this.contentRegistry.getCrud.bind(this.contentRegistry),
+      eventBus: this.eventBus,
+      contentClient: {
+        getForRequest: this.getContentClientForRequest.bind(this),
+      },
+    };
+
     return {
       contentRegistry: this.contentRegistry,
-      api: {
-        register: this.contentRegistry.register.bind(this.contentRegistry),
-        crud: this.contentRegistry.getCrud.bind(this.contentRegistry),
-        eventBus: this.eventBus,
-      },
+      api: coreApi,
     };
   }
 
@@ -78,5 +108,51 @@ export class Core {
         });
       });
     }
+  }
+
+  private getContentClientForRequest({
+    requestHandlerContext,
+    request,
+  }: {
+    request: KibanaRequest;
+    requestHandlerContext: RequestHandlerContext;
+  }) {
+    /** Handler to return a ContentClient for a specific content type Id and request version */
+    const forFn = <T = unknown>(contentTypeId: string, version?: Version) => {
+      const contentDefinition = this.contentRegistry.getDefinition(contentTypeId);
+      const clientFactory = getContentClientFactory({
+        contentRegistry: this.contentRegistry,
+      });
+      const contentClient = clientFactory(contentTypeId);
+
+      return contentClient.getForRequest<T>({
+        requestHandlerContext,
+        request,
+        version: version ?? contentDefinition.version.latest,
+      });
+    };
+
+    const mSearchService = new MSearchService({
+      getSavedObjectsClient: async () => (await requestHandlerContext.core).savedObjects.client,
+      contentRegistry: this.contentRegistry,
+      getConfig: {
+        listingLimit: async () =>
+          (await requestHandlerContext.core).uiSettings.client.get(LISTING_LIMIT_SETTING),
+        perPage: async () =>
+          (await requestHandlerContext.core).uiSettings.client.get(PER_PAGE_SETTING),
+      },
+    });
+
+    const msearchClientFactory = getMSearchClientFactory({
+      contentRegistry: this.contentRegistry,
+      mSearchService,
+    });
+
+    const msearchClient = msearchClientFactory({ requestHandlerContext, request });
+
+    return {
+      for: forFn,
+      msearch: msearchClient.msearch,
+    };
   }
 }

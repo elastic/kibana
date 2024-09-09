@@ -23,7 +23,7 @@
           },
           "; }, baseHref: string) => string"
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,7 +34,7 @@
             "tags": [],
             "label": "{ reportType, allSeries }",
             "description": [],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -48,7 +48,7 @@
                 "signature": [
                   "\"heatmap\" | \"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
                 ],
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
+                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -69,7 +69,7 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
+                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -85,7 +85,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,7 +106,7 @@
           "ExploratoryViewPageProps",
           ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -120,77 +120,7 @@
             "signature": [
               "ExploratoryViewPageProps"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "exploratoryView",
-        "id": "def-public.FieldValueSelection",
-        "type": "Function",
-        "tags": [],
-        "label": "FieldValueSelection",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "FieldValueSelectionProps",
-          ") => JSX.Element"
-        ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "exploratoryView",
-            "id": "def-public.FieldValueSelection.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "FieldValueSelectionProps"
-            ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "exploratoryView",
-        "id": "def-public.FieldValueSuggestions",
-        "type": "Function",
-        "tags": [],
-        "label": "FieldValueSuggestions",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "FieldValueSuggestionsProps",
-          ") => JSX.Element"
-        ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "exploratoryView",
-            "id": "def-public.FieldValueSuggestions.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "FieldValueSuggestionsProps"
-            ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -211,7 +141,7 @@
           "FilterValueLabelProps",
           ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -225,7 +155,7 @@
             "signature": [
               "FilterValueLabelProps"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -244,7 +174,7 @@
         "signature": [
           "(query: Record<string, any>) => string"
         ],
-        "path": "x-pack/plugins/exploratory_view/public/utils/url.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/utils/url.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -258,7 +188,7 @@
             "signature": [
               "Record<string, any>"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/utils/url.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/utils/url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -279,7 +209,7 @@
           "SelectableUrlListProps",
           ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -293,7 +223,7 @@
             "signature": [
               "SelectableUrlListProps"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -314,7 +244,7 @@
           "ParsedQuery",
           "<string>"
         ],
-        "path": "x-pack/plugins/exploratory_view/public/utils/url.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/utils/url.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -328,7 +258,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/utils/url.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/utils/url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -346,7 +276,7 @@
         "tags": [],
         "label": "ConfigProps",
         "description": [],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -367,7 +297,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -388,7 +318,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -402,7 +332,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -416,7 +346,7 @@
         "tags": [],
         "label": "ExploratoryEmbeddableProps",
         "description": [],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -430,7 +360,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -444,7 +374,7 @@
             "signature": [
               "JSX.Element | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -465,7 +395,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -486,7 +416,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -507,7 +437,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -521,7 +451,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -535,7 +465,7 @@
             "signature": [
               "{ from: string; to: string; } | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -551,7 +481,7 @@
               "AppDataType",
               ", string>> | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -565,7 +495,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -579,7 +509,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -594,7 +524,7 @@
               "Position",
               " | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -608,7 +538,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -622,7 +552,7 @@
             "signature": [
               "((param: { range: number[]; }) => void) | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -633,7 +563,7 @@
                 "tags": [],
                 "label": "param",
                 "description": [],
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -647,7 +577,7 @@
                     "signature": [
                       "number[]"
                     ],
-                    "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+                    "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -666,7 +596,7 @@
             "signature": [
               "((loading: boolean) => void) | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -680,7 +610,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -698,7 +628,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -713,7 +643,7 @@
               "ReportConfigMap",
               " | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -727,7 +657,7 @@
             "signature": [
               "\"heatmap\" | \"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -741,7 +671,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -755,7 +685,7 @@
             "signature": [
               "string | JSX.Element | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -771,7 +701,7 @@
               "ActionTypes",
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -785,7 +715,7 @@
             "signature": [
               "\"right\" | \"left\" | \"center\" | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -799,7 +729,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -813,7 +743,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -827,7 +757,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -841,7 +771,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -855,7 +785,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -869,7 +799,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -883,7 +813,7 @@
         "tags": [],
         "label": "ExploratoryViewPublicPluginsSetup",
         "description": [],
-        "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -903,7 +833,7 @@
                 "text": "DataPublicPluginSetup"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -951,7 +881,7 @@
               },
               ") => void; }"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -971,7 +901,7 @@
                 "text": "TriggersAndActionsUIPublicPluginSetup"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -991,7 +921,7 @@
                 "text": "UsageCollectionSetup"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1012,7 +942,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1026,7 +956,7 @@
         "tags": [],
         "label": "ExploratoryViewPublicPluginsStart",
         "description": [],
-        "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1042,11 +972,11 @@
                 "pluginId": "cases",
                 "scope": "public",
                 "docId": "kibCasesPluginApi",
-                "section": "def-public.CasesUiStart",
-                "text": "CasesUiStart"
+                "section": "def-public.CasesPublicStart",
+                "text": "CasesPublicStart"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1069,7 +999,7 @@
               "ActiveCursor",
               "; }"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1089,7 +1019,7 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1109,7 +1039,7 @@
                 "text": "DataViewsServicePublic"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1129,7 +1059,7 @@
                 "text": "DiscoverStart"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1149,7 +1079,7 @@
                 "text": "EmbeddableStart"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1169,7 +1099,7 @@
                 "text": "LensPublicStart"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1189,7 +1119,7 @@
                 "text": "LicensingPluginStart"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1216,9 +1146,9 @@
               "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppDeepLink",
+                "section": "def-public.AppDeepLink",
                 "text": "AppDeepLink"
               },
               "<string>[]; updater$: ",
@@ -1226,14 +1156,14 @@
               "<",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppUpdater",
+                "section": "def-public.AppUpdater",
                 "text": "AppUpdater"
               },
-              ">; }) => void; setIsSidebarEnabled: (isEnabled: boolean) => void; }"
+              ">; }) => void; }"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1253,7 +1183,7 @@
                 "text": "SecurityPluginStart"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1293,7 +1223,7 @@
               },
               ">): void; }"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1314,7 +1244,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1334,7 +1264,7 @@
                 "text": "TriggersAndActionsUIPublicPluginStart"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1354,7 +1284,7 @@
                 "text": "UsageCollectionSetup"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1374,7 +1304,7 @@
                 "text": "UnifiedSearchPublicPluginStart"
               }
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1395,7 +1325,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1411,11 +1341,12 @@
                 "pluginId": "observabilityAIAssistant",
                 "scope": "public",
                 "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-public.ObservabilityAIAssistantPluginStart",
-                "text": "ObservabilityAIAssistantPluginStart"
-              }
+                "section": "def-public.ObservabilityAIAssistantPublicStart",
+                "text": "ObservabilityAIAssistantPublicStart"
+              },
+              " | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1429,7 +1360,7 @@
         "tags": [],
         "label": "SeriesConfig",
         "description": [],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1440,7 +1371,7 @@
             "tags": [],
             "label": "reportType",
             "description": [],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1470,7 +1401,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1492,7 +1423,7 @@
               },
               ">[]"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1506,7 +1437,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1518,9 +1449,9 @@
             "label": "defaultSeriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1534,7 +1465,7 @@
             "signature": [
               "(string | { field: string; nested?: string | undefined; isNegated?: boolean | undefined; })[]"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1555,7 +1486,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1593,7 +1524,7 @@
               },
               ")[] | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1631,7 +1562,7 @@
               },
               ")[] | undefined; })[]"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1645,7 +1576,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1663,7 +1594,7 @@
               "MetricOption",
               "[]; columnType?: string | undefined; })[] | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1677,7 +1608,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1688,7 +1619,7 @@
             "tags": [],
             "label": "hasOperationType",
             "description": [],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1709,7 +1640,7 @@
               },
               "<{ [key: string]: unknown; }> | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1723,7 +1654,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1744,7 +1675,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1758,7 +1689,7 @@
             "signature": [
               "{ query: string; language: \"kuery\"; } | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1772,7 +1703,7 @@
         "tags": [],
         "label": "SeriesUrl",
         "description": [],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1783,7 +1714,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1797,7 +1728,7 @@
             "signature": [
               "{ to: string; from: string; }"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1811,7 +1742,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1832,7 +1763,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1853,7 +1784,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1867,7 +1798,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1879,9 +1810,9 @@
             "label": "dataType",
             "description": [],
             "signature": [
-              "\"uptime\" | \"alerts\" | \"synthetics\" | \"ux\" | \"infra_logs\" | \"infra_metrics\" | \"apm\" | \"mobile\""
+              "\"uptime\" | \"alerts\" | \"apm\" | \"synthetics\" | \"ux\" | \"infra_logs\" | \"infra_metrics\" | \"mobile\""
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1896,7 +1827,7 @@
               "URLReportDefinition",
               " | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1911,7 +1842,7 @@
               "URLTextReportDefinition",
               " | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1925,7 +1856,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1939,7 +1870,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1953,7 +1884,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1967,7 +1898,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1981,7 +1912,7 @@
         "tags": [],
         "label": "UrlFilter",
         "description": [],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1992,7 +1923,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2006,7 +1937,7 @@
             "signature": [
               "(string | number)[] | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2020,7 +1951,7 @@
             "signature": [
               "(string | number)[] | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2034,7 +1965,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2048,7 +1979,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2064,7 +1995,7 @@
         "tags": [],
         "label": "ReportTypes",
         "description": [],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2081,7 +2012,7 @@
         "signature": [
           "\"ALL_VALUES\""
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/url_constants.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/url_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2103,7 +2034,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/hooks/use_series_storage.tsx",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/hooks/use_series_storage.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2118,7 +2049,7 @@
         "signature": [
           "\"/app/exploratory-view\""
         ],
-        "path": "x-pack/plugins/exploratory_view/public/constants.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2133,7 +2064,7 @@
         "signature": [
           "\"ENVIRONMENT_ALL\""
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2148,7 +2079,7 @@
         "signature": [
           "\"FILTER_RECORDS\""
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2163,7 +2094,7 @@
         "signature": [
           "\"operation\""
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2178,7 +2109,7 @@
         "signature": [
           "\"___records___\""
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2193,7 +2124,7 @@
         "signature": [
           "\"RecordsPercentage\""
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2208,7 +2139,7 @@
         "signature": [
           "\"REPORT_METRIC_FIELD\""
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2223,7 +2154,7 @@
         "signature": [
           "\"TERMS_COLUMN\""
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2238,7 +2169,7 @@
         "signature": [
           "\"USE_BREAK_DOWN_COLUMN\""
         ],
-        "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2259,7 +2190,7 @@
         "DataHandler",
         "<T>) => void; }"
       ],
-      "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+      "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -2303,7 +2234,7 @@
         },
         ") => JSX.Element | null; }"
       ],
-      "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+      "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

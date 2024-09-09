@@ -24,6 +24,12 @@ export const listActionTypesRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/list_action_types`,
+      options: {
+        access: 'public',
+        summary: `Get connector types`,
+        deprecated: true,
+        tags: ['oas-tag:connectors'],
+      },
       validate: {},
     },
     router.handleLegacyErrors(async function (context, req, res) {

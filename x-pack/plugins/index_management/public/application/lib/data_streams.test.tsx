@@ -34,5 +34,15 @@ describe('Data stream helpers', () => {
         })
       ).toBe('2 days');
     });
+
+    it('effective_retention should always have precedence over data_retention', () => {
+      expect(
+        getLifecycleValue({
+          enabled: true,
+          data_retention: '2d',
+          effective_retention: '5d',
+        })
+      ).toBe('5 days');
+    });
   });
 });

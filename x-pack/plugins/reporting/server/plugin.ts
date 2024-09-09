@@ -12,9 +12,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { PLUGIN_ID } from '@kbn/reporting-common';
-import type { ReportingConfigType } from '@kbn/reporting-server';
-import { setFieldFormats } from '@kbn/reporting-server';
+import { PLUGIN_ID, setFieldFormats, type ReportingConfigType } from '@kbn/reporting-server';
 import { ReportingCore } from '.';
 import { registerUiSettings } from './config';
 import { registerDeprecations } from './deprecations';
@@ -27,7 +25,8 @@ import type {
   ReportingStartDeps,
 } from './types';
 import { ReportingRequestHandlerContext } from './types';
-import { registerReportingUsageCollector } from './usage';
+import { registerReportingEventTypes, registerReportingUsageCollector } from './usage';
+import { registerFeatures } from './features';
 
 /*
  * @internal
@@ -74,14 +73,20 @@ export class ReportingPlugin
     registerUiSettings(core);
     registerDeprecations({ core, reportingCore });
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
+    registerReportingEventTypes(core);
 
     // Routes
     registerRoutes(reportingCore, this.logger);
 
     // async background setup
     (async () => {
-      // Feature registration relies on config, so it cannot be setup before here.
-      reportingCore.registerFeature();
+      // Feature registration relies on config, depending on whether deprecated roles are enabled, so it cannot be setup before here.
+      registerFeatures({
+        features: plugins.features,
+        deprecatedRoles: reportingCore.getDeprecatedAllowedRoles(),
+        isServerless: this.initContext.env.packageInfo.buildFlavor === 'serverless',
+        logger: this.logger,
+      });
       this.logger.debug('Setup complete');
     })().catch((e) => {
       this.logger.error(`Error in Reporting setup, reporting may not function properly`);
@@ -108,9 +113,11 @@ export class ReportingPlugin
       await reportingCore.pluginStart({
         logger,
         esClient: elasticsearch.client,
+        analytics: core.analytics,
         savedObjects,
         uiSettings,
         store,
+        securityService: core.security,
         ...plugins,
       });
 

@@ -7,13 +7,14 @@
 
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 
 export const bulkMarkApiKeysForInvalidation = async (
   { apiKeys }: { apiKeys: string[] },
   logger: Logger,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
-  withSpan({ name: 'bulkMarkApiKeysForInvalidation', type: 'rules' }, async () => {
+  await withSpan({ name: 'bulkMarkApiKeysForInvalidation', type: 'rules' }, async () => {
     if (apiKeys.length === 0) {
       return;
     }
@@ -28,7 +29,7 @@ export const bulkMarkApiKeysForInvalidation = async (
             apiKeyId,
             createdAt: new Date().toISOString(),
           },
-          type: 'api_key_pending_invalidation',
+          type: API_KEY_PENDING_INVALIDATION_TYPE,
         }))
       );
     } catch (e) {

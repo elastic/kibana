@@ -6,15 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-
-import type { MlApiServices } from '../../../services/ml_api_service';
-import { getDataViews } from '../../../util/dependency_cache';
+import type { MapApi } from '@kbn/maps-plugin/public';
+import type { MlApi } from '../../../services/ml_api_service';
+import type { MlJobService } from '../../../services/job_service';
 import {
   CREATED_BY_LABEL,
   JOB_TYPE,
@@ -22,9 +21,9 @@ import {
 } from '../../../../../common/constants/new_job';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import type { JobCreatorType } from '../common/job_creator';
-import { stashJobForCloning } from '../common/job_creator/util/general';
 import { getJobsItemsFromEmbeddable } from './utils';
-import { QuickJobCreatorBase, CreateState } from '../job_from_dashboard';
+import type { CreateState } from '../job_from_dashboard';
+import { QuickJobCreatorBase } from '../job_from_dashboard';
 import { getDefaultQuery } from '../utils/new_job_utils';
 
 interface VisDescriptor {
@@ -40,12 +39,14 @@ interface VisDescriptor {
 
 export class QuickGeoJobCreator extends QuickJobCreatorBase {
   constructor(
+    dataViews: DataViewsContract,
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
     dashboardService: DashboardStart,
-    mlApiServices: MlApiServices
+    mlApi: MlApi,
+    mlJobService: MlJobService
   ) {
-    super(kibanaConfig, timeFilter, dashboardService, mlApiServices);
+    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApi, mlJobService);
   }
 
   public async createAndSaveGeoJob({
@@ -62,7 +63,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
   }: {
     jobId: string;
     bucketSpan: string;
-    embeddable: MapEmbeddable;
+    embeddable: MapApi;
     startJob: boolean;
     runInRealTime: boolean;
     dataViewId?: string;
@@ -80,8 +81,8 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     } = await getJobsItemsFromEmbeddable(embeddable);
 
     // Map level stuff
-    const embeddableQuery = (await embeddable.getQuery()) ?? getDefaultQuery();
-    const embeddableFilters = (await embeddable.getFilters()) ?? [];
+    const embeddableQuery = (embeddable.query$?.value as Query) ?? getDefaultQuery();
+    const embeddableFilters = embeddable.filters$?.value ?? [];
 
     if (dashboardQuery === undefined || dashboardFilters === undefined) {
       throw new Error('Cannot create job, query and filters are undefined');
@@ -105,7 +106,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
       jobId,
       datafeedConfig,
       jobConfig,
-      createdByLabel: CREATED_BY_LABEL.GEO,
+      createdByLabel: CREATED_BY_LABEL.GEO_FROM_LENS,
       dashboard,
       start,
       end,
@@ -144,7 +145,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
       // add job config and start and end dates to the
       // job cloning stash, so they can be used
       // by the new job wizards
-      stashJobForCloning(
+      this.mlJobService.stashJobForCloning(
         {
           jobConfig,
           datafeedConfig,
@@ -250,7 +251,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
   }: VisDescriptor) {
     const dataView: DataView = sourceDataView
       ? sourceDataView
-      : await getDataViews().get(dataViewId!, true);
+      : await this.dataViews.get(dataViewId!, true);
 
     const jobConfig = createEmptyJob();
     const datafeedConfig = createEmptyDatafeed(dataView.getIndexPattern());

@@ -15,8 +15,11 @@ import { createFleetTestRendererMock } from '../../../mock';
 import {
   AGENTS_PREFIX,
   FLEET_ENROLLMENT_API_PREFIX,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENTS_INDEX,
+  ENROLLMENT_API_KEYS_INDEX,
+  INGEST_SAVED_OBJECT_INDEX,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import { SearchBar, getFieldSpecs } from './search_bar';
@@ -111,6 +114,7 @@ jest.mock('../hooks', () => {
               },
             },
           ]),
+          hasQuerySuggestions: jest.fn().mockReturnValue(true),
         },
         ui: {
           IndexPatternSelect: jest.fn(),
@@ -169,13 +173,12 @@ describe('SearchBar', () => {
 });
 
 describe('getFieldSpecs', () => {
-  it('returns fieldSpecs for fleet-agents', () => {
-    expect(getFieldSpecs(`.${AGENTS_PREFIX}`)).toHaveLength(66);
+  it('returns fieldSpecs for Fleet agents', () => {
+    expect(getFieldSpecs(AGENTS_INDEX, AGENTS_PREFIX)).toHaveLength(73);
   });
-  it('returns getFieldSpecs for fleet-enrollment-api-keys', () => {
-    const indexPattern = `.${FLEET_ENROLLMENT_API_PREFIX}`;
-    expect(getFieldSpecs(indexPattern)).toHaveLength(8);
-    expect(getFieldSpecs(indexPattern)).toEqual([
+
+  it('returns fieldSpecs for Fleet enrollment tokens', () => {
+    expect(getFieldSpecs(ENROLLMENT_API_KEYS_INDEX, FLEET_ENROLLMENT_API_PREFIX)).toEqual([
       {
         aggregatable: true,
         esTypes: ['boolean'],
@@ -235,176 +238,175 @@ describe('getFieldSpecs', () => {
     ]);
   });
 
-  it('returns getFieldSpecs for fleet-agent-policy', () => {
-    const indexPattern = `.${AGENT_POLICY_SAVED_OBJECT_TYPE}`;
-    expect(getFieldSpecs(indexPattern)).toHaveLength(23);
-    expect(getFieldSpecs(indexPattern)).toEqual([
-      {
-        aggregatable: true,
-        esTypes: ['keyword'],
-        name: 'agent_features.name',
-        searchable: true,
-        type: 'string',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['boolean'],
-        name: 'agent_features.enabled',
-        searchable: true,
-        type: 'boolean',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['keyword'],
-        name: 'data_output_id',
-        searchable: true,
-        type: 'string',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['text'],
-        name: 'description',
-        searchable: true,
-        type: 'string',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['keyword'],
-        name: 'download_source_id',
-        searchable: true,
-        type: 'string',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['keyword'],
-        name: 'fleet_server_host_id',
-        searchable: true,
-        type: 'string',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['integer'],
-        name: 'inactivity_timeout',
-        searchable: true,
-        type: 'number',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['boolean'],
-        name: 'is_default',
-        searchable: true,
-        type: 'boolean',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['boolean'],
-        name: 'is_default_fleet_server',
-        searchable: true,
-        type: 'boolean',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['boolean'],
-        name: 'is_managed',
-        searchable: true,
-        type: 'boolean',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['keyword'],
-        name: 'is_preconfigured',
-        searchable: true,
-        type: 'string',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['boolean'],
-        name: 'is_protected',
-        searchable: true,
-        type: 'boolean',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['keyword'],
-        name: 'monitoring_enabled',
-        searchable: true,
-        type: 'string',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['false'],
-        name: 'monitoring_enabled.index',
-        searchable: true,
-        type: 'false',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['keyword'],
-        name: 'monitoring_output_id',
-        searchable: true,
-        type: 'string',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['keyword'],
-        name: 'name',
-        searchable: true,
-        type: 'string',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['keyword'],
-        name: 'namespace',
-        searchable: true,
-        type: 'string',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['integer'],
-        name: 'revision',
-        searchable: true,
-        type: 'number',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['version'],
-        name: 'schema_version',
-        searchable: true,
-        type: 'string',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['keyword'],
-        name: 'status',
-        searchable: true,
-        type: 'string',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['integer'],
-        name: 'unenroll_timeout',
-        searchable: true,
-        type: 'number',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['date'],
-        name: 'updated_at',
-        searchable: true,
-        type: 'date',
-      },
-      {
-        aggregatable: true,
-        esTypes: ['keyword'],
-        name: 'updated_by',
-        searchable: true,
-        type: 'string',
-      },
-    ]);
+  it('returns fieldSpecs for Fleet agent policies', () => {
+    expect(getFieldSpecs(INGEST_SAVED_OBJECT_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE)).toEqual(
+      [
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.agent_features.name',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.agent_features.enabled',
+          searchable: true,
+          type: 'boolean',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.data_output_id',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['text'],
+          name: 'ingest-agent-policies.description',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.download_source_id',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.fleet_server_host_id',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['integer'],
+          name: 'ingest-agent-policies.inactivity_timeout',
+          searchable: true,
+          type: 'number',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.is_default',
+          searchable: true,
+          type: 'boolean',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.is_default_fleet_server',
+          searchable: true,
+          type: 'boolean',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.is_managed',
+          searchable: true,
+          type: 'boolean',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.is_preconfigured',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.is_protected',
+          searchable: true,
+          type: 'boolean',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.monitoring_enabled',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['false'],
+          name: 'ingest-agent-policies.monitoring_enabled.index',
+          searchable: true,
+          type: 'false',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.monitoring_output_id',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.name',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.namespace',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['integer'],
+          name: 'ingest-agent-policies.revision',
+          searchable: true,
+          type: 'number',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['version'],
+          name: 'ingest-agent-policies.schema_version',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.status',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['integer'],
+          name: 'ingest-agent-policies.unenroll_timeout',
+          searchable: true,
+          type: 'number',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['date'],
+          name: 'ingest-agent-policies.updated_at',
+          searchable: true,
+          type: 'date',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          name: 'ingest-agent-policies.updated_by',
+          searchable: true,
+          type: 'string',
+        },
+      ]
+    );
   });
-  expect(getFieldSpecs(`.${PACKAGE_POLICY_SAVED_OBJECT_TYPE}`)).toHaveLength(18);
 
   it('returns empty array if indexPattern is not one of the previous', async () => {
-    expect(getFieldSpecs('.kibana_ingest')).toEqual([]);
+    expect(getFieldSpecs(INGEST_SAVED_OBJECT_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE)).toEqual([]);
   });
 });

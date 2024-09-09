@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -17,9 +18,10 @@ import { DashboardContainerFactory } from '..';
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardRenderer } from './dashboard_renderer';
 import { pluginServices } from '../../services/plugin_services';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardCreationOptions } from '../embeddable/dashboard_container_factory';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { setStubKibanaServices as setPresentationPanelMocks } from '@kbn/presentation-panel-plugin/public/mocks';
 
 describe('dashboard renderer', () => {
   let mockDashboardContainer: DashboardContainer;
@@ -31,6 +33,7 @@ describe('dashboard renderer', () => {
       render: jest.fn(),
       select: jest.fn(),
       navigateToDashboard: jest.fn().mockResolvedValue({}),
+      getInput: jest.fn().mockResolvedValue({}),
     } as unknown as DashboardContainer;
     mockDashboardFactory = {
       create: jest.fn().mockReturnValue(mockDashboardContainer),
@@ -38,6 +41,7 @@ describe('dashboard renderer', () => {
     pluginServices.getServices().embeddable.getEmbeddableFactory = jest
       .fn()
       .mockReturnValue(mockDashboardFactory);
+    setPresentationPanelMocks();
   });
 
   test('calls create method on the Dashboard embeddable factory', async () => {
@@ -146,6 +150,7 @@ describe('dashboard renderer', () => {
       render: jest.fn(),
       navigateToDashboard: jest.fn(),
       select: jest.fn(),
+      getInput: jest.fn().mockResolvedValue({}),
     } as unknown as DashboardContainer;
     const mockSuccessFactory = {
       create: jest.fn().mockReturnValue(mockSuccessEmbeddable),
@@ -240,6 +245,7 @@ describe('dashboard renderer', () => {
       render: jest.fn(),
       navigateToDashboard: jest.fn(),
       select: jest.fn().mockReturnValue('WhatAnExpandedPanel'),
+      getInput: jest.fn().mockResolvedValue({}),
     } as unknown as DashboardContainer;
     const mockSuccessFactory = {
       create: jest.fn().mockReturnValue(mockSuccessEmbeddable),
@@ -260,5 +266,35 @@ describe('dashboard renderer', () => {
     expect(
       wrapper!.find('#superParent').getDOMNode().classList.contains('dshDashboardViewportWrapper')
     ).toBe(true);
+  });
+
+  test('adds a class to apply default background color when dashboard has use margin option set to false', async () => {
+    const mockUseMarginFalseEmbeddable = {
+      ...mockDashboardContainer,
+      getInput: jest.fn().mockResolvedValue({ useMargins: false }),
+    } as unknown as DashboardContainer;
+
+    const mockUseMarginFalseFactory = {
+      create: jest.fn().mockReturnValue(mockUseMarginFalseEmbeddable),
+    } as unknown as DashboardContainerFactory;
+    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+      .fn()
+      .mockReturnValue(mockUseMarginFalseFactory);
+
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(
+        <div id="superParent">
+          <DashboardRenderer savedObjectId="saved_object_kibanana" />
+        </div>
+      );
+    });
+
+    expect(
+      wrapper!
+        .find('#superParent')
+        .getDOMNode()
+        .classList.contains('dshDashboardViewportWrapper--defaultBg')
+    ).not.toBe(null);
   });
 });

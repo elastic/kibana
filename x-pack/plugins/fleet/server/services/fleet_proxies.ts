@@ -201,32 +201,30 @@ async function updateRelatedSavedObject(
 ) {
   await pMap(
     fleetServerHosts,
-    (fleetServerHost) => {
+    (fleetServerHost) =>
       updateFleetServerHost(soClient, fleetServerHost.id, {
         ...omit(fleetServerHost, 'id'),
         proxy_id: null,
-      });
-    },
+      }),
     { concurrency: 20 }
   );
 
   await pMap(
     outputs,
-    (output) => {
+    (output) =>
       outputService.update(soClient, esClient, output.id, {
         ...omit(output, 'id'),
         proxy_id: null,
-      } as Partial<Output>);
-    },
+      } as Partial<Output>),
     { concurrency: 20 }
   );
 
-  await pMap(downloadSources, (downloadSource) => {
+  await pMap(downloadSources, (downloadSource) =>
     downloadSourceService.update(soClient, downloadSource.id, {
       ...omit(downloadSource, 'id'),
       proxy_id: null,
-    });
-  });
+    })
+  );
 }
 
 export async function getFleetProxyRelatedSavedObjects(

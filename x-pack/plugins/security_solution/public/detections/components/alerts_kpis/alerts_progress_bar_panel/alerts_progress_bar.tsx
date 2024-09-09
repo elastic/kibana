@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { TableId } from '@kbn/securitysolution-data-table';
 import type { AlertsProgressBarData, GroupBySelection } from './types';
 import type { AddFilterProps } from '../common/types';
 import { getAggregateData } from './helpers';
@@ -103,6 +104,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
         value={key}
         queryValue={key}
         tooltipContent={null}
+        scopeId={TableId.alertsOnAlertsPage}
       >
         <EuiText size="xs" className="eui-textTruncate">
           {key}

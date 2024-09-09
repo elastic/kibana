@@ -961,7 +961,7 @@
             "label": "'kibana.alert.rule.parameters'",
             "description": [],
             "signature": [
-              "{ index: string[]; data_view_id?: string | undefined; } | undefined"
+              "{ index: string[]; data_view_id?: string | undefined; type?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-securitysolution-ecs/src/index.ts",
             "deprecated": false,
@@ -975,7 +975,7 @@
             "label": "'kibana.alert.workflow_status'",
             "description": [],
             "signature": [
-              "\"in-progress\" | \"open\" | \"closed\" | \"acknowledged\" | undefined"
+              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\" | undefined"
             ],
             "path": "packages/kbn-securitysolution-ecs/src/index.ts",
             "deprecated": false,

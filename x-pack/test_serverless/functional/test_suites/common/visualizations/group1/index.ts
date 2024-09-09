@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EsArchiver } from '@kbn/es-archiver';
+import type { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) => {
@@ -17,7 +17,9 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens serverless - group 1', () => {
+  describe('lens serverless - group 1', function () {
+    this.tags(['esGate']);
+
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -59,7 +61,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       });
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
-      await PageObjects.svlCommonPage.login();
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
@@ -67,7 +68,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     after(async () => {
       await esArchiver.unload(esArchive);
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.svlCommonPage.forceLogout();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
       await kibanaServer.savedObjects.cleanStandardList();

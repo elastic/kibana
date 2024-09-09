@@ -68,7 +68,6 @@
     "@kbn/ml-url-state",
     "@kbn/monaco",
     "@kbn/react-field",
-    "@kbn/repo-info",
     "@kbn/rison",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-management-plugin",
@@ -115,5 +114,19 @@
     "@kbn/ml-creation-wizard-utils",
     "@kbn/deeplinks-management",
     "@kbn/code-editor",
-  ],
+    "@kbn/presentation-publishing",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/ml-time-buckets",
+    "@kbn/aiops-change-point-detection",
+    "@kbn/inference_integration_flyout",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-panel-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/react-kibana-context-render",
+    "@kbn/esql-utils",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/json-schemas"
+  ]
 }

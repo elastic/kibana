@@ -11,7 +11,7 @@ import { dataConfig, generateData } from './generate_data';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -42,14 +42,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177122
   registry.when(
     'Dependency metadata when data is generated',
     { config: 'basic', archives: [] },
     () => {
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('returns correct metadata for the dependency', async () => {
-        await generateData({ synthtraceEsClient, start, end });
+        await generateData({ apmSynthtraceEsClient, start, end });
 
         const { status, body } = await callApi();
         const { span } = dataConfig;
@@ -58,7 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(body.metadata.spanType).to.equal(span.type);
         expect(body.metadata.spanSubtype).to.equal(span.subType);
 
-        await synthtraceEsClient.clean();
+        await apmSynthtraceEsClient.clean();
       });
     }
   );

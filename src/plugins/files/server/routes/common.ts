@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import mime from 'mime';
@@ -19,11 +20,7 @@ export function getDownloadHeadersForFile({ file, fileName }: Args): ResponseHea
   return {
     'content-type':
       (fileName && mime.getType(fileName)) ?? file.data.mimeType ?? 'application/octet-stream',
-    // Note, this name can be overridden by the client if set via a "download" attribute on the HTML tag.
-    'content-disposition': `attachment; filename="${fileName || getDownloadedFileName(file)}"`,
     'cache-control': 'max-age=31536000, immutable',
-    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
-    'x-content-type-options': 'nosniff',
   };
 }
 

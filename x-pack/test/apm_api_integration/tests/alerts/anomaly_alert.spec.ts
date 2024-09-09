@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const logger = getService('log');
 
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   registry.when(
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: [] },
@@ -62,7 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ];
           });
 
-        await synthtraceEsClient.index(events);
+        await apmSynthtraceEsClient.index(events);
 
         await createAndRunApmMlJobs({ es, ml, environments: ['production'], logger });
       });
@@ -72,7 +72,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       async function cleanup() {
-        await synthtraceEsClient.clean();
+        await apmSynthtraceEsClient.clean();
         await cleanupRuleAndAlertState({ es, supertest, logger });
         await ml.cleanMlIndices();
       }

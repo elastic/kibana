@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/console-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "console",
     "server": true,
@@ -15,11 +15,11 @@
     ],
     "optionalPlugins": [
       "usageCollection",
-      "home"
+      "home",
+      "cloud"
     ],
     "requiredBundles": [
       "esUiShared",
-      "kibanaReact",
       "kibanaUtils"
     ]
   }

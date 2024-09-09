@@ -11,6 +11,7 @@ import { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
 import { SUB_ACTION } from '../../../common/openai/constants';
 
 export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = (
+  logger,
   params,
   variables
 ) => {
@@ -20,7 +21,7 @@ export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> 
     ...params,
     subActionParams: {
       ...params.subActionParams,
-      body: renderMustacheString(params.subActionParams.body as string, variables, 'json'),
+      body: renderMustacheString(logger, params.subActionParams.body as string, variables, 'json'),
     },
   };
 };

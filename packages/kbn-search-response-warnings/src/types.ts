@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import type { ClusterDetails } from '@kbn/es-types';
 
 /**
  * A warning object for a search response with incomplete ES results
@@ -31,7 +31,7 @@ export interface SearchResponseIncompleteWarning {
   /**
    * clusters: cluster details.
    */
-  clusters: Record<string, ClusterDetails>;
+  clusters: Record<string, estypes.ClusterDetails>;
   /**
    * openInInspector: callback to open warning in inspector
    */

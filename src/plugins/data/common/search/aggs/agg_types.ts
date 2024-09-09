@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
@@ -58,6 +59,7 @@ export const getAggTypes = () => ({
     { name: BUCKET_TYPES.HISTOGRAM, fn: buckets.getHistogramBucketAgg },
     { name: BUCKET_TYPES.RANGE, fn: buckets.getRangeBucketAgg },
     { name: BUCKET_TYPES.DATE_RANGE, fn: buckets.getDateRangeBucketAgg },
+    { name: BUCKET_TYPES.IP_PREFIX, fn: buckets.getIpPrefixBucketAgg },
     { name: BUCKET_TYPES.IP_RANGE, fn: buckets.getIpRangeBucketAgg },
     { name: BUCKET_TYPES.TERMS, fn: buckets.getTermsBucketAgg },
     { name: BUCKET_TYPES.MULTI_TERMS, fn: buckets.getMultiTermsBucketAgg },
@@ -79,6 +81,7 @@ export const getAggTypesFunctions = () => [
   buckets.aggFilters,
   buckets.aggSignificantTerms,
   buckets.aggSignificantText,
+  buckets.aggIpPrefix,
   buckets.aggIpRange,
   buckets.aggDateRange,
   buckets.aggRange,

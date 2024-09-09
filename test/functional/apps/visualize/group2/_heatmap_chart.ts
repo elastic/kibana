@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -37,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Field = @timestamp');
       await PageObjects.visEditor.selectField('@timestamp');
       // leaving Interval set to Auto
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
     });
 
     it('should save and load', async function () {
@@ -96,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show 6 color ranges if changed on options', async function () {
       await PageObjects.visEditor.clickOptionsTab();
       await PageObjects.visEditor.changeHeatmapColorNumbers(6);
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
 
       const legends = await PageObjects.visChart.getLegendEntries();
@@ -137,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('customize 2 last ranges');
       await PageObjects.visEditor.setCustomRangeByIndex(6, '650', '720');
       await PageObjects.visEditor.setCustomRangeByIndex(7, '800', '905');
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
 
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       const legends = await PageObjects.visChart.getLegendEntries();

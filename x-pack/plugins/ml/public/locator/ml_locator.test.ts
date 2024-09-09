@@ -340,5 +340,56 @@ describe('ML locator', () => {
         });
       });
     });
+
+    describe('AIOps labs', () => {
+      it('should throw an error for invalid Change point detection page state', async () => {
+        await expect(
+          definition.getLocation({
+            page: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
+            pageState: {
+              index: '123123',
+            },
+          })
+        ).rejects.toThrow('Field configs are required to create a change point detection URL');
+
+        await expect(
+          definition.getLocation({
+            page: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
+            pageState: {
+              fieldConfigs: [
+                {
+                  fn: 'max',
+                  metricField: 'CPUUtilization',
+                  splitField: 'instance',
+                },
+              ],
+            },
+          })
+        ).rejects.toThrow('Data view is required to create a change point detection URL');
+      });
+
+      it('should generate valid URL for the Change point detection page', async () => {
+        const location = await definition.getLocation({
+          page: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
+          pageState: {
+            index: 'test-index',
+            timeRange: { from: '2019-10-28T00:00:00.000Z', to: '2019-11-11T13:31:00.000Z' },
+            fieldConfigs: [
+              {
+                fn: 'max',
+                metricField: 'CPUUtilization',
+                splitField: 'instance',
+              },
+            ],
+          },
+        });
+
+        expect(location).toMatchObject({
+          app: 'ml',
+          path: "/aiops/change_point_detection?index=test-index&_g=(time:(from:'2019-10-28T00:00:00.000Z',to:'2019-11-11T13:31:00.000Z'))&_a=(changePoint:(fieldConfigs:!((fn:max,metricField:CPUUtilization,splitField:instance))))",
+          state: {},
+        });
+      });
+    });
   });
 });

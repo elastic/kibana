@@ -11,7 +11,6 @@ import { expandableFlyoutStateFromEventMeta } from '../../../flyout/document_det
 export interface ResolveFlyoutParamsConfig {
   index: string;
   alertId: string;
-  isSecurityFlyoutEnabled: boolean;
 }
 
 /**
@@ -21,27 +20,14 @@ export interface ResolveFlyoutParamsConfig {
  * with Share Button on the Expandable Flyout
  */
 export const resolveFlyoutParams = (
-  { index, alertId, isSecurityFlyoutEnabled }: ResolveFlyoutParamsConfig,
+  { index, alertId }: ResolveFlyoutParamsConfig,
   currentParamsString: string | null
 ) => {
-  if (!isSecurityFlyoutEnabled) {
-    const legacyFlyoutString = encode({
-      panelView: 'eventDetail',
-      params: {
-        eventId: alertId,
-        indexName: index,
-      },
-    });
-    return legacyFlyoutString;
-  }
-
   if (currentParamsString) {
     return currentParamsString;
   }
 
-  const modernFlyoutString = encode(
+  return encode(
     expandableFlyoutStateFromEventMeta({ index, eventId: alertId, scopeId: 'alerts-page' })
   );
-
-  return modernFlyoutString;
 };

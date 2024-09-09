@@ -9,10 +9,15 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep, uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
-import { DatasourceLayers, OperationMetadata, VisualizationType } from '../../types';
+import {
+  DatasourceLayers,
+  FramePublicAPI,
+  OperationMetadata,
+  UserMessage,
+  VisualizationType,
+} from '../../types';
 import {
   State,
-  visualizationTypes,
   XYState,
   XYAnnotationLayerConfig,
   XYLayerConfig,
@@ -20,16 +25,14 @@ import {
   XYReferenceLineLayerConfig,
   SeriesType,
   XYByReferenceAnnotationLayerConfig,
-  XYPersistedAnnotationLayerConfig,
-  XYPersistedByReferenceAnnotationLayerConfig,
-  XYPersistedLinkedByValueAnnotationLayerConfig,
-  XYPersistedLayerConfig,
-  XYPersistedByValueAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
+  visualizationTypes,
+  visualizationSubtypes,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
 import type { ExtraAppendLayerArg } from './visualization';
+import { XY_BREAKDOWN_MISSING_AXIS, XY_Y_MISSING_AXIS } from '../../user_messages_ids';
 
 export function getAxisName(
   axis: 'x' | 'y' | 'yLeft' | 'yRight',
@@ -149,31 +152,10 @@ export const isAnnotationsLayer = (
 ): layer is XYAnnotationLayerConfig =>
   layer.layerType === layerTypes.ANNOTATIONS && 'indexPatternId' in layer;
 
-export const isPersistedAnnotationsLayer = (
-  layer: XYPersistedLayerConfig
-): layer is XYPersistedAnnotationLayerConfig =>
-  layer.layerType === layerTypes.ANNOTATIONS && !('indexPatternId' in layer);
-
-export const isPersistedByValueAnnotationsLayer = (
-  layer: XYPersistedLayerConfig
-): layer is XYPersistedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) &&
-  (layer.persistanceType === 'byValue' || !layer.persistanceType);
-
 export const isByReferenceAnnotationsLayer = (
   layer: XYLayerConfig
 ): layer is XYByReferenceAnnotationLayerConfig =>
   'annotationGroupId' in layer && '__lastSaved' in layer;
-
-export const isPersistedByReferenceAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedByReferenceAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'byReference';
-
-export const isPersistedLinkedByValueAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedLinkedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'linked';
 
 export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
@@ -210,20 +192,48 @@ export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLa
   return options[layerTypes.ANNOTATIONS](layer);
 };
 
-export function getVisualizationType(state: State): VisualizationType | 'mixed' {
+export function getVisualizationSubtypeId(state: State) {
   if (!state.layers.length) {
     return (
-      visualizationTypes.find((t) => t.id === state.preferredSeriesType) ?? visualizationTypes[0]
+      visualizationSubtypes.find((t) => t.id === state.preferredSeriesType) ??
+      visualizationSubtypes[0]
+    ).id;
+  }
+  const dataLayers = getDataLayers(state?.layers);
+  const subtype = (
+    visualizationSubtypes.find((t) => t.id === dataLayers[0].seriesType) ?? visualizationSubtypes[0]
+  ).id;
+  const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));
+
+  return subtype && seriesTypes.length === 1 ? subtype : 'mixed';
+}
+
+export function getVisualizationType(state: State, layerId?: string): VisualizationType | 'mixed' {
+  if (!state.layers.length) {
+    return (
+      visualizationTypes.find((t) => t.subtypes?.includes(state.preferredSeriesType)) ??
+      visualizationTypes[0]
     );
   }
   const dataLayers = getDataLayers(state?.layers);
-  const visualizationType = visualizationTypes.find((t) => t.id === dataLayers?.[0].seriesType);
+  if (layerId) {
+    const dataLayerSeries = layerId
+      ? dataLayers.find((d) => d.layerId === layerId)?.seriesType
+      : dataLayers[0].seriesType;
+    return (
+      visualizationTypes.find((t) => dataLayerSeries && t.subtypes?.includes(dataLayerSeries)) ||
+      visualizationTypes[0]
+    );
+  }
+  const visualizationType =
+    visualizationTypes.find((t) => t.subtypes?.includes(dataLayers[0].seriesType)) ??
+    visualizationTypes[0];
   const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));
 
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }
 
-export function getDescription(state?: State) {
+export function getDescription(state?: State, layerId?: string) {
   if (!state) {
     return {
       icon: defaultIcon,
@@ -233,7 +243,7 @@ export function getDescription(state?: State) {
     };
   }
 
-  const visualizationType = getVisualizationType(state);
+  const visualizationType = getVisualizationType(state, layerId);
 
   if (visualizationType === 'mixed' && isHorizontalChart(state.layers)) {
     return {
@@ -271,15 +281,19 @@ export const supportedDataLayer = {
 };
 
 // i18n ids cannot be dynamically generated, hence the function below
-export function getMessageIdsForDimension(
-  dimension: string,
+function getMessageIdsForDimension(
+  dimension: 'y' | 'break_down',
   layers: number[],
   isHorizontal: boolean
-) {
+): UserMessage {
   const layersList = layers.map((i: number) => i + 1).join(', ');
   switch (dimension) {
-    case 'Break down':
+    case 'break_down':
       return {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        uniqueId: XY_BREAKDOWN_MISSING_AXIS,
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureSplitShort', {
           defaultMessage: `Missing {axis}.`,
           values: { axis: 'Break down by axis' },
@@ -289,8 +303,12 @@ export function getMessageIdsForDimension(
           values: { layers: layers.length, layersList, axis: 'Break down by axis' },
         }),
       };
-    case 'Y':
+    case 'y':
       return {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        uniqueId: XY_Y_MISSING_AXIS,
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYShort', {
           defaultMessage: `Missing {axis}.`,
           values: { axis: getAxisName('y', { isHorizontal }) },
@@ -301,7 +319,6 @@ export function getMessageIdsForDimension(
         }),
       };
   }
-  return { shortMessage: '', longMessage: '' };
 }
 
 const newLayerFn = {
@@ -383,32 +400,54 @@ export function getLayersByType(state: State, byType?: string) {
 }
 
 export function validateLayersForDimension(
-  dimension: string,
-  layers: XYDataLayerConfig[],
+  dimension: 'y' | 'break_down',
+  allLayers: XYLayerConfig[],
   missingCriteria: (layer: XYDataLayerConfig) => boolean
 ):
   | { valid: true }
   | {
       valid: false;
-      payload: { shortMessage: string; longMessage: React.ReactNode };
+      error: UserMessage;
     } {
+  const dataLayers = allLayers
+    .map((layer, i) => ({ layer, originalIndex: i }))
+    .filter(({ layer }) => isDataLayer(layer)) as Array<{
+    layer: XYDataLayerConfig;
+    originalIndex: number;
+  }>;
+
+  // filter out those layers with no accessors at all
+  const filteredLayers = dataLayers.filter(
+    ({ layer: { accessors, xAccessor, splitAccessor } }) =>
+      accessors.length > 0 || xAccessor != null || splitAccessor != null
+  );
   // Multiple layers must be consistent:
   // * either a dimension is missing in ALL of them
   // * or should not miss on any
-  if (layers.every(missingCriteria) || !layers.some(missingCriteria)) {
+  if (
+    filteredLayers.every(({ layer }) => missingCriteria(layer)) ||
+    !filteredLayers.some(({ layer }) => missingCriteria(layer))
+  ) {
     return { valid: true };
   }
   // otherwise it's an error and it has to be reported
-  const layerMissingAccessors = layers.reduce((missing: number[], layer, i) => {
-    if (missingCriteria(layer)) {
-      missing.push(i);
-    }
-    return missing;
-  }, []);
+  const layerMissingAccessors = filteredLayers.reduce(
+    (missing: number[], { layer, originalIndex }) => {
+      if (missingCriteria(layer)) {
+        missing.push(originalIndex);
+      }
+      return missing;
+    },
+    []
+  );
 
   return {
     valid: false,
-    payload: getMessageIdsForDimension(dimension, layerMissingAccessors, isHorizontalChart(layers)),
+    error: getMessageIdsForDimension(
+      dimension,
+      layerMissingAccessors,
+      isHorizontalChart(dataLayers.map(({ layer }) => layer))
+    ),
   };
 }
 
@@ -418,3 +457,16 @@ export const isNumericMetric = (op: OperationMetadata) =>
 export const isNumericDynamicMetric = (op: OperationMetadata) =>
   isNumericMetric(op) && !op.isStaticValue;
 export const isBucketed = (op: OperationMetadata) => op.isBucketed;
+
+export const isTimeChart = (
+  dataLayers: XYDataLayerConfig[],
+  frame?: Pick<FramePublicAPI, 'datasourceLayers'> | undefined
+) =>
+  Boolean(
+    dataLayers.length &&
+      dataLayers.every(
+        (dataLayer) =>
+          dataLayer.xAccessor &&
+          checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
+      )
+  );

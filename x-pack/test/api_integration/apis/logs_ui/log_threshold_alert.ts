@@ -10,8 +10,7 @@ import sinon from 'sinon';
 import {
   executeAlert,
   executeRatioAlert,
-  LogThresholdAlertFactory,
-  LogThresholdAlertLimit,
+  LogThresholdAlertReporter,
 } from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
 import {
   Comparator,
@@ -33,11 +32,15 @@ export default function ({ getService }: FtrProviderContext) {
       describe('without group by', () => {
         it('should trigger alerts below the alert limit', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
-          const alertLimit = {
-            getValue: sinon.fake.returns(10),
-            setLimitReached: sinon.fake(),
-          } as SinonSpiesOf<LogThresholdAlertLimit>;
+          const alertReporter = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
+          const alertsClient = {
+            report: sinon.fake(),
+            getAlertLimitValue: sinon.fake.returns(10),
+            setAlertLimitReached: sinon.fake(),
+            getRecoveredAlerts: sinon.fake(),
+            setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
+          };
           const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
@@ -64,13 +67,13 @@ export default function ({ getService }: FtrProviderContext) {
             'alerts-test-data',
             {},
             esClient,
-            alertFactory,
-            alertLimit,
+            alertReporter,
+            alertsClient,
             timestamp.valueOf()
           );
 
-          expect(alertFactory.callCount).to.equal(1);
-          expect(alertFactory.getCall(0).args).to.eql([
+          expect(alertReporter.callCount).to.equal(1);
+          expect(alertReporter.getCall(0).args).to.eql([
             '*',
             '2 log entries in the last 5 mins. Alert when ≥ 1.',
             2,
@@ -89,18 +92,22 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             undefined,
           ]);
-          expect(alertLimit.setLimitReached.calledOnceWith(false)).to.be(true);
+          expect(alertsClient.setAlertLimitReached.calledOnceWith(false)).to.be(true);
         });
       });
 
       describe('with group by', () => {
         it('should trigger alerts up to the alert limit when group by env', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
-          const alertLimit = {
-            getValue: sinon.fake.returns(2),
-            setLimitReached: sinon.fake(),
-          } as SinonSpiesOf<LogThresholdAlertLimit>;
+          const alertReporter = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
+          const alertsClient = {
+            report: sinon.fake(),
+            getAlertLimitValue: sinon.fake.returns(2),
+            setAlertLimitReached: sinon.fake(),
+            getRecoveredAlerts: sinon.fake(),
+            setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
+          };
           const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
@@ -128,13 +135,13 @@ export default function ({ getService }: FtrProviderContext) {
             'alerts-test-data',
             {},
             esClient,
-            alertFactory,
-            alertLimit,
+            alertReporter,
+            alertsClient,
             timestamp.valueOf()
           );
 
-          expect(alertFactory.callCount).to.equal(2);
-          expect(alertFactory.getCall(0).args).to.eql([
+          expect(alertReporter.callCount).to.equal(2);
+          expect(alertReporter.getCall(0).args).to.eql([
             'dev',
             '3 log entries in the last 5 mins for dev. Alert when ≥ 1.',
             3,
@@ -156,16 +163,20 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             undefined,
           ]);
-          expect(alertLimit.setLimitReached.calledOnceWith(true)).to.be(true);
+          expect(alertsClient.setAlertLimitReached.calledOnceWith(true)).to.be(true);
         });
 
         it('should trigger alerts up to the alert limit when group by host.name', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
-          const alertLimit = {
-            getValue: sinon.fake.returns(1),
-            setLimitReached: sinon.fake(),
-          } as SinonSpiesOf<LogThresholdAlertLimit>;
+          const alertReporter = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
+          const alertsClient = {
+            report: sinon.fake(),
+            getAlertLimitValue: sinon.fake.returns(1),
+            setAlertLimitReached: sinon.fake(),
+            getRecoveredAlerts: sinon.fake(),
+            setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
+          };
           const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
@@ -193,13 +204,13 @@ export default function ({ getService }: FtrProviderContext) {
             'alerts-test-data',
             {},
             esClient,
-            alertFactory,
-            alertLimit,
+            alertReporter,
+            alertsClient,
             timestamp.valueOf()
           );
 
-          expect(alertFactory.callCount).to.equal(1);
-          expect(alertFactory.getCall(0).args).to.eql([
+          expect(alertReporter.callCount).to.equal(1);
+          expect(alertReporter.getCall(0).args).to.eql([
             'host-01',
             '1 log entry in the last 5 mins for host-01. Alert when ≥ 1.',
             1,
@@ -230,16 +241,20 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           ]);
-          expect(alertLimit.setLimitReached.calledOnceWith(true)).to.be(true);
+          expect(alertsClient.setAlertLimitReached.calledOnceWith(true)).to.be(true);
         });
 
         it('alert context should not have excluded fields when group by host.name', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
-          const alertLimit = {
-            getValue: sinon.fake.returns(1),
-            setLimitReached: sinon.fake(),
-          } as SinonSpiesOf<LogThresholdAlertLimit>;
+          const alertReporter = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
+          const alertsClient = {
+            report: sinon.fake(),
+            getAlertLimitValue: sinon.fake.returns(1),
+            setAlertLimitReached: sinon.fake(),
+            getRecoveredAlerts: sinon.fake(),
+            setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
+          };
           const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
@@ -267,24 +282,28 @@ export default function ({ getService }: FtrProviderContext) {
             'alerts-test-data',
             {},
             esClient,
-            alertFactory,
-            alertLimit,
+            alertReporter,
+            alertsClient,
             timestamp.valueOf()
           );
 
-          expect(alertFactory.callCount).to.equal(1);
-          expect(alertFactory.getCall(0).args[5]?.host).not.have.property('disk');
-          expect(alertFactory.getCall(0).args[5]?.host).not.have.property('network');
-          expect(alertFactory.getCall(0).args[5]?.host).not.have.property('cpu');
+          expect(alertReporter.callCount).to.equal(1);
+          expect(alertReporter.getCall(0).args[5]?.host).not.have.property('disk');
+          expect(alertReporter.getCall(0).args[5]?.host).not.have.property('network');
+          expect(alertReporter.getCall(0).args[5]?.host).not.have.property('cpu');
         });
 
         it('should limit alerts to the alert limit', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
-          const alertLimit = {
-            getValue: sinon.fake.returns(1),
-            setLimitReached: sinon.fake(),
-          } as SinonSpiesOf<LogThresholdAlertLimit>;
+          const alertReporter = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
+          const alertsClient = {
+            report: sinon.fake(),
+            getAlertLimitValue: sinon.fake.returns(1),
+            setAlertLimitReached: sinon.fake(),
+            getRecoveredAlerts: sinon.fake(),
+            setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
+          };
           const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
@@ -312,13 +331,13 @@ export default function ({ getService }: FtrProviderContext) {
             'alerts-test-data',
             {},
             esClient,
-            alertFactory,
-            alertLimit,
+            alertReporter,
+            alertsClient,
             timestamp.valueOf()
           );
 
-          expect(alertFactory.callCount).to.equal(1);
-          expect(alertFactory.getCall(0).args).to.eql([
+          expect(alertReporter.callCount).to.equal(1);
+          expect(alertReporter.getCall(0).args).to.eql([
             'dev',
             '3 log entries in the last 5 mins for dev. Alert when ≥ 1.',
             3,
@@ -340,7 +359,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             undefined,
           ]);
-          expect(alertLimit.setLimitReached.calledOnceWith(true)).to.be(true);
+          expect(alertsClient.setAlertLimitReached.calledOnceWith(true)).to.be(true);
         });
       });
     });
@@ -352,11 +371,15 @@ export default function ({ getService }: FtrProviderContext) {
       describe('without group by', () => {
         it('should trigger alerts below the alert limit', async () => {
           const timestamp = new Date(DATES.ten_thousand_plus.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
-          const alertLimit = {
-            getValue: sinon.fake.returns(2),
-            setLimitReached: sinon.fake(),
-          } as SinonSpiesOf<LogThresholdAlertLimit>;
+          const alertReporter = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
+          const alertsClient = {
+            report: sinon.fake(),
+            getAlertLimitValue: sinon.fake.returns(2),
+            setAlertLimitReached: sinon.fake(),
+            getRecoveredAlerts: sinon.fake(),
+            setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
+          };
           const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
@@ -380,12 +403,12 @@ export default function ({ getService }: FtrProviderContext) {
             'filebeat-*',
             {},
             esClient,
-            alertFactory,
-            alertLimit,
+            alertReporter,
+            alertsClient,
             timestamp.valueOf()
           );
-          expect(alertFactory.callCount).to.equal(1);
-          expect(alertFactory.getCall(0).args).to.eql([
+          expect(alertReporter.callCount).to.equal(1);
+          expect(alertReporter.getCall(0).args).to.eql([
             '*',
             'The ratio of selected logs is 0.5526081141328578 in the last 5 mins. Alert when ≥ 0.5.',
             0.5526081141328578,
@@ -406,18 +429,22 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             undefined,
           ]);
-          expect(alertLimit.setLimitReached.calledOnceWith(false)).to.be(true);
+          expect(alertsClient.setAlertLimitReached.calledOnceWith(false)).to.be(true);
         });
       });
 
       describe('with group by', () => {
         it('should trigger alerts below the alert limit', async () => {
           const timestamp = new Date(DATES.ten_thousand_plus.max);
-          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
-          const alertLimit = {
-            getValue: sinon.fake.returns(2),
-            setLimitReached: sinon.fake(),
-          } as SinonSpiesOf<LogThresholdAlertLimit>;
+          const alertReporter = sinon.fake() as SinonSpyOf<LogThresholdAlertReporter>;
+          const alertsClient = {
+            report: sinon.fake(),
+            getAlertLimitValue: sinon.fake.returns(2),
+            setAlertLimitReached: sinon.fake(),
+            getRecoveredAlerts: sinon.fake(),
+            setAlertData: sinon.fake(),
+            isTrackedAlert: sinon.fake(),
+          };
           const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
@@ -442,12 +469,12 @@ export default function ({ getService }: FtrProviderContext) {
             'filebeat-*',
             {},
             esClient,
-            alertFactory,
-            alertLimit,
+            alertReporter,
+            alertsClient,
             timestamp.valueOf()
           );
-          expect(alertFactory.callCount).to.equal(1);
-          expect(alertFactory.getCall(0).args).to.eql([
+          expect(alertReporter.callCount).to.equal(1);
+          expect(alertReporter.getCall(0).args).to.eql([
             'web',
             'The ratio of selected logs is 0.5526081141328578 in the last 5 mins for web. Alert when ≥ 0.5.',
             0.5526081141328578,
@@ -473,7 +500,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             undefined,
           ]);
-          expect(alertLimit.setLimitReached.calledOnceWith(false)).to.be(true);
+          expect(alertsClient.setAlertLimitReached.calledOnceWith(false)).to.be(true);
         });
       });
     });
@@ -484,7 +511,3 @@ type SinonSpyOf<SpyTarget extends (...args: any[]) => any> = sinon.SinonSpy<
   Parameters<SpyTarget>,
   ReturnType<SpyTarget>
 >;
-
-type SinonSpiesOf<SpyTarget extends Record<string, (...args: any[]) => any>> = {
-  [Key in keyof SpyTarget]: SinonSpyOf<SpyTarget[Key]>;
-};

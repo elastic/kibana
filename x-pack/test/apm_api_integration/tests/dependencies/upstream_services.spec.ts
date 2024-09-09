@@ -11,7 +11,7 @@ import { generateData } from './generate_data';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const registry = getService('registry');
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -47,12 +47,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177137
   registry.when('Dependency upstream services', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       before(async () => {
-        await generateData({ synthtraceEsClient, start, end });
+        await generateData({ apmSynthtraceEsClient, start, end });
       });
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('returns a list of upstream services for the dependency', async () => {
         const { status, body } = await callApi();

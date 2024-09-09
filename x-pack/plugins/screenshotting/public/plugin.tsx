@@ -10,7 +10,6 @@ import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
 import { SCREENSHOTTING_APP_ID } from '../common';
 import { App, ScreenshotModeContext } from './app';
 
@@ -25,7 +24,7 @@ export class ScreenshottingPlugin implements Plugin<void, void, SetupDeps> {
       application.register({
         id: SCREENSHOTTING_APP_ID,
         title: 'Screenshotting Expressions Renderer',
-        navLinkStatus: AppNavLinkStatus.hidden,
+        visibleIn: [],
         chromeless: true,
 
         mount: async ({ element }: AppMountParameters) => {

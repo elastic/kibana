@@ -7,3 +7,6 @@
 
 export { useCloudSecurityGrouping } from './use_cloud_security_grouping';
 export { CloudSecurityGrouping } from './cloud_security_grouping';
+export { firstNonNullValue } from './utils/first_non_null_value';
+export { NullGroup } from './null_group';
+export { LoadingGroup } from './loading_group';

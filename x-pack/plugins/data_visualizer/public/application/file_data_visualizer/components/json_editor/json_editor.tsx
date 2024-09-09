@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
 import { expandLiteralStrings, XJsonMode } from '../../../shared_imports';
@@ -16,7 +17,7 @@ interface JobEditorProps {
   value: string;
   height?: string;
   width?: string;
-  mode?: typeof EDITOR_MODE[keyof typeof EDITOR_MODE];
+  mode?: (typeof EDITOR_MODE)[keyof typeof EDITOR_MODE];
   readOnly?: boolean;
   onChange?: CodeEditorProps['onChange'];
 }

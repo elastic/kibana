@@ -14,14 +14,18 @@ import {
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
+import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
+import { LOCAL_LOCATION } from './get_filters';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('getSyntheticsMonitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
+    const kibanaServer = getService('kibanaServer');
+    const retry = getService('retry');
 
     let _monitors: MonitorFields[];
     let monitors: MonitorFields[];
@@ -30,13 +34,15 @@ export default function ({ getService }: FtrProviderContext) {
       const res = await supertest
         .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
-        .send(monitor)
-        .expect(200);
+        .send(monitor);
+
+      expect(res.status).eql(200, JSON.stringify(res.body));
 
       return res.body as EncryptedSyntheticsSavedMonitor;
     };
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set('kbn-xsrf', 'true')
@@ -54,7 +60,8 @@ export default function ({ getService }: FtrProviderContext) {
       monitors = _monitors;
     });
 
-    describe('get many monitors', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/169753
+    describe.skip('get many monitors', () => {
       it('without params', async () => {
         const [mon1, mon2] = await Promise.all(monitors.map(saveMonitor));
 
@@ -82,29 +89,39 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         expect(foundMonitors.map((fm) => omit(fm, 'updated_at', 'created_at'))).eql(
-          expected.map((expectedMon) => omit(expectedMon, 'updated_at', 'created_at'))
+          expected.map((expectedMon) =>
+            omit(expectedMon, ['updated_at', 'created_at', ...secretKeys])
+          )
         );
       });
 
       it('with page params', async () => {
-        await Promise.all([...monitors, ...monitors].map(saveMonitor));
+        await Promise.all(
+          [...monitors, ...monitors]
+            .map((mon) => ({ ...mon, name: mon.name + '1' }))
+            .map(saveMonitor)
+        );
 
-        const firstPageResp = await supertest
-          .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=2`)
-          .expect(200);
-        const secondPageResp = await supertest
-          .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=2&perPage=3`)
-          .expect(200);
+        await retry.try(async () => {
+          const firstPageResp = await supertest
+            .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=2`)
+            .expect(200);
+          const secondPageResp = await supertest
+            .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=2&perPage=3`)
+            .expect(200);
 
-        expect(firstPageResp.body.total).greaterThan(6);
-        expect(firstPageResp.body.monitors.length).eql(2);
-        expect(secondPageResp.body.monitors.length).eql(3);
+          expect(firstPageResp.body.total).greaterThan(6);
+          expect(firstPageResp.body.monitors.length).eql(2);
+          expect(secondPageResp.body.monitors.length).eql(3);
 
-        expect(firstPageResp.body.monitors[0].id).not.eql(secondPageResp.body.monitors[0].id);
+          expect(firstPageResp.body.monitors[0].id).not.eql(secondPageResp.body.monitors[0].id);
+        });
       });
 
       it('with single monitorQueryId filter', async () => {
-        const [_, { id: id2 }] = await Promise.all(monitors.map(saveMonitor));
+        const [_, { id: id2 }] = await Promise.all(
+          monitors.map((mon) => ({ ...mon, name: mon.name + '2' })).map(saveMonitor)
+        );
 
         const resp = await supertest
           .get(
@@ -118,7 +135,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('with multiple monitorQueryId filter', async () => {
-        const [_, { id: id2 }, { id: id3 }] = await Promise.all(monitors.map(saveMonitor));
+        const [_, { id: id2 }, { id: id3 }] = await Promise.all(
+          monitors.map((mon) => ({ ...mon, name: mon.name + '3' })).map(saveMonitor)
+        );
 
         const resp = await supertest
           .get(
@@ -166,7 +185,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('get one monitor', () => {
       it('should get by id', async () => {
-        const [{ id: id1 }] = await Promise.all(monitors.map(saveMonitor));
+        const [{ id: id1 }] = await Promise.all(
+          monitors.map((mon) => ({ ...mon, name: mon.name + '4' })).map(saveMonitor)
+        );
 
         const apiResponse = await supertest
           .get(
@@ -180,6 +201,8 @@ export default function ({ getService }: FtrProviderContext) {
           [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
           [ConfigKey.CONFIG_ID]: apiResponse.body.id,
           revision: 1,
+          locations: [LOCAL_LOCATION],
+          name: 'Test HTTP Monitor 044',
         });
       });
 

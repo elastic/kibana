@@ -28,6 +28,11 @@ export const getAlertRoute = (
       validate: {
         params: paramSchema,
       },
+      options: {
+        summary: 'Get an alert',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);
@@ -37,8 +42,9 @@ export const getAlertRoute = (
       trackLegacyRouteUsage('get', usageCounter);
       const rulesClient = (await context.alerting).getRulesClient();
       const { id } = req.params;
+      const { systemActions, ...rule } = await rulesClient.get({ id, excludeFromPublicApi: true });
       return res.ok({
-        body: await rulesClient.get({ id, excludeFromPublicApi: true }),
+        body: rule,
       });
     })
   );

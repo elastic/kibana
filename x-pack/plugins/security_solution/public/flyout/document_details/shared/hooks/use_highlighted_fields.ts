@@ -8,7 +8,8 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { find, isEmpty } from 'lodash/fp';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
-import { isAlertFromEndpointEvent } from '../../../../common/utils/endpoint_alert_check';
+import { useAlertResponseActionsSupport } from '../../../../common/hooks/endpoint/use_alert_response_actions_support';
+import { isResponseActionsAlertAgentIdField } from '../../../../common/lib/endpoint';
 import {
   getEventCategoriesFromData,
   getEventFieldsToDisplay,
@@ -30,7 +31,7 @@ export interface UseHighlightedFieldsResult {
     /**
      * If the field has a custom override
      */
-    overrideField?: string;
+    overrideField?: { field: string; values: string[] };
     /**
      * Values for the field
      */
@@ -45,6 +46,7 @@ export const useHighlightedFields = ({
   dataFormattedForFieldBrowser,
   investigationFields,
 }: UseHighlightedFieldsParams): UseHighlightedFieldsResult => {
+  const responseActionsSupport = useAlertResponseActionsSupport(dataFormattedForFieldBrowser);
   const eventCategories = getEventCategoriesFromData(dataFormattedForFieldBrowser);
 
   const eventCodeField = find(
@@ -91,10 +93,12 @@ export const useHighlightedFields = ({
       field.id = field.legacyId;
     }
 
-    // if the field is agent.id and the event is not an endpoint event we skip it
+    // If the field is one used by a supported Response Actions agentType,
+    // but the alert field is not the one that the agentType on the alert host uses,
+    // then exit and return accumulator
     if (
-      field.id === 'agent.id' &&
-      !isAlertFromEndpointEvent({ data: dataFormattedForFieldBrowser })
+      isResponseActionsAlertAgentIdField(field.id) &&
+      responseActionsSupport.details.agentIdField !== field.id
     ) {
       return acc;
     }
@@ -102,7 +106,13 @@ export const useHighlightedFields = ({
     return {
       ...acc,
       [field.id]: {
-        ...(field.overrideField && { overrideField: field.overrideField }),
+        ...(field.overrideField && {
+          overrideField: {
+            field: field.overrideField,
+            values:
+              find({ field: field.overrideField }, dataFormattedForFieldBrowser)?.values ?? [],
+          },
+        }),
         values: fieldValues,
       },
     };

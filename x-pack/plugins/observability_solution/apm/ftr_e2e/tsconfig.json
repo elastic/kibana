@@ -1,0 +1,21 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "include": ["**/*"],
+  "exclude": ["tmp", "target/**/*"],
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["cypress", "node", "cypress-real-events"],
+    "isolatedModules": false
+  },
+  "kbn_references": [
+    "@kbn/test",
+    "@kbn/apm-synthtrace",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/dev-utils",
+    "@kbn/axe-config",
+    "@kbn/cypress-config",
+    "@kbn/apm-plugin",
+    "@kbn/ftr-common-functional-services",
+    "@kbn/ftr-common-functional-ui-services"
+  ]
+}

@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-import { ml } from '../services/ml_api_service';
+import type { MlApi } from '../services/ml_api_service';
 
-import { setUpgradeInProgress } from '../services/upgrade_service';
-import { MlCapabilitiesResponse } from '../../../common/types/capabilities';
+import type { MlCapabilitiesResponse } from '../../../common/types/capabilities';
 
-export function getCapabilities(): Promise<MlCapabilitiesResponse> {
-  return new Promise((resolve, reject) => {
-    ml.checkMlCapabilities()
-      .then((resp: MlCapabilitiesResponse) => {
-        if (resp.upgradeInProgress === true) {
-          setUpgradeInProgress(true);
-        }
-        resolve(resp);
-      })
-      .catch(() => {
-        reject();
-      });
-  });
+export function getCapabilities(mlApi: MlApi): Promise<MlCapabilitiesResponse> {
+  return mlApi.checkMlCapabilities();
 }

@@ -12,7 +12,6 @@ import { useActions, useValues } from 'kea';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiTitle,
   EuiSpacer,
   EuiText,
@@ -36,24 +35,21 @@ export const ConvertConnector: React.FC = () => {
   return (
     <>
       {isModalVisible && <ConvertConnectorModal />}
-      <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="wrench" />
-        </EuiFlexItem>
+      <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h4>
+          <EuiTitle size="s">
+            <h3>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.title',
                 {
                   defaultMessage: 'Self-manage this connector',
                 }
               )}
-            </h4>
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
       <EuiText size="s">
         <FormattedMessage
           id="xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.description"
@@ -69,7 +65,7 @@ export const ConvertConnector: React.FC = () => {
             ),
           }}
         />
-        <EuiSpacer size="s" />
+        <EuiSpacer size="l" />
         <EuiButton onClick={() => showModal()}>
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.buttonTitle',

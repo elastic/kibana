@@ -24,7 +24,7 @@ import { getFlightsSavedObjects } from './sample_data/flights_saved_objects';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
-import { MapsXPackConfig } from '../config';
+import { MapsXPackConfig } from './config';
 import { setStartServices } from './kibana_server_services';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 import { initRoutes } from './routes';
@@ -145,7 +145,7 @@ export class MapsPlugin implements Plugin {
     );
   }
 
-  setup(core: CoreSetup, plugins: SetupDeps) {
+  setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
       plugins.data.query.filterManager
     );

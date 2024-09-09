@@ -29,7 +29,7 @@ const TabNavigationItemComponent = ({
   const { getAppUrl, navigateTo } = useNavigation();
 
   const handleClick = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateTo({ path: hrefWithSearch, restoreScroll: true });
       track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
@@ -50,6 +50,7 @@ const TabNavigationItemComponent = ({
       href={appHref}
       onClick={handleClick}
       append={isBeta && <EuiBadge color={'#E0E5EE'}>{betaOptions?.text ?? BETA}</EuiBadge>}
+      id={id}
     >
       {name}
     </EuiTab>

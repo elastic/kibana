@@ -21,6 +21,7 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { setup: true },
       },
+      description: `Initiate Fleet setup`,
     })
     .addVersion(
       {

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, Fragment, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, Fragment, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
-import { useTimeBuckets } from '../../../../components/custom_hooks/use_time_buckets';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { getJobCreatorTitle } from '../../common/job_creator/util/general';
@@ -32,9 +33,10 @@ import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useDataSource } from '../../../../contexts/ml';
-import { useMlKibana } from '../../../../contexts/kibana';
-import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
-import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
+import type { ExistingJobsAndGroups } from '../../../../services/job_service';
+import { useMlJobService } from '../../../../services/job_service';
+import { useNewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { MlPageHeader } from '../../../../components/page_header';
@@ -52,14 +54,20 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const timefilter = useTimefilter();
   const dataSourceContext = useDataSource();
   const {
-    services: { maps: mapsPlugin },
+    services: { maps: mapsPlugin, uiSettings },
   } = useMlKibana();
+  const mlApi = useMlApi();
+  const mlJobService = useMlJobService();
+  const newJobCapsService = useNewJobCapsService();
 
-  const chartInterval = useTimeBuckets();
+  const chartInterval = useTimeBuckets(uiSettings);
 
   const jobCreator = useMemo(
     () =>
       jobCreatorFactory(jobType)(
+        mlApi,
+        mlJobService,
+        newJobCapsService,
         dataSourceContext.selectedDataView,
         dataSourceContext.selectedSavedSearch,
         dataSourceContext.combinedQuery
@@ -200,13 +208,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   chartInterval.setInterval('auto');
 
   const chartLoader = useMemo(
-    () => new ChartLoader(dataSourceContext.selectedDataView, jobCreator.query),
-    [dataSourceContext.selectedDataView, jobCreator.query]
+    () => new ChartLoader(mlApi, dataSourceContext.selectedDataView, jobCreator.query),
+    [mlApi, dataSourceContext.selectedDataView, jobCreator.query]
   );
 
   const mapLoader = useMemo(
-    () => new MapLoader(dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin),
-    [dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin]
+    () => new MapLoader(mlApi, dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin),
+    [mlApi, dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin]
   );
 
   const resultsLoader = useMemo(

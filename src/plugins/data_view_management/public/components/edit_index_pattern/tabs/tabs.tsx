@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { uniq } from 'lodash';
@@ -19,9 +20,10 @@ import {
   EuiTabbedContentTab,
   EuiSpacer,
   EuiFieldSearch,
-  EuiButton,
   EuiFilterSelectItem,
   FilterChecked,
+  EuiToolTip,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
@@ -60,6 +62,8 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   relationships: SavedObjectRelation[];
   allowedTypes: SavedObjectManagementTypeInfo[];
   compositeRuntimeFields: Record<string, RuntimeField>;
+  refreshIndexPatternClick: () => void;
+  isRefreshing?: boolean;
 }
 
 interface FilterItems {
@@ -139,6 +143,14 @@ const addFieldButtonLabel = i18n.translate(
   }
 );
 
+const refreshAriaLabel = i18n.translate('indexPatternManagement.editDataView.refreshAria', {
+  defaultMessage: 'Refresh',
+});
+
+const refreshTooltip = i18n.translate('indexPatternManagement.editDataView.refreshTooltip', {
+  defaultMessage: 'Refresh local copy of data view field list',
+});
+
 const SCHEMA_ITEMS: FilterItems[] = [
   {
     value: 'runtime',
@@ -159,17 +171,19 @@ export const Tabs: React.FC<TabsProps> = ({
   relationships,
   allowedTypes,
   compositeRuntimeFields,
+  refreshIndexPatternClick,
+  isRefreshing,
 }) => {
   const {
     uiSettings,
     docLinks,
     dataViewFieldEditor,
     overlays,
-    theme,
     dataViews,
     http,
     application,
     savedObjectsManagement,
+    ...startServices
   } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [syncingStateFunc, setSyncingStateFunc] = useState<{
@@ -284,7 +298,9 @@ export const Tabs: React.FC<TabsProps> = ({
 
     setIndexedFieldTypes(convertToEuiFilterOptions(tempIndexedFieldTypes));
     setScriptedFieldLanguages(convertToEuiFilterOptions(tempScriptedFieldLanguages));
-  }, [indexPattern]);
+    // need to reset based on changes to fields but indexPattern is the same
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexPattern, fields]);
 
   const closeFieldEditor = useCallback(() => {
     if (closeEditorHandler.current) {
@@ -293,8 +309,8 @@ export const Tabs: React.FC<TabsProps> = ({
   }, []);
 
   const openFieldEditor = useCallback(
-    (fieldName?: string) => {
-      closeEditorHandler.current = dataViewFieldEditor.openEditor({
+    async (fieldName?: string) => {
+      closeEditorHandler.current = await dataViewFieldEditor.openEditor({
         ctx: {
           dataView: indexPattern,
         },
@@ -321,11 +337,13 @@ export const Tabs: React.FC<TabsProps> = ({
     [uiSettings]
   );
 
+  const refreshRef = useRef<HTMLButtonElement>(null);
+
   const userEditPermission = dataViews.getCanSaveSync();
   const getFilterSection = useCallback(
     (type: string) => {
       return (
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="m">
           <EuiFlexItem grow={true}>
             <EuiFieldSearch
               fullWidth
@@ -360,7 +378,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     isOpen={isIndexedFilterOpen}
                     closePopover={() => setIsIndexedFilterOpen(false)}
                   >
-                    {indexedFieldTypes.map((item, index) => {
+                    {indexedFieldTypes.map((item) => {
                       const isSelected = filteredIndexedFieldTypeFilter.includes(item.value);
                       return (
                         <EuiFilterSelectItem
@@ -426,9 +444,41 @@ export const Tabs: React.FC<TabsProps> = ({
                   </EuiPopover>
                 </EuiFilterGroup>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={<p>{refreshTooltip}</p>}>
+                  <EuiButton
+                    buttonRef={refreshRef}
+                    onClick={() => {
+                      refreshIndexPatternClick();
+                      // clear tooltip focus
+                      if (refreshRef.current) {
+                        refreshRef.current.blur();
+                      }
+                    }}
+                    iconType="refresh"
+                    aria-label={refreshAriaLabel}
+                    data-test-subj="refreshDataViewButton"
+                    isLoading={isRefreshing}
+                    isDisabled={isRefreshing}
+                    size="m"
+                    color="success"
+                    className="eui-fullWidth"
+                  >
+                    {refreshAriaLabel}
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
               {userEditPermission && (
                 <EuiFlexItem grow={false}>
-                  <EuiButton fill onClick={() => openFieldEditor()} data-test-subj="addField">
+                  <EuiButton
+                    size="m"
+                    onClick={() => openFieldEditor()}
+                    data-test-subj="addField"
+                    iconType="plusInCircle"
+                    aria-label={addFieldButtonLabel}
+                    color="primary"
+                    fill
+                  >
                     {addFieldButtonLabel}
                   </EuiButton>
                 </EuiFlexItem>
@@ -503,6 +553,8 @@ export const Tabs: React.FC<TabsProps> = ({
       updateFieldFilter,
       updateFieldTypeFilter,
       updateSchemaFieldTypeFilter,
+      isRefreshing,
+      refreshIndexPatternClick,
     ]
   );
 
@@ -531,8 +583,8 @@ export const Tabs: React.FC<TabsProps> = ({
                       getFieldInfo,
                     }}
                     openModal={overlays.openModal}
-                    theme={theme}
                     userEditPermission={dataViews.getCanSaveSync()}
+                    startServices={startServices}
                   />
                 )}
               </DeleteRuntimeFieldProvider>
@@ -610,7 +662,7 @@ export const Tabs: React.FC<TabsProps> = ({
       DeleteRuntimeFieldProvider,
       refreshFields,
       overlays,
-      theme,
+      startServices,
       dataViews,
       compositeRuntimeFields,
       http,

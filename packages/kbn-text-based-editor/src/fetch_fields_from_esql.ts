@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { Query, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
+import { type DataView, textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 
 interface TextBasedLanguagesErrorResponse {
   error: {
@@ -23,15 +24,26 @@ interface TextBasedLanguagesErrorResponse {
 export function fetchFieldsFromESQL(
   query: Query | AggregateQuery,
   expressions: ExpressionsStart,
-  time?: TimeRange
+  time?: TimeRange,
+  abortController?: AbortController,
+  dataView?: DataView
 ) {
   return textBasedQueryStateToAstWithValidation({
     query,
     time,
+    dataView,
   })
     .then((ast) => {
       if (ast) {
-        const execution = expressions.run(ast, null);
+        const executionContract = expressions.execute(ast, null);
+
+        if (abortController) {
+          abortController.signal.onabort = () => {
+            executionContract.cancel();
+          };
+        }
+
+        const execution = executionContract.getData();
         let finalData: Datatable;
         let error: string | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {

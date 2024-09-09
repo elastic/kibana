@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useReducer, useEffect, useMemo } from 'react';
@@ -11,7 +12,7 @@ import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
-import { IAggConfig, AggGroupNames } from '@kbn/data-plugin/public';
+import { IAggConfig, AggGroupNames, IAggType } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import type { Schema } from '@kbn/visualizations-plugin/public';
@@ -124,7 +125,7 @@ function DefaultEditorAggParams({
     !!error || isInvalidParamsTouched(agg.type, aggType, paramsState);
 
   const onAggSelect = useCallback(
-    (value) => {
+    (value: IAggType) => {
       if (agg.type !== value) {
         onAggTypeChange(agg.id, value);
         // reset touched and valid of params
@@ -141,8 +142,8 @@ function DefaultEditorAggParams({
     Object.entries(editorConfig).forEach(([param, paramConfig]) => {
       const paramOptions = agg.type.params.find((paramOption) => paramOption.name === param);
 
-      const hasFixedValue = paramConfig.hasOwnProperty(FIXED_VALUE_PROP);
-      const hasDefault = paramConfig.hasOwnProperty(DEFAULT_PROP);
+      const hasFixedValue = Object.hasOwn(paramConfig, FIXED_VALUE_PROP);
+      const hasDefault = Object.hasOwn(paramConfig, DEFAULT_PROP);
       // If the parameter has a fixed value in the config, set this value.
       // Also for all supported configs we should freeze the editor for this param.
       if (hasFixedValue || hasDefault) {

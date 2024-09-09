@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { getKibanaDir } from '#pipeline-utils';
 
 // TODO - how to generate this dynamically?
 const STORYBOOKS = [
@@ -25,7 +27,7 @@ const STORYBOOKS = [
   'dashboard_enhanced',
   'dashboard',
   'data',
-  'log_explorer',
+  'logs_explorer',
   'embeddable',
   'expression_error',
   'expression_image',
@@ -117,7 +119,12 @@ const upload = () => {
     fs.writeFileSync('index.html', html);
 
     console.log('--- Uploading Storybooks');
+    const activateScript = path.relative(
+      process.cwd(),
+      path.join(getKibanaDir(), '.buildkite', 'scripts', 'common', 'activate_service_account.sh')
+    );
     exec(`
+      ${activateScript} gs://ci-artifacts.kibana.dev
       gsutil -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${process.env.BUILDKITE_COMMIT}/'
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
     `);

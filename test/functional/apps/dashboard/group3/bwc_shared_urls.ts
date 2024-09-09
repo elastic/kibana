@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -78,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        const warningToast = await toasts.getToastElement(1);
+        const warningToast = await toasts.getElementByIndex(1);
         expect(await warningToast.getVisibleText()).to.contain('Cannot load panels');
 
         await PageObjects.dashboard.waitForRenderComplete();
@@ -96,13 +97,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        const warningToast = await toasts.getToastElement(1);
+        const warningToast = await toasts.getElementByIndex(1);
         expect(await warningToast.getVisibleText()).to.contain('Cannot load panels');
         await PageObjects.dashboard.waitForRenderComplete();
       });
 
       it('loads a saved dashboard', async function () {
         await PageObjects.dashboard.saveDashboard('saved with colors', {
+          saveAsNew: true,
           storeTimeWithDashboard: true,
         });
 

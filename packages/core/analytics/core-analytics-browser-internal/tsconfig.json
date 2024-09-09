@@ -6,8 +6,6 @@
   },
   "include": ["**/*.ts"],
   "kbn_references": [
-    "@kbn/logging",
-    "@kbn/analytics-client",
     "@kbn/ebt-tools",
     "@kbn/core-base-browser-internal",
     "@kbn/core-injected-metadata-browser-internal",

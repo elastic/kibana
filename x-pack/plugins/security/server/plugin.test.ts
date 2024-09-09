@@ -8,7 +8,8 @@
 import { of } from 'rxjs';
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { coreMock } from '@kbn/core/server/mocks';
+import type { PluginInitializerContextMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -24,18 +25,23 @@ describe('Security Plugin', () => {
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
   let mockSetupDependencies: PluginSetupDependencies;
   let mockStartDependencies: PluginStartDependencies;
+  let mockInitializerContext: PluginInitializerContextMock<typeof ConfigSchema>;
   beforeEach(() => {
-    plugin = new SecurityPlugin(
-      coreMock.createPluginInitializerContext(
-        ConfigSchema.validate({
+    jest.clearAllMocks();
+    mockInitializerContext = coreMock.createPluginInitializerContext(
+      ConfigSchema.validate(
+        {
           session: { idleTimeout: 1500 },
           authc: {
             providers: ['saml', 'token'],
             saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
           },
-        })
+          encryptionKey: 'z'.repeat(32),
+        },
+        { dist: true }
       )
     );
+    plugin = new SecurityPlugin(mockInitializerContext);
 
     mockCoreSetup = coreMock.createSetup({
       pluginStartContract: { userProfiles: userProfileServiceMock.createStart() },
@@ -48,7 +54,10 @@ describe('Security Plugin', () => {
     });
 
     mockSetupDependencies = {
-      licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
+      licensing: {
+        license$: of({ getUnavailableReason: jest.fn() }),
+        featureUsage: { register: jest.fn() },
+      },
       features: featuresPluginMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
     } as unknown as PluginSetupDependencies;
@@ -118,6 +127,8 @@ describe('Security Plugin', () => {
               },
             },
             "getFeatures": [Function],
+            "getLicenseType": [Function],
+            "getUnavailableReason": [Function],
             "hasAtLeast": [Function],
             "isEnabled": [Function],
             "isLicenseAvailable": [Function],
@@ -127,6 +138,31 @@ describe('Security Plugin', () => {
           },
         }
       `);
+    });
+
+    it('calls core.security.registerSecurityDelegate', () => {
+      plugin.setup(mockCoreSetup, mockSetupDependencies);
+
+      expect(mockCoreSetup.security.registerSecurityDelegate).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls core.userProfile.registerUserProfileDelegate', () => {
+      plugin.setup(mockCoreSetup, mockSetupDependencies);
+
+      expect(mockCoreSetup.userProfile.registerUserProfileDelegate).toHaveBeenCalledTimes(1);
+    });
+
+    it('logs the hash for the security encryption key', () => {
+      plugin.setup(mockCoreSetup, mockSetupDependencies);
+
+      const infoLogs = loggingSystemMock.collect(mockInitializerContext.logger).info;
+
+      expect(infoLogs.length).toBeGreaterThan(0);
+      infoLogs.forEach((log) => {
+        expect(log).toEqual([
+          `Hashed 'xpack.security.encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`,
+        ]);
+      });
     });
   });
 

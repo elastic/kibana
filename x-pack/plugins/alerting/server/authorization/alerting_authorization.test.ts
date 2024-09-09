@@ -10,7 +10,7 @@ import { KibanaRequest } from '@kbn/core/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import {
-  PluginStartContract as FeaturesStartContract,
+  FeaturesPluginStart as FeaturesStartContract,
   KibanaFeature,
 } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -749,6 +749,49 @@ describe('AlertingAuthorization', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized by \\"myOtherApp\\" to create \\"myType\\" alert"`
       );
+    });
+
+    test('checks additional privileges correctly', async () => {
+      const { authorization } = mockSecurity();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        authorization,
+        ruleTypeRegistry,
+        features,
+        getSpace,
+        getSpaceId,
+      });
+
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: true,
+        privileges: { kibana: [] },
+      });
+
+      await alertAuthorization.ensureAuthorized({
+        ruleTypeId: 'myType',
+        consumer: 'myApp',
+        operation: WriteOperations.Create,
+        entity: AlertingAuthorizationEntity.Rule,
+        additionalPrivileges: ['test/create'],
+      });
+
+      expect(ruleTypeRegistry.get).toHaveBeenCalledWith('myType');
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(1);
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'rule',
+        'create'
+      );
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: [mockAuthorizationAction('myType', 'myApp', 'rule', 'create'), 'test/create'],
+      });
     });
   });
 

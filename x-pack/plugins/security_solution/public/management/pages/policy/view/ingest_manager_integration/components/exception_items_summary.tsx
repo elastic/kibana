@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { PropsWithChildren } from 'react';
 import React, { memo, useCallback } from 'react';
 import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
@@ -90,29 +90,33 @@ export const ExceptionItemsSummary = memo<ExceptionItemsSummaryProps>(
 
 ExceptionItemsSummary.displayName = 'ExceptionItemsSummary';
 
-const SummaryStat: FC<{ value: number; color?: EuiBadgeProps['color']; isSmall?: boolean }> = memo(
-  ({ children, value, color, isSmall = false, ...commonProps }) => {
-    return (
-      <EuiText className="eui-displayInlineBlock" size={isSmall ? 'xs' : 's'}>
-        <StyledEuiFlexGroup
-          justifyContent={isSmall ? 'flexStart' : 'center'}
-          direction={isSmall ? 'rowReverse' : 'row'}
-          alignItems="center"
-          gutterSize={isSmall ? 'xs' : 'l'}
-          isSmall={isSmall}
-        >
-          {!isSmall ? (
-            <EuiFlexItem grow={false} style={color === 'primary' ? CSS_BOLD : undefined}>
-              {children}
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={color}>{value}</EuiBadge>
+const SummaryStat = memo<
+  PropsWithChildren<{
+    value: number;
+    color?: EuiBadgeProps['color'];
+    isSmall?: boolean;
+  }>
+>(({ children, value, color, isSmall = false, ...commonProps }) => {
+  return (
+    <EuiText className="eui-displayInlineBlock" size={isSmall ? 'xs' : 's'}>
+      <StyledEuiFlexGroup
+        justifyContent={isSmall ? 'flexStart' : 'center'}
+        direction={isSmall ? 'rowReverse' : 'row'}
+        alignItems="center"
+        gutterSize={isSmall ? 'xs' : 'l'}
+        isSmall={isSmall}
+      >
+        {!isSmall ? (
+          <EuiFlexItem grow={false} style={color === 'primary' ? CSS_BOLD : undefined}>
+            {children}
           </EuiFlexItem>
-        </StyledEuiFlexGroup>
-      </EuiText>
-    );
-  }
-);
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={color}>{value}</EuiBadge>
+        </EuiFlexItem>
+      </StyledEuiFlexGroup>
+    </EuiText>
+  );
+});
 
 SummaryStat.displayName = 'SummaryState';

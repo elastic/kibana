@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, { useContext } from 'react';
 import { type Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
@@ -17,10 +18,11 @@ export const ReloadContext = React.createContext<ReloadContextValue>({
   refreshTimestamp: Date.now(),
 });
 
-export const ReloadContextProvider: React.FC<{ reload$: Observable<number> }> = ({
-  reload$,
-  children,
-}) => {
+export const ReloadContextProvider: FC<
+  PropsWithChildren<{
+    reload$: Observable<number>;
+  }>
+> = ({ reload$, children }) => {
   const refreshTimestamp = useObservable(reload$, Date.now());
   return <ReloadContext.Provider value={{ refreshTimestamp }}>{children}</ReloadContext.Provider>;
 };

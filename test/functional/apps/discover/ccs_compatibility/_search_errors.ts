@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -15,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
   const isCcsTest = config.get('esTestCluster.ccs');
@@ -40,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('exception on single shard shows warning and results', async () => {
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern(defaultIndex);
+      await dataViews.switchToAndValidate(defaultIndex);
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {
         const hitCount = await PageObjects.discover.getHitCount();
@@ -73,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('exception on all shards shows error', async () => {
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern(defaultIndex);
+      await dataViews.switchToAndValidate(defaultIndex);
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {
         const hitCount = await PageObjects.discover.getHitCount();

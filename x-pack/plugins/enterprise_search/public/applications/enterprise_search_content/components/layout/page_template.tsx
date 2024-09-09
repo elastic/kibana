@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
+import { SEARCH_PRODUCT_NAME } from '../../../../../common/constants';
 import { SetEnterpriseSearchContentChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchNav } from '../../../shared/layout';
@@ -24,9 +24,8 @@ export const EnterpriseSearchContentPageTemplate: React.FC<PageTemplateProps> = 
       {...pageTemplateProps}
       solutionNav={{
         items: useEnterpriseSearchNav(),
-        name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
+        name: SEARCH_PRODUCT_NAME,
       }}
-      restrictWidth
       setPageChrome={pageChrome && <SetEnterpriseSearchContentChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && (

@@ -398,36 +398,9 @@ const mockApmDataStreamClientServerLineLayer = {
   label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Line',
 };
 
-export const mockLayerList = [
-  {
-    sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'uuidv4()',
-    label: null,
-    minZoom: 0,
-    maxZoom: 24,
-    alpha: 1,
-    visible: true,
-    style: null,
-    type: LAYER_TYPE.EMS_VECTOR_TILE,
-  },
-  mockLineLayer,
-  mockDestinationLayer,
-  mockSourceLayer,
-  mockLayerGroup,
-];
+export const mockLayerList = [mockLineLayer, mockDestinationLayer, mockSourceLayer, mockLayerGroup];
 
 export const mockLayerListDouble = [
-  {
-    sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'uuidv4()',
-    label: null,
-    minZoom: 0,
-    maxZoom: 24,
-    alpha: 1,
-    visible: true,
-    style: null,
-    type: LAYER_TYPE.EMS_VECTOR_TILE,
-  },
   mockLineLayer,
   mockDestinationLayer,
   mockSourceLayer,
@@ -439,17 +412,6 @@ export const mockLayerListDouble = [
 ];
 
 export const mockLayerListMixed = [
-  {
-    sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'uuidv4()',
-    label: null,
-    minZoom: 0,
-    maxZoom: 24,
-    alpha: 1,
-    visible: true,
-    style: null,
-    type: LAYER_TYPE.EMS_VECTOR_TILE,
-  },
   mockLineLayer,
   mockDestinationLayer,
   mockSourceLayer,

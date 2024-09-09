@@ -7,7 +7,8 @@
 
 import { cloneDeep, each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
-import moment, { Duration } from 'moment';
+import type { Duration } from 'moment';
+import moment from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -300,8 +301,8 @@ export function isModelPlotEnabled(
       // 'partition' field values even though this is supported on the back-end.
       // If supplied, check both the by and partition entities are in the terms.
       const detector = job.analysis_config.detectors[detectorIndex];
-      const detectorHasPartitionField = detector.hasOwnProperty('partition_field_name');
-      const detectorHasByField = detector.hasOwnProperty('by_field_name');
+      const detectorHasPartitionField = Object.hasOwn(detector, 'partition_field_name');
+      const detectorHasByField = Object.hasOwn(detector, 'by_field_name');
       const terms = termsStr.split(',');
 
       if (detectorHasPartitionField) {

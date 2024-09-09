@@ -1,0 +1,24 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["../../../typings/**/*", "common/**/*", "server/**/*", "jest.config.js"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/data-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/observability-shared-plugin",
+    "@kbn/es-types",
+    "@kbn/apm-types",
+    "@kbn/core-http-server-mocks",
+    "@kbn/apm-utils",
+    "@kbn/core-http-server",
+    "@kbn/security-plugin-types-server"
+  ]
+}

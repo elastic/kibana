@@ -6,14 +6,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useUrlParams } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CaseActionBar } from '../case_action_bar';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
-import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { CaseViewActivity } from './components/case_view_activity';
 import { CaseViewAlerts } from './components/case_view_alerts';
@@ -23,15 +22,23 @@ import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 
+const getActiveTabId = (tabId?: string) => {
+  if (tabId && Object.values(CASE_VIEW_PAGE_TABS).includes(tabId as CASE_VIEW_PAGE_TABS)) {
+    return tabId;
+  }
+
+  return CASE_VIEW_PAGE_TABS.ACTIVITY;
+};
+
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
     caseData,
-    onComponentInitialized,
     refreshRef,
     ruleDetailsNavigation,
     actionsNavigation,
     showAlertDetails,
     useFetchAlertData,
+    onAlertsTableLoaded,
   }) => {
     const { features } = useCasesContext();
     const { urlParams } = useUrlParams();
@@ -39,15 +46,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
 
     useCasesTitleBreadcrumbs(caseData.title);
 
-    const activeTabId = useMemo(() => {
-      if (urlParams.tabId && Object.values(CASE_VIEW_PAGE_TABS).includes(urlParams.tabId)) {
-        return urlParams.tabId;
-      }
-      return CASE_VIEW_PAGE_TABS.ACTIVITY;
-    }, [urlParams.tabId]);
-
-    const init = useRef(true);
-    const timelineUi = useTimelineContext()?.ui;
+    const activeTabId = getActiveTabId(urlParams?.tabId);
 
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
       caseData,
@@ -74,23 +73,13 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     }, [isLoading, refreshRef, refreshCaseViewPage]);
 
     const onSubmitTitle = useCallback(
-      (newTitle) =>
+      (newTitle: string) =>
         onUpdateField({
           key: 'title',
           value: newTitle,
         }),
       [onUpdateField]
     );
-
-    // useEffect used for component's initialization
-    useEffect(() => {
-      if (init.current) {
-        init.current = false;
-        if (onComponentInitialized) {
-          onComponentInitialized();
-        }
-      }
-    }, [onComponentInitialized]);
 
     return (
       <>
@@ -113,15 +102,12 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             onUpdateField={onUpdateField}
           />
         </HeaderPage>
-
         <EuiFlexGroup>
           <EuiFlexItem>
             <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
           </EuiFlexItem>
         </EuiFlexGroup>
-
         <EuiSpacer size="l" />
-
         <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`} alignItems="baseline">
           {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
             <CaseViewActivity
@@ -133,11 +119,10 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             />
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
-            <CaseViewAlerts caseData={caseData} />
+            <CaseViewAlerts caseData={caseData} onAlertsTableLoaded={onAlertsTableLoaded} />
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
         </EuiFlexGroup>
-        {timelineUi?.renderTimelineDetailsPanel ? timelineUi.renderTimelineDetailsPanel() : null}
       </>
     );
   }

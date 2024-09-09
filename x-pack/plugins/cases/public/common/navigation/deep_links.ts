@@ -15,7 +15,7 @@ export const CasesDeepLinkId = {
   casesConfigure: 'cases_configure',
 } as const;
 
-export type ICasesDeepLinkId = typeof CasesDeepLinkId[keyof typeof CasesDeepLinkId];
+export type ICasesDeepLinkId = (typeof CasesDeepLinkId)[keyof typeof CasesDeepLinkId];
 
 export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
   basePath = DEFAULT_BASE_PATH,

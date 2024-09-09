@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { FieldDefinition } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { UnsavedFieldChange } from '@kbn/management-settings-types';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { useServices } from './services';
 
 export interface UseSaveParameters {
@@ -17,6 +19,8 @@ export interface UseSaveParameters {
   fields: FieldDefinition[];
   /** The function to invoke for clearing all unsaved changes. */
   clearChanges: () => void;
+  /** The {@link UiSettingsScope} of the unsaved changes. */
+  scope: UiSettingsScope;
 }
 
 /**
@@ -33,10 +37,10 @@ export const useSave = (params: UseSaveParameters) => {
       return;
     }
     try {
-      await saveChanges(changes);
+      await saveChanges(changes, params.scope);
       params.clearChanges();
       const requiresReload = params.fields.some(
-        (setting) => changes.hasOwnProperty(setting.id) && setting.requiresPageReload
+        (setting) => Object.hasOwn(changes, setting.id) && setting.requiresPageReload
       );
       if (requiresReload) {
         showReloadPagePrompt();

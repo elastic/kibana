@@ -59,14 +59,20 @@ export const sendDeletePackagePolicy = (body: DeletePackagePoliciesRequest['body
   });
 };
 
-export function useGetPackagePoliciesQuery(query: GetPackagePoliciesRequest['query']) {
-  return useQuery<GetPackagePoliciesResponse, RequestError>(['packagePolicies'], () =>
-    sendRequestForRq<GetPackagePoliciesResponse>({
-      method: 'get',
-      version: API_VERSIONS.public.v1,
-      path: packagePolicyRouteService.getListPath(),
-      query,
-    })
+export function useGetPackagePoliciesQuery(
+  query: GetPackagePoliciesRequest['query'],
+  options: Partial<{ enabled: boolean }> = {}
+) {
+  return useQuery<GetPackagePoliciesResponse, RequestError>(
+    ['packagePolicies'],
+    () =>
+      sendRequestForRq<GetPackagePoliciesResponse>({
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+        path: packagePolicyRouteService.getListPath(),
+        query,
+      }),
+    options
   );
 }
 
@@ -167,15 +173,19 @@ export function useUpgradePackagePoliciesMutation() {
     UpgradePackagePolicyDryRunResponse,
     RequestError,
     { packagePolicyIds: string[] }
-  >(({ packagePolicyIds }) =>
-    sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
-      path: packagePolicyRouteService.getUpgradePath(),
-      method: 'post',
-      version: API_VERSIONS.public.v1,
-      body: JSON.stringify({
-        packagePolicyIds,
+  >(
+    ({ packagePolicyIds }) =>
+      sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
+        path: packagePolicyRouteService.getUpgradePath(),
+        method: 'post',
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify({
+          packagePolicyIds,
+        }),
       }),
-    })
+    {
+      retry: false,
+    }
   );
 }
 

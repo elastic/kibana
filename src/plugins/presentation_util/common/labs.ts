@@ -1,28 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
 
 export const LABS_PROJECT_PREFIX = 'labs:';
 export const DEFER_BELOW_FOLD = `${LABS_PROJECT_PREFIX}dashboard:deferBelowFold` as const;
-export const DASHBOARD_LINKS_PANEL = `${LABS_PROJECT_PREFIX}dashboard:linksPanel` as const;
 export const BY_VALUE_EMBEDDABLE = `${LABS_PROJECT_PREFIX}canvas:byValueEmbeddable` as const;
 
-export const projectIDs = [DEFER_BELOW_FOLD, BY_VALUE_EMBEDDABLE, DASHBOARD_LINKS_PANEL] as const;
+export const projectIDs = [DEFER_BELOW_FOLD, BY_VALUE_EMBEDDABLE] as const;
 export const environmentNames = ['kibana', 'browser', 'session'] as const;
 export const solutionNames = ['canvas', 'dashboard', 'presentation'] as const;
-
-const technicalPreviewLabel = i18n.translate(
-  'presentationUtil.advancedSettings.technicalPreviewLabel',
-  {
-    defaultMessage: 'technical preview',
-  }
-);
 
 /**
  * This is a list of active Labs Projects for the Presentation Team.  It is the "source of truth" for all projects
@@ -43,23 +36,6 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
     }),
     solutions: ['dashboard'],
   },
-  [DASHBOARD_LINKS_PANEL]: {
-    id: DASHBOARD_LINKS_PANEL,
-    isActive: true,
-    isDisplayed: true,
-    environments: ['kibana', 'browser', 'session'],
-    name: i18n.translate('presentationUtil.labs.enableLinksPanelProjectName', {
-      defaultMessage: 'Enable links panel',
-    }),
-    description: i18n.translate('presentationUtil.labs.enableLinksPanelProjectDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enables the links panel for dashboard, which allows dashboard authors to easily link dashboards together.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    solutions: ['dashboard'],
-  },
   [BY_VALUE_EMBEDDABLE]: {
     id: BY_VALUE_EMBEDDABLE,
     isActive: true,
@@ -75,9 +51,9 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
   },
 };
 
-export type ProjectID = typeof projectIDs[number];
-export type EnvironmentName = typeof environmentNames[number];
-export type SolutionName = typeof solutionNames[number];
+export type ProjectID = (typeof projectIDs)[number];
+export type EnvironmentName = (typeof environmentNames)[number];
+export type SolutionName = (typeof solutionNames)[number];
 
 export type EnvironmentStatus = {
   [env in EnvironmentName]?: boolean;

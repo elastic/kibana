@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -29,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
     const {
       body: { saved_objects: savedObjects },
     } = await supertest
-      .get('/api/saved_objects/_find?type=usage-counters')
+      .get('/api/saved_objects/_find?type=usage-counter')
       .set('kbn-xsrf', 'kibana')
       .expect(200);
 
@@ -51,7 +52,8 @@ export default function ({ getService }: FtrProviderContext) {
     counterType: UiCounterMetricType
   ): UsageCountersSavedObject[] => {
     const matchingEventName = savedObjects.filter(
-      ({ attributes }) => attributes.counterName === `${APP_NAME}:${eventName}`
+      ({ attributes: { domainId, counterName } }) =>
+        domainId === APP_NAME && counterName === eventName
     );
     if (!matchingEventName.length) {
       throw new Error(

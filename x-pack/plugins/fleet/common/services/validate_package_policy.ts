@@ -19,6 +19,8 @@ import type {
   RegistryVarsEntry,
 } from '../types';
 
+import { DATASET_VAR_NAME } from '../constants';
+
 import {
   isValidNamespace,
   doesPackageHaveIntegrations,
@@ -26,6 +28,7 @@ import {
   getNormalizedDataStreams,
 } from '.';
 import { packageHasNoPolicyTemplates } from './policy_template';
+import { isValidDataset } from './is_valid_namespace';
 
 type Errors = string[] | null;
 
@@ -53,7 +56,8 @@ export type PackagePolicyValidationResults = {
 export const validatePackagePolicy = (
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  safeLoadYaml: (yaml: string) => any
+  safeLoadYaml: (yaml: string) => any,
+  spaceSettings?: { allowedNamespacePrefixes?: string[] }
 ): PackagePolicyValidationResults => {
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const validationResults: PackagePolicyValidationResults = {
@@ -63,8 +67,6 @@ export const validatePackagePolicy = (
     inputs: {},
     vars: {},
   };
-  const namespaceValidation = isValidNamespace(packagePolicy.namespace);
-
   if (!packagePolicy.name.trim()) {
     validationResults.name = [
       i18n.translate('xpack.fleet.packagePolicyValidation.nameRequiredErrorMessage', {
@@ -73,8 +75,15 @@ export const validatePackagePolicy = (
     ];
   }
 
-  if (!namespaceValidation.valid && namespaceValidation.error) {
-    validationResults.namespace = [namespaceValidation.error];
+  if (packagePolicy?.namespace) {
+    const namespaceValidation = isValidNamespace(
+      packagePolicy?.namespace,
+      true,
+      spaceSettings?.allowedNamespacePrefixes
+    );
+    if (!namespaceValidation.valid && namespaceValidation.error) {
+      validationResults.namespace = [namespaceValidation.error];
+    }
   }
 
   // Validate package-level vars
@@ -172,7 +181,13 @@ export const validatePackagePolicy = (
 
             results[name] =
               input.enabled && stream.enabled
-                ? validatePackagePolicyConfig(configEntry, streamVarDefs[name], name, safeLoadYaml)
+                ? validatePackagePolicyConfig(
+                    configEntry,
+                    streamVarDefs[name],
+                    name,
+                    safeLoadYaml,
+                    packageInfo.type
+                  )
                 : null;
 
             return results;
@@ -201,7 +216,8 @@ export const validatePackagePolicyConfig = (
   configEntry: PackagePolicyConfigRecordEntry | undefined,
   varDef: RegistryVarsEntry,
   varName: string,
-  safeLoadYaml: (yaml: string) => any
+  safeLoadYaml: (yaml: string) => any,
+  packageType?: string
 ): string[] | null => {
   const errors = [];
 
@@ -353,6 +369,16 @@ export const validatePackagePolicyConfig = (
           defaultMessage: 'Invalid value for select type',
         })
       );
+    }
+  }
+
+  if (varName === DATASET_VAR_NAME && packageType === 'input' && parsedValue !== undefined) {
+    const { valid, error } = isValidDataset(
+      parsedValue.dataset ? parsedValue.dataset : parsedValue,
+      false
+    );
+    if (!valid && error) {
+      errors.push(error);
     }
   }
 

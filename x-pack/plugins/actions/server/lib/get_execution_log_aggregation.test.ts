@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression } from '@kbn/es-query';
 import {
   getExecutionLogAggregation,
@@ -485,7 +486,15 @@ describe('getExecutionLogAggregation', () => {
 
 describe('formatExecutionLogResult', () => {
   test('should return empty results if aggregations are undefined', () => {
-    expect(formatExecutionLogResult({ aggregations: undefined })).toEqual({
+    expect(
+      formatExecutionLogResult({
+        aggregations: undefined,
+        hits: {
+          total: { value: 0, relation: 'eq' },
+          hits: [],
+        } as estypes.SearchHitsMetadata<unknown>,
+      })
+    ).toEqual({
       total: 0,
       data: [],
     });
@@ -494,6 +503,10 @@ describe('formatExecutionLogResult', () => {
     expect(
       formatExecutionLogResult({
         aggregations: { executionLogAgg: undefined as unknown as ExecutionUuidAggResult },
+        hits: {
+          total: { value: 5, relation: 'eq' },
+          hits: [],
+        } as estypes.SearchHitsMetadata<unknown>,
       })
     ).toEqual({
       total: 0,
@@ -554,6 +567,10 @@ describe('formatExecutionLogResult', () => {
           executionUuidCardinality: { doc_count: 1, executionUuidCardinality: { value: 1 } },
         },
       },
+      hits: {
+        total: { value: 5, relation: 'eq' },
+        hits: [],
+      } as estypes.SearchHitsMetadata<unknown>,
     };
     expect(formatExecutionLogResult(results)).toEqual({
       data: [
@@ -675,6 +692,10 @@ describe('formatExecutionLogResult', () => {
           executionUuidCardinality: { doc_count: 2, executionUuidCardinality: { value: 2 } },
         },
       },
+      hits: {
+        total: { value: 10, relation: 'eq' },
+        hits: [],
+      } as estypes.SearchHitsMetadata<unknown>,
     };
     expect(formatExecutionLogResult(results)).toEqual({
       data: [
@@ -918,6 +939,10 @@ describe('formatExecutionKPIAggBuckets', () => {
     expect(
       formatExecutionKPIResult({
         aggregations: undefined,
+        hits: {
+          total: { value: 0, relation: 'eq' },
+          hits: [],
+        } as estypes.SearchHitsMetadata<unknown>,
       })
     ).toEqual({ failure: 0, success: 0, unknown: 0, warning: 0 });
   });
@@ -951,6 +976,10 @@ describe('formatExecutionKPIAggBuckets', () => {
           },
         },
       },
+      hits: {
+        total: { value: 21, relation: 'eq' },
+        hits: [],
+      } as estypes.SearchHitsMetadata<unknown>,
     };
 
     expect(formatExecutionKPIResult(results)).toEqual({

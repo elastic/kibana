@@ -9,23 +9,20 @@ import React, { memo } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useGetEndpointDetails } from '../../../hooks';
+import { useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { HostStatus } from '../../../../../common/endpoint/types';
 
 interface OfflineCalloutProps {
+  agentType: ResponseActionAgentType;
   endpointId: string;
+  hostName: string;
 }
 
-export const OfflineCallout = memo<OfflineCalloutProps>(({ endpointId }) => {
-  const { data: endpointDetails } = useGetEndpointDetails(endpointId, {
-    refetchInterval: 10000,
-  });
+export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId, hostName }) => {
+  const { data } = useGetAgentStatus(endpointId, agentType);
 
-  if (!endpointDetails) {
-    return null;
-  }
-
-  if (endpointDetails.host_status === HostStatus.OFFLINE) {
+  if (data?.[endpointId].status === HostStatus.OFFLINE) {
     return (
       <>
         <EuiCallOut
@@ -40,7 +37,7 @@ export const OfflineCallout = memo<OfflineCalloutProps>(({ endpointId }) => {
             <FormattedMessage
               id="xpack.securitySolution.responder.hostOffline.callout.body"
               defaultMessage="The host {name} is offline, so its responses may be delayed. Pending commands will execute when the host reconnects."
-              values={{ name: <strong>{endpointDetails.metadata.host.name}</strong> }}
+              values={{ name: <strong>{hostName}</strong> }}
             />
           </p>
         </EuiCallOut>

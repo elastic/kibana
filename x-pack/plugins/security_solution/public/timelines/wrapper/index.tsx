@@ -6,17 +6,16 @@
  */
 
 import { EuiFocusTrap, EuiWindowEvent, keys } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 import type { AppLeaveHandler } from '@kbn/core/public';
 import { useDispatch } from 'react-redux';
+import { TimelineModal } from '../components/modal';
 import type { TimelineId } from '../../../common/types';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import { FlyoutBottomBar } from '../components/flyout/bottom_bar';
-import { Pane } from '../components/flyout/pane';
+import { TimelineBottomBar } from '../components/bottom_bar';
 import { getTimelineShowStatusByIdSelector } from '../store/selectors';
 import { useTimelineSavePrompt } from '../../common/hooks/timeline/use_timeline_save_prompt';
 import { timelineActions } from '../store';
-import { focusActiveTimelineButton } from '../components/timeline/helpers';
 
 interface TimelineWrapperProps {
   /**
@@ -39,10 +38,9 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
     const dispatch = useDispatch();
-
+    const openToggleRef = useRef(null);
     const handleClose = useCallback(() => {
       dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
-      focusActiveTimelineButton();
     }, [dispatch, timelineId]);
 
     // pressing the ESC key closes the timeline portal
@@ -60,9 +58,9 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
     return (
       <>
         <EuiFocusTrap disabled={!show}>
-          <Pane timelineId={timelineId} visible={show} />
+          <TimelineModal timelineId={timelineId} visible={show} openToggleRef={openToggleRef} />
         </EuiFocusTrap>
-        <FlyoutBottomBar showTimelineHeaderPanel={!show} timelineId={timelineId} />
+        <TimelineBottomBar show={show} timelineId={timelineId} openToggleRef={openToggleRef} />
         <EuiWindowEvent event="keydown" handler={onKeyDown} />
       </>
     );

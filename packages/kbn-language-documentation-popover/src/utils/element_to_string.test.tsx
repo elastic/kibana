@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { elementToString } from './element_to_string';
 
 describe('elementToString', () => {
@@ -21,7 +23,7 @@ describe('elementToString', () => {
   });
 
   test('Should convert to string if markdown is passed', () => {
-    const text = elementToString(<Markdown markdown={`## Markdown goes here `} />);
+    const text = elementToString(<Markdown markdownContent="## Markdown goes here " readOnly />);
     expect(text).toEqual('## Markdown goes here ');
   });
 
@@ -29,7 +31,7 @@ describe('elementToString', () => {
     const text = elementToString(
       <>
         <h1>Meow</h1>
-        <Markdown markdown={`## Markdown goes here `} />
+        <Markdown markdownContent="## Markdown goes here " readOnly />
       </>
     );
     expect(text).toEqual('## Markdown goes here ');

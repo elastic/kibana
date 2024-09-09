@@ -7,35 +7,14 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { useEffect, useMemo, useState } from 'react';
-import { EcsFlat } from '@kbn/ecs';
-import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
-import { isEmpty } from 'lodash';
+import { EcsFlat } from '@elastic/ecs';
 
-export const getDescription = (fieldName: string, ecsFlat: Record<string, EcsMetadata>) => {
-  let ecsField = ecsFlat[fieldName];
-  if (isEmpty(ecsField?.description ?? '') && fieldName.includes('kibana.alert.')) {
-    ecsField = ecsFlat[fieldName.replace('kibana.alert.', '')];
-  }
-  return ecsField?.description ?? '';
-};
-
-async function loadRuleTypeAadTemplateFields({
-  http,
-  ruleTypeId,
-}: {
-  http: HttpStart;
-  ruleTypeId: string;
-}): Promise<DataViewField[]> {
-  if (!ruleTypeId || !http) return [];
-  const fields = await http.get<DataViewField[]>(`${BASE_RAC_ALERTS_API_PATH}/aad_fields`, {
-    query: { ruleTypeId },
-  });
-
-  return fields;
-}
+import {
+  fetchRuleTypeAadTemplateFields,
+  getDescription,
+} from '@kbn/alerts-ui-shared/src/common/apis/fetch_rule_type_aad_template_fields';
 
 export function useRuleTypeAadTemplateFields(
   http: HttpStart,
@@ -49,7 +28,7 @@ export function useRuleTypeAadTemplateFields(
   useEffect(() => {
     if (enabled && data.length === 0 && ruleTypeId) {
       setIsLoading(true);
-      loadRuleTypeAadTemplateFields({ http, ruleTypeId }).then((res) => {
+      fetchRuleTypeAadTemplateFields({ http, ruleTypeId }).then((res) => {
         setData(res);
         setIsLoading(false);
       });

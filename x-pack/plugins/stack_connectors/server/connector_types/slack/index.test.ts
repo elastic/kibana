@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { IncomingWebhook } from '@slack/webhook';
 import { Logger } from '@kbn/core/server';
 import {
   Services,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
+  ConnectorUsageCollector,
 } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import {
@@ -21,20 +22,16 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
-jest.mock('@slack/webhook', () => {
-  return {
-    IncomingWebhook: jest.fn().mockImplementation(() => {
-      return { send: (message: string) => {} };
-    }),
-  };
-});
+const sendSpy = jest.spyOn(IncomingWebhook.prototype, 'send');
 
 const services: Services = actionsMock.createServices();
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: SlackConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
@@ -42,6 +39,10 @@ beforeEach(() => {
     async executor(options) {
       return { status: 'ok', actionId: options.actionId };
     },
+  });
+  connectorUsageCollector = new ConnectorUsageCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
   });
 });
 
@@ -181,6 +182,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
     expect(response).toMatchInlineSnapshot(`
       Object {
@@ -201,6 +203,7 @@ describe('execute()', () => {
         params: { message: 'failure: this invocation should fail' },
         configurationUtilities,
         logger: mockedLogger,
+        connectorUsageCollector,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"slack mockExecutor failure: this invocation should fail"`
@@ -226,6 +229,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
@@ -252,6 +256,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
     expect(mockedLogger.debug).not.toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
@@ -278,6 +283,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
@@ -304,6 +310,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
@@ -330,6 +337,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
     expect(mockedLogger.debug).not.toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
@@ -344,7 +352,49 @@ describe('execute()', () => {
     const variables = {
       rogue: '*bold*',
     };
-    const params = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+    const params = connectorType.renderParameterTemplates!(
+      mockedLogger,
+      paramsWithTemplates,
+      variables
+    );
     expect(params.message).toBe('`*bold*`');
+  });
+
+  test('returns a user error for rate-limiting responses', async () => {
+    const configUtils = actionsConfigMock.create();
+
+    configUtils.getProxySettings.mockReturnValue({
+      proxyUrl: 'https://someproxyhost',
+      proxySSLSettings: {
+        verificationMode: 'none',
+      },
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    });
+
+    sendSpy.mockRejectedValueOnce({
+      original: { response: { status: 429, statusText: 'failure', headers: {} } },
+    });
+
+    connectorType = getConnectorType({});
+
+    expect(
+      await connectorType.executor({
+        actionId: 'some-id',
+        services,
+        config: {},
+        secrets: { webhookUrl: 'http://example.com' },
+        params: { message: '429' },
+        configurationUtilities: configUtils,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      })
+    ).toEqual({
+      actionId: 'some-id',
+      errorSource: TaskErrorSource.USER,
+      message: 'error posting a slack message, retry later',
+      retry: true,
+      status: 'error',
+    });
   });
 });

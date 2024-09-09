@@ -21,15 +21,27 @@ export function registerManagementSection(
   isServerless: boolean,
   mlFeatures: MlFeatures
 ) {
+  const appName = i18n.translate('xpack.ml.management.jobsListTitle', {
+    defaultMessage: 'Machine Learning',
+  });
+
   return management.sections.section.insightsAndAlerting.registerApp({
     id: 'jobsListLink',
-    title: i18n.translate('xpack.ml.management.jobsListTitle', {
-      defaultMessage: 'Machine Learning',
-    }),
+    title: appName,
     order: 4,
     async mount(params: ManagementAppMountParams) {
+      const [{ chrome }] = await core.getStartServices();
+      const { docTitle } = chrome;
+
+      docTitle.change(appName);
+
       const { mountApp } = await import('./jobs_list');
-      return mountApp(core, params, deps, isServerless, mlFeatures);
+      const unmountAppCallback = await mountApp(core, params, deps, isServerless, mlFeatures);
+
+      return () => {
+        docTitle.reset();
+        unmountAppCallback();
+      };
     },
   });
 }

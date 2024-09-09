@@ -13,133 +13,137 @@
 
 import { executeAction, Props } from './executor';
 import { PassThrough } from 'stream';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { RequestBody } from './langchain/types';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-const request = {
-  body: {
-    params: {},
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { loggerMock } from '@kbn/logging-mocks';
+import * as ParseStream from './parse_stream';
+
+const onLlmResponse = jest.fn(async () => {}); // We need it to be a promise, or it'll crash because of missing `.catch`
+const connectorId = 'testConnectorId';
+const mockLogger = loggerMock.create();
+const testProps: Omit<Props, 'actions'> = {
+  params: {
+    subAction: 'invokeAI',
+    subActionParams: { messages: [{ content: 'hello', role: 'user' }] },
   },
-} as KibanaRequest<unknown, unknown, RequestBody>;
+  actionTypeId: '.bedrock',
+  connectorId,
+  actionsClient: actionsClientMock.create(),
+  onLlmResponse,
+  logger: mockLogger,
+};
+
+const handleStreamStorageSpy = jest.spyOn(ParseStream, 'handleStreamStorage');
 
 describe('executeAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
   it('should execute an action and return a StaticResponse when the response from the actions framework is a string', async () => {
-    const actions = {
-      getActionsClientWithRequest: jest.fn().mockResolvedValue({
-        execute: jest.fn().mockResolvedValue({
-          data: {
-            message: 'Test message',
-          },
-        }),
-      }),
-    };
-    const connectorId = 'testConnectorId';
+    testProps.actionsClient.execute = jest.fn().mockResolvedValue({
+      data: {
+        message: 'Test message',
+      },
+    });
 
-    const result = await executeAction({ actions, request, connectorId } as unknown as Props);
+    const result = await executeAction({ ...testProps });
 
     expect(result).toEqual({
       connector_id: connectorId,
       data: 'Test message',
       status: 'ok',
     });
+    expect(onLlmResponse).toHaveBeenCalledWith('Test message');
   });
 
   it('should execute an action and return a Readable object when the response from the actions framework is a stream', async () => {
     const readableStream = new PassThrough();
-    const actions = {
-      getActionsClientWithRequest: jest.fn().mockResolvedValue({
-        execute: jest.fn().mockResolvedValue({
-          data: readableStream,
-        }),
-      }),
-    };
-    const connectorId = 'testConnectorId';
+    const actionsClient = actionsClientMock.create();
+    actionsClient.execute.mockImplementationOnce(
+      jest.fn().mockResolvedValue({
+        status: 'ok',
+        data: readableStream,
+      })
+    );
 
-    const result = await executeAction({ actions, request, connectorId } as unknown as Props);
+    const result = await executeAction({ ...testProps, actionsClient });
 
     expect(JSON.stringify(result)).toStrictEqual(
       JSON.stringify(readableStream.pipe(new PassThrough()))
     );
-  });
 
-  it('should throw an error if the actions plugin fails to retrieve the actions client', async () => {
-    const actions = {
-      getActionsClientWithRequest: jest
-        .fn()
-        .mockRejectedValue(new Error('Failed to retrieve actions client')),
-    };
-    const connectorId = 'testConnectorId';
-
-    await expect(
-      executeAction({ actions, request, connectorId } as unknown as Props)
-    ).rejects.toThrowError('Failed to retrieve actions client');
+    expect(handleStreamStorageSpy).toHaveBeenCalledWith({
+      actionTypeId: '.bedrock',
+      onMessageSent: onLlmResponse,
+      logger: mockLogger,
+      responseStream: readableStream,
+    });
   });
 
   it('should throw an error if the actions client fails to execute the action', async () => {
-    const actions = {
-      getActionsClientWithRequest: jest.fn().mockResolvedValue({
-        execute: jest.fn().mockRejectedValue(new Error('Failed to execute action')),
-      }),
-    };
-    const connectorId = 'testConnectorId';
+    const actionsClient = actionsClientMock.create();
+    actionsClient.execute.mockRejectedValue(new Error('Failed to execute action'));
+    testProps.actionsClient = actionsClient;
 
-    await expect(
-      executeAction({ actions, request, connectorId } as unknown as Props)
-    ).rejects.toThrowError('Failed to execute action');
+    await expect(executeAction({ ...testProps, actionsClient })).rejects.toThrowError(
+      'Failed to execute action'
+    );
   });
 
   it('should throw an error when the response from the actions framework is null or undefined', async () => {
-    const actions = {
-      getActionsClientWithRequest: jest.fn().mockResolvedValue({
-        execute: jest.fn().mockResolvedValue({
-          data: null,
-        }),
-      }),
-    };
-    const connectorId = 'testConnectorId';
+    const actionsClient = actionsClientMock.create();
+    actionsClient.execute.mockImplementationOnce(
+      jest.fn().mockResolvedValue({
+        data: null,
+      })
+    );
+    testProps.actionsClient = actionsClient;
 
     try {
-      await executeAction({ actions, request, connectorId } as unknown as Props);
+      await executeAction({ ...testProps, actionsClient });
     } catch (e) {
       expect(e.message).toBe('Action result status is error: result is not streamable');
     }
   });
 
   it('should throw an error if action result status is "error"', async () => {
-    const actions = {
-      getActionsClientWithRequest: jest.fn().mockResolvedValue({
-        execute: jest.fn().mockResolvedValue({
-          status: 'error',
-          message: 'Error message',
-          serviceMessage: 'Service error message',
-        }),
-      }),
-    } as unknown as ActionsPluginStart;
-    const connectorId = '12345';
-
-    await expect(executeAction({ actions, request, connectorId })).rejects.toThrowError(
-      'Action result status is error: Error message - Service error message'
+    const actionsClient = actionsClientMock.create();
+    actionsClient.execute.mockImplementationOnce(
+      jest.fn().mockResolvedValue({
+        status: 'error',
+        message: 'Error message',
+        serviceMessage: 'Service error message',
+      })
     );
+    testProps.actionsClient = actionsClient;
+
+    await expect(
+      executeAction({
+        ...testProps,
+        actionsClient,
+        connectorId: '12345',
+      })
+    ).rejects.toThrowError('Action result status is error: Error message - Service error message');
   });
 
   it('should throw an error if content of response data is not a string or streamable', async () => {
-    const actions = {
-      getActionsClientWithRequest: jest.fn().mockResolvedValue({
-        execute: jest.fn().mockResolvedValue({
-          status: 'ok',
-          data: {
-            message: 12345,
-          },
-        }),
-      }),
-    } as unknown as ActionsPluginStart;
-    const connectorId = '12345';
-
-    await expect(executeAction({ actions, request, connectorId })).rejects.toThrowError(
-      'Action result status is error: result is not streamable'
+    const actionsClient = actionsClientMock.create();
+    actionsClient.execute.mockImplementationOnce(
+      jest.fn().mockResolvedValue({
+        status: 'ok',
+        data: {
+          message: 12345,
+        },
+      })
     );
+    testProps.actionsClient = actionsClient;
+
+    await expect(
+      executeAction({
+        ...testProps,
+
+        actionsClient,
+        connectorId: '12345',
+      })
+    ).rejects.toThrowError('Action result status is error: result is not streamable');
   });
 });

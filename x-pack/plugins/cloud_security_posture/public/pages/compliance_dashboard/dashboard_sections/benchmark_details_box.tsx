@@ -17,23 +17,32 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
+import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 import { getBenchmarkIdQuery } from './benchmarks_section';
 import { BenchmarkData } from '../../../../common/types_old';
-import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
+
+interface BenchmarkInfo {
+  name: string;
+  assetType: string;
+  handleClick: () => void;
+}
+
 export const BenchmarkDetailsBox = ({ benchmark }: { benchmark: BenchmarkData }) => {
   const navToFindings = useNavigateFindings();
 
-  const handleBenchmarkClick = () => {
-    return navToFindings(getBenchmarkIdQuery(benchmark));
-  };
+  const handleClickCloudProvider = () =>
+    navToFindings(getBenchmarkIdQuery(benchmark), [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]);
 
-  const getBenchmarkInfo = (
-    benchmarkId: string,
-    cloudAssetCount: number
-  ): { name: string; assetType: string } => {
-    const benchmarks: Record<string, { name: string; assetType: string }> = {
+  const handleClickCluster = () =>
+    navToFindings(getBenchmarkIdQuery(benchmark), [
+      FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME,
+    ]);
+
+  const getBenchmarkInfo = (benchmarkId: string, cloudAssetCount: number): BenchmarkInfo => {
+    const benchmarks: Record<string, BenchmarkInfo> = {
       cis_gcp: {
         name: i18n.translate(
           'xpack.csp.dashboard.benchmarkSection.benchmarkName.cisGcpBenchmarkName',
@@ -48,6 +57,7 @@ export const BenchmarkDetailsBox = ({ benchmark }: { benchmark: BenchmarkData })
             values: { count: cloudAssetCount },
           }
         ),
+        handleClick: handleClickCloudProvider,
       },
       cis_aws: {
         name: i18n.translate(
@@ -63,6 +73,7 @@ export const BenchmarkDetailsBox = ({ benchmark }: { benchmark: BenchmarkData })
             values: { count: cloudAssetCount },
           }
         ),
+        handleClick: handleClickCloudProvider,
       },
       cis_azure: {
         name: i18n.translate(
@@ -78,6 +89,7 @@ export const BenchmarkDetailsBox = ({ benchmark }: { benchmark: BenchmarkData })
             values: { count: cloudAssetCount },
           }
         ),
+        handleClick: handleClickCloudProvider,
       },
       cis_k8s: {
         name: i18n.translate(
@@ -93,6 +105,7 @@ export const BenchmarkDetailsBox = ({ benchmark }: { benchmark: BenchmarkData })
             values: { count: cloudAssetCount },
           }
         ),
+        handleClick: handleClickCluster,
       },
       cis_eks: {
         name: i18n.translate(
@@ -108,6 +121,7 @@ export const BenchmarkDetailsBox = ({ benchmark }: { benchmark: BenchmarkData })
             values: { count: cloudAssetCount },
           }
         ),
+        handleClick: handleClickCluster,
       },
     };
     return benchmarks[benchmarkId];
@@ -149,14 +163,22 @@ export const BenchmarkDetailsBox = ({ benchmark }: { benchmark: BenchmarkData })
             </EuiText>
           }
         >
-          <EuiLink onClick={handleBenchmarkClick} color="text">
+          <EuiLink
+            onClick={benchmarkInfo.handleClick}
+            color="text"
+            data-test-subj="benchmark-section-bench-name"
+          >
             <EuiTitle css={{ fontSize: 20 }}>
               <h5>{benchmarkInfo.name}</h5>
             </EuiTitle>
           </EuiLink>
         </EuiToolTip>
 
-        <EuiLink onClick={handleBenchmarkClick} color="text">
+        <EuiLink
+          data-test-subj="benchmark-asset-type"
+          onClick={benchmarkInfo.handleClick}
+          color="text"
+        >
           <EuiText size="xs">{benchmarkInfo.assetType}</EuiText>
         </EuiLink>
       </EuiFlexItem>

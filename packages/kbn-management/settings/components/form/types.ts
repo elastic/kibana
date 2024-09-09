@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -15,12 +16,13 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { I18nStart } from '@kbn/core-i18n-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { ToastsStart } from '@kbn/core-notifications-browser';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 
 /**
  * Contextual services used by a {@link Form} component.
  */
 export interface Services {
-  saveChanges: (changes: Record<string, UnsavedFieldChange>) => void;
+  saveChanges: (changes: Record<string, UnsavedFieldChange>, scope: UiSettingsScope) => void;
   showError: (message: string) => void;
   showReloadPagePrompt: () => void;
 }
@@ -37,6 +39,7 @@ export type FormServices = FieldRowServices & Services;
 interface KibanaDependencies {
   settings: {
     client: Pick<IUiSettingsClient, 'set'>;
+    globalClient: Pick<IUiSettingsClient, 'set'>;
   };
   theme: ThemeServiceStart;
   i18n: I18nStart;

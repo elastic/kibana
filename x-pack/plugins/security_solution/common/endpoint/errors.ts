@@ -14,5 +14,17 @@ export class EndpointError<MetaType = unknown> extends Error {
     super(message);
     // For debugging - capture name of subclasses
     this.name = this.constructor.name;
+
+    if (meta instanceof Error) {
+      this.stack += `\n----- original error -----\n${meta.stack}`;
+    }
   }
 }
+
+/**
+ * Type guard to check if a given Error is an instance of EndpointError
+ * @param err
+ */
+export const isEndpointError = (err: Error): err is EndpointError => {
+  return err instanceof EndpointError;
+};

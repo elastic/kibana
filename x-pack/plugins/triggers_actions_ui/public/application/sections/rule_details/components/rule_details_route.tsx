@@ -130,20 +130,22 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
     return null;
   };
 
-  return rule && ruleType && actionTypes ? (
-    <>
-      {getLegacyUrlConflictCallout()}
-      <RuleDetails
-        rule={rule}
-        ruleType={ruleType}
-        actionTypes={actionTypes}
-        requestRefresh={requestRefresh}
-        refreshToken={refreshToken}
-      />
-    </>
-  ) : (
-    <CenterJustifiedSpinner />
-  );
+  if (rule && ruleType && actionTypes) {
+    return (
+      <>
+        {getLegacyUrlConflictCallout()}
+        <RuleDetails
+          rule={rule}
+          ruleType={ruleType}
+          actionTypes={actionTypes}
+          requestRefresh={requestRefresh}
+          refreshToken={refreshToken}
+        />
+      </>
+    );
+  }
+
+  return <CenterJustifiedSpinner />;
 };
 
 export async function getRuleData(

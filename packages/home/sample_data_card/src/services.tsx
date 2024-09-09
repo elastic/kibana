@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, MouseEventHandler, useContext } from 'react';
+import React, { FC, PropsWithChildren, MouseEventHandler, useContext } from 'react';
 import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 
 import { SAMPLE_DATA_API } from './constants';
@@ -41,7 +42,10 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const SampleDataCardProvider: FC<Services> = ({ children, ...services }) => {
+export const SampleDataCardProvider: FC<PropsWithChildren<Services>> = ({
+  children,
+  ...services
+}) => {
   const {
     addBasePath,
     getAppNavigationHandler,
@@ -99,7 +103,7 @@ export interface KibanaDependencies {
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const SampleDataCardKibanaProvider: FC<KibanaDependencies> = ({
+export const SampleDataCardKibanaProvider: FC<PropsWithChildren<KibanaDependencies>> = ({
   children,
   ...dependencies
 }) => {

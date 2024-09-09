@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment from 'moment-timezone';
 import { merge, Subscription } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 
 import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -26,7 +27,11 @@ export class MomentService implements CoreService {
   public async start({ uiSettings }: StartDeps) {
     const setDefaultTimezone = (tz: string) => {
       const zone = moment.tz.zone(tz);
-      if (zone) moment.tz.setDefault(zone.name);
+      if (zone) {
+        moment.tz.setDefault(zone.name);
+      } else {
+        moment.tz.setDefault(moment.tz.guess());
+      }
     };
     const setStartDayOfWeek = (day: string) => {
       const dow = moment.weekdays().indexOf(day);

@@ -13,13 +13,16 @@ import { USERS_PATH } from '../../../../common/constants';
 
 const getTabsOnUsersUrl = (tabName: UsersTableType) => `${USERS_PATH}/${tabName}`;
 
-export const navTabsUsers = (
-  hasMlUserPermissions: boolean,
-  isRiskyUserEnabled: boolean
-): UsersNavTab => {
+export const navTabsUsers = (hasMlUserPermissions: boolean): UsersNavTab => {
   const hiddenTabs = [];
 
   const userNavTabs = {
+    [UsersTableType.events]: {
+      id: UsersTableType.events,
+      name: i18n.NAVIGATION_EVENTS_TITLE,
+      href: getTabsOnUsersUrl(UsersTableType.events),
+      disabled: false,
+    },
     [UsersTableType.allUsers]: {
       id: UsersTableType.allUsers,
       name: i18n.NAVIGATION_ALL_USERS_TITLE,
@@ -38,12 +41,6 @@ export const navTabsUsers = (
       href: getTabsOnUsersUrl(UsersTableType.anomalies),
       disabled: false,
     },
-    [UsersTableType.events]: {
-      id: UsersTableType.events,
-      name: i18n.NAVIGATION_EVENTS_TITLE,
-      href: getTabsOnUsersUrl(UsersTableType.events),
-      disabled: false,
-    },
     [UsersTableType.risk]: {
       id: UsersTableType.risk,
       name: i18n.NAVIGATION_RISK_TITLE,
@@ -54,10 +51,6 @@ export const navTabsUsers = (
 
   if (!hasMlUserPermissions) {
     hiddenTabs.push(UsersTableType.anomalies);
-  }
-
-  if (!isRiskyUserEnabled) {
-    hiddenTabs.push(UsersTableType.risk);
   }
 
   return omit(hiddenTabs, userNavTabs);

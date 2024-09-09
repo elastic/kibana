@@ -8,7 +8,7 @@
 import type SuperTest from 'supertest';
 import type {
   RuleCreateProps,
-  PreviewRulesSchema,
+  RulePreviewRequestBody,
   RulePreviewLogs,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
@@ -27,7 +27,7 @@ export const previewRule = async ({
   invocationCount = 1,
   timeframeEnd = new Date(),
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   rule: RuleCreateProps;
   invocationCount?: number;
   timeframeEnd?: Date;
@@ -36,7 +36,7 @@ export const previewRule = async ({
   logs: RulePreviewLogs[];
   isAborted: boolean;
 }> => {
-  const previewRequest: PreviewRulesSchema = {
+  const previewRequest: RulePreviewRequestBody = {
     ...rule,
     invocationCount,
     timeframeEnd: timeframeEnd.toISOString(),

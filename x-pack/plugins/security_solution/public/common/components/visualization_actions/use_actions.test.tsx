@@ -10,7 +10,7 @@ import React from 'react';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { mockAttributes } from './mocks';
-import { useActions } from './use_actions';
+import { DEFAULT_ACTIONS, useActions } from './use_actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import { TestProviders } from '../../mock';
 
@@ -71,15 +71,15 @@ describe(`useActions`, () => {
     const { result } = renderHook(
       () =>
         useActions({
-          withActions: true,
+          withActions: DEFAULT_ACTIONS,
           attributes: mockAttributes,
           timeRange: {
             from: '2022-10-26T23:00:00.000Z',
             to: '2022-11-03T15:16:50.053Z',
           },
           inspectActionProps: {
-            onInspectActionClicked: jest.fn(),
-            isDisabled: false,
+            handleInspectClick: jest.fn(),
+            isInspectButtonDisabled: false,
           },
         }),
       {
@@ -119,15 +119,15 @@ describe(`useActions`, () => {
     const { result } = renderHook(
       () =>
         useActions({
-          withActions: true,
+          withActions: DEFAULT_ACTIONS,
           attributes: mockAttributes,
           timeRange: {
             from: '2022-10-26T23:00:00.000Z',
             to: '2022-11-03T15:16:50.053Z',
           },
           inspectActionProps: {
-            onInspectActionClicked: jest.fn(),
-            isDisabled: false,
+            handleInspectClick: jest.fn(),
+            isInspectButtonDisabled: false,
           },
           extraActions: mockExtraAction,
         }),

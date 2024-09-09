@@ -1,0 +1,4 @@
+foo: 'pre-${KBN_ENV_VAR1}-mid-${KBN_ENV_VAR2:default2}-post'
+nested_list:
+  - id: 'a'
+    values: ['${KBN_ENV_VAR1:default1}', '${KBN_ENV_VAR2:default2}']

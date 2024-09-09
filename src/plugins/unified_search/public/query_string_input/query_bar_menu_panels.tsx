@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, RefObject } from 'react';
 import { isEqual } from 'lodash';
 import {
   EuiContextMenuPanelDescriptor,
@@ -14,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import {
   Filter,
@@ -24,6 +26,8 @@ import {
   toggleFilterNegated,
   pinFilter,
   unpinFilter,
+  COMPARE_ALL_OPTIONS,
+  compareFilters,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -33,11 +37,14 @@ import {
   KQL_TELEMETRY_ROUTE_LATEST_VERSION,
   UI_SETTINGS,
 } from '@kbn/data-plugin/common';
-import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
+import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { fromUser } from './from_user';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { FilterPanelOption } from '../types';
+import { PanelTitle } from './panel_title';
 
 const MAP_ITEMS_TO_FILTER_OPTION: Record<string, FilterPanelOption> = {
   'filter-sets-pinAllFilters': 'pinFilter',
@@ -81,7 +88,7 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.options.saveFilterSetLabel', {
       defaultMessage: 'Save query',
     }),
-  getClearllFiltersButtonLabel: () =>
+  getClearAllFiltersButtonLabel: () =>
     i18n.translate('unifiedSearch.filter.options.clearllFiltersButtonLabel', {
       defaultMessage: 'Clear all',
     }),
@@ -134,24 +141,46 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.options.filterLanguageLabel', {
       defaultMessage: 'Filter language',
     }),
+  getQuickFiltersLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.quickFiltersLabel', {
+      defaultMessage: 'Quick filters',
+    }),
 };
+
+export enum QueryBarMenuPanel {
+  main = 'main',
+  applyToAllFilters = 'applyToAllFilters',
+  updateCurrentQuery = 'updateCurrentQuery',
+  saveAsNewQuery = 'saveAsNewQuery',
+  loadQuery = 'loadQuery',
+  selectLanguage = 'selectLanguage',
+}
+
+export interface AdditionalQueryBarMenuItems {
+  items?: EuiContextMenuPanelItemDescriptor[];
+  panels?: EuiContextMenuPanelDescriptor[];
+}
 
 export interface QueryBarMenuPanelsProps {
   filters?: Filter[];
+  additionalQueryBarMenuItems: AdditionalQueryBarMenuItems;
   savedQuery?: SavedQuery;
   language: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
+  timeFilter?: SavedQueryTimeFilter;
   query?: Query;
   showSaveQuery?: boolean;
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   savedQueryService: SavedQueryService;
+  saveFormComponent?: JSX.Element;
   saveAsNewQueryFormComponent?: JSX.Element;
   manageFilterSetComponent?: JSX.Element;
   hiddenPanelOptions?: FilterPanelOption[];
   nonKqlMode?: 'lucene' | 'text';
   disableQueryLanguageSwitcher?: boolean;
+  queryBarMenuRef: RefObject<EuiContextMenuClass>;
   closePopover: () => void;
   onQueryBarSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
@@ -160,22 +189,26 @@ export interface QueryBarMenuPanelsProps {
   setRenderedComponent: (component: string) => void;
 }
 
-export function QueryBarMenuPanels({
+export function useQueryBarMenuPanels({
   filters,
+  additionalQueryBarMenuItems,
   savedQuery,
   language,
   dateRangeFrom,
   dateRangeTo,
+  timeFilter,
   query,
   showSaveQuery,
   showFilterBar,
   showQueryInput,
   savedQueryService,
+  saveFormComponent,
   saveAsNewQueryFormComponent,
   manageFilterSetComponent,
   hiddenPanelOptions,
   nonKqlMode,
   disableQueryLanguageSwitcher = false,
+  queryBarMenuRef,
   closePopover,
   onQueryBarSubmit,
   onFiltersUpdated,
@@ -188,9 +221,16 @@ export function QueryBarMenuPanels({
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
 
-  const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
+  const [hasSavedQueries, setHasSavedQueries] = useState(false);
   const [hasFiltersOrQuery, setHasFiltersOrQuery] = useState(false);
   const [savedQueryHasChanged, setSavedQueryHasChanged] = useState(false);
+
+  useEffect(() => {
+    if (savedQuery) {
+      cancelPendingListingRequest.current();
+      setHasSavedQueries(true);
+    }
+  }, [savedQuery]);
 
   useEffect(() => {
     const fetchSavedQueries = async () => {
@@ -200,35 +240,39 @@ export function QueryBarMenuPanels({
         requestGotCancelled = true;
       };
 
-      const { queries: savedQueryItems } = await savedQueryService.findSavedQueries('');
+      const queryCount = await savedQueryService.getSavedQueryCount();
 
       if (requestGotCancelled) return;
 
-      setSavedQueries(savedQueryItems.reverse().slice(0, 5));
+      setHasSavedQueries(queryCount > 0);
     };
     if (showQueryInput && showFilterBar) {
       fetchSavedQueries();
     }
-  }, [savedQueryService, savedQuery, showQueryInput, showFilterBar]);
+  }, [savedQueryService, showQueryInput, showFilterBar]);
 
   useEffect(() => {
     if (savedQuery) {
-      let filtersHaveChanged = filters?.length !== savedQuery.attributes?.filters?.length;
-      if (filters?.length === savedQuery.attributes?.filters?.length) {
-        filtersHaveChanged = Boolean(
-          filters?.some(
-            (filter, index) =>
-              !isEqual(filter.query, savedQuery.attributes?.filters?.[index]?.query)
-          )
-        );
-      }
-      if (filtersHaveChanged || !isEqual(query, savedQuery?.attributes.query)) {
+      const filtersHaveChanged = Boolean(
+        savedQuery?.attributes.filters &&
+          !compareFilters(filters ?? [], savedQuery.attributes.filters, COMPARE_ALL_OPTIONS)
+      );
+
+      const timeFilterHasChanged = Boolean(
+        savedQuery?.attributes.timefilter && !isEqual(timeFilter, savedQuery?.attributes.timefilter)
+      );
+
+      if (
+        filtersHaveChanged ||
+        timeFilterHasChanged ||
+        !isEqual(query, savedQuery?.attributes.query)
+      ) {
         setSavedQueryHasChanged(true);
       } else {
         setSavedQueryHasChanged(false);
       }
     }
-  }, [filters, query, savedQuery, savedQuery?.attributes.filters, savedQuery?.attributes.query]);
+  }, [filters, query, savedQuery, timeFilter]);
 
   useEffect(() => {
     const hasFilters = Boolean(filters && filters.length > 0);
@@ -243,10 +287,6 @@ export function QueryBarMenuPanels({
       to: dateRangeTo || defaultTimeSetting.to,
     };
   };
-
-  const handleSave = useCallback(() => {
-    setRenderedComponent('saveForm');
-  }, [setRenderedComponent]);
 
   const onEnableAll = () => {
     reportUiCounter?.(METRIC_TYPE.CLICK, `filter:enable_all`);
@@ -320,7 +360,7 @@ export function QueryBarMenuPanels({
   const luceneLabel = strings.getLuceneLanguageName();
   const kqlLabel = strings.getKqlLanguageName();
 
-  const filtersRelatedPanels = [
+  const filtersRelatedPanels: EuiContextMenuPanelItemDescriptor[] = [
     {
       name: strings.getOptionsAddFilterButtonLabel(),
       icon: 'plus',
@@ -331,35 +371,34 @@ export function QueryBarMenuPanels({
     {
       name: strings.getOptionsApplyAllFiltersButtonLabel(),
       icon: 'filter',
-      panel: 2,
+      panel: QueryBarMenuPanel.applyToAllFilters,
       disabled: !Boolean(filters && filters.length > 0),
       'data-test-subj': 'filter-sets-applyToAllFilters',
     },
   ];
 
-  const queryAndFiltersRelatedPanels = [
+  const queryAndFiltersRelatedPanels: EuiContextMenuPanelItemDescriptor[] = [
     {
       name: savedQuery
         ? strings.getLoadOtherFilterSetLabel()
         : strings.getLoadCurrentFilterSetLabel(),
-      panel: 4,
-      width: 350,
+      panel: QueryBarMenuPanel.loadQuery,
       icon: 'filter',
       'data-test-subj': 'saved-query-management-load-button',
-      disabled: !savedQueries.length,
+      disabled: !hasSavedQueries || !Boolean(manageFilterSetComponent),
     },
     {
       name: savedQuery ? strings.getSaveAsNewFilterSetLabel() : strings.getSaveFilterSetLabel(),
       icon: 'save',
       disabled:
         !Boolean(showSaveQuery) || !hasFiltersOrQuery || (savedQuery && !savedQueryHasChanged),
-      panel: 1,
+      panel: QueryBarMenuPanel.saveAsNewQuery,
       'data-test-subj': 'saved-query-management-save-button',
     },
     { isSeparator: true },
   ];
 
-  const items = [];
+  const items: EuiContextMenuPanelItemDescriptor[] = [];
   // apply to all actions are only shown when there are filters
   if (showFilterBar) {
     items.push(...filtersRelatedPanels);
@@ -368,7 +407,7 @@ export function QueryBarMenuPanels({
   if (showFilterBar || showQueryInput) {
     items.push(
       {
-        name: strings.getClearllFiltersButtonLabel(),
+        name: strings.getClearAllFiltersButtonLabel(),
         disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
         icon: 'cross',
         'data-test-subj': 'filter-sets-removeAllFilters',
@@ -385,6 +424,11 @@ export function QueryBarMenuPanels({
       { isSeparator: true }
     );
   }
+
+  if (showFilterBar && additionalQueryBarMenuItems.items?.length) {
+    items.push(...[...additionalQueryBarMenuItems.items, { isSeparator: true } as const]);
+  }
+
   // saved queries actions are only shown when the showQueryInput and showFilterBar is true
   if (showQueryInput && showFilterBar) {
     items.push(...queryAndFiltersRelatedPanels);
@@ -394,14 +438,14 @@ export function QueryBarMenuPanels({
   if (showQueryInput && !disableQueryLanguageSwitcher) {
     items.push({
       name: `Language: ${language === 'kuery' ? kqlLabel : luceneLabel}`,
-      panel: 3,
+      panel: QueryBarMenuPanel.selectLanguage,
       'data-test-subj': 'switchQueryLanguageButton',
     });
   }
 
-  let panels = [
+  let panels: EuiContextMenuPanelDescriptor[] = [
     {
-      id: 0,
+      id: QueryBarMenuPanel.main,
       title: savedQuery?.attributes.title ? (
         <>
           <EuiFlexGroup direction="column" gutterSize="s">
@@ -419,7 +463,12 @@ export function QueryBarMenuPanels({
                 <EuiButton
                   size="s"
                   fill
-                  onClick={handleSave}
+                  onClick={() => {
+                    queryBarMenuRef.current?.showPanel(
+                      QueryBarMenuPanel.updateCurrentQuery,
+                      'next'
+                    );
+                  }}
                   aria-label={strings.getSavedQueryPopoverSaveChangesButtonAriaLabel(
                     savedQuery?.attributes.title
                   )}
@@ -435,13 +484,7 @@ export function QueryBarMenuPanels({
       items,
     },
     {
-      id: 1,
-      title: strings.getSaveCurrentFilterSetLabel(),
-      disabled: !Boolean(showSaveQuery),
-      content: <div style={{ padding: 16 }}>{saveAsNewQueryFormComponent}</div>,
-    },
-    {
-      id: 2,
+      id: QueryBarMenuPanel.applyToAllFilters,
       initialFocusedItemIndex: 1,
       title: strings.getApplyAllFiltersButtonLabel(),
       items: [
@@ -493,7 +536,29 @@ export function QueryBarMenuPanels({
       ],
     },
     {
-      id: 3,
+      id: QueryBarMenuPanel.updateCurrentQuery,
+      content: (
+        <>
+          <PanelTitle
+            queryBarMenuRef={queryBarMenuRef}
+            title={strings.getSavedQueryPopoverSaveChangesButtonText()}
+          />
+          <div css={{ padding: euiThemeVars.euiSizeM }}>{saveFormComponent}</div>
+        </>
+      ),
+    },
+    {
+      id: QueryBarMenuPanel.saveAsNewQuery,
+      title: strings.getSaveCurrentFilterSetLabel(),
+      content: <div css={{ padding: euiThemeVars.euiSizeM }}>{saveAsNewQueryFormComponent}</div>,
+    },
+    {
+      id: QueryBarMenuPanel.loadQuery,
+      width: 400,
+      content: <div>{manageFilterSetComponent}</div>,
+    },
+    {
+      id: QueryBarMenuPanel.selectLanguage,
       title: strings.getFilterLanguageLabel(),
       content: (
         <QueryLanguageSwitcher
@@ -513,6 +578,7 @@ export function QueryBarMenuPanels({
       width: 400,
       content: <div>{manageFilterSetComponent}</div>,
     },
+    ...(additionalQueryBarMenuItems.panels ?? []),
   ] as EuiContextMenuPanelDescriptor[];
 
   if (hiddenPanelOptions && hiddenPanelOptions.length > 0) {

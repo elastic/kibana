@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import EntityAnalyticsUpsellingComponent from './entity_analytics';
+import { EntityAnalyticsUpsellingPage } from './entity_analytics';
 
 jest.mock('@kbn/security-solution-navigation', () => {
   const original = jest.requireActual('@kbn/security-solution-navigation');
@@ -21,54 +21,33 @@ jest.mock('@kbn/security-solution-navigation', () => {
 describe('EntityAnalyticsUpselling', () => {
   it('should render', () => {
     const { getByTestId } = render(
-      <EntityAnalyticsUpsellingComponent requiredLicense="TEST LICENSE" />
+      <EntityAnalyticsUpsellingPage
+        upgradeMessage="test upgrade message"
+        upgradeToLabel="TEST LICENSE"
+      />
     );
     expect(getByTestId('paywallCardDescription')).toBeInTheDocument();
   });
 
-  it('should throw exception when requiredLicense and requiredProduct are not provided', () => {
-    expect(() => render(<EntityAnalyticsUpsellingComponent />)).toThrow();
-  });
-
-  it('should show product message when requiredProduct is provided', () => {
-    const { getByTestId } = render(
-      <EntityAnalyticsUpsellingComponent
-        requiredProduct="TEST PRODUCT"
-        requiredLicense="TEST LICENSE"
-      />
-    );
-
-    expect(getByTestId('paywallCardDescription')).toHaveTextContent(
-      'Entity risk scoring capability is available in our TEST PRODUCT license tier'
-    );
-  });
-
-  it('should show product badge when requiredProduct is provided', () => {
+  it('should show upgrade label badge', () => {
     const { getByText } = render(
-      <EntityAnalyticsUpsellingComponent
-        requiredProduct="TEST PRODUCT"
-        requiredLicense="TEST LICENSE"
+      <EntityAnalyticsUpsellingPage
+        upgradeToLabel="TEST PRODUCT"
+        upgradeMessage="test upgrade message"
       />
     );
 
     expect(getByText('TEST PRODUCT')).toBeInTheDocument();
   });
 
-  it('should show license message when requiredLicense is provided', () => {
+  it('should show license message', () => {
     const { getByTestId } = render(
-      <EntityAnalyticsUpsellingComponent requiredLicense="TEST LICENSE" />
+      <EntityAnalyticsUpsellingPage
+        upgradeToLabel="TEST PRODUCT"
+        upgradeMessage="test upgrade message"
+      />
     );
 
-    expect(getByTestId('paywallCardDescription')).toHaveTextContent(
-      'This feature is available with TEST LICENSE or higher subscription'
-    );
-  });
-
-  it('should show license badge when requiredLicense is provided', () => {
-    const { getByText } = render(
-      <EntityAnalyticsUpsellingComponent requiredLicense="TEST LICENSE" />
-    );
-
-    expect(getByText('TEST LICENSE')).toBeInTheDocument();
+    expect(getByTestId('paywallCardDescription')).toHaveTextContent('test upgrade message');
   });
 });

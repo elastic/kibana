@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiPopover, EuiScreenReaderOnly } from '@elastic/eui';
@@ -17,7 +18,7 @@ import { ExtraActionsButton } from './extra_actions_button';
 import { ACTIONS_AREA_LABEL, YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 import { partitionActions } from '../hooks/actions';
 import { ExtraActionsPopOverWithAnchor } from './extra_actions_popover';
-import { CellActionExecutionContext } from '../types';
+import type { CellActionExecutionContext } from '../types';
 import { useLoadActionsFn } from '../hooks/use_load_actions';
 
 /** This class is added to the document body while dragging */
@@ -135,7 +136,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
           panelPaddingSize="none"
           repositionOnScroll
           ownFocus={false}
-          data-test-subj={'hoverActionsPopover'}
+          panelProps={{ 'data-test-subj': 'hoverActionsPopover' }}
           aria-label={ACTIONS_AREA_LABEL}
         >
           {showHoverContent && (

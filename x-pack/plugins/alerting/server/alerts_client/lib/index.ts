@@ -19,3 +19,5 @@ export {
 } from './get_summarized_alerts_query';
 export { expandFlattenedAlert } from './format_alert';
 export { sanitizeBulkErrorResponse } from './sanitize_bulk_response';
+export { initializeAlertsClient } from './initialize_alerts_client';
+export { isAlertImproving } from './is_alert_improving';

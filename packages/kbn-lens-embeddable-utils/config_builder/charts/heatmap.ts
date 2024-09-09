@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -18,13 +19,14 @@ import {
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
+  mapToFormula,
 } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
 
 function getAccessorName(type: 'x' | 'y') {
-  return `${ACCESSOR}_${type}`;
+  return `${type}_${ACCESSOR}`;
 }
 
 function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizationState {
@@ -66,17 +68,10 @@ function buildFormulaLayer(
   layer: LensHeatmapConfig,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'][0] {
   const defaultLayer = {
-    ...getFormulaColumn(
-      ACCESSOR,
-      {
-        value: layer.value,
-      },
-      dataView,
-      formulaAPI
-    ),
+    ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
   };
 
   if (layer.xAxis) {

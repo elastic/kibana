@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { monaco, XJsonLang } from '@kbn/monaco';
 import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
@@ -18,7 +19,7 @@ interface MlJobEditorProps {
   value: string;
   height?: string;
   width?: string;
-  mode?: typeof ML_EDITOR_MODE[keyof typeof ML_EDITOR_MODE];
+  mode?: (typeof ML_EDITOR_MODE)[keyof typeof ML_EDITOR_MODE];
   readOnly?: boolean;
   onChange?: CodeEditorProps['onChange'];
   'data-test-subj'?: string;

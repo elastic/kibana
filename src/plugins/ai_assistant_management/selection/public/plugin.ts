@@ -1,22 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from '@kbn/core/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ServerlessPluginSetup } from '@kbn/serverless/public';
+import { type CoreSetup, Plugin, type CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { ServerlessPluginSetup } from '@kbn/serverless/public';
+import { BehaviorSubject, Observable } from 'rxjs';
+import type { BuildFlavor } from '@kbn/config';
+import { AIAssistantType } from '../common/ai_assistant_type';
+import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AiAssistantManagementSelectionPluginSetup {}
+export interface AIAssistantManagementSelectionPluginPublicSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AiAssistantManagementSelectionPluginStart {}
+export interface AIAssistantManagementSelectionPluginPublicStart {
+  aiAssistantType$: Observable<AIAssistantType>;
+}
 
 export interface SetupDependencies {
   management: ManagementSetup;
@@ -27,20 +33,30 @@ export interface SetupDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartDependencies {}
 
-export class AiAssistantManagementPlugin
+export class AIAssistantManagementPlugin
   implements
     Plugin<
-      AiAssistantManagementSelectionPluginSetup,
-      AiAssistantManagementSelectionPluginStart,
+      AIAssistantManagementSelectionPluginPublicSetup,
+      AIAssistantManagementSelectionPluginPublicStart,
       SetupDependencies,
       StartDependencies
     >
 {
+  private readonly kibanaBranch: string;
+  private readonly buildFlavor: BuildFlavor;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
+    this.buildFlavor = this.initializerContext.env.packageInfo.buildFlavor;
+  }
+
   public setup(
-    core: CoreSetup<StartDependencies, AiAssistantManagementSelectionPluginStart>,
+    core: CoreSetup<StartDependencies, AIAssistantManagementSelectionPluginPublicStart>,
     { home, management, serverless }: SetupDependencies
-  ): AiAssistantManagementSelectionPluginSetup {
-    if (serverless) return {};
+  ): AIAssistantManagementSelectionPluginPublicSetup {
+    if (serverless) {
+      return {};
+    }
 
     if (home) {
       home.featureCatalogue.register({
@@ -52,7 +68,7 @@ export class AiAssistantManagementPlugin
           defaultMessage: 'Manage your AI Assistants.',
         }),
         icon: 'sparkles',
-        path: '/app/management/kibana/ai-assistant',
+        path: '/app/management/kibana/aiAssistantManagementSelection',
         showOnHomePage: false,
         category: 'admin',
       });
@@ -70,6 +86,8 @@ export class AiAssistantManagementPlugin
         return mountManagementSection({
           core,
           mountParams,
+          kibanaBranch: this.kibanaBranch,
+          buildFlavor: this.buildFlavor,
         });
       },
     });
@@ -77,7 +95,15 @@ export class AiAssistantManagementPlugin
     return {};
   }
 
-  public start() {
-    return {};
+  public start(coreStart: CoreStart) {
+    const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
+      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
+    );
+
+    const aiAssistantType$ = new BehaviorSubject(preferredAIAssistantType);
+
+    return {
+      aiAssistantType$: aiAssistantType$.asObservable(),
+    };
   }
 }

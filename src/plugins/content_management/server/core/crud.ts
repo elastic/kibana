@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type {
   GetResult,
   BulkGetResult,
@@ -79,17 +81,17 @@ export class ContentCrud<T = unknown> {
     });
 
     try {
-      const item = await this.storage.get(ctx, contentId, options);
+      const result = await this.storage.get(ctx, contentId, options);
 
       this.eventBus.emit({
         type: 'getItemSuccess',
         contentId,
         contentTypeId: this.contentTypeId,
-        data: item,
+        data: result,
         options,
       });
 
-      return { contentTypeId: this.contentTypeId, result: item };
+      return { contentTypeId: this.contentTypeId, result };
     } catch (e) {
       this.eventBus.emit({
         type: 'getItemError',

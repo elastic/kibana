@@ -8,6 +8,7 @@
 import datemath from '@kbn/datemath';
 import expect from '@kbn/expect';
 import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
+import { MOCK_ROLLUP_INDEX_NAME, createMockRollupIndex } from './test_helpers';
 
 export default function ({ getService, getPageObjects }) {
   const es = getService('es');
@@ -41,6 +42,10 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'rollup',
       });
+
+      // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+      // We will simulate rollup usage by creating a mock-up rollup index
+      await createMockRollupIndex(es);
     });
 
     it('create hybrid index pattern', async () => {
@@ -105,7 +110,7 @@ export default function ({ getService, getPageObjects }) {
       // ensure all fields are available
       await PageObjects.settings.clickIndexPatternByName(rollupIndexPatternName);
       const fields = await PageObjects.settings.getFieldNames();
-      expect(fields).to.eql(['@timestamp', '_id', '_index', '_score', '_source']);
+      expect(fields).to.eql(['@timestamp', '_id', '_ignored', '_index', '_score', '_source']);
     });
 
     after(async () => {
@@ -116,6 +121,7 @@ export default function ({ getService, getPageObjects }) {
         rollupTargetIndexName,
         `${regularIndexPrefix}*`,
         `${rollupSourceIndexPrefix}*`,
+        MOCK_ROLLUP_INDEX_NAME,
       ]);
       await kibanaServer.savedObjects.cleanStandardList();
     });

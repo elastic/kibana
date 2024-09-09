@@ -53,14 +53,15 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
       plugins.alerting !== undefined
     );
 
-    core.getStartServices().then(([_, pluginStart]) => {
-      createConfigRoute({
-        logger: this.logger,
-        router,
-        baseRoute: BASE_TRIGGERS_ACTIONS_UI_API_PATH,
-        alertingConfig: plugins.alerting.getConfig,
-        getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
-      });
+    createConfigRoute({
+      logger: this.logger,
+      router,
+      baseRoute: BASE_TRIGGERS_ACTIONS_UI_API_PATH,
+      alertingConfig: plugins.alerting.getConfig,
+      getRulesClientWithRequest: async (request) => {
+        const [, pluginStart] = await core.getStartServices();
+        return pluginStart.alerting.getRulesClientWithRequest(request);
+      },
     });
   }
 

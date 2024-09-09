@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray, isEmpty, pickBy, map } from 'lodash';
+import { isArray, isEmpty, pickBy, map, isNumber } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
@@ -20,6 +20,7 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
+import { QUERY_TIMEOUT } from '../../common/constants';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
@@ -65,14 +66,14 @@ const ActionsTableComponent = () => {
     kuery: 'user_id: *',
   });
 
-  const onTableChange = useCallback(({ page = {} }) => {
+  const onTableChange = useCallback(({ page = {} }: any) => {
     const { index, size } = page;
 
     setPageIndex(index);
     setPageSize(size);
   }, []);
 
-  const renderQueryColumn = useCallback((_, item) => {
+  const renderQueryColumn = useCallback((_: any, item: any) => {
     if (item._source.pack_name) {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
@@ -95,22 +96,28 @@ const ActionsTableComponent = () => {
     );
   }, []);
 
-  const renderAgentsColumn = useCallback((_, item) => <>{item.fields.agents?.length ?? 0}</>, []);
+  const renderAgentsColumn = useCallback(
+    (_: any, item: any) => <>{item.fields.agents?.length ?? 0}</>,
+    []
+  );
 
-  const renderCreatedByColumn = useCallback((userId) => (isArray(userId) ? userId[0] : '-'), []);
+  const renderCreatedByColumn = useCallback(
+    (userId: any) => (isArray(userId) ? userId[0] : '-'),
+    []
+  );
 
   const renderTimestampColumn = useCallback(
-    (_, item) => <>{formatDate(item.fields['@timestamp'][0])}</>,
+    (_: any, item: any) => <>{formatDate(item.fields['@timestamp'][0])}</>,
     []
   );
 
   const renderActionsColumn = useCallback(
-    (item) => <ActionTableResultsButton actionId={item.fields.action_id[0]} />,
+    (item: any) => <ActionTableResultsButton actionId={item.fields.action_id[0]} />,
     []
   );
 
   const handlePlayClick = useCallback(
-    (item) => () => {
+    (item: any) => () => {
       const packId = item._source.pack_id;
 
       if (packId) {
@@ -136,6 +143,7 @@ const ActionsTableComponent = () => {
             query: item._source.queries[0].query,
             ecs_mapping: item._source.queries[0].ecs_mapping,
             savedQueryId: item._source.queries[0].saved_query_id,
+            timeout: item._source.queries[0].timeout ?? QUERY_TIMEOUT.DEFAULT,
             agentSelection: {
               agents: item._source.agent_ids,
               allAgentsSelected: item._source.agent_all,
@@ -143,14 +151,14 @@ const ActionsTableComponent = () => {
               policiesSelected: item._source.agent_policy_ids,
             },
           },
-          (value) => !isEmpty(value)
+          (value) => !isEmpty(value) || isNumber(value)
         ),
       });
     },
     [push]
   );
   const renderPlayButton = useCallback(
-    (item, enabled) => {
+    (item: any, enabled: any) => {
       const playText = i18n.translate('xpack.osquery.liveQueryActions.table.runActionAriaLabel', {
         defaultMessage: 'Run query',
       });
@@ -172,7 +180,7 @@ const ActionsTableComponent = () => {
   const existingPackIds = useMemo(() => map(packsData?.data ?? [], 'id'), [packsData]);
 
   const isPlayButtonAvailable = useCallback(
-    (item) => {
+    (item: any) => {
       if (item.fields.pack_id?.length) {
         return (
           existingPackIds.includes(item.fields.pack_id[0]) &&
@@ -258,7 +266,7 @@ const ActionsTableComponent = () => {
   );
 
   const rowProps = useCallback(
-    (data) => ({
+    (data: any) => ({
       'data-test-subj': `row-${data._source.action_id}`,
     }),
     []

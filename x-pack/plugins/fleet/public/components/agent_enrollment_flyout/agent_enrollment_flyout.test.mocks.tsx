@@ -16,6 +16,14 @@ jest.mock('../../hooks', () => {
     useFleetServerStandalone: jest.fn(),
     useAgentEnrollmentFlyoutData: jest.fn(),
     useAgentVersion: jest.fn().mockReturnValue('8.1.0'),
+    useAuthz: jest.fn().mockReturnValue({
+      fleet: {
+        addAgents: true,
+        addFleetServers: true,
+      },
+      integrations: {},
+    }),
+    useFleetStatus: jest.fn().mockReturnValue({ isReady: true }),
   };
 });
 
@@ -23,16 +31,6 @@ jest.mock('../../hooks/use_request', () => {
   const module = jest.requireActual('../../hooks/use_request');
   return {
     ...module,
-    useGetFleetServerHosts: jest.fn().mockReturnValue({
-      data: {
-        items: [
-          {
-            is_default: true,
-            host_urls: ['http://test.fr'],
-          },
-        ],
-      },
-    }),
     useGetFleetProxies: jest.fn().mockReturnValue({
       data: { items: [] },
       isLoading: false,
@@ -44,10 +42,17 @@ jest.mock('../../hooks/use_request', () => {
     sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { package_policies: [] } },
     }),
-    useGetAgents: jest.fn().mockReturnValue({
-      data: { items: [{ policy_id: 'fleet-server-policy' }] },
-    }),
+    useGetSpaceSettings: jest.fn().mockReturnValue({}),
     useGetAgentPolicies: jest.fn(),
+    useGetEnrollmentSettings: jest.fn().mockReturnValue({
+      isLoading: false,
+      data: {
+        fleet_server: {
+          host: { host_urls: ['https://defaultfleetserver:8220'] },
+          has_active: true,
+        },
+      },
+    }),
   };
 });
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -26,6 +27,7 @@ import type {
   ElasticsearchConfig,
   ElasticsearchService,
   InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
   ElasticsearchStatusMeta,
   NodesVersionCompatibility,
   ClusterInfo,
@@ -106,7 +108,21 @@ const createInternalSetupContractMock = () => {
   return internalSetupContract;
 };
 
-const createInternalStartContractMock = createStartContractMock;
+type MockedInternalElasticsearchServiceStart = jest.Mocked<
+  Omit<InternalElasticsearchServiceStart, 'client' | 'createClient'>
+> &
+  Pick<MockedElasticSearchServiceStart, 'client' | 'createClient'>;
+
+const createInternalStartContractMock = () => {
+  const startContract = createStartContractMock();
+  const internalStartContractMock: MockedInternalElasticsearchServiceStart = {
+    ...startContract,
+    metrics: {
+      elasticsearchWaitTime: 0,
+    },
+  };
+  return internalStartContractMock;
+};
 
 type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
 const createMock = () => {
@@ -133,6 +149,7 @@ const createCapabilities = (
 };
 
 export const elasticsearchServiceMock = {
+  ...elasticsearchClientMock,
   create: createMock,
   createInternalPreboot: createInternalPrebootContractMock,
   createPreboot: createPrebootContractMock,
@@ -141,6 +158,4 @@ export const elasticsearchServiceMock = {
   createInternalStart: createInternalStartContractMock,
   createStart: createStartContractMock,
   createCapabilities,
-
-  ...elasticsearchClientMock,
 };

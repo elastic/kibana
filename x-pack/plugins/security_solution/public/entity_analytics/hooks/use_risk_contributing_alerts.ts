@@ -6,6 +6,9 @@
  */
 
 import { useEffect } from 'react';
+import type { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+
+import type { RiskScoreInput } from '../../../common/api/entity_analytics/common';
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 
@@ -13,25 +16,33 @@ import type {
   UserRiskScore,
   HostRiskScore,
 } from '../../../common/search_strategy/security_solution/risk_score/all';
-import { getAlertsQueryForRiskScore } from '../common/get_alerts_query_for_risk_score';
-
-import { useRiskEngineSettings } from '../api/hooks/use_risk_engine_settings';
+import { isUserRiskScore } from '../../../common/search_strategy/security_solution/risk_score/all';
 
 interface UseRiskContributingAlerts {
   riskScore: UserRiskScore | HostRiskScore | undefined;
-  fields?: string[];
 }
 
-interface Hit {
-  fields: Record<string, string[]>;
+interface AlertData {
+  [ALERT_RULE_UUID]: string;
+  [ALERT_RULE_NAME]: string;
+}
+
+interface AlertHit {
+  _id: string;
   _index: string;
+  _source: AlertData;
+}
+
+export interface InputAlert {
+  alert: AlertData;
+  input: RiskScoreInput;
   _id: string;
 }
 
-interface UseRiskContributingAlertsResult {
+export interface UseRiskContributingAlertsResult {
   loading: boolean;
   error: boolean;
-  data?: Hit[];
+  data?: InputAlert[];
 }
 
 /**
@@ -39,33 +50,48 @@ interface UseRiskContributingAlertsResult {
  */
 export const useRiskContributingAlerts = ({
   riskScore,
-  fields,
 }: UseRiskContributingAlerts): UseRiskContributingAlertsResult => {
-  const { data: riskEngineSettings } = useRiskEngineSettings();
-
-  const { loading, data, setQuery } = useQueryAlerts<Hit, unknown>({
-    // is empty query, to skip fetching alert, until we have risk engine settings
+  const { loading, data, setQuery } = useQueryAlerts<AlertHit, unknown>({
     query: {},
     queryName: ALERTS_QUERY_NAMES.BY_ID,
   });
 
-  useEffect(() => {
-    if (!riskEngineSettings?.range?.start || !riskScore) return;
+  const inputs = getInputs(riskScore);
 
-    setQuery(
-      getAlertsQueryForRiskScore({
-        riskRangeStart: riskEngineSettings.range.start,
-        riskScore,
-        fields,
-      })
-    );
-  }, [setQuery, riskScore, riskEngineSettings?.range?.start, fields]);
+  useEffect(() => {
+    if (!riskScore) return;
+    setQuery({
+      query: {
+        ids: {
+          values: inputs.map((input) => input.id),
+        },
+      },
+    });
+  }, [riskScore, inputs, setQuery]);
 
   const error = !loading && data === undefined;
+
+  const alerts = inputs.map((input) => ({
+    _id: input.id,
+    input,
+    alert: (data?.hits.hits.find((alert) => alert._id === input.id)?._source || {}) as AlertData,
+  }));
 
   return {
     loading,
     error,
-    data: data?.hits.hits,
+    data: alerts,
   };
+};
+
+const getInputs = (riskScore?: UserRiskScore | HostRiskScore) => {
+  if (!riskScore) {
+    return [];
+  }
+
+  if (isUserRiskScore(riskScore)) {
+    return riskScore.user.risk.inputs;
+  }
+
+  return riskScore.host.risk.inputs;
 };

@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import { createHttpServer, createCoreContext } from '@kbn/core-http-server-mocks';
+import { createHttpService, createCoreContext } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
@@ -43,7 +44,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
 
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
-    server = createHttpServer(coreContext);
+    server = createHttpService(coreContext);
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
 
     const contextService = new ContextService(coreContext);
@@ -80,7 +81,9 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
 
     const config = setupConfig();
-    registerGetRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+
+    registerGetRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });
@@ -109,6 +112,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     expect(result.body).toEqual(clientResponse);
     expect(coreUsageStatsClient.incrementSavedObjectsGet).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['index-pattern'],
     });
   });
 

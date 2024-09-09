@@ -1,0 +1,294 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ChartWrapper component renders the component with loading false 1`] = `
+<EuiErrorBoundary>
+  <div
+    intl={
+      Object {
+        "$t": [Function],
+        "defaultFormats": Object {
+          "date": Object {
+            "full": Object {
+              "day": "numeric",
+              "month": "long",
+              "weekday": "long",
+              "year": "numeric",
+            },
+            "long": Object {
+              "day": "numeric",
+              "month": "long",
+              "year": "numeric",
+            },
+            "medium": Object {
+              "day": "numeric",
+              "month": "short",
+              "year": "numeric",
+            },
+            "short": Object {
+              "day": "numeric",
+              "month": "numeric",
+              "year": "2-digit",
+            },
+          },
+          "number": Object {
+            "currency": Object {
+              "style": "currency",
+            },
+            "percent": Object {
+              "style": "percent",
+            },
+          },
+          "relative": Object {
+            "days": Object {
+              "style": "long",
+            },
+            "hours": Object {
+              "style": "long",
+            },
+            "minutes": Object {
+              "style": "long",
+            },
+            "months": Object {
+              "style": "long",
+            },
+            "seconds": Object {
+              "style": "long",
+            },
+            "years": Object {
+              "style": "long",
+            },
+          },
+          "time": Object {
+            "full": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "long": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "medium": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+            },
+            "short": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+            },
+          },
+        },
+        "defaultLocale": "en",
+        "fallbackOnEmptyString": true,
+        "formatDate": [Function],
+        "formatDateTimeRange": [Function],
+        "formatDateToParts": [Function],
+        "formatDisplayName": [Function],
+        "formatList": [Function],
+        "formatListToParts": [Function],
+        "formatMessage": [Function],
+        "formatNumber": [Function],
+        "formatNumberToParts": [Function],
+        "formatPlural": [Function],
+        "formatRelativeTime": [Function],
+        "formatTime": [Function],
+        "formatTimeToParts": [Function],
+        "formats": Object {},
+        "formatters": Object {
+          "getDateTimeFormat": [Function],
+          "getDisplayNames": [Function],
+          "getListFormat": [Function],
+          "getMessageFormat": [Function],
+          "getNumberFormat": [Function],
+          "getPluralRules": [Function],
+          "getRelativeTimeFormat": [Function],
+        },
+        "locale": "en",
+        "messages": Object {},
+        "onError": [Function],
+        "onWarn": [Function],
+        "timeZone": undefined,
+      }
+    }
+    style={
+      Object {
+        "height": "100%",
+        "opacity": 1,
+        "transition": "opacity 0.2s",
+      }
+    }
+  >
+    <SnapshotHeading
+      total={12}
+    />
+    <EuiSpacer
+      size="xs"
+    />
+    <DonutChart
+      down={8}
+      height={144}
+      up={4}
+    />
+  </div>
+</EuiErrorBoundary>
+`;
+
+exports[`ChartWrapper component renders the component with loading true 1`] = `
+<EuiErrorBoundary>
+  <div
+    intl={
+      Object {
+        "$t": [Function],
+        "defaultFormats": Object {
+          "date": Object {
+            "full": Object {
+              "day": "numeric",
+              "month": "long",
+              "weekday": "long",
+              "year": "numeric",
+            },
+            "long": Object {
+              "day": "numeric",
+              "month": "long",
+              "year": "numeric",
+            },
+            "medium": Object {
+              "day": "numeric",
+              "month": "short",
+              "year": "numeric",
+            },
+            "short": Object {
+              "day": "numeric",
+              "month": "numeric",
+              "year": "2-digit",
+            },
+          },
+          "number": Object {
+            "currency": Object {
+              "style": "currency",
+            },
+            "percent": Object {
+              "style": "percent",
+            },
+          },
+          "relative": Object {
+            "days": Object {
+              "style": "long",
+            },
+            "hours": Object {
+              "style": "long",
+            },
+            "minutes": Object {
+              "style": "long",
+            },
+            "months": Object {
+              "style": "long",
+            },
+            "seconds": Object {
+              "style": "long",
+            },
+            "years": Object {
+              "style": "long",
+            },
+          },
+          "time": Object {
+            "full": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "long": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "medium": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+            },
+            "short": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+            },
+          },
+        },
+        "defaultLocale": "en",
+        "fallbackOnEmptyString": true,
+        "formatDate": [Function],
+        "formatDateTimeRange": [Function],
+        "formatDateToParts": [Function],
+        "formatDisplayName": [Function],
+        "formatList": [Function],
+        "formatListToParts": [Function],
+        "formatMessage": [Function],
+        "formatNumber": [Function],
+        "formatNumberToParts": [Function],
+        "formatPlural": [Function],
+        "formatRelativeTime": [Function],
+        "formatTime": [Function],
+        "formatTimeToParts": [Function],
+        "formats": Object {},
+        "formatters": Object {
+          "getDateTimeFormat": [Function],
+          "getDisplayNames": [Function],
+          "getListFormat": [Function],
+          "getMessageFormat": [Function],
+          "getNumberFormat": [Function],
+          "getPluralRules": [Function],
+          "getRelativeTimeFormat": [Function],
+        },
+        "locale": "en",
+        "messages": Object {},
+        "onError": [Function],
+        "onWarn": [Function],
+        "timeZone": undefined,
+      }
+    }
+    style={
+      Object {
+        "height": "100%",
+        "opacity": 0.3,
+        "transition": "opacity 0.2s",
+      }
+    }
+  >
+    <SnapshotHeading
+      total={12}
+    />
+    <EuiSpacer
+      size="xs"
+    />
+    <DonutChart
+      down={8}
+      height={144}
+      up={4}
+    />
+  </div>
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceAround"
+    style={
+      Object {
+        "height": "100%",
+        "marginBottom": 0,
+        "marginTop": "-100%",
+      }
+    }
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiLoadingChart
+        size="xl"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiErrorBoundary>
+`;

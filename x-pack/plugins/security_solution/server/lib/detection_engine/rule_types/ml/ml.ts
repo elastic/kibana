@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+/* eslint require-atomic-updates: ["error", { "allowProperties": true }] */
+
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   AlertInstanceContext,
@@ -15,11 +18,12 @@ import type {
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type { Filter } from '@kbn/es-query';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import type { CompleteRule, MachineLearningRuleParams } from '../../rule_schema';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../utils/large_list_filters/filter_events_against_list';
 import { findMlSignals } from './find_ml_signals';
-import type { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
+import type { BulkCreate, RuleRangeTuple, WrapHits, WrapSuppressedHits } from '../types';
 import {
   addToSearchAfterReturn,
   createErrorsFromShard,
@@ -30,6 +34,27 @@ import {
 import type { SetupPlugins } from '../../../../plugin';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { AnomalyResults } from '../../../machine_learning';
+import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
+import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
+
+interface MachineLearningRuleExecutorParams {
+  completeRule: CompleteRule<MachineLearningRuleParams>;
+  tuple: RuleRangeTuple;
+  ml: SetupPlugins['ml'];
+  listClient: ListClient;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
+  exceptionFilter: Filter | undefined;
+  unprocessedExceptions: ExceptionListItemSchema[];
+  wrapSuppressedHits: WrapSuppressedHits;
+  alertTimestampOverride: Date | undefined;
+  alertWithSuppression: SuppressedAlertService;
+  isAlertSuppressionActive: boolean;
+  experimentalFeatures: ExperimentalFeatures;
+}
 
 export const mlExecutor = async ({
   completeRule,
@@ -42,18 +67,12 @@ export const mlExecutor = async ({
   wrapHits,
   exceptionFilter,
   unprocessedExceptions,
-}: {
-  completeRule: CompleteRule<MachineLearningRuleParams>;
-  tuple: RuleRangeTuple;
-  ml: SetupPlugins['ml'];
-  listClient: ListClient;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
-  exceptionFilter: Filter | undefined;
-  unprocessedExceptions: ExceptionListItemSchema[];
-}) => {
+  isAlertSuppressionActive,
+  wrapSuppressedHits,
+  alertTimestampOverride,
+  alertWithSuppression,
+  experimentalFeatures,
+}: MachineLearningRuleExecutorParams) => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
 
@@ -93,20 +112,31 @@ export const mlExecutor = async ({
       result.warning = true;
     }
 
-    const anomalyResults = await findMlSignals({
-      ml,
-      // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
-      // currently unused by the mlAnomalySearch function.
-      request: {} as unknown as KibanaRequest,
-      savedObjectsClient: services.savedObjectsClient,
-      jobIds: ruleParams.machineLearningJobId,
-      anomalyThreshold: ruleParams.anomalyThreshold,
-      from: tuple.from.toISOString(),
-      to: tuple.to.toISOString(),
-      maxSignals: tuple.maxSignals,
-      exceptionFilter,
-    });
+    let anomalyResults: AnomalyResults;
+    try {
+      anomalyResults = await findMlSignals({
+        ml,
+        // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
+        // currently unused by the mlAnomalySearch function.
+        request: {} as unknown as KibanaRequest,
+        savedObjectsClient: services.savedObjectsClient,
+        jobIds: ruleParams.machineLearningJobId,
+        anomalyThreshold: ruleParams.anomalyThreshold,
+        from: tuple.from.toISOString(),
+        to: tuple.to.toISOString(),
+        maxSignals: tuple.maxSignals,
+        exceptionFilter,
+      });
+    } catch (error) {
+      if (typeof error.message === 'string' && (error.message as string).endsWith('missing')) {
+        result.userError = true;
+      }
+      result.errors.push(error.message);
+      result.success = false;
+      return result;
+    }
 
+    // TODO we add the max_signals warning _before_ filtering the anomalies against the exceptions list. Is that correct?
     if (
       anomalyResults.hits.total &&
       typeof anomalyResults.hits.total !== 'number' &&
@@ -127,17 +157,36 @@ export const mlExecutor = async ({
       ruleExecutionLogger.debug(`Found ${anomalyCount} signals from ML anomalies`);
     }
 
-    const createResult = await bulkCreateMlSignals({
-      anomalyHits: filteredAnomalyHits,
-      completeRule,
-      services,
-      ruleExecutionLogger,
-      id: completeRule.alertId,
-      signalsIndex: ruleParams.outputIndex,
-      bulkCreate,
-      wrapHits,
-    });
-    addToSearchAfterReturn({ current: result, next: createResult });
+    if (anomalyCount && isAlertSuppressionActive) {
+      await bulkCreateSuppressedAlertsInMemory({
+        enrichedEvents: filteredAnomalyHits,
+        toReturn: result,
+        wrapHits,
+        bulkCreate,
+        services,
+        buildReasonMessage: buildReasonMessageForMlAlert,
+        ruleExecutionLogger,
+        tuple,
+        alertSuppression: completeRule.ruleParams.alertSuppression,
+        wrapSuppressedHits,
+        alertTimestampOverride,
+        alertWithSuppression,
+        experimentalFeatures,
+      });
+    } else {
+      const createResult = await bulkCreateMlSignals({
+        anomalyHits: filteredAnomalyHits,
+        completeRule,
+        services,
+        ruleExecutionLogger,
+        id: completeRule.alertId,
+        signalsIndex: ruleParams.outputIndex,
+        bulkCreate,
+        wrapHits,
+      });
+      addToSearchAfterReturn({ current: result, next: createResult });
+    }
+
     const shardFailures = anomalyResults._shards.failures ?? [];
     const searchErrors = createErrorsFromShard({
       errors: shardFailures,

@@ -40,6 +40,7 @@ export const ML_PAGES = {
    * Page: Data Visualizer
    * Open index data visualizer viewer page
    */
+  DATA_VISUALIZER_ESQL: 'datavisualizer/esql',
   DATA_VISUALIZER_INDEX_VIEWER: 'jobs/new_job/datavisualizer',
   ANOMALY_DETECTION_CREATE_JOB: 'jobs/new_job',
   ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER: 'jobs/new_job/recognize',
@@ -84,4 +85,4 @@ export const ML_PAGES = {
   AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT: 'aiops/change_point_detection_index_select',
 } as const;
 
-export type MlPages = typeof ML_PAGES[keyof typeof ML_PAGES];
+export type MlPages = (typeof ML_PAGES)[keyof typeof ML_PAGES];

@@ -1,25 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { serviceContractMock } from './service_contract.mock';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  UserSettingsService,
+  InternalUserSettingsServiceSetup,
+} from '@kbn/core-user-settings-server-internal';
 
-const createSetupContractMock = () => {
+const createSetupContractMock = (): jest.Mocked<InternalUserSettingsServiceSetup> => {
   return {
-    setUserProfileSettings: jest.fn(),
     getUserSettingDarkMode: jest.fn(),
   };
 };
 
-const createMock = () => {
-  const mocked = serviceContractMock();
-  mocked.setup.mockReturnValue(createSetupContractMock());
-  // mocked.start.mockReturnValue(createStartContractMock());
-  return mocked;
+const createMock = (): jest.Mocked<PublicMethodsOf<UserSettingsService>> => {
+  const mock = {
+    setup: jest.fn(),
+    start: jest.fn(),
+  };
+  mock.setup.mockReturnValue(createSetupContractMock());
+  return mock;
 };
 
 export const userSettingsServiceMock = {

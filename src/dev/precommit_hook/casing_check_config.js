@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -40,7 +41,6 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-utility-types/test-d/**/*',
   'Dockerfile*',
   'vars/*',
-  '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
   'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
@@ -69,7 +69,7 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/plugins/maps/server/fonts/**/*',
 
-  'x-pack/plugins/profiling/Makefile',
+  'x-pack/plugins/observability_solution/profiling/Makefile',
 
   // Bazel default files
   '**/WORKSPACE.bazel',
@@ -80,6 +80,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // generator templates use weird filenames based on the requirements for the files they're generating
   'packages/kbn-generate/templates/**/*',
+
+  // ecs templates
+  '**/ecs/fields/**/*',
 ];
 
 /**
@@ -110,6 +113,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'packages/*',
   'packages/core/*/*',
   'packages/kbn-pm/src/utils/__fixtures__/*',
+  'packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
   'typings/*',

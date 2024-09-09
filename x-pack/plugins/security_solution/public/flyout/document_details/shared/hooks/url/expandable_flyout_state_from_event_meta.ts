@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocumentDetailsRightPanelKey } from '../../../right';
+import { DocumentDetailsRightPanelKey } from '../../constants/panel_keys';
 
 interface RedirectParams {
   index: string;

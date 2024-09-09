@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { pick } from 'lodash';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,7 +19,7 @@ import { useEnabledFeatures } from '../contexts/ml';
 
 export const LogRateAnalysisPage: FC = () => {
   const { services } = useMlKibana();
-  const { showNodeInfo } = useEnabledFeatures();
+  const { showContextualInsights, showNodeInfo } = useEnabledFeatures();
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
@@ -32,12 +33,12 @@ export const LogRateAnalysisPage: FC = () => {
       </MlPageHeader>
       {dataView && (
         <LogRateAnalysis
-          // Default to false for now, until page restructure work to enable smooth sticky histogram is done
-          stickyHistogram={false}
           dataView={dataView}
           savedSearch={savedSearch}
+          showContextualInsights={showContextualInsights}
           showFrozenDataTierChoice={showNodeInfo}
           appDependencies={pick(services, [
+            'analytics',
             'application',
             'charts',
             'data',
@@ -53,6 +54,7 @@ export const LogRateAnalysisPage: FC = () => {
             'uiActions',
             'uiSettings',
             'unifiedSearch',
+            'observabilityAIAssistant',
           ])}
         />
       )}

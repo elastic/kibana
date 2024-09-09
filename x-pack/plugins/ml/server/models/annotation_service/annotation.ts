@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { each, get } from 'lodash';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
@@ -17,15 +17,14 @@ import {
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '../../../common/constants/index_patterns';
 
+import type { Annotation, Annotations } from '../../../common/types/annotations';
 import {
-  Annotation,
-  Annotations,
   isAnnotation,
   isAnnotations,
   getAnnotationFieldName,
   getAnnotationFieldValue,
 } from '../../../common/types/annotations';
-import { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions

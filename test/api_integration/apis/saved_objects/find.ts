@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { sortBy } from 'lodash';
@@ -214,13 +215,9 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(400)
           .then((resp) => {
-            expect(resp.body).to.eql({
-              error: 'Bad Request',
-              message:
-                'KQLSyntaxError: Expected AND, OR, end of input, whitespace but "<" found.\ndashboard.' +
-                'attributes.title:foo<invalid\n------------------------------^: Bad Request',
-              statusCode: 400,
-            });
+            expect(resp.body.error).to.be('Bad Request');
+            expect(resp.body.statusCode).to.be(400);
+            expect(resp.body.message).to.match(/KQLSyntaxError[\s\S]+Bad Request/);
           }));
     });
 

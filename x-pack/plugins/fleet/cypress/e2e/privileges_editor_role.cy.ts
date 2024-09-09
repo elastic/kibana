@@ -11,11 +11,7 @@ import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
 import { getIntegrationCard } from '../screens/integrations';
 
-import {
-  FLEET_SERVER_MISSING_PRIVILEGES,
-  ADD_AGENT_BUTTON_TOP,
-  AGENT_FLYOUT,
-} from '../screens/fleet';
+import { ADD_AGENT_BUTTON, FLEET_SERVER_MISSING_PRIVILEGES } from '../screens/fleet';
 import { ADD_INTEGRATION_POLICY_BTN } from '../screens/integrations';
 import { scrollToIntegration } from '../tasks/integrations';
 
@@ -44,18 +40,30 @@ describe('When the user has Editor built-in role', () => {
       navigateTo(FLEET);
     });
 
-    describe('When there are no agent policies', () => {
-      it('If fleet server is not set up, Fleet shows a callout', () => {
-        loginWithUserAndWaitForPage(FLEET, BuiltInEditorUser);
-        cy.getBySel(FLEET_SERVER_MISSING_PRIVILEGES.MESSAGE).should(
-          'contain',
-          'Fleet Server needs to be set up.'
-        );
-
-        cy.getBySel(ADD_AGENT_BUTTON_TOP).click();
-        cy.getBySel(AGENT_FLYOUT.MANAGED_TAB).click();
-        cy.getBySel(FLEET_SERVER_MISSING_PRIVILEGES.PROMPT).should('exist');
+    it('It should not show a callout if fleet server is setup', () => {
+      cy.intercept('GET', '/api/fleet/agents/setup', {
+        body: {
+          isReady: true,
+          is_secrets_storage_enabled: true,
+          missing_requirements: [],
+          missing_optional_features: [],
+        },
       });
+      loginWithUserAndWaitForPage(FLEET, BuiltInEditorUser);
+      cy.getBySel(ADD_AGENT_BUTTON).should('exist');
+    });
+
+    it('It should not show a callout with missing manage_service_accout if fleet server is not setup', () => {
+      cy.intercept('GET', '/api/fleet/agents/setup', {
+        body: {
+          isReady: true,
+          is_secrets_storage_enabled: true,
+          missing_requirements: ['fleet_server'],
+          missing_optional_features: [],
+        },
+      });
+      loginWithUserAndWaitForPage(FLEET, BuiltInEditorUser);
+      cy.getBySel(FLEET_SERVER_MISSING_PRIVILEGES.PROMPT).should('exist');
     });
   });
 

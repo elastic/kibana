@@ -12,10 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_PREVIEW_LOADING_TEST_ID } from './test_ids';
 import { getTreeNodes } from '../utils/analyzer_helpers';
 import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
-import { useRightPanelContext } from '../context';
-import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
-import type { StatsNode } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
+import type { StatsNode } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
 import { isActiveTimeline } from '../../../../helpers';
+import { getField } from '../../shared/utils';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 
 const CHILD_COUNT_LIMIT = 3;
 const ANCESTOR_LEVEL = 3;
@@ -33,18 +35,23 @@ interface Cache {
  */
 export const AnalyzerPreview: React.FC = () => {
   const [cache, setCache] = useState<Partial<Cache>>({});
-  const { dataFormattedForFieldBrowser: data, scopeId } = useRightPanelContext();
+  const {
+    dataFormattedForFieldBrowser: data,
+    getFieldsData,
+    scopeId,
+    eventId,
+    isPreview,
+  } = useDocumentDetailsContext();
+  const ancestorId = getField(getFieldsData(ANCESTOR_ID)) ?? '';
+  const documentId = isPreview ? ancestorId : eventId; // use ancestor as fallback for alert preview
 
-  const documentId = find({ category: 'kibana', field: ANCESTOR_ID }, data);
-  const processDocumentId =
-    documentId && Array.isArray(documentId.values) ? documentId.values[0] : '';
-
+  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
   const index = find({ category: 'kibana', field: RULE_INDICES }, data);
-  const indices = index?.values ?? [];
+  const indices = index?.values ?? selectedPatterns; // adding sourcerer indices for non-alert documents
 
   const { statsNodes, loading, error } = useAlertPrevalenceFromProcessTree({
     isActiveTimeline: isActiveTimeline(scopeId),
-    documentId: processDocumentId,
+    documentId,
     indices,
   });
 
@@ -59,7 +66,7 @@ export const AnalyzerPreview: React.FC = () => {
     [cache.statsNodes]
   );
 
-  const showAnalyzerTree = documentId && index && items && items.length > 0 && !error;
+  const showAnalyzerTree = items && items.length > 0 && !error;
 
   return loading ? (
     <EuiSkeletonText

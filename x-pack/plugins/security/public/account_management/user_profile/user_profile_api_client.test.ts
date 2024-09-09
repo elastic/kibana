@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+
 import { coreMock } from '@kbn/core/public/mocks';
+import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
 import { UserProfileAPIClient } from './user_profile_api_client';
 
@@ -18,6 +21,35 @@ describe('UserProfileAPIClient', () => {
     coreStart.http.post.mockResolvedValue(undefined);
 
     apiClient = new UserProfileAPIClient(coreStart.http);
+  });
+
+  it('should enable the user profile after fetching the data', async () => {
+    const promiseEnabled = firstValueFrom(apiClient.enabled$);
+    apiClient.start(); // Start will fetch the user profile data
+    const enabled = await promiseEnabled;
+    expect(enabled).toBe(true);
+  });
+
+  it('should not enable the user profile if we get a 404 from fetching the profile', async () => {
+    const err = new Error('Awwww');
+    (err as any).response = kibanaResponseFactory.notFound();
+    coreStart.http.get.mockRejectedValue(err);
+
+    const promiseEnabled = firstValueFrom(apiClient.enabled$);
+    apiClient.start(); // Start will fetch the user profile data
+
+    const enabled = await promiseEnabled;
+    expect(enabled).toBe(false);
+  });
+
+  it('should enable the user profile for any other error than a 404', async () => {
+    coreStart.http.get.mockRejectedValue(new Error('Awwww'));
+
+    const promiseEnabled = firstValueFrom(apiClient.enabled$);
+    apiClient.start();
+
+    const enabled = await promiseEnabled;
+    expect(enabled).toBe(true);
   });
 
   it('should get user profile without retrieving any user data', async () => {

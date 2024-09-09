@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -14,13 +15,14 @@ export interface DataGridOptionsRecord {
   previousConfigRowHeight: number;
 }
 
-const getRowHeightKey = (consumer: string) => `${consumer}:dataGridRowHeight`;
+const getRowHeightKey = (consumer: string, key: string) => `${consumer}:${key}`;
 
 export const getStoredRowHeight = (
   storage: Storage,
-  consumer: string
+  consumer: string,
+  key: string
 ): DataGridOptionsRecord | null => {
-  const entry = storage.get(getRowHeightKey(consumer));
+  const entry = storage.get(getRowHeightKey(consumer, key));
   if (
     typeof entry === 'object' &&
     entry !== null &&
@@ -36,9 +38,10 @@ export const updateStoredRowHeight = (
   newRowHeight: number,
   configRowHeight: number,
   storage: Storage,
-  consumer: string
+  consumer: string,
+  key: string
 ) => {
-  storage.set(getRowHeightKey(consumer), {
+  storage.set(getRowHeightKey(consumer, key), {
     previousRowHeight: newRowHeight,
     previousConfigRowHeight: configRowHeight,
   });

@@ -6,21 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
 
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { SimpleSettings } from './simple';
 import { AdvancedSettings } from './advanced';
-import { CombinedField } from '../../../common/components/combined_fields';
+import type { CombinedField } from '../../../common/components/combined_fields';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 interface Props {
   index: string;
   dataView: string;
   initialized: boolean;
-  onIndexChange(): void;
+  onIndexChange(index: string): void;
   createDataView: boolean;
   onCreateDataViewChange(): void;
   onDataViewChange(): void;
@@ -73,7 +74,7 @@ export const ImportSettings: FC<Props> = ({
         defaultMessage: 'Simple',
       }),
       content: (
-        <React.Fragment>
+        <>
           <EuiSpacer size="m" />
 
           <SimpleSettings
@@ -85,8 +86,9 @@ export const ImportSettings: FC<Props> = ({
             indexNameError={indexNameError}
             combinedFields={combinedFields}
             canCreateDataView={canCreateDataView}
+            results={results}
           />
-        </React.Fragment>
+        </>
       ),
     },
     {
@@ -95,7 +97,7 @@ export const ImportSettings: FC<Props> = ({
         defaultMessage: 'Advanced',
       }),
       content: (
-        <React.Fragment>
+        <>
           <EuiSpacer size="m" />
 
           <AdvancedSettings
@@ -119,13 +121,13 @@ export const ImportSettings: FC<Props> = ({
             results={results}
             canCreateDataView={canCreateDataView}
           />
-        </React.Fragment>
+        </>
       ),
     },
   ];
   return (
-    <React.Fragment>
+    <>
       <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />
-    </React.Fragment>
+    </>
   );
 };

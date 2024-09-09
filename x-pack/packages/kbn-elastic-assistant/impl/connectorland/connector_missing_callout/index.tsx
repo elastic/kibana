@@ -7,12 +7,14 @@
 
 import React, { useCallback } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { euiLightVars } from '@kbn/ui-theme';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
-import { CONVERSATIONS_TAB } from '../../assistant/settings/assistant_settings';
 import { ConnectorButton } from '../connector_button';
+import { CONVERSATIONS_TAB } from '../../assistant/settings/const';
 
 interface Props {
   isConnectorConfigured: boolean;
@@ -52,9 +54,12 @@ export const ConnectorMissingCallout: React.FC<Props> = React.memo(
             iconType="controlsVertical"
             size="m"
             title={i18n.MISSING_CONNECTOR_CALLOUT_TITLE}
+            css={css`
+              padding-left: ${euiLightVars.euiPanelPaddingModifiers.paddingMedium} !important;
+              padding-right: ${euiLightVars.euiPanelPaddingModifiers.paddingMedium} !important;
+            `}
           >
             <p>
-              {' '}
               <FormattedMessage
                 defaultMessage="Select a connector above or from the {link} to continue"
                 id="xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.calloutDescription"

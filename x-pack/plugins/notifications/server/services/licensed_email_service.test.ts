@@ -66,7 +66,7 @@ describe('LicensedEmailService', () => {
       const license$ = new Subject<ILicense>();
       const email = new LicensedEmailService(emailServiceMock, license$, 'platinum', logger);
 
-      email.sendPlainTextEmail(someEmail);
+      void email.sendPlainTextEmail(someEmail);
       expect(emailServiceMock.sendPlainTextEmail).not.toHaveBeenCalled();
       license$.next(validLicense);
 
@@ -136,7 +136,7 @@ describe('LicensedEmailService', () => {
       const license$ = new Subject<ILicense>();
       const email = new LicensedEmailService(emailServiceMock, license$, 'platinum', logger);
 
-      email.sendHTMLEmail(someHTMLEmail);
+      void email.sendHTMLEmail(someHTMLEmail);
       expect(emailServiceMock.sendHTMLEmail).not.toHaveBeenCalled();
       license$.next(validLicense);
 

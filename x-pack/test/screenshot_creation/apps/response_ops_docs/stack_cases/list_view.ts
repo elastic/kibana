@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('list view', function () {
     it('cases list screenshot', async () => {
       await cases.navigation.navigateToApp();
-      await commonScreenshots.takeScreenshot('cases', screenshotDirectories, 1400, 1024);
+      await commonScreenshots.takeScreenshot('cases-list', screenshotDirectories, 1500, 1080);
     });
   });
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -102,7 +103,7 @@ const legacyUrlAliasForObj10 = createLegacyUrlAliasObject(obj10.originId!, obj10
 
 describe('#createSavedObjects', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let bulkCreate: typeof savedObjectsClient['bulkCreate'];
+  let bulkCreate: (typeof savedObjectsClient)['bulkCreate'];
 
   /**
    * Creates an options object to be used as an argument for createSavedObjects

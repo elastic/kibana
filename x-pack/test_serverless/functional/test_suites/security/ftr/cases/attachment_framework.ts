@@ -8,6 +8,8 @@
 import { expect } from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
+const ADD_TO_CASE_DATA_TEST_SUBJ = 'embeddablePanelAction-embeddable_addToExistingCase';
+
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
   const dashboard = getPageObject('dashboard');
@@ -20,11 +22,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const header = getPageObject('header');
   const toasts = getService('toasts');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('Cases persistable attachments', () => {
-    describe('lens visualization', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176874
+    describe.skip('lens visualization', () => {
       before(async () => {
-        await svlCommonPage.login();
+        await svlCommonPage.loginAsAdmin();
         await common.navigateToApp('security', { path: 'dashboards' });
         await header.waitUntilLoadingHasFinished();
 
@@ -41,31 +45,39 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await svlCases.api.deleteAllCaseItems();
-        await svlCommonPage.forceLogout();
       });
 
       it('adds lens visualization to a new case', async () => {
         const caseTitle =
           'case created in security solution from my dashboard with lens visualization';
 
-        await testSubjects.click('embeddablePanelToggleMenuIcon');
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToNewCase');
+        await dashboardPanelActions.clickContextMenuItem(ADD_TO_CASE_DATA_TEST_SUBJ);
 
-        await testSubjects.existOrFail('create-case-flyout');
+        await retry.waitFor('wait for the modal to open', async () => {
+          return (
+            (await testSubjects.exists('all-cases-modal')) &&
+            (await testSubjects.exists('cases-table-add-case-filter-bar'))
+          );
+        });
+
+        await retry.waitFor('wait for the flyout to open', async () => {
+          if (await testSubjects.exists('cases-table-add-case-filter-bar')) {
+            await testSubjects.click('cases-table-add-case-filter-bar');
+          }
+
+          return testSubjects.exists('create-case-flyout');
+        });
 
         await testSubjects.setValue('input', caseTitle);
-
         await testSubjects.setValue('euiMarkdownEditorTextArea', 'test description');
 
         // verify that solution picker is not visible
         await testSubjects.missingOrFail('caseOwnerSelector');
-
         await testSubjects.click('create-case-submit');
 
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
-        await toasts.dismissAllToastsWithChecks();
+        await toasts.dismissAllWithChecks();
 
         if (await testSubjects.exists('appLeaveConfirmModal')) {
           await testSubjects.exists('confirmModalConfirmButton');
@@ -75,7 +87,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(caseTitle);
 
-        await testSubjects.existOrFail('comment-persistableState-.lens');
+        await retry.waitFor('wait for the visualization to exist', async () => {
+          return testSubjects.exists('comment-persistableState-.lens');
+        });
       });
 
       it('adds lens visualization to an existing case from dashboard', async () => {
@@ -88,14 +102,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await common.navigateToApp('security', { path: 'dashboards' });
         await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('LandingImageCards-accordionButton');
 
         if (await testSubjects.exists('edit-unsaved-New-Dashboard')) {
           await testSubjects.click('edit-unsaved-New-Dashboard');
         }
 
-        await testSubjects.click('embeddablePanelToggleMenuIcon');
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+        await dashboardPanelActions.clickContextMenuItem(ADD_TO_CASE_DATA_TEST_SUBJ);
 
         // verify that solution filter is not visible
         await testSubjects.missingOrFail('options-filter-popover-button-owner');
@@ -104,7 +117,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
-        await toasts.dismissAllToastsWithChecks();
+        await toasts.dismissAllWithChecks();
 
         if (await testSubjects.exists('appLeaveConfirmModal')) {
           await testSubjects.exists('confirmModalConfirmButton');

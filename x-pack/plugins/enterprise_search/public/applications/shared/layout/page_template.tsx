@@ -47,6 +47,7 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   setPageChrome?: React.ReactNode;
   solutionNavIcon?: string;
   useEndpointHeaderActions?: boolean;
+  hideEmbeddedConsole?: boolean;
 };
 
 export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
@@ -61,10 +62,11 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   solutionNav,
   solutionNavIcon,
   useEndpointHeaderActions = true,
+  hideEmbeddedConsole = false,
   ...pageTemplateProps
 }) => {
   const { readOnlyMode } = useValues(HttpLogic);
-  const { renderHeaderActions } = useValues(KibanaLogic);
+  const { renderHeaderActions, consolePlugin } = useValues(KibanaLogic);
 
   const hasCustomEmptyState = !!emptyState;
   const showCustomEmptyState = hasCustomEmptyState && isEmptyState;
@@ -76,12 +78,11 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
       renderHeaderActions(EndpointsHeaderAction);
     }
     return () => {
-      renderHeaderActions();
+      renderHeaderActions(undefined);
     };
   }, []);
   return (
     <KibanaPageTemplate
-      restrictWidth={false}
       {...pageTemplateProps}
       className={classNames('enterpriseSearchPageTemplate', className)}
       mainProps={{
@@ -117,6 +118,11 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
         children
       ) : (
         <KibanaPageTemplate.Section>{children}</KibanaPageTemplate.Section>
+      )}
+      {!hideEmbeddedConsole && consolePlugin?.EmbeddableConsole !== undefined ? (
+        <consolePlugin.EmbeddableConsole />
+      ) : (
+        <></>
       )}
     </KibanaPageTemplate>
   );

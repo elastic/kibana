@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { buildAggregation } from './build_agg';
 
 describe('buildAgg', () => {
@@ -793,6 +794,51 @@ describe('buildAgg', () => {
       });
     });
 
+    it('should create correct aggregation when condition params are defined and multi terms selected', async () => {
+      expect(
+        buildAggregation({
+          aggType: 'sum',
+          aggField: 'avg-field',
+          termField: ['the-term', 'second-term'],
+          termSize: 100,
+          condition: {
+            resultLimit: 1000,
+            conditionScript: `params.compareValue <= 0`,
+          },
+        })
+      ).toEqual({
+        groupAgg: {
+          multi_terms: {
+            size: 100,
+            terms: [{ field: 'the-term' }, { field: 'second-term' }],
+            order: {
+              metricAgg: 'desc',
+            },
+          },
+          aggs: {
+            conditionSelector: {
+              bucket_selector: {
+                buckets_path: {
+                  compareValue: 'metricAgg',
+                },
+                script: `params.compareValue <= 0`,
+              },
+            },
+            metricAgg: {
+              sum: {
+                field: 'avg-field',
+              },
+            },
+          },
+        },
+        groupAggCount: {
+          stats_bucket: {
+            buckets_path: 'groupAgg._count',
+          },
+        },
+      });
+    });
+
     it('should add topHitsAgg if topHitsSize is defined', () => {
       expect(
         buildAggregation({
@@ -856,6 +902,75 @@ describe('buildAgg', () => {
           },
         },
       });
+    });
+
+    it('should limit size of topHitsAgg', () => {
+      let returnedMessage: string | undefined;
+      expect(
+        buildAggregation({
+          timeSeries: {
+            timeField: 'time-field',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            dateStart: '2021-04-22T15:19:31Z',
+            dateEnd: '2021-04-22T15:20:31Z',
+            interval: '1m',
+          },
+          aggType: 'avg',
+          aggField: 'avg-field',
+          termField: 'the-field',
+          termSize: 20,
+          topHitsSize: 150,
+          loggerCb: (message: string) => (returnedMessage = message),
+        })
+      ).toEqual({
+        groupAgg: {
+          terms: {
+            field: 'the-field',
+            order: {
+              sortValueAgg: 'desc',
+            },
+            size: 20,
+          },
+          aggs: {
+            topHitsAgg: {
+              top_hits: {
+                size: 100,
+              },
+            },
+            dateAgg: {
+              date_range: {
+                field: 'time-field',
+                format: 'strict_date_time',
+                ranges: [
+                  {
+                    from: '2021-04-22T15:14:31.000Z',
+                    to: '2021-04-22T15:19:31.000Z',
+                  },
+                  {
+                    from: '2021-04-22T15:15:31.000Z',
+                    to: '2021-04-22T15:20:31.000Z',
+                  },
+                ],
+              },
+              aggs: {
+                metricAgg: {
+                  avg: {
+                    field: 'avg-field',
+                  },
+                },
+              },
+            },
+            sortValueAgg: {
+              avg: {
+                field: 'avg-field',
+              },
+            },
+          },
+        },
+      });
+
+      expect(returnedMessage).toEqual(`Top hits size is capped at 100`);
     });
   });
 

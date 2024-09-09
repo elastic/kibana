@@ -8,13 +8,12 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { RESPONSE_BUTTON_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
-import { mockContextValue } from '../mocks/mock_context';
-import { mockFlyoutContextValue } from '../../shared/mocks/mock_flyout_context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { ResponseButton } from './response_button';
 import type { SearchHit } from '../../../../../common/search_strategy';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 
 const mockValidSearchHit = {
   fields: {
@@ -31,14 +30,14 @@ const mockValidSearchHit = {
   },
 } as unknown as SearchHit;
 
-const renderResponseButton = (panelContextValue: RightPanelContext = mockContextValue) =>
+const renderResponseButton = (panelContextValue: DocumentDetailsContext = mockContextValue) =>
   render(
     <IntlProvider locale="en">
-      <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-        <RightPanelContext.Provider value={panelContextValue}>
+      <TestProvider>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
           <ResponseButton />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+        </DocumentDetailsContext.Provider>
+      </TestProvider>
     </IntlProvider>
   );
 describe('<ResponseButton />', () => {

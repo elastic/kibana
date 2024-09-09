@@ -18,7 +18,8 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -129,7 +130,7 @@ export const FieldTypesHelpPopover: FC<{
             compressed={true}
             rowHeader="firstName"
             columns={columnsSidebar}
-            responsive={false}
+            responsiveBreakpoint={false}
           />
         </EuiPanel>
         <EuiPanel color="transparent" paddingSize="s">

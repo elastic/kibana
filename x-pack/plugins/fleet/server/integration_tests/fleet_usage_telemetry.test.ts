@@ -135,6 +135,7 @@ describe('fleet usage telemetry', () => {
               name: 'Ubuntu',
               version: '22.04.2 LTS (Jammy Jellyfish)',
             },
+            elastic: { agent: { unprivileged: false } }, // Root agent
           },
           components: [
             {
@@ -172,6 +173,7 @@ describe('fleet usage telemetry', () => {
               name: 'Ubuntu',
               version: '20.04.5 LTS (Focal Fossa)',
             },
+            elastic: { agent: { unprivileged: true } }, // Non root agent
           },
           components: [
             {
@@ -350,6 +352,7 @@ describe('fleet usage telemetry', () => {
       },
       enabled: true,
       policy_id: 'fleet-server-policy',
+      policy_ids: ['fleet-server-policy'],
       inputs: [
         {
           compiled_input: {
@@ -364,6 +367,20 @@ describe('fleet usage telemetry', () => {
           },
         },
       ],
+    });
+
+    await soClient.create('ingest-package-policies', {
+      name: 'nginx-1',
+      namespace: 'default',
+      package: {
+        name: 'nginx',
+        title: 'Nginx',
+        version: '1.0.0',
+      },
+      enabled: true,
+      policy_id: 'policy2',
+      policy_ids: ['policy2', 'policy3'],
+      inputs: [],
     });
 
     await soClient.create(
@@ -425,6 +442,10 @@ describe('fleet usage telemetry', () => {
         schema_version: '1.0.0',
         data_output_id: 'output2',
         monitoring_output_id: 'output3',
+        global_data_tags: [
+          { name: 'test', value: 'test1' },
+          { name: 'test2', value: 'test2' },
+        ],
       },
       { id: 'policy2' }
     );
@@ -443,6 +464,10 @@ describe('fleet usage telemetry', () => {
         schema_version: '1.0.0',
         data_output_id: 'output4',
         monitoring_output_id: 'output4',
+        global_data_tags: [
+          { name: 'test', value: 'test1' },
+          { name: 'test2', value: 'test2' },
+        ],
       },
       { id: 'policy3' }
     );
@@ -479,9 +504,15 @@ describe('fleet usage telemetry', () => {
           unhealthy: 0,
           offline: 0,
           updating: 0,
+          inactive: 0,
+          unenrolled: 0,
           num_host_urls: 0,
         },
         packages: [],
+        agents_per_privileges: {
+          root: 3,
+          unprivileged: 1,
+        },
         agents_per_version: [
           {
             version: '8.6.0',
@@ -557,6 +588,8 @@ describe('fleet usage telemetry', () => {
         agent_policies: {
           count: 3,
           output_types: expect.arrayContaining(['elasticsearch', 'logstash', 'third_type']),
+          count_with_global_data_tags: 2,
+          avg_number_global_data_tags_per_policy: 2,
         },
         agent_logs_panics_last_hour: [
           {
@@ -574,6 +607,19 @@ describe('fleet usage telemetry', () => {
           'this should not be included in metrics',
         ],
         fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
+        integrations_details: [
+          {
+            total_integration_policies: 2,
+            shared_integration_policies: 1,
+            shared_integrations: {
+              agents: undefined,
+              name: 'nginx-1',
+              pkg_name: 'nginx',
+              pkg_version: '1.0.0',
+              shared_by_agent_policies: 2,
+            },
+          },
+        ],
       })
     );
     expect(usage?.upgrade_details.length).toBe(3);

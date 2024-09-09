@@ -1,0 +1,32 @@
+---
+##
+## This the automation will undeploy an existing automated deployment
+## caused by a merged/closed event and if the GitHub label matches
+## the automated one.
+##
+## Owner: @elastic/observablt-robots
+## Further details: https://ela.st/oblt-deploy-my-kibana
+##
+name: undeploy-my-kibana
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  undeploy-my-kibana:
+    if: contains(github.event.pull_request.labels.*.name, 'ci:project-deploy-observability')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
+        with:
+          url: ${{ secrets.OBLT_VAULT_ADDR }}
+          roleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
+          secretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
+
+      - uses: elastic/apm-pipeline-library/.github/actions/undeploy-my-kibana@current
+        with:
+          token: ${{ env.GITHUB_TOKEN }}

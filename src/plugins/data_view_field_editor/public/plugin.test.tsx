@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-kibana-mount', () => {
+  const original = jest.requireActual('@kbn/react-kibana-mount');
 
   return {
     ...original,
@@ -46,7 +48,7 @@ describe('DataViewFieldEditorPlugin', () => {
   });
 
   test('should expose a handler to open the indexpattern field editor', async () => {
-    const startApi = await plugin.start(coreStart, pluginStart);
+    const startApi = plugin.start(coreStart, pluginStart);
     expect(startApi.openEditor).toBeDefined();
   });
 
@@ -61,13 +63,13 @@ describe('DataViewFieldEditorPlugin', () => {
         openFlyout,
       },
     };
-    const { openEditor } = await plugin.start(coreStartMocked, pluginStart);
+    const { openEditor } = plugin.start(coreStartMocked, pluginStart);
 
-    openEditor({ onSave: onSaveSpy, ctx: { dataView: {} as any } });
+    await openEditor({ onSave: onSaveSpy, ctx: { dataView: {} as any } });
 
     expect(openFlyout).toHaveBeenCalled();
 
-    const [[{ __reactMount__ }]] = openFlyout.mock.calls;
+    const [[__reactMount__]] = openFlyout.mock.calls;
     expect(__reactMount__.props.children.type).toBe(FieldEditorLoader);
 
     // We force call the "onSave" prop from the <RuntimeFieldEditorFlyoutContent /> component
@@ -80,14 +82,14 @@ describe('DataViewFieldEditorPlugin', () => {
   });
 
   test('should return a handler to close the flyout', async () => {
-    const { openEditor } = await plugin.start(coreStart, pluginStart);
+    const { openEditor } = plugin.start(coreStart, pluginStart);
 
-    const closeEditorHandler = openEditor({ onSave: noop, ctx: { dataView: {} as any } });
+    const closeEditorHandler = await openEditor({ onSave: noop, ctx: { dataView: {} as any } });
     expect(typeof closeEditorHandler).toBe('function');
   });
 
   test('should expose a handler to open field deletion modal', async () => {
-    const startApi = await plugin.start(coreStart, pluginStart);
+    const startApi = plugin.start(coreStart, pluginStart);
     expect(startApi.openDeleteModal).toBeDefined();
   });
 
@@ -111,14 +113,14 @@ describe('DataViewFieldEditorPlugin', () => {
         updateSavedObject: jest.fn(),
       },
     };
-    const { openDeleteModal } = await plugin.start(coreStartMocked, pluginStartMocked);
+    const { openDeleteModal } = plugin.start(coreStartMocked, pluginStartMocked);
 
     const indexPatternMock = {
       removeRuntimeField: removeFieldSpy,
       isPersisted: () => true,
     } as unknown as DataView;
 
-    openDeleteModal({
+    await openDeleteModal({
       onDelete: onDeleteSpy,
       ctx: { dataView: indexPatternMock },
       fieldName: ['a', 'b', 'c'],
@@ -145,14 +147,14 @@ describe('DataViewFieldEditorPlugin', () => {
   });
 
   test('should return a handler to close the modal', async () => {
-    const { openDeleteModal } = await plugin.start(coreStart, pluginStart);
+    const { openDeleteModal } = plugin.start(coreStart, pluginStart);
 
-    const closeModal = openDeleteModal({ fieldName: ['a'], ctx: { dataView: {} as any } });
+    const closeModal = await openDeleteModal({ fieldName: ['a'], ctx: { dataView: {} as any } });
     expect(typeof closeModal).toBe('function');
   });
 
   test('should expose a render props component to delete runtime fields', async () => {
-    const { DeleteRuntimeFieldProvider } = await plugin.start(coreStart, pluginStart);
+    const { DeleteRuntimeFieldProvider } = plugin.start(coreStart, pluginStart);
 
     const TestComponent = ({ callback }: { callback: (...args: any[]) => void }) => {
       return (

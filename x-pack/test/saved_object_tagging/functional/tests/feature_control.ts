@@ -45,8 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const unselectTags = async () => {
     if (await tagManagementPage.isSelectionColumnDisplayed()) {
-      await tagManagementPage.selectAllTagRows();
-      await tagManagementPage.selectAllTagRows();
+      await tagManagementPage.clickOnBulkAction('clear_selection');
     }
   };
 

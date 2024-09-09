@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -16,11 +17,13 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 const findTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>,
-  supertestWithoutAuth: any
+  supertest: SuperTestAgent,
+  supertestWithoutAuth: SupertestWithoutAuthProviderType
 ) => {
   describe(describeType, () => {
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -99,6 +102,7 @@ const findTestUtils = (
                       monitoring: match.monitoring,
                       snooze_schedule: match.snooze_schedule,
                       ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                      is_snoozed_until: null,
                     }
                   : {}),
               });
@@ -321,6 +325,7 @@ const findTestUtils = (
                       monitoring: match.monitoring,
                       snooze_schedule: match.snooze_schedule,
                       ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                      is_snoozed_until: null,
                     }
                   : {}),
               });
@@ -405,6 +410,7 @@ const findTestUtils = (
                 tags: [myTag],
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
@@ -413,6 +419,7 @@ const findTestUtils = (
                 tags: [myTag],
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               break;
@@ -495,6 +502,7 @@ const findTestUtils = (
                 execution_status: matchFirst.execution_status,
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
@@ -504,6 +512,7 @@ const findTestUtils = (
                 execution_status: matchSecond.execution_status,
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               break;
@@ -573,7 +582,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   describe('find with post', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);
   });

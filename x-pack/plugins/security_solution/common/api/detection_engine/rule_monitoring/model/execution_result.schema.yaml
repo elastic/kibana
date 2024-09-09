@@ -52,6 +52,19 @@ components:
           type: string
         security_message:
           type: string
+        backfill:
+          type: object
+          description: Backfill information for the rule execution result with source event date range
+          properties:
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string     
+              format: date-time     
+          required:
+            - from
+            - to    
       required:
         - execution_uuid
         - timestamp

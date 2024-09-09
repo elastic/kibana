@@ -2,11 +2,9 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/steps/functional/common_cypress.sh
+source .buildkite/scripts/steps/functional/common.sh
 
-.buildkite/scripts/bootstrap.sh
-node scripts/build_kibana_platform_plugins.js
+export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 export JOB=kibana-osquery-cypress
 

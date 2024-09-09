@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   MsearchMultisearchHeader,
   MsearchMultisearchBody,
 } from '@elastic/elasticsearch/lib/api/types';
-import { AllowedValuesInputs } from '../schemas/get_unallowed_field_values';
+import type { AllowedValuesInputs } from '../schemas/get_unallowed_field_values';
 
 export const getMSearchRequestHeader = (indexName: string): MsearchMultisearchHeader => ({
   expand_wildcards: ['open'],

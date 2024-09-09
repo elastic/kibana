@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { useUiSettings } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { SingleMetricJobCreator } from '../../../../../common/job_creator';
-import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
-import { LineChartData } from '../../../../../common/chart_loader';
+import type { SingleMetricJobCreator } from '../../../../../common/job_creator';
+import type { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
+import type { LineChartData } from '../../../../../common/chart_loader';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { getChartSettings } from '../../../charts/common/settings';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 const DTR_IDX = 0;
 
 export const SingleMetricDetectorsSummary: FC = () => {
+  const uiSettings = useUiSettings();
   const {
     jobCreator: jc,
     chartLoader,
@@ -24,6 +27,7 @@ export const SingleMetricDetectorsSummary: FC = () => {
     chartInterval,
   } = useContext(JobCreatorContext);
   const jobCreator = jc as SingleMetricJobCreator;
+  const toastNotificationService = useToastNotificationService();
 
   const [lineChartsData, setLineChartData] = useState<LineChartData>({});
   const [loadingData, setLoadingData] = useState(false);
@@ -55,7 +59,7 @@ export const SingleMetricDetectorsSummary: FC = () => {
     if (jobCreator.aggFieldPair !== null) {
       setLoadingData(true);
       try {
-        const cs = getChartSettings(jobCreator, chartInterval);
+        const cs = getChartSettings(uiSettings, jobCreator, chartInterval);
         const resp: LineChartData = await chartLoader.loadLineCharts(
           jobCreator.start,
           jobCreator.end,
@@ -70,7 +74,7 @@ export const SingleMetricDetectorsSummary: FC = () => {
           setLineChartData(resp);
         }
       } catch (error) {
-        getToastNotificationService().displayErrorToast(error);
+        toastNotificationService.displayErrorToast(error);
         setLineChartData({});
       }
       setLoadingData(false);

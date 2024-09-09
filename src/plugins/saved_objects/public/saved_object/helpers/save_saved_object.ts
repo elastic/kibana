@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -11,6 +12,7 @@ import {
   SavedObjectConfig,
   SavedObjectKibanaServices,
   SavedObjectSaveOpts,
+  StartServices,
 } from '../../types';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from '../../constants';
 import { createSource } from './create_source';
@@ -38,6 +40,7 @@ export function isErrorNonFatal(error: { message: string }) {
  * @property {func} [options.onTitleDuplicate] - function called if duplicate title exists.
  * When not provided, confirm modal will be displayed asking user to confirm or cancel save.
  * @param {SavedObjectKibanaServices} [services]
+ * @param {StartServices} [startServices]
  * @return {Promise}
  * @resolved {String} - The id of the doc
  */
@@ -49,7 +52,8 @@ export async function saveSavedObject(
     isTitleDuplicateConfirmed = false,
     onTitleDuplicate,
   }: SavedObjectSaveOpts = {},
-  services: SavedObjectKibanaServices
+  services: SavedObjectKibanaServices,
+  startServices: StartServices
 ): Promise<string> {
   const { savedObjectsClient, chrome } = services;
 
@@ -79,7 +83,8 @@ export async function saveSavedObject(
       savedObject,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
-      services
+      services,
+      startServices
     );
     savedObject.isSaving = true;
     const resp = confirmOverwrite
@@ -88,7 +93,8 @@ export async function saveSavedObject(
           savedObject,
           esType,
           savedObject.creationOpts({ references }),
-          services
+          services,
+          startServices
         )
       : await savedObjectsClient.create(
           esType,

@@ -10,7 +10,7 @@ import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/cor
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { LicenseState } from './lib/license_state';
 import { registerSearchRoute } from './routes/search';

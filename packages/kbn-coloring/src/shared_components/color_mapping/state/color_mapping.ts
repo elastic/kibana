@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { ColorMapping } from '../config';
+import { DEFAULT_OTHER_ASSIGNMENT_INDEX } from '../config/default_color_mapping';
 
 export interface RootState {
   colorMapping: ColorMapping.Config;
@@ -22,7 +24,6 @@ export interface RootState {
 }
 
 const initialState: RootState['colorMapping'] = {
-  assignmentMode: 'auto',
   assignments: [],
   specialAssignments: [],
   paletteId: 'eui',
@@ -34,7 +35,6 @@ export const colorMappingSlice = createSlice({
   initialState,
   reducers: {
     updateModel: (state, action: PayloadAction<ColorMapping.Config>) => {
-      state.assignmentMode = action.payload.assignmentMode;
       state.assignments = [...action.payload.assignments];
       state.specialAssignments = [...action.payload.specialAssignments];
       state.paletteId = action.payload.paletteId;
@@ -53,11 +53,9 @@ export const colorMappingSlice = createSlice({
       state.colorMode = { ...action.payload.colorMode };
     },
     assignStatically: (state, action: PayloadAction<ColorMapping.Config['assignments']>) => {
-      state.assignmentMode = 'manual';
       state.assignments = [...action.payload];
     },
     assignAutomatically: (state) => {
-      state.assignmentMode = 'auto';
       state.assignments = [];
     },
 
@@ -66,6 +64,9 @@ export const colorMappingSlice = createSlice({
       action: PayloadAction<ColorMapping.Config['assignments'][number]>
     ) => {
       state.assignments.push({ ...action.payload });
+    },
+    addNewAssignments: (state, action: PayloadAction<ColorMapping.Config['assignments']>) => {
+      state.assignments.push(...action.payload);
     },
     updateAssignment: (
       state,
@@ -120,6 +121,21 @@ export const colorMappingSlice = createSlice({
     },
     removeAssignment: (state, action: PayloadAction<number>) => {
       state.assignments.splice(action.payload, 1);
+      if (state.assignments.length === 0) {
+        state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = {
+          ...state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
+          color: { type: 'loop' },
+          touched: true,
+        };
+      }
+    },
+    removeAllAssignments: (state) => {
+      state.assignments = [];
+      state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = {
+        ...state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
+        color: { type: 'loop' },
+        touched: true,
+      };
     },
     changeColorMode: (state, action: PayloadAction<ColorMapping.Config['colorMode']>) => {
       state.colorMode = { ...action.payload };
@@ -209,11 +225,13 @@ export const {
   assignStatically,
   assignAutomatically,
   addNewAssignment,
+  addNewAssignments,
   updateAssignment,
   updateAssignmentColor,
   updateSpecialAssignmentColor,
   updateAssignmentRule,
   removeAssignment,
+  removeAllAssignments,
   changeColorMode,
   updateGradientColorStep,
   removeGradientColorStep,

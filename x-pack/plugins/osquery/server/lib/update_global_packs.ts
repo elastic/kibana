@@ -9,7 +9,7 @@ import type { SavedObjectsClient } from '@kbn/core/server';
 import { set } from '@kbn/safer-lodash-set';
 import { has, map, mapKeys } from 'lodash';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import produce from 'immer';
 import { convertShardsToObject } from '../routes/utils';
 import { packSavedObjectType } from '../../common/types';
@@ -25,9 +25,10 @@ export const updateGlobalPacksCreateCallback = async (
 ) => {
   const agentPolicyService = osqueryContext.getAgentPolicyService();
 
-  const agentPoliciesResult = await agentPolicyService?.getByIds(packsClient, [
-    packagePolicy.policy_id,
-  ]);
+  const agentPoliciesResult = await agentPolicyService?.getByIds(
+    packsClient,
+    packagePolicy.policy_ids
+  );
   const agentPolicyResultIds = map(agentPoliciesResult, 'id');
   const agentPolicies = agentPoliciesResult
     ? mapKeys(await agentPolicyService?.getByIds(packsClient, agentPolicyResultIds), 'id')
@@ -46,7 +47,7 @@ export const updateGlobalPacksCreateCallback = async (
 
   if (packsContainingShardForPolicy.length) {
     await Promise.all(
-      map(packsContainingShardForPolicy, (pack) => {
+      map(packsContainingShardForPolicy, (pack) =>
         packsClient.update(
           packSavedObjectType,
           pack.saved_object_id,
@@ -54,15 +55,15 @@ export const updateGlobalPacksCreateCallback = async (
           {
             references: [
               ...(pack.references ?? []),
-              {
-                id: packagePolicy.policy_id,
-                name: agentPolicies[packagePolicy.policy_id]?.name,
-                type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-              },
+              ...packagePolicy.policy_ids.map((policyId) => ({
+                id: policyId,
+                name: agentPolicies[policyId]?.name,
+                type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+              })),
             ],
           }
-        );
-      })
+        )
+      )
     );
 
     return produce<NewPackagePolicy>(packagePolicy, (draft) => {

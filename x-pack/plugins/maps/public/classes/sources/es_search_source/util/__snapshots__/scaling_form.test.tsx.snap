@@ -6,10 +6,9 @@ exports[`scaling form should disable clusters option when clustering is not supp
     size="xs"
   >
     <h5>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Scaling"
         id="xpack.maps.esSearch.scaleTitle"
-        values={Object {}}
       />
        
       <ScalingDocumenationPopover
@@ -23,13 +22,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
   <EuiSpacer
     size="m"
   />
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiFormRow>
     <div>
       <EuiRadio
         checked={false}
@@ -59,13 +52,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
       />
     </div>
   </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiFormRow>
     <EuiSwitch
       checked={true}
       compressed={true}
@@ -82,10 +69,9 @@ exports[`scaling form should render 1`] = `
     size="xs"
   >
     <h5>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Scaling"
         id="xpack.maps.esSearch.scaleTitle"
-        values={Object {}}
       />
        
       <ScalingDocumenationPopover
@@ -99,13 +85,7 @@ exports[`scaling form should render 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiFormRow>
     <div>
       <EuiRadio
         checked={false}
@@ -128,13 +108,7 @@ exports[`scaling form should render 1`] = `
       />
     </div>
   </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiFormRow>
     <EuiSwitch
       checked={true}
       compressed={true}

@@ -66,7 +66,7 @@ export const SentinelOneGetAgentsResponseSchema = schema.object({
         registeredAt: schema.string(),
         lastIpToMgmt: schema.string(),
         storageName: schema.nullable(schema.string()),
-        osUsername: schema.string(),
+        osUsername: schema.nullable(schema.string()),
         groupIp: schema.string(),
         createdAt: schema.string(),
         remoteProfilingState: schema.string(),
@@ -162,7 +162,108 @@ export const SentinelOneIsolateHostResponseSchema = schema.object({
 
 export const SentinelOneGetRemoteScriptsParamsSchema = schema.object({
   query: schema.nullable(schema.string()),
+  // Possible values (multiples comma delimiter): `linux` or `macos` or `windows`
   osTypes: schema.nullable(schema.string()),
+  // possible values (multiples comma delimiter): `action` or `artifactCollection` or `dataCollection`
+  scriptType: schema.nullable(schema.string()),
+});
+
+export const SentinelOneFetchAgentFilesParamsSchema = schema.object({
+  agentId: schema.string({ minLength: 1 }),
+  zipPassCode: schema.string({ minLength: 10 }),
+  files: schema.arrayOf(schema.string({ minLength: 1 })),
+});
+
+export const SentinelOneFetchAgentFilesResponseSchema = schema.object({
+  errors: schema.nullable(schema.arrayOf(schema.string())),
+  data: schema.maybe(
+    schema.object(
+      {
+        success: schema.boolean(),
+      },
+      { unknowns: 'allow' }
+    )
+  ),
+});
+
+export const SentinelOneDownloadAgentFileParamsSchema = schema.object({
+  agentId: schema.string({ minLength: 1 }),
+  activityId: schema.string({ minLength: 1 }),
+});
+
+export const SentinelOneDownloadAgentFileResponseSchema = schema.stream();
+
+export const SentinelOneGetActivitiesParamsSchema = schema.maybe(
+  schema.object({
+    accountIds: schema.maybe(schema.string({ minLength: 1 })),
+    activityTypes: schema.maybe(schema.string()),
+    activityUuids: schema.maybe(schema.string({ minLength: 1 })),
+    agentIds: schema.maybe(schema.string({ minLength: 1 })),
+    alertIds: schema.maybe(schema.string({ minLength: 1 })),
+    countOnly: schema.maybe(schema.boolean()),
+    createdAt__between: schema.maybe(schema.string({ minLength: 1 })),
+    createdAt__gt: schema.maybe(schema.string({ minLength: 1 })),
+    createdAt__gte: schema.maybe(schema.string({ minLength: 1 })),
+    createdAt__lt: schema.maybe(schema.string({ minLength: 1 })),
+    createdAt__lte: schema.maybe(schema.string({ minLength: 1 })),
+    cursor: schema.maybe(schema.string({ minLength: 1 })),
+    groupIds: schema.maybe(schema.string({ minLength: 1 })),
+    ids: schema.maybe(schema.string({ minLength: 1 })),
+    includeHidden: schema.maybe(schema.boolean()),
+    limit: schema.maybe(schema.number()),
+    ruleIds: schema.maybe(schema.string({ minLength: 1 })),
+    siteIds: schema.maybe(schema.string({ minLength: 1 })),
+    skip: schema.maybe(schema.number()),
+    skipCount: schema.maybe(schema.boolean()),
+    sortBy: schema.maybe(schema.string({ minLength: 1 })),
+    sortOrder: schema.maybe(schema.string({ minLength: 1 })),
+    threatIds: schema.maybe(schema.string({ minLength: 1 })),
+    userEmails: schema.maybe(schema.string({ minLength: 1 })),
+    userIds: schema.maybe(schema.string({ minLength: 1 })),
+  })
+);
+
+export const SentinelOneGetActivitiesResponseSchema = schema.object({
+  errors: schema.maybe(schema.arrayOf(schema.string())),
+  pagination: schema.object({
+    nextCursor: schema.nullable(schema.string()),
+    totalItems: schema.number(),
+  }),
+  data: schema.arrayOf(
+    schema.object(
+      {
+        accountId: schema.string(),
+        accountName: schema.string(),
+        activityType: schema.number(),
+        activityUuid: schema.string(),
+        agentId: schema.nullable(schema.string()),
+        agentUpdatedVersion: schema.nullable(schema.string()),
+        comments: schema.nullable(schema.string()),
+        createdAt: schema.string(),
+        data: schema.object(
+          {
+            // Empty by design.
+            // The SentinelOne Activity Log can place any (unknown) data here
+          },
+          { unknowns: 'allow' }
+        ),
+        description: schema.nullable(schema.string()),
+        groupId: schema.nullable(schema.string()),
+        groupName: schema.nullable(schema.string()),
+        hash: schema.nullable(schema.string()),
+        id: schema.string(),
+        osFamily: schema.nullable(schema.string()),
+        primaryDescription: schema.nullable(schema.string()),
+        secondaryDescription: schema.nullable(schema.string()),
+        siteId: schema.string(),
+        siteName: schema.string(),
+        threatId: schema.nullable(schema.string()),
+        updatedAt: schema.string(),
+        userId: schema.nullable(schema.string()),
+      },
+      { unknowns: 'allow' }
+    )
+  ),
 });
 
 export const AlertIds = schema.maybe(schema.arrayOf(schema.string()));
@@ -226,18 +327,24 @@ export const SentinelOneGetRemoteScriptsResponseSchema = schema.object({
 });
 
 export const SentinelOneExecuteScriptParamsSchema = schema.object({
-  computerName: schema.maybe(schema.string()),
+  // Only a sub-set of filters are defined below. This API, however, support many more filters
+  // which can be added in the future if needed.
+  filter: schema.object({
+    uuids: schema.maybe(schema.string({ minLength: 1 })),
+    ids: schema.maybe(schema.string({ minLength: 1 })),
+  }),
   script: schema.object({
-    scriptId: schema.string(),
-    scriptName: schema.maybe(schema.string()),
     apiKey: schema.maybe(schema.string()),
-    outputDirectory: schema.maybe(schema.string()),
-    requiresApproval: schema.maybe(schema.boolean()),
-    taskDescription: schema.maybe(schema.string()),
-    singularityxdrUrl: schema.maybe(schema.string()),
     inputParams: schema.maybe(schema.string()),
-    singularityxdrKeyword: schema.maybe(schema.string()),
-    scriptRuntimeTimeoutSeconds: schema.maybe(schema.number()),
+    outputDirectory: schema.maybe(schema.string()),
+    outputDestination: schema.maybe(
+      schema.oneOf([
+        schema.literal('Local'),
+        schema.literal('None'),
+        schema.literal('SentinelCloud'),
+        schema.literal('SingularityXDR'),
+      ])
+    ),
     passwordFromScope: schema.maybe(
       schema.object({
         scopeLevel: schema.maybe(schema.string()),
@@ -245,9 +352,46 @@ export const SentinelOneExecuteScriptParamsSchema = schema.object({
       })
     ),
     password: schema.maybe(schema.string()),
+    requiresApproval: schema.maybe(schema.boolean()),
+    scriptId: schema.string(),
+    scriptName: schema.maybe(schema.string()),
+    scriptRuntimeTimeoutSeconds: schema.maybe(schema.number()),
+    singularityxdrKeyword: schema.maybe(schema.string()),
+    singularityxdrUrl: schema.maybe(schema.string()),
+    taskDescription: schema.maybe(schema.string()),
   }),
   alertIds: AlertIds,
 });
+
+export const SentinelOneExecuteScriptResponseSchema = schema.object({
+  errors: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  data: schema.nullable(
+    schema.object({
+      pendingExecutionId: schema.nullable(schema.string()),
+      affected: schema.nullable(schema.number()),
+      parentTaskId: schema.nullable(schema.string()),
+      pending: schema.nullable(schema.boolean()),
+    })
+  ),
+});
+
+export const SentinelOneGetRemoteScriptResultsParamsSchema = schema.object({
+  taskIds: schema.arrayOf(schema.string()),
+});
+
+export const SentinelOneGetRemoteScriptResultsResponseSchema = schema.object(
+  {
+    errors: schema.nullable(schema.arrayOf(schema.object({ type: schema.string() }))),
+    data: schema.any(),
+  },
+  { unknowns: 'allow' }
+);
+
+export const SentinelOneDownloadRemoteScriptResultsParamsSchema = schema.object({
+  taskId: schema.string({ minLength: 1 }),
+});
+
+export const SentinelOneDownloadRemoteScriptResultsResponseSchema = schema.stream();
 
 export const SentinelOneGetRemoteScriptStatusParamsSchema = schema.object(
   {
@@ -262,39 +406,7 @@ export const SentinelOneGetRemoteScriptStatusResponseSchema = schema.object({
     nextCursor: schema.nullable(schema.string()),
   }),
   errors: schema.nullable(schema.arrayOf(schema.object({ type: schema.string() }))),
-  data: schema.arrayOf(
-    schema.object(
-      {
-        agentIsDecommissioned: schema.nullable(schema.boolean()),
-        agentComputerName: schema.nullable(schema.string()),
-        status: schema.nullable(schema.string()),
-        groupName: schema.nullable(schema.string()),
-        initiatedById: schema.nullable(schema.string()),
-        parentTaskId: schema.nullable(schema.string()),
-        updatedAt: schema.nullable(schema.string()),
-        createdAt: schema.nullable(schema.string()),
-        agentIsActive: schema.nullable(schema.boolean()),
-        agentOsType: schema.nullable(schema.string()),
-        agentMachineType: schema.nullable(schema.string()),
-        id: schema.nullable(schema.string()),
-        siteName: schema.nullable(schema.string()),
-        detailedStatus: schema.nullable(schema.string()),
-        siteId: schema.nullable(schema.string()),
-        scriptResultsSignature: schema.nullable(schema.nullable(schema.string())),
-        initiatedBy: schema.nullable(schema.string()),
-        accountName: schema.nullable(schema.string()),
-        groupId: schema.nullable(schema.string()),
-        agentUuid: schema.nullable(schema.string()),
-        accountId: schema.nullable(schema.string()),
-        type: schema.nullable(schema.string()),
-        scriptResultsPath: schema.nullable(schema.string()),
-        scriptResultsBucket: schema.nullable(schema.string()),
-        description: schema.nullable(schema.string()),
-        agentId: schema.nullable(schema.string()),
-      },
-      { unknowns: 'allow' }
-    )
-  ),
+  data: schema.arrayOf(schema.mapOf(schema.string(), schema.any())),
 });
 
 export const SentinelOneBaseFilterSchema = schema.object({
@@ -450,36 +562,9 @@ export const SentinelOneBaseFilterSchema = schema.object({
   alertIds: AlertIds,
 });
 
-export const SentinelOneKillProcessParamsSchema = SentinelOneBaseFilterSchema.extends({
-  processName: schema.string(),
-});
-
 export const SentinelOneIsolateHostParamsSchema = SentinelOneBaseFilterSchema;
 
 export const SentinelOneGetAgentsParamsSchema = SentinelOneBaseFilterSchema;
-
-export const SentinelOneGetRemoteScriptsStatusParams = schema.object({
-  parentTaskId: schema.string(),
-});
-
-export const SentinelOneExecuteScriptResponseSchema = schema.object({
-  errors: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-  data: schema.nullable(
-    schema.object({
-      pendingExecutionId: schema.nullable(schema.string()),
-      affected: schema.nullable(schema.number()),
-      parentTaskId: schema.nullable(schema.string()),
-      pending: schema.nullable(schema.boolean()),
-    })
-  ),
-});
-
-export const SentinelOneKillProcessResponseSchema = SentinelOneExecuteScriptResponseSchema;
-
-export const SentinelOneKillProcessSchema = schema.object({
-  subAction: schema.literal(SUB_ACTION.KILL_PROCESS),
-  subActionParams: SentinelOneKillProcessParamsSchema,
-});
 
 export const SentinelOneIsolateHostSchema = schema.object({
   subAction: schema.literal(SUB_ACTION.ISOLATE_HOST),
@@ -497,7 +582,6 @@ export const SentinelOneExecuteScriptSchema = schema.object({
 });
 
 export const SentinelOneActionParamsSchema = schema.oneOf([
-  SentinelOneKillProcessSchema,
   SentinelOneIsolateHostSchema,
   SentinelOneReleaseHostSchema,
   SentinelOneExecuteScriptSchema,

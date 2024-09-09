@@ -24,13 +24,15 @@ import {
   type MlRecordForInfluencer,
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
-
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { IUiSettingsClient } from '@kbn/core/public';
+
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
-import { getDataViewIdFromName } from '../util/index_utils';
+import type { MlIndexUtils } from '../util/index_service';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
@@ -38,21 +40,19 @@ import {
   isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { ml } from '../services/ml_api_service';
-import { mlJobService } from '../services/job_service';
-import { getUiSettings } from '../util/dependency_cache';
+import type { MlJobService } from '../services/job_service';
 
+import type { SwimlaneType } from './explorer_constants';
 import {
   MAX_CATEGORY_EXAMPLES,
   MAX_INFLUENCER_FIELD_VALUES,
   SWIMLANE_TYPE,
-  SwimlaneType,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import { MlResultsService } from '../services/results_service';
-import { TimeRangeBounds } from '../util/time_buckets';
-import { Annotations, AnnotationsTable } from '../../../common/types/annotations';
+import type { MlResultsService } from '../services/results_service';
+import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
+import type { MlApi } from '../services/ml_api_service';
 
 export interface ExplorerJob {
   id: string;
@@ -239,7 +239,7 @@ export async function loadFilteredTopInfluencers(
   )) as any[];
 }
 
-export function getInfluencers(selectedJobs: any[]): string[] {
+export function getInfluencers(mlJobService: MlJobService, selectedJobs: any[]): string[] {
   const influencers: string[] = [];
   selectedJobs.forEach((selectedJob) => {
     const job = mlJobService.getJob(selectedJob.id);
@@ -250,15 +250,14 @@ export function getInfluencers(selectedJobs: any[]): string[] {
   return influencers;
 }
 
-export function getDateFormatTz(): string {
-  const uiSettings = getUiSettings();
+export function getDateFormatTz(uiSettings: IUiSettingsClient): string {
   // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
   const tzConfig = uiSettings.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
   return dateFormatTz;
 }
 
-export function getFieldsByJob() {
+export function getFieldsByJob(mlJobService: MlJobService) {
   return mlJobService.jobs.reduce(
     (reducedFieldsByJob, job) => {
       // Add the list of distinct by, over, partition and influencer fields for each job.
@@ -353,6 +352,7 @@ export function getSelectionJobIds(
 }
 
 export function loadOverallAnnotations(
+  mlApi: MlApi,
   selectedJobs: ExplorerJob[],
   bounds: TimeRangeBounds
 ): Promise<AnnotationsTable> {
@@ -361,7 +361,7 @@ export function loadOverallAnnotations(
 
   return new Promise((resolve) => {
     lastValueFrom(
-      ml.annotations.getAnnotations$({
+      mlApi.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
@@ -407,6 +407,7 @@ export function loadOverallAnnotations(
 }
 
 export function loadAnnotationsTableData(
+  mlApi: MlApi,
   selectedCells: AppStateSelectedCells | undefined | null,
   selectedJobs: ExplorerJob[],
   bounds: Required<TimeRangeBounds>
@@ -416,7 +417,7 @@ export function loadAnnotationsTableData(
 
   return new Promise((resolve) => {
     lastValueFrom(
-      ml.annotations.getAnnotations$({
+      mlApi.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
@@ -465,6 +466,8 @@ export function loadAnnotationsTableData(
 }
 
 export async function loadAnomaliesTableData(
+  mlApi: MlApi,
+  mlJobService: MlJobService,
   selectedCells: AppStateSelectedCells | undefined | null,
   selectedJobs: ExplorerJob[],
   dateFormatTz: string,
@@ -479,7 +482,7 @@ export async function loadAnomaliesTableData(
   const timeRange = getSelectionTimeRange(selectedCells, bounds);
 
   return new Promise((resolve, reject) => {
-    ml.results
+    mlApi.results
       .getAnomaliesTableData(
         jobIds,
         [],
@@ -633,7 +636,8 @@ export function removeFilterFromQueryString(
 // Returns an object mapping job ids to source indices which map to geo fields for that index
 export async function getDataViewsAndIndicesWithGeoFields(
   selectedJobs: Array<CombinedJob | ExplorerJob>,
-  dataViewsService: DataViewsContract
+  dataViewsService: DataViewsContract,
+  mlIndexUtils: MlIndexUtils
 ): Promise<{ sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields; dataViews: DataView[] }> {
   const sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields = {};
   // Avoid searching for data view again if previous job already has same source index
@@ -654,7 +658,8 @@ export async function getDataViewsAndIndicesWithGeoFields(
       if (Array.isArray(sourceIndices)) {
         for (const sourceIndex of sourceIndices) {
           const cachedDV = dataViewsMap.get(sourceIndex);
-          const dataViewId = cachedDV?.id ?? (await getDataViewIdFromName(sourceIndex));
+          const dataViewId =
+            cachedDV?.id ?? (await mlIndexUtils.getDataViewIdFromName(sourceIndex));
 
           if (dataViewId) {
             const dataView = cachedDV ?? (await dataViewsService.get(dataViewId));

@@ -43,6 +43,7 @@ describe('Agent policy advanced options content', () => {
 
   const render = ({
     isProtected = false,
+    isManaged = false,
     policyId = 'agent-policy-1',
     newAgentPolicy = false,
     packagePolicy = [createPackagePolicyMock()],
@@ -54,6 +55,7 @@ describe('Agent policy advanced options content', () => {
         ...createAgentPolicyMock(),
         package_policies: packagePolicy,
         id: policyId,
+        is_managed: isManaged,
       };
     }
 
@@ -89,6 +91,16 @@ describe('Agent policy advanced options content', () => {
         hasAtLeast: () => false,
       } as unknown as LicenseService);
       render();
+      expect(renderResult.queryByTestId('tamperProtectionSwitch')).not.toBeInTheDocument();
+    });
+    it('should be visible if policy is not managed/hosted', () => {
+      usePlatinumLicense();
+      render({ isManaged: false });
+      expect(renderResult.queryByTestId('tamperProtectionSwitch')).toBeInTheDocument();
+    });
+    it('should not be visible if policy is managed/hosted', () => {
+      usePlatinumLicense();
+      render({ isManaged: true });
       expect(renderResult.queryByTestId('tamperProtectionSwitch')).not.toBeInTheDocument();
     });
     it('switched to true enables the uninstall command link', async () => {
@@ -150,6 +162,15 @@ describe('Agent policy advanced options content', () => {
         render({ newAgentPolicy: true });
         expect(renderResult.getByTestId('tamperProtectionSwitch')).toBeDisabled();
       });
+    });
+  });
+
+  describe('Custom Fields', () => {
+    it('should render the CustomFields component with correct props', () => {
+      usePlatinumLicense();
+      render();
+      expect(renderResult.queryByText('Custom fields')).toBeInTheDocument();
+      expect(renderResult.queryByText('This policy has no custom fields')).toBeInTheDocument();
     });
   });
 });

@@ -18,6 +18,7 @@ interface Props {
   result: SearchResultType[];
   documentFieldsState: State['documentFields'];
   style?: React.CSSProperties;
+  onClearSearch?: () => void;
 }
 
 const ITEM_HEIGHT = 64;
@@ -50,12 +51,21 @@ const Row = React.memo<RowProps>(({ data, index, style }) => {
 }, areEqual);
 
 export const SearchResult = React.memo(
-  ({ result, documentFieldsState: { status, fieldToEdit }, style: virtualListStyle }: Props) => {
+  ({
+    result,
+    documentFieldsState: { status, fieldToEdit },
+    style: virtualListStyle,
+    onClearSearch,
+  }: Props) => {
     const dispatch = useDispatch();
     const listHeight = Math.min(result.length * ITEM_HEIGHT, 600);
 
     const clearSearch = () => {
-      dispatch({ type: 'search:update', value: '' });
+      if (onClearSearch !== undefined) {
+        onClearSearch();
+      } else {
+        dispatch({ type: 'search:update', value: '' });
+      }
     };
 
     const itemData = useMemo(

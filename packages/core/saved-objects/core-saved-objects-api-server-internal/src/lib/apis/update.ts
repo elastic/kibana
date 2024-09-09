@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -81,6 +82,7 @@ export const executeUpdate = async <T>(
     preflight: preflightHelper,
     migration: migrationHelper,
     validation: validationHelper,
+    user: userHelper,
   } = helpers;
   const { securityExtension } = extensions;
   const typeDefinition = registry.getType(type)!;
@@ -151,6 +153,7 @@ export const executeUpdate = async <T>(
   // END ALL PRE_CLIENT CALL CHECKS && MIGRATE EXISTING DOC;
 
   const time = getCurrentTime();
+  const updatedBy = userHelper.getCurrentUserProfileUid();
   let updatedOrCreatedSavedObject: SavedObject<T>;
   // `upsert` option set and document was not found -> we need to perform an upsert operation
   const shouldPerformUpsert = upsert && docNotFound;
@@ -176,7 +179,9 @@ export const executeUpdate = async <T>(
       attributes: {
         ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, upsert)),
       },
+      created_at: time,
       updated_at: time,
+      ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
       ...(Array.isArray(references) && { references }),
     }) as SavedObjectSanitizedDoc<T>;
     validationHelper.validateObjectForCreate(type, migratedUpsert);
@@ -232,7 +237,9 @@ export const executeUpdate = async <T>(
     updatedOrCreatedSavedObject = {
       id,
       type,
+      created_at: time,
       updated_at: time,
+      ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
       version: encodeHitVersion(createDocResponseBody),
       namespaces,
       ...(originId && { originId }),
@@ -246,18 +253,24 @@ export const executeUpdate = async <T>(
     // at this point, we already know 1. the document exists 2. we're not doing an upsert
     // therefor we can safely process with the "standard" update sequence.
 
-    const updatedAttributes = mergeForUpdate({
-      targetAttributes: {
-        ...migrated!.attributes,
-      },
-      updatedAttributes: await encryptionHelper.optionallyEncryptAttributes(
-        type,
-        id,
-        namespace,
-        attributes
-      ),
-      typeMappings: typeDefinition.mappings,
-    });
+    const mergeAttributes = options.mergeAttributes ?? true;
+    const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
+      type,
+      id,
+      namespace,
+      attributes
+    );
+
+    const updatedAttributes = mergeAttributes
+      ? mergeForUpdate({
+          targetAttributes: {
+            ...(migrated!.attributes as Record<string, unknown>),
+          },
+          updatedAttributes: encryptedUpdatedAttributes,
+          typeMappings: typeDefinition.mappings,
+        })
+      : encryptedUpdatedAttributes;
+
     const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
       ...migrated!,
       id,
@@ -267,6 +280,7 @@ export const executeUpdate = async <T>(
       namespaces: savedObjectNamespaces,
       attributes: updatedAttributes,
       updated_at: time,
+      updated_by: updatedBy,
       ...(Array.isArray(references) && { references }),
     });
 
@@ -330,6 +344,7 @@ export const executeUpdate = async <T>(
       id,
       type,
       updated_at: time,
+      ...(updatedBy && { updated_by: updatedBy }),
       version: encodeHitVersion(indexDocResponseBody),
       namespaces,
       ...(originId && { originId }),

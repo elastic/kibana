@@ -6,20 +6,17 @@
  */
 
 import React from 'react';
-import { waitFor, act } from '@testing-library/react';
+import { act } from '@testing-library/react';
 import { mount } from 'enzyme';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { AlertsCountPanel } from '.';
 
 import type { Status } from '../../../../../common/api/detection_engine';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
 import { TestProviders } from '../../../../common/mock';
-import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
-import { TABLE } from '../../../pages/detection_engine/chart_panels/chart_select/translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
-import { allowedExperimentalValues } from '../../../../../common/experimental_features';
+import { ChartContextMenu } from '../chart_panels/chart_context_menu';
+import { COUNTS } from '../chart_panels/chart_select/translations';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
@@ -39,61 +36,33 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-const defaultUseQueryAlertsReturn = {
-  loading: false,
-  data: {},
-  setQuery: () => {},
-  response: '',
-  request: '',
-  refetch: () => {},
-};
-const mockUseQueryAlerts = jest.fn().mockReturnValue(defaultUseQueryAlertsReturn);
-jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
-  return {
-    useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
-  };
-});
-
-jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/components/page/use_refetch_by_session');
-jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
+jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 jest.mock('../../../../common/components/page/use_refetch_by_session');
 jest.mock('../common/hooks', () => ({
   useInspectButton: jest.fn(),
   useStackByFields: jest.fn().mockReturnValue(() => []),
 }));
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-const getMockUseIsExperimentalFeatureEnabled =
-  (mockMapping?: Partial<ExperimentalFeatures>) => (flag: keyof typeof allowedExperimentalValues) =>
-    mockMapping ? mockMapping?.[flag] : allowedExperimentalValues?.[flag];
-jest.mock('../../../../common/hooks/use_experimental_features');
 
+const mockSetIsExpanded = jest.fn();
 const defaultProps = {
-  inspectTitle: TABLE,
+  inspectTitle: COUNTS,
   signalIndexName: 'signalIndexName',
   stackByField0: DEFAULT_STACK_BY_FIELD,
   stackByField1: DEFAULT_STACK_BY_FIELD1,
   setStackByField0: jest.fn(),
   setStackByField1: jest.fn(),
   isExpanded: true,
-  setIsExpanded: jest.fn(),
+  setIsExpanded: mockSetIsExpanded,
   showBuildingBlockAlerts: false,
   showOnlyThreatIndicatorAlerts: false,
   status: 'open' as Status,
+  extraActions: [{ id: 'resetGroupByFields' }] as Action[],
 };
-const mockSetToggle = jest.fn();
-const mockUseQueryToggle = useQueryToggle as jest.Mock;
 
 describe('AlertsCountPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
-    mockUseIsExperimentalFeatureEnabled.mockImplementation(
-      getMockUseIsExperimentalFeatureEnabled({
-        chartEmbeddablesEnabled: false,
-        alertsPageChartsEnabled: false,
-      })
-    );
   });
 
   it('renders correctly', async () => {
@@ -160,26 +129,6 @@ describe('AlertsCountPanel', () => {
     });
   });
 
-  describe('Query', () => {
-    it('it render with a illegal KQL', async () => {
-      jest.mock('@kbn/es-query', () => ({
-        buildEsQuery: jest.fn().mockImplementation(() => {
-          throw new Error('Something went wrong');
-        }),
-      }));
-      const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsCountPanel {...props} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="alertsCountPanel"]').exists()).toBeTruthy();
-      });
-    });
-  });
-
   describe('toggleQuery', () => {
     it('toggles', async () => {
       await act(async () => {
@@ -189,108 +138,82 @@ describe('AlertsCountPanel', () => {
           </TestProviders>
         );
         wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
-        expect(mockSetToggle).toBeCalledWith(false);
-      });
-    });
-    it('alertsPageChartsEnabled is false and toggleStatus=true, render', async () => {
-      await act(async () => {
-        const wrapper = mount(
-          <TestProviders>
-            <AlertsCountPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="alertsCountTable"]').exists()).toEqual(true);
-      });
-    });
-    it('alertsPageChartsEnabled is false and toggleStatus=false, hide', async () => {
-      mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
-      await act(async () => {
-        const wrapper = mount(
-          <TestProviders>
-            <AlertsCountPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="alertsCountTable"]').exists()).toEqual(false);
+        expect(mockSetIsExpanded).toBeCalledWith(false);
       });
     });
 
-    it('alertsPageChartsEnabled is true and isExpanded=true, render', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(
-        getMockUseIsExperimentalFeatureEnabled({
-          chartEmbeddablesEnabled: false,
-          alertsPageChartsEnabled: true,
-        })
-      );
+    it('when isExpanded is true, render counts panel', async () => {
       await act(async () => {
         const wrapper = mount(
           <TestProviders>
             <AlertsCountPanel {...defaultProps} />
           </TestProviders>
         );
-        expect(wrapper.find('[data-test-subj="alertsCountTable"]').exists()).toEqual(true);
+        expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(true);
       });
     });
-    it('alertsPageChartsEnabled is true and isExpanded=false, hide', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(
-        getMockUseIsExperimentalFeatureEnabled({
-          chartEmbeddablesEnabled: false,
-          alertsPageChartsEnabled: true,
-        })
-      );
+    it('when isExpanded is false, hide counts panel', async () => {
       await act(async () => {
         const wrapper = mount(
           <TestProviders>
             <AlertsCountPanel {...defaultProps} isExpanded={false} />
           </TestProviders>
         );
-        expect(wrapper.find('[data-test-subj="alertsCountTable"]').exists()).toEqual(false);
+        expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(false);
       });
     });
   });
-});
 
-describe('when the isChartEmbeddablesEnabled experimental feature flag is enabled', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
-    mockUseIsExperimentalFeatureEnabled.mockImplementation(
-      getMockUseIsExperimentalFeatureEnabled({
-        chartEmbeddablesEnabled: true,
-        alertsPageChartsEnabled: false,
-      })
-    );
-  });
-
-  it('renders LensEmbeddable', async () => {
-    await act(async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(wrapper.find('[data-test-subj="embeddable-count-table"]').exists()).toBeTruthy();
+  describe('Visualization', () => {
+    it('should render embeddable', async () => {
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsCountPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toBeTruthy();
+      });
     });
-  });
 
-  it('renders LensEmbeddable with provided height', async () => {
-    await act(async () => {
-      mount(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(218);
+    it('should render with provided height', async () => {
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <AlertsCountPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(
+          218
+        );
+      });
     });
-  });
 
-  it('should skip calling getAlertsRiskQuery', async () => {
-    await act(async () => {
-      mount(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(mockUseQueryAlerts.mock.calls[0][0].skip).toBeTruthy();
+    it('should render with extra actions', async () => {
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <AlertsCountPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(
+          (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions[0].id
+        ).toEqual('resetGroupByFields');
+      });
+    });
+
+    it('should render with extra options', async () => {
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <AlertsCountPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(
+          (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraOptions
+            .breakdownField
+        ).toEqual(defaultProps.stackByField1);
+      });
     });
   });
 });

@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-export default function () {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Serverless search API - feature flags', function () {
-    // add tests that require feature flags, defined in config.feature_flags.ts
-    // loadTestFile(require.resolve(<path_to_test_file>));
+    loadTestFile(require.resolve('./search_indices'));
+    loadTestFile(require.resolve('./platform_security'));
+    loadTestFile(require.resolve('../common/platform_security/roles_routes_feature_flag.ts'));
+    loadTestFile(require.resolve('../common/management/multiple_spaces_enabled.ts'));
   });
 }

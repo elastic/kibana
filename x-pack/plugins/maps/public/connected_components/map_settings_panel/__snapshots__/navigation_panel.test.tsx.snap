@@ -6,23 +6,16 @@ exports[`should render 1`] = `
     size="xs"
   >
     <h5>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Navigation"
         id="xpack.maps.mapSettingsPanel.navigationTitle"
-        values={Object {}}
       />
     </h5>
   </EuiTitle>
   <EuiSpacer
     size="m"
   />
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiFormRow>
     <EuiSwitch
       checked={false}
       compressed={true}
@@ -57,12 +50,7 @@ exports[`should render 1`] = `
     size="m"
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Initial map location"
-    labelType="label"
   >
     <EuiRadioGroup
       idSelected="LAST_SAVED_LOCATION"
@@ -98,23 +86,16 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
     size="xs"
   >
     <h5>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Navigation"
         id="xpack.maps.mapSettingsPanel.navigationTitle"
-        values={Object {}}
       />
     </h5>
   </EuiTitle>
   <EuiSpacer
     size="m"
   />
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiFormRow>
     <EuiSwitch
       checked={false}
       compressed={true}
@@ -149,12 +130,7 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
     size="m"
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Initial map location"
-    labelType="label"
   >
     <EuiRadioGroup
       idSelected="BROWSER_LOCATION"
@@ -182,12 +158,8 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
     display="columnCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Initial zoom"
-    labelType="label"
   >
     <ValidatedRange
       compressed={true}
@@ -209,23 +181,16 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
     size="xs"
   >
     <h5>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Navigation"
         id="xpack.maps.mapSettingsPanel.navigationTitle"
-        values={Object {}}
       />
     </h5>
   </EuiTitle>
   <EuiSpacer
     size="m"
   />
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
+  <EuiFormRow>
     <EuiSwitch
       checked={false}
       compressed={true}
@@ -260,12 +225,7 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
     size="m"
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Initial map location"
-    labelType="label"
   >
     <EuiRadioGroup
       idSelected="FIXED_LOCATION"
@@ -293,12 +253,8 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
     display="columnCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Initial latitude"
-    labelType="label"
   >
     <EuiFieldNumber
       compressed={true}
@@ -307,12 +263,8 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
     display="columnCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Initial longitude"
-    labelType="label"
   >
     <EuiFieldNumber
       compressed={true}
@@ -321,12 +273,8 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
     display="columnCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Initial zoom"
-    labelType="label"
   >
     <ValidatedRange
       compressed={true}
@@ -348,10 +296,9 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
       <EuiButtonEmpty
         onClick={[Function]}
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Set to current view"
           id="xpack.maps.mapSettingsPanel.useCurrentViewBtnLabel"
-          values={Object {}}
         />
       </EuiButtonEmpty>
     </EuiFlexItem>

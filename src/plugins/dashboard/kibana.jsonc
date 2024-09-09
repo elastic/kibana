@@ -15,7 +15,6 @@
       "controls",
       "inspector",
       "navigation",
-      "savedObjects",
       "savedObjectsFinder",
       "savedObjectsManagement",
       "contentManagement",
@@ -35,8 +34,15 @@
       "usageCollection",
       "taskManager",
       "serverless",
-      "noDataPage"
+      "noDataPage",
+      "observabilityAIAssistant"
     ],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "presentationUtil"]
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "presentationUtil",
+      "presentationPanel",
+      "savedObjects"
+    ]
   }
 }

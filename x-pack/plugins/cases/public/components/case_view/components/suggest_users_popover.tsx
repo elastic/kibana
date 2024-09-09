@@ -113,7 +113,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
       isOpen={isPopoverOpen}
       closePopover={onClosePopover}
       panelStyle={{
-        minWidth: 520,
+        width: 400,
       }}
       selectableProps={{
         onChange,

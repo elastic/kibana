@@ -7,6 +7,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_sele
   fullWidth={false}
   isClearable={false}
   onChange={[MockFunction]}
+  optionMatcher={[Function]}
   options={
     Array [
       Object {

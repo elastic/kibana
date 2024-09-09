@@ -10,7 +10,7 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/search-types';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
   FactoryQueryTypes,

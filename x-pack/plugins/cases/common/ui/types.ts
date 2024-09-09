@@ -119,10 +119,18 @@ export interface ResolvedCase {
 
 export type CasesConfigurationUI = Pick<
   SnakeToCamelCase<Configuration>,
-  'closureType' | 'connector' | 'mappings' | 'customFields' | 'id' | 'version'
+  | 'closureType'
+  | 'connector'
+  | 'mappings'
+  | 'customFields'
+  | 'templates'
+  | 'id'
+  | 'version'
+  | 'owner'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
+export type CasesConfigurationUITemplate = CasesConfigurationUI['templates'][number];
 
 export type SortOrder = 'asc' | 'desc';
 
@@ -137,18 +145,6 @@ export interface QueryParams extends SortingParams {
   page: number;
   perPage: number;
 }
-export type PartialQueryParams = Partial<QueryParams>;
-
-export interface UrlQueryParams extends SortingParams {
-  page: string;
-  perPage: string;
-}
-
-export interface ParsedUrlQueryParams extends Partial<UrlQueryParams> {
-  [index: string]: string | string[] | undefined | null;
-}
-
-export type LocalStorageQueryParams = Partial<Omit<QueryParams, 'page'>>;
 
 export interface SystemFilterOptions {
   search: string;
@@ -171,11 +167,13 @@ export interface FilterOptions extends SystemFilterOptions {
   };
 }
 
-export type PartialFilterOptions = Partial<FilterOptions>;
-
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
 export type SingleCaseMetricsFeature = Exclude<CaseMetricsFeature, CaseMetricsFeature.MTTR>;
 
+/**
+ * If you add a new value here and you want to support it on the URL
+ * you have to also add it here x-pack/plugins/cases/public/components/all_cases/schema.ts
+ */
 export enum SortFieldCase {
   closedAt = 'closedAt',
   createdAt = 'createdAt',

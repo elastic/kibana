@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { HostEntityOverview } from './host_entity_overview';
+import { HostEntityOverview, HOST_PREVIEW_BANNER } from './host_entity_overview';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
@@ -17,14 +17,18 @@ import {
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
 } from './test_ids';
-import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { DocumentDetailsContext } from '../../shared/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { HostPreviewPanelKey } from '../../../entity_details/host_right';
+import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
 const hostName = 'host';
 const osFamily = 'Windows';
@@ -41,9 +45,23 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
 };
 
-const flyoutContextValue = {
-  openLeftPanel: jest.fn(),
-} as unknown as ExpandableFlyoutContextValue;
+jest.mock('@kbn/expandable-flyout');
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
+
+jest.mock('../../../../common/hooks/use_experimental_features');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
@@ -53,7 +71,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 });
 
 const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../common/containers/sourcerer', () => {
+jest.mock('../../../../sourcerer/containers', () => {
   return {
     useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
@@ -71,15 +89,18 @@ jest.mock('../../../../common/containers/use_first_last_seen');
 const renderHostEntityContent = () =>
   render(
     <TestProviders>
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <HostEntityOverview hostName={hostName} />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+      <DocumentDetailsContext.Provider value={panelContextValue}>
+        <HostEntityOverview hostName={hostName} />
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
 describe('<HostEntityContent />', () => {
+  beforeAll(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+  });
+
   describe('license is valid', () => {
     it('should render os family and host risk level', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
@@ -108,9 +129,9 @@ describe('<HostEntityContent />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
           <HostEntityOverview hostName={hostName} />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -122,9 +143,9 @@ describe('<HostEntityContent />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
           <HostEntityOverview hostName={hostName} />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -153,20 +174,38 @@ describe('<HostEntityContent />', () => {
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent('—');
     });
 
-    it('should navigate to left panel entities tab when clicking on title', () => {
+    it('should navigate to left panel entities tab when clicking on title when feature flag is off', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
       const { getByTestId } = renderHostEntityContent();
 
       getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID).click();
-      expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
+      expect(mockFlyoutApi.openLeftPanel).toHaveBeenCalledWith({
         id: DocumentDetailsLeftPanelKey,
         path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
         params: {
           id: panelContextValue.eventId,
           indexName: panelContextValue.indexName,
           scopeId: panelContextValue.scopeId,
+        },
+      });
+    });
+
+    it('should open host preview when clicking on title when feature flag is on', () => {
+      mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+
+      const { getByTestId } = renderHostEntityContent();
+
+      getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID).click();
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: HostPreviewPanelKey,
+        params: {
+          hostName,
+          scopeId: mockContextValue.scopeId,
+          banner: HOST_PREVIEW_BANNER,
         },
       });
     });

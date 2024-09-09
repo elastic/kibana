@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './filter_item.scss';
@@ -34,7 +35,7 @@ import React, {
   useCallback,
 } from 'react';
 import type { DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { FilterEditor } from '../filter_editor/filter_editor';
@@ -62,6 +63,7 @@ export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps 
   readOnly?: boolean;
   suggestionsAbstraction?: SuggestionsAbstraction;
   filtersCount?: number;
+  dataViews?: DataViewsContract;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -399,6 +401,7 @@ function FilterItemComponent(props: FilterItemProps) {
                 suggestionsAbstraction={props.suggestionsAbstraction}
                 docLinks={docLinks}
                 filtersCount={props.filtersCount}
+                dataViews={props.dataViews}
               />
             </div>,
           ]}

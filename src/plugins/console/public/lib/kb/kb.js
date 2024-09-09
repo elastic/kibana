@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { API_BASE_PATH } from '../../../common/constants';
 
 import {
   IndexAutocompleteComponent,
@@ -16,12 +19,12 @@ import {
   DataStreamAutocompleteComponent,
 } from '../autocomplete/components';
 
-import $ from 'jquery';
 import _ from 'lodash';
 
 import Api from './api';
 
 let ACTIVE_API = new Api();
+let apiLoaded = false;
 const isNotAnIndexName = (name) => name[0] === '_' && name !== '_all';
 
 const parametrizedComponentFactories = {
@@ -113,36 +116,30 @@ function loadApisFromJson(
   }
 }
 
-// TODO: clean up setting up of active API and use of jQuery.
-// This function should be attached to a class that holds the current state, not setup
-// when the file is required. Also, jQuery should not be used to make network requests
-// like this, it looks like a minor security issue.
-export function setActiveApi(api) {
+function setActiveApi(api) {
   if (!api) {
-    $.ajax({
-      url: '../api/console/api_server',
-      dataType: 'json', // disable automatic guessing
-      headers: {
-        'kbn-xsrf': 'kibana',
-        // workaround for serverless
-        'x-elastic-internal-origin': 'Kibana',
-      },
-    }).then(
-      function (data) {
-        setActiveApi(loadApisFromJson(data));
-      },
-      function (jqXHR) {
-        console.log("failed to load API '" + api + "': " + jqXHR.responseText);
-      }
-    );
     return;
   }
 
   ACTIVE_API = api;
 }
 
-setActiveApi();
+export async function loadActiveApi(http) {
+  // Only load the API data once
+  if (apiLoaded) return;
+  apiLoaded = true;
+
+  try {
+    const data = await http.get(`${API_BASE_PATH}/api_server`);
+    setActiveApi(loadApisFromJson(data));
+  } catch (err) {
+    console.log(`failed to load API: ${err.responseText}`);
+    // If we fail to load the API, clear this flag so it can be retried
+    apiLoaded = false;
+  }
+}
 
 export const _test = {
   loadApisFromJson: loadApisFromJson,
+  setActiveApi: setActiveApi,
 };

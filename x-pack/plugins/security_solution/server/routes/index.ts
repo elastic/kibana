@@ -58,24 +58,9 @@ import { registerTagsRoutes } from '../lib/tags/routes';
 import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
 import { setAlertAssigneesRoute } from '../lib/detection_engine/routes/signals/set_alert_assignees_route';
 import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/suggest_user_profiles_route';
-import {
-  riskEngineDisableRoute,
-  riskEngineInitRoute,
-  riskEngineEnableRoute,
-  riskEngineStatusRoute,
-  riskEnginePrivilegesRoute,
-  riskEngineSettingsRoute,
-} from '../lib/entity_analytics/risk_engine/routes';
 import { registerTimelineRoutes } from '../lib/timeline/routes';
-import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_score/routes/calculation';
-import { riskScorePreviewRoute } from '../lib/entity_analytics/risk_score/routes/preview';
-import {
-  assetCriticalityStatusRoute,
-  assetCriticalityUpsertRoute,
-  assetCriticalityGetRoute,
-  assetCriticalityDeleteRoute,
-  assetCriticalityPrivilegesRoute,
-} from '../lib/entity_analytics/asset_criticality/routes';
+import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
+import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -93,9 +78,9 @@ export const initRoutes = (
   previewRuleDataClient: IRuleDataClient,
   previewTelemetryReceiver: ITelemetryReceiver
 ) => {
-  registerFleetIntegrationsRoutes(router, logger);
+  registerFleetIntegrationsRoutes(router);
   registerLegacyRuleActionsRoutes(router, logger);
-  registerPrebuiltRulesRoutes(router, security);
+  registerPrebuiltRulesRoutes(router);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
@@ -114,19 +99,19 @@ export const initRoutes = (
 
   registerResolverRoutes(router, getStartServices, config);
 
-  registerTimelineRoutes(router, config, security);
+  registerTimelineRoutes(router, config);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
-  setSignalsStatusRoute(router, logger, telemetrySender, getStartServices);
+  setSignalsStatusRoute(router, logger, telemetrySender);
   setAlertTagsRoute(router);
   setAlertAssigneesRoute(router);
   querySignalsRoute(router, ruleDataClient);
   getSignalsMigrationStatusRoute(router);
-  createSignalsMigrationRoute(router, security);
-  finalizeSignalsMigrationRoute(router, ruleDataService, security);
-  deleteSignalsMigrationRoute(router, security);
+  createSignalsMigrationRoute(router);
+  finalizeSignalsMigrationRoute(router, ruleDataService);
+  deleteSignalsMigrationRoute(router);
   suggestUserProfilesRoute(router, getStartServices);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
@@ -145,37 +130,21 @@ export const initRoutes = (
   createStoredScriptRoute(router, logger);
   deleteStoredScriptRoute(router);
   readPrebuiltDevToolContentRoute(router);
-  createPrebuiltSavedObjectsRoute(router, logger, security);
-  deletePrebuiltSavedObjectsRoute(router, security);
+  createPrebuiltSavedObjectsRoute(router, logger);
+  deletePrebuiltSavedObjectsRoute(router);
   getRiskScoreIndexStatusRoute(router);
-  installRiskScoresRoute(router, logger, security);
+  installRiskScoresRoute(router, logger);
 
   // Dashboards
-  registerDashboardsRoutes(router, logger, security);
-  registerTagsRoutes(router, logger, security);
+  registerDashboardsRoutes(router, logger);
+  registerTagsRoutes(router, logger);
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
-  if (config.experimentalFeatures.riskScoringRoutesEnabled) {
-    riskScorePreviewRoute(router, logger, config.experimentalFeatures);
-    riskScoreCalculationRoute(router, logger, config.experimentalFeatures);
-    riskEngineStatusRoute(router);
-    riskEngineInitRoute(router, getStartServices);
-    riskEngineEnableRoute(router, getStartServices);
-    riskEngineDisableRoute(router, getStartServices);
-    riskEngineSettingsRoute(router);
-    if (config.experimentalFeatures.riskEnginePrivilegesRouteEnabled) {
-      riskEnginePrivilegesRoute(router, getStartServices);
-    }
-  }
-  if (config.experimentalFeatures.entityAnalyticsAssetCriticalityEnabled) {
-    assetCriticalityStatusRoute(router, logger);
-    assetCriticalityUpsertRoute(router, logger);
-    assetCriticalityGetRoute(router, logger);
-    assetCriticalityDeleteRoute(router, logger);
-    assetCriticalityPrivilegesRoute(router, getStartServices, logger);
-  }
+  registerEntityAnalyticsRoutes({ router, config, getStartServices, logger });
+  // Security Integrations
+  getFleetManagedIndexTemplatesRoute(router);
 };

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../monaco_imports';
 
 import { ESQL_LANG_ID } from './lib/constants';
@@ -13,25 +15,21 @@ import { ESQL_LANG_ID } from './lib/constants';
 import type { CustomLangModuleType } from '../types';
 import type { ESQLWorker } from './worker/esql_worker';
 
-import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
 import { WorkerProxyService } from '../common/worker_proxy';
-import type { ESQLCallbacks } from './lib/ast/shared/types';
-import { ESQLAstAdapter } from './lib/monaco/esql_ast_provider';
+import { ESQLAstAdapter } from './lib/esql_ast_provider';
+import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
+import { wrapAsMonacoCodeActions } from './lib/converters/actions';
 
 const workerProxyService = new WorkerProxyService<ESQLWorker>();
 
 export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
-    const { ESQLTokensProvider } = await import('./lib/monaco');
+    const { ESQLTokensProvider } = await import('./lib');
 
     workerProxyService.setup(ESQL_LANG_ID);
 
     monaco.languages.setTokensProvider(ESQL_LANG_ID, new ESQLTokensProvider());
-
-    // handle syntax errors via the diagnostic adapter
-    // but then enrich them via the separate validate function
-    new DiagnosticsAdapter(ESQL_LANG_ID, (...uris) => workerProxyService.getWorker(uris));
   },
   languageConfiguration: {
     brackets: [
@@ -42,11 +40,13 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
       { open: '(', close: ')' },
       { open: '[', close: ']' },
       { open: `'`, close: `'` },
+      { open: '"""', close: '"""' },
       { open: '"', close: '"' },
     ],
     surroundingPairs: [
       { open: '(', close: ')' },
       { open: `'`, close: `'` },
+      { open: '"""', close: '"""' },
       { open: '"', close: '"' },
     ],
   },
@@ -91,7 +91,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   },
   getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
     return {
-      triggerCharacters: [',', '(', '=', ' ', ''],
+      triggerCharacters: [',', '(', '=', ' ', '[', ''],
       async provideCompletionItems(
         model: monaco.editor.ITextModel,
         position: monaco.Position,
@@ -101,12 +101,31 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
           (...uris) => workerProxyService.getWorker(uris),
           callbacks
         );
-        const suggestionEntries = await astAdapter.autocomplete(model, position, context);
+        const suggestions = await astAdapter.autocomplete(model, position, context);
         return {
-          suggestions: suggestionEntries.suggestions.map((suggestion) => ({
-            ...suggestion,
-            range: undefined as unknown as monaco.IRange,
-          })),
+          // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638
+          suggestions: wrapAsMonacoSuggestions(suggestions),
+        };
+      },
+    };
+  },
+
+  getCodeActionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CodeActionProvider => {
+    return {
+      async provideCodeActions(
+        model /** ITextModel*/,
+        range /** Range*/,
+        context /** CodeActionContext*/,
+        token /** CancellationToken*/
+      ) {
+        const astAdapter = new ESQLAstAdapter(
+          (...uris) => workerProxyService.getWorker(uris),
+          callbacks
+        );
+        const actions = await astAdapter.codeAction(model, range, context);
+        return {
+          actions: wrapAsMonacoCodeActions(model, actions),
+          dispose: () => {},
         };
       },
     };

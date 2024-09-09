@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import {
@@ -70,7 +70,7 @@ export const TEST_CASES = Object.freeze({
   HIDDEN: CASES.HIDDEN,
 });
 
-export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_get');
   const expectResponseBody =
     (testCase: ResolveTestCase): ExpectResponseBody =>
@@ -135,7 +135,7 @@ export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
             const { type, id } = test.request;
             await supertest
               .get(`${getUrlPrefix(spaceId)}/api/saved_objects/resolve/${type}/${id}`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .expect(test.responseStatusCode)
               .then(test.responseBody);
           });

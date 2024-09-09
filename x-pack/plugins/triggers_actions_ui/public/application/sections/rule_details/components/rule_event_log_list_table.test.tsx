@@ -95,6 +95,7 @@ describe('rule_event_log_list_table', () => {
     useLoadRuleEventLogs.mockReturnValue({
       data: mockLogResponse,
       isLoading: false,
+      hasExceedLogs: false,
       loadEventLogs: mockLoadEventLog,
     });
   });
@@ -130,6 +131,7 @@ describe('rule_event_log_list_table', () => {
     useLoadRuleEventLogs.mockReturnValue({
       data: [],
       isLoading: true,
+      hasExceedLogs: false,
       loadEventLogs: mockLoadEventLog,
     });
 
@@ -254,6 +256,7 @@ describe('rule_event_log_list_table', () => {
           total: 100,
         },
         isLoading: true,
+        hasExceedLogs: false,
         loadEventLogs: mockLoadEventLog,
       });
     });
@@ -306,6 +309,7 @@ describe('rule_event_log_list_table', () => {
           total: 0,
         },
         isLoading: false,
+        hasExceedLogs: false,
         loadEventLogs: mockLoadEventLog,
       });
       render(<RuleEventLogListWithProvider ruleId={ruleMock.id} />);
@@ -324,6 +328,7 @@ describe('rule_event_log_list_table', () => {
           total: 1,
         },
         isLoading: false,
+        hasExceedLogs: false,
         loadEventLogs: mockLoadEventLog,
       });
 
@@ -343,6 +348,7 @@ describe('rule_event_log_list_table', () => {
           total: 85,
         },
         isLoading: false,
+        hasExceedLogs: false,
         loadEventLogs: mockLoadEventLog,
       });
 
@@ -368,6 +374,7 @@ describe('rule_event_log_list_table', () => {
           total: 85,
         },
         isLoading: false,
+        hasExceedLogs: false,
         loadEventLogs: mockLoadEventLog,
       });
 
@@ -397,7 +404,7 @@ describe('rule_event_log_list_table', () => {
         outcomeFilter: [],
         page: 0,
         perPage: 10,
-        dateStart: 'now-24h',
+        dateStart: 'now-15m',
         dateEnd: 'now',
       })
     );
@@ -460,6 +467,7 @@ describe('rule_event_log_list_table', () => {
           total: 1100,
         },
         isLoading: false,
+        hasExceedLogs: false,
         loadEventLogs: mockLoadEventLog,
       });
     });
@@ -481,6 +489,36 @@ describe('rule_event_log_list_table', () => {
       // Prompt is shown
       await waitFor(() => {
         expect(screen.getByTestId('refineSearchPrompt')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Show exceed document prompt', () => {
+    beforeEach(() => {
+      useLoadRuleEventLogs.mockReturnValue({
+        data: {
+          data: [],
+          total: 11000,
+        },
+        isLoading: false,
+        hasExceedLogs: true,
+        loadEventLogs: mockLoadEventLog,
+      });
+    });
+
+    it('should show the exceed limit logs prompt normally', async () => {
+      render(<RuleEventLogListWithProvider ruleId={ruleMock.id} />);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('exceedLimitLogsCallout')).toBeInTheDocument();
+      });
+    });
+
+    it('should hide the logs table', async () => {
+      render(<RuleEventLogListWithProvider ruleId={ruleMock.id} />);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('eventLogList')).not.toBeInTheDocument();
       });
     });
   });

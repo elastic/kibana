@@ -13,7 +13,7 @@ import { config, expectedValues, generateData } from './generate_data';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -49,15 +49,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177650
   registry.when('Serverless overview', { config: 'basic', archives: [] }, () => {
     const { billedDurationMs, pythonServerlessFunctionNames, faasDuration, serverlessId } = config;
     const { expectedMemoryUsedRate } = expectedValues;
 
+    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async () => {
-      await generateData({ start, end, synthtraceEsClient });
+      await generateData({ start, end, apmSynthtraceEsClient });
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('Python service', () => {
       let serverlessSummary: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/summary'>;

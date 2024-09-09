@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../common/endpoint/service/response_actions/constants';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { FormattedError } from '../formatted_error';
@@ -48,15 +49,11 @@ export const FILE_DELETED_MESSAGE = i18n.translate(
   }
 );
 
-export const FILE_PASSCODE_INFO_MESSAGE = i18n.translate(
-  'xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo',
-  {
+export const FILE_PASSCODE_INFO_MESSAGE = (passcode: string) =>
+  i18n.translate('xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo', {
     defaultMessage: '(ZIP file passcode: {passcode}).',
-    values: {
-      passcode: 'elastic',
-    },
-  }
-);
+    values: { passcode },
+  });
 
 export const FILE_TRUNCATED_MESSAGE = i18n.translate(
   'xpack.securitySolution.responseActionFileDownloadLink.fileTruncated',
@@ -108,6 +105,11 @@ export interface ResponseActionFileDownloadLinkProps {
   isTruncatedFile?: boolean;
   'data-test-subj'?: string;
   textSize?: 's' | 'xs';
+  /**
+   * If zip file needs a passcode to be opened. If `false`, then the passcode text will not be displayed.
+   * Default is `true`
+   */
+  showPasscode?: boolean;
 }
 
 /**
@@ -123,6 +125,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     buttonTitle = DEFAULT_BUTTON_TITLE,
     canAccessFileDownloadLink,
     isTruncatedFile = false,
+    showPasscode = true,
     textSize = 's',
     'data-test-subj': dataTestSubj,
   }) => {
@@ -141,7 +144,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     }, [action, agentId]);
 
     const {
-      isFetching,
+      isLoading,
       data: fileInfo,
       error,
     } = useGetFileInfo(action, undefined, {
@@ -152,7 +155,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
       return null;
     }
 
-    if (isFetching) {
+    if (isLoading) {
       return <EuiSkeletonText lines={1} data-test-subj={getTestId('loading')} />;
     }
 
@@ -184,13 +187,15 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
         >
           <EuiText size={textSize}>{buttonTitle}</EuiText>
         </EuiButtonEmpty>
-        <EuiText
-          size={textSize}
-          data-test-subj={getTestId('passcodeMessage')}
-          className="eui-displayInline"
-        >
-          {FILE_PASSCODE_INFO_MESSAGE}
-        </EuiText>
+        {showPasscode && (
+          <EuiText
+            size={textSize}
+            data-test-subj={getTestId('passcodeMessage')}
+            className="eui-displayInline"
+          >
+            {FILE_PASSCODE_INFO_MESSAGE(RESPONSE_ACTIONS_ZIP_PASSCODE[action.agentType])}
+          </EuiText>
+        )}
         <EuiText size={textSize} color="warning" data-test-subj={getTestId('fileDeleteMessage')}>
           {FILE_DELETED_MESSAGE}
         </EuiText>

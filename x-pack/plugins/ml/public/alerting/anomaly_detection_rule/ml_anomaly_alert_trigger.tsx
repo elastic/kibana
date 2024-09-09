@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiSpacer, EuiForm } from '@elastic/eui';
 import useMount from 'react-use/lib/useMount';
 import { i18n } from '@kbn/i18n';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ML_ANOMALY_RESULT_TYPE, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -196,8 +197,8 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
         onChange={useCallback(onAlertParamChange('jobSelection'), [])}
         errors={Array.isArray(errors.jobSelection) ? errors.jobSelection : []}
+        shouldUseDropdownJobCreate
       />
-
       <ConfigValidator
         jobConfigs={jobConfigs}
         alertInterval={ruleInterval}
@@ -205,7 +206,6 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         alertParams={resultParams}
         maxNumberOfBuckets={maxNumberOfBuckets}
       />
-
       <ResultTypeSelector
         value={ruleParams.resultType}
         availableOption={availableResultTypes}
@@ -224,21 +224,17 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         onChange={useCallback(onAlertParamChange('includeInterim'), [])}
       />
       <EuiSpacer size="m" />
-
       <AdvancedSettings
         value={advancedSettings}
-        onChange={useCallback((update) => {
+        onChange={useCallback((update: any) => {
           Object.keys(update).forEach((k) => {
             setRuleParams(k, update[k as keyof MlAnomalyDetectionAlertAdvancedSettings]);
           });
           // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [])}
       />
-
       <EuiSpacer size="m" />
-
       <PreviewAlertCondition alertingApiService={alertingApiService} alertParams={ruleParams} />
-
       <EuiSpacer size="m" />
     </EuiForm>
   );

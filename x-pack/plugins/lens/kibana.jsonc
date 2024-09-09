@@ -21,7 +21,6 @@
       "navigation",
       "urlForwarding",
       "visualizations",
-      "dashboard",
       "uiActions",
       "uiActionsEnhanced",
       "embeddable",
@@ -36,7 +35,7 @@
       "expressionTagcloud",
       "eventAnnotation",
       "unifiedSearch",
-      "contentManagement"
+      "contentManagement",
     ],
     "optionalPlugins": [
       "expressionLegacyMetricVis",
@@ -46,7 +45,8 @@
       "globalSearch",
       "savedObjectsTagging",
       "spaces",
-      "serverless"
+      "serverless",
+      "licensing"
     ],
     "requiredBundles": [
       "unifiedSearch",
@@ -56,7 +56,8 @@
       "embeddable",
       "fieldFormats",
       "charts",
-      "textBasedLanguages",
+      "esqlDataGrid",
+      "esql",
     ],
     "extraPublicDirs": [
       "common/constants"

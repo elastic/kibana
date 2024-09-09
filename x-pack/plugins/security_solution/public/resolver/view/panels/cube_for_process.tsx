@@ -56,7 +56,7 @@ export const CubeForProcess = memo(function ({
     >
       <desc>
         {i18n.translate('xpack.securitySolution.resolver.node_icon', {
-          defaultMessage: `{state, select, running {Running Process} terminated {Terminated Process} loading {Loading Process} error {Error Process}}`,
+          defaultMessage: `{state, select, running {Running Process} terminated {Terminated Process} loading {Loading Process} error {Error Process} other {Unknown Process State}}`,
           values: { state },
         })}
       </desc>

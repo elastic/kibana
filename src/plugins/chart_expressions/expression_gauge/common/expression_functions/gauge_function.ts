@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -11,22 +12,11 @@ import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/co
 import { GaugeExpressionFunctionDefinition, GaugeRenderProps } from '../types';
 import {
   EXPRESSION_GAUGE_NAME,
-  GaugeCentralMajorModes,
   GaugeColorModes,
   GaugeLabelMajorModes,
   GaugeShapes,
   GaugeTicksPositions,
 } from '../constants';
-import { isRoundShape } from '../utils';
-
-export const errors = {
-  centralMajorNotSupportedForShapeError: (shape: string) =>
-    i18n.translate('expressionGauge.functions.gauge.errors.centralMajorNotSupportedForShapeError', {
-      defaultMessage:
-        'Fields "centralMajor" and "centralMajorMode" are not supported by the shape "{shape}"',
-      values: { shape },
-    }),
-};
 
 const strings = {
   getMetricHelp: () =>
@@ -60,6 +50,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       options: [
         GaugeShapes.HORIZONTAL_BULLET,
         GaugeShapes.VERTICAL_BULLET,
+        GaugeShapes.SEMI_CIRCLE,
         GaugeShapes.ARC,
         GaugeShapes.CIRCLE,
       ],
@@ -139,12 +130,14 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       }),
     },
     centralMajor: {
+      deprecated: true,
       types: ['string'],
       help: i18n.translate('expressionGauge.functions.gauge.args.centralMajor.help', {
         defaultMessage: 'Specifies the centralMajor of the gauge chart displayed inside the chart.',
       }),
     },
     centralMajorMode: {
+      deprecated: true,
       types: ['string'],
       options: [GaugeLabelMajorModes.NONE, GaugeLabelMajorModes.AUTO, GaugeLabelMajorModes.CUSTOM],
       help: i18n.translate('expressionGauge.functions.gauge.args.centralMajorMode.help', {
@@ -152,8 +145,8 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       }),
       strict: true,
     },
-    // used only in legacy gauge, consider it as @deprecated
     percentageMode: {
+      deprecated: true, // used only in legacy gauge, consider it as @deprecated
       types: ['boolean'],
       default: false,
       help: i18n.translate('expressionGauge.functions.gauge.percentageMode.help', {
@@ -186,12 +179,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     validateAccessor(args.max, data.columns);
     validateAccessor(args.goal, data.columns);
 
-    const { centralMajor, centralMajorMode, ...restArgs } = args;
-    const { metric, min, max, goal } = restArgs;
-
-    if (!isRoundShape(args.shape) && (centralMajorMode || centralMajor)) {
-      throw new Error(errors.centralMajorNotSupportedForShapeError(args.shape));
-    }
+    const { metric, min, max, goal } = args;
 
     if (handlers?.inspectorAdapters?.tables) {
       handlers.inspectorAdapters.tables.reset();
@@ -211,21 +199,13 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
-    const centralMajorArgs = isRoundShape(args.shape)
-      ? {
-          centralMajorMode: !centralMajorMode ? GaugeCentralMajorModes.AUTO : centralMajorMode,
-          centralMajor,
-        }
-      : {};
-
     return {
       type: 'render',
       as: EXPRESSION_GAUGE_NAME,
       value: {
         data,
         args: {
-          ...restArgs,
-          ...centralMajorArgs,
+          ...args,
           ariaLabel:
             args.ariaLabel ??
             (handlers.variables?.embeddableTitle as string) ??

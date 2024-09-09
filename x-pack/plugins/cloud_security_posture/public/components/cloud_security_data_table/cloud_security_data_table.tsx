@@ -5,24 +5,38 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
-import { UnifiedDataTableSettings, useColumns } from '@kbn/unified-data-table';
-import { type DataView } from '@kbn/data-views-plugin/common';
+import _ from 'lodash';
+import {
+  DataGridDensity,
+  UnifiedDataTableSettings,
+  UnifiedDataTableSettingsColumn,
+  useColumns,
+} from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
-import { EuiDataGridCellValueElementProps, EuiDataGridStyle, EuiProgress } from '@elastic/eui';
+import {
+  EuiDataGridCellValueElementProps,
+  EuiDataGridControlColumn,
+  EuiDataGridStyle,
+  EuiProgress,
+} from '@elastic/eui';
 import { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { EmptyState } from '../empty_state';
-import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
 import { useStyles } from './use_styles';
 import { AdditionalControls } from './additional_controls';
+import { useDataViewContext } from '../../common/contexts/data_view_context';
+import { TakeAction } from '../take_action';
 
+import { RuleResponse } from '../../common/types';
 export interface CloudSecurityDefaultColumn {
   id: string;
   width?: number;
@@ -41,7 +55,6 @@ const useNewFieldsApi = true;
 const controlColumnIds = ['openDetails'];
 
 export interface CloudSecurityDataTableProps {
-  dataView: DataView;
   isLoading: boolean;
   defaultColumns: CloudSecurityDefaultColumn[];
   rows: DataTableRecord[];
@@ -77,21 +90,21 @@ export interface CloudSecurityDataTableProps {
   /**
    * Height override for the data grid.
    */
-  height?: number;
+  height?: number | string;
+
   /**
-   * Callback Function when the DataView field is edited.
-   * Required to enable editing of the field in the data grid.
+   * This function will be used in the control column to create a rule for a specific finding.
    */
-  dataViewRefetch?: () => void;
+  createRuleFn?: (rowIndex: number) => ((http: HttpSetup) => Promise<RuleResponse>) | undefined;
+  /* Optional props passed to Columns to display Provided Labels as Column name instead of field name */
+  columnHeaders?: Record<string, string>;
   /**
-   * Flag to indicate if the data view is refetching.
-   * Required for smoothing re-rendering the DataTable columns.
+   * Specify if distribution bar is shown on data table, used to calculate height of data table in virtualized mode
    */
-  dataViewIsRefetching?: boolean;
+  hasDistributionBar?: boolean;
 }
 
 export const CloudSecurityDataTable = ({
-  dataView,
   isLoading,
   defaultColumns,
   rows,
@@ -103,8 +116,9 @@ export const CloudSecurityDataTable = ({
   customCellRenderer,
   groupSelectorComponent,
   height,
-  dataViewRefetch,
-  dataViewIsRefetching,
+  createRuleFn,
+  columnHeaders,
+  hasDistributionBar = true,
   ...rest
 }: CloudSecurityDataTableProps) => {
   const {
@@ -122,16 +136,34 @@ export const CloudSecurityDataTable = ({
     columnsLocalStorageKey,
     defaultColumns.map((c) => c.id)
   );
-  const [settings, setSettings] = useLocalStorage<UnifiedDataTableSettings>(
+  const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
     `${columnsLocalStorageKey}:settings`,
     {
-      columns: defaultColumns.reduce((prev, curr) => {
-        const columnDefaultSettings = curr.width ? { width: curr.width } : {};
-        const newColumn = { [curr.id]: columnDefaultSettings };
-        return { ...prev, ...newColumn };
+      columns: defaultColumns.reduce((columnSettings, column) => {
+        const columnDefaultSettings = column.width ? { width: column.width } : {};
+        const newColumn = { [column.id]: columnDefaultSettings };
+        return { ...columnSettings, ...newColumn };
       }, {} as UnifiedDataTableSettings['columns']),
     }
   );
+
+  const settings = useMemo(() => {
+    return {
+      columns: Object.keys(persistedSettings?.columns as UnifiedDataTableSettings).reduce(
+        (columnSettings, columnId) => {
+          const newColumn: UnifiedDataTableSettingsColumn = {
+            ..._.pick(persistedSettings?.columns?.[columnId], ['width']),
+            display: columnHeaders?.[columnId],
+          };
+
+          return { ...columnSettings, [columnId]: newColumn };
+        },
+        {} as UnifiedDataTableSettings['columns']
+      ),
+    };
+  }, [persistedSettings, columnHeaders]);
+
+  const { dataView, dataViewIsRefetching } = useDataViewContext();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
@@ -149,7 +181,6 @@ export const CloudSecurityDataTable = ({
     fieldFormats,
     toastNotifications,
     storage,
-    dataViewFieldEditor,
   } = useKibana().services;
 
   const styles = useStyles();
@@ -164,7 +195,6 @@ export const CloudSecurityDataTable = ({
     toastNotifications,
     storage,
     data,
-    dataViewFieldEditor,
   };
 
   const {
@@ -182,6 +212,32 @@ export const CloudSecurityDataTable = ({
     columns,
     sort,
   });
+
+  /**
+   * This object is used to determine if the table rendering will be virtualized and the virtualization wrapper height.
+   * mode should be passed as a key to the UnifiedDataTable component to force a re-render when the mode changes.
+   */
+  const computeDataTableRendering = useMemo(() => {
+    // Enable virtualization mode when the table is set to a large page size.
+    const isVirtualizationEnabled = pageSize >= 100;
+
+    const getWrapperHeight = () => {
+      if (height) return height;
+
+      // If virtualization is not needed the table will render unconstrained.
+      if (!isVirtualizationEnabled) return 'auto';
+
+      const baseHeight = 362; // height of Kibana Header + Findings page header and search bar
+      const filterBarHeight = filters?.length > 0 ? 40 : 0;
+      const distributionBarHeight = hasDistributionBar ? 52 : 0;
+      return `calc(100vh - ${baseHeight}px - ${filterBarHeight}px - ${distributionBarHeight}px)`;
+    };
+
+    return {
+      wrapperHeight: getWrapperHeight(),
+      mode: isVirtualizationEnabled ? 'virtualized' : 'standard',
+    };
+  }, [pageSize, height, filters?.length, hasDistributionBar]);
 
   const onAddFilter: AddFieldFilterHandler | undefined = useMemo(
     () =>
@@ -203,14 +259,14 @@ export const CloudSecurityDataTable = ({
     [dataView, filterManager, setUrlQuery]
   );
 
-  const onResize = (colSettings: { columnId: string; width: number }) => {
-    const grid = settings || {};
+  const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
+    const grid = persistedSettings || {};
     const newColumns = { ...(grid.columns || {}) };
-    newColumns[colSettings.columnId] = {
-      width: Math.round(colSettings.width),
-    };
+    newColumns[colSettings.columnId] = colSettings.width
+      ? { width: Math.round(colSettings.width) }
+      : {};
     const newGrid = { ...grid, columns: newColumns };
-    setSettings(newGrid);
+    setPersistedSettings(newGrid);
   };
 
   const externalCustomRenderers = useMemo(() => {
@@ -241,12 +297,19 @@ export const CloudSecurityDataTable = ({
     />
   );
 
-  const dataTableStyle = {
-    // Change the height of the grid to fit the page
-    // If there are filters, leave space for the filter bar
-    // Todo: Replace this component with EuiAutoSizer
-    height: height ?? `calc(100vh - ${filters?.length > 0 ? 443 : 403}px)`,
-  };
+  const externalControlColumns: EuiDataGridControlColumn[] | undefined = createRuleFn
+    ? [
+        {
+          id: 'select',
+          width: 20,
+          headerCellRender: () => null,
+          rowCellRender: ({ rowIndex }) =>
+            createRuleFn && (
+              <TakeAction isDataGridControlColumn createRuleFn={createRuleFn(rowIndex)} />
+            ),
+        },
+      ]
+    : undefined;
 
   const rowHeightState = 0;
 
@@ -262,10 +325,13 @@ export const CloudSecurityDataTable = ({
       <div
         data-test-subj={rest['data-test-subj']}
         className={styles.gridContainer}
-        style={dataTableStyle}
+        style={{
+          height: computeDataTableRendering.wrapperHeight,
+        }}
       >
         <EuiProgress size="xs" color="accent" style={loadingStyle} />
         <UnifiedDataTable
+          key={computeDataTableRendering.mode}
           className={styles.gridStyle}
           ariaLabelledBy={title}
           columns={currentColumns}
@@ -291,12 +357,13 @@ export const CloudSecurityDataTable = ({
           showTimeCol={false}
           settings={settings}
           onFetchMoreRecords={loadMore}
+          externalControlColumns={externalControlColumns}
           externalCustomRenderers={externalCustomRenderers}
           externalAdditionalControls={externalAdditionalControls}
           gridStyleOverride={gridStyle}
           rowLineHeightOverride="24px"
           controlColumnIds={controlColumnIds}
-          onFieldEdited={dataViewRefetch}
+          dataGridDensityState={DataGridDensity.EXPANDED}
         />
       </div>
     </CellActionsProvider>

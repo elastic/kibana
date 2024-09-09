@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -106,7 +107,8 @@ async function createRoot({ logFileName }: CreateRootConfig) {
 // suite is very long, the 10mins default can cause timeouts
 jest.setTimeout(15 * 60 * 1000);
 
-describe('migration v2', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/156117
+describe.skip('migration v2', () => {
   let esServer: TestElasticsearchUtils;
   let rootA: Root;
   let rootB: Root;
@@ -162,23 +164,35 @@ describe('migration v2', () => {
   });
 
   afterEach(async () => {
-    await Promise.all([rootA.shutdown(), rootB.shutdown(), rootC.shutdown()]);
+    try {
+      await Promise.all([rootA.shutdown(), rootB.shutdown(), rootC.shutdown()]);
+    } catch (e) {
+      /* trap */
+    }
 
     if (esServer) {
       await esServer.stop();
-      await delay(10000);
     }
   });
 
   const startWithDelay = async (instances: Root[], delayInSec: number) => {
     const promises: Array<Promise<unknown>> = [];
+    const errors: string[] = [];
     for (let i = 0; i < instances.length; i++) {
-      promises.push(instances[i].start());
-      if (i < instances.length - 1) {
+      promises.push(
+        instances[i].start().catch((err) => {
+          errors.push(err.message);
+        })
+      );
+      if (i < instances.length - 2) {
+        // We wait between instances, but not after the last one
         await delay(delayInSec * 1000);
       }
     }
-    return Promise.all(promises);
+    await Promise.all(promises);
+    if (errors.length) {
+      throw new Error(`Failed to start all instances: ${errors.join(',')}`);
+    }
   };
 
   it('migrates saved objects normally when multiple Kibana instances are started at the same time', async () => {

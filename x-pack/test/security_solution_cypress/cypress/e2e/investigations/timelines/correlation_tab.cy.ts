@@ -6,13 +6,7 @@
  */
 
 import { openTimeline } from '../../../tasks/timelines';
-import { getTimeline } from '../../../objects/timeline';
-
-import {
-  SERVER_SIDE_EVENT_COUNT,
-  TIMELINE_TAB_CONTENT_EQL,
-  TIMELINE_CORRELATION_INPUT,
-} from '../../../screens/timeline';
+import { TIMELINE_CORRELATION_INPUT, EQL_EVENT_COUNT } from '../../../screens/timeline';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
@@ -21,7 +15,7 @@ import { addEqlToTimeline, saveTimeline, clearEqlInTimeline } from '../../../tas
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 import { EQL_QUERY_VALIDATION_ERROR } from '../../../screens/create_new_rule';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
   const eql = 'any where process.name == "zsh"';
@@ -30,7 +24,7 @@ describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
     login();
     deleteTimelines();
     cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
-    createTimeline(getTimeline()).then((response) => {
+    createTimeline().then((response) => {
       visit(TIMELINES_URL);
       openTimeline(response.body.data.persistTimeline.timeline.savedObjectId);
       addEqlToTimeline(eql);
@@ -40,10 +34,7 @@ describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('should update timeline after adding eql', () => {
-    cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`)
-      .invoke('text')
-      .then(parseInt)
-      .should('be.gt', 0);
+    cy.get(`${EQL_EVENT_COUNT}`).invoke('text').then(parseInt).should('be.gt', 0);
   });
 
   it('should update timeline after removing eql', () => {

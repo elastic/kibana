@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -17,35 +17,23 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { StatefulEventsViewer } from '../../../../common/components/events_viewer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import * as i18n from './translations';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { getHistogramConfig, isNoisy } from './helpers';
-import type {
-  ChartSeriesConfigs,
-  ChartSeriesData,
-} from '../../../../common/components/charts/common';
+import { isNoisy } from './helpers';
 import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { BarChart } from '../../../../common/components/charts/barchart';
-import { usePreviewHistogram } from './use_preview_histogram';
+
 import { getAlertsPreviewDefaultModel } from '../../../../detections/components/alerts_table/default_config';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { DetailsPanel } from '../../../../timelines/components/side_panel';
 import { PreviewRenderCellValue } from './preview_table_cell_renderer';
 import { getPreviewTableControlColumn } from './preview_table_control_columns';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getRulePreviewLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/rule_preview';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
-
-const LoadingChart = styled(EuiLoadingChart)`
-  display: block;
-  margin: 0 auto;
-`;
+import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
+import { INSPECT_ACTION } from '../../../../common/components/visualization_actions/use_actions';
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
@@ -78,7 +66,6 @@ const PreviewHistogramComponent = ({
   timeframeOptions,
 }: PreviewHistogramProps) => {
   const { uiSettings } = useKibana().services;
-  const { setQuery, isInitializing } = useGlobalTime();
   const startDate = useMemo(
     () => timeframeOptions.timeframeStart.toISOString(),
     [timeframeOptions]
@@ -94,34 +81,28 @@ const PreviewHistogramComponent = ({
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
-  const isAlertsPreviewChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled(
-    'alertsPreviewChartEmbeddablesEnabled'
-  );
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
 
   const extraVisualizationOptions = useMemo(
     () => ({
       ruleId: previewId,
       spaceId,
+      showLegend: !isEqlRule,
     }),
-    [previewId, spaceId]
+    [isEqlRule, previewId, spaceId]
   );
 
-  const [isLoading, { data, inspect, totalCount, refetch }] = usePreviewHistogram({
-    previewId,
-    startDate,
-    endDate,
-    spaceId,
-    indexPattern,
-    ruleType,
-    skip: isAlertsPreviewChartEmbeddablesEnabled,
-  });
   const license = useLicense();
-  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
 
   const { globalFullScreen } = useGlobalFullScreen();
   const previousPreviewId = usePrevious(previewId);
   const previewQueryId = `${ID}-${previewId}`;
+  const previewEmbeddableId = `${previewQueryId}-embeddable`;
+  const { responses: visualizationResponses } = useVisualizationResponse({
+    visualizationId: previewEmbeddableId,
+  });
+
+  const totalCount = visualizationResponses?.[0]?.hits?.total ?? 0;
 
   useEffect(() => {
     if (previousPreviewId !== previewId && totalCount > 0) {
@@ -129,34 +110,8 @@ const PreviewHistogramComponent = ({
         addNoiseWarning();
       }
     }
-  }, [totalCount, addNoiseWarning, previousPreviewId, previewId, timeframeOptions]);
+  }, [addNoiseWarning, previewId, previousPreviewId, timeframeOptions, totalCount]);
 
-  useEffect((): void => {
-    if (!isLoading && !isInitializing) {
-      setQuery({
-        id: previewQueryId,
-        inspect,
-        loading: isLoading,
-        refetch,
-      });
-    }
-  }, [
-    setQuery,
-    inspect,
-    isLoading,
-    isInitializing,
-    refetch,
-    previewId,
-    isAlertsPreviewChartEmbeddablesEnabled,
-    previewQueryId,
-  ]);
-
-  const barConfig = useMemo(
-    (): ChartSeriesConfigs => getHistogramConfig(endDate, startDate, !isEqlRule),
-    [endDate, startDate, isEqlRule]
-  );
-
-  const chartData = useMemo((): ChartSeriesData[] => [{ key: 'hits', value: data }], [data]);
   const config = getEsQueryConfig(uiSettings);
   const pageFilters = useMemo(() => {
     const filterQuery = buildEsQuery(
@@ -195,32 +150,24 @@ const PreviewHistogramComponent = ({
               id={previewQueryId}
               title={i18n.QUERY_GRAPH_HITS_TITLE}
               titleSize="xs"
-              showInspectButton={!isAlertsPreviewChartEmbeddablesEnabled}
+              showInspectButton={false}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
-            {isLoading ? (
-              <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
-            ) : isAlertsPreviewChartEmbeddablesEnabled ? (
-              <VisualizationEmbeddable
-                applyGlobalQueriesAndFilters={false}
-                extraOptions={extraVisualizationOptions}
-                getLensAttributes={getRulePreviewLensAttributes}
-                height={CHART_HEIGHT}
-                id={`${previewQueryId}-embeddable`}
-                inspectTitle={i18n.QUERY_GRAPH_HITS_TITLE}
-                scopeId={SourcererScopeName.detections}
-                stackByField={ruleType === 'machine_learning' ? 'host.name' : 'event.category'}
-                timerange={timerange}
-                withActions={false}
-              />
-            ) : (
-              <BarChart
-                configs={barConfig}
-                barChart={chartData}
-                data-test-subj="preview-histogram-bar-chart"
-              />
-            )}
+            <VisualizationEmbeddable
+              applyGlobalQueriesAndFilters={false}
+              disableOnClickFilter={true}
+              enableLegendActions={false}
+              extraOptions={extraVisualizationOptions}
+              getLensAttributes={getRulePreviewLensAttributes}
+              height={CHART_HEIGHT}
+              id={previewEmbeddableId}
+              inspectTitle={i18n.QUERY_GRAPH_HITS_TITLE}
+              scopeId={SourcererScopeName.detections}
+              stackByField={ruleType === 'machine_learning' ? 'host.name' : 'event.category'}
+              timerange={timerange}
+              withActions={INSPECT_ACTION}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <>
@@ -252,13 +199,6 @@ const PreviewHistogramComponent = ({
           bulkActions={false}
         />
       </FullScreenContainer>
-      <DetailsPanel
-        browserFields={browserFields}
-        isFlyoutView
-        runtimeMappings={runtimeMappings}
-        scopeId={TableId.rulePreview}
-        isReadOnly
-      />
     </>
   );
 };

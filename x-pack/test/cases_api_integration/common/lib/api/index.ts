@@ -37,6 +37,7 @@ import {
   Case,
   Cases,
   CaseStatuses,
+  CaseCustomField,
 } from '@kbn/cases-plugin/common/types/domain';
 import {
   AlertResponse,
@@ -45,6 +46,7 @@ import {
   CasesFindResponse,
   CasesPatchRequest,
   CasesStatusResponse,
+  CustomFieldPutRequest,
   GetRelatedCasesByAlertResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import { User } from '../authentication/types';
@@ -105,9 +107,9 @@ export const getSignalsWithES = async ({
   return signals.body.hits.hits.reduce((acc, hit) => {
     let indexMap = acc.get(hit._index);
     if (indexMap === undefined) {
-      indexMap = new Map<string, estypes.SearchHit<SignalHit>>([[hit._id, hit]]);
+      indexMap = new Map<string, estypes.SearchHit<SignalHit>>([[hit._id!, hit]]);
     } else {
-      indexMap.set(hit._id, hit);
+      indexMap.set(hit._id!, hit);
     }
     acc.set(hit._index, indexMap);
     return acc;
@@ -127,7 +129,7 @@ export const setStatus = async ({
   supertest,
   cases,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   cases: SetStatusCasesParams[];
 }): Promise<Cases> => {
   const { body }: { body: Cases } = await supertest
@@ -141,7 +143,7 @@ export const setStatus = async ({
 /**
  * Add case as a connector
  */
-export const createCaseAction = async (supertest: SuperTest.SuperTest<SuperTest.Test>) => {
+export const createCaseAction = async (supertest: SuperTest.Agent) => {
   const { body: createdAction } = await supertest
     .post('/api/actions/connector')
     .set('kbn-xsrf', 'foo')
@@ -157,10 +159,7 @@ export const createCaseAction = async (supertest: SuperTest.SuperTest<SuperTest.
 /**
  * Remove a connector
  */
-export const deleteCaseAction = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  id: string
-) => {
+export const deleteCaseAction = async (supertest: SuperTest.Agent, id: string) => {
   await supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo');
 };
 
@@ -416,15 +415,15 @@ export const updateCase = async ({
   auth = { user: superUser, space: null },
   headers = {},
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   params: CasesPatchRequest;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null } | null;
-  headers?: Record<string, unknown>;
+  headers?: Record<string, string | string[]>;
 }): Promise<Case[]> => {
   const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`);
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: cases } = await apiCall
     .set('kbn-xsrf', 'true')
@@ -442,7 +441,7 @@ export const getAllCasesStatuses = async ({
   auth = { user: superUser, space: null },
   query = {},
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
   query?: Record<string, unknown>;
@@ -463,7 +462,7 @@ export const getCase = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseId: string;
   includeComments?: boolean;
   expectedHttpCode?: number;
@@ -488,7 +487,7 @@ export const getCaseMetrics = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseId: string;
   features: CaseMetricsFeature[] | CaseMetricsFeature;
   expectedHttpCode?: number;
@@ -510,7 +509,7 @@ export const resolveCase = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseId: string;
   includeComments?: boolean;
   expectedHttpCode?: number;
@@ -535,7 +534,7 @@ export const findCases = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -558,7 +557,7 @@ export const getCasesByAlert = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   alertID: string;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
@@ -579,7 +578,7 @@ export const getTags = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -600,7 +599,7 @@ export const getReporters = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -621,7 +620,7 @@ export const getCategories = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -644,18 +643,18 @@ export const pushCase = async ({
   auth = { user: superUser, space: null },
   headers = {},
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseId: string;
   connectorId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null } | null;
-  headers?: Record<string, unknown>;
+  headers?: Record<string, string | string[]>;
 }): Promise<Case> => {
   const apiCall = supertest.post(
     `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/connector/${connectorId}/_push`
   );
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: res } = await apiCall
     .set('kbn-xsrf', 'true')
@@ -672,7 +671,7 @@ export const getAlertsAttachedToCase = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -725,7 +724,7 @@ export const getCasesMetrics = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   features: string[] | string;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
@@ -772,7 +771,7 @@ export const bulkGetCases = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   ids: string[];
   fields?: string[];
   expectedHttpCode?: number;
@@ -794,7 +793,7 @@ export const searchCases = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   body?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -807,4 +806,39 @@ export const searchCases = async ({
     .expect(expectedHttpCode);
 
   return res;
+};
+
+export const replaceCustomField = async ({
+  supertest,
+  caseId,
+  customFieldId,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+  headers = {},
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  customFieldId: string;
+  params: CustomFieldPutRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, string | string[]>;
+}): Promise<CaseCustomField> => {
+  const apiCall = supertest.put(
+    `${getSpaceUrlPrefix(
+      auth?.space
+    )}${CASES_INTERNAL_URL}/${caseId}/custom_fields/${customFieldId}`
+  );
+
+  void setupAuth({ apiCall, headers, auth });
+
+  const { body: theCustomField } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .set(headers)
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return theCustomField;
 };

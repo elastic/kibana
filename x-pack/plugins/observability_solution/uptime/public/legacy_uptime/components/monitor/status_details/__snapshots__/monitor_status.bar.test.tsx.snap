@@ -1,0 +1,120 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorStatusBar component renders 1`] = `
+Array [
+  <div>
+    <h2
+      class="euiTitle emotion-euiTitle-s"
+    >
+      Up in 2 locations
+    </h2>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+  />,
+  <dl
+    class="euiDescriptionList emotion-euiDescriptionList-column-left-s-s"
+    data-type="column"
+    style="grid-template-columns:1fr 3fr"
+  >
+    <dt
+      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-reverse"
+    >
+      Overall availability
+    </dt>
+    <dd
+      class="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed"
+      data-test-subj="uptimeOverallAvailability"
+    >
+      0.00 %
+    </dd>
+    <dt
+      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-reverse"
+    >
+      Url
+    </dt>
+    <dd
+      class="euiDescriptionList__description eui-textBreakAll emotion-euiDescriptionList__description-column-compressed"
+      data-test-subj="monitor-page-url"
+    >
+      --
+    </dd>
+    <dt
+      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-reverse"
+    >
+      Monitor ID
+    </dt>
+    <dd
+      class="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed"
+      data-test-subj="monitor-page-title"
+    />
+    <dt
+      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-reverse"
+    >
+      Tags
+    </dt>
+    <dd
+      class="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed"
+    >
+      <a
+        class="euiLink emotion-euiLink-primary"
+        data-test-subj="syntheticsMonitorTagsSetTagsLink"
+        href="undefined/monitor-options.html#monitor-tags"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        Set tags
+        <span
+          class="emotion-EuiExternalLinkIcon"
+          data-euiicon-type="popout"
+        >
+          External link
+        </span>
+        <span
+          class="emotion-euiScreenReaderOnly"
+        >
+          (opens in a new tab or window)
+        </span>
+      </a>
+    </dd>
+    <dt
+      class="euiDescriptionList__title emotion-euiDescriptionList__title-column-reverse"
+    >
+      Enable status alerts
+    </dt>
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
+    >
+      <div
+        class="euiFormRow emotion-euiFormRow"
+        id="generated-id-row"
+      >
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            class="euiSwitch emotion-euiSwitch"
+          >
+            <button
+              aria-checked="false"
+              aria-label="Enable status alerts"
+              class="euiSwitch__button emotion-euiSwitch__button-compressed"
+              data-test-subj="uptimeDisplayDefineConnector"
+              id="generated-id"
+              role="switch"
+              type="button"
+            >
+              <span
+                class="euiSwitch__body emotion-euiSwitch__body-off"
+              />
+              <span
+                class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dl>,
+]
+`;

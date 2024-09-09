@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { v4 as uuidv4 } from 'uuid';
 import { has } from 'lodash';
 
@@ -57,14 +59,19 @@ export const loadDashboardState = async ({
    * This is a newly created dashboard, so there is no saved object state to load.
    */
   if (!savedObjectId) {
-    return { dashboardInput: newDashboardState, dashboardFound: true, newDashboardCreated: true };
+    return {
+      dashboardInput: newDashboardState,
+      dashboardFound: true,
+      newDashboardCreated: true,
+      references: [],
+    };
   }
 
   /**
    * Load the saved object from Content Management
    */
-  let rawDashboardContent;
-  let resolveMeta;
+  let rawDashboardContent: DashboardCrudTypes['GetOut']['item'];
+  let resolveMeta: DashboardCrudTypes['GetOut']['meta'];
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
   if (cachedDashboard) {
@@ -81,8 +88,15 @@ export const loadDashboardState = async ({
         throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
       });
 
-    dashboardContentManagementCache.addDashboard(result);
     ({ item: rawDashboardContent, meta: resolveMeta } = result);
+    const { outcome: loadOutcome } = resolveMeta;
+    if (loadOutcome !== 'aliasMatch') {
+      /**
+       * Only add the dashboard to the cache if it does not require a redirect - otherwise, the meta
+       * alias info gets cached and prevents the dashboard contents from being updated
+       */
+      dashboardContentManagementCache.addDashboard(result);
+    }
   }
 
   if (!rawDashboardContent || !rawDashboardContent.version) {
@@ -90,6 +104,7 @@ export const loadDashboardState = async ({
       dashboardInput: newDashboardState,
       dashboardFound: false,
       dashboardId: savedObjectId,
+      references: [],
     };
   }
 
@@ -185,6 +200,7 @@ export const loadDashboardState = async ({
 
   return {
     managed,
+    references,
     resolveMeta,
     dashboardInput,
     anyMigrationRun,

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import {
   type ApiVersion,
   ELASTIC_HTTP_VERSION_HEADER,
@@ -23,7 +25,7 @@ const INTERNAL_VERSION_REGEX = /^[1-9][0-9]*$/;
  * release date we only allow one public version temporarily.
  * @internal
  */
-const ALLOWED_PUBLIC_VERSION = '2023-10-31';
+export const ALLOWED_PUBLIC_VERSION = '2023-10-31';
 
 export function isAllowedPublicVersion(version: string): undefined | string {
   if (ALLOWED_PUBLIC_VERSION !== version) {

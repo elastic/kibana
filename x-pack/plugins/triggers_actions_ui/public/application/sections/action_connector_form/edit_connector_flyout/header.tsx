@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiTitle,
@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { betaBadgeProps } from '../beta_badge_props';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 import { EditConnectorTabs } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
@@ -34,7 +34,7 @@ const FlyoutHeaderComponent: React.FC<{
   connectorTypeId: string;
   connectorTypeDesc: string;
   selectedTab: EditConnectorTabs;
-  setTab: () => void;
+  setTab: (nextPage: EditConnectorTabs) => void;
   icon?: IconType | null;
 }> = ({
   icon,
@@ -52,6 +52,18 @@ const FlyoutHeaderComponent: React.FC<{
 
   const { euiTheme } = useEuiTheme();
   const canExecute = hasExecuteActionsCapability(capabilities, connectorTypeId);
+
+  const setConfigurationTab = useCallback(() => {
+    setTab(EditConnectorTabs.Configuration);
+  }, [setTab]);
+
+  const setTestTab = useCallback(() => {
+    setTab(EditConnectorTabs.Test);
+  }, [setTab]);
+
+  const setRulesTab = useCallback(() => {
+    setTab(EditConnectorTabs.Rules);
+  }, [setTab]);
 
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="edit-connector-flyout-header">
@@ -91,8 +103,8 @@ const FlyoutHeaderComponent: React.FC<{
                 <EuiFlexItem grow={false}>
                   {isExperimental && (
                     <EuiBetaBadge
-                      label={betaBadgeProps.label}
-                      tooltipContent={betaBadgeProps.tooltipContent}
+                      label={TECH_PREVIEW_LABEL}
+                      tooltipContent={TECH_PREVIEW_DESCRIPTION}
                     />
                   )}
                 </EuiFlexItem>
@@ -120,8 +132,8 @@ const FlyoutHeaderComponent: React.FC<{
               {isExperimental && (
                 <EuiFlexItem grow={false}>
                   <EuiBetaBadge
-                    label={betaBadgeProps.label}
-                    tooltipContent={betaBadgeProps.tooltipContent}
+                    label={TECH_PREVIEW_LABEL}
+                    tooltipContent={TECH_PREVIEW_DESCRIPTION}
                   />
                 </EuiFlexItem>
               )}
@@ -137,7 +149,7 @@ const FlyoutHeaderComponent: React.FC<{
         `}
       >
         <EuiTab
-          onClick={setTab}
+          onClick={setConfigurationTab}
           data-test-subj="configureConnectorTab"
           isSelected={EditConnectorTabs.Configuration === selectedTab}
         >
@@ -145,9 +157,18 @@ const FlyoutHeaderComponent: React.FC<{
             defaultMessage: 'Configuration',
           })}
         </EuiTab>
+        <EuiTab
+          onClick={setRulesTab}
+          data-test-subj="rulesConnectorTab"
+          isSelected={EditConnectorTabs.Rules === selectedTab}
+        >
+          {i18n.translate('xpack.triggersActionsUI.sections.rulesConnectorList.tabText', {
+            defaultMessage: 'Rules',
+          })}
+        </EuiTab>
         {canExecute && (
           <EuiTab
-            onClick={setTab}
+            onClick={setTestTab}
             data-test-subj="testConnectorTab"
             isSelected={EditConnectorTabs.Test === selectedTab}
           >

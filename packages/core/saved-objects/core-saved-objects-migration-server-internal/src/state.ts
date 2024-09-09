@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Option from 'fp-ts/lib/Option';
@@ -13,7 +14,11 @@ import type {
   SavedObjectsRawDoc,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from '@kbn/core-saved-objects-server';
-import type { IndexMapping, IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
+import type {
+  IndexMapping,
+  IndexTypesMap,
+  VirtualVersionMap,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import type { ControlState } from './state_action_machine';
 import type { AliasAction } from './actions';
@@ -159,6 +164,18 @@ export interface BaseState extends ControlState {
    */
   readonly knownTypes: string[];
   /**
+   * Contains a list of the SO types that are currently assigned to this migrator's index
+   */
+  readonly indexTypes: string[];
+  /**
+   * Contains information about the most recent model version where each type has been modified
+   */
+  readonly latestMappingsVersions: VirtualVersionMap;
+  /**
+   * Contains a map holding information about [md5 => modelVersion] equivalence
+   */
+  readonly hashToVersionMap: Record<string, string>;
+  /**
    * All exclude filter hooks registered for types on this index. Keyed by type name.
    */
   readonly excludeFromUpgradeFilterHooks: Record<
@@ -170,14 +187,12 @@ export interface BaseState extends ControlState {
    */
   readonly migrationDocLinks: DocLinks['kibanaUpgradeSavedObjects'];
   readonly waitForMigrationCompletion: boolean;
-
   /**
    * This flag tells the migrator that SO documents must be redistributed,
    * i.e. stored in different system indices, compared to where they are currently stored.
    * This requires reindexing documents.
    */
   readonly mustRelocateDocuments: boolean;
-
   /**
    * This object holds a relation of all the types that are stored in each index, e.g.:
    * {
@@ -187,7 +202,6 @@ export interface BaseState extends ControlState {
    * }
    */
   readonly indexTypesMap: IndexTypesMap;
-
   /** Capabilities of the ES cluster we're using */
   readonly esCapabilities: ElasticsearchCapabilities;
 }
@@ -371,7 +385,11 @@ export interface RefreshTarget extends PostInitState {
   readonly targetIndex: string;
 }
 
-export interface CheckTargetMappingsState extends PostInitState {
+export interface CheckClusterRoutingAllocationState extends SourceExistsState {
+  readonly controlState: 'CHECK_CLUSTER_ROUTING_ALLOCATION';
+}
+
+export interface CheckTargetTypesMappingsState extends PostInitState {
   readonly controlState: 'CHECK_TARGET_MAPPINGS';
 }
 
@@ -497,6 +515,10 @@ export interface LegacyBaseState extends SourceExistsState {
   readonly legacyPreMigrationDoneActions: AliasAction[];
 }
 
+export interface LegacyCheckClusterRoutingAllocationState extends LegacyBaseState {
+  readonly controlState: 'LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION';
+}
+
 export interface LegacySetWriteBlockState extends LegacyBaseState {
   /** Set a write block on the legacy index to prevent any further writes */
   readonly controlState: 'LEGACY_SET_WRITE_BLOCK';
@@ -536,7 +558,8 @@ export interface LegacyDeleteState extends LegacyBaseState {
 
 export type State = Readonly<
   | CalculateExcludeFiltersState
-  | CheckTargetMappingsState
+  | CheckClusterRoutingAllocationState
+  | CheckTargetTypesMappingsState
   | CheckUnknownDocumentsState
   | CheckVersionIndexReadyActions
   | CleanupUnknownAndExcluded
@@ -548,6 +571,7 @@ export type State = Readonly<
   | DoneState
   | FatalState
   | InitState
+  | LegacyCheckClusterRoutingAllocationState
   | LegacyCreateReindexTargetState
   | LegacyDeleteState
   | LegacyReindexState

@@ -15,13 +15,13 @@ import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/d
 import { AttachmentType, Case } from '@kbn/cases-plugin/common';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import {
-  getRuleForSignalTesting,
+  getRuleForAlertTesting,
   createRule,
   waitForRuleSuccess,
-  waitForSignalsToBePresent,
-  getSignalsByIds,
-  getQuerySignalIds,
-} from '../../../detection_engine_api_integration/utils';
+  waitForAlertsToBePresent,
+  getAlertsByIds,
+  getQueryAlertIds,
+} from '../../../common/utils/security_solution';
 import { superUser } from './authentication/users';
 import { User } from './authentication/types';
 import { getSpaceUrlPrefix } from './api/helpers';
@@ -30,30 +30,30 @@ import { createComment, deleteAllComments } from './api';
 import { postCaseReq } from './mock';
 
 export const createSecuritySolutionAlerts = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   numberOfSignals: number = 1
 ): Promise<estypes.SearchResponse<DetectionAlert & RiskEnrichmentFields>> => {
   const rule = {
-    ...getRuleForSignalTesting(['auditbeat-*']),
+    ...getRuleForAlertTesting(['auditbeat-*']),
     query: 'process.executable: "/usr/bin/sudo"',
   };
   const { id } = await createRule(supertest, log, rule);
   await waitForRuleSuccess({ supertest, log, id });
-  await waitForSignalsToBePresent(supertest, log, numberOfSignals, [id]);
-  const signals = await getSignalsByIds(supertest, log, [id]);
+  await waitForAlertsToBePresent(supertest, log, numberOfSignals, [id]);
+  const signals = await getAlertsByIds(supertest, log, [id]);
 
   return signals;
 };
 
 export const getSecuritySolutionAlerts = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   alertIds: string[]
 ): Promise<estypes.SearchResponse<DetectionAlert & RiskEnrichmentFields>> => {
   const { body: updatedAlert } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
-    .send(getQuerySignalIds(alertIds))
+    .send(getQueryAlertIds(alertIds))
     .expect(200);
 
   return updatedAlert;
@@ -70,7 +70,7 @@ export const getAlertById = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   id: string;
   index: string;
   expectedHttpCode?: number;
@@ -97,7 +97,7 @@ export const createCaseAttachAlertAndDeleteAlert = async ({
   alerts,
   getAlerts,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   totalCases: number;
   indexOfCaseToDelete: number;
   owner: string;
@@ -145,7 +145,7 @@ export const createCaseAttachAlertAndDeleteCase = async ({
   alerts,
   getAlerts,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   totalCases: number;
   indicesOfCaseToDelete: number[];
   owner: string;
@@ -194,7 +194,7 @@ export const createCaseAndAttachAlert = async ({
   alerts,
   getAlerts,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   totalCases: number;
   owner: string;
   alerts: Alerts;

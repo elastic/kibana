@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Duration } from 'moment';
@@ -26,6 +27,9 @@ const configSchema = schema.object(
     }),
     keepaliveTimeout: schema.number({
       defaultValue: 120000,
+    }),
+    payloadTimeout: schema.number({
+      defaultValue: 20000,
     }),
     shutdownTimeout: schema.duration({
       defaultValue: '30s',
@@ -67,12 +71,14 @@ export const config: ServiceConfigDescriptor<ServerConfigType> = {
 };
 
 export class ServerConfig implements IHttpConfig {
+  readonly protocol = 'http1';
   host: string;
   port: number;
   maxPayload: ByteSizeValue;
   keepaliveTimeout: number;
   shutdownTimeout: Duration;
   socketTimeout: number;
+  payloadTimeout: number;
   ssl: ISslConfig;
   cors: ICorsConfig;
   restrictInternalApis: boolean;
@@ -84,6 +90,7 @@ export class ServerConfig implements IHttpConfig {
     this.keepaliveTimeout = rawConfig.keepaliveTimeout;
     this.shutdownTimeout = rawConfig.shutdownTimeout;
     this.socketTimeout = rawConfig.socketTimeout;
+    this.payloadTimeout = rawConfig.payloadTimeout;
     this.ssl = new SslConfig(rawConfig.ssl);
     this.cors = {
       enabled: false,

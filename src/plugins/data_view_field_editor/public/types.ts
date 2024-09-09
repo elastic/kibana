@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FieldSpec } from '@kbn/data-views-plugin/public';
@@ -38,12 +39,12 @@ export interface PluginStart {
   /**
    * Method to open the data view field editor fly-out
    */
-  openEditor(options: OpenFieldEditorOptions): () => void;
+  openEditor(options: OpenFieldEditorOptions): Promise<CloseEditor>;
   /**
    * Method to open the data view field delete fly-out
    * @param options Configuration options for the fly-out
    */
-  openDeleteModal(options: OpenFieldDeleteModalOptions): () => void;
+  openDeleteModal(options: OpenFieldDeleteModalOptions): Promise<CloseEditor>;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   /**
    * Convenience method for user permissions checks

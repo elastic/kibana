@@ -22,6 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 
 export type FieldProps = {
   label: string;
@@ -51,6 +52,7 @@ function getOptions(fields: FieldProps[], selectedFields: FieldProps[]): EuiSele
     .map((field) => {
       return {
         value: field.name,
+        name: field.name,
         prepend:
           'type' in field ? (
             <FieldIcon className="eui-alignMiddle" type={field.type} fill="none" />
@@ -161,6 +163,7 @@ export class AddTooltipFieldPopover extends Component<Props, State> {
           searchProps={{ compressed: true }}
           options={this.state.options}
           onChange={this._onSelect}
+          optionMatcher={comboBoxFieldOptionMatcher}
         >
           {(list, search) => (
             <div style={{ width: '300px' }}>

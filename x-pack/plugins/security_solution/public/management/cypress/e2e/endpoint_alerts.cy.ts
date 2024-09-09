@@ -19,8 +19,7 @@ import { login, ROLE } from '../tasks/login';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169958
-describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
+describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
@@ -34,7 +33,7 @@ describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, ()
 
         return enableAllPolicyProtections(policy.id).then(() => {
           // Create and enroll a new Endpoint host
-          return createEndpointHost(policy.policy_id).then((host) => {
+          return createEndpointHost(policy.policy_ids[0]).then((host) => {
             createdHost = host as CreateAndEnrollEndpointHostResponse;
           });
         });

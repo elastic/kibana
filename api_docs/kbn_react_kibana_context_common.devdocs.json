@@ -2,26 +2,10 @@
   "id": "@kbn/react-kibana-context-common",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/react-kibana-context-common",
-        "id": "def-common.getColorMode",
+        "id": "def-public.getColorMode",
         "type": "Function",
         "tags": [],
         "label": "getColorMode",
@@ -32,9 +16,9 @@
           "(theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-common.KibanaTheme",
+            "section": "def-public.KibanaTheme",
             "text": "KibanaTheme"
           },
           ") => ",
@@ -46,7 +30,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-kibana-context-common",
-            "id": "def-common.getColorMode.$1",
+            "id": "def-public.getColorMode.$1",
             "type": "Object",
             "tags": [],
             "label": "theme",
@@ -56,9 +40,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/react-kibana-context-common",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                "section": "def-common.KibanaTheme",
+                "section": "def-public.KibanaTheme",
                 "text": "KibanaTheme"
               }
             ],
@@ -77,7 +61,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/react-kibana-context-common",
-        "id": "def-common.KibanaTheme",
+        "id": "def-public.KibanaTheme",
         "type": "Interface",
         "tags": [],
         "label": "KibanaTheme",
@@ -90,7 +74,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-kibana-context-common",
-            "id": "def-common.KibanaTheme.darkMode",
+            "id": "def-public.KibanaTheme.darkMode",
             "type": "boolean",
             "tags": [],
             "label": "darkMode",
@@ -106,7 +90,7 @@
       },
       {
         "parentPluginId": "@kbn/react-kibana-context-common",
-        "id": "def-common.ThemeServiceStart",
+        "id": "def-public.ThemeServiceStart",
         "type": "Interface",
         "tags": [],
         "label": "ThemeServiceStart",
@@ -119,7 +103,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-kibana-context-common",
-            "id": "def-common.ThemeServiceStart.theme$",
+            "id": "def-public.ThemeServiceStart.theme$",
             "type": "Object",
             "tags": [],
             "label": "theme$",
@@ -129,9 +113,9 @@
               "<",
               {
                 "pluginId": "@kbn/react-kibana-context-common",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                "section": "def-common.KibanaTheme",
+                "section": "def-public.KibanaTheme",
                 "text": "KibanaTheme"
               },
               ">"
@@ -149,7 +133,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/react-kibana-context-common",
-        "id": "def-common.defaultTheme",
+        "id": "def-public.defaultTheme",
         "type": "Object",
         "tags": [],
         "label": "defaultTheme",
@@ -162,7 +146,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-kibana-context-common",
-            "id": "def-common.defaultTheme.darkMode",
+            "id": "def-public.defaultTheme.darkMode",
             "type": "boolean",
             "tags": [],
             "label": "darkMode",
@@ -178,5 +162,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

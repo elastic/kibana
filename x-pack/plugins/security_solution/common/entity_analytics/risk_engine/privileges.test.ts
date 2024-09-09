@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityAnalyticsPrivileges } from '../../api/entity_analytics/common';
+import type { EntityAnalyticsPrivileges } from '../../api/entity_analytics';
 import { getMissingRiskEnginePrivileges } from './privileges';
 
 describe('getMissingRiskEnginePrivileges', () => {

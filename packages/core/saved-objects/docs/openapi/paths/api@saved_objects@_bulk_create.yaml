@@ -1,5 +1,5 @@
 post:
-  summary: Create multiple Kibana saved objects.
+  summary: Create saved objects
   operationId: bulkCreateSavedObjects
   deprecated: true
   tags:

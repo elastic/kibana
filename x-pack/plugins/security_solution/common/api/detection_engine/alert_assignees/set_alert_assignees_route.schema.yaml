@@ -4,11 +4,15 @@ info:
   version: '2023-10-31'
 paths:
   /api/detection_engine/signals/assignees:
-    summary: Assigns users to alerts
     post:
-      operationId: SetAlertAssignees
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
-      description: Assigns users to alerts.
+      operationId: SetAlertAssignees
+      summary: Assign and unassign users from detection alerts
+      description: |
+        Assign users to detection alerts, and unassign them from alerts.
+        > info
+        > You cannot add and remove the same assignee in the same request.
       requestBody:
         required: true
         content:
@@ -23,7 +27,7 @@ paths:
                   $ref: '#/components/schemas/AlertAssignees'
                   description: Details about the assignees to assign and unassign.
                 ids:
-                  $ref: '#/components/schemas/AlertIds'
+                  $ref: '../../model/alert.schema.yaml#/components/schemas/AlertIds'
                   description: List of alerts ids to assign and unassign passed assignees.
       responses:
         200:
@@ -42,17 +46,10 @@ components:
         add:
           type: array
           items:
-            $ref: '../model/rule_schema/common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
           description: A list of users ids to assign.
         remove:
           type: array
           items:
-            $ref: '../model/rule_schema/common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
           description: A list of users ids to unassign.
-
-    AlertIds:
-      type: array
-      items:
-        $ref: '../model/rule_schema/common_attributes.schema.yaml#/components/schemas/NonEmptyString'
-      minItems: 1
-      description: A list of alerts ids.

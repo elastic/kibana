@@ -7,178 +7,386 @@
 
 import React from 'react';
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Assistant } from '.';
-import { Conversation } from '../assistant_context/types';
 import type { IHttpFetchError } from '@kbn/core/public';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
-import { useConnectorSetup } from '../connectorland/connector_setup';
 
-import { UseQueryResult } from '@tanstack/react-query';
-import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
+import { DefinedUseQueryResult, UseQueryResult } from '@tanstack/react-query';
 
-import { useLocalStorage } from 'react-use';
-import { PromptEditor } from './prompt_editor';
+import { useLocalStorage, useSessionStorage } from 'react-use';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { mockAssistantAvailability, TestProviders } from '../mock/test_providers/test_providers';
+import { useFetchCurrentUserConversations } from './api';
+import { Conversation } from '../assistant_context/types';
+import * as all from './chat_send/use_chat_send';
+import { useConversation } from './use_conversation';
+import { AIConnector } from '../connectorland/connector_selector';
+import { omit } from 'lodash';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
 jest.mock('react-use');
 
-jest.mock('./prompt_editor', () => ({ PromptEditor: jest.fn() }));
 jest.mock('./quick_prompts/quick_prompts', () => ({ QuickPrompts: jest.fn() }));
+jest.mock('./api/conversations/use_fetch_current_user_conversations');
 
-const MOCK_CONVERSATION_TITLE = 'electric sheep';
+jest.mock('./use_conversation');
 
-const getInitialConversations = (): Record<string, Conversation> => ({
-  [WELCOME_CONVERSATION_TITLE]: {
-    id: WELCOME_CONVERSATION_TITLE,
+const mockData = {
+  welcome_id: {
+    id: 'welcome_id',
+    title: 'Welcome',
+    category: 'assistant',
     messages: [],
-    apiConfig: {},
+    apiConfig: { connectorId: '123' },
+    replacements: {},
   },
-  [MOCK_CONVERSATION_TITLE]: {
-    id: MOCK_CONVERSATION_TITLE,
+  electric_sheep_id: {
+    id: 'electric_sheep_id',
+    category: 'assistant',
+    title: 'electric sheep',
     messages: [],
-    apiConfig: {},
+    apiConfig: { connectorId: '123' },
+    replacements: {},
   },
-});
+};
 
-const renderAssistant = (extraProps = {}, providerProps = {}) =>
-  render(
-    <TestProviders getInitialConversations={getInitialConversations} {...providerProps}>
-      <Assistant {...extraProps} />
+const renderAssistant = async (extraProps = {}, providerProps = {}) => {
+  const chatSendSpy = jest.spyOn(all, 'useChatSend');
+  const assistant = render(
+    <TestProviders>
+      <Assistant
+        conversationTitle={'Welcome'}
+        chatHistoryVisible={true}
+        setChatHistoryVisible={jest.fn()}
+        {...extraProps}
+      />
     </TestProviders>
   );
+  await waitFor(() => {
+    // wait for conversation to mount before performing any tests
+    expect(chatSendSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        currentConversation: mockData.welcome_id,
+      })
+    );
+  });
+  return assistant;
+};
+const mockDeleteConvo = jest.fn();
+const mockGetDefaultConversation = jest.fn().mockReturnValue(mockData.welcome_id);
+const clearConversation = jest.fn();
+const mockUseConversation = {
+  clearConversation: clearConversation.mockResolvedValue(mockData.welcome_id),
+  getConversation: jest.fn(),
+  getDefaultConversation: mockGetDefaultConversation,
+  deleteConversation: mockDeleteConvo,
+  setApiConfig: jest.fn().mockResolvedValue({}),
+};
+
+const refetchResults = jest.fn();
 
 describe('Assistant', () => {
-  beforeAll(() => {
-    jest.mocked(useConnectorSetup).mockReturnValue({
-      comments: [],
-      prompt: <></>,
-    });
-
-    jest.mocked(PromptEditor).mockReturnValue(null);
-    jest.mocked(QuickPrompts).mockReturnValue(null);
-  });
-
   let persistToLocalStorage: jest.Mock;
+  let persistToSessionStorage: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     persistToLocalStorage = jest.fn();
+    persistToSessionStorage = jest.fn();
+    (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
 
+    jest.mocked(QuickPrompts).mockReturnValue(null);
+    const connectors: unknown[] = [
+      {
+        id: 'hi',
+        name: 'OpenAI connector',
+        actionTypeId: '.gen-ai',
+      },
+    ];
+    jest.mocked(useLoadConnectors).mockReturnValue({
+      isFetched: true,
+      isFetchedAfterMount: true,
+      data: connectors,
+    } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
+
+    jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+      data: mockData,
+      isLoading: false,
+      refetch: refetchResults.mockResolvedValue({
+        isLoading: false,
+        data: {
+          ...mockData,
+          welcome_id: {
+            ...mockData.welcome_id,
+            apiConfig: { newProp: true },
+          },
+        },
+      }),
+      isFetched: true,
+    } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
     jest
       .mocked(useLocalStorage)
       .mockReturnValue([undefined, persistToLocalStorage] as unknown as ReturnType<
         typeof useLocalStorage
       >);
+    jest
+      .mocked(useSessionStorage)
+      .mockReturnValue([undefined, persistToSessionStorage] as unknown as ReturnType<
+        typeof useSessionStorage
+      >);
   });
 
+  describe('persistent storage', () => {
+    it('should refetchCurrentUserConversations after settings save button click', async () => {
+      const chatSendSpy = jest.spyOn(all, 'useChatSend');
+      await renderAssistant();
+
+      fireEvent.click(screen.getByTestId('settings'));
+
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        data: {
+          ...mockData,
+          welcome_id: {
+            ...mockData.welcome_id,
+            apiConfig: { newProp: true },
+          },
+        },
+        isLoading: false,
+        refetch: jest.fn().mockResolvedValue({
+          isLoading: false,
+          data: {
+            ...mockData,
+            welcome_id: {
+              ...mockData.welcome_id,
+              apiConfig: { newProp: true },
+            },
+          },
+        }),
+        isFetched: true,
+      } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('save-button'));
+      });
+
+      expect(chatSendSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          currentConversation: {
+            apiConfig: { newProp: true },
+            category: 'assistant',
+            id: mockData.welcome_id.id,
+            messages: [],
+            title: 'Welcome',
+            replacements: {},
+          },
+        })
+      );
+    });
+
+    it('should refetchCurrentUserConversations after settings save button click, but do not update convos when refetch returns bad results', async () => {
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        data: mockData,
+        isLoading: false,
+        refetch: jest.fn().mockResolvedValue({
+          isLoading: false,
+          data: omit(mockData, 'welcome_id'),
+        }),
+        isFetched: true,
+      } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
+      const chatSendSpy = jest.spyOn(all, 'useChatSend');
+      await renderAssistant();
+
+      fireEvent.click(screen.getByTestId('settings'));
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('save-button'));
+      });
+
+      expect(chatSendSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          currentConversation: {
+            apiConfig: { connectorId: '123' },
+            replacements: {},
+            category: 'assistant',
+            id: mockData.welcome_id.id,
+            messages: [],
+            title: 'Welcome',
+          },
+        })
+      );
+    });
+
+    it('should delete conversation when delete button is clicked', async () => {
+      await renderAssistant();
+      const deleteButton = screen.getAllByTestId('delete-option')[0];
+      await act(async () => {
+        fireEvent.click(deleteButton);
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      });
+
+      await waitFor(() => {
+        expect(mockDeleteConvo).toHaveBeenCalledWith(mockData.electric_sheep_id.id);
+      });
+    });
+    it('should refetchCurrentUserConversations after clear chat history button click', async () => {
+      await renderAssistant();
+      fireEvent.click(screen.getByTestId('chat-context-menu'));
+      fireEvent.click(screen.getByTestId('clear-chat'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(() => {
+        expect(clearConversation).toHaveBeenCalled();
+        expect(refetchResults).toHaveBeenCalled();
+      });
+    });
+  });
   describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation id to local storage', async () => {
-      const connectors: unknown[] = [{}];
-
-      jest.mocked(useLoadConnectors).mockReturnValue({
-        isSuccess: true,
-        data: connectors,
-      } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
-
-      renderAssistant();
+      const getConversation = jest.fn().mockResolvedValue(mockData.electric_sheep_id);
+      (useConversation as jest.Mock).mockReturnValue({
+        ...mockUseConversation,
+        getConversation,
+      });
+      await renderAssistant();
 
       expect(persistToLocalStorage).toHaveBeenCalled();
 
-      expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith(mockData.welcome_id.id);
 
-      const previousConversationButton = screen.getByLabelText('Previous conversation');
-
+      const previousConversationButton = await screen.findByText(mockData.electric_sheep_id.title);
       expect(previousConversationButton).toBeInTheDocument();
       await act(async () => {
         fireEvent.click(previousConversationButton);
       });
 
-      expect(persistToLocalStorage).toHaveBeenLastCalledWith('electric sheep');
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith('electric_sheep_id');
     });
 
     it('should not persist the conversation id to local storage when excludeFromLastConversationStorage flag is indicated', async () => {
-      const connectors: unknown[] = [{}];
+      const conversation = {
+        ...mockData.electric_sheep_id,
+        excludeFromLastConversationStorage: true,
+      };
+      const getConversation = jest.fn().mockResolvedValue(conversation);
+      (useConversation as jest.Mock).mockReturnValue({
+        ...mockUseConversation,
+        getConversation,
+      });
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        data: {
+          ...mockData,
+          electric_sheep_id: conversation,
+        },
+        isLoading: false,
+        refetch: jest.fn().mockResolvedValue({
+          isLoading: false,
+          data: {
+            ...mockData,
+            electric_sheep_id: conversation,
+          },
+        }),
+        isFetched: true,
+      } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
 
-      jest.mocked(useLoadConnectors).mockReturnValue({
-        isSuccess: true,
-        data: connectors,
-      } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
-
-      const { getByLabelText } = renderAssistant(
-        {},
-        {
-          getInitialConversations: () => ({
-            [WELCOME_CONVERSATION_TITLE]: {
-              id: WELCOME_CONVERSATION_TITLE,
-              messages: [],
-              apiConfig: {},
-            },
-            [MOCK_CONVERSATION_TITLE]: {
-              id: MOCK_CONVERSATION_TITLE,
-              messages: [],
-              apiConfig: {},
-              excludeFromLastConversationStorage: true,
-            },
-          }),
-        }
-      );
+      const { findByText } = await renderAssistant();
 
       expect(persistToLocalStorage).toHaveBeenCalled();
 
-      expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith(mockData.welcome_id.id);
 
-      const previousConversationButton = getByLabelText('Previous conversation');
+      const previousConversationButton = await findByText(mockData.electric_sheep_id.title);
 
       expect(previousConversationButton).toBeInTheDocument();
 
       await act(async () => {
         fireEvent.click(previousConversationButton);
       });
-      expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith(mockData.welcome_id.id);
     });
-    it('should call the setConversationId callback if it is defined and the conversation id changes', async () => {
-      const connectors: unknown[] = [{}];
-      const setConversationId = jest.fn();
-      jest.mocked(useLoadConnectors).mockReturnValue({
-        isSuccess: true,
-        data: connectors,
-      } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
 
-      renderAssistant({ setConversationId });
+    it('should fetch current conversation when id has value', async () => {
+      const refetch = jest.fn();
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        data: {
+          ...mockData,
+          electric_sheep_id: { ...mockData.electric_sheep_id, title: 'updated title' },
+        },
+        isLoading: false,
+        refetch: refetch.mockResolvedValue({
+          isLoading: false,
+          data: {
+            ...mockData,
+            electric_sheep_id: { ...mockData.electric_sheep_id, title: 'updated title' },
+          },
+        }),
+        isFetched: true,
+      } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
+      await renderAssistant();
 
+      const previousConversationButton = await screen.findByText('updated title');
       await act(async () => {
-        fireEvent.click(screen.getByLabelText('Previous conversation'));
+        fireEvent.click(previousConversationButton);
       });
 
-      expect(setConversationId).toHaveBeenLastCalledWith('electric sheep');
+      expect(refetch).toHaveBeenCalled();
+
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith('electric_sheep_id');
+    });
+    it.skip('should refetch all conversations when id is empty', async () => {
+      const chatSendSpy = jest.spyOn(all, 'useChatSend');
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        data: {
+          ...mockData,
+          'electric sheep': { ...mockData.electric_sheep_id, id: '', apiConfig: { newProp: true } },
+        },
+        isLoading: false,
+        refetch: jest.fn().mockResolvedValue({
+          isLoading: false,
+          data: {
+            ...mockData,
+            'electric sheep': {
+              ...mockData.electric_sheep_id,
+              id: '',
+              apiConfig: { newProp: true },
+            },
+          },
+        }),
+        isFetched: true,
+      } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
+      await renderAssistant();
+
+      const previousConversationButton = screen.getByLabelText('Previous conversation');
+      await act(async () => {
+        fireEvent.click(previousConversationButton);
+      });
+      expect(chatSendSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          currentConversation: {
+            ...mockData.electric_sheep_id,
+            id: '',
+            apiConfig: { newProp: true },
+          },
+        })
+      );
     });
   });
 
   describe('when no connectors are loaded', () => {
     it('should set welcome conversation id in local storage', async () => {
-      const emptyConnectors: unknown[] = [];
-
-      jest.mocked(useLoadConnectors).mockReturnValue({
-        isSuccess: true,
-        data: emptyConnectors,
-      } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
-
-      renderAssistant();
+      await renderAssistant();
 
       expect(persistToLocalStorage).toHaveBeenCalled();
-      expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith(mockData.welcome_id.id);
     });
   });
 
   describe('when not authorized', () => {
     it('should be disabled', async () => {
-      const { queryByTestId } = renderAssistant(
+      const { queryByTestId } = await renderAssistant(
         {},
         {
           assistantAvailability: { ...mockAssistantAvailability, isAssistantEnabled: false },

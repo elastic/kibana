@@ -25,6 +25,7 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { ConfigSchema } from '../server/config';
 import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
 
@@ -49,8 +50,13 @@ export interface PluginsDependencies {
 
 export class TransformUiPlugin {
   private isServerless: boolean = false;
-  constructor(initializerContext: PluginInitializerContext) {
+  private experimentalFeatures: ConfigSchema['experimental'] = {
+    ruleFormV2Enabled: false,
+  };
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    this.experimentalFeatures =
+      initializerContext.config.get().experimental ?? this.experimentalFeatures;
   }
 
   public setup(coreSetup: CoreSetup<PluginsDependencies>, pluginsSetup: PluginsDependencies): void {
@@ -66,7 +72,12 @@ export class TransformUiPlugin {
       order: 5,
       mount: async (params) => {
         const { mountManagementSection } = await import('./app/mount_management_section');
-        return mountManagementSection(coreSetup, params, this.isServerless);
+        return mountManagementSection(
+          coreSetup,
+          params,
+          this.isServerless,
+          this.experimentalFeatures
+        );
       },
     });
     registerFeature(home);

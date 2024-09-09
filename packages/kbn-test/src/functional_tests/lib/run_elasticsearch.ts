@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Url from 'url';
@@ -11,7 +12,8 @@ import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ArtifactLicense } from '@kbn/es';
+import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
+import { isServerlessProjectType } from '@kbn/es/src/utils';
 import type { Config } from '../../functional_test_runner';
 import { createTestEsCluster, esTestConfig } from '../../es';
 
@@ -53,7 +55,9 @@ function getEsConfig({
   const serverless: boolean = config.get('serverless');
   const files: string[] | undefined = config.get('esTestCluster.files');
 
-  const esServerlessOptions = getESServerlessOptions(esServerlessImage, config);
+  const esServerlessOptions = serverless
+    ? getESServerlessOptions(esServerlessImage, config)
+    : undefined;
 
   return {
     ssl,
@@ -162,6 +166,7 @@ async function startEsNode({
 }
 
 interface EsServerlessOptions {
+  projectType: ServerlessProjectType;
   host?: string;
   resources: string[];
   kibanaUrl: string;
@@ -184,7 +189,24 @@ function getESServerlessOptions(
   const serverlessHost: string | undefined =
     config.has('esServerlessOptions.host') && config.get('esServerlessOptions.host');
 
+  const kbnServerArgs =
+    (config.has('kbnTestServer.serverArgs') &&
+      (config.get('kbnTestServer.serverArgs') as string[])) ||
+    [];
+
+  const projectType = kbnServerArgs
+    .filter((arg) => arg.startsWith('--serverless'))
+    .reduce((acc, arg) => {
+      const match = arg.match(/--serverless[=\s](\w+)/);
+      return acc + (match ? match[1] : '');
+    }, '') as ServerlessProjectType;
+
+  if (!isServerlessProjectType(projectType)) {
+    throw new Error(`Unsupported serverless projectType: ${projectType}`);
+  }
+
   const commonOptions = {
+    projectType,
     host: serverlessHost,
     resources: serverlessResources,
     kibanaUrl: Url.format({

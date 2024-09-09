@@ -24,7 +24,7 @@ type ErrorGroupsDetailedStatistics =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -64,14 +64,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177656
   registry.when('Error groups detailed statistics', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       const { PROD_LIST_ERROR_RATE, PROD_ID_ERROR_RATE } = config;
       before(async () => {
-        await generateData({ serviceName, start, end, synthtraceEsClient });
+        await generateData({ serviceName, start, end, apmSynthtraceEsClient });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('without data comparison', () => {
         let errorGroupsDetailedStatistics: ErrorGroupsDetailedStatistics;

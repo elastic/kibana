@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
-import { CoreStart } from '@kbn/core/public';
-import { CanvasServices } from './services';
-import { CanvasSetup, CanvasStart, CanvasStartDeps, CanvasPlugin } from './plugin';
+import type { PluginInitializerContext } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { CanvasServices } from './services';
+import { type CanvasSetup, type CanvasStart, type CanvasStartDeps, CanvasPlugin } from './plugin';
 
 export type { CanvasSetup, CanvasStart };
 

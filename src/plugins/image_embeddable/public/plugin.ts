@@ -1,25 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
-import { IMAGE_EMBEDDABLE_TYPE, ImageEmbeddableFactoryDefinition } from './image_embeddable';
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { imageClickTrigger } from './actions';
+import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { IMAGE_EMBEDDABLE_TYPE } from './image_embeddable/constants';
+import { registerCreateImageAction } from './actions/create_image_action';
 
-export interface SetupDependencies {
+export interface ImageEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
   files: FilesSetup;
   security?: SecurityPluginSetup;
@@ -27,12 +30,13 @@ export interface SetupDependencies {
   screenshotMode?: ScreenshotModePluginSetup;
 }
 
-export interface StartDependencies {
-  embeddable: EmbeddableStart;
+export interface ImageEmbeddableStartDependencies {
   files: FilesStart;
   security?: SecurityPluginStart;
   uiActions: UiActionsStart;
+  embeddable: EmbeddableStart;
   screenshotMode?: ScreenshotModePluginStart;
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -42,36 +46,40 @@ export interface SetupContract {}
 export interface StartContract {}
 
 export class ImageEmbeddablePlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
+  implements
+    Plugin<
+      SetupContract,
+      StartContract,
+      ImageEmbeddableSetupDependencies,
+      ImageEmbeddableStartDependencies
+    >
 {
-  constructor(protected readonly context: PluginInitializerContext) {}
+  constructor() {}
 
-  public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
-    const start = createStartServicesGetter(core.getStartServices);
-    plugins.embeddable.registerEmbeddableFactory(
-      IMAGE_EMBEDDABLE_TYPE,
-      new ImageEmbeddableFactoryDefinition({
-        start: () => ({
-          application: start().core.application,
-          overlays: start().core.overlays,
-          files: start().plugins.files.filesClientFactory.asUnscoped(),
-          externalUrl: start().core.http.externalUrl,
-          theme: start().core.theme,
-          getUser: async () => {
-            const security = start().plugins.security;
-            return security ? await security.authc.getCurrentUser() : undefined;
-          },
-          uiActions: start().plugins.uiActions,
-          isScreenshotMode: () => plugins.screenshotMode?.isScreenshotMode() ?? false,
-        }),
-      })
-    );
-
+  public setup(
+    core: CoreSetup<ImageEmbeddableStartDependencies>,
+    plugins: ImageEmbeddableSetupDependencies
+  ): SetupContract {
     plugins.uiActions.registerTrigger(imageClickTrigger);
+
+    plugins.embeddable.registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
+      const [_, { getImageEmbeddableFactory }, [__, { embeddableEnhanced }]] = await Promise.all([
+        untilPluginStartServicesReady(),
+        import('./image_embeddable/get_image_embeddable_factory'),
+        core.getStartServices(),
+      ]);
+      return getImageEmbeddableFactory({ embeddableEnhanced });
+    });
     return {};
   }
 
-  public start(core: CoreStart, plugins: StartDependencies): StartContract {
+  public start(core: CoreStart, plugins: ImageEmbeddableStartDependencies): StartContract {
+    setKibanaServices(core, plugins);
+
+    untilPluginStartServicesReady().then(() => {
+      registerCreateImageAction();
+    });
+
     return {};
   }
 

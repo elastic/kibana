@@ -14,18 +14,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-i18n-server-mocks",
-        "id": "def-common.i18nServiceMock",
+        "id": "def-server.i18nServiceMock",
         "type": "Object",
         "tags": [],
         "label": "i18nServiceMock",
@@ -36,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-i18n-server-mocks",
-            "id": "def-common.i18nServiceMock.create",
+            "id": "def-server.i18nServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +44,7 @@
           },
           {
             "parentPluginId": "@kbn/core-i18n-server-mocks",
-            "id": "def-common.i18nServiceMock.createSetupContract",
+            "id": "def-server.i18nServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -61,10 +53,34 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-i18n-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreI18nServerPluginApi",
-                "section": "def-common.I18nServiceSetup",
+                "section": "def-server.I18nServiceSetup",
                 "text": "I18nServiceSetup"
+              },
+              ">"
+            ],
+            "path": "packages/core/i18n/core-i18n-server-mocks/src/i18n_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-i18n-server-mocks",
+            "id": "def-server.i18nServiceMock.createInternalPrebootContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalPrebootContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-i18n-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreI18nServerInternalPluginApi",
+                "section": "def-server.InternalI18nServicePreboot",
+                "text": "InternalI18nServicePreboot"
               },
               ">"
             ],
@@ -78,5 +94,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

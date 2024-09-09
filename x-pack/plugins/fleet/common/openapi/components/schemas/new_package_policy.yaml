@@ -13,6 +13,8 @@ properties:
         type: string
       title:
         type: string
+      requires_root:
+        type: boolean  
     required:
       - name
       - version
@@ -20,7 +22,6 @@ properties:
     type: string
   output_id:
     type: string
-    deprecated: true
   inputs:
     type: array
     items:
@@ -46,10 +47,18 @@ properties:
         - enabled
   policy_id:
     type: string
+    nullable: true
+    deprecated: true
+  policy_ids:
+    type: array
+    items:
+      type: string  
   name:
     type: string
   description:
     type: string
+  overrides:
+    type: object
 required:
   - inputs
   - name

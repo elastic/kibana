@@ -80,7 +80,7 @@ export const SourceContent: React.FC = () => {
   const hasItems = totalItems > 0;
   const emptyMessage = contentFilterValue
     ? i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.noContentForValue.message', {
-        defaultMessage: "No results for '{contentFilterValue}'",
+        defaultMessage: "No results for ''{contentFilterValue}''",
         values: { contentFilterValue },
       })
     : NO_CONTENT_MESSAGE;

@@ -16,7 +16,7 @@ export const CHECK_EXCEPTION_TTL_ACTION_TYPES = {
 } as const;
 
 export type CheckExceptionTtlActionTypes =
-  typeof CHECK_EXCEPTION_TTL_ACTION_TYPES[keyof typeof CHECK_EXCEPTION_TTL_ACTION_TYPES];
+  (typeof CHECK_EXCEPTION_TTL_ACTION_TYPES)[keyof typeof CHECK_EXCEPTION_TTL_ACTION_TYPES];
 
 interface IncludeExpiredExceptionsModalProps {
   handleCloseModal: () => void;

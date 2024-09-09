@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
   EuiDescribedFormGroup,
@@ -16,9 +14,14 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import { validateTopNBucket } from '../validators';
+import { TOP_N_BUCKETS_COUNT } from '../../../common/constants/alerts';
 import { type MlAnomalyDetectionAlertAdvancedSettings } from '../../../common/types/alerts';
 import { TimeIntervalControl } from '../time_interval_control';
-import { TOP_N_BUCKETS_COUNT } from '../../../common/constants/alerts';
 
 interface AdvancedSettingsProps {
   value: MlAnomalyDetectionAlertAdvancedSettings;
@@ -26,6 +29,13 @@ interface AdvancedSettingsProps {
 }
 
 export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, onChange }) => {
+  const topNBucketsValidationErrors = useMemo(() => {
+    if (!isDefined(value.topNBuckets)) {
+      return null;
+    }
+    return validateTopNBucket(value.topNBuckets);
+  }, [value.topNBuckets]);
+
   return (
     <EuiAccordion
       id="mlAnomalyAlertAdvancedSettings"
@@ -100,6 +110,8 @@ export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, 
               defaultMessage="Number of latest buckets"
             />
           }
+          isInvalid={topNBucketsValidationErrors !== null}
+          data-test-subj={'mlAnomalyAlertTopNBucketsFormRow'}
         >
           <EuiFieldNumber
             value={value.topNBuckets ?? TOP_N_BUCKETS_COUNT}
@@ -108,6 +120,7 @@ export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, 
               onChange({ topNBuckets: Number(e.target.value) });
             }}
             data-test-subj={'mlAnomalyAlertTopNBuckets'}
+            isInvalid={topNBucketsValidationErrors !== null}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

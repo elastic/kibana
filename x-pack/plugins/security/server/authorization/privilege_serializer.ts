@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { PRIVILEGES_ALL_WILDCARD } from '../../common/constants';
+
 const featurePrefix = 'feature_';
 const spacePrefix = 'space_';
 const reservedPrefix = 'reserved_';
-const basePrivilegeNames = ['all', 'read'];
+const basePrivilegeNames = ['all', 'read', PRIVILEGES_ALL_WILDCARD];
 const globalBasePrivileges = [...basePrivilegeNames];
 const spaceBasePrivileges = basePrivilegeNames.map(
   (privilegeName) => `${spacePrefix}${privilegeName}`

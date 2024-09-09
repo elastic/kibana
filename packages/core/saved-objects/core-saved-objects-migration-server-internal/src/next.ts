@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -15,7 +16,7 @@ import type { WaitGroup } from './kibana_migrator_utils';
 import type {
   AllActionStates,
   CalculateExcludeFiltersState,
-  CheckTargetMappingsState,
+  CheckTargetTypesMappingsState,
   CheckUnknownDocumentsState,
   CleanupUnknownAndExcluded,
   CleanupUnknownAndExcludedWaitForTaskState,
@@ -80,21 +81,20 @@ export const nextActionMap = (
 ) => {
   return {
     INIT: (state: InitState) =>
-      Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
+      Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_MIGRATION_COMPLETION: (state: WaitForMigrationCompletionState) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
-    UPDATE_SOURCE_MAPPINGS_PROPERTIES: ({
-      sourceIndex,
-      sourceIndexMappings,
-      targetIndexMappings,
-    }: UpdateSourceMappingsPropertiesState) =>
+    UPDATE_SOURCE_MAPPINGS_PROPERTIES: (state: UpdateSourceMappingsPropertiesState) =>
       Actions.updateSourceMappingsProperties({
         client,
-        sourceIndex: sourceIndex.value,
-        sourceMappings: sourceIndexMappings.value,
-        targetMappings: targetIndexMappings,
+        indexTypes: state.indexTypes,
+        sourceIndex: state.sourceIndex.value,
+        indexMappings: state.sourceIndexMappings.value,
+        appMappings: state.targetIndexMappings,
+        latestMappingsVersions: state.latestMappingsVersions,
+        hashToVersionMap: state.hashToVersionMap,
       }),
     CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
       Actions.cleanupUnknownAndExcluded({
@@ -118,6 +118,7 @@ export const nextActionMap = (
       Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
     REFRESH_SOURCE: (state: RefreshSource) =>
       Actions.refreshIndex({ client, index: state.sourceIndex.value }),
+    CHECK_CLUSTER_ROUTING_ALLOCATION: () => Actions.checkClusterRoutingAllocationEnabled(client),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,
@@ -126,7 +127,11 @@ export const nextActionMap = (
         knownTypes: state.knownTypes,
       }),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
-      Actions.setWriteBlock({ client, index: state.sourceIndex.value }),
+      Actions.safeWriteBlock({
+        client,
+        sourceIndex: state.sourceIndex.value,
+        targetIndex: state.targetIndex,
+      }),
     CALCULATE_EXCLUDE_FILTERS: (state: CalculateExcludeFiltersState) =>
       Actions.calculateExcludeFilters({
         client,
@@ -204,10 +209,13 @@ export const nextActionMap = (
       }),
     REFRESH_TARGET: (state: RefreshTarget) =>
       Actions.refreshIndex({ client, index: state.targetIndex }),
-    CHECK_TARGET_MAPPINGS: (state: CheckTargetMappingsState) =>
-      Actions.checkTargetMappings({
-        actualMappings: Option.toUndefined(state.sourceIndexMappings),
-        expectedMappings: state.targetIndexMappings,
+    CHECK_TARGET_MAPPINGS: (state: CheckTargetTypesMappingsState) =>
+      Actions.checkTargetTypesMappings({
+        indexTypes: state.indexTypes,
+        indexMappings: Option.toUndefined(state.sourceIndexMappings),
+        appMappings: state.targetIndexMappings,
+        latestMappingsVersions: state.latestMappingsVersions,
+        hashToVersionMap: state.hashToVersionMap,
       }),
     UPDATE_TARGET_MAPPINGS_PROPERTIES: (state: UpdateTargetMappingsPropertiesState) =>
       Actions.updateAndPickupMappings({
@@ -281,6 +289,8 @@ export const nextActionMap = (
       ),
     MARK_VERSION_INDEX_READY_CONFLICT: (state: MarkVersionIndexReadyConflict) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
+    LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
+      Actions.checkClusterRoutingAllocationEnabled(client),
     LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>
       Actions.setWriteBlock({ client, index: state.legacyIndex }),
     LEGACY_CREATE_REINDEX_TARGET: (state: LegacyCreateReindexTargetState) =>
@@ -334,7 +344,7 @@ export const next = (
       // instead of the union.
       const nextAction = map[state.controlState] as (
         state: State
-      ) => ReturnType<typeof map[AllActionStates]>;
+      ) => ReturnType<(typeof map)[AllActionStates]>;
       return delay(nextAction(state));
     }
   };

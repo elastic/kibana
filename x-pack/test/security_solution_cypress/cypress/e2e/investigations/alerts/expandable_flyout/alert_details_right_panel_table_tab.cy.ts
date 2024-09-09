@@ -6,7 +6,7 @@
  */
 
 import { openTableTab } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { closeTimeline, openActiveTimeline } from '../../../../tasks/timeline';
 import { PROVIDER_BADGE } from '../../../../screens/timeline';
 import { removeKqlFilter } from '../../../../tasks/search_bar';
@@ -43,7 +43,7 @@ describe(
       createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
+      expandAlertAtIndexExpandableFlyout();
       openTableTab();
     });
 
@@ -97,11 +97,11 @@ describe(
 
       const timestampColumn = '@timestamp';
       cy.get(TIMESTAMP_COLUMN).should('be.visible');
-      cy.get(COLUMN_HEADER).should('contain.text', timestampColumn);
+      cy.get(COLUMN_HEADER).first().should('contain.text', timestampColumn);
       toggleColumnTableTabTable();
-      cy.get(COLUMN_HEADER).should('not.contain.text', timestampColumn);
+      cy.get(COLUMN_HEADER).first().should('not.contain.text', timestampColumn);
       toggleColumnTableTabTable();
-      cy.get(TIMESTAMP_COLUMN).should('be.visible');
+      cy.get(TIMESTAMP_COLUMN).first().should('be.visible');
       cy.get(COLUMN_HEADER).should('contain.text', timestampColumn);
     });
   }

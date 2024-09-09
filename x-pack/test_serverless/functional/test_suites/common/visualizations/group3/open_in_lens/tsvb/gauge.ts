@@ -36,13 +36,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Convert to Lens" menu item', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Basic');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(true);
+      expect(await panelActions.canConvertToLensByTitle('Gauge - Basic')).to.eql(true);
     });
 
     it('should convert to Lens', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Basic');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Gauge - Basic');
       await lens.waitForVisualization('mtrVis');
 
       const metricData = await lens.getMetricVisualizationData();
@@ -50,8 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert metric with params', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Value count');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Gauge - Value count');
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
         const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
@@ -65,23 +62,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should not allow converting of unsupported metric', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Unsupported metric');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Gauge - Unsupported metric')).to.eql(
+        false
+      );
     });
 
     it('should not allow converting of invalid panel', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Invalid panel');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Gauge - Invalid panel')).to.eql(false);
     });
 
     it('should convert color ranges', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Color ranges');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Gauge - Color ranges');
       await lens.waitForVisualization('mtrVis');
 
       await retry.try(async () => {
         const closePalettePanels = await testSubjects.findAll(
-          'lns-indexPattern-PalettePanelContainerBack'
+          'lns-indexPattern-SettingWithSiblingFlyoutBack'
         );
         if (closePalettePanels.length) {
           await lens.closePalettePanel();
@@ -93,7 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await dimensions[0].click();
 
-        await lens.openPalettePanel('lnsMetric');
+        await lens.openPalettePanel();
         const colorStops = await lens.getPaletteColorStops();
 
         expect(colorStops).to.eql([
@@ -106,15 +102,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should bring the ignore global filters configured at series level over', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Ignore global filters series');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Gauge - Ignore global filters series');
       await lens.waitForVisualization('mtrVis');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
 
     it('should bring the ignore global filters configured at panel level over', async () => {
-      const visPanel = await panelActions.getPanelHeading('Gauge - Ignore global filters panel');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Gauge - Ignore global filters panel');
       await lens.waitForVisualization('mtrVis');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });

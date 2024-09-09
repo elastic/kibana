@@ -1,17 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fastIsEqual from 'fast-deep-equal';
@@ -50,8 +43,6 @@ interface EditControlGroupProps {
   onClose: () => void;
 }
 
-type EditorControlGroupInput = ControlGroupInput;
-
 const editorControlGroupInputIsEqual = (a: ControlGroupInput, b: ControlGroupInput) =>
   fastIsEqual(a, b);
 
@@ -62,7 +53,7 @@ export const ControlGroupEditor = ({
   onDeleteAll,
   onClose,
 }: EditControlGroupProps) => {
-  const [controlGroupEditorState, setControlGroupEditorState] = useState<EditorControlGroupInput>({
+  const [controlGroupEditorState, setControlGroupEditorState] = useState<ControlGroupInput>({
     ...getDefaultControlGroupInput(),
     ...initialInput,
   });
@@ -92,7 +83,9 @@ export const ControlGroupEditor = ({
 
   const applyChangesToInput = useCallback(() => {
     const inputToApply = { ...controlGroupEditorState };
-    if (!editorControlGroupInputIsEqual(inputToApply, initialInput)) updateInput(inputToApply);
+    if (!editorControlGroupInputIsEqual(inputToApply, initialInput)) {
+      updateInput(inputToApply);
+    }
   }, [controlGroupEditorState, initialInput, updateInput]);
 
   return (
@@ -160,7 +153,7 @@ export const ControlGroupEditor = ({
                 label={
                   <ControlSettingTooltipLabel
                     label={ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsTitle()}
-                    tooltip={ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsSubTitle()}
+                    tooltip={ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsTooltip()}
                   />
                 }
                 checked={!Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreValidations)}
@@ -173,13 +166,30 @@ export const ControlGroupEditor = ({
                 label={
                   <ControlSettingTooltipLabel
                     label={ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchyTitle()}
-                    tooltip={ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchySubTitle()}
+                    tooltip={ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchyTooltip()}
                   />
                 }
                 checked={controlGroupEditorState.chainingSystem === 'HIERARCHICAL'}
                 onChange={(e) =>
                   updateControlGroupEditorSetting({
                     chainingSystem: e.target.checked ? 'HIERARCHICAL' : 'NONE',
+                  })
+                }
+              />
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                compressed
+                data-test-subj="control-group-auto-apply-selections"
+                label={
+                  <ControlSettingTooltipLabel
+                    label={ControlGroupStrings.management.selectionSettings.showApplySelections.getShowApplySelectionsTitle()}
+                    tooltip={ControlGroupStrings.management.selectionSettings.showApplySelections.getShowApplySelectionsTooltip()}
+                  />
+                }
+                checked={!controlGroupEditorState.showApplySelections}
+                onChange={(e) =>
+                  updateControlGroupEditorSetting({
+                    showApplySelections: !e.target.checked,
                   })
                 }
               />

@@ -6,18 +6,13 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "create": "__flag__",
-      "flat_settings": "__flag__",
       "master_timeout": [
         "30s",
         "-1",
         "0"
       ],
-      "timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
-      "order": ""
+      "order": "",
+      "cause": ""
     },
     "methods": [
       "PUT",
@@ -26,7 +21,7 @@
     "patterns": [
       "_template/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates-v1.html",
     "availability": {
       "stack": true,
       "serverless": true

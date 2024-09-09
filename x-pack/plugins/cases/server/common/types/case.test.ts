@@ -12,7 +12,7 @@ import {
   getPartialCaseTransformedAttributesRt,
   OwnerRt,
 } from './case';
-import { decodeOrThrow } from '../../../common/api';
+import { decodeOrThrow } from '../runtime_types';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 
 describe('case types', () => {

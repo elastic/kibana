@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, memo, FC } from 'react';
+import React, { useState, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 
-export const FunctionHelpPopover: FC = memo(() => {
+export const FunctionHelpPopover = memo(() => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -242,7 +242,7 @@ export const FunctionHelpPopover: FC = memo(() => {
           items={items}
           compressed={true}
           columns={columns}
-          responsive={false}
+          responsiveBreakpoint={false}
         />
       </EuiPanel>
       <EuiPanel color="transparent" paddingSize="s">

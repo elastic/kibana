@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import type { GetFieldsData } from './use_get_fields_data';
 import { ANCESTOR_ID } from '../constants/field_names';
 import { getField } from '../utils';
 
 export interface ShowRelatedAlertsBySameSourceEventParams {
+  /**
+   * Id of the event document
+   */
+  eventId: string;
   /**
    * Retrieves searchHit values for the provided field
    */
@@ -24,18 +28,19 @@ export interface ShowRelatedAlertsBySameSourceEventResult {
   /**
    * Value of the kibana.alert.original_event.id field
    */
-  originalEventId?: string;
+  originalEventId: string;
 }
 
 /**
- * Returns true if document has kibana.alert.original.event.id field with values
+ * Returns kibana.alert.ancestors.id field or default eventId
  */
 export const useShowRelatedAlertsBySameSourceEvent = ({
+  eventId,
   getFieldsData,
 }: ShowRelatedAlertsBySameSourceEventParams): ShowRelatedAlertsBySameSourceEventResult => {
-  const originalEventId = getField(getFieldsData(ANCESTOR_ID));
+  const originalEventId = getField(getFieldsData(ANCESTOR_ID)) ?? eventId;
   return {
-    show: originalEventId != null,
-    ...(originalEventId && { originalEventId }),
+    show: true,
+    originalEventId,
   };
 };

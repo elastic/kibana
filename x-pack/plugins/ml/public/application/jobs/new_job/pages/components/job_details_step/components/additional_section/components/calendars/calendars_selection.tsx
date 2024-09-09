@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiComboBoxProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -22,10 +22,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
-import { ml } from '../../../../../../../../../services/ml_api_service';
 import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app';
-import { Calendar } from '../../../../../../../../../../../common/types/calendars';
-import { useMlKibana } from '../../../../../../../../../contexts/kibana';
+import type { Calendar } from '../../../../../../../../../../../common/types/calendars';
+import { useMlApi, useMlKibana } from '../../../../../../../../../contexts/kibana';
 import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../../../../../../../common/constants/locator';
 
@@ -35,6 +34,7 @@ export const CalendarsSelection: FC = () => {
       application: { getUrlForApp },
     },
   } = useMlKibana();
+  const mlApi = useMlApi();
 
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [selectedCalendars, setSelectedCalendars] = useState<Calendar[]>(jobCreator.calendars);
@@ -46,7 +46,7 @@ export const CalendarsSelection: FC = () => {
 
   async function loadCalendars() {
     setIsLoading(true);
-    const calendars = (await ml.calendars()).filter(
+    const calendars = (await mlApi.calendars()).filter(
       (c) => c.job_ids.includes(GLOBAL_CALENDAR) === false
     );
     setOptions(calendars.map((c) => ({ label: c.calendar_id, value: c })));

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SavedObjectAttributes, SavedObjectsCreateOptions, OverlayStart } from '@kbn/core/public';
 import { SavedObjectsClientContract } from '@kbn/core/public';
+import { analyticsServiceMock, i18nServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { saveWithConfirmation } from './save_with_confirmation';
 import * as deps from './confirm_modal_promise';
 import { OVERWRITE_REJECTED } from '../../constants';
@@ -22,6 +24,11 @@ describe('saveWithConfirmation', () => {
     title: 'test title',
     displayName: 'test display name',
   };
+  const startServices = {
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+    i18n: i18nServiceMock.createStartContract(),
+    theme: themeServiceMock.createStartContract(),
+  };
 
   beforeEach(() => {
     savedObjectsClient.create = jest.fn();
@@ -29,7 +36,13 @@ describe('saveWithConfirmation', () => {
   });
 
   test('should call create of savedObjectsClient', async () => {
-    await saveWithConfirmation(source, savedObject, options, { savedObjectsClient, overlays });
+    await saveWithConfirmation(
+      source,
+      savedObject,
+      options,
+      { savedObjectsClient, overlays },
+      startServices
+    );
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
       savedObject.getEsType(),
       source,
@@ -44,12 +57,23 @@ describe('saveWithConfirmation', () => {
         opt && opt.overwrite ? Promise.resolve({} as any) : Promise.reject({ res: { status: 409 } })
       );
 
-    await saveWithConfirmation(source, savedObject, options, { savedObjectsClient, overlays });
+    await saveWithConfirmation(
+      source,
+      savedObject,
+      options,
+      { savedObjectsClient, overlays },
+      startServices
+    );
     expect(deps.confirmModalPromise).toHaveBeenCalledWith(
       expect.any(String),
       expect.any(String),
       expect.any(String),
-      overlays
+      overlays,
+      expect.objectContaining({
+        analytics: expect.any(Object),
+        i18n: expect.any(Object),
+        theme: expect.any(Object),
+      })
     );
   });
 
@@ -60,7 +84,13 @@ describe('saveWithConfirmation', () => {
         opt && opt.overwrite ? Promise.resolve({} as any) : Promise.reject({ res: { status: 409 } })
       );
 
-    await saveWithConfirmation(source, savedObject, options, { savedObjectsClient, overlays });
+    await saveWithConfirmation(
+      source,
+      savedObject,
+      options,
+      { savedObjectsClient, overlays },
+      startServices
+    );
     expect(savedObjectsClient.create).toHaveBeenLastCalledWith(savedObject.getEsType(), source, {
       overwrite: true,
       ...options,
@@ -73,10 +103,16 @@ describe('saveWithConfirmation', () => {
 
     expect.assertions(1);
     await expect(
-      saveWithConfirmation(source, savedObject, options, {
-        savedObjectsClient,
-        overlays,
-      })
+      saveWithConfirmation(
+        source,
+        savedObject,
+        options,
+        {
+          savedObjectsClient,
+          overlays,
+        },
+        startServices
+      )
     ).rejects.toThrow(OVERWRITE_REJECTED);
   });
 });

@@ -18,6 +18,7 @@ import { act } from 'react-dom/test-utils';
 import { LensEmbeddableInput } from '../embeddable';
 import { loadInitial } from './lens_slice';
 import { Filter } from '@kbn/es-query';
+import faker from 'faker';
 
 const history = {
   location: {
@@ -92,8 +93,9 @@ describe('Initializing the store', () => {
             {
               icon: 'empty',
               id: 'testVis',
-              label: 'TEST1',
-              groupLabel: 'testVisGroup',
+              label: faker.lorem.word(),
+              sortPriority: 1,
+              description: faker.lorem.sentence(),
             },
           ],
         },
@@ -198,7 +200,7 @@ describe('Initializing the store', () => {
       expect(store.getState()).toEqual({
         lens: expect.objectContaining({
           visualization: {
-            state: { newState: 'newState' }, // new vis gets initialized
+            state: 'testVis initial state', // new vis gets initialized
             activeId: 'testVis',
           },
           activeDatasourceId: 'testDatasource2', // resets to first on the list

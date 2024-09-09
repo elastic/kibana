@@ -18,7 +18,7 @@ exports[`NoDataPageBody render 1`] = `
       color="subdued"
     >
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Add your data to get started, or {link} about {solution}."
           id="kibana-react.noDataPage.intro"
           values={
@@ -26,10 +26,9 @@ exports[`NoDataPageBody render 1`] = `
               "link": <EuiLink
                 href="test"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="learn more"
                   id="kibana-react.noDataPage.intro.link"
-                  values={Object {}}
                 />
               </EuiLink>,
               "solution": "Elastic",

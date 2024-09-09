@@ -37,7 +37,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async getWaffleMap() {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         const element = await testSubjects.find('waffleMap');
         if (!element) {
           throw new Error();
@@ -94,17 +94,17 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async clickOnFirstNode() {
       const firstNode = await this.getFirstNode();
-      firstNode.click();
+      return firstNode.click();
     },
 
     async clickOnGoToNodeDetails() {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         await testSubjects.click('viewAssetDetailsContextMenuItem');
       });
     },
 
     async clickOnNodeDetailsFlyoutOpenAsPage() {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         await testSubjects.click('infraAssetDetailsOpenAsPageButton');
       });
     },
@@ -139,7 +139,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
       // wait for input value to echo the input before submitting
       // this ensures the React state has caught up with the events
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         const value = await input.getAttribute('value');
         expect(value).to.eql(query);
       });
@@ -212,10 +212,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       return testSubjects.click('goToPods');
     },
 
-    async goToDocker() {
+    async goToContainer() {
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
-      return testSubjects.click('goToDocker');
+      return testSubjects.click('goToContainer');
     },
 
     async goToSettings() {
@@ -279,8 +279,12 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('createSavedViewButton');
     },
 
-    async getNoMetricsIndicesPrompt() {
-      return testSubjects.find('noDataPage');
+    async noDataPromptExists() {
+      return testSubjects.existOrFail('noDataPage');
+    },
+
+    async noDataPromptAddDataClick() {
+      return testSubjects.click('noDataDefaultFooterAction');
     },
 
     async getNoMetricsDataPrompt() {
@@ -294,9 +298,12 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async getInfraMissingMetricsIndicesCallout() {
       return testSubjects.find('infraIndicesPanelSettingsWarningCallout');
     },
+    async getInfraIndicesPanelSettingsWarningCalloutUsedByRules() {
+      return testSubjects.find('infraIndicesPanelSettingsWarningCalloutUsedByRules');
+    },
 
     async getInfraMissingRemoteClusterIndicesCallout() {
-      return testSubjects.find('infraIndicesPanelSettingsDangerCallout');
+      return testSubjects.find('infraIndicesPanelSettingsWarningCallout');
     },
 
     async openSourceConfigurationFlyout() {
@@ -474,6 +481,46 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async clickDismissKubernetesTourButton() {
       return testSubjects.click('infra-kubernetesTour-dismiss');
+    },
+
+    async clickCloseFlyoutButton() {
+      return testSubjects.click('euiFlyoutCloseButton');
+    },
+
+    async clickCustomMetricDropdown() {
+      await testSubjects.click('infraInventoryMetricDropdown');
+    },
+
+    async addCustomMetric(field: string) {
+      await testSubjects.click('infraModeSwitcherAddMetricButton');
+      const groupByCustomField = await testSubjects.find('infraCustomMetricFieldSelect');
+      await comboBox.setElement(groupByCustomField, field);
+      await testSubjects.click('infraCustomMetricFormSaveButton');
+    },
+
+    async getMetricsContextMenuItemsCount() {
+      const contextMenu = await testSubjects.find('infraInventoryMetricsContextMenu');
+      const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
+      return menuItems.length;
+    },
+
+    async ensureCustomMetricAddButtonIsDisabled() {
+      const button = await testSubjects.find('infraModeSwitcherAddMetricButton');
+      expect(await button.getAttribute('disabled')).to.be('true');
+    },
+
+    async clickAnomalyActionMenuButton() {
+      await testSubjects.click('infraAnomalyActionMenuButton');
+    },
+
+    async clickShowAffectedHostsButton() {
+      await this.clickAnomalyActionMenuButton();
+      await testSubjects.click('infraAnomalyFlyoutShowAffectedHosts');
+    },
+
+    async getAnomalyHostName() {
+      const element = await testSubjects.find('nodeNameRow');
+      return await element.getVisibleText();
     },
   };
 }

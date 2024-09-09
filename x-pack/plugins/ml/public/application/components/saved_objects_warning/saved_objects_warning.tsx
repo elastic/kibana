@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
-import { useMlApiContext } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import { JobSpacesSyncFlyout } from '../job_spaces_sync';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
@@ -26,7 +27,7 @@ export const SavedObjectsWarning: FC<Props> = ({
 }) => {
   const {
     savedObjects: { syncCheck },
-  } = useMlApiContext();
+  } = useMlApi();
 
   const mounted = useRef(false);
   const [showWarning, setShowWarning] = useState(false);

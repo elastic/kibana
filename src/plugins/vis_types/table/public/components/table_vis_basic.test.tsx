@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -13,6 +14,7 @@ import { FormattedColumn, TableVisConfig, TableVisUiState } from '../types';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createTableVisCell } from './table_vis_cell';
 import { createGridColumns } from './table_vis_columns';
+import { EuiDataGridProps } from '@elastic/eui';
 
 jest.mock('./table_vis_columns', () => ({
   createGridColumns: jest.fn(() => []),
@@ -107,7 +109,8 @@ describe('TableVisBasic', () => {
       undefined
     );
 
-    const { onSort } = comp.find('EuiDataGrid').prop('sorting');
+    const { onSort } = comp.find('EuiDataGrid').prop<EuiDataGridProps['sorting']>('sorting')!;
+
     // sort the first column
     onSort([{ id: 'first', direction: 'asc' }]);
     expect(uiStateProps.setSort).toHaveBeenCalledWith({ columnIndex: 0, direction: 'asc' });

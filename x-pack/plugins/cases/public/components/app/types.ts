@@ -11,7 +11,6 @@ import type { CasesNavigation } from '../links';
 import type { CasesTimelineIntegration } from '../timeline_context';
 
 export interface CasesRoutesProps {
-  onComponentInitialized?: () => void;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
@@ -22,4 +21,5 @@ export interface CasesRoutesProps {
    */
   refreshRef?: MutableRefObject<CaseViewRefreshPropInterface>;
   timelineIntegration?: CasesTimelineIntegration;
+  onAlertsTableLoaded?: (eventIds: Array<Partial<{ _id: string }>>) => void;
 }

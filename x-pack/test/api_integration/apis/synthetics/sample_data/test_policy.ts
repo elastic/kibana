@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import expect from 'expect';
 import { omit, sortBy } from 'lodash';
-import expect from '@kbn/expect';
 import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { INSTALLED_VERSION } from '../services/private_location_test_service';
 import { commonVars } from './test_project_monitor_policy';
@@ -35,6 +34,7 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
     package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
     enabled: true,
     policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
+    policy_ids: ['5347cd10-0368-11ed-8df7-a7424c6f5167'],
     inputs: [
       getHttpInput(props),
       {
@@ -190,7 +190,7 @@ export const getHttpInput = ({
     schedule: { value: '"@every 5m"', type: 'text' },
     urls: { value: '"https://nextjs-test-synthetics.vercel.app/api/users"', type: 'text' },
     'service.name': { value: null, type: 'text' },
-    timeout: { value: '3ms', type: 'text' },
+    timeout: { value: '180s', type: 'text' },
     max_redirects: { value: '3', type: 'integer' },
     processors: {
       type: 'yaml',
@@ -267,7 +267,7 @@ export const getHttpInput = ({
     enabled: true,
     urls: 'https://nextjs-test-synthetics.vercel.app/api/users',
     schedule: '@every 5m',
-    timeout: '3ms',
+    timeout: '180s',
     max_redirects: 3,
     max_attempts: 2,
     proxy_url: proxyUrl ?? 'http://proxy.com',
@@ -545,16 +545,16 @@ export const comparePolicies = (aPolicy: PackagePolicy, bPolicy: PackagePolicy) 
   const bIcmpInput = b.inputs?.find((input) => input.type === 'synthetics/icmp');
   const bBrowserInput = b.inputs?.find((input) => input.type === 'synthetics/browser');
 
-  expect(aHttpInput).eql(bHttpInput);
-  expect(aTcpInput).eql(bTcpInput);
-  expect(aIcmpInput).eql(bIcmpInput);
-  expect(aBrowserInput).eql(bBrowserInput);
+  expect(aHttpInput).toEqual(bHttpInput);
+  expect(aTcpInput).toEqual(bTcpInput);
+  expect(aIcmpInput).toEqual(bIcmpInput);
+  expect(aBrowserInput).toEqual(bBrowserInput);
 
   // delete inputs to compare rest of policy
   delete a.inputs;
   delete b.inputs;
 
-  expect(a).eql(b);
+  expect(a).toEqual(b);
 };
 
 export const ignoreTestFields = [
@@ -565,6 +565,7 @@ export const ignoreTestFields = [
   'updated_at',
   'updated_by',
   'policy_id',
+  'policy_ids',
   'version',
   'revision',
 ];

@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useRef } from 'react';
 import { EuiInputPopover } from '@elastic/eui';
-import { FROM_INDEX, TO_INDEX } from '../time_utils';
-import { EuiDualRangeRef } from './time_slider_sliding_window_range';
-import { getRoundedTimeRangeBounds } from '../time_slider_selectors';
+import React, { FC } from 'react';
+
+import { TimeSlice } from '../../../common/types';
 import { useTimeSlider } from '../embeddable/time_slider_embeddable';
+import { getRoundedTimeRangeBounds } from '../time_slider_selectors';
+import { FROM_INDEX, TO_INDEX } from '../time_utils';
 import { TimeSliderPopoverButton } from './time_slider_popover_button';
 import { TimeSliderPopoverContent } from './time_slider_popover_content';
 
@@ -19,7 +21,7 @@ import './index.scss';
 
 interface Props {
   formatDate: (epoch: number) => string;
-  onChange: (value?: [number, number]) => void;
+  onChange: (value?: TimeSlice) => void;
 }
 
 export const TimeSlider: FC<Props> = (props: Props) => {
@@ -41,12 +43,6 @@ export const TimeSlider: FC<Props> = (props: Props) => {
     return state.componentState.isOpen;
   });
 
-  const rangeRef = useRef<EuiDualRangeRef>(null);
-
-  const onPanelResize = (width: number) => {
-    rangeRef.current?.onResize(width);
-  };
-
   const from = value ? value[FROM_INDEX] : timeRangeMin;
   const to = value ? value[TO_INDEX] : timeRangeMax;
 
@@ -67,10 +63,8 @@ export const TimeSlider: FC<Props> = (props: Props) => {
       isOpen={isOpen}
       closePopover={() => timeSlider.dispatch.setIsOpen({ isOpen: false })}
       panelPaddingSize="s"
-      onPanelResize={onPanelResize}
     >
       <TimeSliderPopoverContent
-        rangeRef={rangeRef}
         value={[from, to]}
         onChange={props.onChange}
         stepSize={stepSize}

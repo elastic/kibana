@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import './solution_nav.scss';
 
-import React, { FC, useState, useMemo } from 'react';
+import React, { FC, useState, useMemo, useEffect } from 'react';
 import classNames from 'classnames';
 import {
   EuiAvatarProps,
@@ -23,6 +25,9 @@ import {
   htmlIdGenerator,
   useIsWithinBreakpoints,
   useIsWithinMinBreakpoint,
+  useEuiTheme,
+  useEuiThemeCSSVariables,
+  EuiPageSidebar,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -71,6 +76,7 @@ export type SolutionNavProps = Omit<EuiSideNavProps<{}>, 'children' | 'items' | 
 };
 
 const FLYOUT_SIZE = 248;
+const FLYOUT_SIZE_CSS = `${FLYOUT_SIZE}px`;
 
 const setTabIndex = (items: Array<EuiSideNavItemType<{}>>, isHidden: boolean) => {
   return items.map((item) => {
@@ -174,6 +180,32 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     );
   }, [children, headingID, isCustomSideNav, isHidden, items, rest]);
 
+  const { euiTheme } = useEuiTheme();
+  const navWidth = useMemo(() => {
+    if (isLargerBreakpoint) {
+      return isOpenOnDesktop ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
+    }
+    if (isMediumBreakpoint) {
+      return isSideNavOpenOnMobile || !canBeCollapsed ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
+    }
+    return '0';
+  }, [
+    euiTheme,
+    isOpenOnDesktop,
+    isSideNavOpenOnMobile,
+    canBeCollapsed,
+    isMediumBreakpoint,
+    isLargerBreakpoint,
+  ]);
+  const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
+  // Setting a global CSS variable with the nav width
+  // so that other pages have it available when needed.
+  useEffect(() => {
+    setGlobalCSSVariables({
+      '--kbnSolutionNavOffset': navWidth,
+    });
+  }, [navWidth, setGlobalCSSVariables]);
+
   return (
     <>
       {isSmallerBreakpoint && (
@@ -205,11 +237,11 @@ export const SolutionNav: FC<SolutionNavProps> = ({
               className="kbnSolutionNav__flyout"
               hideCloseButton={!canBeCollapsed}
             >
-              <div className={sideNavClasses}>
+              <EuiPageSidebar className={sideNavClasses} hasEmbellish={true}>
                 {titleText}
                 <EuiSpacer size="l" />
                 {sideNavContent}
-              </div>
+              </EuiPageSidebar>
             </EuiFlyout>
           )}
           {canBeCollapsed && (

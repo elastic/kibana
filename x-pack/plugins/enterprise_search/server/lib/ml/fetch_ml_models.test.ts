@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { mockLogger } from '../../__mocks__';
+
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { MlModelDeploymentState } from '../../../common/types/ml';
-
-import { fetchMlModels } from './fetch_ml_models';
 import {
   E5_LINUX_OPTIMIZED_MODEL_ID,
   E5_MODEL_ID,
   ELSER_LINUX_OPTIMIZED_MODEL_ID,
   ELSER_MODEL_ID,
-} from './utils';
+} from '@kbn/ml-trained-models-utils';
+
+import { MlModelDeploymentState } from '../../../common/types/ml';
+
+import { fetchMlModels } from './fetch_ml_models';
 
 describe('fetchMlModels', () => {
   const mockTrainedModelsProvider = {
@@ -33,8 +36,10 @@ describe('fetchMlModels', () => {
     }));
   });
 
-  it('errors when there is no trained model provider', () => {
-    expect(() => fetchMlModels(undefined)).rejects.toThrowError('Machine Learning is not enabled');
+  it('errors when there is no trained model provider', async () => {
+    await expect(() => fetchMlModels(undefined, mockLogger)).rejects.toThrowError(
+      'Machine Learning is not enabled'
+    );
   });
 
   it('returns placeholders if no model is found', async () => {
@@ -47,7 +52,10 @@ describe('fetchMlModels', () => {
       Promise.resolve(mockModelConfigs)
     );
 
-    const models = await fetchMlModels(mockTrainedModelsProvider as unknown as MlTrainedModels);
+    const models = await fetchMlModels(
+      mockTrainedModelsProvider as unknown as MlTrainedModels,
+      mockLogger
+    );
 
     expect(models.length).toBe(2);
     expect(models[0]).toMatchObject({
@@ -72,11 +80,17 @@ describe('fetchMlModels', () => {
           inference_config: {
             text_embedding: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: 'model_1',
           inference_config: {
             text_classification: {},
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
       ],
@@ -99,7 +113,10 @@ describe('fetchMlModels', () => {
       Promise.resolve(mockModelStats)
     );
 
-    const models = await fetchMlModels(mockTrainedModelsProvider as unknown as MlTrainedModels);
+    const models = await fetchMlModels(
+      mockTrainedModelsProvider as unknown as MlTrainedModels,
+      mockLogger
+    );
 
     expect(models.length).toBe(3);
     expect(models[0].modelId).toEqual(ELSER_MODEL_ID); // Placeholder
@@ -144,7 +161,10 @@ describe('fetchMlModels', () => {
       Promise.resolve(mockModelStats)
     );
 
-    const models = await fetchMlModels(mockTrainedModelsProvider as unknown as MlTrainedModels);
+    const models = await fetchMlModels(
+      mockTrainedModelsProvider as unknown as MlTrainedModels,
+      mockLogger
+    );
 
     expect(models.length).toBe(2);
     expect(models[0].modelId).toEqual(ELSER_MODEL_ID); // Placeholder
@@ -160,11 +180,17 @@ describe('fetchMlModels', () => {
           inference_config: {
             text_embedding: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: E5_LINUX_OPTIMIZED_MODEL_ID,
           inference_config: {
             text_embedding: {},
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
         {
@@ -172,11 +198,17 @@ describe('fetchMlModels', () => {
           inference_config: {
             text_expansion: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: ELSER_LINUX_OPTIMIZED_MODEL_ID,
           inference_config: {
             text_expansion: {},
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
       ],
@@ -194,7 +226,10 @@ describe('fetchMlModels', () => {
       Promise.resolve(mockModelStats)
     );
 
-    const models = await fetchMlModels(mockTrainedModelsProvider as unknown as MlTrainedModels);
+    const models = await fetchMlModels(
+      mockTrainedModelsProvider as unknown as MlTrainedModels,
+      mockLogger
+    );
 
     expect(models.length).toBe(2);
     expect(models[0].modelId).toEqual(ELSER_MODEL_ID);
@@ -210,11 +245,17 @@ describe('fetchMlModels', () => {
           inference_config: {
             text_embedding: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: E5_LINUX_OPTIMIZED_MODEL_ID,
           inference_config: {
             text_embedding: {},
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
         {
@@ -222,11 +263,17 @@ describe('fetchMlModels', () => {
           inference_config: {
             text_expansion: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: ELSER_LINUX_OPTIMIZED_MODEL_ID,
           inference_config: {
             text_expansion: {},
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
       ],
@@ -249,7 +296,10 @@ describe('fetchMlModels', () => {
       modelName,
     }));
 
-    const models = await fetchMlModels(mockTrainedModelsProvider as unknown as MlTrainedModels);
+    const models = await fetchMlModels(
+      mockTrainedModelsProvider as unknown as MlTrainedModels,
+      mockLogger
+    );
 
     expect(models.length).toBe(2);
     expect(models[0].modelId).toEqual(ELSER_LINUX_OPTIMIZED_MODEL_ID);
@@ -265,17 +315,26 @@ describe('fetchMlModels', () => {
           inference_config: {
             text_expansion: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: E5_MODEL_ID,
           inference_config: {
             text_embedding: {},
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: 'model_1',
           inference_config: {
             ner: {},
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
       ],
@@ -311,7 +370,10 @@ describe('fetchMlModels', () => {
       Promise.resolve(mockModelStats)
     );
 
-    const models = await fetchMlModels(mockTrainedModelsProvider as unknown as MlTrainedModels);
+    const models = await fetchMlModels(
+      mockTrainedModelsProvider as unknown as MlTrainedModels,
+      mockLogger
+    );
 
     expect(models.length).toBe(3);
     expect(models[0]).toMatchObject({
@@ -336,6 +398,9 @@ describe('fetchMlModels', () => {
           model_id: ELSER_MODEL_ID,
           inference_config: {
             text_expansion: {},
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
       ],
@@ -366,7 +431,45 @@ describe('fetchMlModels', () => {
       Promise.resolve(mockModelStats)
     );
 
-    const models = await fetchMlModels(mockTrainedModelsProvider as unknown as MlTrainedModels);
+    const models = await fetchMlModels(
+      mockTrainedModelsProvider as unknown as MlTrainedModels,
+      mockLogger
+    );
+
+    expect(models.length).toBe(2);
+    expect(models[0]).toMatchObject({
+      modelId: ELSER_MODEL_ID,
+      deploymentState: MlModelDeploymentState.NotDeployed,
+    });
+    expect(mockTrainedModelsProvider.getTrainedModels).toHaveBeenCalledTimes(2);
+  });
+
+  it('gracefully handles errors when fetching downloading/downloaded deployment state for promoted models', async () => {
+    const mockModelConfigs = {
+      count: 1,
+      trained_model_configs: [
+        {
+          model_id: ELSER_MODEL_ID,
+          inference_config: {
+            text_expansion: {},
+          },
+          input: {
+            fields: ['text_field'],
+          },
+        },
+      ],
+    };
+
+    // 1st call: get models
+    // 2nd call: error while getting definition_status for ELSER
+    mockTrainedModelsProvider.getTrainedModels
+      .mockImplementationOnce(() => Promise.resolve(mockModelConfigs))
+      .mockImplementationOnce(() => Promise.reject('some error'));
+
+    const models = await fetchMlModels(
+      mockTrainedModelsProvider as unknown as MlTrainedModels,
+      mockLogger
+    );
 
     expect(models.length).toBe(2);
     expect(models[0]).toMatchObject({
@@ -385,17 +488,26 @@ describe('fetchMlModels', () => {
           inference_config: {
             ner: {}, // "Named Entity Recognition"
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: 'model_2',
           inference_config: {
             text_embedding: {}, // "Dense Vector Text Embedding"
           },
+          input: {
+            fields: ['text_field'],
+          },
         },
         {
           model_id: 'model_3',
           inference_config: {
             text_classification: {}, // "Text Classification"
+          },
+          input: {
+            fields: ['text_field'],
           },
         },
       ],
@@ -413,7 +525,10 @@ describe('fetchMlModels', () => {
       Promise.resolve(mockModelStats)
     );
 
-    const models = await fetchMlModels(mockTrainedModelsProvider as unknown as MlTrainedModels);
+    const models = await fetchMlModels(
+      mockTrainedModelsProvider as unknown as MlTrainedModels,
+      mockLogger
+    );
 
     expect(models.length).toBe(5);
     expect(models[0].modelId).toEqual(ELSER_MODEL_ID); // Pinned to top

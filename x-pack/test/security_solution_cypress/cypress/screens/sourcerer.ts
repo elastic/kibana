@@ -15,7 +15,7 @@ export const SOURCERER = {
   badgeAlerts: '[data-test-subj="sourcerer-alerts-badge"]',
   badgeAlertsOption: '[data-test-subj="security-alerts-option-badge"]',
   siemDefaultIndexInput:
-    '[data-test-subj="advancedSetting-editField-securitySolution:defaultIndex"]',
+    '[data-test-subj="management-settings-editField-securitySolution:defaultIndex"]',
   popoverTitle: '[data-test-subj="sourcerer-title"]',
   resetButton: 'button[data-test-subj="sourcerer-reset"]',
   saveButton: 'button[data-test-subj="sourcerer-save"]',
@@ -30,4 +30,4 @@ export const SOURCERER = {
 };
 
 export const HOSTS_STAT =
-  '[data-test-subj="stat-hosts"] [data-test-subj="stat-title"] [data-test-subj="metric_value"]';
+  '[data-test-embeddable-id="hostsKpiHostsQuery-hosts-metric-embeddable"] [data-test-subj="metric_value"]';

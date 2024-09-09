@@ -13,9 +13,9 @@ import { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
 
 import { ListingProps as Props } from '.';
 import { mockJobs } from '../../common/test';
-import { Job } from '../lib/job';
 import { TestBed, TestDependencies, setup } from './__test__';
 import { mockConfig } from './__test__/report_listing.test.helpers';
+import { Job } from '@kbn/reporting-public';
 
 describe('ReportListing', () => {
   let testBed: TestBed;
@@ -40,7 +40,7 @@ describe('ReportListing', () => {
 
   it('renders a listing with some items', () => {
     const { find } = testBed;
-    expect(find('reportDownloadLink').length).toBe(mockJobs.length);
+    expect(find('reportJobRow').length).toBe(mockJobs.length);
   });
 
   it('subscribes to license changes, and unsubscribes on dismount', async () => {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -277,9 +278,9 @@ export function functionbeatEnableInstructions() {
     'home.tutorials.common.functionbeatEnableOnPremInstructions.defaultTextPost',
     {
       defaultMessage:
-        'Where `<cloudwatch-log-group>` is the name of the log group you want to ingest, \
-and `<unique-bucket-name>` is a valid S3 bucket name which will be used for staging the \
-Functionbeat deploy.',
+        "Where `'<cloudwatch-log-group>'` is the name of the log group you want to ingest, \
+and `'<unique-bucket-name>'` is a valid S3 bucket name which will be used for staging the \
+Functionbeat deploy.",
     }
   );
   return {
@@ -320,8 +321,11 @@ export function functionbeatAWSInstructions() {
   });
   const defaultPost = i18n.translate('home.tutorials.common.functionbeatAWSInstructions.textPost', {
     defaultMessage:
-      'Where `<your-access-key>` and `<your-secret-access-key>` are your account credentials and \
-`us-east-1` is the desired region.',
+      'Where {accessKey} and {secretAccessKey} are your account credentials and `us-east-1` is the desired region.',
+    values: {
+      accessKey: '`<your-access-key>`',
+      secretAccessKey: '`<your-secret-access-key>`',
+    },
   });
 
   return {

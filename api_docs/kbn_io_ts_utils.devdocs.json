@@ -100,9 +100,9 @@
           "<DecodedValue, EncodedValue, InputValue>) => ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RouteValidationFunction",
+            "section": "def-server.RouteValidationFunction",
             "text": "RouteValidationFunction"
           },
           "<DecodedValue>"
@@ -638,7 +638,9 @@
         "description": [],
         "signature": [
           "(type: ",
-          "Mixed",
+          "Type",
+          "<any, any, unknown> | ",
+          "ParseableType",
           ") => JSONSchema"
         ],
         "path": "packages/kbn-io-ts-utils/src/to_json_schema/index.ts",
@@ -648,12 +650,14 @@
           {
             "parentPluginId": "@kbn/io-ts-utils",
             "id": "def-common.toJsonSchema.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "Mixed"
+              "Type",
+              "<any, any, unknown> | ",
+              "ParseableType"
             ],
             "path": "packages/kbn-io-ts-utils/src/to_json_schema/index.ts",
             "deprecated": false,
@@ -940,6 +944,22 @@
     "objects": [
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.arrayToStringRt",
+        "type": "Object",
+        "tags": [],
+        "label": "arrayToStringRt",
+        "description": [],
+        "signature": [
+          "Type",
+          "<unknown[], string, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/array_to_string_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.DateFromStringOrNumber",
         "type": "Object",
         "tags": [],
@@ -1022,6 +1042,22 @@
           "<number, string, unknown>"
         ],
         "path": "packages/kbn-io-ts-utils/src/iso_to_epoch_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.isoToEpochSecsRt",
+        "type": "Object",
+        "tags": [],
+        "label": "isoToEpochSecsRt",
+        "description": [],
+        "signature": [
+          "Type",
+          "<number, string, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/iso_to_epoch_secs_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

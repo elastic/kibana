@@ -18,12 +18,12 @@ import {
   AddConnectorApiLogicArgs,
   AddConnectorApiLogicResponse,
 } from '../../../api/connector/add_connector_api_logic';
-import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
+import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
 import { SearchIndexTabId } from '../../search_index/search_index';
 
 type AddConnectorActions = Pick<
   Actions<AddConnectorApiLogicArgs, AddConnectorApiLogicResponse>,
-  'apiError' | 'apiSuccess' | 'makeRequest'
+  'apiError' | 'apiSuccess' | 'makeRequest' | 'apiReset'
 > & {
   setIsModalVisible: (isModalVisible: boolean) => { isModalVisible: boolean };
 };
@@ -37,15 +37,13 @@ export const AddConnectorLogic = kea<MakeLogicType<AddConnectorValues, AddConnec
     setIsModalVisible: (isModalVisible: boolean) => ({ isModalVisible }),
   },
   connect: {
-    actions: [AddConnectorApiLogic, ['apiError', 'apiSuccess']],
+    actions: [AddConnectorApiLogic, ['apiError', 'apiSuccess', 'makeRequest', 'apiReset']],
   },
   listeners: {
-    apiSuccess: async ({ indexName }, breakpoint) => {
-      // Give Elasticsearch the chance to propagate the index so we don't end up in an error state after navigating
-      await breakpoint(1000);
+    apiSuccess: async ({ id }) => {
       KibanaLogic.values.navigateToUrl(
-        generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-          indexName,
+        generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+          connectorId: id,
           tabId: SearchIndexTabId.CONFIGURATION,
         })
       );
@@ -56,9 +54,11 @@ export const AddConnectorLogic = kea<MakeLogicType<AddConnectorValues, AddConnec
     isModalVisible: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         apiError: (_, error) =>
           error.body?.attributes?.error_code === ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
         apiSuccess: () => false,
+        // @ts-expect-error upgrade typescript v5.1.6
         setIsModalVisible: (_, { isModalVisible }) => isModalVisible,
       },
     ],

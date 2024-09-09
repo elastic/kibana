@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -23,5 +24,10 @@ export const toElasticsearchQuery = (...params: Parameters<typeof astToElasticse
 export { KQLSyntaxError } from './kuery_syntax_error';
 export { nodeTypes, nodeBuilder } from './node_types';
 export { fromKueryExpression, toKqlExpression } from './ast';
-export { escapeKuery, escapeQuotes } from './utils';
+export {
+  escapeKuery,
+  escapeQuotes,
+  getKqlFieldNames,
+  getKqlFieldNamesFromExpression,
+} from './utils';
 export type { DslQuery, KueryNode, KueryQueryOptions, KueryParseOptions } from './types';

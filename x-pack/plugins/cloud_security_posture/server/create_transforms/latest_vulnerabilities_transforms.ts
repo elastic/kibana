@@ -8,20 +8,27 @@
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
   VULNERABILITIES_INDEX_PATTERN,
 } from '../../common/constants';
 
+const CURRENT_VULN_TRANSFORM_VERSION =
+  'cloud_security_posture.vulnerabilities_latest-default-8.15.0';
+
+export const DEPRECATED_VULN_TRANSFORM_VERSIONS = [
+  'cloud_security_posture.vulnerabilities_latest-default-8.8.0',
+];
+
 export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
-  transform_id: 'cloud_security_posture.vulnerabilities_latest-default-8.8.0',
+  transform_id: CURRENT_VULN_TRANSFORM_VERSION,
   description:
     'Defines vulnerabilities transformation to view only the latest vulnerability per resource',
   source: {
     index: VULNERABILITIES_INDEX_PATTERN,
   },
   dest: {
-    index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+    index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   },
   frequency: '5m',
   sync: {

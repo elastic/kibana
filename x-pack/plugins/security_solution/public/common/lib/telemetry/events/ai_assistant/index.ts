@@ -45,18 +45,25 @@ export const assistantMessageSentEvent: TelemetryEvent = {
         optional: false,
       },
     },
-    isEnabledKnowledgeBase: {
-      type: 'boolean',
+    actionTypeId: {
+      type: 'keyword',
       _meta: {
-        description: 'Is knowledge base enabled',
+        description: 'Kibana connector type',
         optional: false,
       },
     },
-    isEnabledRAGAlerts: {
-      type: 'boolean',
+    model: {
+      type: 'keyword',
       _meta: {
-        description: 'Is RAG on Alerts enabled',
-        optional: false,
+        description: 'LLM model',
+        optional: true,
+      },
+    },
+    provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'OpenAI provider',
+        optional: true,
       },
     },
   },
@@ -85,17 +92,17 @@ export const assistantQuickPrompt: TelemetryEvent = {
 export const assistantSettingToggledEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.AssistantSettingToggled,
   schema: {
-    isEnabledKnowledgeBase: {
+    alertsCountUpdated: {
       type: 'boolean',
       _meta: {
-        description: 'Is knowledge base enabled',
+        description: 'Did alerts count update',
         optional: true,
       },
     },
-    isEnabledRAGAlerts: {
+    assistantStreamingEnabled: {
       type: 'boolean',
       _meta: {
-        description: 'Is RAG on Alerts enabled',
+        description: 'Is streaming enabled',
         optional: true,
       },
     },

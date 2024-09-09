@@ -22,7 +22,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const panelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
-  const comboBox = getService('comboBox');
 
   describe('Table', function describeIndexTests() {
     const fixture =
@@ -43,50 +42,49 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should allow converting a count aggregation', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Basic');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(true);
+      expect(await panelActions.canConvertToLensByTitle('Table - Basic')).to.eql(true);
     });
 
     it('should not allow converting of not valid panel', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Invalid panel');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Table - Invalid panel')).to.eql(false);
     });
 
     it('should not allow converting of unsupported aggregations', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Unsupported agg');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Table - Unsupported agg')).to.eql(false);
     });
 
     it('should not allow converting sibling pipeline aggregations', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Sibling pipeline agg');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Table - Sibling pipeline agg')).to.eql(
+        false
+      );
     });
 
     it('should not allow converting parent pipeline aggregations', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Parent pipeline agg');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Table - Parent pipeline agg')).to.eql(
+        false
+      );
     });
 
     it('should not allow converting invalid aggregation function', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Invalid agg');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Table - Invalid agg')).to.eql(false);
     });
 
     it('should not allow converting series with different aggregation function or aggregation by', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Different agg function');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Table - Different agg function')).to.eql(
+        false
+      );
     });
 
     it('should convert last value mode to reduced time range', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Last value mode');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Table - Last value mode');
       await lens.waitForVisualization('lnsDataTable');
 
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
       await testSubjects.click('indexPattern-advanced-accordion');
-      expect(
-        await comboBox.getComboBoxSelectedOptions('indexPattern-dimension-reducedTimeRange')
-      ).to.eql(['1 minute (1m)']);
+      const reducedTimeRange = await testSubjects.find(
+        'indexPattern-dimension-reducedTimeRange > comboBoxSearchInput'
+      );
+      expect(await reducedTimeRange.getAttribute('value')).to.be('1 minute (1m)');
 
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
@@ -97,8 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert static value to the metric dimension', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Static value');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Table - Static value');
       await lens.waitForVisualization('lnsDataTable');
 
       await retry.try(async () => {
@@ -112,8 +109,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert aggregate by to split row dimension', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Agg by');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Table - Agg by');
       await lens.waitForVisualization('lnsDataTable');
 
       await retry.try(async () => {
@@ -131,8 +127,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert group by field with custom label', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - GroupBy label');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Table - GroupBy label');
       await lens.waitForVisualization('lnsDataTable');
 
       await retry.try(async () => {
@@ -144,13 +139,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert color ranges', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Color ranges');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Table - Color ranges');
       await lens.waitForVisualization('lnsDataTable');
 
       await retry.try(async () => {
         const closePalettePanels = await testSubjects.findAll(
-          'lns-indexPattern-PalettePanelContainerBack'
+          'lns-indexPattern-SettingWithSiblingFlyoutBack'
         );
         if (closePalettePanels.length) {
           await lens.closePalettePanel();
@@ -159,7 +153,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
 
-        await lens.openPalettePanel('lnsDatatable');
+        await lens.openPalettePanel();
         const colorStops = await lens.getPaletteColorStops();
 
         expect(colorStops).to.eql([
@@ -171,8 +165,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should bring the ignore global filters configured at panel level over', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Ignore global filters panel');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Table - Ignore global filters panel');
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);

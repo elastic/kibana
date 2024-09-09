@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-import React, { memo, FC } from 'react';
-
 import { EuiFormRow } from '@elastic/eui';
-
+import { monaco } from '@kbn/monaco';
+import { isEqual } from 'lodash';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-
 import { CodeEditor } from '@kbn/code-editor';
-
-import { StepDefineFormHook } from '../step_define';
+import pivotJsonSchema from '@kbn/json-schemas/src/put___transform__transform_id___pivot_schema.json';
+import type { StepDefineFormHook } from '../step_define';
 
 export const AdvancedPivotEditor: FC<StepDefineFormHook['advancedPivotEditor']> = memo(
   ({
@@ -65,6 +64,22 @@ export const AdvancedPivotEditor: FC<StepDefineFormHook['advancedPivotEditor']> 
             wrappingIndent: 'indent',
           }}
           value={advancedEditorConfig}
+          editorDidMount={(editor: monaco.editor.IStandaloneCodeEditor) => {
+            const editorModelUri: string = editor.getModel()?.uri.toString()!;
+            monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+              validate: true,
+              enableSchemaRequest: false,
+              schemaValidation: 'error',
+              schemas: [
+                ...(monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas ?? []),
+                {
+                  uri: editorModelUri,
+                  fileMatch: [editorModelUri],
+                  schema: pivotJsonSchema,
+                },
+              ],
+            });
+          }}
         />
       </EuiFormRow>
     );

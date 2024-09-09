@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -12,7 +13,6 @@ import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { addProfile } from '../../../../common/customizations';
 
 export const DISCOVER_CONTEXT_APP_LOCATOR = 'DISCOVER_CONTEXT_APP_LOCATOR';
 
@@ -22,7 +22,6 @@ export interface DiscoverContextAppLocatorParams extends SerializableRecord {
   columns?: string[];
   filters?: Filter[];
   referrer: string; // discover main view url
-  profile?: string;
 }
 
 export type DiscoverContextAppLocator = LocatorPublic<DiscoverContextAppLocatorParams>;
@@ -65,13 +64,7 @@ export class DiscoverContextAppLocatorDefinition
       dataViewId = index;
     }
 
-    let path = '#/';
-
-    if (params.profile) {
-      path = addProfile(path, params.profile);
-    }
-
-    path = `${path}context/${dataViewId}/${encodeURIComponent(rowId)}`;
+    let path = `#/context/${dataViewId}/${encodeURIComponent(rowId)}`;
 
     if (Object.keys(queryState).length) {
       path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);

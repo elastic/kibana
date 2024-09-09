@@ -34,7 +34,7 @@ export interface GroupByExpressionProps {
   onChangeSelectedTermSize: (selectedTermSize?: number) => void;
   onChangeSelectedTermField: (selectedTermField?: string | string[]) => void;
   onChangeSelectedGroupBy: (selectedGroupBy?: string) => void;
-  fields: FieldOption[];
+  fields?: FieldOption[];
   termSize?: number;
   termField?: string | string[];
   customGroupByTypes?: {
@@ -78,7 +78,7 @@ export const GroupByExpression = ({
 
   const availableFieldOptions: GroupByOverFieldOption[] = useMemo(
     () =>
-      fields.reduce((options: GroupByOverFieldOption[], field: FieldOption) => {
+      (fields ?? []).reduce((options: GroupByOverFieldOption[], field: FieldOption) => {
         if (groupByTypes[groupBy].validNormalizedTypes.includes(field.normalizedType)) {
           options.push({ label: field.name });
         }
@@ -109,13 +109,15 @@ export const GroupByExpression = ({
   }, [selectedTermsFieldsOptions, groupBy, onChangeSelectedTermField]);
 
   useEffect(() => {
-    // if current field set doesn't contain selected field, clear selection
-    const hasUnknownField = selectedTermsFieldsOptions.some(
-      (fieldOption) => !fields.some((field) => field.name === fieldOption.label)
-    );
-    if (hasUnknownField) {
-      setSelectedTermsFieldsOptions([]);
-      onChangeSelectedTermField(undefined);
+    if (fields) {
+      // if current field set doesn't contain selected field, clear selection
+      const hasUnknownField = selectedTermsFieldsOptions.some(
+        (fieldOption) => !fields.some((field) => field.name === fieldOption.label)
+      );
+      if (hasUnknownField) {
+        setSelectedTermsFieldsOptions([]);
+        onChangeSelectedTermField(undefined);
+      }
     }
   }, [selectedTermsFieldsOptions, fields, onChangeSelectedTermField]);
 
@@ -195,13 +197,13 @@ export const GroupByExpression = ({
           {groupByTypes[groupBy].sizeRequired ? (
             <>
               <EuiFlexItem grow={1}>
-                <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
+                <EuiFormRow isInvalid={Number(errors.termSize.length) > 0} error={errors.termSize}>
                   <EuiFieldNumber
                     data-test-subj="fieldsNumberSelect"
                     css={css`
                       min-width: 50px;
                     `}
-                    isInvalid={errors.termSize.length > 0}
+                    isInvalid={Number(errors.termSize.length) > 0}
                     value={termSize || ''}
                     onChange={(e) => {
                       const { value } = e.target;
@@ -214,7 +216,10 @@ export const GroupByExpression = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
-                <EuiFormRow isInvalid={errors.termField.length > 0} error={errors.termField}>
+                <EuiFormRow
+                  isInvalid={Number(errors.termField.length) > 0}
+                  error={errors.termField}
+                >
                   <EuiComboBox
                     singleSelection={canSelectMultiTerms ? false : { asPlainText: true }}
                     placeholder={i18n.translate(
@@ -224,7 +229,7 @@ export const GroupByExpression = ({
                       }
                     )}
                     data-test-subj="fieldsExpressionSelect"
-                    isInvalid={errors.termField.length > 0}
+                    isInvalid={Number(errors.termField.length) > 0}
                     selectedOptions={selectedTermsFieldsOptions}
                     onChange={(
                       selectedOptions: Array<EuiComboBoxOptionOption<GroupByOverFieldOption>>

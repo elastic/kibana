@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -15,6 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const es = getService('es');
   const retry = getService('retry');
+  const dataViews = getService('dataViews');
+
   const PageObjects = getPageObjects([
     'common',
     'unifiedSearch',
@@ -72,11 +75,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
       });
 
-      await PageObjects.discover.createAdHocDataView(initialPattern, true);
-
-      await retry.waitFor('current data view to get updated', async () => {
-        return (await PageObjects.discover.getCurrentlySelectedDataView()) === `${initialPattern}*`;
+      await dataViews.createFromSearchBar({
+        name: initialPattern,
+        adHoc: true,
+        hasTimeField: true,
       });
+      await dataViews.waitForSwitcherToBe(`${initialPattern}*`);
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
       expect(await PageObjects.discover.getHitCountInt()).to.be(2);
@@ -85,8 +90,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('create saved data view', async function () {
       const updatedPattern = 'my-index-000001';
-      await PageObjects.discover.clickIndexPatternActions();
-      await PageObjects.unifiedSearch.createNewDataView(updatedPattern, false, true);
+      await dataViews.createFromSearchBar({
+        name: updatedPattern,
+        adHoc: false,
+        hasTimeField: true,
+      });
+      await PageObjects.discover.waitUntilSearchingHasFinished();
 
       await retry.try(async () => {
         expect(await PageObjects.discover.getHitCountInt()).to.be(1);
@@ -118,8 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
         });
       }
-      await PageObjects.discover.clickIndexPatternActions();
-      await PageObjects.unifiedSearch.editDataView(updatedPattern, 'timestamp');
+      await dataViews.editFromSearchBar({ newName: updatedPattern, newTimeField: 'timestamp' });
       await retry.try(async () => {
         expect(await PageObjects.discover.getHitCountInt()).to.be(3);
       });
@@ -130,11 +138,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('update data view with no time field', async function () {
-      await PageObjects.discover.clickIndexPatternActions();
-      await PageObjects.unifiedSearch.editDataView(
-        undefined,
-        "--- I don't want to use the time filter ---"
-      );
+      await dataViews.editFromSearchBar({
+        newTimeField: "--- I don't want to use the time filter ---",
+      });
       await retry.try(async () => {
         expect(await PageObjects.discover.getHitCountInt()).to.be(4);
       });

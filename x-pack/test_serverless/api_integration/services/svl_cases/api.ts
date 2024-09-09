@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
 import { CASES_URL } from '@kbn/cases-plugin/common';
 import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+import type { RoleCredentials } from '../../../shared/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export interface User {
@@ -23,13 +23,8 @@ export interface User {
 
 export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
   const kbnServer = getService('kibanaServer');
-  const supertest = getService('supertest');
-
-  const superUser: User = {
-    username: 'superuser',
-    password: 'superuser',
-    roles: ['superuser'],
-  };
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlCommonApi = getService('svlCommonApi');
 
   const defaultUser = {
     email: null,
@@ -57,22 +52,6 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
   };
 
   return {
-    setupAuth({
-      apiCall,
-      headers,
-      auth,
-    }: {
-      apiCall: SuperTest.Test;
-      headers: Record<string, unknown>;
-      auth?: { user: User; space: string | null } | null;
-    }): SuperTest.Test {
-      if (!Object.hasOwn(headers, 'Cookie') && auth != null) {
-        return apiCall.auth(auth.user.username, auth.user.password);
-      }
-
-      return apiCall;
-    },
-
     getSpaceUrlPrefix(spaceId: string | undefined | null) {
       return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
     },
@@ -139,65 +118,65 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
 
     async createCase(
       params: CasePostRequest,
-      expectedHttpCode: number = 200,
-      auth: { user: User; space: string | null } | null = { user: superUser, space: null },
-      headers: Record<string, unknown> = {}
+      roleAuthc: RoleCredentials,
+      expectedHttpCode: number = 200
     ): Promise<Case> {
-      const apiCall = supertest.post(`${CASES_URL}`);
-
-      this.setupAuth({ apiCall, headers, auth });
+      const apiCall = supertestWithoutAuth.post(`${CASES_URL}`);
 
       const response = await apiCall
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
-        .set(headers)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .send(params)
         .expect(expectedHttpCode);
 
       return response.body;
     },
 
-    async findCases({
-      query = {},
-      expectedHttpCode = 200,
-      auth = { user: superUser, space: null },
-    }: {
-      query?: Record<string, unknown>;
-      expectedHttpCode?: number;
-      auth?: { user: User; space: string | null };
-    }): Promise<CasesFindResponse> {
-      const { body: res } = await supertest
-        .get(`${this.getSpaceUrlPrefix(auth.space)}${CASES_URL}/_find`)
-        .auth(auth.user.username, auth.user.password)
+    async findCases(
+      {
+        query = {},
+        expectedHttpCode = 200,
+        space = 'default',
+      }: {
+        query?: Record<string, unknown>;
+        expectedHttpCode?: number;
+        space?: string;
+      },
+      roleAuthc: RoleCredentials
+    ): Promise<CasesFindResponse> {
+      const { body: res } = await supertestWithoutAuth
+        .get(`${this.getSpaceUrlPrefix(space)}${CASES_URL}/_find`)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .query({ sortOrder: 'asc', ...query })
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
         .send()
         .expect(expectedHttpCode);
 
       return res;
     },
 
-    async getCase({
-      caseId,
-      includeComments = false,
-      expectedHttpCode = 200,
-      auth = { user: superUser, space: null },
-    }: {
-      caseId: string;
-      includeComments?: boolean;
-      expectedHttpCode?: number;
-      auth?: { user: User; space: string | null };
-    }): Promise<Case> {
-      const { body: theCase } = await supertest
+    async getCase(
+      {
+        caseId,
+        space = 'default',
+        includeComments = false,
+        expectedHttpCode = 200,
+      }: {
+        caseId: string;
+        space?: string;
+        includeComments?: boolean;
+        expectedHttpCode?: number;
+      },
+      roleAuthc: RoleCredentials
+    ): Promise<Case> {
+      const { body: theCase } = await supertestWithoutAuth
         .get(
           `${this.getSpaceUrlPrefix(
-            auth?.space
+            space
           )}${CASES_URL}/${caseId}?includeComments=${includeComments}`
         )
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
-        .auth(auth.user.username, auth.user.password)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .expect(expectedHttpCode);
 
       return theCase;

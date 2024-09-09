@@ -37,6 +37,7 @@ export interface HostItem {
   host?: Maybe<HostEcs>;
   lastSeen?: Maybe<string[]>;
   risk?: string;
+  criticality?: string;
 }
 
 export interface HostValue {

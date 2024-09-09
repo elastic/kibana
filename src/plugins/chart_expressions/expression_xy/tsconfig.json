@@ -29,12 +29,12 @@
     "@kbn/chart-icons",
     "@kbn/ui-theme",
     "@kbn/analytics",
-    "@kbn/kibana-react-plugin",
     "@kbn/chart-expressions-common",
     "@kbn/event-annotation-common",
     "@kbn/visualization-ui-components",
     "@kbn/es-query",
     "@kbn/cell-actions",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, FC, PropsWithChildren } from 'react';
 import { PluginServiceFactory } from './factory';
 
 /**
@@ -16,7 +17,10 @@ import { PluginServiceFactory } from './factory';
  * The `StartParameters` generic determines what parameters are expected to
  * start the service.
  */
-export type PluginServiceProviders<Services, StartParameters = {}> = {
+export type PluginServiceProviders<
+  Services extends Record<keyof Services, {}>,
+  StartParameters = {}
+> = {
   [K in keyof Services]: PluginServiceProvider<
     Services[K],
     StartParameters,
@@ -59,7 +63,7 @@ export class PluginServiceProvider<
   private _requiredServices?: RequiredServices;
   private context = createContext<Service | null>(null);
   private pluginService: Service | null = null;
-  public readonly Provider: React.FC = ({ children }) => {
+  public readonly Provider: FC<PropsWithChildren<unknown>> = ({ children }) => {
     return <this.context.Provider value={this.getService()}>{children}</this.context.Provider>;
   };
 

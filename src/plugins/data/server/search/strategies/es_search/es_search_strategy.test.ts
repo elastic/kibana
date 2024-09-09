@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -12,7 +13,7 @@ import { pluginInitializerContextConfigMock } from '@kbn/core/server/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
 import { SearchStrategyDependencies } from '../../types';
 
-import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
+import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import { errors } from '@elastic/elasticsearch';
 import { KbnSearchError } from '../../report_search_error';
 import { firstValueFrom } from 'rxjs';
@@ -156,7 +157,7 @@ describe('ES search strategy', () => {
       expect(e).toBeInstanceOf(KbnSearchError);
       expect(e.statusCode).toBe(404);
       expect(e.message).toBe(errResponse.message);
-      expect(e.errBody).toBe(indexNotFoundException);
+      expect(e.errBody).toEqual(indexNotFoundException);
     }
   });
 

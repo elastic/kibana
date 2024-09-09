@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -21,6 +22,7 @@ import type {
 } from '@kbn/core/server';
 
 import { firstValueFrom, ReplaySubject } from 'rxjs';
+import apm from 'elastic-apm-node';
 import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
@@ -259,7 +261,16 @@ export class TelemetryCollectionManagerPlugin
     config: EncryptedStatsGetterConfig
   ): Promise<Array<{ clusterUuid: string; stats: string }>>;
   private async getStats(config: StatsGetterConfig) {
+    const retrieveSnapshotTelemetryTransaction = apm.startTransaction(
+      'Retrieve Snapshot Telemetry',
+      'telemetry'
+    );
+    retrieveSnapshotTelemetryTransaction.addLabels({
+      unencrypted: config.unencrypted,
+      refresh: config.refreshCache,
+    });
     if (!this.usageCollection) {
+      retrieveSnapshotTelemetryTransaction.end('skipped');
       return [];
     }
     const collection = this.collectionStrategy;
@@ -268,15 +279,14 @@ export class TelemetryCollectionManagerPlugin
       const statsCollectionConfig = this.getStatsCollectionConfig(config, this.usageCollection);
       if (statsCollectionConfig) {
         try {
+          retrieveSnapshotTelemetryTransaction.startSpan('Fetch usage');
           const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
           this.logger.debug(`Received Usage using ${collection.title} collection.`);
 
-          return await Promise.all(
+          retrieveSnapshotTelemetryTransaction.startSpan('Prepare response');
+          const results = await Promise.all(
             usageData.map(async (clusterStats) => {
-              const { cluster_uuid: clusterUuid } = clusterStats.cluster_stats as Record<
-                string,
-                string
-              >;
+              const { cluster_uuid: clusterUuid } = clusterStats;
 
               return {
                 clusterUuid,
@@ -288,13 +298,19 @@ export class TelemetryCollectionManagerPlugin
               };
             })
           );
+          retrieveSnapshotTelemetryTransaction.end('success');
+          return results;
         } catch (err) {
           this.logger.debug(
             `Failed to collect any usage with registered collection ${collection.title}.`
           );
+          retrieveSnapshotTelemetryTransaction.end('error');
+          return [];
         }
       }
     }
+
+    retrieveSnapshotTelemetryTransaction.end('skipped');
 
     return [];
   }

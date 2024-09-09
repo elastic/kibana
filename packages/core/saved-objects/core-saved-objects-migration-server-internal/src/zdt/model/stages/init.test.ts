@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -14,6 +15,7 @@ import {
   getAliasActionsMock,
   checkIndexCurrentAlgorithmMock,
   getAliasesMock,
+  getCreationAliasesMock,
 } from './init.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import { FetchIndexResponse } from '../../../actions';
@@ -57,6 +59,7 @@ describe('Stage: init', () => {
     checkIndexCurrentAlgorithmMock.mockReset().mockReturnValue('zdt');
     getAliasesMock.mockReset().mockReturnValue(Either.right({}));
     buildIndexMappingsMock.mockReset().mockReturnValue({});
+    getCreationAliasesMock.mockReset().mockReturnValue([]);
 
     context = createContextMock({ indexPrefix: '.kibana', types: ['foo', 'bar'] });
     context.typeRegistry.registerType({
@@ -73,24 +76,12 @@ describe('Stage: init', () => {
     });
   });
 
-  it('INIT -> INIT when cluster routing allocation is incompatible', () => {
-    const state = createState();
-    const res: StateActionResponse<'INIT'> = Either.left({
-      type: 'incompatible_cluster_routing_allocation',
-    });
-
-    const newState = init(state, res, context);
-
-    expect(newState.controlState).toEqual('INIT');
-    expect(newState.retryCount).toEqual(1);
-    expect(newState.retryDelay).toEqual(2000);
-    expect(newState.logs).toHaveLength(1);
-  });
-
   it('calls getCurrentIndex with the correct parameters', () => {
     const state = createState();
     const fetchIndexResponse = createResponse();
-    const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+    const res: StateActionResponse<'INIT'> = Either.right(
+      fetchIndexResponse
+    ) as Either.Right<FetchIndexResponse>;
 
     const aliases = { '.foo': '.bar' };
     getAliasesMock.mockReturnValue(Either.right(aliases));
@@ -108,7 +99,9 @@ describe('Stage: init', () => {
   it('calls checkVersionCompatibility with the correct parameters', () => {
     const state = createState();
     const fetchIndexResponse = createResponse();
-    const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+    const res: StateActionResponse<'INIT'> = Either.right(
+      fetchIndexResponse
+    ) as Either.Right<FetchIndexResponse>;
 
     init(state, res, context);
 
@@ -128,7 +121,9 @@ describe('Stage: init', () => {
 
     it('adds a log entry about the algo check', () => {
       const state = createState();
-      const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+      const res: StateActionResponse<'INIT'> = Either.right(
+        createResponse()
+      ) as Either.Right<FetchIndexResponse>;
 
       const newState = init(state, res, context);
 
@@ -140,7 +135,9 @@ describe('Stage: init', () => {
     it('INIT -> FATAL', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
-      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+      const res: StateActionResponse<'INIT'> = Either.right(
+        fetchIndexResponse
+      ) as Either.Right<FetchIndexResponse>;
 
       const newState = init(state, res, context);
 
@@ -160,7 +157,9 @@ describe('Stage: init', () => {
 
     it('adds a log entry about the algo check', () => {
       const state = createState();
-      const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+      const res: StateActionResponse<'INIT'> = Either.right(
+        createResponse()
+      ) as Either.Right<FetchIndexResponse>;
 
       const newState = init(state, res, context);
 
@@ -172,7 +171,9 @@ describe('Stage: init', () => {
     it('INIT -> FATAL', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
-      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+      const res: StateActionResponse<'INIT'> = Either.right(
+        fetchIndexResponse
+      ) as Either.Right<FetchIndexResponse>;
 
       const newState = init(state, res, context);
 
@@ -193,7 +194,9 @@ describe('Stage: init', () => {
 
     it('calls buildIndexMappings with the correct parameters', () => {
       const state = createState();
-      const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+      const res: StateActionResponse<'INIT'> = Either.right(
+        createResponse()
+      ) as Either.Right<FetchIndexResponse>;
 
       init(state, res, context);
 
@@ -205,7 +208,9 @@ describe('Stage: init', () => {
 
     it('adds a log entry about the algo check', () => {
       const state = createState();
-      const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+      const res: StateActionResponse<'INIT'> = Either.right(
+        createResponse()
+      ) as Either.Right<FetchIndexResponse>;
 
       const newState = init(state, res, context);
 
@@ -217,7 +222,9 @@ describe('Stage: init', () => {
     it('INIT -> UPDATE_INDEX_MAPPINGS', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
-      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+      const res: StateActionResponse<'INIT'> = Either.right(
+        fetchIndexResponse
+      ) as Either.Right<FetchIndexResponse>;
 
       const mockMappings = { properties: { someMappings: 'string' } };
       buildIndexMappingsMock.mockReturnValue(mockMappings);
@@ -246,7 +253,9 @@ describe('Stage: init', () => {
 
     it('adds a log entry about the algo check', () => {
       const state = createState();
-      const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+      const res: StateActionResponse<'INIT'> = Either.right(
+        createResponse()
+      ) as Either.Right<FetchIndexResponse>;
 
       const newState = init(state, res, context);
 
@@ -258,7 +267,9 @@ describe('Stage: init', () => {
     it('INIT -> UPDATE_INDEX_MAPPINGS', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
-      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+      const res: StateActionResponse<'INIT'> = Either.right(
+        fetchIndexResponse
+      ) as Either.Right<FetchIndexResponse>;
 
       const mockMappings = { properties: { someMappings: 'string' } };
       buildIndexMappingsMock.mockReturnValue(mockMappings);
@@ -283,7 +294,9 @@ describe('Stage: init', () => {
 
     it('adds a log entry about the algo check', () => {
       const state = createState();
-      const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+      const res: StateActionResponse<'INIT'> = Either.right(
+        createResponse()
+      ) as Either.Right<FetchIndexResponse>;
 
       const newState = init(state, res, context);
 
@@ -300,7 +313,9 @@ describe('Stage: init', () => {
       it('calls buildIndexMappings with the correct parameters', () => {
         const state = createState();
         const fetchIndexResponse = createResponse();
-        const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
 
         init(state, res, context);
 
@@ -310,13 +325,34 @@ describe('Stage: init', () => {
         });
       });
 
+      it('calls getCreationAliases with the correct parameters', () => {
+        const state = createState();
+        const fetchIndexResponse = createResponse();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
+
+        init(state, res, context);
+
+        expect(getCreationAliasesMock).toHaveBeenCalledTimes(1);
+        expect(getCreationAliasesMock).toHaveBeenCalledWith({
+          indexPrefix: context.indexPrefix,
+          kibanaVersion: context.kibanaVersion,
+        });
+      });
+
       it('INIT -> CREATE_TARGET_INDEX', () => {
         const state = createState();
         const fetchIndexResponse = createResponse();
-        const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
 
         const mockMappings = { properties: { someMappings: 'string' } };
         buildIndexMappingsMock.mockReturnValue(mockMappings);
+
+        const creationAliases = ['.foo', '.bar'];
+        getCreationAliasesMock.mockReturnValue(creationAliases);
 
         const newState = init(state, res, context);
 
@@ -325,6 +361,7 @@ describe('Stage: init', () => {
             controlState: 'CREATE_TARGET_INDEX',
             currentIndex: '.kibana_1',
             indexMappings: mockMappings,
+            creationAliases,
           })
         );
       });
@@ -334,7 +371,9 @@ describe('Stage: init', () => {
       it('calls generateAdditiveMappingDiff with the correct parameters', () => {
         const state = createState();
         const fetchIndexResponse = createResponse();
-        const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
 
         checkVersionCompatibilityMock.mockReturnValue({
           status: 'greater',
@@ -345,7 +384,7 @@ describe('Stage: init', () => {
         expect(generateAdditiveMappingDiffMock).toHaveBeenCalledTimes(1);
         expect(generateAdditiveMappingDiffMock).toHaveBeenCalledWith({
           types: ['foo', 'bar'].map((type) => context.typeRegistry.getType(type)),
-          meta: fetchIndexResponse[currentIndex].mappings._meta,
+          mapping: fetchIndexResponse[currentIndex].mappings,
           deletedTypes: context.deletedTypes,
         });
       });
@@ -353,7 +392,9 @@ describe('Stage: init', () => {
       it('INIT -> UPDATE_INDEX_MAPPINGS', () => {
         const state = createState();
         const fetchIndexResponse = createResponse();
-        const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
 
         checkVersionCompatibilityMock.mockReturnValue({
           status: 'greater',
@@ -376,7 +417,9 @@ describe('Stage: init', () => {
 
       it('adds a log entry about the version check', () => {
         const state = createState();
-        const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+        const res: StateActionResponse<'INIT'> = Either.right(
+          createResponse()
+        ) as Either.Right<FetchIndexResponse>;
 
         checkVersionCompatibilityMock.mockReturnValue({
           status: 'greater',
@@ -394,7 +437,9 @@ describe('Stage: init', () => {
       it('INIT -> UPDATE_ALIASES if alias actions are not empty', () => {
         const state = createState();
         const fetchIndexResponse = createResponse();
-        const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
 
         checkVersionCompatibilityMock.mockReturnValue({
           status: 'equal',
@@ -417,7 +462,9 @@ describe('Stage: init', () => {
       it('INIT -> INDEX_STATE_UPDATE_DONE if alias actions are empty', () => {
         const state = createState();
         const fetchIndexResponse = createResponse();
-        const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
 
         checkVersionCompatibilityMock.mockReturnValue({
           status: 'equal',
@@ -439,7 +486,9 @@ describe('Stage: init', () => {
 
       it('adds a log entry about the version check', () => {
         const state = createState();
-        const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+        const res: StateActionResponse<'INIT'> = Either.right(
+          createResponse()
+        ) as Either.Right<FetchIndexResponse>;
 
         checkVersionCompatibilityMock.mockReturnValue({
           status: 'equal',
@@ -457,7 +506,9 @@ describe('Stage: init', () => {
       it('INIT -> INDEX_STATE_UPDATE_DONE', () => {
         const state = createState();
         const fetchIndexResponse = createResponse();
-        const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
 
         checkVersionCompatibilityMock.mockReturnValue({
           status: 'lesser',
@@ -474,7 +525,9 @@ describe('Stage: init', () => {
 
       it('adds a log entry about the version check', () => {
         const state = createState();
-        const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+        const res: StateActionResponse<'INIT'> = Either.right(
+          createResponse()
+        ) as Either.Right<FetchIndexResponse>;
 
         checkVersionCompatibilityMock.mockReturnValue({
           status: 'lesser',
@@ -492,7 +545,9 @@ describe('Stage: init', () => {
       it('INIT -> FATAL', () => {
         const state = createState();
         const fetchIndexResponse = createResponse();
-        const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
 
         checkVersionCompatibilityMock.mockReturnValue({
           status: 'conflict',
@@ -510,7 +565,9 @@ describe('Stage: init', () => {
 
       it('adds a log entry about the version check', () => {
         const state = createState();
-        const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+        const res: StateActionResponse<'INIT'> = Either.right(
+          createResponse()
+        ) as Either.Right<FetchIndexResponse>;
 
         checkVersionCompatibilityMock.mockReturnValue({
           status: 'conflict',

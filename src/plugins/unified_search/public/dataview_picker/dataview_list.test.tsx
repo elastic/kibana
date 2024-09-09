@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { MouseEvent } from 'react';
@@ -11,7 +12,8 @@ import { EuiSelectable } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { ShallowWrapper } from 'enzyme';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
-import { DataViewsList, DataViewsListProps } from './dataview_list';
+import { DataViewListItemEnhanced, DataViewsList, DataViewsListProps } from './dataview_list';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 
 function getDataViewPickerList(instance: ShallowWrapper) {
   return instance.find(EuiSelectable).first();
@@ -47,14 +49,15 @@ describe('DataView list component', () => {
   ];
   const changeDataViewSpy = jest.fn();
   let props: DataViewsListProps;
+
   beforeEach(() => {
     props = {
       currentDataViewId: 'dataview-1',
       onChangeDataView: changeDataViewSpy,
       dataViewsList: list,
-      isTextBasedLangSelected: false,
     };
   });
+
   it('should trigger the onChangeDataView if a new dataview is selected', async () => {
     const component = shallow(<DataViewsList {...props} />);
     await act(async () => {
@@ -63,7 +66,7 @@ describe('DataView list component', () => {
     expect(changeDataViewSpy).toHaveBeenCalled();
   });
 
-  it('should list all dataviiew', () => {
+  it('should list all dataviews', () => {
     const component = shallow(<DataViewsList {...props} />);
 
     expect(getDataViewPickerOptions(component)!.map((option: any) => option.label)).toEqual([
@@ -72,9 +75,40 @@ describe('DataView list component', () => {
     ]);
   });
 
-  it('should render a warning icon if a text based language is selected', () => {
-    const component = shallow(<DataViewsList {...props} isTextBasedLangSelected />);
+  describe('ad hoc data views', () => {
+    const runAdHocDataViewTest = (esqlDataViews: DataViewListItemEnhanced[] = []) => {
+      const dataViewList = [
+        ...list,
+        {
+          id: 'dataview-3',
+          title: 'dataview-3',
+          isAdhoc: true,
+        },
+        ...esqlDataViews,
+      ];
+      const component = shallow(<DataViewsList {...props} dataViewsList={dataViewList} />);
+      expect(getDataViewPickerOptions(component)!.map((option: any) => option.label)).toEqual([
+        'dataview-1',
+        'dataview-2',
+        'dataview-3',
+      ]);
+    };
 
-    expect(getDataViewPickerOptions(component)!.map((option: any) => option.append)).not.toBeNull();
+    const esqlDataViews: DataViewListItemEnhanced[] = [
+      {
+        id: 'dataview-4',
+        title: 'dataview-4',
+        type: ESQL_TYPE,
+        isAdhoc: true,
+      },
+    ];
+
+    it('should show ad hoc data views for data view mode', () => {
+      runAdHocDataViewTest();
+    });
+
+    it('should not show ES|QL ad hoc data views for data view mode', () => {
+      runAdHocDataViewTest(esqlDataViews);
+    });
   });
 });

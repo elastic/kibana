@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './_dashboard_app.scss';
@@ -13,10 +14,9 @@ import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HashRouter, RouteComponentProps, Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { I18nProvider } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { AppMountParameters, CoreSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
 import {
@@ -31,7 +31,6 @@ import { pluginServices } from '../services/plugin_services';
 import { RedirectToProps } from '../dashboard_container/types';
 import { createDashboardEditUrl } from '../dashboard_constants';
 import { DashboardNoMatch } from './listing_page/dashboard_no_match';
-import { DashboardStart, DashboardStartDependencies } from '../plugin';
 import { DashboardMountContext } from './hooks/dashboard_mount_context';
 import { DashboardEmbedSettings, DashboardMountContextProps } from './types';
 import { DashboardListingPage } from './listing_page/dashboard_listing_page';
@@ -47,11 +46,16 @@ export const dashboardUrlParams = {
 export interface DashboardMountProps {
   appUnMounted: () => void;
   element: AppMountParameters['element'];
-  core: CoreSetup<DashboardStartDependencies, DashboardStart>;
+  coreStart: CoreStart;
   mountContext: DashboardMountContextProps;
 }
 
-export async function mountApp({ core, element, appUnMounted, mountContext }: DashboardMountProps) {
+export async function mountApp({
+  coreStart,
+  element,
+  appUnMounted,
+  mountContext,
+}: DashboardMountProps) {
   const {
     chrome: { setBadge, docTitle, setHelpExtension },
     dashboardCapabilities: { showWriteControls },
@@ -145,25 +149,23 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   });
 
   const app = (
-    <I18nProvider>
+    <KibanaRenderContextProvider {...coreStart}>
       <DashboardMountContext.Provider value={mountContext}>
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <HashRouter>
-            <Routes>
-              <Route
-                path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
-                render={renderDashboard}
-              />
-              <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
-              <Route exact path="/">
-                <Redirect to={LANDING_PAGE_PATH} />
-              </Route>
-              <Route render={renderNoMatch} />
-            </Routes>
-          </HashRouter>
-        </KibanaThemeProvider>
+        <HashRouter>
+          <Routes>
+            <Route
+              path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
+              render={renderDashboard}
+            />
+            <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+            <Route exact path="/">
+              <Redirect to={LANDING_PAGE_PATH} />
+            </Route>
+            <Route render={renderNoMatch} />
+          </Routes>
+        </HashRouter>
       </DashboardMountContext.Provider>
-    </I18nProvider>
+    </KibanaRenderContextProvider>
   );
 
   setHelpExtension({

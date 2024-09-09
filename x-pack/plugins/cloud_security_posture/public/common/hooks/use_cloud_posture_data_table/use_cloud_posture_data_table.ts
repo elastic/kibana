@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { Dispatch, SetStateAction, useCallback } from 'react';
-import { type DataView } from '@kbn/data-views-plugin/common';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { CriteriaWithPagination } from '@elastic/eui';
 import { DataTableRecord } from '@kbn/discover-utils/types';
@@ -46,13 +45,11 @@ export interface CloudPostureDataTableResult {
 */
 export const useCloudPostureDataTable = ({
   defaultQuery = getDefaultQuery,
-  dataView,
   paginationLocalStorageKey,
   columnsLocalStorageKey,
   nonPersistedFilters,
 }: {
   defaultQuery?: (params: FindingsBaseURLQuery) => FindingsBaseURLQuery;
-  dataView: DataView;
   paginationLocalStorageKey: string;
   columnsLocalStorageKey?: string;
   nonPersistedFilters?: Filter[];
@@ -62,7 +59,7 @@ export const useCloudPostureDataTable = ({
   const { pageSize, setPageSize } = usePageSize(paginationLocalStorageKey);
 
   const onChangeItemsPerPage = useCallback(
-    (newPageSize) => {
+    (newPageSize: any) => {
       setPageSize(newPageSize);
       setUrlQuery({
         pageIndex: 0,
@@ -84,7 +81,7 @@ export const useCloudPostureDataTable = ({
   }, [setUrlQuery]);
 
   const onChangePage = useCallback(
-    (newPageIndex) => {
+    (newPageIndex: any) => {
       setUrlQuery({
         pageIndex: newPageIndex,
       });
@@ -93,7 +90,7 @@ export const useCloudPostureDataTable = ({
   );
 
   const onSort = useCallback(
-    (sort) => {
+    (sort: any) => {
       setUrlQuery({
         sort,
       });
@@ -102,7 +99,7 @@ export const useCloudPostureDataTable = ({
   );
 
   const setTableOptions = useCallback(
-    ({ page, sort }) => {
+    ({ page, sort }: any) => {
       setPageSize(page.size);
       setUrlQuery({
         sort,
@@ -116,14 +113,13 @@ export const useCloudPostureDataTable = ({
    * Page URL query to ES query
    */
   const baseEsQuery = useBaseEsQuery({
-    dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
     ...(nonPersistedFilters ? { nonPersistedFilters } : {}),
   });
 
   const handleUpdateQuery = useCallback(
-    (query) => {
+    (query: any) => {
       setUrlQuery({ ...query, pageIndex: 0 });
     },
     [setUrlQuery]
@@ -141,7 +137,7 @@ export const useCloudPostureDataTable = ({
   return {
     setUrlQuery,
     sort: urlQuery.sort,
-    filters: urlQuery.filters,
+    filters: urlQuery.filters || [],
     query: baseEsQuery.query
       ? baseEsQuery.query
       : {

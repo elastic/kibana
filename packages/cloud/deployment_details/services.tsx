@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 
 export interface DeploymentDetailsContextValue {
   cloudId?: string;
@@ -22,7 +23,7 @@ const DeploymentDetailsContext = React.createContext<DeploymentDetailsContextVal
 /**
  * Abstract external service Provider.
  */
-export const DeploymentDetailsProvider: FC<DeploymentDetailsContextValue> = ({
+export const DeploymentDetailsProvider: FC<PropsWithChildren<DeploymentDetailsContextValue>> = ({
   children,
   ...services
 }) => {
@@ -75,10 +76,9 @@ export interface DeploymentDetailsKibanaDependencies {
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const DeploymentDetailsKibanaProvider: FC<DeploymentDetailsKibanaDependencies> = ({
-  children,
-  ...services
-}) => {
+export const DeploymentDetailsKibanaProvider: FC<
+  PropsWithChildren<DeploymentDetailsKibanaDependencies>
+> = ({ children, ...services }) => {
   const {
     core: {
       application: { navigateToUrl },

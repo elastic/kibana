@@ -50,6 +50,7 @@ function getPackagePolicy(name: string, policyId = '') {
     namespace: 'default',
     enabled: true,
     policy_id: policyId,
+    policy_ids: [policyId],
     inputs: [],
   };
 }
@@ -188,6 +189,37 @@ describe('createAgentPolicyWithPackages', () => {
       getPackagePolicy('system-1', 'new_id'),
       expect.anything()
     );
+  });
+
+  it('should call deploy policy once when create policy with system package', async () => {
+    mockedAgentPolicyService.deployPolicy.mockClear();
+    mockedAgentPolicyService.create.mockImplementation(
+      async (soClient, esClient, newPolicy, options) => {
+        if (!options?.skipDeploy) {
+          await mockedAgentPolicyService.deployPolicy(soClientMock, 'new_id');
+        }
+        return Promise.resolve({
+          ...newPolicy,
+          id: options?.id || 'new_id',
+        } as AgentPolicy);
+      }
+    );
+    const response = await createAgentPolicyWithPackages({
+      esClient: esClientMock,
+      soClient: soClientMock,
+      newPolicy: { name: 'Agent policy 1', namespace: 'default' },
+      withSysMonitoring: true,
+      spaceId: 'default',
+    });
+
+    expect(response.id).toEqual('new_id');
+    expect(mockedBulkInstallPackages).toHaveBeenCalledWith({
+      savedObjectsClient: soClientMock,
+      esClient: esClientMock,
+      packagesToInstall: ['system'],
+      spaceId: 'default',
+    });
+    expect(mockedAgentPolicyService.deployPolicy).toHaveBeenCalledTimes(1);
   });
 
   it('should create policy with system and elastic_agent package', async () => {

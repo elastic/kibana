@@ -8,7 +8,6 @@
 import React, { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiModal,
@@ -20,6 +19,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import {
+  usePageUrlState,
+  UrlStateProvider,
+  type ListingPageUrlState,
+  type PageUrlState,
+} from '@kbn/ml-url-state';
 
 import { useAppDependencies } from '../../app_dependencies';
 import type { TransformListRow } from '../../common';
@@ -27,11 +32,10 @@ import { isTransformStats } from '../../../../common/types/transform_stats';
 import { useGetTransformsStats } from '../../hooks/use_get_transform_stats';
 import { useEnabledFeatures } from '../../serverless_context';
 import { needsReauthorization } from '../../common/reauthorization_utils';
-import { TRANSFORM_STATE } from '../../../../common/constants';
+import { TRANSFORM_LIST_COLUMN } from '../../common';
 
 import {
   useDocumentationLinks,
-  useDeleteTransforms,
   useTransformCapabilities,
   useGetTransforms,
   useGetTransformNodes,
@@ -49,6 +53,15 @@ import {
   getAlertRuleManageContext,
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
+import { DanglingTasksWarning } from './components/dangling_task_warning/dangling_task_warning';
+
+const getDefaultTransformListState = (): ListingPageUrlState => ({
+  pageIndex: 0,
+  pageSize: 10,
+  sortField: TRANSFORM_LIST_COLUMN.ID,
+  sortDirection: 'asc',
+  showPerPageOptions: true,
+});
 
 const ErrorMessageCallout: FC<{
   text: JSX.Element;
@@ -78,8 +91,10 @@ export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
   const { dataViewEditor } = useAppDependencies();
-
-  const deleteTransforms = useDeleteTransforms();
+  const [transformPageState, setTransformPageState] = usePageUrlState<PageUrlState>(
+    'transform',
+    getDefaultTransformListState()
+  );
 
   const {
     isInitialLoading: transformNodesInitialLoading,
@@ -102,6 +117,7 @@ export const TransformManagement: FC = () => {
     error: transformsStatsErrorMessage,
     data: transformsStats,
   } = useGetTransformsStats({
+    basic: true,
     enabled: !transformNodesInitialLoading && transformNodes > 0,
   });
 
@@ -292,51 +308,7 @@ export const TransformManagement: FC = () => {
             <EuiSpacer size="s" />
 
             <AlertRulesManageContext.Provider value={getAlertRuleManageContext()}>
-              {transformIdsWithoutConfig ? (
-                <>
-                  <EuiCallOut color="warning">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.transform.danglingTasksError"
-                        defaultMessage="{count} {count, plural, one {transform is} other {transforms are}} missing configuration details: [{transformIds}] {count, plural, one {It} other {They}} cannot be recovered and should be deleted."
-                        values={{
-                          count: transformIdsWithoutConfig.length,
-                          transformIds: transformIdsWithoutConfig.join(', '),
-                        }}
-                      />
-                    </p>
-                    <EuiButton
-                      color="warning"
-                      size="s"
-                      onClick={() =>
-                        deleteTransforms(
-                          // If transform task doesn't have any corresponding config
-                          // we won't know what the destination index or data view would be
-                          // and should be force deleted
-                          {
-                            transformsInfo: transformIdsWithoutConfig.map((id) => ({
-                              id,
-                              state: TRANSFORM_STATE.FAILED,
-                            })),
-                            deleteDestIndex: false,
-                            deleteDestDataView: false,
-                            forceDelete: true,
-                          }
-                        )
-                      }
-                    >
-                      <FormattedMessage
-                        id="xpack.transform.forceDeleteTransformMessage"
-                        defaultMessage="Delete {count} {count, plural, one {transform} other {transforms}}"
-                        values={{
-                          count: transformIdsWithoutConfig.length,
-                        }}
-                      />
-                    </EuiButton>
-                  </EuiCallOut>
-                  <EuiSpacer />
-                </>
-              ) : null}
+              <DanglingTasksWarning transformIdsWithoutConfig={transformIdsWithoutConfig} />
               {(transformNodes > 0 || transforms.length > 0) && (
                 <TransformList
                   isLoading={transformsWithoutStatsLoading}
@@ -345,6 +317,8 @@ export const TransformManagement: FC = () => {
                   transforms={transforms}
                   transformsLoading={transformsWithoutStatsLoading}
                   transformsStatsLoading={transformsStatsLoading}
+                  pageState={transformPageState as ListingPageUrlState}
+                  updatePageState={setTransformPageState}
                 />
               )}
               <TransformAlertFlyoutWrapper />
@@ -379,7 +353,9 @@ export const TransformManagementSection: FC = () => {
 
   return (
     <CapabilitiesWrapper requiredCapabilities={'canGetTransform'}>
-      <TransformManagement />
+      <UrlStateProvider>
+        <TransformManagement />
+      </UrlStateProvider>
     </CapabilitiesWrapper>
   );
 };
