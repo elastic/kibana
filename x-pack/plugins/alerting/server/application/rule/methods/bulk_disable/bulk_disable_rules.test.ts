@@ -493,6 +493,39 @@ describe('bulkDisableRules', () => {
       { overwrite: true }
     );
 
+    expect(result.rules[0].id).toBe('id1');
+    expect(result.rules[1].id).toBe('id2');
+  });
+
+  test('should return rules in correct format', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [enabledRuleForBulkOps1, disabledRuleForBulkDisable2],
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
+    });
+
+    const result = await rulesClient.bulkDisableRules({ ids: ['id1', 'id2'] });
+
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'id1',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+        expect.objectContaining({
+          id: 'id2',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+      ]),
+      { overwrite: true }
+    );
+
     expect(result).toStrictEqual({
       errors: [],
       rules: [returnedRuleForBulkDisable1, returnedRuleForBulkDisable2],

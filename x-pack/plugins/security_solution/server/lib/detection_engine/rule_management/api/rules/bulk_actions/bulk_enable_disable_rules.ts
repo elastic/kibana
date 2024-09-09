@@ -64,20 +64,6 @@ export const bulkEnableDisableRules = async ({
       ? await rulesClient.bulkEnableRules({ ids: ruleIds })
       : await rulesClient.bulkDisableRules({ ids: ruleIds });
 
-  updatedRules.push(
-    ...rules.flatMap((rule) => {
-      const updatedRule = results.rules.find((resultsRule) => resultsRule.id === rule.id);
-      if (updatedRule) {
-        return {
-          ...rule,
-          enabled: updatedRule.enabled,
-        };
-      } else {
-        return [];
-      }
-    })
-  );
-
   // Rule objects returned from the bulkEnableRules are not
   // compatible with the response type. So we need to map them to
   // the original rules and update the enabled field
@@ -93,7 +79,7 @@ export const bulkEnableDisableRules = async ({
   );
 
   return {
-    updatedRules,
+    updatedRules: results.rules as RuleAlertType[],
     errors,
   };
 };
