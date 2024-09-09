@@ -1,0 +1,15 @@
+## LEAST
+
+Returns the minimum value from multiple columns. This is similar to `MV_MIN` except it is intended to run on multiple columns at once.
+
+### Examples
+
+```esql
+ROW a = 10, b = 20
+| EVAL l = LEAST(a, b)
+```
+
+```esql
+ROW x = 5, y = 15, z = 10
+| EVAL min_value = LEAST(x, y, z)
+```

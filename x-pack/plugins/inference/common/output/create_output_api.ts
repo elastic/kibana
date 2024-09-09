@@ -9,22 +9,29 @@ import { map } from 'rxjs';
 import { ChatCompleteAPI, ChatCompletionEventType, MessageRole } from '../chat_complete';
 import { withoutTokenCountEvents } from '../chat_complete/without_token_count_events';
 import { OutputAPI, OutputEvent, OutputEventType } from '.';
+import { ensureMultiTurn } from '../ensure_multi_turn';
 
 export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
-  return (id, { connectorId, input, schema, system }) => {
+  return (id, { connectorId, input, schema, system, previousMessages }) => {
     return chatCompleteApi({
       connectorId,
       system,
-      messages: [
+      messages: ensureMultiTurn([
+        ...(previousMessages || []),
         {
           role: MessageRole.User,
           content: input,
         },
-      ],
+      ]),
       ...(schema
         ? {
-            tools: { output: { description: `Output your response in the this format`, schema } },
-            toolChoice: { function: 'output' },
+            tools: {
+              output: {
+                description: `Use the following schema to respond to the user's request in structured data, so it can be parsed and handled.`,
+                schema,
+              },
+            },
+            toolChoice: { function: 'output' as const },
           }
         : {}),
     }).pipe(
@@ -33,17 +40,18 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
         if (event.type === ChatCompletionEventType.ChatCompletionChunk) {
           return {
             type: OutputEventType.OutputUpdate,
-            data: {
-              id,
-              content: event.content,
-            },
+            id,
+            content: event.content,
           };
         }
+
         return {
-          data: {
-            id,
-            output: event.toolCalls[0].function.arguments,
-          },
+          id,
+          output:
+            event.toolCalls.length && 'arguments' in event.toolCalls[0].function
+              ? event.toolCalls[0].function.arguments
+              : undefined,
+          content: event.content,
           type: OutputEventType.OutputComplete,
         };
       })

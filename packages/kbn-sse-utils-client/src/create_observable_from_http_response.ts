@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createParser } from 'eventsource-parser';
 import { Observable, throwError } from 'rxjs';
 import { createSSEInternalError, ServerSentEvent, ServerSentEventError } from '@kbn/sse-utils';
+import { ServerSentErrorEvent } from '@kbn/sse-utils/src/errors';
 
 export interface StreamedHttpResponse {
   response?: { body: ReadableStream<Uint8Array> | null | undefined };
@@ -32,9 +34,16 @@ export function createObservableFromHttpResponse<T extends ServerSentEvent = nev
         try {
           const data = JSON.parse(event.data);
           if (event.event === 'error') {
-            subscriber.error(new ServerSentEventError(data.code, data.message, data.meta));
+            const errorData = data as Omit<ServerSentErrorEvent, 'type'>;
+            subscriber.error(
+              new ServerSentEventError(
+                errorData.error.code,
+                errorData.error.message,
+                errorData.error.meta
+              )
+            );
           } else {
-            subscriber.next({ type: event.event || 'event', data } as T);
+            subscriber.next({ type: event.event || 'event', ...data } as T);
           }
         } catch (error) {
           subscriber.error(createSSEInternalError(`Failed to parse JSON`));

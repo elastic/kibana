@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { lastValueFrom, of, toArray } from 'rxjs';
@@ -12,9 +13,10 @@ import type { StreamedHttpResponse } from './create_observable_from_http_respons
 import { ServerSentEventErrorCode } from '@kbn/sse-utils/src/errors';
 
 function toSse(...events: Array<{ type: string; data: Record<string, any> }>) {
-  return events.map((event) =>
-    new TextEncoder().encode(`event: ${event.type}\ndata: ${JSON.stringify(event.data)}\n\n`)
-  );
+  return events.map((event) => {
+    const { type, ...rest } = event;
+    return new TextEncoder().encode(`event: ${type}\ndata: ${JSON.stringify(rest)}\n\n`);
+  });
 }
 
 describe('httpResponseIntoObservable', () => {
@@ -22,15 +24,11 @@ describe('httpResponseIntoObservable', () => {
     const events = [
       {
         type: 'chatCompletionChunk',
-        data: {
-          content: 'Hello',
-        },
+        content: 'Hello',
       },
       {
         type: 'chatCompletionChunk',
-        data: {
-          content: 'Hello again',
-        },
+        content: 'Hello again',
       },
     ];
 

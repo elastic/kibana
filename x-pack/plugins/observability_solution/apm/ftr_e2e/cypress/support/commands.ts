@@ -88,18 +88,28 @@ Cypress.Commands.add('selectAbsoluteTimeRange', (start: string, end: string) => 
   const format = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
   cy.getByTestSubj('superDatePickerstartDatePopoverButton').click();
+<<<<<<< HEAD
   cy.contains('Start date')
     .parentsUntil('.euiDatePopoverContent')
     .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
     .clear({ force: true })
+=======
+  cy.getByTestSubj('superDatePickerAbsoluteDateInput').clear({ force: true });
+  cy.getByTestSubj('superDatePickerAbsoluteDateInput')
+>>>>>>> fa686b9905e963af28c5b81e3a91026570dfc711
     .type(moment(start).format(format), { force: true })
     .type('{enter}');
 
   cy.getByTestSubj('superDatePickerendDatePopoverButton').click();
+<<<<<<< HEAD
   cy.contains('End date')
     .parentsUntil('.euiDatePopoverContent')
     .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
     .clear({ force: true })
+=======
+  cy.getByTestSubj('superDatePickerAbsoluteDateInput').clear({ force: true });
+  cy.getByTestSubj('superDatePickerAbsoluteDateInput')
+>>>>>>> fa686b9905e963af28c5b81e3a91026570dfc711
     .type(moment(end).format(format), { force: true })
     .type('{enter}');
 });

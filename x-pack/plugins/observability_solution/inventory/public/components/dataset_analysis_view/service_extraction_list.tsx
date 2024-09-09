@@ -111,9 +111,9 @@ export function ServiceExtractionList({ indexPatterns }: { indexPatterns: string
             next: (event) => {
               setCandidates((prev) => {
                 return prev.concat(
-                  event.data.output.candidates.map((candidate, index) => ({
+                  event.output.candidates.map((candidate, index) => ({
                     ...candidate,
-                    dataset: event.data.output.dataset,
+                    dataset: event.output.dataset,
                     accept: index === 0,
                   }))
                 );
