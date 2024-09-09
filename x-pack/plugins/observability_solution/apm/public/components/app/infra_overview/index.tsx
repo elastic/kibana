@@ -10,7 +10,6 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { InfraTabs } from './infra_tabs';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
-import { logsOnlyEmptyStateContent } from './constants';
 
 export function InfraOverview() {
   const { serviceEntitySummary } = useApmServiceContext();
@@ -19,13 +18,7 @@ export function InfraOverview() {
     serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
   if (hasLogsOnlySignal) {
-    return (
-      <ServiceTabEmptyState
-        title={logsOnlyEmptyStateContent.title}
-        content={logsOnlyEmptyStateContent.content}
-        imgName={logsOnlyEmptyStateContent.imgName}
-      />
-    );
+    return <ServiceTabEmptyState id="infraOverview" />;
   }
 
   return (

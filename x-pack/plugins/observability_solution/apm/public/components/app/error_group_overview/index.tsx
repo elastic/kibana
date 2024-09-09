@@ -17,7 +17,6 @@ import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
 import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
-import { logsOnlyEmptyStateContent } from './constants';
 
 export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
@@ -38,13 +37,7 @@ export function ErrorGroupOverview() {
     serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
   if (hasLogsOnlySignal) {
-    return (
-      <ServiceTabEmptyState
-        title={logsOnlyEmptyStateContent.title}
-        content={logsOnlyEmptyStateContent.content}
-        imgName={logsOnlyEmptyStateContent.imgName}
-      />
-    );
+    return <ServiceTabEmptyState id="errorGroupOverview" />;
   }
 
   return (

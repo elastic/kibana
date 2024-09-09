@@ -18,7 +18,6 @@ import { isApmSignal, isLogsSignal, isLogsOnlySignal } from '../../../utils/get_
 import { ApmOverview } from './apm_overview';
 import { LogsOverview } from './logs_overview';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
-import { logsOnlyEmptyStateContent } from './constants';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 
@@ -88,8 +87,7 @@ export function ServiceOverview() {
                 {hasLogsOnlySignal && !dismissedLogsOnlyEmptyState && (
                   <>
                     <ServiceTabEmptyState
-                      title={logsOnlyEmptyStateContent.title}
-                      content={logsOnlyEmptyStateContent.content}
+                      id="serviceOverview"
                       onDissmiss={() => setDismissedLogsOnlyEmptyState(true)}
                     />
                     <EuiSpacer size="m" />

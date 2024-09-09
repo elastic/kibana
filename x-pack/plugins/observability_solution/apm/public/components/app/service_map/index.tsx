@@ -31,7 +31,6 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { isLogsOnlySignal } from '../../../utils/get_signal_type';
-import { logsOnlyEmptyStateContent } from './constants';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
 
 function PromptContainer({ children }: { children: ReactNode }) {
@@ -86,13 +85,7 @@ export function ServiceMapServiceDetail() {
     serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
   if (hasLogsOnlySignal) {
-    return (
-      <ServiceTabEmptyState
-        title={logsOnlyEmptyStateContent.title}
-        content={logsOnlyEmptyStateContent.content}
-        imgName={logsOnlyEmptyStateContent.imgName}
-      />
-    );
+    return <ServiceTabEmptyState id="serviceMap" />;
   }
   return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
 }

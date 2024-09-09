@@ -21,7 +21,6 @@ import { SloCallout } from '../../shared/slo_callout';
 import { TransactionsTable } from '../../shared/transactions_table';
 import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
-import { logsOnlyEmptyStateContent } from './constants';
 
 export function TransactionOverview() {
   const {
@@ -69,13 +68,7 @@ export function TransactionOverview() {
     serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
   if (hasLogsOnlySignal) {
-    return (
-      <ServiceTabEmptyState
-        title={logsOnlyEmptyStateContent.title}
-        content={logsOnlyEmptyStateContent.content}
-        imgName={logsOnlyEmptyStateContent.imgName}
-      />
-    );
+    return <ServiceTabEmptyState id="transactionOverview" />;
   }
 
   return (

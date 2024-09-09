@@ -15,7 +15,6 @@ import { ServiceOverviewDependenciesTable } from '../service_overview/service_ov
 import { ServiceDependenciesBreakdownChart } from './service_dependencies_breakdown_chart';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
-import { logsOnlyEmptyStateContent } from './constants';
 
 export function ServiceDependencies() {
   const { serviceEntitySummary } = useApmServiceContext();
@@ -24,13 +23,7 @@ export function ServiceDependencies() {
     serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
   if (hasLogsOnlySignal) {
-    return (
-      <ServiceTabEmptyState
-        title={logsOnlyEmptyStateContent.title}
-        content={logsOnlyEmptyStateContent.content}
-        imgName={logsOnlyEmptyStateContent.imgName}
-      />
-    );
+    return <ServiceTabEmptyState id="serviceDependencies" />;
   }
 
   return (

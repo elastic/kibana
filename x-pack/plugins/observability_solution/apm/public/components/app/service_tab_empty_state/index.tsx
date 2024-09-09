@@ -22,12 +22,10 @@ import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 import { AddApmData } from '../../shared/add_data_buttons/buttons';
+import { emptyStateDefinitions, EmptyStateKey } from './constants';
 
 export interface ServiceTabEmptyStateProps {
-  title: string;
-  content: string;
-  imgName?: string;
-  dismissable?: boolean;
+  id: EmptyStateKey;
   onDissmiss?: () => void;
 }
 
@@ -45,18 +43,14 @@ const learnMoreLink = {
   href: 'https://www.elastic.co/observability/application-performance-monitoring',
 };
 
-export function ServiceTabEmptyState({
-  title,
-  content,
-  imgName,
-  onDissmiss,
-}: ServiceTabEmptyStateProps) {
+export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStateProps) {
   const { euiTheme } = useEuiTheme();
   const imgFolder = `/plugins/apm/assets/service_tab_empty_state/${
     useUiSetting('theme:darkMode') === 'enabled' ? 'dark' : 'light'
   }`;
+  const imgName2 = emptyStateDefinitions[id].imgName;
   const imgSrc = useKibanaUrl(
-    `${imgFolder}/${imgName ? imgName : 'service_tab_empty_state_overview.png'}`
+    `${imgFolder}/${imgName2 ? imgName2 : 'service_tab_empty_state_overview.png'}`
   );
 
   return (
@@ -65,10 +59,10 @@ export function ServiceTabEmptyState({
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="s">
-              <h3>{title}</h3>
+              <h3>{emptyStateDefinitions[id].title}</h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiText size="s">{content}</EuiText>
+            <EuiText size="s">{emptyStateDefinitions[id].content}</EuiText>
             <EuiSpacer size="m" />
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem grow={false}>
@@ -101,7 +95,7 @@ export function ServiceTabEmptyState({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {!imgName && (
+          {!emptyStateDefinitions[id].imgName && (
             <EuiFlexItem
               style={{
                 maxHeight: `${euiTheme.base * 16}px`,
@@ -110,7 +104,7 @@ export function ServiceTabEmptyState({
                 border: `${euiTheme.border.thin}`,
               }}
             >
-              <EuiImage src={imgSrc} alt={content} />
+              <EuiImage src={imgSrc} alt={emptyStateDefinitions[id].content} />
             </EuiFlexItem>
           )}
 
@@ -128,10 +122,15 @@ export function ServiceTabEmptyState({
           )}
         </EuiFlexGroup>
       </EuiPanel>
-      {imgName && (
+      {emptyStateDefinitions[id] && (
         <>
           <EuiSpacer size="l" />
-          <EuiImage src={imgSrc} alt={content} size="fullWidth" style={{ opacity: 0.4 }} />
+          <EuiImage
+            src={imgSrc}
+            alt={emptyStateDefinitions[id].content}
+            size="fullWidth"
+            style={{ opacity: 0.4 }}
+          />
         </>
       )}
     </>
