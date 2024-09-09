@@ -1415,6 +1415,134 @@ describe('TaskClaiming', () => {
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
     });
 
+    test('should handle conflict errors when bulk updating the task doc', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+        mockInstance({ id: `id-4`, taskType: 'report' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+      store.bulkUpdate.mockResolvedValueOnce([
+        asOk(fetchedTasks[0]),
+        // @ts-expect-error
+        asErr({
+          type: 'task',
+          id: fetchedTasks[1].id,
+          error: {
+            statusCode: 409,
+            message: 'Conflict',
+          },
+        }),
+        asOk(fetchedTasks[2]),
+        asOk(fetchedTasks[3]),
+      ]);
+      store.bulkGet.mockResolvedValueOnce([
+        asOk(fetchedTasks[0]),
+        asOk(fetchedTasks[2]),
+        asOk(fetchedTasks[3]),
+      ]);
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+        taskPartitioner,
+      });
+
+      const [resultOrErr] = await getAllAsPromise(
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
+      );
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 3; stale: 0; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
+        { tags: ['claimAvailableTasksMget'] }
+      );
+      expect(taskManagerLogger.error).not.toHaveBeenCalled();
+
+      expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
+        size: 40,
+        seq_no_primary_term: true,
+      });
+      expect(store.getDocVersions).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-4',
+      ]);
+      expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            ...fetchedTasks[0],
+            attempts: 1,
+            ownerId: 'test-test',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+          },
+          {
+            ...fetchedTasks[1],
+            attempts: 1,
+            ownerId: 'test-test',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+          },
+          {
+            ...fetchedTasks[2],
+            attempts: 1,
+            ownerId: 'test-test',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+          },
+          {
+            ...fetchedTasks[3],
+            attempts: 1,
+            ownerId: 'test-test',
+            retryAt: new Date('1970-01-01T00:05:30.000Z'),
+            status: 'running',
+            startedAt: new Date('1970-01-01T00:00:00.000Z'),
+          },
+        ],
+        { validate: false, excludeLargeFields: true }
+      );
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-3', 'id-4']);
+
+      expect(result.stats).toEqual({
+        tasksClaimed: 3,
+        tasksConflicted: 1,
+        tasksErrors: 0,
+        tasksUpdated: 3,
+        tasksLeftUnclaimed: 0,
+      });
+      expect(result.docs.length).toEqual(3);
+    });
+
     test('should handle individual errors when bulk updating the task doc', async () => {
       const store = taskStoreMock.create({ taskManagerId: 'test-test' });
       store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
