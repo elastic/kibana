@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiFieldNumber,
 } from '@elastic/eui';
 
 import {
@@ -51,6 +52,29 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
       fullWidth
       required={required}
       value={ensureStringType(innerValue)}
+      isInvalid={!isValid}
+      onChange={(event) => {
+        setInnerValue(event.target.value);
+        validateAndSetConfigValue(event.target.value);
+      }}
+      placeholder={placeholder}
+    />
+  );
+};
+
+export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
+  configEntry,
+  isLoading,
+  validateAndSetConfigValue,
+}) => {
+  const { isValid, required, placeholder, value } = configEntry;
+  const [innerValue, setInnerValue] = useState(value);
+  return (
+    <EuiFieldNumber
+      fullWidth
+      disabled={isLoading}
+      required={required}
+      value={innerValue as number}
       isInvalid={!isValid}
       onChange={(event) => {
         setInnerValue(event.target.value);
@@ -177,7 +201,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
 
     case DisplayType.NUMERIC:
       return (
-        <ConfigInputField
+        <ConfigNumberField
           key={key}
           isLoading={isLoading}
           configEntry={configEntry}

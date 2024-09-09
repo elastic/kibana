@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import { ChatCompleteParams } from '../../../common/inference/types';
@@ -23,9 +24,11 @@ export enum ServiceProviderKeys {
   elasticsearch = 'elasticsearch',
   elser = 'elser',
   googleaistudio = 'googleaistudio',
+  googlevertexai = 'googlevertexai',
   hugging_face = 'hugging_face',
   mistral = 'mistral',
   openai = 'openai',
+  anthropic = 'anthropic',
 }
 
 export interface Config {
@@ -43,3 +46,5 @@ export interface Secrets {
 }
 
 export type InferenceConnector = ConnectorTypeModel<Config, Secrets, InferenceActionParams>;
+
+export type InferenceActionConnector = UserConfiguredActionConnector<Config, Secrets>;

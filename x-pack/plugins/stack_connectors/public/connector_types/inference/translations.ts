@@ -85,3 +85,17 @@ export const SELECT_PROVIDER = i18n.translate(
     defaultMessage: 'Select a service',
   }
 );
+
+export const COPY_TOOLTIP = i18n.translate(
+  'xpack.stackConnectors.components.inference.copy.tooltip',
+  {
+    defaultMessage: 'Copy to clipboard',
+  }
+);
+
+export const COPIED_TOOLTIP = i18n.translate(
+  'xpack.stackConnectors.components.inference.copied.tooltip',
+  {
+    defaultMessage: 'Copied!',
+  }
+);

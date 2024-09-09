@@ -12,10 +12,27 @@ import {
   StreamingResponseSchema,
   ChatCompleteParamsSchema,
   ChatCompleteResponseSchema,
+  RerankParamsSchema,
+  RerankResponseSchema,
+  SparseEmbeddingParamsSchema,
+  SparseEmbeddingResponseSchema,
+  TextEmbeddingParamsSchema,
+  TextEmbeddingResponseSchema,
 } from './schema';
 
 export type Config = TypeOf<typeof ConfigSchema>;
 export type Secrets = TypeOf<typeof SecretsSchema>;
+
 export type ChatCompleteParams = TypeOf<typeof ChatCompleteParamsSchema>;
 export type ChatCompleteResponse = TypeOf<typeof ChatCompleteResponseSchema>;
+
+export type RerankParams = TypeOf<typeof RerankParamsSchema>;
+export type RerankResponse = TypeOf<typeof RerankResponseSchema>;
+
+export type SparseEmbeddingParams = TypeOf<typeof SparseEmbeddingParamsSchema>;
+export type SparseEmbeddingResponse = TypeOf<typeof SparseEmbeddingResponseSchema>;
+
+export type TextEmbeddingParams = TypeOf<typeof TextEmbeddingParamsSchema>;
+export type TextEmbeddingResponse = TypeOf<typeof TextEmbeddingResponseSchema>;
+
 export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;

@@ -6,19 +6,16 @@
  */
 
 import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
-import {
-  EuiSelectable,
-  EuiHighlight,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiSelectable, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { InferenceProvider, useProviders } from '../get_providers';
-import { SERVICE_PROVIDERS } from '../render_service_provider/service_provider';
+import {
+  SERVICE_PROVIDERS,
+  ServiceProviderIcon,
+  ServiceProviderName,
+} from '../render_service_provider/service_provider';
 import { ServiceProviderKeys } from '../../types';
 
 /**
@@ -43,21 +40,19 @@ export interface SelectableProviderProps {
   }: GetSelectableOptions) => EuiSelectableOption[];
   onClosePopover: () => void;
   onProviderChange: (provider?: InferenceProvider) => void;
-  taskType: string;
 }
 
 const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
   getSelectableOptions,
   onClosePopover,
   onProviderChange,
-  taskType,
 }) => {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
   const [searchProviderValue, setSearchProviderValue] = useState<string>('');
-  const { data, isLoading } = useProviders(http, toasts, taskType);
+  const { data, isLoading } = useProviders(http, toasts);
   const onSearchProvider = useCallback(
     (val: string) => {
       setSearchProviderValue(val);
@@ -71,25 +66,26 @@ const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon
-              data-test-subj={`table-column-service-provider-${option.label}`}
-              type={provider.icon}
-            />
+            <ServiceProviderIcon providerKey={option.label as ServiceProviderKeys} />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiFlexGroup gutterSize="none" direction="column" responsive={false}>
               <EuiFlexItem data-test-subj="provider">
-                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+                <ServiceProviderName
+                  providerKey={option.label as ServiceProviderKeys}
+                  searchValue={searchValue}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false}>
-              {provider.solutions.map((solution) => (
-                <EuiFlexItem>
-                  <EuiBadge color="hollow">{solution}</EuiBadge>
-                </EuiFlexItem>
-              ))}
+              {provider &&
+                provider.solutions.map((solution) => (
+                  <EuiFlexItem>
+                    <EuiBadge color="hollow">{solution}</EuiBadge>
+                  </EuiFlexItem>
+                ))}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -148,7 +144,6 @@ const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
       options={getSelectableOptions({
         providers: data ?? [],
         searchProviderValue,
-        taskType,
       })}
     >
       {EuiSelectableContent}

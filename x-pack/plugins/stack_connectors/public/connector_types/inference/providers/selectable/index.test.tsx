@@ -10,34 +10,23 @@ import React from 'react';
 import type { ShallowWrapper } from 'enzyme';
 import { shallow, mount } from 'enzyme';
 
-import { SortFieldTimelineEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
-import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from '.';
-import { Direction } from '../../../../../common/search_strategy';
+import { SelectableProvider } from '.';
 
-const mockFetchAllTimeline = jest.fn();
-jest.mock('../../../containers/all', () => {
-  return {
-    useGetAllTimeline: jest.fn(() => ({
-      fetchAllTimeline: mockFetchAllTimeline,
-      timelines: [],
-    })),
-  };
-});
-describe('SelectableTimeline', () => {
+const mockGetProviders = jest.fn();
+describe('SelectableProvider', () => {
   const props = {
-    hideUntitled: false,
+    taskType: 'completion',
     getSelectableOptions: jest.fn().mockReturnValue([]),
     onClosePopover: jest.fn(),
-    onTimelineChange: jest.fn(),
-    timelineType: TimelineTypeEnum.default,
+    onProviderChange: jest.fn(),
   };
 
   describe('should render', () => {
     let wrapper: ShallowWrapper;
 
-    describe('timeline', () => {
+    describe('provider', () => {
       beforeAll(() => {
-        wrapper = shallow(<SelectableTimeline {...props} />);
+        wrapper = shallow(<SelectableProvider {...props} />);
       });
 
       afterAll(() => {
@@ -46,16 +35,15 @@ describe('SelectableTimeline', () => {
 
       test('render placeholder', () => {
         const searchProps: EuiSelectableProps['searchProps'] = wrapper
-          .find('[data-test-subj="selectable-input"]')
+          .find('[data-test-subj="selectable-provider-input"]')
           .prop('searchProps');
-        expect(searchProps?.placeholder).toEqual('e.g. Timeline name or description');
+        expect(searchProps?.placeholder).toEqual('');
       });
     });
 
-    describe('timeline template', () => {
-      const templateTimelineProps = { ...props, timelineType: TimelineTypeEnum.template };
+    describe('template', () => {
       beforeAll(() => {
-        wrapper = shallow(<SelectableTimeline {...templateTimelineProps} />);
+        wrapper = shallow(<SelectableProvider {...templateProps} />);
       });
 
       afterAll(() => {
@@ -64,30 +52,22 @@ describe('SelectableTimeline', () => {
 
       test('render placeholder', () => {
         const searchProps: EuiSelectableProps['searchProps'] = wrapper
-          .find('[data-test-subj="selectable-input"]')
+          .find('[data-test-subj="selectable-provider-input"]')
           .prop('searchProps');
-        expect(searchProps?.placeholder).toEqual('e.g. Timeline template name or description');
+        expect(searchProps?.placeholder).toEqual('e.g. template name or description');
       });
     });
   });
 
-  describe('fetchAllTimeline', () => {
+  describe('getProviders', () => {
     const args = {
       pageInfo: {
         pageIndex: 1,
-        pageSize: ORIGINAL_PAGE_SIZE,
       },
       search: '',
-      sort: {
-        sortField: SortFieldTimelineEnum.updated,
-        sortOrder: Direction.desc,
-      },
-      status: null,
-      onlyUserFavorite: false,
-      timelineType: TimelineTypeEnum.default,
     };
     beforeAll(() => {
-      mount(<SelectableTimeline {...props} />);
+      mount(<SelectableProvider {...props} />);
     });
 
     afterAll(() => {
@@ -95,7 +75,7 @@ describe('SelectableTimeline', () => {
     });
 
     test('should be called with correct args', () => {
-      expect(mockFetchAllTimeline).toBeCalledWith(args);
+      expect(mockGetProviders).toBeCalledWith(args);
     });
   });
 });

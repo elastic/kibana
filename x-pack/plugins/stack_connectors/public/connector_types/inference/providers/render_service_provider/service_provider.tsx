@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiHighlight, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import elasticIcon from '../assets/images/elastic.svg';
 import huggingFaceIcon from '../assets/images/hugging_face.svg';
@@ -20,6 +20,7 @@ import { ServiceProviderKeys } from '../../types';
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
+  searchValue?: string;
 }
 
 interface ServiceProviderRecord {
@@ -44,6 +45,11 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     name: 'Azure OpenAI',
     solutions: ['Observability', 'Security', 'Search'],
   },
+  [ServiceProviderKeys.anthropic]: {
+    icon: '',
+    name: 'Anthropic',
+    solutions: ['Search'],
+  },
   [ServiceProviderKeys.cohere]: {
     icon: cohereIcon,
     name: 'Cohere',
@@ -64,6 +70,11 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     name: 'Google AI Studio',
     solutions: ['Search'],
   },
+  [ServiceProviderKeys.googlevertexai]: {
+    icon: googleAIStudioIcon,
+    name: 'Google Vertex AI',
+    solutions: ['Observability', 'Security', 'Search'],
+  },
   [ServiceProviderKeys.hugging_face]: {
     icon: huggingFaceIcon,
     name: 'Hugging Face',
@@ -81,18 +92,24 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
   },
 };
 
-export const ServiceProvider: React.FC<ServiceProviderProps> = ({ providerKey }) => {
+export const ServiceProviderIcon: React.FC<ServiceProviderProps> = ({ providerKey }) => {
   const provider = SERVICE_PROVIDERS[providerKey];
 
   return provider ? (
-    <>
-      <EuiIcon
-        data-test-subj={`table-column-service-provider-${providerKey}`}
-        type={provider.icon}
-        style={{ marginRight: '8px' }}
-      />
-      <span>{provider.name}</span>
-    </>
+    <EuiIcon data-test-subj={`icon-service-provider-${providerKey}`} type={provider.icon} />
+  ) : (
+    <span>{providerKey}</span>
+  );
+};
+
+export const ServiceProviderName: React.FC<ServiceProviderProps> = ({
+  providerKey,
+  searchValue,
+}) => {
+  const provider = SERVICE_PROVIDERS[providerKey];
+
+  return provider ? (
+    <EuiHighlight search={searchValue ?? ''}>{provider.name}</EuiHighlight>
   ) : (
     <span>{providerKey}</span>
   );

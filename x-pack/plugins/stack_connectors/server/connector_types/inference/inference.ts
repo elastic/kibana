@@ -15,7 +15,10 @@ import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 import {
   ChatCompleteParamsSchema,
   ChatCompleteResponseSchema,
+  RerankParamsSchema,
+  SparseEmbeddingParamsSchema,
   StreamingResponseSchema,
+  TextEmbeddingParamsSchema,
 } from '../../../common/inference/schema';
 import {
   Config,
@@ -72,9 +75,21 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     });
 
     this.registerSubAction({
-      name: SUB_ACTION.TEST,
+      name: SUB_ACTION.RERANK,
       method: 'runApi',
-      schema: ChatCompleteParamsSchema,
+      schema: RerankParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.SPARSE_EMBEDDING,
+      method: 'runApi',
+      schema: SparseEmbeddingParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.TEXT_EMBEDDING,
+      method: 'runApi',
+      schema: TextEmbeddingParamsSchema,
     });
 
     /* this.registerSubAction({
@@ -109,14 +124,9 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async runApi({
-    input,
-    model: reqModel,
-    signal,
-    timeout,
-  }: ChatCompleteParams): Promise<ChatCompleteResponse> {
+  public async runApi({ input }: ChatCompleteParams): Promise<ChatCompleteResponse> {
     // set model on per request basis
-    const currentModel = reqModel ?? this.model;
+    const currentModel = this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
     const token = '';
 
@@ -128,8 +138,8 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      signal,
-      timeout,
+      // signal,
+      // timeout,
       responseSchema: ChatCompleteResponseSchema,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as SubActionRequestParams<any>;
@@ -142,13 +152,8 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     return { completion: completionText };
   }
 
-  private async streamAPI({
-    input,
-    model: reqModel,
-    signal,
-    timeout,
-  }: ChatCompleteParams): Promise<StreamingResponse> {
-    const currentModel = reqModel ?? this.model;
+  private async streamAPI({ input }: ChatCompleteParams): Promise<StreamingResponse> {
+    const currentModel = this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent?alt=sse`;
     const token = '';
 
@@ -162,8 +167,8 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      signal,
-      timeout,
+      // signal,
+      // timeout,
     });
 
     return response.data.pipe(new PassThrough());
@@ -177,20 +182,9 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * @param messages An array of messages to be sent to the API
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async invokeStream({
-    input,
-    model,
-    temperature = 0,
-    signal,
-    timeout,
-  }: ChatCompleteParams): Promise<IncomingMessage> {
+  public async invokeStream({ input }: ChatCompleteParams): Promise<IncomingMessage> {
     const res = (await this.streamAPI({
-      input: JSON.stringify(
-        formatInferencePayload([{ role: 'user', content: input }], temperature)
-      ),
-      model,
-      signal,
-      timeout,
+      input: JSON.stringify(formatInferencePayload([{ role: 'user', content: input }], 0)),
     })) as unknown as IncomingMessage;
     return res;
   }

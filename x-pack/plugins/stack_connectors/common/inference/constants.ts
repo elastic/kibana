@@ -17,6 +17,9 @@ export const INFERENCE_CONNECTOR_ID = '.inference';
 export enum SUB_ACTION {
   TEST = 'test',
   CHAT_COMPLETE = 'chatComplete',
+  RERANK = 'rerank',
+  TEXT_EMBEDDING = 'textEmbedding',
+  SPARSE_EMBEDDING = 'sparse_embedding',
 }
 
 export const DEFAULT_PROVIDER = 'openai';

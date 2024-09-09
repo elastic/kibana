@@ -7,26 +7,26 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { ServiceProvider } from './service_provider';
+import { ServiceProviderIcon } from './service_provider';
 import { ServiceProviderKeys } from '../../types';
 
-jest.mock('../../../../assets/images/providers/elastic.svg', () => 'elasticIcon.svg');
-jest.mock('../../../../assets/images/providers/hugging_face.svg', () => 'huggingFaceIcon.svg');
-jest.mock('../../../../assets/images/providers/cohere.svg', () => 'cohereIcon.svg');
-jest.mock('../../../../assets/images/providers/open_ai.svg', () => 'openAIIcon.svg');
+jest.mock('../assets/images/elastic.svg', () => 'elasticIcon.svg');
+jest.mock('../assets/images/hugging_face.svg', () => 'huggingFaceIcon.svg');
+jest.mock('../assets/images/cohere.svg', () => 'cohereIcon.svg');
+jest.mock('../assets/images/open_ai.svg', () => 'openAIIcon.svg');
 
 describe('ServiceProvider component', () => {
   it('renders Hugging Face icon and name when providerKey is hugging_face', () => {
-    render(<ServiceProvider providerKey={ServiceProviderKeys.hugging_face} />);
+    render(<ServiceProviderIcon providerKey={ServiceProviderKeys.hugging_face} />);
     expect(screen.getByText('Hugging Face')).toBeInTheDocument();
-    const icon = screen.getByTestId('table-column-service-provider-hugging_face');
+    const icon = screen.getByTestId('icon-service-provider-hugging_face');
     expect(icon).toBeInTheDocument();
   });
 
   it('renders Open AI icon and name when providerKey is openai', () => {
-    render(<ServiceProvider providerKey={ServiceProviderKeys.openai} />);
+    render(<ServiceProviderIcon providerKey={ServiceProviderKeys.openai} />);
     expect(screen.getByText('OpenAI')).toBeInTheDocument();
-    const icon = screen.getByTestId('table-column-service-provider-openai');
+    const icon = screen.getByTestId('icon-service-provider-openai');
     expect(icon).toBeInTheDocument();
   });
 });
