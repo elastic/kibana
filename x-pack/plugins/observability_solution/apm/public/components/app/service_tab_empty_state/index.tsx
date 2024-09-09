@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+/* eslint-disable @elastic/eui/href-or-on-click */
+
 import {
   EuiButton,
   EuiButtonIcon,
@@ -20,6 +23,7 @@ import {
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { EmptyStateClickParams, EntityInventoryAddDataParams } from '../../../services/telemetry';
 import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 import { AddApmData } from '../../shared/add_data_buttons/buttons';
@@ -45,6 +49,13 @@ const learnMoreLink = {
 };
 
 const baseImgFolder = '/plugins/apm/assets/service_tab_empty_state';
+const defaultAddDataTelemetryParqams: EntityInventoryAddDataParams = {
+  view: 'add_apm_cta',
+};
+
+const defaultClickTelemetryParams: EmptyStateClickParams = {
+  view: 'add_apm_cta',
+};
 
 export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStateProps) {
   const { euiTheme } = useEuiTheme();
@@ -58,9 +69,15 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
   );
 
   function handleAddAPMClick() {
-    services.telemetry.reportEntityInventoryAddData({
-      view: 'add_apm_cta',
-    });
+    services.telemetry.reportEntityInventoryAddData(defaultAddDataTelemetryParqams);
+  }
+
+  function handleTryItClick() {
+    services.telemetry.reportTryItClick(defaultClickTelemetryParams);
+  }
+
+  function handleLearnMoreClick() {
+    services.telemetry.reportLearnMoreClick(defaultClickTelemetryParams);
   }
 
   return (
@@ -89,6 +106,7 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
                   iconType="launch"
                   iconSide="right"
                   href={tryItNowButton.href}
+                  onClick={handleTryItClick}
                   target="_blank"
                 >
                   {tryItNowButton.label}
@@ -97,6 +115,7 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
               <EuiFlexItem grow={false}>
                 <EuiLink
                   href={learnMoreLink.href}
+                  onClick={handleLearnMoreClick}
                   target="_blank"
                   data-test-subj="ServiceTabEmptyStateLearnMoreButton"
                   external
