@@ -30,7 +30,7 @@ import {
   getPackageInfoMock,
 } from './mocks';
 import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { getPosturePolicy } from './utils';
+import { getPosturePolicy, POLICY_TEMPLATE_FORM_DTS } from './utils';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_AZURE,
@@ -160,6 +160,20 @@ describe('<CspPolicyTemplateForm />', () => {
       </FleetAppWrapper>
     );
   };
+
+  it('shows loader when useIsSubscriptionStatusValid is loading', () => {
+    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'loading',
+        data: undefined,
+      })
+    );
+
+    const policy = getMockPolicyAWS();
+    render(<WrappedComponent newPolicy={policy} />);
+
+    expect(screen.getByTestId(POLICY_TEMPLATE_FORM_DTS.LOADER)).toBeInTheDocument();
+  });
 
   it('shows license block if subscription is not allowed', () => {
     (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
