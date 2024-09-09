@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -17,12 +18,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const dataViews = getService('dataViews');
 
-  const PageObjects = getPageObjects([
+  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
     'common',
-    'unifiedSearch',
     'discover',
     'timePicker',
-    'dashboard',
     'unifiedFieldList',
   ]);
 
@@ -32,9 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
 
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setCommonlyUsedTime('This_week');
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
+      await timePicker.setCommonlyUsedTime('This_week');
     });
 
     after(async () => {
@@ -80,11 +79,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         hasTimeField: true,
       });
       await dataViews.waitForSwitcherToBe(`${initialPattern}*`);
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-      expect(await PageObjects.discover.getHitCountInt()).to.be(2);
-      expect((await PageObjects.unifiedFieldList.getAllFieldNames()).length).to.be(3);
+      expect(await discover.getHitCountInt()).to.be(2);
+      expect((await unifiedFieldList.getAllFieldNames()).length).to.be(3);
     });
 
     it('create saved data view', async function () {
@@ -94,14 +93,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         adHoc: false,
         hasTimeField: true,
       });
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       await retry.try(async () => {
-        expect(await PageObjects.discover.getHitCountInt()).to.be(1);
+        expect(await discover.getHitCountInt()).to.be(1);
       });
 
-      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-      expect((await PageObjects.unifiedFieldList.getAllFieldNames()).length).to.be(2);
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
+      expect((await unifiedFieldList.getAllFieldNames()).length).to.be(2);
     });
 
     it('update data view with a different time field', async function () {
@@ -128,12 +127,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       await dataViews.editFromSearchBar({ newName: updatedPattern, newTimeField: 'timestamp' });
       await retry.try(async () => {
-        expect(await PageObjects.discover.getHitCountInt()).to.be(3);
+        expect(await discover.getHitCountInt()).to.be(3);
       });
-      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-      expect((await PageObjects.unifiedFieldList.getAllFieldNames()).length).to.be(3);
-      expect(await PageObjects.discover.isChartVisible()).to.be(true);
-      expect(await PageObjects.timePicker.timePickerExists()).to.be(true);
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
+      expect((await unifiedFieldList.getAllFieldNames()).length).to.be(3);
+      expect(await discover.isChartVisible()).to.be(true);
+      expect(await timePicker.timePickerExists()).to.be(true);
     });
 
     it('update data view with no time field', async function () {
@@ -141,12 +140,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         newTimeField: "--- I don't want to use the time filter ---",
       });
       await retry.try(async () => {
-        expect(await PageObjects.discover.getHitCountInt()).to.be(4);
+        expect(await discover.getHitCountInt()).to.be(4);
       });
-      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-      expect((await PageObjects.unifiedFieldList.getAllFieldNames()).length).to.be(3);
-      expect(await PageObjects.discover.isChartVisible()).to.be(false);
-      expect(await PageObjects.timePicker.timePickerExists()).to.be(false);
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
+      expect((await unifiedFieldList.getAllFieldNames()).length).to.be(3);
+      expect(await discover.isChartVisible()).to.be(false);
+      expect(await timePicker.timePickerExists()).to.be(false);
     });
   });
 }

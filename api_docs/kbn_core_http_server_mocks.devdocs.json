@@ -434,6 +434,8 @@
             "section": "def-server.ICspConfig",
             "text": "ICspConfig"
           },
+          "; server: ",
+          "Server",
           "; auth: ",
           {
             "pluginId": "@kbn/core-http-server",
@@ -442,8 +444,6 @@
             "section": "def-server.HttpAuth",
             "text": "HttpAuth"
           },
-          "; server: ",
-          "Server",
           "; registerStaticDir: jest.MockInstance<void, [path: string, dirPath: string], unknown>; registerRouteHandlerContext: <Context extends ",
           {
             "pluginId": "@kbn/core-http-server",

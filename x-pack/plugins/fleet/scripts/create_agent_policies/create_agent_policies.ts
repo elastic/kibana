@@ -7,8 +7,12 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import yargs from 'yargs';
+import { chunk } from 'lodash';
 
+import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
+
+import { packagePolicyFixture } from './fixtures';
 
 const logger = new ToolingLog({
   level: 'info',
@@ -26,13 +30,17 @@ const printUsage = () =>
 
 const INDEX_BULK_OP = '{ "index":{ "_id": "{{id}}" } }\n';
 
-async function createAgentPoliciesDocsBulk(size: number) {
+function getPolicyId(idx: number | string) {
+  return `test-policy-${idx}`;
+}
+
+async function createAgentPoliciesDocsBulk(range: number[]) {
   const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
-  const body = Array.from({ length: size }, (_, index) => index + 1)
+  const body = range
     .flatMap((idx) => [
       INDEX_BULK_OP.replace(
         /{{id}}/,
-        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}:test-policy-${idx}`
+        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}:${getPolicyId(idx)}`
       ),
       JSON.stringify({
         [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -79,9 +87,9 @@ async function createAgentPoliciesDocsBulk(size: number) {
   return data;
 }
 
-async function createEnrollmentToken(size: number) {
+async function createEnrollmentToken(range: number[]) {
   const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
-  const body = Array.from({ length: size }, (_, index) => index + 1)
+  const body = range
     .flatMap((idx) => [
       INDEX_BULK_OP.replace(/{{id}}/, `test-enrollment-token-${idx}`),
       JSON.stringify({
@@ -89,7 +97,7 @@ async function createEnrollmentToken(size: number) {
         api_key_id: 'faketest123',
         api_key: 'test==',
         name: `Test Policy ${idx}`,
-        policy_id: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}:test-policy-${idx}`,
+        policy_id: `${getPolicyId(idx)}`,
         namespaces: [],
         created_at: new Date().toISOString(),
       }) + '\n',
@@ -104,6 +112,41 @@ async function createEnrollmentToken(size: number) {
       'Content-Type': 'application/x-ndjson',
     },
   });
+  const data = await res.json();
+
+  if (!data.items) {
+    logger.error('Error creating agent policies docs: ' + JSON.stringify(data));
+    process.exit(1);
+  }
+  return data;
+}
+
+async function createPackagePolicies(range: number[]) {
+  const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
+  const body = range
+    .flatMap((idx) => [
+      INDEX_BULK_OP.replace(
+        /{{id}}/,
+        `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}:test-policy-${idx}`
+      ),
+      JSON.stringify(
+        packagePolicyFixture({
+          idx,
+          agentPolicyId: getPolicyId(idx),
+        })
+      ) + '\n',
+    ])
+    .join('');
+
+  const res = await fetch(`${ES_URL}/.kibana_ingest/_bulk`, {
+    method: 'post',
+    body,
+    headers: {
+      Authorization: auth,
+      'Content-Type': 'application/x-ndjson',
+    },
+  });
+
   const data = await res.json();
 
   if (!data.items) {
@@ -129,6 +172,15 @@ export async function run() {
 
   const size = Number(sizeArg).valueOf();
   logger.info(`Creating ${size} policies`);
-  await Promise.all([createAgentPoliciesDocsBulk(size), createEnrollmentToken(size)]);
+
+  const range = Array.from({ length: size }, (_ignore, index) => index + 1);
+
+  for (const rangePart of chunk(range, 200)) {
+    await Promise.all([
+      createAgentPoliciesDocsBulk(rangePart),
+      createEnrollmentToken(rangePart),
+      createPackagePolicies(rangePart),
+    ]);
+  }
   logger.info(`Succesfuly created ${size} policies`);
 }

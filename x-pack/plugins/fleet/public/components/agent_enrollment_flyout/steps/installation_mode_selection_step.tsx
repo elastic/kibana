@@ -15,9 +15,11 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import { useAuthz } from '../../../hooks';
 import type { FlyoutMode } from '../types';
 
-const PermissionWrapper: React.FunctionComponent<{
-  showTooltip: boolean;
-}> = ({ children, showTooltip }) => {
+const PermissionWrapper: React.FunctionComponent<
+  React.PropsWithChildren<{
+    showTooltip: boolean;
+  }>
+> = ({ children, showTooltip }) => {
   return showTooltip && children ? (
     <EuiToolTip
       content={

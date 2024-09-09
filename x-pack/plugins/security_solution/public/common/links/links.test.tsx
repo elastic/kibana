@@ -86,7 +86,7 @@ const mockUiSettingsClient = uiSettingsServiceMock.createStartContract();
 const renderUseAppLinks = () =>
   renderHook<{}, AppLinkItems>(() => useAppLinks(), { wrapper: TestProviders });
 const renderUseLinkExists = (id: SecurityPageName) =>
-  renderHook<SecurityPageName, boolean>(() => useLinkExists(id), {
+  renderHook<React.PropsWithChildren<SecurityPageName>, boolean>(() => useLinkExists(id), {
     wrapper: TestProviders,
   });
 

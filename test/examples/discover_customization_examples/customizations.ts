@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -14,7 +15,7 @@ const TEST_END_TIME = 'Sep 23, 2015 @ 18:31:44.000';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
+  const { common, timePicker, header } = getPageObjects(['common', 'timePicker', 'header']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -29,14 +30,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.common.navigateToApp('home');
+      await common.navigateToApp('home');
       const currentUrl = await browser.getCurrentUrl();
       const customizationUrl =
         currentUrl.substring(0, currentUrl.indexOf('/app/home')) +
         '/app/discoverCustomizationExamples';
       await browser.get(customizationUrl);
-      await PageObjects.timePicker.setAbsoluteRange(TEST_START_TIME, TEST_END_TIME);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await timePicker.setAbsoluteRange(TEST_START_TIME, TEST_END_TIME);
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -61,9 +62,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     it('Search bar', async () => {
       await testSubjects.click('logsViewSelectorButton');
       await testSubjects.click('logsViewSelectorOption-ASavedSearch');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
-        const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
+        const { title, description } = await common.getSharedItemTitleAndDescription();
         const expected = {
           title: 'A Saved Search',
           description: 'A Saved Search Description',
@@ -72,7 +73,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         expect(description).to.eql(expected.description);
       });
       await browser.goBack();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     });
 
     it('Search bar Prepend Filters exists and should apply filter properly', async () => {
@@ -96,7 +97,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
       // Click the item to apply filter
       await item.click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       // Validate that filter is applied
       const rows = await dataGrid.getDocTableRows();

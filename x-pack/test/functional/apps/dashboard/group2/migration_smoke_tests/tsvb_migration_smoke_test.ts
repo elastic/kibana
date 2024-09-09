@@ -14,34 +14,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
 
-  const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects', 'dashboard']);
+  const { settings, savedObjects, dashboard } = getPageObjects([
+    'settings',
+    'savedObjects',
+    'dashboard',
+  ]);
 
   describe('TSVB - Export import saved objects between versions', () => {
     describe('From 7.12.1', () => {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.uiSettings.replace({});
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.savedObjects.importFile(
+        await settings.navigateTo();
+        await settings.clickKibanaSavedObjects();
+        await savedObjects.importFile(
           path.join(__dirname, 'exports', 'tsvb_dashboard_migration_test_7_12_1.ndjson')
         );
       });
 
       it('should be able to import dashboard with TSVB panels from 7.12.1', async () => {
         // this will catch cases where there is an error in the migrations.
-        await PageObjects.savedObjects.checkImportSucceeded();
-        await PageObjects.savedObjects.clickImportDone();
+        await savedObjects.checkImportSucceeded();
+        await savedObjects.clickImportDone();
       });
 
       it('should render all panels on the dashboard', async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.loadSavedDashboard('TSVB Index Pattern Smoke Test');
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('TSVB Index Pattern Smoke Test');
 
         // dashboard should load properly
-        await PageObjects.dashboard.expectOnDashboard('TSVB Index Pattern Smoke Test');
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.expectOnDashboard('TSVB Index Pattern Smoke Test');
+        await dashboard.waitForRenderComplete();
 
         // There should be 0 error embeddables on the dashboard
         const errorEmbeddables = await testSubjects.findAll('embeddableStackError');
@@ -49,10 +54,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show the edit action for all panels', async () => {
-        await PageObjects.dashboard.switchToEditMode();
+        await dashboard.switchToEditMode();
 
         //   All panels should be editable. This will catch cases where an error does not create an error embeddable.
-        const panelTitles = await PageObjects.dashboard.getPanelTitles();
+        const panelTitles = await dashboard.getPanelTitles();
         for (const title of panelTitles) {
           await dashboardPanelActions.expectExistsEditPanelAction(title);
         }
@@ -60,18 +65,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should retain all panel drilldowns from 7.12.1', async () => {
         // Both panels configured with drilldowns in 7.12.1 should still have drilldowns.
-        const totalPanels = await PageObjects.dashboard.getPanelCount();
+        const totalPanels = await dashboard.getPanelCount();
         let panelsWithDrilldowns = 0;
         let drilldownCount = 0;
         for (let panelIndex = 0; panelIndex < totalPanels; panelIndex++) {
-          const panelDrilldownCount = await PageObjects.dashboard.getPanelDrilldownCount(
+          const panelDrilldownCount = await dashboardDrilldownPanelActions.getPanelDrilldownCount(
             panelIndex
           );
           if (panelDrilldownCount >= 1) {
             panelsWithDrilldowns++;
           }
 
-          drilldownCount += await PageObjects.dashboard.getPanelDrilldownCount(panelIndex);
+          drilldownCount += await dashboardDrilldownPanelActions.getPanelDrilldownCount(panelIndex);
         }
         expect(panelsWithDrilldowns).to.be(2);
         expect(drilldownCount).to.be(3);
@@ -87,26 +92,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.uiSettings.replace({});
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.savedObjects.importFile(
+        await settings.navigateTo();
+        await settings.clickKibanaSavedObjects();
+        await savedObjects.importFile(
           path.join(__dirname, 'exports', 'tsvb_dashboard_migration_test_7_13_3.ndjson')
         );
       });
 
       it('should be able to import dashboard with TSVB panels from 7.13.3', async () => {
         // this will catch cases where there is an error in the migrations.
-        await PageObjects.savedObjects.checkImportSucceeded();
-        await PageObjects.savedObjects.clickImportDone();
+        await savedObjects.checkImportSucceeded();
+        await savedObjects.clickImportDone();
       });
 
       it('should render all panels on the dashboard', async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.loadSavedDashboard('TSVB 7.13.3');
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('TSVB 7.13.3');
 
         // dashboard should load properly
-        await PageObjects.dashboard.expectOnDashboard('TSVB 7.13.3');
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.expectOnDashboard('TSVB 7.13.3');
+        await dashboard.waitForRenderComplete();
 
         // There should be 0 error embeddables on the dashboard
         const errorEmbeddables = await testSubjects.findAll('embeddableStackError');
@@ -114,10 +119,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show the edit action for all panels', async () => {
-        await PageObjects.dashboard.switchToEditMode();
+        await dashboard.switchToEditMode();
 
         //   All panels should be editable. This will catch cases where an error does not create an error embeddable.
-        const panelTitles = await PageObjects.dashboard.getPanelTitles();
+        const panelTitles = await dashboard.getPanelTitles();
         for (const title of panelTitles) {
           await dashboardPanelActions.expectExistsEditPanelAction(title);
         }

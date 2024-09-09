@@ -46,6 +46,7 @@ export interface BaseCspSetupStatus {
   isPluginInitialized: boolean;
   installedPackageVersion?: string | undefined;
   hasMisconfigurationsFindings?: boolean;
+  hasVulnerabilitiesFindings?: boolean;
 }
 
 export type CspSetupStatus = BaseCspSetupStatus;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReactWrapper, ShallowWrapper } from 'enzyme';
+import { ReactWrapper, ShallowWrapper, ComponentType } from 'enzyme';
 import React, { ChangeEvent } from 'react';
 import { screen, act, render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -173,7 +173,7 @@ function mountWithServices(component: React.ReactElement): ReactWrapper {
     // This is an elegant way to wrap a component in Enzyme
     // preserving the root at the component level rather than
     // at the wrapper one
-    wrappingComponent: KibanaContextProvider,
+    wrappingComponent: KibanaContextProvider as ComponentType<{}>,
     wrappingComponentProps: { services },
   });
 }

@@ -14,7 +14,7 @@ import { renderWrapper } from '../../test/mock_server/mock_server_test_provider'
 import { Configurations } from './configurations';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
-import { findingsNavigation } from '../../common/navigation/constants';
+import { findingsNavigation } from '@kbn/cloud-security-posture';
 import userEvent from '@testing-library/user-event';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';

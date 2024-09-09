@@ -8,12 +8,13 @@
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
+import { GET_STATUS_ROUTE, GET_USER_PRIVILEGES_ROUTE } from '../../common/routes';
 import { fetchIndicesStatus, fetchUserStartPrivileges } from '../lib/status';
 
 export function registerStatusRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
-      path: '/internal/search_indices/status',
+      path: GET_STATUS_ROUTE,
       validate: {},
       options: {
         access: 'internal',
@@ -33,7 +34,7 @@ export function registerStatusRoutes(router: IRouter, logger: Logger) {
 
   router.get(
     {
-      path: '/internal/search_indices/start_privileges',
+      path: GET_USER_PRIVILEGES_ROUTE,
       validate: {},
       options: {
         access: 'internal',

@@ -25,7 +25,7 @@ const defaultProps: ComponentProps<typeof NotesButton> = {
   toolTip: 'Sample Tooltip',
 };
 
-const TestWrapper: React.FC = ({ children }) => {
+const TestWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   return <ThemeProvider theme={{ eui: { euiColorDanger: 'red' } }}>{children}</ThemeProvider>;
 };
 

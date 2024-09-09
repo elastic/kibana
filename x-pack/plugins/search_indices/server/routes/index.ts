@@ -8,8 +8,10 @@
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
+import { registerIndicesRoutes } from './indices';
 import { registerStatusRoutes } from './status';
 
 export function defineRoutes(router: IRouter, logger: Logger) {
+  registerIndicesRoutes(router, logger);
   registerStatusRoutes(router, logger);
 }

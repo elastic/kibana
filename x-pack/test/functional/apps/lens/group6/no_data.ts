@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'lens', 'header', 'timePicker']);
+  const { common, header } = getPageObjects(['common', 'header']);
 
   describe('lens no data', () => {
     before(async function () {
@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const indices = Object.keys(await es.indices.get({ index: '*' }));
       await Promise.all(indices.map(async (index) => await es.indices.delete({ index })));
       await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
-      await PageObjects.common.navigateToApp('lens');
+      await common.navigateToApp('lens');
     });
 
     after(async () => {
@@ -30,17 +30,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('when no data opens integrations', async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       const addIntegrations = await testSubjects.find('kbnOverviewAddIntegrations');
       await addIntegrations.click();
-      await PageObjects.common.waitUntilUrlIncludes('integrations/browse');
+      await common.waitUntilUrlIncludes('integrations/browse');
     });
 
     it('adds a new data view when no data views', async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
-      await PageObjects.common.navigateToApp('lens');
+      await common.navigateToApp('lens');
 
       const dataViewToCreate = 'logstash';
       await dataViews.createFromPrompt({ name: dataViewToCreate });

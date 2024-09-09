@@ -11,23 +11,23 @@ import { range } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const elasticChart = getService('elasticChart');
 
   describe('lens chart data', () => {
     before(async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.lens.goToTimeRange();
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
@@ -73,31 +73,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
 
     it('should render xy chart', async () => {
-      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      const data = await lens.getCurrentChartDebugState('xyVisChart');
       assertMatchesExpectedData(data);
     });
 
     it('should render pie chart', async () => {
-      await PageObjects.lens.switchToVisualization('pie');
-      const data = await PageObjects.lens.getCurrentChartDebugState('partitionVisChart');
+      await lens.switchToVisualization('pie');
+      const data = await lens.getCurrentChartDebugState('partitionVisChart');
       assertMatchesExpectedPieData(data);
     });
 
     it('should render donut chart', async () => {
-      await PageObjects.lens.setDonutHoleSize('Large');
-      const data = await PageObjects.lens.getCurrentChartDebugState('partitionVisChart');
+      await lens.setDonutHoleSize('Large');
+      const data = await lens.getCurrentChartDebugState('partitionVisChart');
       assertMatchesExpectedPieData(data);
     });
 
     it('should render treemap chart', async () => {
-      await PageObjects.lens.switchToVisualization('treemap', 'treemap');
-      const data = await PageObjects.lens.getCurrentChartDebugState('partitionVisChart');
+      await lens.switchToVisualization('treemap', 'treemap');
+      const data = await lens.getCurrentChartDebugState('partitionVisChart');
       assertMatchesExpectedPieData(data);
     });
 
     it('should render heatmap chart', async () => {
-      await PageObjects.lens.switchToVisualization('heatmap', 'heat');
-      const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
+      await lens.switchToVisualization('heatmap', 'heat');
+      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       // assert axes
       expect(debugState?.axes!.x[0].labels).to.eql([
@@ -124,13 +124,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render datatable', async () => {
-      await PageObjects.lens.switchToVisualization('lnsDatatable');
-      await PageObjects.lens.waitForVisualization();
+      await lens.switchToVisualization('lnsDatatable');
+      await lens.waitForVisualization();
       const terms = await Promise.all(
-        range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 0))
+        range(0, 6).map((index) => lens.getDatatableCellText(index, 0))
       );
       const values = await Promise.all(
-        range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))
+        range(0, 6).map((index) => lens.getDatatableCellText(index, 1))
       );
       expect(terms).to.eql(expectedData.map(({ x }) => x));
       expect(values.map((value) => Math.floor(100 * Number(value.replace(',', ''))) / 100)).to.eql(
@@ -139,9 +139,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render metric', async () => {
-      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
-      await PageObjects.lens.waitForVisualization('legacyMtrVis');
-      await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
+      await lens.switchToVisualization('lnsLegacyMetric');
+      await lens.waitForVisualization('legacyMtrVis');
+      await lens.assertLegacyMetric('Average of bytes', '5,727.322');
     });
   });
 }

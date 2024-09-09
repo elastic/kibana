@@ -16307,7 +16307,7 @@
             "label": "validation",
             "description": [],
             "signature": [
-              "\"ip\" | \"date\" | \"base64\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"time\" | \"datetime\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+              "\"ip\" | \"date\" | \"base64\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"time\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
             ],
             "path": "node_modules/zod/lib/ZodError.d.ts",
             "deprecated": false,
@@ -18911,7 +18911,7 @@
         "label": "StringValidation",
         "description": [],
         "signature": [
-          "\"ip\" | \"date\" | \"base64\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"time\" | \"datetime\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+          "\"ip\" | \"date\" | \"base64\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"time\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
         ],
         "path": "node_modules/zod/lib/ZodError.d.ts",
         "deprecated": false,

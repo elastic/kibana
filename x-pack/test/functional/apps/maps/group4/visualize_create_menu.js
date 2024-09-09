@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['visualize', 'header', 'maps']);
+  const { visualize, header, maps } = getPageObjects(['visualize', 'header', 'maps']);
   const listingTable = getService('listingTable');
   const security = getService('security');
 
@@ -23,18 +23,18 @@ export default function ({ getService, getPageObjects }) {
             }
           );
 
-          await PageObjects.visualize.navigateToNewVisualization();
+          await visualize.navigateToNewVisualization();
         });
 
         it('should show maps application in create menu', async () => {
-          const hasMapsApp = await PageObjects.visualize.hasMapsApp();
+          const hasMapsApp = await visualize.hasMapsApp();
           expect(hasMapsApp).to.equal(true);
         });
 
         it('should take users to Maps application when Maps is clicked', async () => {
-          await PageObjects.visualize.clickMapsApp();
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          const onMapPage = await PageObjects.maps.onMapPage();
+          await visualize.clickMapsApp();
+          await header.waitUntilLoadingHasFinished();
+          const onMapPage = await maps.onMapPage();
           expect(onMapPage).to.equal(true);
         });
       });
@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }) {
             }
           );
 
-          await PageObjects.visualize.navigateToNewVisualization();
+          await visualize.navigateToNewVisualization();
         });
 
         after(async () => {
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('should not show maps application in create menu', async () => {
-          const hasMapsApp = await PageObjects.visualize.hasMapsApp();
+          const hasMapsApp = await visualize.hasMapsApp();
           expect(hasMapsApp).to.equal(false);
         });
       });
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
           skipBrowserRefresh: true,
         });
 
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
+        await visualize.navigateToNewAggBasedVisualization();
       });
 
       after(async () => {
@@ -76,12 +76,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not show legacy region map visualizion in create menu', async () => {
-        const hasLegecyViz = await PageObjects.visualize.hasVisType('region_map');
+        const hasLegecyViz = await visualize.hasVisType('region_map');
         expect(hasLegecyViz).to.equal(false);
       });
 
       it('should not show legacy tilemap map visualizion in create menu', async () => {
-        const hasLegecyViz = await PageObjects.visualize.hasVisType('tile_map');
+        const hasLegecyViz = await visualize.hasVisType('tile_map');
         expect(hasLegecyViz).to.equal(false);
       });
     });
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }) {
           }
         );
 
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
+        await visualize.navigateToNewAggBasedVisualization();
       });
 
       after(async () => {
@@ -102,11 +102,11 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should allow to change meta-data on a map visualization', async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickMapsApp();
-        await PageObjects.maps.waitForLayersToLoad();
-        await PageObjects.maps.saveMap('myTestMap');
-        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await visualize.navigateToNewVisualization();
+        await visualize.clickMapsApp();
+        await maps.waitForLayersToLoad();
+        await maps.saveMap('myTestMap');
+        await visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('myTestMap');
         await listingTable.inspectVisualization();
         await listingTable.editVisualizationDetails({

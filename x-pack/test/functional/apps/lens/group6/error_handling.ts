@@ -10,14 +10,11 @@ import { intersection, uniq } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
+  const { visualize, lens, dashboard, timePicker } = getPageObjects([
     'visualize',
     'lens',
     'dashboard',
-    'header',
     'timePicker',
-    'common',
-    'navigationalSearch',
   ]);
   const security = getService('security');
   const listingTable = getService('listingTable');
@@ -49,36 +46,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('the warning is shown and user can fix the state', async () => {
-        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsMetricWithNonExistingDataView');
-        await PageObjects.lens.clickVisualizeListItemTitle('lnsMetricWithNonExistingDataView');
-        await PageObjects.lens.waitForMissingDataViewWarning();
-        await PageObjects.lens.switchToVisualization('lnsDatatable');
-        await PageObjects.lens.waitForMissingDataViewWarning();
-        await PageObjects.lens.switchToVisualization('pie');
-        await PageObjects.lens.waitForMissingDataViewWarning();
-        await PageObjects.lens.switchToVisualization('line');
-        await PageObjects.lens.waitForMissingDataViewWarning();
-        await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
-        await PageObjects.lens.closeDimensionEditor();
-        await PageObjects.lens.dragDimensionToDimension({
+        await lens.clickVisualizeListItemTitle('lnsMetricWithNonExistingDataView');
+        await lens.waitForMissingDataViewWarning();
+        await lens.switchToVisualization('lnsDatatable');
+        await lens.waitForMissingDataViewWarning();
+        await lens.switchToVisualization('pie');
+        await lens.waitForMissingDataViewWarning();
+        await lens.switchToVisualization('line');
+        await lens.waitForMissingDataViewWarning();
+        await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
+        await lens.closeDimensionEditor();
+        await lens.dragDimensionToDimension({
           from: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
           to: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         });
-        await PageObjects.lens.switchFirstLayerIndexPattern('log*');
-        await PageObjects.lens.waitForMissingDataViewWarningDisappear();
-        await PageObjects.lens.waitForEmptyWorkspace();
+        await lens.switchFirstLayerIndexPattern('log*');
+        await lens.waitForMissingDataViewWarningDisappear();
+        await lens.waitForEmptyWorkspace();
       });
 
       it('works fine when the dataViews is missing for referenceLines and annotations', async () => {
-        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName(
           'lnsXYWithReferenceLinesAndAnnotationsWithNonExistingDataView'
         );
-        await PageObjects.lens.clickVisualizeListItemTitle(
+        await lens.clickVisualizeListItemTitle(
           'lnsXYWithReferenceLinesAndAnnotationsWithNonExistingDataView'
         );
-        await PageObjects.lens.waitForMissingDataViewWarning();
+        await lens.waitForMissingDataViewWarning();
       });
     });
 
@@ -87,10 +84,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test/functional/fixtures/kbn_archiver/lens/missing_fields'
       );
 
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.loadSavedDashboard(
-        'dashboard containing vis with missing fields'
-      );
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard('dashboard containing vis with missing fields');
 
       const expectedMessages = [
         'Field @timestamp was not found.',
@@ -102,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Field kubernetes.container.name was not found.',
       ];
 
-      const dashboardMessageList = await PageObjects.lens.getMessageListTexts('error');
+      const dashboardMessageList = await lens.getMessageListTexts('error');
 
       // make sure all the expected messages are there
       expect(intersection(expectedMessages, dashboardMessageList).length).to.be(
@@ -112,12 +107,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // make sure the visualization is rendering
       await testSubjects.find('emptyPlaceholder');
 
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.switchToEditMode();
       await dashboardPanelActions.clickEdit();
-      await PageObjects.timePicker.waitForNoDataPopover();
-      await PageObjects.timePicker.ensureHiddenNoDataPopover();
+      await timePicker.waitForNoDataPopover();
+      await timePicker.ensureHiddenNoDataPopover();
 
-      const editorMessageList = await PageObjects.lens.getMessageListTexts('error');
+      const editorMessageList = await lens.getMessageListTexts('error');
 
       expect(intersection(expectedMessages, editorMessageList).length).to.be(
         uniq(expectedMessages).length
@@ -135,8 +130,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test/functional/fixtures/kbn_archiver/lens/fundamental_config_errors_on_dashboard'
       );
 
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.loadSavedDashboard('lens fundamental config errors dash');
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard('lens fundamental config errors dash');
 
       const failureElements = await testSubjects.findAll('errorMessageMarkdown');
       const errorMessages = await Promise.all(failureElements.map((el) => el.getVisibleText()));

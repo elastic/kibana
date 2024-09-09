@@ -15,3 +15,5 @@ export const TAB_ID_VULNERABILITY_FLYOUT = (tabId: string) =>
 export const LATEST_VULNERABILITIES_TABLE = 'latest_vulnerabilities_table';
 
 export const VULNERABILITIES_GROUPING_COUNTER = 'vulnerabilities_grouping_counter';
+
+export const VULNERABILITIES_PAGE = 'cloud-sec-vulnerabilities-page';

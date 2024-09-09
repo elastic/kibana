@@ -2,7 +2,7 @@
   "name": "@kbn/securitysolution-io-ts-types",
   "version": "1.0.0",
   "description": "io ts utilities and types to be shared with plugins from the security solution project",
-  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "private": true,
   "sideEffects": false
 }

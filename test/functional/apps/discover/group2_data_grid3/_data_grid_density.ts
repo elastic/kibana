@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -15,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
   const defaultSettings = { defaultIndex: 'logstash-*' };
   const security = getService('security');
 
@@ -34,10 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
     });
 
     it('should use the default density', async () => {
@@ -65,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataGrid.getCurrentDensityValue()).to.be('Expanded');
 
       await browser.refresh();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentDensityValue()).to.be('Expanded');
@@ -73,12 +74,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should save and revert unsaved densities properly', async () => {
       // Open saved search
-      await PageObjects.discover.loadSavedSearch('A Saved Search');
+      await discover.loadSavedSearch('A Saved Search');
 
       // Change density
       await dataGrid.clickGridSettings();
       await dataGrid.changeDensityValue('Expanded');
-      await PageObjects.discover.saveUnsavedChanges();
+      await discover.saveUnsavedChanges();
 
       // Change density
       await dataGrid.clickGridSettings();
@@ -86,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('unsavedChangesBadge');
 
       // Revert change
-      await PageObjects.discover.revertUnsavedChanges();
+      await discover.revertUnsavedChanges();
 
       // Verify density reset
       await dataGrid.clickGridSettings();

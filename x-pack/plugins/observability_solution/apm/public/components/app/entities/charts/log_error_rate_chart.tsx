@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiTitle, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -23,6 +24,8 @@ import {
   getMetricsFormula,
 } from '../../../shared/charts/helper/get_metrics_formulas';
 import { ExploreLogsButton } from '../../../shared/explore_logs_button/explore_logs_button';
+import { mergeKueries, toKueryFilterFormat } from '../../../../../common/utils/kuery_utils';
+import { ERROR_LOG_LEVEL, LOG_LEVEL } from '../../../../../common/es_fields/apm';
 
 type LogErrorRateReturnType =
   APIReturnType<'GET /internal/apm/entities/services/{serviceName}/logs_error_rate_timeseries'>;
@@ -74,6 +77,14 @@ export function LogErrorRateChart({ height }: { height: number }) {
     },
   ];
 
+  const errorLogKueryFormat = mergeKueries(
+    [
+      toKueryFilterFormat(LOG_LEVEL, ['error', 'ERROR']),
+      toKueryFilterFormat(ERROR_LOG_LEVEL, ['error', 'ERROR']),
+    ],
+    'OR'
+  );
+
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -123,7 +134,10 @@ export function LogErrorRateChart({ height }: { height: number }) {
             <ExploreLogsButton
               start={start}
               end={end}
-              kuery={`(log.level: error OR error.log.level: error) AND service.name: "${serviceName}"`}
+              kuery={mergeKueries([
+                `(${errorLogKueryFormat})`,
+                toKueryFilterFormat(SERVICE_NAME, [serviceName]),
+              ])}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

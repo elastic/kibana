@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless search UI - feature flags', function () {
     // add tests that require feature flags, defined in config.feature_flags.ts
     loadTestFile(require.resolve('./elasticsearch_start.ts'));
+    loadTestFile(require.resolve('./search_index_detail.ts'));
     loadTestFile(require.resolve('../common/platform_security/navigation/management_nav_cards.ts'));
     loadTestFile(require.resolve('../common/platform_security/roles.ts'));
     loadTestFile(require.resolve('../common/spaces/multiple_spaces_enabled.ts'));

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -11,7 +12,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
-  const PageObjects = getPageObjects([
+  const { common, discover, timePicker, dashboard, unifiedFieldList, header } = getPageObjects([
     'common',
     'discover',
     'timePicker',
@@ -32,14 +33,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   async function findFirstColumnTokens() {
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.discover.waitUntilSearchingHasFinished();
+    await header.waitUntilLoadingHasFinished();
+    await discover.waitUntilSearchingHasFinished();
     return await findFirstFieldIcons('euiDataGridBody > dataGridHeader');
   }
 
   async function findFirstDocViewerTokens() {
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.discover.waitUntilSearchingHasFinished();
+    await header.waitUntilLoadingHasFinished();
+    await discover.waitUntilSearchingHasFinished();
     let fieldTokens: string[] | undefined = [];
     await retry.try(async () => {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -84,14 +85,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
     });
 
     it('should not render field tokens when Document column is visible', async function () {
-      expect(await PageObjects.discover.getHitCount()).to.be('14,004');
+      expect(await discover.getHitCount()).to.be('14,004');
 
       expect(await findFirstColumnTokens()).to.eql([]);
 
@@ -110,10 +111,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render field tokens correctly when columns are selected', async function () {
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('ip');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('geo.coordinates');
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
+      await unifiedFieldList.clickFieldListItemAdd('extension');
+      await unifiedFieldList.clickFieldListItemAdd('ip');
+      await unifiedFieldList.clickFieldListItemAdd('geo.coordinates');
 
       expect(await findFirstColumnTokens()).to.eql(['Number', 'Text', 'IP address', 'Geo point']);
 
@@ -132,13 +133,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render field tokens correctly for ES|QL', async function () {
-      await PageObjects.discover.selectTextBaseLang();
-      expect(await PageObjects.discover.getHitCount()).to.be('10');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('ip');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('geo.coordinates');
+      await discover.selectTextBaseLang();
+      expect(await discover.getHitCount()).to.be('10');
+      await unifiedFieldList.clickFieldListItemAdd('@timestamp');
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
+      await unifiedFieldList.clickFieldListItemAdd('extension');
+      await unifiedFieldList.clickFieldListItemAdd('ip');
+      await unifiedFieldList.clickFieldListItemAdd('geo.coordinates');
 
       expect(await findFirstColumnTokens()).to.eql(['Number', 'Text', 'IP address', 'Geo point']);
 
@@ -157,16 +158,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render field tokens correctly on Dashboard', async function () {
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('geo.coordinates');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd(
-        'relatedContent.article:modified_time'
-      );
-      await PageObjects.discover.saveSearch('With columns');
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
+      await unifiedFieldList.clickFieldListItemAdd('extension');
+      await unifiedFieldList.clickFieldListItemAdd('geo.coordinates');
+      await unifiedFieldList.clickFieldListItemAdd('relatedContent.article:modified_time');
+      await discover.saveSearch('With columns');
 
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
+      await common.navigateToApp('dashboard');
+      await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.addSavedSearch('With columns');
 
@@ -187,8 +186,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render field tokens correctly on Surrounding Documents page', async function () {
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
+      await unifiedFieldList.clickFieldListItemAdd('extension');
 
       // navigate to the context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -197,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         rowIndex: 0,
       });
       await surroundingActionEl.click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       expect(await findFirstColumnTokens()).to.eql(['Number', 'Text']);
     });

@@ -8,35 +8,39 @@ import { i18n } from '@kbn/i18n';
 
 export const vulnerabilitiesTableFieldLabels: Record<string, string> = {
   'resource.id': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnLabel',
+    'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.resourceIdColumnLabel',
     { defaultMessage: 'Resource ID' }
   ),
   'resource.name': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.resourceNameColumnLabel',
+    'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.resourceNameColumnLabel',
     { defaultMessage: 'Resource Name' }
   ),
   'vulnerability.id': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.vulnerabilityIdColumnLabel',
+    'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.vulnerabilityIdColumnLabel',
     { defaultMessage: 'Vulnerability' }
   ),
   'vulnerability.score.base': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.vulnerabilityScoreColumnLabel',
+    'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.vulnerabilityScoreColumnLabel',
     { defaultMessage: 'CVSS' }
   ),
   'vulnerability.severity': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.vulnerabilitySeverityColumnLabel',
+    'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.vulnerabilitySeverityColumnLabel',
     { defaultMessage: 'Severity' }
   ),
   'package.name': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.packageNameColumnLabel',
+    'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.packageNameColumnLabel',
     { defaultMessage: 'Package' }
   ),
   'package.version': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.packageVersionColumnLabel',
+    'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.packageVersionColumnLabel',
     { defaultMessage: 'Version' }
   ),
   'package.fixed_version': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.packageFixedVersionColumnLabel',
+    'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.packageFixedVersionColumnLabel',
     { defaultMessage: 'Fix Version' }
+  ),
+  'data_stream.dataset': i18n.translate(
+    'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.sourceColumnLabel',
+    { defaultMessage: 'Source' }
   ),
 } as const;

@@ -15,7 +15,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
+  const { common, header, home, dashboard } = getPageObjects([
+    'common',
+    'header',
+    'home',
+    'dashboard',
+  ]);
   const browser = getService('browser');
 
   describe('upgrade dashboard smoke tests', function describeIndexTests() {
@@ -33,10 +38,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     spaces.forEach(({ space, basePath }) => {
       describe('space: ' + space, () => {
         beforeEach(async () => {
-          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+          await common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
           await browser.refresh();
         });
         dashboardTests.forEach(({ name, numPanels }) => {
@@ -44,10 +49,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await kibanaServer.uiSettings.update({
               'timepicker:timeDefaults': `{ "from": "now-5y", "to": "now"}`,
             });
-            await PageObjects.home.launchSampleDashboard(name);
-            await PageObjects.header.waitUntilLoadingHasFinished();
+            await home.launchSampleDashboard(name);
+            await header.waitUntilLoadingHasFinished();
             await renderable.waitForRender();
-            const panelCount = await PageObjects.dashboard.getPanelCount();
+            const panelCount = await dashboard.getPanelCount();
             expect(panelCount).to.be.above(numPanels);
           });
         });
@@ -55,8 +60,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await kibanaServer.uiSettings.update({
             'timepicker:timeDefaults': `{ "from": "now-5y", "to": "now"}`,
           });
-          await PageObjects.home.launchSampleDashboard('flights');
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await home.launchSampleDashboard('flights');
+          await header.waitUntilLoadingHasFinished();
           await renderable.waitForRender();
           log.debug('Checking saved searches rendered');
           await dashboardExpect.savedSearchRowCount(49);

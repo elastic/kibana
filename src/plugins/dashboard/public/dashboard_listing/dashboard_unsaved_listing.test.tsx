@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, ComponentType } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { waitFor } from '@testing-library/react';
@@ -30,7 +32,9 @@ function mountWith({ props: incomingProps }: { props?: Partial<DashboardUnsavedL
   }> = ({ children }) => {
     return <I18nProvider>{children}</I18nProvider>;
   };
-  const component = mount(<DashboardUnsavedListing {...props} />, { wrappingComponent });
+  const component = mount(<DashboardUnsavedListing {...props} />, {
+    wrappingComponent: wrappingComponent as ComponentType<{}>,
+  });
   return { component, props };
 }
 

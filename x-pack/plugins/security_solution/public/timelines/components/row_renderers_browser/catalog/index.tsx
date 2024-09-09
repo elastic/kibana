@@ -46,7 +46,7 @@ export interface RowRendererOption {
   name: string;
   description: React.ReactNode;
   searchableDescription: string;
-  example: React.ReactNode;
+  example: React.ElementType;
 }
 
 export const renderers: RowRendererOption[] = [

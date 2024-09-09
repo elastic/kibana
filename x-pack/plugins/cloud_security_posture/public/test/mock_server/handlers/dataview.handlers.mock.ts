@@ -7,7 +7,7 @@
 
 import { http, HttpResponse } from 'msw';
 import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
-import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '../../../../common/constants';
+import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
 
 const generateDataViewField = (name: string, type: 'string' | 'date' = 'string') => ({
   name,

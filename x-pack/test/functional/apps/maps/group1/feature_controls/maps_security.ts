@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'error', 'maps', 'settings', 'security']);
+  const securityService = getService('security');
+  const { common, error, maps, security } = getPageObjects(['common', 'error', 'maps', 'security']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
@@ -23,12 +23,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
     });
 
     describe('global maps all privileges', () => {
       before(async () => {
-        await security.role.create('global_maps_all_role', {
+        await securityService.role.create('global_maps_all_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -42,25 +42,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_maps_all_user', {
+        await securityService.user.create('global_maps_all_user', {
           password: 'global_maps_all_user-password',
           roles: ['global_maps_all_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.forceLogout();
 
-        await PageObjects.security.login('global_maps_all_user', 'global_maps_all_user-password', {
+        await security.login('global_maps_all_user', 'global_maps_all_user-password', {
           expectSpaceSelector: false,
         });
       });
 
       after(async () => {
         // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await PageObjects.security.forceLogout();
+        await security.forceLogout();
         await Promise.all([
-          security.role.delete('global_maps_all_role'),
-          security.user.delete('global_maps_all_user'),
+          securityService.role.delete('global_maps_all_role'),
+          securityService.user.delete('global_maps_all_user'),
         ]);
       });
 
@@ -70,13 +70,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows a map to be created`, async () => {
-        await PageObjects.maps.openNewMap();
-        await PageObjects.maps.expectExistAddLayerButton();
-        await PageObjects.maps.saveMap('my test map');
+        await maps.openNewMap();
+        await maps.expectExistAddLayerButton();
+        await maps.saveMap('my test map');
       });
 
       it(`allows a map to be deleted`, async () => {
-        await PageObjects.maps.deleteSavedMaps('my test map');
+        await maps.deleteSavedMaps('my test map');
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -84,7 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows saving via the saved query management component popover with no saved query loaded', async () => {
-        await PageObjects.maps.openNewMap();
+        await maps.openNewMap();
         await queryBar.setQuery('response:200');
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
@@ -119,7 +119,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global maps read-only privileges', () => {
       before(async () => {
-        await security.role.create('global_maps_read_role', {
+        await securityService.role.create('global_maps_read_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -133,26 +133,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_maps_read_user', {
+        await securityService.user.create('global_maps_read_user', {
           password: 'global_maps_read_user-password',
           roles: ['global_maps_read_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_maps_read_user',
-          'global_maps_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.login('global_maps_read_user', 'global_maps_read_user-password', {
+          expectSpaceSelector: false,
+        });
 
-        await PageObjects.maps.gotoMapListingPage();
+        await maps.gotoMapListingPage();
       });
 
       after(async () => {
-        await security.role.delete('global_maps_read_role');
-        await security.user.delete('global_maps_read_user');
+        await securityService.role.delete('global_maps_read_role');
+        await securityService.user.delete('global_maps_read_user');
       });
 
       it('shows Maps navlink', async () => {
@@ -161,7 +157,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`does not show create new button`, async () => {
-        await PageObjects.maps.expectMissingCreateNewButton();
+        await maps.expectMissingCreateNewButton();
       });
 
       it(`does not allow a map to be deleted`, async () => {
@@ -174,15 +170,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('existing map', () => {
         before(async () => {
-          await PageObjects.maps.loadSavedMap('document example');
+          await maps.loadSavedMap('document example');
         });
 
         it(`can't save`, async () => {
-          await PageObjects.maps.expectMissingSaveButton();
+          await maps.expectMissingSaveButton();
         });
 
         it(`can't add layer`, async () => {
-          await PageObjects.maps.expectMissingAddLayerButton();
+          await maps.expectMissingAddLayerButton();
         });
 
         it('allows loading a saved query via the saved query management component', async () => {
@@ -214,7 +210,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('no maps privileges', () => {
       before(async () => {
-        await security.role.create('no_maps_privileges_role', {
+        await securityService.role.create('no_maps_privileges_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -228,24 +224,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('no_maps_privileges_user', {
+        await securityService.user.create('no_maps_privileges_user', {
           password: 'no_maps_privileges_user-password',
           roles: ['no_maps_privileges_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'no_maps_privileges_user',
-          'no_maps_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.login('no_maps_privileges_user', 'no_maps_privileges_user-password', {
+          expectSpaceSelector: false,
+        });
       });
 
       after(async () => {
-        await security.role.delete('no_maps_privileges_role');
-        await security.user.delete('no_maps_privileges_user');
+        await securityService.role.delete('no_maps_privileges_role');
+        await securityService.user.delete('no_maps_privileges_user');
       });
 
       it('does not show Maps navlink', async () => {
@@ -254,11 +246,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`returns a 403`, async () => {
-        await PageObjects.common.navigateToActualUrl('maps', '', {
+        await common.navigateToActualUrl('maps', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectForbidden();
+        await error.expectForbidden();
       });
     });
   });

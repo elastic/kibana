@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -18,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const docTable = getService('docTable');
   const queryBar = getService('queryBar');
   const find = getService('find');
-  const PageObjects = getPageObjects([
+  const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'header',
@@ -43,9 +44,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('discover doc table');
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     after(async function () {
@@ -56,29 +57,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show records by default', async function () {
       // with the default range the number of hits is ~14000
-      const rows = await PageObjects.discover.getDocTableRows();
+      const rows = await discover.getDocTableRows();
       expect(rows.length).to.be.greaterThan(0);
     });
 
     it('should refresh the table content when changing time window', async function () {
-      const initialRows = await PageObjects.discover.getDocTableRows();
+      const initialRows = await discover.getDocTableRows();
 
       const fromTime = 'Sep 20, 2015 @ 23:00:00.000';
       const toTime = 'Sep 20, 2015 @ 23:14:00.000';
 
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await timePicker.setAbsoluteRange(fromTime, toTime);
+      await discover.waitUntilSearchingHasFinished();
 
-      const finalRows = await PageObjects.discover.getDocTableRows();
+      const finalRows = await discover.getDocTableRows();
       expect(finalRows.length).to.be.below(initialRows.length);
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     describe('classic table in window 900x700', function () {
       before(async () => {
         await browser.setWindowSize(900, 700);
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await common.navigateToApp('discover');
+        await discover.waitUntilSearchingHasFinished();
       });
 
       it('should load more rows when scrolling down the document table', async function () {
@@ -96,8 +97,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('classic table in window 600x700', function () {
       before(async () => {
         await browser.setWindowSize(600, 700);
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await common.navigateToApp('discover');
+        await discover.waitUntilSearchingHasFinished();
       });
 
       it('should load more rows when scrolling down the document table', async function () {
@@ -114,8 +115,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('legacy', function () {
       before(async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await common.navigateToApp('discover');
+        await discover.waitUntilSearchingHasFinished();
       });
       after(async () => {
         await kibanaServer.uiSettings.replace({});
@@ -123,21 +124,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it(`should load up to ${rowsHardLimit} rows when scrolling at the end of the table`, async function () {
         const initialRows = await testSubjects.findAll('docTableRow');
         // click the Skip to the end of the table
-        await PageObjects.discover.skipToEndOfDocTable();
+        await discover.skipToEndOfDocTable();
         // now count the rows
         const finalRows = await testSubjects.findAll('docTableRow');
         expect(finalRows.length).to.be.above(initialRows.length);
         expect(finalRows.length).to.be(rowsHardLimit);
-        await PageObjects.discover.backToTop();
+        await discover.backToTop();
       });
 
       it('should go the end and back to top of the classic table when using the accessible buttons', async function () {
         // click the Skip to the end of the table
-        await PageObjects.discover.skipToEndOfDocTable();
+        await discover.skipToEndOfDocTable();
         // now check the footer text content
-        const footer = await PageObjects.discover.getDocTableFooter();
+        const footer = await discover.getDocTableFooter();
         expect(await footer.getVisibleText()).to.have.string(rowsHardLimit);
-        await PageObjects.discover.backToTop();
+        await discover.backToTop();
         // check that the skip to end of the table button now has focus
         const skipButton = await testSubjects.find('discoverSkipTableButton');
         const activeElement = await find.activeElement();
@@ -170,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should show the detail panel actions', async function () {
           await retry.try(async function () {
             await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
-            // const detailsEl = await PageObjects.discover.getDocTableRowDetails(rowToInspect);
+            // const detailsEl = await discover.getDocTableRowDetails(rowToInspect);
             const [surroundingActionEl, singleActionEl] = await docTable.getRowActions({
               isAnchorRow: false,
               rowIndex: rowToInspect - 1,
@@ -183,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should not close the detail panel actions when data is re-requested', async function () {
           await retry.try(async function () {
-            const nrOfFetches = await PageObjects.discover.getNrOfFetches();
+            const nrOfFetches = await discover.getNrOfFetches();
             await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
             const detailsEl = await docTable.getDetailsRows();
             const defaultMessageEl = await detailsEl[0].findByTestSubject(
@@ -191,7 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             );
             expect(defaultMessageEl).to.be.ok();
             await queryBar.submitQuery();
-            const nrOfFetchesResubmit = await PageObjects.discover.getNrOfFetches();
+            const nrOfFetchesResubmit = await discover.getNrOfFetches();
             expect(nrOfFetchesResubmit).to.be.above(nrOfFetches);
             const defaultMessageElResubmit = await detailsEl[0].findByTestSubject(
               'docViewerRowDetailsTitle'
@@ -202,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should show allow toggling columns from the expanded document', async function () {
-          await PageObjects.discover.clickNewSearchButton();
+          await discover.clickNewSearchButton();
           await retry.try(async function () {
             await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
 
@@ -236,23 +237,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         };
         afterEach(async function () {
           for (const column of extraColumns) {
-            await PageObjects.unifiedFieldList.clickFieldListItemRemove(column);
-            await PageObjects.header.waitUntilLoadingHasFinished();
+            await unifiedFieldList.clickFieldListItemRemove(column);
+            await header.waitUntilLoadingHasFinished();
           }
         });
 
         it('should add more columns to the table', async function () {
           for (const column of extraColumns) {
-            await PageObjects.unifiedFieldList.clearFieldSearchInput();
-            await PageObjects.unifiedFieldList.findFieldByName(column);
-            await PageObjects.unifiedFieldList.waitUntilFieldlistHasCountOfFields(
-              expectedFieldLength[column]
-            );
+            await unifiedFieldList.clearFieldSearchInput();
+            await unifiedFieldList.findFieldByName(column);
+            await unifiedFieldList.waitUntilFieldlistHasCountOfFields(expectedFieldLength[column]);
             await retry.waitFor('field to appear', async function () {
               return await testSubjects.exists(`field-${column}`);
             });
-            await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
-            await PageObjects.header.waitUntilLoadingHasFinished();
+            await unifiedFieldList.clickFieldListItemAdd(column);
+            await header.waitUntilLoadingHasFinished();
             // test the header now
             const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
             const docHeaderText = await docHeader.getVisibleText();
@@ -262,17 +261,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should remove columns from the table', async function () {
           for (const column of extraColumns) {
-            await PageObjects.unifiedFieldList.clearFieldSearchInput();
-            await PageObjects.unifiedFieldList.findFieldByName(column);
-            await PageObjects.unifiedFieldList.waitUntilFieldlistHasCountOfFields(
-              expectedFieldLength[column]
-            );
-            await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
-            await PageObjects.header.waitUntilLoadingHasFinished();
+            await unifiedFieldList.clearFieldSearchInput();
+            await unifiedFieldList.findFieldByName(column);
+            await unifiedFieldList.waitUntilFieldlistHasCountOfFields(expectedFieldLength[column]);
+            await unifiedFieldList.clickFieldListItemAdd(column);
+            await header.waitUntilLoadingHasFinished();
           }
           // remove the second column
-          await PageObjects.unifiedFieldList.clickFieldListItemRemove(extraColumns[1]);
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await unifiedFieldList.clickFieldListItemRemove(extraColumns[1]);
+          await header.waitUntilLoadingHasFinished();
           // test that the second column is no longer there
           const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
           expect(await docHeader.getVisibleText()).to.not.have.string(extraColumns[1]);
@@ -280,9 +277,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should make the document table scrollable', async function () {
-        await PageObjects.unifiedFieldList.clearFieldSearchInput();
+        await unifiedFieldList.clearFieldSearchInput();
         const dscTableWrapper = await find.byCssSelector('.kbnDocTableWrapper');
-        const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
+        const fieldNames = await unifiedFieldList.getAllFieldNames();
         const clientHeight = await dscTableWrapper.getAttribute('clientHeight');
         let fieldCounter = 0;
         const checkScrollable = async () => {
@@ -292,7 +289,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return Number(scrollWidth) > Number(clientWidth);
         };
         const addColumn = async () => {
-          await PageObjects.unifiedFieldList.clickFieldListItemAdd(fieldNames[fieldCounter++]);
+          await unifiedFieldList.clickFieldListItemAdd(fieldNames[fieldCounter++]);
         };
 
         await addColumn();

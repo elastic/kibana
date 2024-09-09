@@ -14,7 +14,7 @@ import { shortcutManager } from '../../lib/shortcut_manager';
 import { CanvasRouter } from '../../routes';
 import { Flyouts } from '../flyouts';
 
-class ShortcutManagerContextWrapper extends React.Component {
+class ShortcutManagerContextWrapper extends React.Component<React.PropsWithChildren<{}>> {
   static childContextTypes = {
     shortcuts: PropTypes.object.isRequired,
   };

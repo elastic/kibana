@@ -10,16 +10,9 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const security = getService('security');
+  const securityService = getService('security');
   const config = getService('config');
-  const PageObjects = getPageObjects([
-    'common',
-    'dashboard',
-    'security',
-    'spaceSelector',
-    'share',
-    'error',
-  ]);
+  const { dashboard, security, error } = getPageObjects(['dashboard', 'security', 'error']);
   const appsMenu = getService('appsMenu');
   const panelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
@@ -46,13 +39,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
     });
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
 
       await kbnServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
@@ -60,7 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global dashboard all privileges, no embeddable application privileges', () => {
       before(async () => {
-        await security.role.create('global_dashboard_all_role', {
+        await securityService.role.create('global_dashboard_all_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -74,24 +67,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_dashboard_all_user', {
+        await securityService.user.create('global_dashboard_all_user', {
           password: 'global_dashboard_all_user-password',
           roles: ['global_dashboard_all_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_dashboard_all_user',
-          'global_dashboard_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.login('global_dashboard_all_user', 'global_dashboard_all_user-password', {
+          expectSpaceSelector: false,
+        });
       });
 
       after(async () => {
-        await security.role.delete('global_dashboard_all_role');
-        await security.user.delete('global_dashboard_all_user');
+        await securityService.role.delete('global_dashboard_all_role');
+        await securityService.user.delete('global_dashboard_all_user');
       });
 
       it('only shows the dashboard navlink', async () => {
@@ -100,7 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
-        await PageObjects.dashboard.gotoDashboardListingURL({
+        await dashboard.gotoDashboardListingURL({
           args: navigationArgs,
         });
         await testSubjects.existOrFail('dashboardLandingPage', {
@@ -114,14 +103,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new dashboard shows addNew button`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({ args: navigationArgs });
+        await dashboard.gotoDashboardURL({ args: navigationArgs });
         await testSubjects.existOrFail('emptyDashboardWidget', {
           timeout: config.get('timeouts.waitFor'),
         });
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({
+        await dashboard.gotoDashboardURL({
           id: 'i-exist',
           args: navigationArgs,
         });
@@ -131,19 +120,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`does not allow a visualization to be edited`, async () => {
-        await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
+        await dashboard.gotoDashboardEditMode('A Dashboard');
         await panelActions.expectMissingEditPanelAction();
       });
 
       it(`does not allow a map to be edited`, async () => {
-        await PageObjects.dashboard.gotoDashboardEditMode('dashboard with map');
+        await dashboard.gotoDashboardEditMode('dashboard with map');
         await panelActions.expectMissingEditPanelAction();
       });
     });
 
     describe('global dashboard & embeddable all privileges', () => {
       before(async () => {
-        await security.role.create('global_dashboard_visualize_all_role', {
+        await securityService.role.create('global_dashboard_visualize_all_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -159,13 +148,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_dashboard_visualize_all_user', {
+        await securityService.user.create('global_dashboard_visualize_all_user', {
           password: 'global_dashboard_visualize_all_user-password',
           roles: ['global_dashboard_visualize_all_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await security.login(
           'global_dashboard_visualize_all_user',
           'global_dashboard_visualize_all_user-password',
           {
@@ -175,19 +164,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await security.role.delete('global_dashboard_visualize_all_role');
-        await security.user.delete('global_dashboard_visualize_all_user');
+        await securityService.role.delete('global_dashboard_visualize_all_role');
+        await securityService.user.delete('global_dashboard_visualize_all_user');
       });
 
       it(`allows a visualization to be edited`, async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
+        await dashboard.navigateToApp();
+        await dashboard.gotoDashboardEditMode('A Dashboard');
         await panelActions.expectExistsEditPanelAction();
       });
 
       it(`allows a map to be edited`, async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.gotoDashboardEditMode('dashboard with map');
+        await dashboard.navigateToApp();
+        await dashboard.gotoDashboardEditMode('dashboard with map');
         await panelActions.expectExistsEditPanelAction();
       });
 
@@ -245,7 +234,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global dashboard read-only privileges', () => {
       before(async () => {
-        await security.role.create('global_dashboard_read_role', {
+        await securityService.role.create('global_dashboard_read_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -259,24 +248,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_dashboard_read_user', {
+        await securityService.user.create('global_dashboard_read_user', {
           password: 'global_dashboard_read_user-password',
           roles: ['global_dashboard_read_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_dashboard_read_user',
-          'global_dashboard_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.login('global_dashboard_read_user', 'global_dashboard_read_user-password', {
+          expectSpaceSelector: false,
+        });
       });
 
       after(async () => {
-        await security.role.delete('global_dashboard_read_role');
-        await security.user.delete('global_dashboard_read_user');
+        await securityService.role.delete('global_dashboard_read_role');
+        await securityService.user.delete('global_dashboard_read_user');
       });
 
       it('shows dashboard navlink', async () => {
@@ -285,7 +270,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
-        await PageObjects.dashboard.gotoDashboardListingURL({
+        await dashboard.gotoDashboardListingURL({
           args: navigationArgs,
         });
         await testSubjects.existOrFail('dashboardLandingPage', {
@@ -295,21 +280,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`shows read-only badge`, async () => {
-        await PageObjects.dashboard.gotoDashboardListingURL({
+        await dashboard.gotoDashboardListingURL({
           args: navigationArgs,
         });
         await globalNav.badgeExistsOrFail('Read only');
       });
 
       it(`create new dashboard shows the read only warning`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({
+        await dashboard.gotoDashboardURL({
           args: navigationArgs,
         });
         await testSubjects.existOrFail('dashboardEmptyReadOnly', { timeout: 20000 });
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({
+        await dashboard.gotoDashboardURL({
           id: 'i-exist',
           args: navigationArgs,
         });
@@ -350,7 +335,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global dashboard read-only with url_create privileges', () => {
       before(async () => {
-        await security.role.create('global_dashboard_read_url_create_role', {
+        await securityService.role.create('global_dashboard_read_url_create_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -364,13 +349,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_dashboard_read_url_create_user', {
+        await securityService.user.create('global_dashboard_read_url_create_user', {
           password: 'global_dashboard_read_url_create_user-password',
           roles: ['global_dashboard_read_url_create_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await security.login(
           'global_dashboard_read_url_create_user',
           'global_dashboard_read_url_create_user-password',
           {
@@ -380,8 +365,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await security.role.delete('global_dashboard_read_url_create_role');
-        await security.user.delete('global_dashboard_read_url_create_user');
+        await securityService.role.delete('global_dashboard_read_url_create_role');
+        await securityService.user.delete('global_dashboard_read_url_create_user');
       });
 
       it('shows dashboard navlink', async () => {
@@ -390,7 +375,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
-        await PageObjects.dashboard.gotoDashboardListingURL({
+        await dashboard.gotoDashboardListingURL({
           args: navigationArgs,
         });
         await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
@@ -402,14 +387,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new dashboard shows the read only warning`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({
+        await dashboard.gotoDashboardURL({
           args: navigationArgs,
         });
         await testSubjects.existOrFail('dashboardEmptyReadOnly', { timeout: 20000 });
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({ id: 'i-exist', args: navigationArgs });
+        await dashboard.gotoDashboardURL({ id: 'i-exist', args: navigationArgs });
         await testSubjects.existOrFail('embeddablePanelHeading-APie', { timeout: 10000 });
       });
 
@@ -441,7 +426,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('no dashboard privileges', () => {
       before(async () => {
-        await security.role.create('no_dashboard_privileges_role', {
+        await securityService.role.create('no_dashboard_privileges_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -455,13 +440,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('no_dashboard_privileges_user', {
+        await securityService.user.create('no_dashboard_privileges_user', {
           password: 'no_dashboard_privileges_user-password',
           roles: ['no_dashboard_privileges_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await security.login(
           'no_dashboard_privileges_user',
           'no_dashboard_privileges_user-password',
           {
@@ -471,8 +456,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await security.role.delete('no_dashboard_privileges_role');
-        await security.user.delete('no_dashboard_privileges_user');
+        await securityService.role.delete('no_dashboard_privileges_role');
+        await securityService.user.delete('no_dashboard_privileges_user');
       });
 
       it(`doesn't show dashboard navLink`, async () => {
@@ -481,25 +466,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows 403`, async () => {
-        await PageObjects.dashboard.gotoDashboardListingURL({
+        await dashboard.gotoDashboardListingURL({
           args: navigationArgs,
         });
-        await PageObjects.error.expectForbidden();
+        await error.expectForbidden();
       });
 
       it(`create new dashboard shows 403`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({ args: navigationArgs });
-        await PageObjects.error.expectForbidden();
+        await dashboard.gotoDashboardURL({ args: navigationArgs });
+        await error.expectForbidden();
       });
 
       it(`edit dashboard for object which doesn't exist shows 403`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({ id: 'i-dont-exist', args: navigationArgs });
-        await PageObjects.error.expectForbidden();
+        await dashboard.gotoDashboardURL({ id: 'i-dont-exist', args: navigationArgs });
+        await error.expectForbidden();
       });
 
       it(`edit dashboard for object which exists shows 403`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({ id: 'i-exist', args: navigationArgs });
-        await PageObjects.error.expectForbidden();
+        await dashboard.gotoDashboardURL({ id: 'i-exist', args: navigationArgs });
+        await error.expectForbidden();
       });
     });
   });

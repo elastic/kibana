@@ -12,26 +12,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
-  const PageObjects = getPageObjects(['common', 'dashboard', 'home', 'dashboardControls']);
+  const { common, dashboard, home, dashboardControls } = getPageObjects([
+    'common',
+    'dashboard',
+    'home',
+    'dashboardControls',
+  ]);
   const browser = getService('browser');
 
   describe('Dashboard controls a11y tests', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await PageObjects.home.addSampleDataSet('flights');
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
-      await PageObjects.dashboard.switchToEditMode();
+      await home.addSampleDataSet('flights');
+      await common.navigateToApp('dashboard');
+      await dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
+      await dashboard.switchToEditMode();
     });
 
     after(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await PageObjects.home.removeSampleDataSet('flights');
+      await home.removeSampleDataSet('flights');
     });
 
     it('Controls main menu panel', async () => {
@@ -57,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Options control panel & dashboard with options control', async () => {
-      await PageObjects.dashboardControls.controlsEditorSetfield('OriginCityName');
+      await dashboardControls.controlsEditorSetfield('OriginCityName');
       await a11y.testAppSnapshot();
       await testSubjects.click('control-editor-save');
       await a11y.testAppSnapshot();
@@ -83,12 +88,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Dashboard with options and range control panel popovers', async () => {
       await testSubjects.click('dashboardQuickSaveMenuItem');
       await a11y.testAppSnapshot();
-      const optionsControlId = (await PageObjects.dashboardControls.getAllControlIds())[0];
-      await PageObjects.dashboardControls.optionsListOpenPopover(optionsControlId);
+      const optionsControlId = (await dashboardControls.getAllControlIds())[0];
+      await dashboardControls.optionsListOpenPopover(optionsControlId);
       await a11y.testAppSnapshot();
       // a11y error on range control https://github.com/elastic/kibana/issues/135266 - uncomment after the fix
-      // const rangeControlId = (await PageObjects.dashboardControls.getAllControlIds())[1];
-      // await PageObjects.dashboardControls.rangeSliderOpenPopover(rangeControlId);
+      // const rangeControlId = (await dashboardControls.getAllControlIds())[1];
+      // await dashboardControls.rangeSliderOpenPopover(rangeControlId);
       // await a11y.testAppSnapshot();
     });
   });

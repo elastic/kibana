@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import type { QueryOperator } from '@kbn/timelines-plugin/common';
 import { DataProviderTypeEnum } from '../../../../../../common/api/timeline';
@@ -29,7 +30,7 @@ const mockProvider = {
 
 describe('useInsightQuery', () => {
   it('should return renderable defaults', () => {
-    const { result } = renderHook<UseInsightQuery, UseInsightQueryResult>(
+    const { result } = renderHook<React.PropsWithChildren<UseInsightQuery>, UseInsightQueryResult>(
       () =>
         useInsightQuery({
           dataProviders: [mockProvider],
