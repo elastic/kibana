@@ -70,6 +70,10 @@ export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
     value: (x: boolean, y?: boolean) => y ?? x,
     default: () => false,
   },
+  hasTriedOnce: {
+    value: (x: boolean, y?: boolean) => y ?? x,
+    default: () => false,
+  },
   currentPipeline: {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),

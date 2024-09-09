@@ -21,7 +21,7 @@ import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_u
 
 const kibanaReactContextMock = createKibanaReactContext({
   mlServices: {
-    mlApiServices: {
+    mlApi: {
       annotations: {
         indexAnnotation: jest.fn().mockResolvedValue({}),
         deleteAnnotation: jest.fn().mockResolvedValue({}),
