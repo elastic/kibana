@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { parseDuration } from '@kbn/alerting-plugin/server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { savedObjectsAdapter } from '../../saved_objects';
@@ -181,6 +182,8 @@ export class DefaultAlertService {
 
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
+      const currentIntervalInMs = parseDuration(alert.schedule.interval);
+      const minimumIntervalInMs = parseDuration(interval);
       const actions = await this.getAlertActions(ruleType);
       const {
         actions: actionsFromRules = [],
@@ -192,7 +195,10 @@ export class DefaultAlertService {
           actions,
           name: alert.name,
           tags: alert.tags,
-          schedule: { interval },
+          schedule: {
+            interval:
+              currentIntervalInMs < minimumIntervalInMs ? interval : alert.schedule.interval,
+          },
           params: alert.params,
         },
       });
