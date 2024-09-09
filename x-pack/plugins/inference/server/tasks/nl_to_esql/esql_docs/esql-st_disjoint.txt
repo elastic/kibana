@@ -1,0 +1,17 @@
+## ST_DISJOINT
+
+The `ST_DISJOINT` function returns whether two geometries or geometry columns are disjoint. This is the inverse of the `ST_INTERSECTS` function. In mathematical terms: `ST_Disjoint(A, B) ⇔ A ⋂ B = ∅`.
+
+### Examples
+
+```esql
+FROM airport_city_boundaries
+| WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((-10 -60, 120 -60, 120 60, -10 60, -10 -60))"))
+| KEEP abbrev, airport, region, city, city_location
+```
+
+```esql
+FROM airport_city_boundaries
+| WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((30 10, 40 40, 20 40, 10 20, 30 10))"))
+| KEEP abbrev, airport, region, city, city_location
+```
