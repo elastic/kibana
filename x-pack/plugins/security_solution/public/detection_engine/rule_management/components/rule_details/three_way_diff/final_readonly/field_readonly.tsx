@@ -21,6 +21,9 @@ import { ThreatReadOnly } from './fields/threat/threat';
 import { ThreatIndexReadOnly } from './fields/threat_index/threat_index';
 import { ThreatIndicatorPathReadOnly } from './fields/threat_indicator_path/threat_indicator_path';
 import { ThreatQueryReadOnly } from './fields/threat_query/threat_query';
+import { NameReadOnly } from './fields/name/name';
+import { TagsReadOnly } from './fields/tags/tags';
+import { DescriptionReadOnly } from './fields/description/description';
 
 interface FieldReadOnlyProps {
   fieldName: keyof DiffableAllFields;
@@ -31,6 +34,8 @@ export function FieldReadOnly({ fieldName, finalDiffableRule }: FieldReadOnlyPro
   switch (fieldName) {
     case 'data_source':
       return <DataSourceReadOnly dataSource={finalDiffableRule.data_source} />;
+    case 'description':
+      return <DescriptionReadOnly description={finalDiffableRule.description} />;
     case 'eql_query':
       return (
         <EqlQueryReadOnly
@@ -54,6 +59,8 @@ export function FieldReadOnly({ fieldName, finalDiffableRule }: FieldReadOnlyPro
           machineLearningJobId={finalDiffableRule.machine_learning_job_id}
         />
       );
+    case 'name':
+      return <NameReadOnly name={finalDiffableRule.name} />;
     case 'related_integrations':
       return (
         <RelatedIntegrationsReadOnly relatedIntegrations={finalDiffableRule.related_integrations} />
@@ -64,6 +71,8 @@ export function FieldReadOnly({ fieldName, finalDiffableRule }: FieldReadOnlyPro
       return <RiskScoreMappingReadOnly riskScoreMapping={finalDiffableRule.risk_score_mapping} />;
     case 'severity_mapping':
       return <SeverityMappingReadOnly severityMapping={finalDiffableRule.severity_mapping} />;
+    case 'tags':
+      return <TagsReadOnly tags={finalDiffableRule.tags} />;
     case 'threat':
       return <ThreatReadOnly threat={finalDiffableRule.threat} />;
     case 'threat_index':
