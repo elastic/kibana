@@ -8,4 +8,5 @@
 import { investigationSchema } from '@kbn/investigation-shared';
 import * as t from 'io-ts';
 
+export type Investigation = t.TypeOf<typeof investigationSchema>;
 export type StoredInvestigation = t.OutputOf<typeof investigationSchema>;
