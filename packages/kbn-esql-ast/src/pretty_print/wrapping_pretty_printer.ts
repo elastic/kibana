@@ -356,9 +356,9 @@ export class WrappingPrettyPrinter {
   protected decorateWithComments(
     indent: string,
     node: ESQLAstBaseItem,
-    txt: string
+    txt: string,
+    indented: boolean = false
   ): { txt: string; indented: boolean } {
-    let indented: boolean = false;
     const formatting = node.formatting;
 
     if (!formatting) {
@@ -476,8 +476,13 @@ export class WrappingPrettyPrinter {
 
     .on('visitRenameExpression', (ctx, inp: Input): Output => {
       const operator = this.keyword('AS');
-      const { txt: formatted } = this.visitBinaryExpression(ctx, operator, inp);
-      const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
+      const expression = this.visitBinaryExpression(ctx, operator, inp);
+      const { txt, indented } = this.decorateWithComments(
+        inp.indent,
+        ctx.node,
+        expression.txt,
+        expression.indented
+      );
 
       return { txt, indented };
     })
