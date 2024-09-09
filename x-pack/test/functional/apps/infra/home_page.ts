@@ -74,10 +74,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Home page', function () {
     this.tags('includeFirefox');
+    let synthEsClient: InfraSynthtraceEsClient;
 
     before(async () => {
+      synthEsClient = await getInfraSynthtraceEsClient(esClient);
       await kibanaServer.savedObjects.cleanStandardList();
+      return synthEsClient.clean();
     });
+
+    after(() => synthEsClient.clean());
 
     describe('without metrics present', () => {
       it('renders an empty data prompt and redirects to the onboarding page', async () => {
@@ -110,10 +115,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('with metrics present', () => {
-      let synthEsClient: InfraSynthtraceEsClient;
       before(async () => {
-        synthEsClient = await getInfraSynthtraceEsClient(esClient);
-        await synthEsClient.clean();
         await synthEsClient.index([
           generateHostData({
             from: DATE_WITH_HOSTS_DATA_FROM,
@@ -134,10 +136,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.waitForLoading();
       });
-      after(async () => {
-        await browser.removeLocalStorageItem(KUBERNETES_TOUR_STORAGE_KEY);
-        await synthEsClient.clean();
-      });
+
+      after(async () => browser.removeLocalStorageItem(KUBERNETES_TOUR_STORAGE_KEY));
 
       it('renders the correct page title', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
