@@ -66,3 +66,5 @@ export const DEFAULT_ALLOWED_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat', 'win
 export const DEFAULT_ALLOWED_LOGS_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat', 'winlogbeat'];
 
 export const LOG_LEVEL_FIELDS = ['log.level', 'log_level'];
+export const SERVICE_NAME_FIELDS = ['service.name', 'service_name'];
+export const AGENT_NAME_FIELD = 'agent.name';
