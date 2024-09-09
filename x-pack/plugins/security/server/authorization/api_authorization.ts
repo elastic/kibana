@@ -13,19 +13,11 @@ import type {
   Privilege,
   PrivilegeSet,
   RouteAuthz,
-  RouteSecurity,
-  RouteSecurityGetter,
 } from '@kbn/core/server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 
 import { API_OPERATION_PREFIX } from '../../common/constants';
-
-const isRouteSecurityGetter = (
-  security?: RouteSecurityGetter | RecursiveReadonly<RouteSecurity>
-): security is RouteSecurityGetter => {
-  return typeof security === 'function';
-};
 
 const isAuthzDisabled = (authz?: RecursiveReadonly<RouteAuthz>): authz is AuthzDisabled => {
   return (authz as AuthzDisabled)?.enabled === false;
@@ -42,9 +34,7 @@ export function initAPIAuthorization(
       return toolkit.next();
     }
 
-    const security = isRouteSecurityGetter(request.route.options.security)
-      ? request.route.options.security(request)
-      : request.route.options.security;
+    const security = request.route.options.security;
 
     if (security) {
       if (isAuthzDisabled(security.authz)) {
@@ -112,14 +102,6 @@ export function initAPIAuthorization(
           });
         }
       }
-
-      // eslint-disable-next-line no-console
-      console.log(
-        isRouteSecurityGetter(request.route.options.security)
-          ? 'Versioned Route Security:'
-          : 'Route Security:',
-        security
-      );
 
       return toolkit.authzResultNext(kibanaPrivileges);
     }

@@ -45,12 +45,8 @@ export interface KibanaRequestState extends RequestApplicationState {
  * @public
  */
 export type KibanaRequestRouteOptions<Method extends RouteMethod> = Method extends 'get' | 'options'
-  ? Required<Omit<RouteConfigOptions<Method>, 'body' | 'security'>> & {
-      security?: InternalRouteSecurity;
-    }
-  : Required<Omit<RouteConfigOptions<Method>, 'security'>> & {
-      security?: InternalRouteSecurity;
-    };
+  ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
+  : Required<RouteConfigOptions<Method>>;
 
 /**
  * Request specific route information exposed to a handler.

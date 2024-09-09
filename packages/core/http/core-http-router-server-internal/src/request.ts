@@ -31,6 +31,8 @@ import {
   RawRequest,
   FakeRawRequest,
   HttpProtocol,
+  RouteSecurityGetter,
+  RouteSecurity,
 } from '@kbn/core-http-server';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
@@ -46,6 +48,12 @@ import { patchRequest } from './patch_requests';
 patchRequest();
 
 const requestSymbol = Symbol('request');
+
+const isRouteSecurityGetter = (
+  security?: RouteSecurityGetter | RecursiveReadonly<RouteSecurity>
+): security is RouteSecurityGetter => {
+  return typeof security === 'function';
+};
 
 /**
  * Core internal implementation of {@link KibanaRequest}
@@ -297,7 +305,7 @@ export class CoreKibanaRequest<
         true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
       access: this.getAccess(request),
       tags: request.route?.settings?.tags || [],
-      security: ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.security,
+      security: this.getSecurity(request),
       timeout: {
         payload: payloadTimeout,
         idleSocket: socketTimeout === 0 ? undefined : socketTimeout,
@@ -319,6 +327,13 @@ export class CoreKibanaRequest<
     };
   }
 
+  private getSecurity(request: RawRequest): RouteSecurity | undefined {
+    const securityConfig = ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+      ?.security;
+
+    return isRouteSecurityGetter(securityConfig) ? securityConfig(this) : securityConfig;
+  }
+
   /** set route access to internal if not declared */
   private getAccess(request: RawRequest): 'internal' | 'public' {
     return (
@@ -331,7 +346,13 @@ export class CoreKibanaRequest<
       return true;
     }
 
-    const authOptions = request.route.settings.auth;
+    const security = this.getSecurity(request);
+
+    if (security?.authc) {
+      return security.authc.enabled ?? true;
+    }
+
+    const authOptions = security?.authc?.enabled ?? request.route.settings.auth;
     if (typeof authOptions === 'object') {
       // 'try' is used in the legacy platform
       if (authOptions.mode === 'optional' || authOptions.mode === 'try') {

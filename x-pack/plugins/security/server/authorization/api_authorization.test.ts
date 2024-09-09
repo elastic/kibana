@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RouteSecurity, RouteSecurityGetter } from '@kbn/core/server';
+import type { RouteSecurity } from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
@@ -148,7 +148,7 @@ describe('initAPIAuthorization', () => {
         kibanaPrivilegesRequestActions,
         asserts,
       }: {
-        security?: RouteSecurity | RouteSecurityGetter;
+        security?: RouteSecurity;
         kibanaPrivilegesResponse?: Array<{ privilege: string; authorized: boolean }>;
         kibanaPrivilegesRequestActions?: string[];
         asserts: {
@@ -412,29 +412,5 @@ describe('initAPIAuthorization', () => {
         authzDisabled: true,
       },
     });
-
-    testSecurityConfig(
-      `protected route with RouteSecurityGetter returns "authzResult" if user has all required privileges `,
-      {
-        security: () => {
-          return {
-            authz: {
-              requiredPrivileges: ['privilege1', 'privilege2'],
-            },
-          };
-        },
-        kibanaPrivilegesResponse: [
-          { privilege: 'api:privilege1', authorized: true },
-          { privilege: 'api:privilege2', authorized: true },
-        ],
-        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2'],
-        asserts: {
-          authzResult: {
-            privilege1: true,
-            privilege2: true,
-          },
-        },
-      }
-    );
   });
 });
