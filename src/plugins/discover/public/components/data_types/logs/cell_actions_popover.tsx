@@ -110,16 +110,22 @@ interface FieldBadgeWithActionsProps {
    */
   text: string;
   icon?: EuiBadgeProps['iconType'];
+  truncated?: boolean;
 }
 
-export function FieldBadgeWithActions({ property, text, icon }: FieldBadgeWithActionsProps) {
+export function FieldBadgeWithActions({
+  property,
+  text,
+  icon,
+  truncated = false,
+}: FieldBadgeWithActionsProps) {
   return (
     <CellActionsPopover
       property={property}
       text={text}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
         <EuiBadge {...popoverTriggerProps} color="hollow" iconType={icon} iconSide="left">
-          <EuiTextTruncate text={text} truncation="middle" width={120} />
+          {truncated ? <EuiTextTruncate text={text} truncation="middle" width={120} /> : text}
         </EuiBadge>
       )}
     />

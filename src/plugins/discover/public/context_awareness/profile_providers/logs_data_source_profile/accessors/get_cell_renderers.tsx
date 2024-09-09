@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { getSummaryColumn } from '../../../../components/data_types/logs/summary_column';
 import { LOG_LEVEL_FIELDS } from '../../../../../common/data_types/logs/constants';
 import { getLogLevelBadgeCell } from '../../../../components/data_types/logs/log_level_badge_cell';
@@ -25,5 +26,5 @@ export const makeGetCellRenderersHandler =
       }),
       {}
     ),
-    _source: getSummaryColumn({ data: services.data, params }),
+    [SOURCE_COLUMN]: getSummaryColumn({ data: services.data, params }),
   });
