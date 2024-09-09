@@ -425,7 +425,7 @@
         "tags": [],
         "label": "useGetAlertsGroupAggregationsQuery",
         "description": [
-          "\nFetches alerts aggregations for a given groupByField.\n\nSome default aggregations are applied:\n- `groupByFields`, to get the buckets based on the provided grouping field,\n  - `unitsCount`, to count the number of alerts in each bucket,\n- `unitsCount`, to count the total number of alerts targeted by the query,\n- `groupsCount`, to count the total number of groups.\n\nThe provided `aggregations` are applied within `groupByFields`. Here the `groupByField` runtime\nfield can be used to perform grouping-based aggregations.\n\nApplies alerting RBAC through featureIds."
+          "\nFetches alerts aggregations for a given groupByField.\n\nSome default aggregations are applied:\n- `groupByFields`, to get the buckets based on the provided grouping field,\n  - `unitsCount`, to count the number of alerts in each bucket,\n- `unitsCount`, to count the total number of alerts targeted by the query,\n- `groupsCount`, to count the total number of groups.\n\nThe provided `aggregations` are applied within `groupByFields`. Here the `groupByField` runtime\nfield can be used to perform grouping-based aggregations.\n`groupByField` buckets computed over a field with a null/absent value are marked with the\n`isNullGroup` flag set to true and their key is set to the `--` string.\n\nApplies alerting RBAC through featureIds."
         ],
         "signature": [
           "<T>({ http, toasts, enabled, params, }: ",
@@ -1499,6 +1499,20 @@
             "type": "string",
             "tags": [],
             "label": "producerId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.ActionParamsProps.featureId",
+            "type": "string",
+            "tags": [],
+            "label": "featureId",
             "description": [],
             "signature": [
               "string | undefined"
@@ -4129,7 +4143,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"ruleTypeId\">(key: Prop, value: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",

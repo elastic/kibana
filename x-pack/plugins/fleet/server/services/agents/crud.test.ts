@@ -57,7 +57,9 @@ describe('Agents CRUD test', () => {
       closePointInTime: jest.fn(),
     } as unknown as ElasticsearchClient;
 
-    mockContract = createAppContextStartContractMock();
+    mockContract = createAppContextStartContractMock({}, false, {
+      withoutSpaceExtensions: soClientMock,
+    });
     appContextService.start(mockContract);
   });
 

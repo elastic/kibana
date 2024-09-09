@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCode } from '@elastic/eui';
@@ -16,6 +17,7 @@ import {
   LanguageDocumentationPopover,
   type LanguageDocumentationSections,
 } from '@kbn/language-documentation-popover';
+import { getLimitFromESQLQuery } from '@kbn/esql-utils';
 import { type MonacoMessage, getDocumentationSections } from '../helpers';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { QueryHistoryAction, QueryHistory } from './query_history';
@@ -98,6 +100,8 @@ export const EditorFooter = memo(function EditorFooter({
     [runQuery, updateQuery]
   );
 
+  const limit = useMemo(() => getLimitFromESQLQuery(code), [code]);
+
   useEffect(() => {
     async function getDocumentation() {
       const sections = await getDocumentationSections('esql');
@@ -126,9 +130,16 @@ export const EditorFooter = memo(function EditorFooter({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            <EuiFlexGroup
+              gutterSize="none"
+              responsive={false}
+              alignItems="center"
+              css={css`
+                gap: 12px;
+              `}
+            >
               <QueryWrapComponent code={code} updateQuery={updateQuery} />
-              <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
+              <EuiFlexItem grow={false}>
                 <EuiText
                   size="xs"
                   color="subdued"
@@ -144,7 +155,7 @@ export const EditorFooter = memo(function EditorFooter({
               </EuiFlexItem>
               {/* If there is no space and no @timestamp detected hide the information */}
               {(detectedTimestamp || !isSpaceReduced) && !hideTimeFilterInfo && (
-                <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
+                <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiText
@@ -175,6 +186,35 @@ export const EditorFooter = memo(function EditorFooter({
                   </EuiFlexGroup>
                 </EuiFlexItem>
               )}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      data-test-subj="TextBasedLangEditor-limit-info"
+                    >
+                      <p>
+                        {isSpaceReduced
+                          ? i18n.translate(
+                              'textBasedEditor.query.textBasedLanguagesEditor.limitInfoReduced',
+                              {
+                                defaultMessage: 'LIMIT {limit}',
+                                values: { limit },
+                              }
+                            )
+                          : i18n.translate(
+                              'textBasedEditor.query.textBasedLanguagesEditor.limitInfo',
+                              {
+                                defaultMessage: 'LIMIT {limit} rows',
+                                values: { limit },
+                              }
+                            )}
+                      </p>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
               {errors && errors.length > 0 && (
                 <ErrorsWarningsFooterPopover
                   isPopoverOpen={isErrorPopoverOpen}

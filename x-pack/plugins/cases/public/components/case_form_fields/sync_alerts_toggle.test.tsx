@@ -30,6 +30,10 @@ describe('SyncAlertsToggle', () => {
     appMockRender = createAppMockRenderer();
   });
 
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('it renders', async () => {
     appMockRender.render(
       <FormTestComponent>

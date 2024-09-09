@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -30,38 +31,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const vizName = 'Visualization AreaChart Name Test - Charts library';
 
+  const initAreaChart = async () => {
+    log.debug('navigateToApp visualize');
+    await PageObjects.visualize.navigateToNewAggBasedVisualization();
+    log.debug('clickAreaChart');
+    await PageObjects.visualize.clickAreaChart();
+    log.debug('clickNewSearch');
+    await PageObjects.visualize.clickNewSearch();
+    log.debug('Click X-axis');
+    await PageObjects.visEditor.clickBucket('X-axis');
+    log.debug('Click Date Histogram');
+    await PageObjects.visEditor.selectAggregation('Date Histogram');
+    log.debug('Check field value');
+    const fieldValues = await PageObjects.visEditor.getField();
+    log.debug('fieldValue = ' + fieldValues);
+    expect(fieldValues[0]).to.be('@timestamp');
+    const intervalValue = await PageObjects.visEditor.getInterval();
+    log.debug('intervalValue = ' + intervalValue);
+    expect(intervalValue[0]).to.be('Auto');
+    await PageObjects.visEditor.clickGo(true);
+  };
+
   describe('area charts', function indexPatternCreation() {
     before(async () => {
       await PageObjects.visualize.initTests();
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-    });
-    const initAreaChart = async () => {
-      log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
-      log.debug('clickAreaChart');
-      await PageObjects.visualize.clickAreaChart();
-      log.debug('clickNewSearch');
-      await PageObjects.visualize.clickNewSearch();
-      log.debug('Click X-axis');
-      await PageObjects.visEditor.clickBucket('X-axis');
-      log.debug('Click Date Histogram');
-      await PageObjects.visEditor.selectAggregation('Date Histogram');
-      log.debug('Check field value');
-      const fieldValues = await PageObjects.visEditor.getField();
-      log.debug('fieldValue = ' + fieldValues);
-      expect(fieldValues[0]).to.be('@timestamp');
-      const intervalValue = await PageObjects.visEditor.getInterval();
-      log.debug('intervalValue = ' + intervalValue);
-      expect(intervalValue[0]).to.be('Auto');
-      await PageObjects.visEditor.clickGo(true);
-    };
-
-    before(async function () {
       await security.testUser.setRoles([
         'kibana_admin',
         'long_window_logstash',
         'test_logstash_reader',
       ]);
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await initAreaChart();
     });
 

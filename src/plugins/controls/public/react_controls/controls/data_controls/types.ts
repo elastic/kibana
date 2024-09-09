@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreStart } from '@kbn/core/public';
@@ -38,11 +39,11 @@ export type DataControlApi = DefaultControlApi &
 export interface CustomOptionsComponentProps<
   State extends DefaultDataControlState = DefaultDataControlState
 > {
-  initialState: Omit<State, 'fieldName'>;
+  initialState: Partial<State>;
   field: DataViewField;
   updateState: (newState: Partial<State>) => void;
   setControlEditorValid: (valid: boolean) => void;
-  parentApi: ControlGroupApi;
+  controlGroupApi: ControlGroupApi;
 }
 
 export interface DataControlFactory<

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { readFileSync } from 'fs';
-import { load } from 'js-yaml';
+import { safeLoad } from 'js-yaml';
 import { join } from 'path';
 import { bundleFolder, readBundledSpecs } from './bundle_specs';
 
@@ -25,7 +26,7 @@ describe('OpenAPI Bundler - specs with multiple modifications', () => {
 
     const [bundledSpec] = Object.values(readBundledSpecs(outputFolderPath));
 
-    const expected = load(
+    const expected = safeLoad(
       readFileSync(join(folderToBundlePath, 'expected.yaml'), { encoding: 'utf8' })
     );
 

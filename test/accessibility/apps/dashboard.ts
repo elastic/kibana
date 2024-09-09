@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -20,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const dashboardName = 'Dashboard Listing A11y';
     const clonedDashboardName = 'Dashboard Listing A11y (1)';
 
-    it('dashboard', async () => {
+    it('navitate to dashboard app', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await a11y.testAppSnapshot();
     });
@@ -61,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Open Edit mode', async () => {
+    it('Open Edit mode again', async () => {
       await PageObjects.dashboard.switchToEditMode();
       await a11y.testAppSnapshot();
     });
@@ -86,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Open add panel', async () => {
+    it('Open add panel again', async () => {
       await dashboardAddPanel.clickOpenAddPanel();
       await a11y.testAppSnapshot();
     });

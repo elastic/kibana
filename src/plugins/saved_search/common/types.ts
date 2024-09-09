@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -15,6 +16,7 @@ import type {
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { DataGridDensity } from '@kbn/unified-data-table';
 import { VIEW_MODE } from '.';
 
 export interface DiscoverGridSettings extends SerializableRecord {
@@ -64,6 +66,7 @@ export interface SavedSearchAttributes {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  density?: DataGridDensity;
   visContext?: VisContextUnmapped;
 }
 

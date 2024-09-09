@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useReducer, useCallback, useEffect, useRef, useMemo } from 'react';
@@ -38,6 +39,10 @@ import type {
 } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { RecentlyAccessed } from '@kbn/recently-accessed';
+import {
+  ContentInsightsProvider,
+  useContentInsightsServices,
+} from '@kbn/content-management-content-insights-public';
 
 import {
   Table,
@@ -54,12 +59,10 @@ import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
 import { sortByRecentlyAccessed } from './components/table_sort_select';
+import { ContentEditorActivityRow } from './components/content_editor_activity_row';
 
 interface ContentEditorConfig
-  extends Pick<
-    OpenContentEditorParams,
-    'isReadonly' | 'onSave' | 'customValidators' | 'showActivityView'
-  > {
+  extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
   enabled?: boolean;
 }
 
@@ -371,6 +374,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   } = useServices();
 
   const openContentEditor = useOpenContentEditor();
+  const contentInsightsServices = useContentInsightsServices();
 
   const isInRouterContext = useInRouterContext();
 
@@ -567,6 +571,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
             close();
           }),
+        appendRows: contentInsightsServices && (
+          // have to "REWRAP" in the provider here because it will be rendered in a different context
+          <ContentInsightsProvider {...contentInsightsServices}>
+            <ContentEditorActivityRow item={item} />
+          </ContentInsightsProvider>
+        ),
       });
     },
     [
@@ -576,6 +586,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       contentEditor,
       tableItemsRowActions,
       fetchItems,
+      contentInsightsServices,
     ]
   );
 
@@ -713,7 +724,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         name: i18n.translate('contentManagement.tableList.listing.table.actionTitle', {
           defaultMessage: 'Actions',
         }),
-        width: `${32 * actions.length}px`,
+        width: `72px`,
         actions,
       });
     }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -24,10 +25,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
   const monacoEditor = getService('monacoEditor');
+  const browser = getService('browser');
 
   describe('discover doc viewer', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await browser.setWindowSize(1600, 1200);
     });
 
     beforeEach(async () => {
@@ -174,7 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(initialFieldsCount).to.above(numberFieldsCount);
 
         const pinnedFieldsCount = 1;
-        await dataGrid.clickFieldActionInFlyout('agent', 'togglePinFilterButton');
+        await dataGrid.togglePinActionInFlyout('agent');
 
         await PageObjects.discover.openFilterByFieldTypeInDocViewer();
         expect(await find.allByCssSelector('[data-test-subj*="typeFilter"]')).to.have.length(6);
@@ -227,6 +230,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length < results;
         });
+      });
+    });
+
+    describe('pinning fields', function () {
+      it('should be able to pin and unpin fields', async function () {
+        await dataGrid.clickRowToggle();
+        await PageObjects.discover.isShowingDocViewer();
+        await retry.waitFor('rendered items', async () => {
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+        });
+
+        let fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+        let fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+
+        expect(fieldNames.join(',').startsWith('_id,_ignored,_index,_score,@message')).to.be(true);
+        expect(await dataGrid.isFieldPinnedInFlyout('agent')).to.be(false);
+
+        await dataGrid.togglePinActionInFlyout('agent');
+
+        fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+        fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+        expect(fieldNames.join(',').startsWith('agent,_id,_ignored')).to.be(true);
+        expect(await dataGrid.isFieldPinnedInFlyout('agent')).to.be(true);
+
+        await dataGrid.togglePinActionInFlyout('@message');
+
+        fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+        fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+        expect(fieldNames.join(',').startsWith('@message,agent,_id,_ignored')).to.be(true);
+        expect(await dataGrid.isFieldPinnedInFlyout('@message')).to.be(true);
+
+        await dataGrid.togglePinActionInFlyout('@message');
+
+        fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+        fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+        expect(fieldNames.join(',').startsWith('agent,_id,_ignored')).to.be(true);
+        expect(await dataGrid.isFieldPinnedInFlyout('agent')).to.be(true);
+        expect(await dataGrid.isFieldPinnedInFlyout('@message')).to.be(false);
       });
     });
   });

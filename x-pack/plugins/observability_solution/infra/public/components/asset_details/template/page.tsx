@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { InfraLoadingPanel } from '../../loading';
 import { ASSET_DETAILS_PAGE_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
 import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
@@ -25,6 +22,7 @@ import { ContentTemplateProps } from '../types';
 import { getIntegrationsAvailable } from '../utils';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
+import { PageTitleWithPopover } from '../header/page_title_with_popover';
 
 const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
   host: [SYSTEM_INTEGRATION],
@@ -86,7 +84,13 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       onboardingFlow={asset.type === 'host' ? OnboardingFlow.Hosts : OnboardingFlow.Infra}
       dataAvailabilityModules={DATA_AVAILABILITY_PER_TYPE[asset.type] || undefined}
       pageHeader={{
-        pageTitle: asset.name,
+        pageTitle: loading ? (
+          <EuiLoadingSpinner size="m" />
+        ) : asset.type === 'host' ? (
+          <PageTitleWithPopover name={asset.name} />
+        ) : (
+          asset.name
+        ),
         tabs: tabEntries,
         rightSideItems,
         breadcrumbs: headerBreadcrumbs,
@@ -94,24 +98,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
       data-asset-type={asset.type}
     >
-      {loading ? (
-        <EuiFlexGroup
-          direction="column"
-          css={css`
-            height: calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));
-          `}
-        >
-          <InfraLoadingPanel
-            height="100%"
-            width="auto"
-            text={i18n.translate('xpack.infra.waffle.loadingDataText', {
-              defaultMessage: 'Loading data',
-            })}
-          />
-        </EuiFlexGroup>
-      ) : (
-        <Content />
-      )}
+      <Content />
     </InfraPageTemplate>
   );
 };

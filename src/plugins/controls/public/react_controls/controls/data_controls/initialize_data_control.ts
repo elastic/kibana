@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEqual } from 'lodash';
@@ -36,7 +37,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
    * responsible for managing
    */
   editorStateManager: ControlStateManager<EditorState>,
-  controlGroup: ControlGroupApi,
+  controlGroupApi: ControlGroupApi,
   services: {
     core: CoreStart;
     dataViews: DataViewsPublicPluginStart;
@@ -159,22 +160,24 @@ export const initializeDataControl = <EditorState extends object = {}>(
           (Object.keys(initialState) as Array<keyof DefaultDataControlState & EditorState>).forEach(
             (key) => {
               if (!isEqual(mergedStateManager[key].getValue(), newState[key])) {
-                mergedStateManager[key].next(newState[key]);
+                mergedStateManager[key].next(
+                  newState[key] as DefaultDataControlState & EditorState[typeof key]
+                );
               }
             }
           );
         } else {
           // replace the control with a new one of the updated type
-          controlGroup.replacePanel(controlId, { panelType: newType, initialState: newState });
+          controlGroupApi.replacePanel(controlId, { panelType: newType, initialState: newState });
         }
       },
       initialState: {
         ...initialState,
-        controlType,
-        controlId,
-        defaultPanelTitle: defaultPanelTitle.getValue(),
       },
-      controlGroupApi: controlGroup,
+      controlType,
+      controlId,
+      initialDefaultPanelTitle: defaultPanelTitle.getValue(),
+      controlGroupApi,
     });
   };
 

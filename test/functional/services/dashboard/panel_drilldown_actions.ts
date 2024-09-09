@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
@@ -69,7 +70,7 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
 
     async clickActionByText(text: string) {
       log.debug(`clickActionByText: "${text}"`);
-      (await this.getActionWebElementByText(text)).click();
+      await (await this.getActionWebElementByText(text)).click();
     }
 
     async getActionHrefByText(text: string) {
@@ -80,7 +81,7 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
 
     async openHrefByText(text: string) {
       log.debug(`openHref: "${text}"`);
-      (await this.getActionWebElementByText(text)).openHref();
+      await (await this.getActionWebElementByText(text)).openHref();
     }
 
     async getActionWebElementByText(text: string): Promise<WebElementWrapper> {

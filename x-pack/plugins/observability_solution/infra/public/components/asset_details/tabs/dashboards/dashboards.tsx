@@ -124,11 +124,9 @@ export function Dashboards() {
     }
   }, [
     allAvailableDashboards,
-    asset.type,
     currentDashboard?.dashboardSavedObjectId,
     dashboards,
     setUrlState,
-    telemetry,
     urlState?.dashboardId,
   ]);
 
@@ -165,7 +163,7 @@ export function Dashboards() {
   ]);
 
   const getLocatorParams = useCallback(
-    (params, isFlyoutView) => {
+    (params: any, isFlyoutView: any) => {
       const searchParams = new URLSearchParams(location.search);
       const tableProperties = searchParams.get('tableProperties');
       const flyoutParams =
