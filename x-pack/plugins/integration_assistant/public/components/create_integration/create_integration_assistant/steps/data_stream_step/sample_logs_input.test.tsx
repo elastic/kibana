@@ -13,7 +13,7 @@ import { ActionsProvider } from '../../state';
 import { mockActions } from '../../mocks/state';
 import { mockServices } from '../../../../../services/mocks/services';
 
-const wrapper: React.FC = ({ children }) => (
+const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
     <ActionsProvider value={mockActions}>{children}</ActionsProvider>
   </TestProvider>
