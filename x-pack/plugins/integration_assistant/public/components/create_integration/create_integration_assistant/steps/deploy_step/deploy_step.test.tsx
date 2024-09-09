@@ -56,7 +56,7 @@ jest.mock('@elastic/filesaver', () => ({
   saveAs: (...params: unknown[]) => mockSaveAs(...params),
 }));
 
-const wrapper: React.FC = ({ children }) => (
+const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
     <ActionsProvider value={mockActions}>{children}</ActionsProvider>
   </TestProvider>
