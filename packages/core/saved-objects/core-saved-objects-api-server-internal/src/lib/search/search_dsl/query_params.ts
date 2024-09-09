@@ -13,8 +13,7 @@ import {
   ALL_NAMESPACES_STRING,
   DEFAULT_NAMESPACE_STRING,
 } from '@kbn/core-saved-objects-utils-server';
-import { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { getProperty } from '@kbn/core-saved-objects-base-server-internal/src/mappings/lib/get_property';
+import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { getReferencesFilter } from './references_filter';
 
 type KueryNode = any;
@@ -141,7 +140,7 @@ interface QueryParams {
   hasNoReference?: SavedObjectTypeIdTuple | SavedObjectTypeIdTuple[];
   hasNoReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
-  mappings?: IndexMapping;
+  mappings: IndexMapping;
 }
 
 // A de-duplicated set of namespaces makes for a more efficient query.
@@ -164,7 +163,7 @@ export function getQueryParams({
   type,
   typeToNamespacesMap,
   search,
-  searchFields = [],
+  searchFields: searchFieldsParam = [],
   rootSearchFields,
   defaultSearchOperator,
   hasReference,
@@ -217,45 +216,68 @@ export function getQueryParams({
   };
 
   if (search) {
+    const { fields, nestedFields } = extractFieldsAndNestedFields({
+      searchFields: searchFieldsParam,
+      types,
+      mappings,
+    });
+
     const useMatchPhrasePrefix = shouldUseMatchPhrasePrefix(search);
-    // TODO: I would guess mappings are always present except in test. Check this.
-    if (mappings) {
-      const searchStringQuery = getSearchStringQuery({
-        search,
-        types,
-        searchFields,
-        rootSearchFields,
-        defaultSearchOperator,
-        mappings,
-      });
+    const isSearchingInAllFields =
+      searchFieldsParam.length === 0 ||
+      (searchFieldsParam.length === 1 && searchFieldsParam[0] === '*');
+    const useNestedStringClause =
+      nestedFields.searchFields.size > 0 && !isSearchingInAllFields && !useMatchPhrasePrefix;
+    // TODO: improve name as it's also used for match_phrase_prefix
+    const simpleQueryOptions =
+      isSearchingInAllFields || useMatchPhrasePrefix
+        ? {
+            types,
+            searchFields: searchFieldsParam,
+          }
+        : { types: fields.types, searchFields: fields.searchFields };
+    const useSimpleQueryStringClause =
+      isSearchingInAllFields || simpleQueryOptions.searchFields.length > 0;
+    const useSimpleQueryStringClauseOnly = !useNestedStringClause && !useMatchPhrasePrefix;
+    const useNestedStringClauseOnly = !useSimpleQueryStringClause && !useMatchPhrasePrefix;
 
-      if (useMatchPhrasePrefix) {
-        bool.should = [
-          searchStringQuery,
-          ...getMatchPhrasePrefixClauses({ search, searchFields, types, registry }),
-        ];
-        bool.minimum_should_match = 1;
-      } else {
-        bool.must = searchStringQuery;
-      }
+    const simpleQueryStringClause = useSimpleQueryStringClause
+      ? getSimpleQueryStringClause({
+          search,
+          searchFields: simpleQueryOptions.searchFields,
+          types: simpleQueryOptions.types,
+          rootSearchFields,
+          defaultSearchOperator,
+        })
+      : [];
+
+    const nestedStringClause = useNestedStringClause
+      ? getNestedQueryStringClause({
+          search,
+          nestedFields: nestedFields.searchFields,
+        })
+      : [];
+
+    const matchPhrasePrefixClause = useMatchPhrasePrefix
+      ? getMatchPhrasePrefixClauses({
+          search,
+          searchFields: simpleQueryOptions.searchFields,
+          types: simpleQueryOptions.types,
+          registry,
+        })
+      : [];
+
+    if (useSimpleQueryStringClauseOnly) {
+      bool.must = [...simpleQueryStringClause];
+    } else if (useNestedStringClauseOnly) {
+      bool.must = [...nestedStringClause];
     } else {
-      const simpleQueryStringClause = getSimpleQueryStringClause({
-        search,
-        types,
-        searchFields,
-        rootSearchFields,
-        defaultSearchOperator,
-      });
-
-      if (useMatchPhrasePrefix) {
-        bool.should = [
-          simpleQueryStringClause,
-          ...getMatchPhrasePrefixClauses({ search, searchFields, types, registry }),
-        ];
-        bool.minimum_should_match = 1;
-      } else {
-        bool.must = [simpleQueryStringClause];
-      }
+      bool.should = [
+        ...simpleQueryStringClause,
+        ...nestedStringClause,
+        ...matchPhrasePrefixClause,
+      ].filter(Boolean);
+      bool.minimum_should_match = 1;
     }
   }
 
@@ -348,69 +370,65 @@ const getMatchPhrasePrefixFields = ({
   return output;
 };
 
-const getSearchStringQuery = ({
-  search,
+const extractFieldsAndNestedFields = ({
+  searchFields,
   types,
-  searchFields = [],
-  rootSearchFields,
-  defaultSearchOperator,
   mappings,
 }: {
-  search: string;
+  searchFields: string[];
   types: string[];
-  searchFields?: string[];
-  rootSearchFields?: string[];
-  defaultSearchOperator?: SearchOperator;
   mappings: IndexMapping;
 }) => {
-  const nestedFields: Map<string, string[]> = new Map();
-  const fields: { types: Set<string>; searchFields: Set<string> } = {
-    types: new Set(),
-    searchFields: new Set(),
+  const usedFields: Set<string> = new Set();
+  const typesUsedByFields: Set<string> = new Set();
+  const usedNestedFields: Map<string, string[]> = new Map();
+  const typesUsedNestedFields: Set<string> = new Set();
+
+  types.forEach((type) => {
+    searchFields.forEach((rawSearchField) => {
+      const isFieldDefinedAsNested = rawSearchField.split('.').length > 1;
+      // Keeps the prefix only when boosting or wildcard
+      const searchField = rawSearchField.replace(/[*^].$/, '');
+      const absoluteFieldPath = `${type}.${searchField}`;
+      const parentNode = absoluteFieldPath.split('.').slice(0, -1).join('.');
+      const parentNodeType = getProperty(mappings, parentNode)?.type;
+
+      const nodeType = getProperty(mappings, absoluteFieldPath)?.type;
+      if (isFieldDefinedAsNested) {
+        if (parentNodeType === 'nested' && nodeType !== undefined) {
+          usedNestedFields.set(parentNode, [
+            ...(usedNestedFields.get(parentNode) || []),
+            absoluteFieldPath,
+          ]);
+          typesUsedNestedFields.add(type);
+        } else if (nodeType !== undefined) {
+          usedFields.add(rawSearchField);
+          typesUsedByFields.add(type);
+        }
+      } else {
+        usedFields.add(rawSearchField);
+        typesUsedByFields.add(type);
+      }
+    });
+  });
+
+  const typesUsedByNestedFieldsAndNotBySearchFields = Array.from(typesUsedNestedFields).filter(
+    (type) => !typesUsedByFields.has(type)
+  );
+  const typesUsedBySearchFieldsAndNotByNestedFields = Array.from(typesUsedByFields).filter(
+    (type) => !typesUsedNestedFields.has(type)
+  );
+
+  const fields = {
+    types: typesUsedBySearchFieldsAndNotByNestedFields,
+    searchFields: Array.from(usedFields.values()),
+  };
+  const nestedFields = {
+    types: typesUsedByNestedFieldsAndNotBySearchFields,
+    searchFields: usedNestedFields,
   };
 
-  const isSearchByAll =
-    searchFields.length === 0 || (searchFields.length === 1 && searchFields[0] === '*');
-
-  if (!isSearchByAll) {
-    types.forEach((type) => {
-      searchFields.forEach((searchField) => {
-        const isFieldDefinedAsNested = searchField.split('.').length > 1;
-        const absoluteFieldPath = `${type}.${searchField}`;
-        const currentPathType = getProperty(mappings, absoluteFieldPath)?.type;
-
-        // currentPathType === nested means that its no leaf field definition
-        // and is therefore dissmissed
-        if (currentPathType !== undefined && currentPathType !== 'nested') {
-          if (isFieldDefinedAsNested) {
-            const path = absoluteFieldPath.split('.').slice(0, -1).join('.');
-            nestedFields.set(path, [
-              ...Array.from(nestedFields.get(path) || []),
-              absoluteFieldPath,
-            ]);
-          } else {
-            fields.types.add(type);
-            fields.searchFields.add(searchField);
-          }
-        }
-      });
-    });
-  }
-
-  const nestedQueries = getNestedQueryStringClause({
-    nestedFields,
-    search,
-  });
-
-  const simpleQueryString = getSimpleQueryStringClause({
-    search,
-    types: Array.from(fields.types.keys()),
-    searchFields: Array.from(fields.searchFields.keys()),
-    rootSearchFields,
-    defaultSearchOperator,
-  });
-
-  return { bool: { should: [...nestedQueries, simpleQueryString].filter(Boolean) } };
+  return { fields, nestedFields };
 };
 
 /**
@@ -456,11 +474,13 @@ const getSimpleQueryStringClause = ({
   rootSearchFields?: string[];
   defaultSearchOperator?: SearchOperator;
 }) => {
-  return {
-    simple_query_string: {
-      query: search,
-      ...getSimpleQueryStringTypeFields(types, searchFields, rootSearchFields),
-      ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
+  return [
+    {
+      simple_query_string: {
+        query: search,
+        ...getSimpleQueryStringTypeFields(types, searchFields, rootSearchFields),
+        ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
+      },
     },
-  };
+  ];
 };

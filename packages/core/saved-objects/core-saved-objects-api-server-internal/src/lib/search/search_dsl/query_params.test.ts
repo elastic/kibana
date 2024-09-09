@@ -13,7 +13,10 @@ import {
   ALL_NAMESPACES_STRING,
   DEFAULT_NAMESPACE_STRING,
 } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  SavedObjectTypeRegistry,
+  type IndexMapping,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { getQueryParams } from './query_params';
 import {
   SavedObjectsType,
@@ -84,16 +87,26 @@ const ALL_TYPE_SUBSETS = ALL_TYPES.reduce(
   .filter((x) => x.length) // exclude empty set
   .map((x) => (x.length === 1 ? x[0] : x)); // if a subset is a single string, destructure it
 
+const createMappings = ({ registry }: { registry: SavedObjectTypeRegistry }) => {
+  return {
+    properties: registry.getAllTypes().reduce((acc, type) => {
+      acc[type.name] = { properties: type.mappings.properties };
+      return acc;
+    }, {} as any),
+  };
+};
 /**
  * Note: these tests cases are defined in the order they appear in the source code, for readability's sake
  */
 describe('#getQueryParams', () => {
   let registry: SavedObjectTypeRegistry;
+  let mappings: IndexMapping;
   type Result = ReturnType<typeof getQueryParams>;
 
   beforeEach(() => {
     registry = new SavedObjectTypeRegistry();
     registerTypes(registry);
+    mappings = createMappings({ registry });
 
     getReferencesFilterMock.mockReturnValue({ references_filter: true });
   });
@@ -148,13 +161,21 @@ describe('#getQueryParams', () => {
 
     describe('`kueryNode` parameter', () => {
       it('does not include the clause when `kueryNode` is not specified', () => {
-        const result = getQueryParams({ registry, kueryNode: undefined });
+        const result = getQueryParams({
+          registry,
+          kueryNode: undefined,
+          mappings,
+        });
         expect(result.query.bool.filter).toHaveLength(1);
       });
 
       it('includes the specified Kuery clause', () => {
         const test = (kueryNode: KueryNode) => {
-          const result = getQueryParams({ registry, kueryNode });
+          const result = getQueryParams({
+            registry,
+            kueryNode,
+            mappings,
+          });
           const expected = esKuery.toElasticsearchQuery(kueryNode);
           expect(result.query.bool.filter).toHaveLength(2);
           expectResult(result, expected);
@@ -204,6 +225,7 @@ describe('#getQueryParams', () => {
         registry,
         hasReference: undefined,
         hasNoReference: undefined,
+        mappings,
       });
 
       expect(getReferencesFilterMock).not.toHaveBeenCalled();
@@ -216,6 +238,7 @@ describe('#getQueryParams', () => {
           registry,
           hasReference,
           hasReferenceOperator: 'AND',
+          mappings,
         });
 
         expect(getReferencesFilterMock).toHaveBeenCalledTimes(1);
@@ -233,6 +256,7 @@ describe('#getQueryParams', () => {
           registry,
           hasReference,
           hasReferenceOperator: 'AND',
+          mappings,
         });
 
         const filters: any[] = result.query.bool.filter;
@@ -247,6 +271,7 @@ describe('#getQueryParams', () => {
           registry,
           hasNoReference,
           hasNoReferenceOperator: 'AND',
+          mappings,
         });
 
         expect(getReferencesFilterMock).toHaveBeenCalledTimes(1);
@@ -265,6 +290,7 @@ describe('#getQueryParams', () => {
           registry,
           hasNoReference,
           hasReferenceOperator: 'AND',
+          mappings,
         });
 
         const filters: any[] = result.query.bool.filter;
@@ -293,7 +319,11 @@ describe('#getQueryParams', () => {
       };
 
       it('searches for all known types when `type` is not specified', () => {
-        const result = getQueryParams({ registry, type: undefined });
+        const result = getQueryParams({
+          registry,
+          type: undefined,
+          mappings,
+        });
         expectResult(result, ...ALL_TYPES);
       });
 
@@ -302,6 +332,7 @@ describe('#getQueryParams', () => {
           const result = getQueryParams({
             registry,
             type: typeOrTypes,
+            mappings,
           });
           const type = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
           expectResult(result, ...type);
@@ -323,12 +354,22 @@ describe('#getQueryParams', () => {
 
       const test = (namespaces?: string[]) => {
         for (const typeOrTypes of ALL_TYPE_SUBSETS) {
-          const result = getQueryParams({ registry, type: typeOrTypes, namespaces });
+          const result = getQueryParams({
+            registry,
+            type: typeOrTypes,
+            namespaces,
+            mappings,
+          });
           const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
           expectResult(result, ...types.map((x) => createTypeClause(x, namespaces)));
         }
         // also test with no specified type/s
-        const result = getQueryParams({ registry, type: undefined, namespaces });
+        const result = getQueryParams({
+          registry,
+          type: undefined,
+          namespaces,
+          mappings,
+        });
         expectResult(result, ...ALL_TYPES.map((x) => createTypeClause(x, namespaces)));
       };
 
@@ -337,6 +378,7 @@ describe('#getQueryParams', () => {
           registry,
           search: '*',
           namespaces: ['foo', '*', 'foo', 'bar', 'default'],
+          mappings,
         });
 
         expectResult(
@@ -382,6 +424,7 @@ describe('#getQueryParams', () => {
             ['shared', ['bar', 'default']], // 'shared' is only authorized in the 'bar' and 'default' namespaces
             ['global', ['foo', 'bar', 'default']], // 'global' is authorized in all namespaces (which are ignored anyway)
           ]),
+          mappings,
         });
         expectResult(
           result,
@@ -406,6 +449,7 @@ describe('#getQueryParams', () => {
           const result = getQueryParams({
             registry,
             search: undefined,
+            mappings,
           });
           expect(result.query.bool.must).toBeUndefined();
         });
@@ -414,6 +458,7 @@ describe('#getQueryParams', () => {
           const result = getQueryParams({
             registry,
             search,
+            mappings: createMappings({ registry }),
           });
           expectResult(result, expect.objectContaining({ query: search }));
         });
@@ -439,6 +484,7 @@ describe('#getQueryParams', () => {
               search,
               searchFields,
               rootSearchFields,
+              mappings,
             });
             let fields = rootSearchFields || [];
             if (searchFields) {
@@ -453,6 +499,7 @@ describe('#getQueryParams', () => {
             search,
             searchFields,
             rootSearchFields,
+            mappings,
           });
           let fields = rootSearchFields || [];
           if (searchFields) {
@@ -469,6 +516,7 @@ describe('#getQueryParams', () => {
               search,
               searchFields: undefined,
               rootSearchFields: ['foo', 'bar.baz'],
+              mappings,
             })
           ).toThrowErrorMatchingInlineSnapshot(
             `"rootSearchFields entry \\"bar.baz\\" is invalid: cannot contain \\".\\" character"`
@@ -481,6 +529,7 @@ describe('#getQueryParams', () => {
             search,
             searchFields: undefined,
             rootSearchFields: undefined,
+            mappings,
           });
           expectResult(result, expect.objectContaining({ lenient: true, fields: ['*'] }));
         });
@@ -494,7 +543,8 @@ describe('#getQueryParams', () => {
         });
 
         it('supports multiple search fields', () => {
-          test({ searchFields: ['title, title.raw'] });
+          // TODO: check if .raw is something valid
+          test({ searchFields: ['title', 'title.raw'] });
         });
 
         it('includes specified raw search fields', () => {
@@ -516,6 +566,7 @@ describe('#getQueryParams', () => {
             registry,
             search,
             defaultSearchOperator: undefined,
+            mappings,
           });
           expectResult(
             result,
@@ -529,6 +580,7 @@ describe('#getQueryParams', () => {
             registry,
             search,
             defaultSearchOperator,
+            mappings,
           });
           expectResult(
             result,
@@ -555,6 +607,7 @@ describe('#getQueryParams', () => {
           search,
           searchFields,
           type,
+          mappings,
         });
 
       it('uses a `should` clause instead of `must`', () => {
@@ -657,6 +710,7 @@ describe('#getQueryParams', () => {
     });
 
     describe('search for nested fields', () => {
+      let nestedFieldMappings: IndexMapping;
       const getNestedMapping = ({
         fieldName,
       }: {
@@ -667,7 +721,6 @@ describe('#getQueryParams', () => {
             [fieldName]: {
               type: 'nested',
               properties: {
-                // TODO: what happens when this is not value but something else like key?
                 value: {
                   type: 'text',
                 },
@@ -680,27 +733,16 @@ describe('#getQueryParams', () => {
         };
       };
 
-      const getMappings = () => {
-        return {
-          properties: registry.getAllTypes().reduce((acc, type) => {
-            acc[type.name] = { properties: type.mappings.properties };
-            return acc;
-          }, {} as any),
-        };
-      };
-
       beforeEach(() => {
         const nestedTypeSO: SavedObjectsType = {
           name: 'nestedtype',
           hidden: true,
           namespaceType: 'multiple-isolated',
           mappings: getNestedMapping({ fieldName: 'title' }),
-          management: {
-            defaultSearchField: 'title', // TODO: shouldn't this be user.name?
-          },
         };
 
         registry.registerType(nestedTypeSO);
+        nestedFieldMappings = createMappings({ registry });
       });
 
       it('supports nested files', () => {
@@ -709,44 +751,89 @@ describe('#getQueryParams', () => {
           search: 'foo',
           searchFields: ['title.value'],
           type: ['nestedtype'],
-          mappings: getMappings(),
+          mappings: nestedFieldMappings,
         });
 
-        const shouldClause = result.query.bool.must.bool.should;
-        const nestedQueryClause = shouldClause[0].nested;
+        const mustClause = result.query.bool.must;
+        expect(mustClause.length).toBe(1);
+        const nestedQueryClause = mustClause[0].nested;
 
         expect(nestedQueryClause.path).toBe('nestedtype.title');
         expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
         expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
           'nestedtype.title.value',
         ]);
-
-        const simpleQueryClause = shouldClause[1].simple_query_string;
-        expect(simpleQueryClause.fields).toEqual(['*']);
-        expect(simpleQueryClause.query).toBe('foo');
       });
 
-      it('should identify repeated field names in different types', () => {
-        const result = getQueryParams({
-          registry,
-          search: 'foo',
-          searchFields: ['title', 'title.value'],
-          type: ['nestedtype', 'saved', 'pending'], // all three types have a field called title
-          mappings: getMappings(),
+      describe('when using same field name for different types and one is nested', () => {
+        it('should identify repeated field names in different types', () => {
+          const result = getQueryParams({
+            registry,
+            search: 'foo',
+            searchFields: ['title', 'title.value'],
+            type: ['nestedtype', 'saved', 'pending'], // all three types have a field called title
+            mappings: nestedFieldMappings,
+          });
+
+          const shouldClause = result.query.bool.should;
+          const simpleQueryClause = shouldClause[0].simple_query_string;
+          const nestedQueryClause = shouldClause[1].nested;
+
+          expect(nestedQueryClause.path).toBe('nestedtype.title');
+          expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
+          expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
+            'nestedtype.title.value',
+          ]);
+
+          expect(simpleQueryClause.fields).toEqual(['saved.title', 'pending.title']);
+          expect(simpleQueryClause.query).toBe('foo');
         });
 
-        const shouldClause = result.query.bool.must.bool.should;
-        const nestedQueryClause = shouldClause[0].nested;
-        const simpleQueryClause = shouldClause[1].simple_query_string;
+        it('should work with boosted', () => {
+          const result = getQueryParams({
+            registry,
+            search: 'foo',
+            searchFields: ['title^3', 'title.value'],
+            type: ['nestedtype', 'saved', 'pending'], // all three types have a field called title
+            mappings: nestedFieldMappings,
+          });
 
-        expect(nestedQueryClause.path).toBe('nestedtype.title');
-        expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
-        expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
-          'nestedtype.title.value',
-        ]);
+          const shouldClause = result.query.bool.should;
+          const simpleQueryClause = shouldClause[0].simple_query_string;
+          const nestedQueryClause = shouldClause[1].nested;
 
-        expect(simpleQueryClause.fields).toEqual(['saved.title', 'pending.title']);
-        expect(simpleQueryClause.query).toBe('foo');
+          expect(nestedQueryClause.path).toBe('nestedtype.title');
+          expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
+          expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
+            'nestedtype.title.value',
+          ]);
+
+          expect(simpleQueryClause.fields).toEqual(['saved.title^3', 'pending.title^3']);
+          expect(simpleQueryClause.query).toBe('foo');
+        });
+
+        it('should work .raw', () => {
+          const result = getQueryParams({
+            registry,
+            search: 'foo',
+            searchFields: ['title.raw', 'title.value'],
+            type: ['nestedtype', 'saved', 'pending'], // all three types have a field called title
+            mappings: nestedFieldMappings,
+          });
+
+          const shouldClause = result.query.bool.should;
+          const simpleQueryClause = shouldClause[0].simple_query_string;
+          const nestedQueryClause = shouldClause[1].nested;
+
+          expect(nestedQueryClause.path).toBe('nestedtype.title');
+          expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
+          expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
+            'nestedtype.title.value',
+          ]);
+
+          expect(simpleQueryClause.fields).toEqual(['saved.title.raw']);
+          expect(simpleQueryClause.query).toBe('foo');
+        });
       });
 
       it('should ignore nested fields when searching for wildcard', () => {
@@ -754,43 +841,25 @@ describe('#getQueryParams', () => {
           registry,
           search: 'foo',
           type: ['nestedtype'],
-          mappings: getMappings(),
+          mappings: nestedFieldMappings,
         });
 
-        const shouldClause = result.query.bool.must.bool.should;
-        const nestedTypeTitleQueryClause = shouldClause[0].nested;
+        const mustClause = result.query.bool.must;
+        const nestedTypeTitleQueryClause = mustClause[0].nested;
+        const simpleQueryClause = mustClause[0].simple_query_string;
 
         expect(nestedTypeTitleQueryClause).toBe(undefined);
+
+        expect(simpleQueryClause.fields[0]).toBe('*');
+        expect(simpleQueryClause.fields.length).toBe(1);
       });
 
       it('should use one nested clause if there are multiple nested fields in same type', () => {
-        const mappings = getNestedMapping({ fieldName: 'title' });
         const anotherNestedTypeSO: SavedObjectsType = {
           name: 'anothernestedtype',
           hidden: true,
           namespaceType: 'multiple-isolated',
-          mappings: {
-            ...mappings,
-            properties: {
-              ...mappings.properties,
-              description: {
-                type: 'nested',
-                properties: {
-                  value: {
-                    type: 'keyword',
-                    fields: {
-                      string: {
-                        type: 'text',
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          management: {
-            defaultSearchField: 'title',
-          },
+          mappings: getNestedMapping({ fieldName: 'title' }),
         };
 
         registry.registerType(anotherNestedTypeSO);
@@ -799,14 +868,13 @@ describe('#getQueryParams', () => {
           search: 'foo',
           searchFields: ['title.value', 'title.key'],
           type: ['anothernestedtype'],
-          mappings: getMappings(),
+          mappings: createMappings({ registry }),
         });
 
-        const shouldClause = result.query.bool.must.bool.should;
-        const nestedTypeQueryClause = shouldClause[0].nested;
-        const simpleQueryClause = shouldClause[1].simple_query_string;
+        const mustClause = result.query.bool.must;
+        const nestedTypeQueryClause = mustClause[0].nested;
 
-        expect(shouldClause.length).toBe(2); // ensures there is no extra nested clause
+        expect(mustClause.length).toBe(1);
 
         expect(nestedTypeQueryClause.path).toBe('anothernestedtype.title');
         expect(nestedTypeQueryClause.query.simple_query_string.query).toBe('foo');
@@ -814,28 +882,43 @@ describe('#getQueryParams', () => {
           'anothernestedtype.title.value',
           'anothernestedtype.title.key',
         ]);
-
-        expect(simpleQueryClause.fields).toEqual(['*']);
-        expect(simpleQueryClause.query).toBe('foo');
       });
 
-      it('should ignore wrongly configured search fields (nested but its not)', () => {
+      // TODO: this is not taking into account nested fields
+      it('ignores match_phrase_prefix for nested fields', () => {
+        const result = getQueryParams({
+          registry,
+          search: 'foo*',
+          searchFields: ['title.value', 'title'],
+          type: ['nestedtype', 'saved'],
+          mappings: nestedFieldMappings,
+        });
+
+        console.log(JSON.stringify(result));
+        const shouldClause = result.query.bool.should;
+        expect(shouldClause.length).toBe(2);
+        expect(shouldClause[0].simple_query_string).toBeTruthy();
+        expect(shouldClause[1].match_phrase_prefix).toBeTruthy();
+        // TODO: add the field to make sure its not using the nested type
+      });
+
+      it('defaultSearchField does not work with nested fields', () => {
         const result = getQueryParams({
           registry,
           search: 'foo',
-          searchFields: ['title.value'], // title is not a nested field
-          type: ['saved'],
-          mappings: getMappings(),
+          type: ['nestedtype'],
+          mappings: nestedFieldMappings,
         });
 
-        const shouldClause = result.query.bool.must.bool.should;
-        const nestedTypeTitleQueryClause = shouldClause[0].nested;
-        const simpleQueryClause = shouldClause[0].simple_query_string;
-
-        expect(nestedTypeTitleQueryClause).toBe(undefined);
-
-        expect(simpleQueryClause.fields).toEqual(['*']);
-        expect(simpleQueryClause.query).toBe('foo');
+        const mustClause = result.query.bool.must;
+        expect(mustClause.length).toBe(1);
+        expect(mustClause[0].simple_query_string).toEqual(
+          expect.objectContaining({
+            fields: ['*'],
+            query: 'foo',
+            lenient: true,
+          })
+        );
       });
     });
   });
@@ -847,6 +930,7 @@ describe('#getQueryParams', () => {
           getQueryParams({
             registry,
             namespaces: [],
+            mappings,
           })
         ).toThrowError('cannot specify empty namespaces array');
       });
