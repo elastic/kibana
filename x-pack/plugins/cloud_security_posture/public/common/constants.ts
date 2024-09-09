@@ -242,6 +242,7 @@ export const VULNERABILITY_FIELDS = {
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
   CLOUD_PROVIDER: 'cloud.provider',
   DESCRIPTION: 'vulnerability.description',
+  SOURCE: 'data_stream.dataset',
 } as const;
 export const VULNERABILITY_GROUPING_OPTIONS = {
   NONE: 'none',
