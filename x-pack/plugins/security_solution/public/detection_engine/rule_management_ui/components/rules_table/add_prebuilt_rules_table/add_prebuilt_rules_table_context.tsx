@@ -94,6 +94,8 @@ interface AddPrebuiltRulesTableContextProviderProps {
   children: React.ReactNode;
 }
 
+const PREBUILT_RULE_INSTALL_FLYOUT_ANCHOR = 'installPrebuiltRulePreview';
+
 export const AddPrebuiltRulesTableContextProvider = ({
   children,
 }: AddPrebuiltRulesTableContextProviderProps) => {
@@ -211,6 +213,10 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
     rules: filteredRules,
     ruleActionsFactory,
+    flyoutProps: {
+      id: PREBUILT_RULE_INSTALL_FLYOUT_ANCHOR,
+      dataTestSubj: PREBUILT_RULE_INSTALL_FLYOUT_ANCHOR,
+    },
   });
 
   const actions = useMemo(

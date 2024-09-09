@@ -285,6 +285,10 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     rules: filteredRules,
     ruleActionsFactory,
     extraTabsFactory,
+    flyoutProps: {
+      id: PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR,
+      dataTestSubj: PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR,
+    },
   });
 
   const actions = useMemo<UpgradePrebuiltRulesTableActions>(

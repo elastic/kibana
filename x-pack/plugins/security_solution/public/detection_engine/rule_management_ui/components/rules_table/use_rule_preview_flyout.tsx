@@ -12,12 +12,20 @@ import { invariant } from '../../../../../common/utils/invariant';
 import type { RuleObjectId } from '../../../../../common/api/detection_engine';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleDetailsFlyout } from '../../../rule_management/components/rule_details/rule_details_flyout';
-import { PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 
 interface UseRulePreviewFlyoutParams {
   rules: RuleResponse[];
   ruleActionsFactory: (rule: RuleResponse, closeRulePreview: () => void) => ReactNode;
   extraTabsFactory?: (rule: RuleResponse) => EuiTabbedContentTab[];
+  flyoutProps: RulePreviewFlyoutProps;
+}
+
+interface RulePreviewFlyoutProps {
+  /**
+   * Rule preview flyout unique id used in HTML
+   */
+  id: string;
+  dataTestSubj: string;
 }
 
 interface UseRulePreviewFlyoutResult {
@@ -30,6 +38,7 @@ export function useRulePreviewFlyout({
   rules,
   extraTabsFactory,
   ruleActionsFactory,
+  flyoutProps,
 }: UseRulePreviewFlyoutParams): UseRulePreviewFlyoutResult {
   const [rule, setRuleForPreview] = useState<RuleResponse | undefined>();
   const closeRulePreview = useCallback(() => setRuleForPreview(undefined), []);
@@ -47,8 +56,8 @@ export function useRulePreviewFlyout({
       <RuleDetailsFlyout
         rule={rule}
         size="l"
-        id={PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR}
-        dataTestSubj="updatePrebuiltRulePreview"
+        id={flyoutProps.id}
+        dataTestSubj={flyoutProps.dataTestSubj}
         closeFlyout={closeRulePreview}
         ruleActions={ruleActions}
         extraTabs={extraTabs}
