@@ -12,7 +12,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['timePicker']);
+  const { timePicker } = getPageObjects(['timePicker']);
+
   const from = '2024-06-10T14:00:00.000Z';
   const to = '2024-06-10T16:30:00.000Z';
 
@@ -32,7 +33,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await kibanaServer.importExport.unload(
         'test/functional/fixtures/kbn_archiver/discover/context_awareness'
       );
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     loadTestFile(require.resolve('./_root_profile'));
