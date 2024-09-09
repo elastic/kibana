@@ -65,7 +65,6 @@ export class EntityStoreDataClient {
     const definition = getEntityDefinition(entityType);
 
     const savedObj = await this.engineClient.get(entityType).then(ensureEngineExists(entityType));
-    await this.options.entityClient.startEntityDefinition(definition);
 
     if (savedObj.attributes.status !== 'stopped') {
       throw new Error(
@@ -74,7 +73,7 @@ export class EntityStoreDataClient {
     }
 
     this.options.logger.debug(`Starting entity store for ${entityType}`);
-    // TODO: Manually start the transforms
+    await this.options.entityClient.startEntityDefinition(definition);
 
     const updatedObj = await this.engineClient.update(savedObj.id, 'started');
     return updatedObj.attributes;
@@ -84,7 +83,6 @@ export class EntityStoreDataClient {
     const definition = getEntityDefinition(entityType);
 
     const savedObj = await this.engineClient.get(entityType).then(ensureEngineExists(entityType));
-    await this.options.entityClient.stopEntityDefinition(definition);
 
     if (savedObj.attributes.status !== 'started') {
       throw new Error(
@@ -93,7 +91,8 @@ export class EntityStoreDataClient {
     }
 
     this.options.logger.debug(`Stopping entity store for ${entityType}`);
-    // TODO: Manually stop the transforms
+    await this.options.entityClient.stopEntityDefinition(definition);
+
     const updatedObj = await this.engineClient.update(savedObj.id, 'stopped');
     return updatedObj.attributes;
   }
