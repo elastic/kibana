@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/inventory-plugin",
-  "owner": "@elastic/obs-ai-assistant",
+  "owner": "@elastic/obs-ux-infra-services",
   "plugin": {
     "id": "inventory",
     "server": true,

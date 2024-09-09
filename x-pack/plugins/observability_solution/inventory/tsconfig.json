@@ -35,6 +35,5 @@
     "@kbn/data-views-plugin",
     "@kbn/server-route-repository-client",
     "@kbn/react-kibana-context-render",
-    "@kbn/zod"
   ]
 }
