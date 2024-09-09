@@ -7,15 +7,17 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
+
 import {
-  generateHistoryBackfillTransformId,
   generateHistoryTransformId,
+  generateHistoryBackfillTransformId,
   generateLatestTransformId,
 } from './helpers/generate_component_id';
 import { retryTransientEsErrors } from './helpers/retry';
+
 import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 
-export async function startTransform(
+export async function stopTransforms(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
@@ -23,29 +25,41 @@ export async function startTransform(
   try {
     const historyTransformId = generateHistoryTransformId(definition);
     const latestTransformId = generateLatestTransformId(definition);
+
     await retryTransientEsErrors(
       () =>
-        esClient.transform.startTransform({ transform_id: historyTransformId }, { ignore: [409] }),
+        esClient.transform.stopTransform(
+          { transform_id: historyTransformId, wait_for_completion: true, force: true },
+          { ignore: [409, 404] }
+        ),
       { logger }
     );
+
     if (isBackfillEnabled(definition)) {
       const historyBackfillTransformId = generateHistoryBackfillTransformId(definition);
       await retryTransientEsErrors(
         () =>
-          esClient.transform.startTransform(
-            { transform_id: historyBackfillTransformId },
-            { ignore: [409] }
+          esClient.transform.stopTransform(
+            {
+              transform_id: historyBackfillTransformId,
+              wait_for_completion: true,
+              force: true,
+            },
+            { ignore: [409, 404] }
           ),
         { logger }
       );
     }
     await retryTransientEsErrors(
       () =>
-        esClient.transform.startTransform({ transform_id: latestTransformId }, { ignore: [409] }),
+        esClient.transform.stopTransform(
+          { transform_id: latestTransformId, wait_for_completion: true, force: true },
+          { ignore: [409, 404] }
+        ),
       { logger }
     );
-  } catch (err) {
-    logger.error(`Cannot start entity transforms [${definition.id}]: ${err}`);
-    throw err;
+  } catch (e) {
+    logger.error(`Cannot stop entity transforms [${definition.id}]: ${e}`);
+    throw e;
   }
 }
