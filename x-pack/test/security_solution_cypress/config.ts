@@ -55,6 +55,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // packages listed in fleet_packages.json
         // See: https://elastic.slack.com/archives/CNMNXV4RG/p1683033379063079
         `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
+        '--csp.strict=false',
+        '--csp.warnLegacyBrowsers=false',
       ],
     },
   };
