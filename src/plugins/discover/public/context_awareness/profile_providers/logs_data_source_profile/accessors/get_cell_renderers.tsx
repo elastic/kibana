@@ -15,8 +15,8 @@ import { ProfileProviderServices } from '../../profile_provider_services';
 export const makeGetCellRenderersHandler =
   (services: ProfileProviderServices): DataSourceProfileProvider['profile']['getCellRenderers'] =>
   (prev) =>
-  () => ({
-    ...prev(),
+  (params) => ({
+    ...prev(params),
     ...LOG_LEVEL_FIELDS.reduce(
       (acc, field) => ({
         ...acc,
@@ -25,5 +25,5 @@ export const makeGetCellRenderersHandler =
       }),
       {}
     ),
-    _source: getSummaryColumn({ data: services.data }),
+    _source: getSummaryColumn({ data: services.data, params }),
   });

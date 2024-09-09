@@ -16,6 +16,7 @@ import {
   EuiPopoverFooter,
   EuiText,
   EuiButtonIcon,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
@@ -118,7 +119,7 @@ export function FieldBadgeWithActions({ property, text, icon }: FieldBadgeWithAc
       text={text}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
         <EuiBadge {...popoverTriggerProps} color="hollow" iconType={icon} iconSide="left">
-          {text}
+          <EuiTextTruncate text={text} truncation="middle" width={120} />
         </EuiBadge>
       )}
     />

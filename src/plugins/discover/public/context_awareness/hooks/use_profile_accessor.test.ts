@@ -33,8 +33,8 @@ describe('useProfileAccessor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockProfiles = [
-      { getCellRenderers: (prev) => () => ({ ...prev(), profile1: jest.fn() }) },
-      { getCellRenderers: (prev) => () => ({ ...prev(), profile2: jest.fn() }) },
+      { getCellRenderers: (prev) => (params) => ({ ...prev(params), profile1: jest.fn() }) },
+      { getCellRenderers: (prev) => (params) => ({ ...prev(params), profile2: jest.fn() }) },
     ];
   });
 
@@ -46,7 +46,7 @@ describe('useProfileAccessor', () => {
     const accessor = result.current(base);
     expect(getMergedAccessor).toHaveBeenCalledTimes(1);
     expect(getMergedAccessor).toHaveBeenCalledWith(mockProfiles, 'getCellRenderers', base);
-    const renderers = accessor();
+    const renderers = accessor({ rowHeight: 0 });
     expect(renderers).toEqual({
       base: expect.any(Function),
       profile1: expect.any(Function),
@@ -71,7 +71,9 @@ describe('useProfileAccessor', () => {
       useProfileAccessor('getCellRenderers', { record })
     );
     const prevResult = result.current;
-    mockProfiles = [{ getCellRenderers: (prev) => () => ({ ...prev(), profile3: jest.fn() }) }];
+    mockProfiles = [
+      { getCellRenderers: (prev) => (params) => ({ ...prev(params), profile3: jest.fn() }) },
+    ];
     rerender();
     expect(result.current).not.toBe(prevResult);
   });

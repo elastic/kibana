@@ -10,6 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CustomCellRenderer, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 
 export interface DocViewerExtension {
   title: string | undefined;
@@ -38,6 +39,10 @@ export interface DefaultAppStateExtension {
   rowHeight?: number;
 }
 
+export interface CellRenderersExtensionParams {
+  rowHeight: number | undefined;
+}
+
 export interface RowControlsExtensionParams {
   dataView: DataView;
 }
@@ -45,7 +50,7 @@ export interface RowControlsExtensionParams {
 export interface Profile {
   getDefaultAppState: (params: DefaultAppStateExtensionParams) => DefaultAppStateExtension;
   // Data grid
-  getCellRenderers: () => CustomCellRenderer;
+  getCellRenderers: (params: CellRenderersExtensionParams) => CustomCellRenderer;
   getRowIndicatorProvider: (
     params: RowIndicatorExtensionParams
   ) => UnifiedDataTableProps['getRowIndicator'] | undefined;

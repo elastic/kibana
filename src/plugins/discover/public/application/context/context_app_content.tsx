@@ -27,7 +27,11 @@ import {
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-table';
+import {
+  DataLoadingState,
+  ROWS_HEIGHT_OPTIONS,
+  UnifiedDataTableProps,
+} from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
@@ -163,7 +167,7 @@ export function ContextAppContent({
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    return getCellRenderers();
+    return getCellRenderers({ rowHeight: ROWS_HEIGHT_OPTIONS.single });
   }, [getCellRenderersAccessor]);
 
   return (

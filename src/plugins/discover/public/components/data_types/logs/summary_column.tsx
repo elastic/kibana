@@ -6,29 +6,44 @@
  * Side Public License, v 1.
  */
 
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { ROWS_HEIGHT_OPTIONS, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import React from 'react';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { VirtualColumnServiceProvider } from '../../../application/main/hooks/grid_customisations/use_virtual_column_services';
 import { Resource } from '../../discover_grid/virtual_columns/logs/resource';
 import { Content } from '../../discover_grid/virtual_columns/logs/content';
 
 type SummaryColumnProps = DataGridCellValueElementProps;
 
+interface SummaryColumnsGridParams {
+  rowHeight: number | undefined;
+}
+
 export const getSummaryColumn =
-  ({ data }: { data: DataPublicPluginStart }) =>
+  ({ data, params }: { data: DataPublicPluginStart; params: SummaryColumnsGridParams }) =>
   (props: SummaryColumnProps) => {
     const { dataView } = props;
+    const { rowHeight } = params;
+    const virtualColumnServices = { data, dataView };
 
-    const virtualColumnServices = {
-      data,
-      dataView,
-    };
+    const isSingleLine = rowHeight === ROWS_HEIGHT_OPTIONS.single;
+    const shouldCenter =
+      rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === ROWS_HEIGHT_OPTIONS.auto;
 
     return (
       <VirtualColumnServiceProvider services={virtualColumnServices}>
-        <Resource {...props} limited />
-        <Content {...props} />
+        <EuiFlexGroup
+          gutterSize="s"
+          wrap={!isSingleLine}
+          style={{ height: '100%' }}
+          {...(shouldCenter && { alignItems: 'center' })}
+        >
+          <EuiFlexItem grow={false}>
+            <Resource {...props} limited={isSingleLine} shouldCenter={shouldCenter} />
+          </EuiFlexItem>
+          <Content {...props} isSingleLine={isSingleLine} />
+        </EuiFlexGroup>
       </VirtualColumnServiceProvider>
     );
   };
