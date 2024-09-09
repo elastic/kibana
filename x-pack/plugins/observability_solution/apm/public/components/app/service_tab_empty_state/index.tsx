@@ -122,7 +122,7 @@ export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStatePro
           )}
         </EuiFlexGroup>
       </EuiPanel>
-      {emptyStateDefinitions[id] && (
+      {emptyStateDefinitions[id].imgName && (
         <>
           <EuiSpacer size="l" />
           <EuiImage
