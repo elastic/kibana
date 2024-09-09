@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { difference, isEqual, union, uniq } from 'lodash';
+import { difference, union, uniq } from 'lodash';
 import type { RuleDataSource } from '../../../../../../../../common/api/detection_engine';
 import { DataSourceType } from '../../../../../../../../common/api/detection_engine';
 
@@ -34,16 +34,4 @@ export const getDedupedDataSourceVersion = (version: RuleDataSource): RuleDataSo
     };
   }
   return version;
-};
-
-export const determineIfAllVersionsAreEqual = <T>(
-  baseVersion: T,
-  currentVersion: T,
-  targetVersion: T
-): boolean => {
-  const baseEqlCurrent = isEqual(baseVersion, currentVersion);
-  const baseEqlTarget = isEqual(baseVersion, targetVersion);
-  const currentEqlTarget = isEqual(currentVersion, targetVersion);
-
-  return baseEqlCurrent && baseEqlTarget && currentEqlTarget;
 };
