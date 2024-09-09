@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiHorizontalRule, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useTheme } from '@kbn/observability-utils/hooks/use_theme';
 import React from 'react';
-import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
-import { EntityTypeList, EntityTypeListItem } from '../entity_type_list';
+import { EntityTypeList } from '../entity_type_list';
 
 export function InventoryPageTemplate({ children }: { children: React.ReactNode }) {
   const {
@@ -21,8 +20,6 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
   } = useKibana();
 
   const { PageTemplate } = observabilityShared.navigation;
-
-  const router = useInventoryRouter();
 
   const theme = useTheme();
 
@@ -68,15 +65,6 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
             </EuiTitle>
             <EuiFlexGroup direction="column" gutterSize="m">
               <EntityTypeList />
-              <EuiHorizontalRule margin="none" />
-              <EntityTypeListItem
-                icon="sparkles"
-                count={0}
-                href={router.link('/updates')}
-                label={i18n.translate('xpack.inventory.updatesLinkLabel', {
-                  defaultMessage: 'Updates',
-                })}
-              />
             </EuiFlexGroup>
           </EuiFlexGroup>
         </EuiPanel>
