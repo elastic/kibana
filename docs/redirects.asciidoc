@@ -448,7 +448,7 @@ This content has moved. Refer to <<manage-cases-settings>>.
 This content has moved. Refer to <<drilldowns>>.
 
 [role="exclude", id="tsvb"]
-== Create drilldowns
+== TSVB
 
 [[tsvb-index-pattern-mode]]
 This content has moved. Refer to <<tsvb-panel>>.
