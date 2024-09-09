@@ -1908,6 +1908,13 @@ export const suggestForSortCmd = async (innerText: string, getFieldsByType: GetF
       }
       return suggestions;
     }
+    case 'space4': {
+      return [
+        ...getFinalSuggestions({
+          comma: true,
+        }),
+      ];
+    }
   }
 
   return (await getFieldsByType('any')) as SuggestionRawDefinition[];

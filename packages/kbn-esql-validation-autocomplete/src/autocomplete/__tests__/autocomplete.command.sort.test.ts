@@ -82,6 +82,12 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | sort stringField NULLS L/', ['NULLS LAST']);
         await assertSuggestions('from a | sort stringField NULLS LAS/', ['NULLS LAST']);
       });
+
+      test('after nulls are entered, suggests comma or pipe', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a | sort stringField NULLS LAST /', [',', '| ']);
+      });
     });
   });
 });
