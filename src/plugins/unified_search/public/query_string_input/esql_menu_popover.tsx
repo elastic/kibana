@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   EuiPopover,
   EuiButton,
@@ -18,7 +18,12 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { getDocumentationSections } from '@kbn/text-based-editor';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
+import {
+  LanguageDocumentationFlyout,
+  type LanguageDocumentationSections,
+} from '@kbn/language-documentation-popover';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export const ESQLMenuPopover = () => {
@@ -26,9 +31,33 @@ export const ESQLMenuPopover = () => {
 
   const { docLinks } = kibana.services;
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
+  const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
+  const [documentationSections, setDocumentationSections] =
+    useState<LanguageDocumentationSections>();
+
+  useEffect(() => {
+    async function getDocumentation() {
+      const sections = await getDocumentationSections('esql');
+      setDocumentationSections(sections);
+    }
+    if (!documentationSections) {
+      getDocumentation();
+    }
+  }, [documentationSections]);
+
   const esqlPanelItems = useMemo(() => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
     panelItems.push(
+      <EuiContextMenuItem
+        key="quickReference"
+        icon="documentation"
+        data-test-subj="esql-quick-reference"
+        onClick={() => setIsLanguageComponentOpen(!isLanguageComponentOpen)}
+      >
+        {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.quickReference', {
+          defaultMessage: 'Quick Reference',
+        })}
+      </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="about"
         icon="iInCircle"
@@ -65,32 +94,45 @@ export const ESQLMenuPopover = () => {
       </EuiContextMenuItem>
     );
     return panelItems;
-  }, [docLinks.links.query.queryESQL, docLinks.links.query.queryESQLExamples]);
+  }, [
+    docLinks.links.query.queryESQL,
+    docLinks.links.query.queryESQLExamples,
+    isLanguageComponentOpen,
+  ]);
 
   return (
-    <EuiPopover
-      button={
-        <EuiButton
-          color="text"
-          onClick={() => setIsESQLMenuPopoverOpen(!isESQLMenuPopoverOpen)}
-          data-test-subj="esql-menu-button"
-          size="s"
-        >
-          {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.label', {
-            defaultMessage: 'ES|QL help',
-          })}
-        </EuiButton>
-      }
-      panelProps={{
-        ['data-test-subj']: 'esql-menu-popover',
-        css: { width: 240 },
-      }}
-      isOpen={isESQLMenuPopoverOpen}
-      closePopover={() => setIsESQLMenuPopoverOpen(false)}
-      panelPaddingSize="s"
-      display="block"
-    >
-      <EuiContextMenuPanel size="s" items={esqlPanelItems} />
-    </EuiPopover>
+    <>
+      <EuiPopover
+        button={
+          <EuiButton
+            color="text"
+            onClick={() => setIsESQLMenuPopoverOpen(!isESQLMenuPopoverOpen)}
+            data-test-subj="esql-menu-button"
+            size="s"
+          >
+            {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.label', {
+              defaultMessage: 'ES|QL help',
+            })}
+          </EuiButton>
+        }
+        panelProps={{
+          ['data-test-subj']: 'esql-menu-popover',
+          css: { width: 240 },
+        }}
+        isOpen={isESQLMenuPopoverOpen}
+        closePopover={() => setIsESQLMenuPopoverOpen(false)}
+        panelPaddingSize="s"
+        display="block"
+      >
+        <EuiContextMenuPanel size="s" items={esqlPanelItems} />
+      </EuiPopover>
+      <LanguageDocumentationFlyout
+        sections={documentationSections}
+        searchInDescription
+        linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
+        isHelpMenuOpen={isLanguageComponentOpen}
+        onHelpMenuVisibilityChange={setIsLanguageComponentOpen}
+      />
+    </>
   );
 };

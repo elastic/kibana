@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
-import {
-  EuiFlyout,
-  EuiButtonIcon,
-  EuiButtonIconProps,
-  useEuiTheme,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-} from '@elastic/eui';
+import { EuiFlyout, useEuiTheme, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
 import { DocumentationMainContent, DocumentationNavigation } from '../shared';
 import type { LanguageDocumentationSections } from '../../types';
@@ -23,14 +16,12 @@ interface DocumentationFlyoutProps {
   isHelpMenuOpen: boolean;
   onHelpMenuVisibilityChange: (status: boolean) => void;
   sections?: LanguageDocumentationSections;
-  buttonProps?: Omit<EuiButtonIconProps, 'iconType'>;
   searchInDescription?: boolean;
   linkToDocumentation?: string;
 }
 
 function DocumentationFlyout({
   sections,
-  buttonProps,
   searchInDescription,
   linkToDocumentation,
   isHelpMenuOpen,
@@ -56,21 +47,12 @@ function DocumentationFlyout({
     }
   }, []);
 
-  const toggleDocumentationFlyout = useCallback(() => {
-    onHelpMenuVisibilityChange?.(!isHelpMenuOpen);
-  }, [isHelpMenuOpen, onHelpMenuVisibilityChange]);
-
   useEffect(() => {
     onHelpMenuVisibilityChange(isHelpMenuOpen ?? false);
   }, [isHelpMenuOpen, onHelpMenuVisibilityChange]);
 
   return (
     <>
-      <EuiButtonIcon
-        iconType="documentation"
-        onClick={toggleDocumentationFlyout}
-        {...buttonProps}
-      />
       {isHelpMenuOpen && (
         <EuiFlyout
           ownFocus

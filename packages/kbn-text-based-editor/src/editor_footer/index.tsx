@@ -298,21 +298,23 @@ export const EditorFooter = memo(function EditorFooter({
               )}
               {documentationSections && !editorIsInline && (
                 <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="documentation"
+                    onClick={() => setIsLanguageComponentOpen(!isLanguageComponentOpen)}
+                    color="text"
+                    size="xs"
+                    data-test-subj="TextBasedLangEditor-documentation"
+                    aria-label={i18n.translate(
+                      'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
+                      {
+                        defaultMessage: 'Documentation',
+                      }
+                    )}
+                  />
                   <LanguageDocumentationFlyout
                     sections={documentationSections}
                     searchInDescription
                     linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
-                    buttonProps={{
-                      color: 'text',
-                      size: 'xs',
-                      'data-test-subj': 'TextBasedLangEditor-documentation',
-                      'aria-label': i18n.translate(
-                        'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
-                        {
-                          defaultMessage: 'Documentation',
-                        }
-                      ),
-                    }}
                     isHelpMenuOpen={isLanguageComponentOpen}
                     onHelpMenuVisibilityChange={setIsLanguageComponentOpen}
                   />
