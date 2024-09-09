@@ -9,7 +9,7 @@ import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-serve
 import type {
   EngineDescriptor,
   EntityType,
-} from '../../../../../common/api/entity_analytics/entity_store/generated/common.gen';
+} from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { HOST_ENTITY_DEFINITION, USER_ENTITY_DEFINITION } from '../definition';
 import { entityEngineDescriptorTypeName } from '../saved_object';
 

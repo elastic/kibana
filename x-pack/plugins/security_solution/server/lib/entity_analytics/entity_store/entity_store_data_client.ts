@@ -8,11 +8,11 @@
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 
+import type { InitEntityStoreResponse } from '../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 import type {
   EngineDescriptor,
   EntityType,
-} from '../../../../common/api/entity_analytics/entity_store/generated/common.gen';
-import type { InitEntityStoreResponse } from '../../../../common/api/entity_analytics/entity_store/generated/init.gen';
+} from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { entityEngineDescriptorTypeName } from './saved_object';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { ensureEngineExists, getEntityDefinition } from './utils/utils';

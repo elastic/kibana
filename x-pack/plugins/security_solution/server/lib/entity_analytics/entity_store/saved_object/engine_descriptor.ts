@@ -14,7 +14,7 @@ import type {
   EngineDescriptor,
   EngineStatus,
   EntityType,
-} from '../../../../../common/api/entity_analytics/entity_store/generated/common.gen';
+} from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 
 import { entityEngineDescriptorTypeName } from './engine_descriptor_type';
 import { getByEntityTypeQuery } from '../utils/utils';
