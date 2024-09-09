@@ -6,14 +6,14 @@
  */
 import React from 'react';
 import Chance from 'chance';
+import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
 import { Vulnerabilities } from './vulnerabilities';
 import {
-  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
-import { useDataView } from '../../common/api/use_data_view';
+import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
@@ -27,7 +27,7 @@ import { TestProvider } from '../../test/test_provider';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 
-jest.mock('../../common/api/use_data_view');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_data_view');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_is_subscription_status_valid');
