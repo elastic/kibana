@@ -39,7 +39,7 @@ describe('useBreadcrumbs', () => {
   describe('when setBreadcrumbs and setTitle are not defined', () => {
     it('does not set breadcrumbs or the title', () => {
       renderHook(() => useBreadcrumbs([]), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <MemoryRouter>
             <KibanaContext.Provider
               services={
