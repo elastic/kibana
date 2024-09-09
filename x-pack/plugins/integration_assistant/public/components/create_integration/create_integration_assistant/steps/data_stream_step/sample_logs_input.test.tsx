@@ -13,7 +13,7 @@ import { ActionsProvider } from '../../state';
 import { mockActions } from '../../mocks/state';
 import { mockServices } from '../../../../../services/mocks/services';
 
-const wrapper: React.FC = ({ children }) => (
+const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
     <ActionsProvider value={mockActions}>{children}</ActionsProvider>
   </TestProvider>
@@ -174,7 +174,7 @@ describe('SampleLogsInput', () => {
 
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logSamples: tooLargeLogsSample.split(',').slice(0, 10),
+            logSamples: tooLargeLogsSample.split(',').slice(0, 2),
             samplesFormat: { name: 'json', json_path: [] },
           });
         });
@@ -245,7 +245,7 @@ describe('SampleLogsInput', () => {
 
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logSamples: tooLargeLogsSample.split('\n').slice(0, 10),
+            logSamples: tooLargeLogsSample.split('\n').slice(0, 2),
             samplesFormat: { name: 'ndjson', multiline: false },
           });
         });

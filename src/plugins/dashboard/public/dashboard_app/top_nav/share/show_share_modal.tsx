@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiCheckboxGroup } from '@elastic/eui';
+import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryState } from '@kbn/data-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -25,7 +27,6 @@ import { DashboardLocatorParams } from '../../../dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
 import { dashboardUrlParams } from '../../dashboard_router';
 import { shareModalStrings } from '../../_dashboard_app_strings';
-import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -169,9 +170,7 @@ export function ShowShareModal({
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
       filters: unsavedDashboardState.filters,
-      controlGroupState: panelModifications?.[
-        PANELS_CONTROL_GROUP_KEY
-      ] as DashboardLocatorParams['controlGroupState'],
+      controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: allUnsavedPanels as DashboardLocatorParams['panels'],
 
       // options

@@ -8,7 +8,7 @@
 import React, { lazy, useCallback, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { useLocation } from 'react-router-dom';
+import { useLocation, matchPath } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiPageTemplate, EuiSpacer, EuiPageHeader, EuiButton, EuiButtonEmpty } from '@elastic/eui';
@@ -54,9 +54,12 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   const [actions, setActions] = useState<ActionConnector[]>([]);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
 
-  const editItem = (actionConnector: ActionConnector, tab: EditConnectorTabs, isFix?: boolean) => {
-    setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
-  };
+  const editItem = useCallback(
+    (actionConnector: ActionConnector, tab: EditConnectorTabs, isFix?: boolean) => {
+      setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
+    },
+    [setEditConnectorProps]
+  );
 
   const loadActions = useCallback(async () => {
     setIsLoadingActions(true);
@@ -176,16 +179,19 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   );
 
   let topRightSideButtons: React.ReactNode[] = [];
-  switch (location.pathname) {
-    case '/connectors':
-      topRightSideButtons = [createConnectorButton, documentationButton];
-      break;
-    case '/logs':
-      topRightSideButtons = [documentationButton];
-      break;
-    default:
-      topRightSideButtons = [];
+
+  if (
+    matchPath(location.pathname, {
+      path: routeToConnectors,
+      exact: true,
+    }) ||
+    matchPath(location.pathname, { path: routeToConnectorEdit, exact: true })
+  ) {
+    topRightSideButtons = [createConnectorButton, documentationButton];
+  } else if (matchPath(location.pathname, { path: routeToLogs, exact: true })) {
+    topRightSideButtons = [documentationButton];
   }
+
   return (
     <>
       <EuiPageHeader
