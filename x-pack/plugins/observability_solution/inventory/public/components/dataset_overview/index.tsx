@@ -20,7 +20,7 @@ export function DatasetOverview() {
     path: { id },
   } = useInventoryParams('/datastream/{id}/*');
 
-  const baseQuery = `FROM "${id}" | WHERE @timestamp <= NOW() AND @timestamp >= NOW() - 30 minutes`;
+  const baseQuery = `FROM "${id}" | WHERE @timestamp <= NOW() AND @timestamp >= NOW() - 60 minutes`;
 
   const logsQuery = `${baseQuery} | LIMIT 100`;
 

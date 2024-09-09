@@ -57,7 +57,11 @@ export function esqlResultToTimeseries<T extends string>({
       }
     });
 
-    const seriesKey = Array.from(labels.keys()).sort().join(',') || '-';
+    const seriesKey =
+      Array.from(labels.entries())
+        .map(([key, value]) => [key, value].join(':'))
+        .sort()
+        .join(',') || '-';
 
     if (!collectedSeries.has(seriesKey)) {
       collectedSeries.set(seriesKey, {

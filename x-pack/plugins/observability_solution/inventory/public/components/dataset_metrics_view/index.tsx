@@ -27,7 +27,6 @@ import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { ErrorCallOut } from '../error_call_out';
 import { LoadingPanel } from '../loading_panel';
 import type { ExtractMetricDefinitionProcess } from '../../../server/lib/datasets/extract_metric_definitions';
-import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
 import { UncontrolledEsqlChart } from '../esql_chart/uncontrolled_esql_chart';
 
 export function DatasetMetricsView() {
@@ -62,7 +61,7 @@ export function DatasetMetricsView() {
   const fetchMetricDefinitionsController = useAbortController();
 
   const [metricDefinitionSuggestions, setMetricDefinitionSuggestions] =
-    useLocalStorage<ExtractMetricDefinitionProcess>('inventory.metricDefinitions');
+    useLocalStorage<ExtractMetricDefinitionProcess>(`inventory.metricDefinitions.${id}`);
 
   const [metricExtractionLoading, setMetricExtractionLoading] = useState(false);
 
@@ -111,7 +110,7 @@ export function DatasetMetricsView() {
     <>
       <EuiCallOut
         title={
-          value?.metrics.length
+          !value?.metrics.length
             ? i18n.translate('xpack.inventory.datasetMetricsView.noMetricsCalloutTitle', {
                 defaultMessage: 'No metrics defined',
               })
@@ -221,11 +220,12 @@ export function DatasetMetricsView() {
                 aggregations += `WEIGHTED_AVG(${suggestion.metric.field}, ${suggestion.metric.by})`;
                 break;
             }
-            const esqlQuery = `FROM "${id}" | WHERE @timestamp >= NOW() - 30 minutes AND @timestamp <= NOW() | STATS ${aggregations} BY @timestamp = BUCKET(@timestamp, 1 minute)${
-              suggestion.metric.groupBy ? `, ${suggestion.metric.groupBy}` : ''
-            }`;
+            const esqlQuery = `FROM "${id}" | WHERE @timestamp >= NOW() - 60 minutes AND @timestamp <= NOW() | STATS ${aggregations} BY @timestamp = BUCKET(@timestamp, 1 minute)${
+              suggestion.metric.grouping ? `, ${suggestion.metric.grouping}` : ''
+            } | SORT metric DESC`;
+
             return (
-              <EuiPanel hasBorder>
+              <EuiPanel hasBorder key={suggestion.metric.label}>
                 <EuiFlexGroup direction="column">
                   <EuiTitle size="s">
                     <h4>{suggestion.metric.label}</h4>

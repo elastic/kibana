@@ -24,7 +24,7 @@ interface Format {
 export interface BaseMetric {
   label: string;
   type: MetricType;
-  groupBy?: string;
+  grouping?: string;
   format?: Format;
   filter?: string;
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isArray } from 'lodash';
 import { EsqlQueryResult } from '../hooks/use_esql_query_result';
 
 type Column = EsqlQueryResult['columns'][number];
@@ -25,7 +26,8 @@ function analyzeColumnValues(datatable: EsqlQueryResult): Array<{
   return datatable.columns.map((column, index) => {
     const values = new Set<unknown>();
     for (const row of datatable.rows) {
-      values.add(row[index]);
+      const val = row[index];
+      values.add(isArray(val) ? val.map(String).join(',') : val);
     }
     return {
       name: column.name,
@@ -77,11 +79,13 @@ export function getInitialColumnsForLogs({
     }
   }
 
-  for (const { column } of constantColumns) {
-    if (initialColumns.size <= 8) {
-      initialColumns.add(column);
-    } else {
-      break;
+  if (initialColumns.size <= 1) {
+    for (const { column } of constantColumns) {
+      if (initialColumns.size <= 8) {
+        initialColumns.add(column);
+      } else {
+        break;
+      }
     }
   }
 
