@@ -254,7 +254,6 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     this.validateVersion(options.version);
-    // TODO: [Authz] Implement validation for versioned route in https://github.com/elastic/kibana/issues/191712
     options = prepareVersionedRouteValidation(options);
 
     this.handlers.set(options.version, {

@@ -147,7 +147,7 @@ export interface KibanaRequest<
   readonly isFakeRequest: boolean;
 
   /**
-   * Authorization check result, passed through to the route handler.
+   * Authorization check result, passed to the route handler.
    * Indicates whether the specific privilege was granted or denied.
    */
   readonly authzResult?: Record<string, boolean>;

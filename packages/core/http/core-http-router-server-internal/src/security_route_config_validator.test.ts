@@ -122,7 +122,6 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    // TODO: [Authz] expected value of type [string] but got [Object] is incorrect there
     expect(() => validRouteSecurity(routeSecurity)).toThrowErrorMatchingInlineSnapshot(`
       "[authz.requiredPrivileges.0]: types that failed validation:
       - [authz.requiredPrivileges.0.0.allRequired]: array size is [0], but cannot be smaller than [1]

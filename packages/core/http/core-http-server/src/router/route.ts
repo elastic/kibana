@@ -125,7 +125,7 @@ export interface PrivilegeSet {
 }
 
 /**
- * An array representing a combination of simple privileges or more complex privilege sets.
+ * An array representing a combination of simple privileges or complex privilege sets.
  */
 type Privileges = Array<Privilege | PrivilegeSet>;
 

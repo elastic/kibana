@@ -236,7 +236,6 @@ describe('Router', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
       expect(() =>
         router.get(
-          // we use 'any' because validate requires valid Type or function usage
           {
             path: '/',
             validate: false,
@@ -257,7 +256,6 @@ describe('Router', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
       expect(() =>
         router.get(
-          // we use 'any' because validate requires valid Type or function usage
           {
             path: '/',
             validate: false,
