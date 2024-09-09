@@ -36,7 +36,7 @@ function DocumentationFlyout({
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
 
   const filteredGroups = useMemo(() => {
-    return getFilteredGroups(searchText, searchInDescription, sections);
+    return getFilteredGroups(searchText, searchInDescription, sections, 1);
   }, [sections, searchText, searchInDescription]);
 
   const onNavigationChange = useCallback((selectedOptions) => {

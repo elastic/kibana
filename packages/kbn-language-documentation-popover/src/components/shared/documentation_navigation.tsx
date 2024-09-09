@@ -47,7 +47,12 @@ function DocumentationNav({
             padding-top: ${euiTheme.size.xs};
           `}
         >
-          <EuiLink external href={linkToDocumentation} target="_blank">
+          <EuiLink
+            external
+            href={linkToDocumentation}
+            target="_blank"
+            data-test-subj="language-documentation-navigation-link"
+          >
             {i18n.translate('languageDocumentationPopover.esqlDocsLabel', {
               defaultMessage: 'View full ES|QL documentation',
             })}
@@ -82,6 +87,7 @@ function DocumentationNav({
             placeholder={i18n.translate('languageDocumentationPopover.navigationPlaceholder', {
               defaultMessage: 'Commands and functions',
             })}
+            data-test-subj="language-documentation-navigation-dropdown"
             options={filteredGroups}
             selectedOptions={selectedSection ? [{ label: selectedSection }] : []}
             singleSelection={{ asPlainText: true }}

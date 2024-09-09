@@ -358,11 +358,7 @@ export const EditorFooter = memo(function EditorFooter({
       )}
       {isLanguageComponentOpen && editorIsInline && (
         <EuiFlexItem grow={false}>
-          <LanguageDocumentationInline
-            sections={documentationSections}
-            searchInDescription
-            linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
-          />
+          <LanguageDocumentationInline sections={documentationSections} searchInDescription />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

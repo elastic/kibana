@@ -16,16 +16,11 @@ import type { LanguageDocumentationSections } from '../../types';
 interface DocumentationInlineProps {
   sections?: LanguageDocumentationSections;
   searchInDescription?: boolean;
-  linkToDocumentation?: string;
 }
 
 const MAX_HEIGHT = 250;
 
-function DocumentationInline({
-  sections,
-  searchInDescription,
-  linkToDocumentation,
-}: DocumentationInlineProps) {
+function DocumentationInline({ sections, searchInDescription }: DocumentationInlineProps) {
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
   const [selectedSection, setSelectedSection] = useState<string | undefined>();
@@ -34,7 +29,7 @@ function DocumentationInline({
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
 
   const filteredGroups = useMemo(() => {
-    return getFilteredGroups(searchText, searchInDescription, sections);
+    return getFilteredGroups(searchText, searchInDescription, sections, 1);
   }, [sections, searchText, searchInDescription]);
 
   const onNavigationChange = useCallback((selectedOptions) => {

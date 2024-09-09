@@ -12,11 +12,12 @@ import { elementToString } from './element_to_string';
 export const getFilteredGroups = (
   searchText: string,
   searchInDescription?: boolean,
-  sections?: LanguageDocumentationSections
+  sections?: LanguageDocumentationSections,
+  numOfGroupsToOmit?: number
 ) => {
   const normalizedSearchText = searchText.trim().toLocaleLowerCase();
   return sections?.groups
-    .slice(1)
+    .slice(numOfGroupsToOmit ?? 0)
     .map((group) => {
       const options = group.items.filter((helpItem) => {
         return (
