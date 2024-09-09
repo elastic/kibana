@@ -66,7 +66,7 @@ export const useHostsView = () => {
         }
       );
       const duration = performance.now() - start;
-      telemetry?.reportPerformanceMetricEvent(
+      telemetry.reportPerformanceMetricEvent(
         'infra_hosts_table_load',
         duration,
         { key1: 'data_load', value1: duration },

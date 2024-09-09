@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { suggest } from './autocomplete';
@@ -11,7 +12,7 @@ import { evalFunctionDefinitions } from '../definitions/functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import {
-  ADD_DATE_HISTOGRAM_SNIPPET,
+  getAddDateHistogramSnippet,
   getDateLiterals,
   getSafeInsertText,
   TIME_SYSTEM_PARAMS,
@@ -270,10 +271,23 @@ describe('autocomplete', () => {
       `dissect keywordField ${constantPattern} |`,
     ];
     for (const subExpression of subExpressions) {
-      testSuggestions(`from a | ${subExpression} grok /`, getFieldNamesByType(ESQL_STRING_TYPES));
+      testSuggestions(
+        `from a | ${subExpression} grok /`,
+        getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+      );
       testSuggestions(`from a | ${subExpression} grok keywordField /`, [constantPattern], ' ');
       testSuggestions(`from a | ${subExpression} grok keywordField ${constantPattern} /`, ['| ']);
     }
+
+    testSuggestions(
+      'from a | grok /',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
+    testSuggestions(
+      'from a | grok key/',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
+    testSuggestions('from a | grok keywordField/', []);
   });
 
   describe('dissect', () => {
@@ -285,10 +299,9 @@ describe('autocomplete', () => {
       `dissect keywordField ${constantPattern} append_separator = ":" |`,
     ];
     for (const subExpression of subExpressions) {
-      // Unskip once https://github.com/elastic/kibana/issues/190070 is fixed
-      testSuggestions.skip(
+      testSuggestions(
         `from a | ${subExpression} dissect /`,
-        getFieldNamesByType(ESQL_STRING_TYPES)
+        getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
       );
       testSuggestions(`from a | ${subExpression} dissect keywordField /`, [constantPattern], ' ');
       testSuggestions(
@@ -305,6 +318,16 @@ describe('autocomplete', () => {
         ['| ']
       );
     }
+
+    testSuggestions(
+      'from a | dissect /',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
+    testSuggestions(
+      'from a | dissect key/',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
+    testSuggestions('from a | dissect keywordField/', []);
   });
 
   describe('sort', () => {
@@ -567,7 +590,10 @@ describe('autocomplete', () => {
     ]);
 
     // DISSECT field
-    testSuggestions('FROM index1 | DISSECT b/', getFieldNamesByType(ESQL_STRING_TYPES));
+    testSuggestions(
+      'FROM index1 | DISSECT b/',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
 
     // DROP (first field)
     testSuggestions('FROM index1 | DROP f/', getFieldNamesByType('any'));
@@ -599,7 +625,11 @@ describe('autocomplete', () => {
     ]);
 
     // GROK field
-    testSuggestions('FROM index1 | GROK f/', getFieldNamesByType(ESQL_STRING_TYPES), undefined);
+    testSuggestions(
+      'FROM index1 | GROK f/',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((field) => `${field} `),
+      undefined
+    );
 
     // KEEP (first field)
     testSuggestions('FROM index1 | KEEP f/', getFieldNamesByType('any'));
@@ -657,7 +687,7 @@ describe('autocomplete', () => {
     // STATS argument BY expression
     testSuggestions('FROM index1 | STATS field BY f/', [
       'var0 = ',
-      ADD_DATE_HISTOGRAM_SNIPPET,
+      getAddDateHistogramSnippet(),
       ...getFunctionSignaturesByReturnType('stats', 'any', { grouping: true, scalar: true }),
       ...getFieldNamesByType('any').map((field) => `${field} `),
     ]);
@@ -870,7 +900,7 @@ describe('autocomplete', () => {
       'by'
     );
     testSuggestions('FROM a | STATS AVG(numberField) BY /', [
-      ADD_DATE_HISTOGRAM_SNIPPET,
+      getAddDateHistogramSnippet(),
       attachTriggerCommand('var0 = '),
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
@@ -880,7 +910,7 @@ describe('autocomplete', () => {
 
     // STATS argument BY assignment (checking field suggestions)
     testSuggestions('FROM a | STATS AVG(numberField) BY var0 = /', [
-      ADD_DATE_HISTOGRAM_SNIPPET,
+      getAddDateHistogramSnippet(),
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
         .map(attachTriggerCommand),
