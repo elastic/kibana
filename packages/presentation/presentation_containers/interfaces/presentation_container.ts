@@ -20,7 +20,7 @@ export interface PresentationContainer extends CanAddNewPanel {
   /**
    * Removes a panel from the container.
    */
-  removePanel?: (panelId: string) => void;
+  removePanel: (panelId: string) => void;
 
   /**
    * Determines whether or not a container is capable of removing panels.
@@ -30,7 +30,7 @@ export interface PresentationContainer extends CanAddNewPanel {
   /**
    * Replaces a panel in the container with a new panel.
    */
-  replacePanel?: <SerializedState extends object = object>(
+  replacePanel: <SerializedState extends object = object>(
     idToRemove: string,
     newPanel: PanelPackage<SerializedState>
   ) => Promise<string>;
@@ -38,14 +38,14 @@ export interface PresentationContainer extends CanAddNewPanel {
   /**
    * Returns the number of panels in the container.
    */
-  getPanelCount?: () => number;
+  getPanelCount: () => number;
 
   /**
    * A publishing subject containing the child APIs of the container. Note that
    * children are created asynchronously. This means that the children$ observable might
    * contain fewer children than the actual number of panels in the container.
    */
-  children$?: PublishingSubject<{ [key: string]: unknown }>;
+  children$: PublishingSubject<{ [key: string]: unknown }>;
 }
 
 export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {

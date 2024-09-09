@@ -31,7 +31,7 @@ export function AddFromLibraryButton({ onItemAdd }: AddFromLibraryButtonProps) {
   const panelRef = useRef<OverlayRef>();
 
   const container = useMemo<
-    PresentationContainer & {
+    Pick<PresentationContainer, 'addNewPanel'> & {
       addNewEmbeddable: (
         type: string,
         explicitInput: { savedObjectId: string },
