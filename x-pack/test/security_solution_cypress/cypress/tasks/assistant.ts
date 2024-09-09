@@ -44,7 +44,6 @@ import {
   SHOW_ANONYMIZED_BUTTON,
   ASSISTANT_SETTINGS_BUTTON,
   SEND_TO_TIMELINE_BUTTON,
-  SYSTEM_PROMPT,
 } from '../screens/ai_assistant';
 import { TOASTER } from '../screens/alerts_detection_rules';
 
