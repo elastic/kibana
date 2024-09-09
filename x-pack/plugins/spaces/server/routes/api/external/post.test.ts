@@ -53,9 +53,13 @@ describe('Spaces Public API', () => {
       basePath: httpService.basePath,
     });
 
+    const featuresPluginMockStart = featuresPluginMock.createStart();
+
+    featuresPluginMockStart.getKibanaFeatures.mockReturnValue([]);
+
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMockStart);
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
