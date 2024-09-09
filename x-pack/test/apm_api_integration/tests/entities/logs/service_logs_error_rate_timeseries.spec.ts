@@ -165,7 +165,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             expect(response.status).to.be(200);
-            expect(first(response.body.currentPeriod?.['my-service'])?.y).to.be(0.5);
+            expect(first(response.body.currentPeriod?.['my-service'])?.y).to.be(1);
             expect(last(response.body.currentPeriod?.['my-service'])?.y).to.be(1);
           });
         });

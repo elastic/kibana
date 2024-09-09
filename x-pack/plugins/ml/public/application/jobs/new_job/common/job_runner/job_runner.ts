@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { MlApiServices } from '../../../../services/ml_api_service';
+import type { MlApi } from '../../../../services/ml_api_service';
 import type { MlJobService } from '../../../../services/job_service';
 import type { JobCreator } from '../job_creator';
 import type { DatafeedId, JobId } from '../../../../../../common/types/anomaly_detection_jobs';
@@ -22,7 +22,7 @@ export type ProgressSubscriber = (progress: number) => void;
 export type JobAssignmentSubscriber = (assigned: boolean) => void;
 
 export class JobRunner {
-  private _mlApiServices: MlApiServices;
+  private _mlApi: MlApi;
   private _mlJobService: MlJobService;
   private _jobId: JobId;
   private _datafeedId: DatafeedId;
@@ -44,7 +44,7 @@ export class JobRunner {
   private _jobAssignedToNode$: BehaviorSubject<boolean>;
 
   constructor(jobCreator: JobCreator) {
-    this._mlApiServices = jobCreator.mlApiServices;
+    this._mlApi = jobCreator.mlApi;
     this._mlJobService = jobCreator.mlJobService;
     this._jobId = jobCreator.jobId;
     this._datafeedId = jobCreator.datafeedId;
@@ -193,7 +193,7 @@ export class JobRunner {
   }
 
   private async _isJobAssigned(): Promise<boolean> {
-    const { jobs } = await this._mlApiServices.getJobStats({ jobId: this._jobId });
+    const { jobs } = await this._mlApi.getJobStats({ jobId: this._jobId });
     return jobs.length > 0 && jobs[0].node !== undefined;
   }
 
@@ -212,7 +212,7 @@ export class JobRunner {
     isRunning: boolean;
     isJobClosed: boolean;
   }> {
-    return await this._mlApiServices.jobs.getLookBackProgress(this._jobId, this._start, this._end);
+    return await this._mlApi.jobs.getLookBackProgress(this._jobId, this._start, this._end);
   }
 
   public subscribeToProgress(func: ProgressSubscriber) {

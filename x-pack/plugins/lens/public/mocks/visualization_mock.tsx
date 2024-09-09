@@ -7,6 +7,7 @@
 import React from 'react';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { toExpression } from '@kbn/interpreter';
+import faker from 'faker';
 import { Visualization, VisualizationMap } from '../types';
 
 export function createMockVisualization(
@@ -25,7 +26,8 @@ export function createMockVisualization(
         icon: 'empty',
         id,
         label: id,
-        groupLabel: `${id}Group`,
+        sortPriority: 1,
+        description: faker.lorem.sentence(),
       },
     ],
     appendLayer: jest.fn(),
