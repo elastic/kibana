@@ -444,6 +444,34 @@ ROW 1
       /* 5 */ /* 6 */ a AS
         b /* 7 */ /* 8 */ // 9`);
     });
+
+    test('rename expression, surrounded from three sides with comments, and between other expressions', () => {
+      const query = `
+        ROW 1 | RENAME
+        x AS y,
+
+        /* 1 */
+        // 2
+        /* 3 */
+        // 4
+        /* 5 */ /* 6 */ a AS b /* 7 */ /* 8 */, // 9
+        
+        x AS y
+        `;
+      const text = reprint(query).text;
+
+      expect('\n' + text).toBe(`
+ROW 1
+  | RENAME
+      x AS y,
+      /* 1 */
+      // 2
+      /* 3 */
+      // 4
+      /* 5 */ /* 6 */ a AS
+        b, /* 7 */ /* 8 */ // 9
+      x AS y`);
+    });
   });
 
   describe('function call expressions', () => {
