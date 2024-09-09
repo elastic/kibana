@@ -17,8 +17,7 @@ import {
   internalRuleToAPIResponse,
 } from '../../../normalization/rule_converters';
 import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-
-import { validateMlAuth, RuleResponseValidationError } from '../utils';
+import { validateMlAuth, RuleResponseValidationError, toggleRuleEnabledOnUpdate } from '../utils';
 
 import { readRules } from '../read_rules';
 
@@ -46,6 +45,7 @@ export const importRule = async (
   }
 
   let importedInternalRule: RuleAlertType;
+  let enabled: boolean = ruleToImport.enabled;
 
   if (existingRule && overwriteRules) {
     const ruleUpdateParams = convertUpdateAPIToInternalSchema({
@@ -57,6 +57,10 @@ export const importRule = async (
       id: existingRule.id,
       data: ruleUpdateParams,
     });
+
+     // We strip `enabled` from the rule object to use in the rules client and need to enable it separately if user has enabled the updated rule
+     const { enabled: isNowEnabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleToImport.enabled);
+     enabled = isNowEnabled;
   } else {
     /* Rule does not exist, so we'll create it */
     const ruleCreateParams = convertCreateAPIToInternalSchema(ruleToImport, {
@@ -70,7 +74,7 @@ export const importRule = async (
   }
 
   /* Trying to convert an internal rule to a RuleResponse object */
-  const parseResult = RuleResponse.safeParse(internalRuleToAPIResponse(importedInternalRule));
+  const parseResult = RuleResponse.safeParse(internalRuleToAPIResponse({...importedInternalRule, enabled}));
 
   if (!parseResult.success) {
     throw new RuleResponseValidationError({
