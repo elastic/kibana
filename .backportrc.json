@@ -54,6 +54,7 @@
   ],
   "branchLabelMapping": {
     "^v9.0.0$": "main",
+    "^v8.16.0$": "8.x",
     "^v(\\d+).(\\d+).\\d+$": "$1.$2"
   },
   "autoMerge": true,
