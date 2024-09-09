@@ -23,6 +23,7 @@ import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { getDynamicFunctions } from './dynamic_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
 import {
@@ -140,7 +141,8 @@ function buildFunctionLookup() {
       .concat(
         evalFunctionDefinitions,
         statsAggregationFunctionDefinitions,
-        groupingFunctionDefinitions
+        groupingFunctionDefinitions,
+        getDynamicFunctions()
       )
       .reduce((memo, def) => {
         memo.set(def.name, def);

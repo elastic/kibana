@@ -6,20 +6,126 @@
  * Side Public License, v 1.
  */
 
+import { FunctionDefinition } from '../../definitions/types';
+import { setDynamicFunctions } from '../../shared/dynamic_functions';
+import { setup } from './helpers';
+
 describe('function validation', () => {
+  afterEach(() => {
+    setDynamicFunctions([]);
+  });
+
   describe('parameter validation', () => {
-    it('accepts arguments of the correct type', () => {
-      // straight call
-      // assignment
-      // nested function
-      // inline cast
-      // field
-      // literal
+    describe('type validation', () => {
+      beforeEach(() => {
+        const definitions: FunctionDefinition[] = [
+          {
+            name: 'test',
+            type: 'eval',
+            description: '',
+            supportedCommands: ['eval'],
+            signatures: [
+              {
+                params: [{ name: 'arg1', type: 'integer' }],
+                returnType: 'integer',
+              },
+              {
+                params: [{ name: 'arg1', type: 'date' }],
+                returnType: 'date',
+              },
+            ],
+          },
+          {
+            name: 'returns_integer',
+            type: 'eval',
+            description: '',
+            supportedCommands: ['eval'],
+            signatures: [
+              {
+                params: [],
+                returnType: 'integer',
+              },
+            ],
+          },
+          {
+            name: 'returns_double',
+            type: 'eval',
+            description: '',
+            supportedCommands: ['eval'],
+            signatures: [
+              {
+                params: [],
+                returnType: 'double',
+              },
+            ],
+          },
+        ];
+
+        setDynamicFunctions(definitions);
+      });
+
+      it('accepts arguments of the correct type', async () => {
+        const { expectErrors } = await setup();
+
+        // straight call
+        await expectErrors('FROM a_index | EVAL TEST(1)', []);
+        await expectErrors('FROM a_index | EVAL TEST(NOW())', []);
+
+        // assignment
+        await expectErrors('FROM a_index | EVAL var = TEST(1)', []);
+        await expectErrors('FROM a_index | EVAL var = TEST(NOW())', []);
+
+        // nested function
+        await expectErrors('FROM a_index | EVAL TEST(RETURNS_INTEGER())', []);
+
+        // inline cast
+        await expectErrors('FROM a_index | EVAL TEST(1.::INT)', []);
+
+        // field
+        await expectErrors('FROM a_index | EVAL TEST(integerField)', []);
+        await expectErrors('FROM a_index | EVAL TEST(dateField)', []);
+
+        // variables
+        await expectErrors('FROM a_index | EVAL var1 = 1 | EVAL TEST(var1)', []);
+        await expectErrors('FROM a_index | EVAL var1 = NOW() | EVAL TEST(var1)', []);
+      });
+
+      it('rejects arguments of an incorrect type', async () => {
+        const { expectErrors } = await setup();
+
+        // straight call
+        await expectErrors('FROM a_index | EVAL TEST(1.1)', [
+          'Argument of [test] must be [integer], found value [1.1] type [decimal]',
+        ]);
+
+        // assignment
+        await expectErrors('FROM a_index | EVAL var = TEST(1.1)', [
+          'Argument of [test] must be [integer], found value [1.1] type [decimal]',
+        ]);
+
+        // nested function
+        await expectErrors('FROM a_index | EVAL TEST(RETURNS_DOUBLE())', [
+          'Argument of [test] must be [integer], found value [RETURNS_DOUBLE()] type [double]',
+        ]);
+
+        // inline cast
+        await expectErrors('FROM a_index | EVAL TEST(1::DOUBLE)', [
+          'Argument of [test] must be [integer], found value [1::DOUBLE] type [DOUBLE]',
+        ]);
+
+        // field
+        await expectErrors('FROM a_index | EVAL TEST(doubleField)', [
+          'Argument of [test] must be [integer], found value [doubleField] type [double]',
+        ]);
+
+        // // variables
+        await expectErrors('FROM a_index | EVAL var1 = 1. | EVAL TEST(var1)', [
+          'Argument of [test] must be [integer], found value [var1] type [decimal]',
+        ]);
+      });
+
+      it('accepts nulls by default', () => {});
     });
-
-    it('accepts nulls by default', () => {});
-
-    it('rejects arguments of an incorrect type', () => {});
 
     it('validates argument count', () => {
       // too many
@@ -43,7 +149,7 @@ describe('function validation', () => {
     });
   });
 
-  describe('function type support', () => {
+  describe('command support', () => {
     it('does not allow aggregations outside of STATS', () => {
       // SORT
       // WHERE
