@@ -12,7 +12,6 @@ import {
   TaskManagerStartContract,
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
-
 import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
 import {
   getTotalCountAggregations,
@@ -41,12 +40,6 @@ export function initializeAlertingTelemetry(
   registerAlertingTelemetryTask(logger, core, taskManager, eventLogIndex);
 }
 
-export function scheduleAlertingTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
-  if (taskManager) {
-    scheduleTasks(logger, taskManager).catch(() => {}); // it shouldn't reject, but just in case
-  }
-}
-
 function registerAlertingTelemetryTask(
   logger: Logger,
   core: CoreSetup,
@@ -63,6 +56,12 @@ function registerAlertingTelemetryTask(
   });
 }
 
+export function scheduleAlertingTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
+  if (taskManager) {
+    scheduleTasks(logger, taskManager).catch(() => {}); // it shouldn't reject, but just in case
+  }
+}
+
 async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContract) {
   try {
     await taskManager.ensureScheduled({
@@ -75,6 +74,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   } catch (e) {
     logger.error(`Error scheduling ${TASK_ID}, received ${e.message}`);
   }
+  await taskManager.runSoon(TASK_ID);
 }
 
 export function telemetryTaskRunner(
@@ -98,25 +98,26 @@ export function telemetryTaskRunner(
         .getStartServices()
         .then(([coreStart]) => coreStart.savedObjects.getIndexForType(RULE_SAVED_OBJECT_TYPE));
 
-    const getMXIndex = () =>
+    const getSavedObjectClient = () =>
       core
         .getStartServices()
         .then(([coreStart]) =>
-          coreStart.savedObjects.getIndexForType(MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE)
+          coreStart.savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE])
         );
 
     return {
       async run() {
         const esClient = await getEsClient();
         const alertIndex = await getAlertIndex();
-        const MWIndex = await getMXIndex();
+        const savedObjectsClient = await getSavedObjectClient();
+
         return Promise.all([
           getTotalCountAggregations({ esClient, alertIndex, logger }),
           getTotalCountInUse({ esClient, alertIndex, logger }),
           getExecutionsPerDayCount({ esClient, eventLogIndex, logger }),
           getExecutionTimeoutsPerDayCount({ esClient, eventLogIndex, logger }),
           getFailedAndUnrecognizedTasksPerDay({ esClient, taskManagerIndex, logger }),
-          getTotalMWCount({ esClient, MWIndex, logger }),
+          getTotalMWCount({ logger, savedObjectsClient }),
         ])
           .then(
             ([

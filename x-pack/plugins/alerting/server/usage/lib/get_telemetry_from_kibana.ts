@@ -11,7 +11,7 @@ import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger, ISavedObjectsRepository } from '@kbn/core/server';
 
 import {
   ConnectorsByConsumersBucket,
@@ -23,6 +23,8 @@ import { AlertingUsage } from '../types';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 import { groupRulesBySearchType } from './group_rules_by_search_type';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
+import { MaintenanceWindowAttributes } from '../../data/maintenance_window/types';
 
 interface Opts {
   esClient: ElasticsearchClient;
@@ -31,8 +33,7 @@ interface Opts {
 }
 
 interface MWOpts {
-  esClient: ElasticsearchClient;
-  MWIndex: string;
+  savedObjectsClient: ISavedObjectsRepository;
   logger: Logger;
 }
 
@@ -54,7 +55,7 @@ type GetTotalCountsResults = Pick<
   | 'connectors_per_alert'
 > & { errorMessage?: string; hasErrors: boolean };
 
-type GetTotalMWCountMWResults = Pick<AlertingUsage, 'count_total_mw'> & {
+type GetTotalMWCountResults = Pick<AlertingUsage, 'count_total_mw'> & {
   errorMessage?: string;
   hasErrors: boolean;
 };
@@ -503,39 +504,26 @@ export async function getTotalCountInUse({
 }
 
 export async function getTotalMWCount({
-  esClient,
-  MWIndex,
+  savedObjectsClient,
   logger,
-}: MWOpts): Promise<GetTotalMWCountMWResults> {
+}: MWOpts): Promise<GetTotalMWCountResults> {
   try {
-    const query = {
-      index: MWIndex,
-      body: {
-        query: {
-          bool: {
-            filter: [{ term: { type: 'maintenance-window' } }],
-          },
-        },
-      },
-    };
-
-    logger.debug(() => `query for getTotalCountAggregationsMW - ${JSON.stringify(query)}`);
-    const results = await esClient.search(query);
-
-    logger.debug(
-      () => `results for getTotalCountAggregationsMW query - ${JSON.stringify(results)}`
-    );
-
-    const countTotalMW =
-      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
+    const MWFinder = savedObjectsClient.createPointInTimeFinder<MaintenanceWindowAttributes>({
+      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      perPage: 10000,
+    });
+    const MWs = [];
+    for await (const response of MWFinder.find()) {
+      MWs.push(...response.saved_objects);
+    }
+    await MWFinder.close();
 
     return {
       hasErrors: false,
-      count_total_mw: countTotalMW ?? 0,
+      count_total_mw: MWs?.length ?? 0,
     };
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
-
     logger.warn(
       `Error executing alerting telemetry task: getTotalCountAggregations - ${JSON.stringify(err)}`,
       {
