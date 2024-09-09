@@ -19,9 +19,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
 
   const uiCapabilitiesExceptions = [
     // appSearch and workplace Search are loaded but disabled because the ent-search application isn't running.
-    // enterpriseSearchRelevance requires an enterprise license
     // That means the following capabilities are disabled:
-    'enterpriseSearchRelevance',
     'appSearch',
     'workplaceSearch',
   ];
