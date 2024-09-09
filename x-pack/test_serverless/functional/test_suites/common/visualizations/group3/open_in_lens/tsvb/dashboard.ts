@@ -79,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await timePicker.setDefaultAbsoluteRange();
 
       // save it to library
-      await panelActions.legacySaveToLibrary(visTitle);
+      await panelActions.saveToLibrary(visTitle);
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
