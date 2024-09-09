@@ -16,12 +16,6 @@ export enum DatasetType {
   alias = 'alias',
 }
 
-export interface Dataset {
-  type: DatasetType;
-  name: string;
-  creation_date: number | null;
-}
-
 export interface DatasetDefinition {
   properties: Record<string, string | number | boolean>;
   description: string;

@@ -81,7 +81,7 @@ export function DatasetMetricsView() {
         })
         .subscribe({
           next: (event) => {
-            setMetricDefinitionSuggestions(event.data.process);
+            setMetricDefinitionSuggestions(event.process);
           },
           complete: () => {
             resolve();

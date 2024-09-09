@@ -56,7 +56,7 @@ const listServiceDefinitionsRoute = createInventoryServerRoute({
         indexPatterns: params?.body?.indexPatterns,
       });
 
-      return fetchedDatasets.map((dataset) => dataset.name);
+      return fetchedDatasets.map((dataset) => dataset.entity.name);
     }
 
     async function fetchEntityDefinitions() {
@@ -310,18 +310,7 @@ const listEntitiesRoute = createInventoryServerRoute({
         : [],
     ]);
 
-    const allEntities: Entity[] = [
-      ...datasets.map(
-        (dataset): DatasetEntity => ({
-          id: dataset.name,
-          name: dataset.name,
-          type: 'datastream',
-          properties: {
-            'dataset.type': dataset.type,
-          },
-        })
-      ),
-    ];
+    const allEntities: Entity[] = [...datasets.map((dataset): DatasetEntity => dataset.entity)];
 
     return {
       entities: allEntities,

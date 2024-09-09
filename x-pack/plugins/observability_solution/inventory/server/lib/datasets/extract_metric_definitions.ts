@@ -256,7 +256,7 @@ export function extractMetricDefinitions({
 
         logger.debug(() => JSON.stringify(outputCompleteEvent));
 
-        return outputCompleteEvent.data.content;
+        return outputCompleteEvent.content;
       });
 
       const labels = await step('extracting_labels', async () => {
@@ -304,7 +304,7 @@ export function extractMetricDefinitions({
             .pipe(withoutOutputUpdateEvents())
         );
 
-        return completeEvent.data.output.labels;
+        return completeEvent.output.labels;
       });
 
       return step(
@@ -429,7 +429,7 @@ export function extractMetricDefinitions({
             description,
             labels,
             constants: actualConstantFields,
-            metrics: output.data.output.metrics.map((metric): MetricDefinition => {
+            metrics: output.output.metrics.map((metric): MetricDefinition => {
               return {
                 filter: metric.kqlFilter,
                 metric: metric as Metric,

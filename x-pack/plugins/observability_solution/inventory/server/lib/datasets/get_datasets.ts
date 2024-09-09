@@ -7,7 +7,7 @@
 
 import { castArray } from 'lodash';
 import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { Dataset, DatasetType } from '../../../common/datasets';
+import { DatasetEntity, DatasetType } from '../../../common/datasets';
 
 export async function getDatasets({
   esClient,
@@ -15,7 +15,7 @@ export async function getDatasets({
 }: {
   esClient: ObservabilityElasticsearchClient;
   indexPatterns?: string[];
-}): Promise<Array<Dataset & { indices: string[] }>> {
+}): Promise<Array<{ entity: DatasetEntity; indices: string[] }>> {
   const resolveIndicesResponse = await esClient.client.indices.resolveIndex({
     name: indexPatterns ?? ['*', '-.*', '*:*', '*:-.*'],
     expand_wildcards: ['open'],
@@ -41,5 +41,17 @@ export async function getDatasets({
 
   const allDatasets = dataStreams.concat(aliases);
 
-  return allDatasets;
+  return allDatasets.map((dataset): { entity: DatasetEntity; indices: string[] } => {
+    return {
+      entity: {
+        id: dataset.name,
+        name: dataset.name,
+        type: 'dataStream',
+        properties: {
+          'dataset.type': dataset.type,
+        },
+      },
+      indices: dataset.indices,
+    };
+  });
 }

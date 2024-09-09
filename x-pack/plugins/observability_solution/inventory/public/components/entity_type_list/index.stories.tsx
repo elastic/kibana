@@ -50,14 +50,14 @@ export const Default: Story = {
       definitions: [
         {
           icon: 'node',
+          name: 'service',
           label: 'Services',
-          type: 'service',
           count: 9,
         },
         {
           icon: 'pipeNoBreaks',
+          name: 'dataset',
           label: 'Datasets',
-          type: 'dataset',
           count: 11,
         },
       ],

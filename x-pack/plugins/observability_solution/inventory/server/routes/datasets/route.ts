@@ -6,10 +6,9 @@
  */
 import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { z } from '@kbn/zod';
-import { keyBy } from 'lodash';
 import { map, tap, type Observable } from 'rxjs';
 import { ServerSentEventBase } from '@kbn/sse-utils';
-import type { Dataset } from '../../../common/datasets';
+import type { DatasetEntity } from '../../../common/datasets';
 import { MetricDefinition } from '../../../common/metrics';
 import {
   ExtractMetricDefinitionProcess,
@@ -32,7 +31,7 @@ const listDatasetsRoute = createInventoryServerRoute({
   options: {
     tags: ['access:inventory'],
   },
-  handler: async ({ params, context, logger }): Promise<{ datasets: Dataset[] }> => {
+  handler: async ({ params, context, logger }): Promise<{ datasets: DatasetEntity[] }> => {
     const esClient = createObservabilityEsClient({
       client: (await context.core).elasticsearch.client.asCurrentUser,
       logger,
@@ -44,58 +43,8 @@ const listDatasetsRoute = createInventoryServerRoute({
       indexPatterns: params?.query?.indexPatterns?.split(','),
     });
 
-    const datasetsByName = keyBy(allDatasets, (dataset) => dataset.name);
-
-    const allNames = Object.keys(datasetsByName);
-
-    const datasetsByIndexName: Record<string, string[]> = {};
-
-    allDatasets.forEach((dataset) => {
-      dataset.indices.forEach((index) => {
-        const trackingDatasets = datasetsByIndexName[index];
-        if (!trackingDatasets) {
-          datasetsByIndexName[index] = [];
-        }
-        datasetsByIndexName[index].push(dataset.name);
-      });
-    });
-
-    const nonRemoteIndexNames = allNames.filter((name) => !name.includes(':'));
-
-    if (nonRemoteIndexNames.length) {
-      const settingsResponse = await esClient.client.indices.getSettings({
-        index: allNames.filter((name) => !name.includes(':')),
-        filter_path: '*.settings.index.creation_date',
-      });
-
-      Object.entries(settingsResponse).forEach(([concreteIndexName, indexState]) => {
-        if (!indexState.settings?.creation_date) {
-          return;
-        }
-        const creationDate = new Date(indexState.settings.creation_date).getTime();
-
-        const datasetNames = datasetsByIndexName[concreteIndexName];
-
-        datasetNames.forEach((datasetName) => {
-          const dataset = datasetsByName[datasetName];
-          if (!dataset) {
-            return;
-          }
-          if (!dataset.creation_date || dataset.creation_date > creationDate) {
-            dataset.creation_date = creationDate;
-          }
-        });
-      });
-    }
-
     return {
-      datasets: allDatasets.map((dataset) => {
-        return {
-          name: dataset.name,
-          creation_date: dataset.creation_date,
-          type: dataset.type,
-        };
-      }),
+      datasets: allDatasets.map((dataset) => dataset.entity),
     };
   },
 });
@@ -163,7 +112,7 @@ const extractDatasetMetricsRoute = createInventoryServerRoute({
       map((process) => {
         return {
           type: 'extract_metric_definitions',
-          data: { process },
+          process,
         };
       })
     );

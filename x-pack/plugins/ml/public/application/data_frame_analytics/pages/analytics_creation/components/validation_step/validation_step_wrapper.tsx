@@ -18,7 +18,7 @@ import type { CreateAnalyticsStepProps } from '../../../analytics_management/hoo
 import { ValidationStep } from './validation_step';
 import { ValidationStepDetails } from './validation_step_details';
 import { ANALYTICS_STEPS } from '../../page';
-import { useMlApiContext } from '../../../../../contexts/kibana';
+import { useMlApi } from '../../../../../contexts/kibana';
 import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import type {
   CalloutMessage,
@@ -53,7 +53,7 @@ export const ValidationStepWrapper: FC<CreateAnalyticsStepProps> = ({
   const showDetails = step !== ANALYTICS_STEPS.VALIDATION && stepActivated === true;
   const {
     dataFrameAnalytics: { validateDataFrameAnalytics },
-  } = useMlApiContext();
+  } = useMlApi();
 
   const dataTestSubj = `mlAnalyticsCreateJobWizardValidationStepWrapper${
     showValidationStep ? ' active' : ''

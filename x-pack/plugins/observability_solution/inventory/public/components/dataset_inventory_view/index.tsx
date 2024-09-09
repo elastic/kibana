@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import React, { useMemo, useState } from 'react';
-import { Dataset, DatasetType } from '../../../common/datasets';
+import { DatasetEntity, DatasetType } from '../../../common/datasets';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -64,7 +64,7 @@ export function DatasetInventoryView() {
     [inventoryAPIClient, notifications]
   );
 
-  const columns = useMemo<Array<EuiBasicTableColumn<Dataset>>>(() => {
+  const columns = useMemo<Array<EuiBasicTableColumn<DatasetEntity>>>(() => {
     return [
       {
         field: 'name',
@@ -156,7 +156,7 @@ export function DatasetInventoryView() {
           ),
         }}
       />
-      <EuiBasicTable<Dataset>
+      <EuiBasicTable<DatasetEntity>
         columns={columns}
         items={visibleItems}
         itemId="name"
@@ -169,7 +169,7 @@ export function DatasetInventoryView() {
         noItemsMessage={i18n.translate('xpack.inventory.datasetView.noItemsMessage', {
           defaultMessage: `No matching datasets for selected patterns`,
         })}
-        onChange={(criteria: CriteriaWithPagination<Dataset>) => {
+        onChange={(criteria: CriteriaWithPagination<DatasetEntity>) => {
           const { size, index } = criteria.page;
           setPage(() => ({
             pageIndex: index,

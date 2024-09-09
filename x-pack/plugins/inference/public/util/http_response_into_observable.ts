@@ -6,16 +6,16 @@
  */
 
 import { catchError, map, OperatorFunction, pipe, switchMap, tap, throwError } from 'rxjs';
-import { InferenceTaskEvent, InferenceTaskEventType } from '../../common/tasks';
-import {
-  createObservableFromHttpResponse,
-  StreamedHttpResponse,
-} from './create_observable_from_http_response';
 import {
   createInferenceInternalError,
   InferenceTaskError,
   InferenceTaskErrorEvent,
 } from '../../common/errors';
+import { InferenceTaskEvent, InferenceTaskEventType } from '../../common/inference_task';
+import {
+  createObservableFromHttpResponse,
+  StreamedHttpResponse,
+} from './create_observable_from_http_response';
 
 export function httpResponseIntoObservable<
   T extends InferenceTaskEvent = never

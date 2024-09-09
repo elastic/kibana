@@ -20,7 +20,7 @@ import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_ab
 import { partition } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
-import { Dataset, DatasetType } from '../../../common/datasets';
+import { DatasetEntity, DatasetType } from '../../../common/datasets';
 import { createDatasetMatcher } from '../../../common/utils/create_dataset_matcher';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
@@ -67,7 +67,7 @@ export function DatasetView() {
     [inventoryAPIClient, notifications]
   );
 
-  const columns = useMemo<Array<EuiBasicTableColumn<Dataset>>>(() => {
+  const columns = useMemo<Array<EuiBasicTableColumn<DatasetEntity>>>(() => {
     return [
       {
         field: 'name',
@@ -193,7 +193,7 @@ export function DatasetView() {
           { defaultMessage: 'Select datasets to onboard' }
         )}
       />
-      <EuiBasicTable<Dataset>
+      <EuiBasicTable<DatasetEntity>
         columns={columns}
         items={visibleItems}
         itemId="name"
@@ -205,7 +205,7 @@ export function DatasetView() {
         noItemsMessage={i18n.translate('xpack.inventory.datasetView.noItemsMessage', {
           defaultMessage: `No matching datasets for selected patterns`,
         })}
-        onChange={(criteria: CriteriaWithPagination<Dataset>) => {
+        onChange={(criteria: CriteriaWithPagination<DatasetEntity>) => {
           const { size, index } = criteria.page;
           setPage(() => ({
             pageIndex: index,
@@ -222,7 +222,7 @@ export function DatasetView() {
           data-test-subj="inventoryDatasetViewRunAiAnalysisButton"
           disabled={!selectedOptions.length}
           onClick={() => {
-            router.push('/dataset/analyze', {
+            router.push('/datastream/analyze', {
               path: {},
               query: {
                 indexPatterns: selectedOptions.map((option) => option.label).join(','),

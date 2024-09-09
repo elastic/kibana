@@ -122,15 +122,12 @@ export function extractServiceDefinitions({
               map((event) => {
                 return {
                   ...event,
-                  data: {
-                    ...event.data,
-                    output: {
-                      ...event.data.output,
-                      dataset,
-                      total,
-                      analysis: truncated,
-                      samples,
-                    },
+                  output: {
+                    ...event.output,
+                    dataset,
+                    total,
+                    analysis: truncated,
+                    samples,
                   },
                 };
               }),
@@ -143,7 +140,7 @@ export function extractServiceDefinitions({
         switchMap((event) => {
           return from(
             Promise.all(
-              event.data.output.fields.map((field) =>
+              event.output.fields.map((field) =>
                 getFieldCoverage({
                   field,
                   dataset,
@@ -155,12 +152,9 @@ export function extractServiceDefinitions({
             ).then((coverage) => {
               return {
                 ...event,
-                data: {
-                  ...event.data,
-                  output: {
-                    ...event.data.output,
-                    coverage,
-                  },
+                output: {
+                  ...event.output,
+                  coverage,
                 },
               };
             })
@@ -180,7 +174,7 @@ export function extractServiceDefinitions({
             # Dataset
     
             The current dataset is ${dataset}. The total number of documents
-            in the index is ${event.data.output.total}, and ${event.data.output.samples.length}
+            in the index is ${event.output.total}, and ${event.output.samples.length}
             documents were sampled.
     
             ## Fields
@@ -193,7 +187,7 @@ export function extractServiceDefinitions({
             - "full": all documents in the dataset have this field set.
 
             \`\`\`
-            ${JSON.stringify(event.data.output.coverage)}
+            ${JSON.stringify(event.output.coverage)}
             \`\`\`
 
 
@@ -214,14 +208,14 @@ export function extractServiceDefinitions({
             .pipe(
               withoutOutputUpdateEvents(),
               map((serviceDefinitionEvent) => {
-                const { analysis, coverage } = event.data.output;
+                const { analysis, coverage } = event.output;
 
                 const coveragesByFieldName = keyBy(
                   coverage,
                   (fieldCoverage) => fieldCoverage.field
                 );
 
-                const candidates = serviceDefinitionEvent.data.output.fields.map((field) => {
+                const candidates = serviceDefinitionEvent.output.fields.map((field) => {
                   const fieldCoverage = coveragesByFieldName[field];
                   return {
                     field,
@@ -232,20 +226,17 @@ export function extractServiceDefinitions({
 
                 const droppedCandidates = omit(
                   coveragesByFieldName,
-                  serviceDefinitionEvent.data.output.fields
+                  serviceDefinitionEvent.output.fields
                 );
 
                 return {
                   ...serviceDefinitionEvent,
-                  data: {
-                    ...serviceDefinitionEvent.data,
-                    output: {
-                      ...serviceDefinitionEvent.data.output,
-                      dataset,
-                      analysis,
-                      candidates,
-                      droppedCandidates,
-                    },
+                  output: {
+                    ...serviceDefinitionEvent.output,
+                    dataset,
+                    analysis,
+                    candidates,
+                    droppedCandidates,
                   },
                 };
               }),

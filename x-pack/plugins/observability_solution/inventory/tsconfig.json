@@ -34,6 +34,17 @@
     "@kbn/data-views-plugin",
     "@kbn/server-route-repository-client",
     "@kbn/react-kibana-context-render",
-    "@kbn/zod"
+    "@kbn/observability-utils-browser",
+    "@kbn/esql-datagrid",
+    "@kbn/esql-utils",
+    "@kbn/expressions-plugin",
+    "@kbn/data-plugin",
+    "@kbn/es-types",
+    "@kbn/field-types",
+    "@kbn/utility-types",
+    "@kbn/observability-utils-server",
+    "@kbn/observability-utils-common",
+    "@kbn/zod",
+    "@kbn/sse-utils",
   ]
 }

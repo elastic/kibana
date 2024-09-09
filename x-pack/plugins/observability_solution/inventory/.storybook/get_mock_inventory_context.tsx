@@ -8,6 +8,8 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { InventoryKibanaContext } from '../public/hooks/use_kibana';
 
 export function getMockInventoryContext(): InventoryKibanaContext {
@@ -19,6 +21,8 @@ export function getMockInventoryContext(): InventoryKibanaContext {
       start: {
         observabilityShared: {} as unknown as ObservabilitySharedPluginStart,
         inference: {} as unknown as InferencePublicStart,
+        dataViews: {} as unknown as DataViewsPublicPluginStart,
+        data: {} as unknown as DataPublicPluginStart,
       },
     },
     services: {

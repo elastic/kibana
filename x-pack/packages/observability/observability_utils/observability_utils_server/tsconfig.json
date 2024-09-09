@@ -16,6 +16,9 @@
     "target/**/*"
   ],
   "kbn_references": [
-    
+    "@kbn/core",
+    "@kbn/es-types",
+    "@kbn/apm-utils",
+    "@kbn/es-query",
   ]
 }
