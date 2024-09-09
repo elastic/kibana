@@ -409,21 +409,21 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug(`expectLinkedToLibrary(${title})`);
     if (legacy) {
       await this.expectExistsPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
-      await this.expectMissingPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
     } else {
       await this.expectExistsPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
-      await this.expectMissingPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
     }
+    await this.expectMissingPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
+    await this.expectMissingPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
   }
 
   public async expectNotLinkedToLibrary(title = '', legacy?: boolean) {
     this.log.debug(`expectNotLinkedToLibrary(${title})`);
     if (legacy) {
       await this.expectExistsPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
-      await this.expectMissingPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
     } else {
       await this.expectExistsPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
-      await this.expectMissingPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
     }
+    await this.expectMissingPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+    await this.expectMissingPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
   }
 }
