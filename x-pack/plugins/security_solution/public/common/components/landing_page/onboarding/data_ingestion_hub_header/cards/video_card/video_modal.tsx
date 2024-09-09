@@ -65,7 +65,7 @@ export const DataIngestionHubVideoModal: React.FC<DataIngestionHubVideoModalComp
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton color="primary" onClick={onCloseModal}>
+              <EuiButton data-test-subj="video-modal-button" color="primary" onClick={onCloseModal}>
                 {isOnboardingHubVisited
                   ? DATA_INGESTION_HUB_VIDEO_MODAL_BUTTON_CLOSE
                   : DATA_INGESTION_HUB_VIDEO_MODAL_BUTTON}

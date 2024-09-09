@@ -10,7 +10,6 @@ import { useLocalStorage } from 'react-use';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { Card } from '../card';
 import { DataIngestionHubVideoModal } from './video_modal';
-import { useSpaceId } from '../../../../../../hooks/use_space_id';
 import * as i18n from '../../translations';
 import { useCardStyles } from '../card.styles';
 
@@ -18,6 +17,7 @@ interface VideoCardProps {
   icon: string;
   title: string;
   description: string;
+  spaceId: string;
 }
 
 export const getStorageKeyBySpace = (storageKey: string, spaceId: string | null | undefined) => {
@@ -30,8 +30,8 @@ export const getStorageKeyBySpace = (storageKey: string, spaceId: string | null 
 const IS_ONBOARDING_HUB_VISITED_LOCAL_STORAGE_KEY = 'secutirySolution.isOnboardingHubVisited';
 
 export const VideoCard: React.FC<VideoCardProps> = React.memo((props) => {
-  const { icon, title, description } = props;
-  const spaceId = useSpaceId();
+  const { icon, title, description, spaceId } = props;
+
   const { cardButtonStyle } = useCardStyles();
   const [isModalVisible, setIsModalVisible] = useState(false);
 

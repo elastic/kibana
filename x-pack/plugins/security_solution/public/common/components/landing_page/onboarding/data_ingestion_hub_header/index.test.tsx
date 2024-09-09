@@ -104,7 +104,12 @@ describe('WelcomeHeaderComponent', () => {
 
   it('should display the modal when the "video" card is clicked', () => {
     mockUseHeaderCards.mockReturnValue([
-      <VideoCard icon={'mockIcon.png'} title={'Video'} description={'Video description'} />,
+      <VideoCard
+        spaceId="mockSpaceId"
+        icon={'mockIcon.png'}
+        title={'Video'}
+        description={'Video description'}
+      />,
     ]);
     const { getByText, queryByTestId } = render(<DataIngestionHubHeader />);
 

@@ -8,6 +8,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import { COLOR_MODES_STANDARD, useEuiTheme } from '@elastic/eui';
+import { useSpaceId } from '../../../../../hooks/use_space_id';
 import video from '../../images/data_ingestion_hub_video.png';
 import darkVideo from '../../images/dark_data_ingestion_hub_video.png';
 import teammates from '../../images/data_ingestion_hub_teammates.png';
@@ -23,15 +24,11 @@ export const useHeaderCards: () => ReactNode[] = () => {
   const { colorMode } = useEuiTheme();
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
   const usersUrl = useUsersUrl();
+  const spaceId = useSpaceId();
 
   const demoUrl = 'https://www.elastic.co/demo-gallery/security-overview';
 
   const headerCards = [
-    <VideoCard
-      icon={isDarkMode ? darkVideo : video}
-      title={i18n.DATA_INGESTION_HUB_HEADER_VIDEO_TITLE}
-      description={i18n.DATA_INGESTION_HUB_HEADER_VIDEO_DESCRIPTION}
-    />,
     <LinkCard
       icon={isDarkMode ? darkTeammates : teammates}
       title={i18n.DATA_INGESTION_HUB_HEADER_TEAMMATES_TITLE}
@@ -47,6 +44,17 @@ export const useHeaderCards: () => ReactNode[] = () => {
       linkTitle={i18n.DATA_INGESTION_HUB_HEADER_DEMO_LINK_TITLE}
     />,
   ];
+
+  if (spaceId) {
+    headerCards.unshift(
+      <VideoCard
+        spaceId={spaceId}
+        icon={isDarkMode ? darkVideo : video}
+        title={i18n.DATA_INGESTION_HUB_HEADER_VIDEO_TITLE}
+        description={i18n.DATA_INGESTION_HUB_HEADER_VIDEO_DESCRIPTION}
+      />
+    );
+  }
 
   return headerCards;
 };
