@@ -8,14 +8,31 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { HighlightField, HighlightFieldProps } from './highlight_field';
+import { getUnifiedDocViewerServices } from '../../../plugin';
+
+const APM_LINK_TO_TRACE_LOCATOR = 'APM_LINK_TO_TRACE_LOCATOR';
 
 export function TraceIdHighlightField(props: HighlightFieldProps) {
-  // Locator would be defined here
-  const href = `/foo/app/apm/link-to/trace/${props.value}`;
+  const {
+    share: { url: urlService },
+  } = getUnifiedDocViewerServices();
+
+  const apmLinkToServiceEntityLocator = urlService.locators.get<{ traceId: string }>(
+    APM_LINK_TO_TRACE_LOCATOR
+  );
+  const href = apmLinkToServiceEntityLocator?.getRedirectUrl({
+    traceId: props.value as string,
+  });
+
+  const routeLinkProps = getRouterLinkProps({
+    href,
+    onClick: () => apmLinkToServiceEntityLocator?.navigate({ traceId: props.value as string }),
+  });
   return (
     <HighlightField {...props}>
-      {({ content }) => <EuiLink href={href}>{content}</EuiLink>}
+      {({ content }) => <EuiLink {...routeLinkProps}>{content}</EuiLink>}
     </HighlightField>
   );
 }

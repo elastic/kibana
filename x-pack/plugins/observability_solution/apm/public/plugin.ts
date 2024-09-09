@@ -87,7 +87,6 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { ITelemetryClient, TelemetryService } from './services/telemetry';
 import { registerServiceInventoryViewTypeContext } from './analytics/register_service_inventory_view_type_context';
-import { LinkToServiceEntityLocatorDefinition } from './locator/entity_link_locator';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = void;
@@ -424,7 +423,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     const locator = plugins.share.url.locators.create(new APMServiceDetailLocator(core.uiSettings));
-    plugins.share.url.locators.create(new LinkToServiceEntityLocatorDefinition());
 
     return {
       locator,

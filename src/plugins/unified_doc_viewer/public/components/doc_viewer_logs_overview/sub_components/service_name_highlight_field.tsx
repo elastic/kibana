@@ -16,20 +16,23 @@ import { getUnifiedDocViewerServices } from '../../../plugin';
 const APM_LINK_TO_SERVICE_ENTITY_LOCATOR = 'APM_LINK_TO_SERVICE_ENTITY_LOCATOR';
 
 export function ServiceNameHighlightField(props: HighlightFieldProps) {
-  const { share } = getUnifiedDocViewerServices();
-  const { url: urlService } = share;
+  const {
+    share: { url: urlService },
+  } = getUnifiedDocViewerServices();
+
   const apmLinkToServiceEntityLocator = urlService.locators.get<{ serviceName: string }>(
     APM_LINK_TO_SERVICE_ENTITY_LOCATOR
   );
   const href = apmLinkToServiceEntityLocator?.getRedirectUrl({
     serviceName: props.value as string,
   });
-  const { isEntityManagerEnabled } = useLogsOverviewContext();
 
   const routeLinkProps = getRouterLinkProps({
     href,
     onClick: () => apmLinkToServiceEntityLocator?.navigate({ serviceName: props.value as string }),
   });
+
+  const { isEntityManagerEnabled } = useLogsOverviewContext();
 
   return (
     <HighlightField {...props}>
