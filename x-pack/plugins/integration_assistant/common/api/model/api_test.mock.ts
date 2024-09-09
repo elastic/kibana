@@ -62,6 +62,7 @@ export const getCategorizationRequestMock = (): CategorizationRequestBody => ({
   dataStreamName: 'test-data-stream-name',
   packageName: 'test-package-name',
   rawSamples,
+  samplesFormat: { name: 'ndjson' },
 });
 
 export const getBuildIntegrationRequestMock = (): BuildIntegrationRequestBody => ({
@@ -82,6 +83,7 @@ export const getRelatedRequestMock = (): RelatedRequestBody => ({
   rawSamples,
   connectorId: 'test-connector-id',
   currentPipeline: getPipelineMock(),
+  samplesFormat: { name: 'structured', multiline: false },
 });
 
 export const getAnalyzeLogsRequestBody = (): AnalyzeLogsRequestBody => ({

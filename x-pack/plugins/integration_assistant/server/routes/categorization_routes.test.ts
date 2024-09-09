@@ -41,6 +41,7 @@ describe('registerCategorizationRoute', () => {
       rawSamples: ['{"ei":0}'],
       currentPipeline: { processors: [{ script: { source: {} } }] },
       connectorId: 'testConnector',
+      samplesFormat: { name: 'json' },
     },
   });
 

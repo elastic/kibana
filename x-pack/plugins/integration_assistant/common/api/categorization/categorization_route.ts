@@ -23,7 +23,7 @@ export const CategorizationRequestBody = z.object({
   packageName: PackageName,
   dataStreamName: DataStreamName,
   rawSamples: RawSamples,
-  samplesFormat: SamplesFormat.optional(),
+  samplesFormat: SamplesFormat,
   currentPipeline: Pipeline,
   connectorId: Connector,
   langSmithOptions: LangSmithOptions.optional(),
