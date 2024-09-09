@@ -23,17 +23,7 @@ export class OtelSynthtraceEsClient extends SynthtraceEsClient<OtelDocument> {
       ...options,
       pipeline: otelPipeline(),
     });
-    this.dataStreams = [
-      '.otel-*',
-      'metrics-*',
-      'logs-*.',
-      'traces-*.',
-      'generic.otel-*',
-      'traces-otel-default',
-      'metric-otel-*',
-      'logs-otel.error-*',
-      '*-otel-*',
-    ];
+    this.dataStreams = ['.otel-*-synth', '*-synth-*'];
   }
 }
 
@@ -58,53 +48,55 @@ export function getRoutingTransform() {
     objectMode: true,
     transform(document: ESDocumentWithOperation<OtelDocument>, encoding, callback) {
       const namespace = 'default';
-      let index: string | undefined = 'traces-otel-default';
-      console.log(document);
-      console.log('doc', document.attributes[`processor.event`]);
+      let index: string | undefined;
 
-      switch (document.attributes['processor.event']) {
+      switch (document?.attributes?.['processor.event']) {
         case 'transaction':
         case 'span':
-          index = `traces-otel-${namespace}`;
-          document._index = `traces-otel-${namespace}`;
+          index = `.ds-traces-generic.otel-${namespace}-synth-2024.09.09-000001`;
+          // document._index = `.ds-traces-generic.otel-${namespace}-synth-2024.09.09-000001`;
           break;
 
         case 'error':
-          index = `logs-otel.error-${namespace}`;
-          document._index = `logs-otel.error-${namespace}`;
+          index = `.logs-otel.error-${namespace}-synth-2024.09.09-000001`;
+          // document._index = `logs-otel.error-${namespace}-synth-2024.09.09-000001`;
           break;
 
         case 'metric':
           const metricsetName = document.attributes['metricset.name'];
-          document._index = `metrics-otel.${metricsetName}.${document.attributes['metricset.interval']!}-${namespace}`;
+          document._index = `.ds-metrics-otel.service_summary.${document.attributes[
+            'metricset.interval'
+          ]!}-${namespace}-synth-2024.09.09-000001`;
 
-          if (metricsetName === 'app') {
-            index = `metrics-otel.app.${document.attributes['service.name']}-${namespace}`;
-          } else if (
+          // if (metricsetName === 'app') {
+          //   index = `metrics-otel.app.${document?.attributes?.['service.name']}-${namespace}-2024.09.09-000001`;
+          // } else 
+          if (
             metricsetName === 'transaction' ||
             metricsetName === 'service_transaction' ||
             metricsetName === 'service_destination' ||
             metricsetName === 'service_summary'
           ) {
-            index = `metrics-otel.${metricsetName}.${document.attributes['metricset.interval']!}-${namespace}`;
+            index = `.ds-metrics-otel.${metricsetName}.${document.attributes[
+              'metricset.interval'
+            ]!}-${namespace}-2024.09.09-000001`;
           } else {
             index = `metrics-otel.internal-${namespace}`;
           }
           break;
         default:
-          if (document['event.action'] != null) {
-            index = `logs-otel.app-${namespace}`;
-          }
+          // if (document['event.action'] != null) {
+          //   index = `logs-otel.app-${namespace}`;
+          // }
           break;
       }
 
-      console.log('index', index);
       if (!index) {
         const error = new Error('Cannot determine index for event');
         Object.assign(error, { document });
       }
 
-      // document._index = index;
+      document._index = index;
 
       callback(null, document);
     },
