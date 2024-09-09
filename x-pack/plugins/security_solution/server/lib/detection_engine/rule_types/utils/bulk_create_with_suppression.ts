@@ -119,7 +119,7 @@ export const bulkCreateWithSuppression = async <
         // console.error('NEW ALERT GROUP ID', newAlerts[0]?._source[ALERT_GROUP_ID]);
 
         return (
-          isEqlBuildingBlockAlert(newAlertSource) &&
+          isEqlBuildingBlockAlert(someAlert?._source) &&
           isEqlShellAlert(newAlertSource) &&
           someAlert?._source?.[ALERT_GROUP_ID] === newAlertSource?.[ALERT_GROUP_ID]
         );
