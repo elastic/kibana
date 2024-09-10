@@ -285,6 +285,12 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               data-test-subj="settingsOutputsFlyout.nameInput"
               fullWidth
               {...inputs.nameInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.nameInputPlaceholder',
+                {
+                  defaultMessage: 'Specify name',
+                }
+              )}
             />
           </EuiFormRow>
           <EuiFormRow
