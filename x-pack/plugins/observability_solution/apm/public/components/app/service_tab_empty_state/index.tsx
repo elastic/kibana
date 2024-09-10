@@ -22,9 +22,10 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EmptyStateClickParams, EntityInventoryAddDataParams } from '../../../services/telemetry';
 import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 import { AddApmData } from '../../shared/add_data_buttons/buttons';
 import { emptyStateDefinitions, EmptyStateKey } from './constants';
@@ -60,8 +61,10 @@ const defaultClickTelemetryParams: EmptyStateClickParams = {
 export function ServiceTabEmptyState({ id, onDissmiss }: ServiceTabEmptyStateProps) {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
+  const { core } = useApmPluginContext();
+
   const imgFolder = `${baseImgFolder}/${
-    useUiSetting('theme:darkMode') === 'enabled' ? 'dark' : 'light'
+    core.uiSettings.get('theme:darkMode') === 'enabled' ? 'dark' : 'light'
   }`;
   const imgName = emptyStateDefinitions[id].imgName;
   const imgSrc = useKibanaUrl(

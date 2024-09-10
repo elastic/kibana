@@ -49,7 +49,7 @@ describe('useFetchMoreRecords', () => {
 
   const getWrapper = (
     stateContainer: DiscoverStateContainer
-  ): WrapperComponent<UseFetchMoreRecordsParams> => {
+  ): WrapperComponent<React.PropsWithChildren<UseFetchMoreRecordsParams>> => {
     return ({ children }) => (
       <DiscoverMainProvider value={stateContainer}>
         <>{children}</>

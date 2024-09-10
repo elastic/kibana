@@ -7,23 +7,16 @@
 
 import React, { ComponentProps, ComponentType } from 'react';
 import { ServiceTabEmptyState } from '.';
-import {
-  ApmPluginContext,
-  ApmPluginContextValue,
-} from '../../../context/apm_plugin/apm_plugin_context';
-
-const contextMock = {
-  core: { http: { basePath: { prepend: () => {} } } },
-} as unknown as ApmPluginContextValue;
+import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 export default {
   title: 'APP/ServiceTabEmptyState',
   component: ServiceTabEmptyState,
   decorators: [
     (Story: ComponentType) => (
-      <ApmPluginContext.Provider value={contextMock}>
+      <MockApmPluginStorybook>
         <Story />
-      </ApmPluginContext.Provider>
+      </MockApmPluginStorybook>
     ),
   ],
 };
