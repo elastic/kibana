@@ -7,13 +7,7 @@
 
 import React, { useState, type FC } from 'react';
 
-import {
-  EuiButtonIcon,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiText,
-  type EuiLinkButtonProps,
-} from '@elastic/eui';
+import { EuiBadge, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 
 import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
@@ -21,19 +15,19 @@ import { i18n } from '@kbn/i18n';
 
 import './log_rate_analysis_info_popover.scss';
 
-export const LogRateAnalysisInfoPopoverButton: FC<{ onClick: EuiLinkButtonProps['onClick'] }> = ({
-  onClick,
-}) => {
+export const LogRateAnalysisInfoPopoverButton: FC<{
+  onClick: React.MouseEventHandler<HTMLButtonElement>;
+  label: string;
+}> = ({ onClick, label }) => {
   return (
-    <EuiButtonIcon
-      data-test-subj="aiopsLogRateAnalysisInfoPopoverButton"
-      size="s"
-      iconType="help"
-      aria-label={i18n.translate('xpack.aiops.logRateAnalysis.infoPopover.ariaLabel', {
-        defaultMessage: 'Analysis information',
-      })}
+    <EuiBadge
+      color="success"
       onClick={onClick}
-    />
+      onClickAriaLabel='Click to open "Log rate analysis info" popover'
+      data-test-subj="aiopsLogRateAnalysisInfoPopoverButton"
+    >
+      {label}
+    </EuiBadge>
   );
 };
 
@@ -49,42 +43,45 @@ export const LogRateAnalysisInfoPopover: FC = () => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  const infoTitlePrefix = i18n.translate('xpack.aiops.analysis.analysisTypeInfoTitlePrefix', {
+    defaultMessage: 'Analysis type: ',
+  });
   let infoTitle: string;
-  let infoText: string;
+  let infoContent: string;
 
   if (!showInfoPopover) {
     return null;
   }
 
   if (!zeroDocsFallback && analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE) {
-    infoTitle = i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutTitle', {
-      defaultMessage: 'Analysis type: Log rate spike',
+    infoTitle = i18n.translate('xpack.aiops.analysis.analysisTypeSpikeInfoTitle', {
+      defaultMessage: 'Log rate spike',
     });
-    infoText = i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutContent', {
+    infoContent = i18n.translate('xpack.aiops.analysis.analysisTypeSpikeInfoContent', {
       defaultMessage:
         'The median log rate in the selected deviation time range is higher than the baseline. Therefore, the analysis results table shows statistically significant items within the deviation time range that are contributors to the spike. The "doc count" column refers to the amount of documents in the deviation time range.',
     });
   } else if (!zeroDocsFallback && analysisType === LOG_RATE_ANALYSIS_TYPE.DIP) {
-    infoTitle = i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutTitle', {
-      defaultMessage: 'Analysis type: Log rate dip',
+    infoTitle = i18n.translate('xpack.aiops.analysis.analysisTypeDipInfoTitle', {
+      defaultMessage: 'Log rate dip',
     });
-    infoText = i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutContent', {
+    infoContent = i18n.translate('xpack.aiops.analysis.analysisTypeDipInfoContent', {
       defaultMessage:
         'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less in number or missing within the deviation time range. The "doc count" column refers to the amount of documents in the baseline time range.',
     });
   } else if (zeroDocsFallback && analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE) {
-    infoTitle = i18n.translate('xpack.aiops.analysis.analysisTypeSpikeFallbackCallOutTitle', {
-      defaultMessage: 'Analysis type: Top items for deviation time range',
+    infoTitle = i18n.translate('xpack.aiops.analysis.analysisTypeSpikeFallbackInfoTitle', {
+      defaultMessage: 'Top items for deviation time range',
     });
-    infoText = i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutContentFallback', {
+    infoContent = i18n.translate('xpack.aiops.analysis.analysisTypeSpikeInfoContentFallback', {
       defaultMessage:
         'The baseline time range does not contain any documents. Therefore the results show top log message categories and field values for the deviation time range.',
     });
   } else if (zeroDocsFallback && analysisType === LOG_RATE_ANALYSIS_TYPE.DIP) {
-    infoTitle = i18n.translate('xpack.aiops.analysis.analysisTypeDipFallbackCallOutTitle', {
-      defaultMessage: 'Analysis type: Top items for baseline time range',
+    infoTitle = i18n.translate('xpack.aiops.analysis.analysisTypeDipFallbackInfoTitle', {
+      defaultMessage: 'Top items for baseline time range',
     });
-    infoText = i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutContentFallback', {
+    infoContent = i18n.translate('xpack.aiops.analysis.analysisTypeDipInfoContentFallback', {
       defaultMessage:
         'The deviation time range does not contain any documents. Therefore the results show top log message categories and field values for the baseline time range.',
     });
@@ -96,7 +93,10 @@ export const LogRateAnalysisInfoPopover: FC = () => {
     <EuiPopover
       anchorPosition="upCenter"
       button={
-        <LogRateAnalysisInfoPopoverButton onClick={setIsPopoverOpen.bind(null, !isPopoverOpen)} />
+        <LogRateAnalysisInfoPopoverButton
+          onClick={setIsPopoverOpen.bind(null, !isPopoverOpen)}
+          label={infoTitle}
+        />
       }
       closePopover={setIsPopoverOpen.bind(null, false)}
       isOpen={isPopoverOpen}
@@ -104,14 +104,19 @@ export const LogRateAnalysisInfoPopover: FC = () => {
       panelClassName="aiopsLogRateAnalysisInfoPopover__panel"
       panelPaddingSize="none"
     >
-      {infoTitle && <EuiPopoverTitle paddingSize="s">{infoTitle}</EuiPopoverTitle>}
+      {infoTitle && (
+        <EuiPopoverTitle paddingSize="m">
+          {infoTitlePrefix}
+          {infoTitle}
+        </EuiPopoverTitle>
+      )}
 
       <EuiText
         className="aiopsLogRateAnalysisInfoPopover__content eui-scrollBar"
-        size="s"
+        size="m"
         tabIndex={0}
       >
-        {infoText}
+        {infoContent}
         {fieldSelectionMessage && ` ${fieldSelectionMessage}`}{' '}
       </EuiText>
     </EuiPopover>
