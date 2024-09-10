@@ -15,8 +15,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const reportingFunctional = getService('reportingFunctional');
   const esArchiver = getService('esArchiver');
 
-  // Failing: See https://github.com/elastic/kibana/issues/192014
-  describe.skip('Access to Management > Reporting', () => {
+  describe('Access to Management > Reporting', () => {
     before(async () => {
       await reportingFunctional.initEcommerce();
     });
