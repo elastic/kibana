@@ -1,0 +1,134 @@
+openapi: 3.0.0
+info:
+  title: Manage Knowledge Base Entries API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/knowledge_base/entries:
+    post:
+      x-codegen-enabled: true
+      # This API is still behind the `assistantKnowledgeBaseByDefault` feature flag
+      x-internal: true
+      x-labels: [ess, serverless]
+      operationId: CreateKnowledgeBaseEntry
+      description: Create a Knowledge Base Entry
+      summary: Create a Knowledge Base Entry
+      tags:
+        - Knowledge Base Entries API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryCreateProps'
+      responses:
+        200:
+          description: Successful request returning Knowledge Base Entries
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
+
+  /internal/elastic_assistant/knowledge_base/entries/{id}:
+    get:
+      x-codegen-enabled: true
+      # This API is still behind the `assistantKnowledgeBaseByDefault` feature flag
+      x-internal: true
+      x-labels: [ess, serverless]
+      operationId: ReadKnowledgeBaseEntry
+      description: Read a Knowledge Base Entry
+      summary: Read a Knowledge Base Entry
+      tags:
+        - Knowledge Base Entries API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The Knowledge Base Entry's `id` value.
+          schema:
+            $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Successful request returning a Knowledge Base Entry
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
+    put:
+      x-codegen-enabled: true
+      # This API is still behind the `assistantKnowledgeBaseByDefault` feature flag
+      x-internal: true
+      x-labels: [ess, serverless]
+      operationId: UpdateKnowledgeBaseEntry
+      description: Update a Knowledge Base Entry
+      summary: Update a Knowledge Base Entry
+      tags:
+        - Knowledge Base Entries API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The Knowledge Base Entry's `id` value
+          schema:
+            $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryUpdateProps'
+      responses:
+        200:
+          description: Successful request returning the updated Knowledge Base Entry
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
+    delete:
+      x-codegen-enabled: true
+      # This API is still behind the `assistantKnowledgeBaseByDefault` feature flag
+      x-internal: true
+      x-labels: [ess, serverless]
+      operationId: DeleteKnowledgeBaseEntry
+      description: Deletes a single Knowledge Base Entry using the `id` field
+      summary: Deletes a single Knowledge Base Entry using the `id` field
+      tags:
+        - Knowledge Base Entries API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The Knowledge Base Entry's `id` value
+          schema:
+            $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Successful request returning the deleted Knowledge Base Entry
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
+
