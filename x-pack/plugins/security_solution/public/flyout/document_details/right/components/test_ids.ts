@@ -15,6 +15,8 @@ export const FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID =
   `${FLYOUT_TABLE_TEST_ID}FieldNameCellIcon` as const;
 export const FLYOUT_TABLE_FIELD_NAME_CELL_TEXT_TEST_ID =
   `${FLYOUT_TABLE_TEST_ID}FieldNameCellText` as const;
+export const FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}PreviewLinkField` as const;
 
 /* Header */
 
