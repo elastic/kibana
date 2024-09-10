@@ -58,6 +58,7 @@ import { isUnrecoverableError } from './errors';
 import { CLAIM_STRATEGY_MGET, type EventLoopDelayConfig } from '../config';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
+import { getNextRunAt } from '../lib/get_next_run_at';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -164,7 +165,7 @@ export class TaskManagerRunner implements TaskRunner {
   private eventLoopDelayConfig: EventLoopDelayConfig;
   private readonly taskValidator: TaskValidator;
   private readonly claimStrategy: string;
-  private consistentSchedulingGapThreshold: number = 0;
+  private currentPollInterval?: number;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -211,9 +212,7 @@ export class TaskManagerRunner implements TaskRunner {
     });
     this.claimStrategy = strategy;
     pollIntervalConfiguration$.subscribe((pollInterval) => {
-      // Let's only perform consistent scheduling for tasks that were picked up
-      // within ${pollInterval}ms of its runtime (no delay)
-      this.consistentSchedulingGapThreshold = pollInterval;
+      this.currentPollInterval = pollInterval;
     });
   }
 
@@ -641,25 +640,17 @@ export class TaskManagerRunner implements TaskRunner {
             return asOk({ status: TaskStatus.ShouldDelete });
           }
 
-          const { runAt: originalRunAt, startedAt, schedule } = this.instance.task;
-          const nextRunAt =
-            runAt ||
-            new Date(
-              Math.max(
-                intervalFromDate(
-                  Date.now() - originalRunAt.getTime() < this.consistentSchedulingGapThreshold
-                    ? originalRunAt
-                    : startedAt!,
-                  reschedule?.interval ?? schedule?.interval
-                )!.getTime(),
-                Date.now()
-              )
-            );
-
           return asOk({
-            runAt: nextRunAt,
+            runAt: getNextRunAt(
+              this.instance.task,
+              {
+                runAt,
+                schedule: reschedule,
+              },
+              this.currentPollInterval
+            ),
             state,
-            schedule: reschedule ?? schedule,
+            schedule: reschedule ?? this.instance.task.schedule,
             attempts,
             status: TaskStatus.Idle,
           });
