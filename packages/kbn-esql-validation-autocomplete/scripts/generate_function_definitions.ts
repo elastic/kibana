@@ -194,14 +194,14 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
   date_diff: {
     signatures: [
       {
-        params: [{ literalOptions: dateDiffOptions, literalSuggestions: dateDiffSuggestions }],
+        params: [{ acceptedValues: dateDiffOptions, literalSuggestions: dateDiffSuggestions }],
       },
     ],
   },
   date_extract: {
     signatures: [
       {
-        params: [{ literalOptions: dateExtractOptions }],
+        params: [{ acceptedValues: dateExtractOptions }],
       },
     ],
   },

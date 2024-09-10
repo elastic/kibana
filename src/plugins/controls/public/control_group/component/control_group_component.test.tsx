@@ -169,7 +169,7 @@ describe('Control group component', () => {
     applyButton = controlGroupComponent.getByTestId('controlGroup--applyFiltersButton');
     expect(applyButton).toBeEnabled();
 
-    userEvent.click(applyButton);
+    await userEvent.click(applyButton);
     expect(controlGroupContainer.publishFilters).toBeCalledWith(unpublishedFilters);
   });
 
