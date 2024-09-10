@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Ingest Pipelines', () => {
+export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
+  describe('Management', () => {
     loadTestFile(require.resolve('./ingest_pipelines'));
   });
 }
