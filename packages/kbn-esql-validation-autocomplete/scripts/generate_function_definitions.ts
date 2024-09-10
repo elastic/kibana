@@ -25,9 +25,13 @@ const aliasTable: Record<string, string[]> = {
 };
 const aliases = new Set(Object.values(aliasTable).flat());
 
-const evalSupportedCommandsAndOptions = {
+const scalarSupportedCommandsAndOptions = {
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
+};
+
+const aggregationSupportedCommandsAndOptions = {
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
 };
 
 // coalesce can be removed when a test is added for version type
@@ -40,7 +44,7 @@ const extraFunctions: FunctionDefinition[] = [
     name: 'case',
     description:
       'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
-    ...evalSupportedCommandsAndOptions,
+    ...scalarSupportedCommandsAndOptions,
     signatures: [
       {
         params: [
@@ -246,8 +250,8 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
     ...(ESFunctionDefinition.type === 'eval'
-      ? evalSupportedCommandsAndOptions
-      : { supportedCommands: ['stats'] }),
+      ? scalarSupportedCommandsAndOptions
+      : aggregationSupportedCommandsAndOptions),
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
     signatures: _.uniqBy(

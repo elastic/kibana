@@ -69,7 +69,7 @@ const avgDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
   supportedOptions: undefined,
   validate: undefined,
   examples: [
@@ -209,7 +209,7 @@ const countDefinition: FunctionDefinition = {
       returnType: 'long',
     },
   ],
-  supportedCommands: ['stats'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
   supportedOptions: undefined,
   validate: undefined,
   examples: [
@@ -726,7 +726,7 @@ const countDistinctDefinition: FunctionDefinition = {
       returnType: 'long',
     },
   ],
-  supportedCommands: ['stats'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
   supportedOptions: undefined,
   validate: undefined,
   examples: [
@@ -836,7 +836,7 @@ const maxDefinition: FunctionDefinition = {
       returnType: 'version',
     },
   ],
-  supportedCommands: ['stats'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
   supportedOptions: undefined,
   validate: undefined,
   examples: [
@@ -886,7 +886,7 @@ const medianDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
   supportedOptions: undefined,
   validate: undefined,
   examples: [
@@ -939,7 +939,7 @@ const medianAbsoluteDeviationDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
   supportedOptions: undefined,
   validate: undefined,
   examples: [
@@ -1048,7 +1048,7 @@ const minDefinition: FunctionDefinition = {
       returnType: 'version',
     },
   ],
-  supportedCommands: ['stats'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
   supportedOptions: undefined,
   validate: undefined,
   examples: [
@@ -1212,7 +1212,7 @@ const percentileDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
   supportedOptions: undefined,
   validate: undefined,
   examples: [
@@ -1251,7 +1251,7 @@ const stCentroidAggDefinition: FunctionDefinition = {
       returnType: 'geo_point',
     },
   ],
-  supportedCommands: ['stats'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
   supportedOptions: undefined,
   validate: undefined,
   examples: ['FROM airports\n| STATS centroid=ST_CENTROID_AGG(location)'],
@@ -1297,7 +1297,7 @@ const sumDefinition: FunctionDefinition = {
       returnType: 'long',
     },
   ],
-  supportedCommands: ['stats'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
   supportedOptions: undefined,
   validate: undefined,
   examples: [
@@ -1454,7 +1454,7 @@ const topDefinition: FunctionDefinition = {
       returnType: 'long',
     },
   ],
-  supportedCommands: ['stats'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
   supportedOptions: undefined,
   validate: undefined,
   examples: [
@@ -1563,7 +1563,7 @@ const valuesDefinition: FunctionDefinition = {
       returnType: 'version',
     },
   ],
-  supportedCommands: ['stats'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
   supportedOptions: undefined,
   validate: undefined,
   examples: [
@@ -1716,7 +1716,7 @@ const weightedAvgDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
   supportedOptions: undefined,
   validate: undefined,
   examples: [
