@@ -10,7 +10,7 @@
 import joi from 'joi';
 import { isConfigSchema, Type } from '@kbn/config-schema';
 import { get } from 'lodash';
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from '../../type';
 import type { KnownParameters } from '../../type';
 import { isReferenceObject } from '../common';
 import { parse } from './parse';

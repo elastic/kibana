@@ -9,8 +9,8 @@
 
 import Joi from 'joi';
 import joiToJsonParse from 'joi-to-json';
-import type { OpenAPIV3 } from 'openapi-types';
 import { omit } from 'lodash';
+import type { OpenAPIV3 } from '../../type';
 import { createCtx, postProcessMutations } from './post_process_mutations';
 import type { IContext } from './post_process_mutations';
 

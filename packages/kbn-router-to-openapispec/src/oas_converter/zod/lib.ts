@@ -8,9 +8,10 @@
  */
 
 import { z, isZod } from '@kbn/zod';
-import type { OpenAPIV3 } from 'openapi-types';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import zodToJsonSchema from 'zod-to-json-schema';
+import type { OpenAPIV3 } from '../../type';
+
 import { KnownParameters } from '../../type';
 import { validatePathParameters } from '../common';
 

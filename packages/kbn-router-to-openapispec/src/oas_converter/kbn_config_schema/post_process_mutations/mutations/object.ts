@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OpenAPIV3 } from 'openapi-types';
 import { metaFields } from '@kbn/config-schema';
+import type { OpenAPIV3 } from '../../../../type';
 import { deleteField, stripBadDefault } from './utils';
 
 const { META_FIELD_X_OAS_OPTIONAL } = metaFields;

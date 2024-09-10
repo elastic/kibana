@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from '../../../type';
 import * as mutations from './mutations';
 import type { IContext } from './context';
 import { isAnyType } from './mutations/utils';
