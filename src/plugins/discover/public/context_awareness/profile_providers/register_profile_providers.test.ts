@@ -9,9 +9,9 @@
 
 import { createEsqlDataSource } from '../../../common/data_sources';
 import { createContextAwarenessMocks } from '../__mocks__';
-import { exampleDataSourceProfileProvider } from './example_data_source_profile';
-import { exampleDocumentProfileProvider } from './example_document_profile';
-import { exampleRootProfileProvider } from './example_root_pofile';
+import { exampleDataSourceProfileProvider } from './example/example_data_source_profile';
+import { exampleDocumentProfileProvider } from './example/example_document_profile';
+import { exampleRootProfileProvider } from './example/example_root_pofile';
 import {
   registerProfileProviders,
   registerEnabledProfileProviders,
