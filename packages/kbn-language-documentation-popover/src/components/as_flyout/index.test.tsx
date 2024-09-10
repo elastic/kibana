@@ -8,61 +8,58 @@
  */
 
 import React from 'react';
-import { screen, render, fireEvent } from '@testing-library/react';
-import { Markdown } from '@kbn/shared-ux-markdown';
+import { screen, render, fireEvent, waitFor } from '@testing-library/react';
 import { LanguageDocumentationFlyout } from '.';
 
-describe('###Documentation flyout component', () => {
-  const sections = {
-    groups: [
-      {
-        label: 'Section one',
-        description: 'Section 1 description',
-        items: [],
-      },
-      {
-        label: 'Section two',
-        items: [
-          {
-            label: 'Section two item 1',
-            description: (
-              <Markdown readOnly markdownContent={`## Section two item 1 description `} />
-            ),
-          },
-          {
-            label: 'Section two item 2',
-            description: (
-              <Markdown readOnly markdownContent={`## Section two item 2 description `} />
-            ),
-          },
-        ],
-      },
-      {
-        label: 'Section three',
-        items: [
-          {
-            label: 'Section three item 1',
-            description: (
-              <Markdown readOnly markdownContent={`## Section three item 1 description `} />
-            ),
-          },
-          {
-            label: 'Section three item 2',
-            description: (
-              <Markdown readOnly markdownContent={`## Section three item 2 description `} />
-            ),
-          },
-        ],
-      },
-    ],
-    initialSection: <span>Here is the initial section</span>,
+jest.mock('../../sections', () => {
+  const module = jest.requireActual('../../sections');
+  return {
+    ...module,
+    getESQLDocsSections: () => ({
+      groups: [
+        {
+          label: 'Section one',
+          description: 'Section 1 description',
+          items: [],
+        },
+        {
+          label: 'Section two',
+          items: [
+            {
+              label: 'Section two item 1',
+              description: 'Section two item 1 description',
+            },
+            {
+              label: 'Section two item 2',
+              description: 'Section two item 2 description',
+            },
+          ],
+        },
+        {
+          label: 'Section three',
+          items: [
+            {
+              label: 'Section three item 1',
+              description: 'Section three item 1 description',
+            },
+            {
+              label: 'Section three item 2',
+              description: 'Section three item 2 description',
+            },
+          ],
+        },
+      ],
+      initialSection: <span>Here is the initial section</span>,
+    }),
   };
+});
+
+describe('###Documentation flyout component', () => {
   const renderFlyout = (linkToDocumentation?: string) => {
     return render(
       <LanguageDocumentationFlyout
         isHelpMenuOpen={true}
         onHelpMenuVisibilityChange={jest.fn()}
-        sections={sections}
         linkToDocumentation={linkToDocumentation}
       />
     );
@@ -79,16 +76,20 @@ describe('###Documentation flyout component', () => {
     expect(screen.getByTestId('language-documentation-navigation-link')).toBeInTheDocument();
   });
 
-  it('contains the two last sections', () => {
+  it('contains the two last sections', async () => {
     renderFlyout();
-    expect(screen.getByText('Section two')).toBeInTheDocument();
-    expect(screen.getByText('Section three')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Section two')).toBeInTheDocument();
+      expect(screen.getByText('Section three')).toBeInTheDocument();
+    });
   });
 
-  it('contains the correct section if user updates the search input', () => {
+  it('contains the correct section if user updates the search input', async () => {
     renderFlyout();
     const input = screen.getByTestId('language-documentation-navigation-search');
     fireEvent.change(input, { target: { value: 'two' } });
-    expect(screen.getByText('Section two')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Section two')).toBeInTheDocument();
+    });
   });
 });

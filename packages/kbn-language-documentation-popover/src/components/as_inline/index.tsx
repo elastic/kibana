@@ -6,31 +6,43 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useState, useRef, useMemo } from 'react';
+import React, { useCallback, useState, useRef, useMemo, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, euiScrollBarStyles, EuiSpacer } from '@elastic/eui';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
 import { DocumentationMainContent, DocumentationNavigation } from '../shared';
 import type { LanguageDocumentationSections } from '../../types';
+import { getESQLDocsSections } from '../../sections';
 
 interface DocumentationInlineProps {
-  sections?: LanguageDocumentationSections;
   searchInDescription?: boolean;
 }
 
 const MAX_HEIGHT = 250;
 
-function DocumentationInline({ sections, searchInDescription }: DocumentationInlineProps) {
+function DocumentationInline({ searchInDescription }: DocumentationInlineProps) {
   const theme = useEuiTheme();
+  const [documentationSections, setDocumentationSections] =
+    useState<LanguageDocumentationSections>();
   const scrollBarStyles = euiScrollBarStyles(theme);
   const [selectedSection, setSelectedSection] = useState<string | undefined>();
   const [searchText, setSearchText] = useState('');
 
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
 
+  useEffect(() => {
+    async function getDocumentation() {
+      const sections = await getESQLDocsSections();
+      setDocumentationSections(sections);
+    }
+    if (!documentationSections) {
+      getDocumentation();
+    }
+  }, [documentationSections]);
+
   const filteredGroups = useMemo(() => {
-    return getFilteredGroups(searchText, searchInDescription, sections, 1);
-  }, [sections, searchText, searchInDescription]);
+    return getFilteredGroups(searchText, searchInDescription, documentationSections, 1);
+  }, [documentationSections, searchText, searchInDescription]);
 
   const onNavigationChange = useCallback((selectedOptions) => {
     setSelectedSection(selectedOptions.length ? selectedOptions[0].label : undefined);
@@ -61,7 +73,7 @@ function DocumentationInline({ sections, searchInDescription }: DocumentationInl
         searchText={searchText}
         scrollTargets={scrollTargets}
         filteredGroups={filteredGroups}
-        sections={sections}
+        sections={documentationSections}
       />
     </div>
   );

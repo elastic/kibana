@@ -12,12 +12,9 @@ import React, { memo, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCode, EuiButtonIcon } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
-import {
-  LanguageDocumentationInline,
-  type LanguageDocumentationSections,
-} from '@kbn/language-documentation-popover';
+import { LanguageDocumentationInline } from '@kbn/language-documentation-popover';
 import { getLimitFromESQLQuery } from '@kbn/esql-utils';
-import { type MonacoMessage, getDocumentationSections } from '../helpers';
+import { type MonacoMessage } from '../helpers';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { QueryHistoryAction, QueryHistory } from './query_history';
 import { SubmitFeedbackComponent } from './feedback_component';
@@ -73,8 +70,6 @@ export const EditorFooter = memo(function EditorFooter({
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
-  const [documentationSections, setDocumentationSections] =
-    useState<LanguageDocumentationSections>();
 
   const onUpdateAndSubmit = useCallback(
     (qs: string) => {
@@ -96,13 +91,9 @@ export const EditorFooter = memo(function EditorFooter({
   }, [isHistoryOpen, setIsHistoryOpen]);
 
   const toggleLanguageComponent = useCallback(async () => {
-    if (!documentationSections) {
-      const sections = await getDocumentationSections('esql');
-      setDocumentationSections(sections);
-    }
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
     setIsHistoryOpen(false);
-  }, [documentationSections, isLanguageComponentOpen, setIsHistoryOpen]);
+  }, [isLanguageComponentOpen, setIsHistoryOpen]);
 
   const limit = useMemo(() => getLimitFromESQLQuery(code), [code]);
 
@@ -317,7 +308,7 @@ export const EditorFooter = memo(function EditorFooter({
       )}
       {isLanguageComponentOpen && editorIsInline && (
         <EuiFlexItem grow={false}>
-          <LanguageDocumentationInline sections={documentationSections} searchInDescription />
+          <LanguageDocumentationInline searchInDescription />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

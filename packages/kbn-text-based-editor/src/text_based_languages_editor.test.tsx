@@ -16,21 +16,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TextBasedLanguagesEditor } from './text_based_languages_editor';
 import type { TextBasedLanguagesEditorProps } from './types';
 import { ReactWrapper } from 'enzyme';
-
-jest.mock('./helpers', () => {
-  const module = jest.requireActual('./helpers');
-  return {
-    ...module,
-    getDocumentationSections: () => ({
-      groups: [
-        {
-          label: 'How it works',
-          items: [],
-        },
-      ],
-    }),
-  };
-});
 import { of } from 'rxjs';
 
 describe('TextBasedLanguagesEditor', () => {

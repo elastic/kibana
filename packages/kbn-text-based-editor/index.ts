@@ -9,7 +9,6 @@
 
 export type { TextBasedLanguagesEditorProps } from './src/types';
 export { fetchFieldsFromESQL } from './src/fetch_fields_from_esql';
-export { getDocumentationSections } from './src/helpers';
 import { TextBasedLanguagesEditor } from './src/text_based_languages_editor';
 
 // React.lazy support

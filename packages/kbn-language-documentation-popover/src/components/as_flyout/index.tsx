@@ -10,23 +10,25 @@ import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { EuiFlyout, useEuiTheme, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
 import { DocumentationMainContent, DocumentationNavigation } from '../shared';
+import { getESQLDocsSections } from '../../sections';
 import type { LanguageDocumentationSections } from '../../types';
 
 interface DocumentationFlyoutProps {
   isHelpMenuOpen: boolean;
   onHelpMenuVisibilityChange: (status: boolean) => void;
-  sections?: LanguageDocumentationSections;
   searchInDescription?: boolean;
   linkToDocumentation?: string;
 }
 
 function DocumentationFlyout({
-  sections,
   searchInDescription,
   linkToDocumentation,
   isHelpMenuOpen,
   onHelpMenuVisibilityChange,
 }: DocumentationFlyoutProps) {
+  const [documentationSections, setDocumentationSections] =
+    useState<LanguageDocumentationSections>();
+
   const { euiTheme } = useEuiTheme();
   const DEFAULT_WIDTH = euiTheme.base * 34;
 
@@ -34,10 +36,6 @@ function DocumentationFlyout({
   const [searchText, setSearchText] = useState('');
 
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
-
-  const filteredGroups = useMemo(() => {
-    return getFilteredGroups(searchText, searchInDescription, sections, 1);
-  }, [sections, searchText, searchInDescription]);
 
   const onNavigationChange = useCallback((selectedOptions) => {
     setSelectedSection(selectedOptions.length ? selectedOptions[0].label : undefined);
@@ -50,6 +48,20 @@ function DocumentationFlyout({
   useEffect(() => {
     onHelpMenuVisibilityChange(isHelpMenuOpen ?? false);
   }, [isHelpMenuOpen, onHelpMenuVisibilityChange]);
+
+  useEffect(() => {
+    async function getDocumentation() {
+      const sections = await getESQLDocsSections();
+      setDocumentationSections(sections);
+    }
+    if (!documentationSections) {
+      getDocumentation();
+    }
+  }, [documentationSections]);
+
+  const filteredGroups = useMemo(() => {
+    return getFilteredGroups(searchText, searchInDescription, documentationSections, 1);
+  }, [documentationSections, searchText, searchInDescription]);
 
   return (
     <>
@@ -76,7 +88,7 @@ function DocumentationFlyout({
               searchText={searchText}
               scrollTargets={scrollTargets}
               filteredGroups={filteredGroups}
-              sections={sections}
+              sections={documentationSections}
             />
           </EuiFlyoutBody>
         </EuiFlyout>

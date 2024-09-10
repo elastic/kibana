@@ -19,10 +19,7 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
-import {
-  LanguageDocumentationFlyout,
-  type LanguageDocumentationSections,
-} from '@kbn/language-documentation-popover';
+import { LanguageDocumentationFlyout } from '@kbn/language-documentation-popover';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export const ESQLMenuPopover = () => {
@@ -31,17 +28,10 @@ export const ESQLMenuPopover = () => {
   const { docLinks } = kibana.services;
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
-  const [documentationSections, setDocumentationSections] =
-    useState<LanguageDocumentationSections>();
 
   const toggleLanguageComponent = useCallback(async () => {
-    if (!documentationSections) {
-      const { getDocumentationSections } = await import('@kbn/text-based-editor');
-      const sections = await getDocumentationSections('esql');
-      setDocumentationSections(sections);
-    }
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
-  }, [documentationSections, isLanguageComponentOpen]);
+  }, [isLanguageComponentOpen]);
 
   const esqlPanelItems = useMemo(() => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
@@ -125,7 +115,6 @@ export const ESQLMenuPopover = () => {
         <EuiContextMenuPanel size="s" items={esqlPanelItems} />
       </EuiPopover>
       <LanguageDocumentationFlyout
-        sections={documentationSections}
         searchInDescription
         linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
         isHelpMenuOpen={isLanguageComponentOpen}
