@@ -15,11 +15,9 @@ import { TheHiveTLP } from './types';
 
 const { emptyField } = fieldValidators;
 
-const tlpOptions: Array<{ text: string; value: number }> = Object.entries(TheHiveTLP).map(
-  ([_, value], index) => ({
-    text: value,
-    value: index,
-  })
+const tlpOptions = Object.entries(TheHiveTLP).reduce<Array<{ text: string; value: number }>>(
+  (acc, [key, value]) => (typeof value === 'number' ? [...acc, { text: key, value }] : acc),
+  []
 );
 
 const TheHiveFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = () => {
@@ -41,7 +39,7 @@ const TheHiveFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ()
               validator: emptyField(i18n.TLP_REQUIRED),
             },
           ],
-          defaultValue: tlpOptions[2].value,
+          defaultValue: TheHiveTLP.AMBER,
         }}
         onChange={onTLPChange}
         componentProps={{

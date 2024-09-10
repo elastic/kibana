@@ -6,9 +6,9 @@
  */
 
 export enum TheHiveTLP {
-  CLEAR = 'CLEAR',
-  GREEN = 'GREEN',
-  AMBER = 'AMBER',
-  AMBER_STRICT = 'AMBER+STRICT',
-  RED = 'RED',
+  CLEAR = 0,
+  GREEN = 1,
+  AMBER = 2,
+  'AMBER+STRICT' = 3,
+  RED = 4,
 }

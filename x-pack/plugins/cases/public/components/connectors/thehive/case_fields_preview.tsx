@@ -15,8 +15,8 @@ import * as i18n from './translations';
 import { TheHiveTLP } from './types';
 
 const mapTLP = (tlpValue: number): string => {
-  const tlpValues = Object.values(TheHiveTLP);
-  return tlpValues[tlpValue] || TheHiveTLP.AMBER;
+  const entry = Object.entries(TheHiveTLP).find(([_, value]) => value === tlpValue);
+  return entry?.[0] ?? 'AMBER';
 };
 
 const TheHiveFieldsPreviewComponent: React.FunctionComponent<

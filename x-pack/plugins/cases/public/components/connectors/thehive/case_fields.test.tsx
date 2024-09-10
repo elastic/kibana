@@ -45,8 +45,6 @@ describe('TheHive Cases Fields', () => {
     );
 
     userEvent.selectOptions(screen.getByTestId('tlp-field'), '4');
-    expect(await screen.findByTestId('tlp-field')).toHaveValue(
-      Object.values(TheHiveTLP).indexOf(TheHiveTLP.RED).toString()
-    );
+    expect(await screen.findByTestId('tlp-field')).toHaveValue(TheHiveTLP.RED.toString());
   });
 });
