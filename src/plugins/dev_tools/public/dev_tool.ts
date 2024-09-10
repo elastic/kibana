@@ -8,7 +8,7 @@
 
 import { RouteComponentProps } from 'react-router-dom';
 
-import { AppUnmount, ScopedHistory } from '@kbn/core/public';
+import { AppUnmount } from '@kbn/core/public';
 import { DevToolsStartServices } from './types';
 
 /**
@@ -21,7 +21,7 @@ export type CreateDevToolArgs = Omit<DevToolApp, 'enable' | 'disable' | 'isDisab
 
 interface DevToolMountParams extends DevToolsStartServices {
   element: HTMLDivElement;
-  history: ScopedHistory;
+  history: RouteComponentProps['history'];
   location: RouteComponentProps['location'];
 }
 

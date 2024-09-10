@@ -35,7 +35,7 @@ export interface AppServices {
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
-  history: ScopedHistory;
+  history: RouteComponentProps['history'];
   appServices: AppServices;
   location: RouteComponentProps['location'];
   startServices: DevToolsStartServices;

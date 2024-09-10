@@ -8,10 +8,11 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HttpSetup, NotificationsSetup, DocLinksStart, ScopedHistory } from '@kbn/core/public';
+import { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { RouteComponentProps } from 'react-router-dom';
 import {
   createStorage,
   createHistory,
@@ -33,7 +34,7 @@ export interface BootDependencies extends ConsoleStartServices {
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;
-  history: ScopedHistory;
+  history: RouteComponentProps['history'];
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
   isMonacoEnabled: boolean;

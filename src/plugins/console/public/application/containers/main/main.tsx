@@ -79,7 +79,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
 
   // Update currentView on initial load if URL contains tabs
   useEffect(() => {
-    if (!isEmbeddable && initialLoad.current) {
+    if (!isEmbeddable && routeHistory && initialLoad.current) {
       loadTabFromURL(routeHistory.location.hash, currentView, (tab) =>
         dispatch({ type: 'setCurrentView', payload: tab })
       );
@@ -89,7 +89,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
 
   // Update the currentView when URL changes
   useEffect(() => {
-    if (!isEmbeddable) {
+    if (!isEmbeddable && routeHistory) {
       const unlisten = routeHistory.listen(() => {
         window.dispatchEvent(new HashChangeEvent('hashchange'));
         loadTabFromURL(routeHistory.location.hash, currentView, (tab) =>
@@ -102,7 +102,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
 
   // Update the URL hash when currentView changes
   useEffect(() => {
-    if (!isEmbeddable && routeHistory.location.hash !== `#/${currentView}`) {
+    if (!isEmbeddable && routeHistory && routeHistory.location.hash !== `#/${currentView}`) {
       routeHistory.push(`#/${currentView}`);
     }
   }, [currentView, isEmbeddable, routeHistory]);
