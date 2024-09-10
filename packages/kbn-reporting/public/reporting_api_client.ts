@@ -251,7 +251,7 @@ export class ReportingAPIClient implements IReportingAPI {
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
   public verifyBrowser() {
-    return this.http.post<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.BROWSER);
+    return this.http.get<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.BROWSER);
   }
 
   public verifyScreenCapture() {

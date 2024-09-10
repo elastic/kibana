@@ -47,7 +47,8 @@ const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 const DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const DATE_BEFORE_ALERT_CREATION = moment().format(DATE_FORMAT);
 
-describe('Entity Analytics Dashboard', { tags: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/192513
+describe.skip('Entity Analytics Dashboard', { tags: ['@ess'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });

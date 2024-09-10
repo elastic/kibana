@@ -11,6 +11,7 @@ import { PublishingSubject } from '../publishing_subject';
 
 export interface PublishesDisabledActionIds {
   disabledActionIds: PublishingSubject<string[] | undefined>;
+  setDisabledActionIds: (ids: string[] | undefined) => void;
   getAllTriggersDisabled?: () => boolean;
 }
 
@@ -22,6 +23,8 @@ export const apiPublishesDisabledActionIds = (
   unknownApi: null | unknown
 ): unknownApi is PublishesDisabledActionIds => {
   return Boolean(
-    unknownApi && (unknownApi as PublishesDisabledActionIds)?.disabledActionIds !== undefined
+    unknownApi &&
+      (unknownApi as PublishesDisabledActionIds)?.disabledActionIds !== undefined &&
+      typeof (unknownApi as PublishesDisabledActionIds)?.setDisabledActionIds === 'function'
   );
 };
