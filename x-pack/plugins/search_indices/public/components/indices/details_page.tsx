@@ -28,11 +28,13 @@ import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { useIndex } from '../../hooks/api/use_index';
 import { useKibana } from '../../hooks/use_kibana';
 import { DeleteIndexModal } from './delete_index_modal';
+import { IndexloadingError } from './details_page_loading_error';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const { console: consolePlugin, docLinks, application } = useKibana().services;
-  const { data: index, refetch, isLoading, isSuccess } = useIndex(indexName);
+  const { data: index, refetch, isSuccess, isInitialLoading } = useIndex(indexName);
+
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
@@ -41,6 +43,9 @@ export const SearchIndexDetailsPage = () => {
     application.navigateToApp('management', { deepLinkId: 'index_management' });
   }, [application]);
 
+  const refetchIndex = useCallback(() => {
+    refetch();
+  }, [refetch]);
   const [showMoreOptions, setShowMoreOptions] = useState<boolean>(false);
   const [isShowingDeleteModal, setShowDeleteIndexModal] = useState<boolean>(false);
   const moreOptionsPopover = (
@@ -82,8 +87,7 @@ export const SearchIndexDetailsPage = () => {
       />
     </EuiPopover>
   );
-
-  if (isLoading && !index) {
+  if (isInitialLoading) {
     return (
       <SectionLoading>
         {i18n.translate('xpack.searchIndices.loadingDescription', {
@@ -92,63 +96,6 @@ export const SearchIndexDetailsPage = () => {
       </SectionLoading>
     );
   }
-  const pageloadingError = (
-    <EuiPageTemplate.EmptyPrompt
-      data-test-subj="pageLoadError"
-      color="danger"
-      iconType="warning"
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.searchIndices.pageLoaError.errorTitle"
-            defaultMessage="Unable to load index details"
-          />
-        </h2>
-      }
-      body={
-        <EuiText color="subdued">
-          <FormattedMessage
-            id="xpack.searchIndices.pageLoadError.description"
-            defaultMessage="We encountered an error loading data for index {indexName}. Make sure that the index name in the URL is correct and try again."
-            values={{
-              indexName,
-            }}
-          />
-        </EuiText>
-      }
-      actions={
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="danger"
-              iconType="arrowLeft"
-              onClick={() => navigateToIndexListPage()}
-              data-test-subj="loadingErrorBackToIndicesButton"
-            >
-              <FormattedMessage
-                id="xpack.searchIndices.pageLoadError.backToIndicesButtonLabel"
-                defaultMessage="Back to indices"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconSide="right"
-              onClick={() => refetch}
-              iconType="refresh"
-              color="danger"
-              data-test-subj="reloadButton"
-            >
-              <FormattedMessage
-                id="xpack.searchIndices.pageLoadError.reloadButtonLabel"
-                defaultMessage="Reload"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    />
-  );
 
   return (
     <EuiPageTemplate
@@ -159,7 +106,11 @@ export const SearchIndexDetailsPage = () => {
       bottomBorder={false}
     >
       {!isSuccess || !index ? (
-        pageloadingError
+        <IndexloadingError
+          indexName={indexName}
+          navigateToIndexListPage={navigateToIndexListPage}
+          reloadFunction={refetchIndex}
+        />
       ) : (
         <>
           <EuiPageSection>

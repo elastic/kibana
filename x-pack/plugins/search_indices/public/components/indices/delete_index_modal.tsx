@@ -31,8 +31,7 @@ export const DeleteIndexModal: React.FC<DeleteIndexModelProps> = ({
       title={i18n.translate(
         'xpack.searchIndices.indexActionsMenu.deleteIndex.confirmModal.modalTitle',
         {
-          defaultMessage: 'Delete {index}',
-          values: { index: indexName },
+          defaultMessage: 'Delete index',
         }
       )}
       onCancel={onCancel}
@@ -61,7 +60,7 @@ export const DeleteIndexModal: React.FC<DeleteIndexModelProps> = ({
           />
         </p>
         <ul>
-          <li key={indexName}>{indexName}</li>
+          <li>{indexName}</li>
         </ul>
 
         <p>
