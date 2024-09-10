@@ -10,7 +10,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { CancelSyncJobModal } from './sync_job_cancel_modal';
-import '@testing-library/jest-dom/extend-expect';
 import { I18nProvider } from '@kbn/i18n-react';
 
 describe('CancelSyncJobModal', () => {

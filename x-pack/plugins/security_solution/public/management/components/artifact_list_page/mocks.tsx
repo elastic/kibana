@@ -7,9 +7,9 @@
 
 import React from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { act, waitFor, within } from '@testing-library/react';
+import { waitFor, within } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { ArtifactFormComponentProps } from './types';
 import type { ArtifactListPageProps } from './artifact_list_page';
 import { ArtifactListPage } from './artifact_list_page';
@@ -52,6 +52,7 @@ export const getFormComponentMock = (): {
 };
 
 export const getFirstCard = async (
+  user: UserEvent,
   renderResult: ReturnType<AppContextTestRender['render']>,
   {
     showActions = false,
@@ -67,12 +68,12 @@ export const getFirstCard = async (
   const card = cards[0];
 
   if (showActions) {
-    await act(async () => {
-      userEvent.click(within(card).getByTestId(`${testId}-card-header-actions-button`));
+    await user.click(within(card).getByTestId(`${testId}-card-header-actions-button`));
 
-      await waitFor(() => {
-        expect(renderResult.getByTestId(`${testId}-card-header-actions-contextMenuPanel`));
-      });
+    await waitFor(() => {
+      expect(
+        renderResult.getByTestId(`${testId}-card-header-actions-contextMenuPanel`)
+      ).toBeInTheDocument();
     });
   }
 
@@ -80,6 +81,7 @@ export const getFirstCard = async (
 };
 
 export interface ArtifactListPageRenderingSetup {
+  user: UserEvent;
   renderArtifactListPage: (
     props?: Partial<ArtifactListPageProps>
   ) => ReturnType<AppContextTestRender['render']>;
@@ -95,6 +97,9 @@ export interface ArtifactListPageRenderingSetup {
  * Returns the setup needed to render the ArtifactListPage for unit tests
  */
 export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSetup => {
+  // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
+
   const mockedContext = createAppRootMockRenderer();
 
   const { history, coreStart } = mockedContext;
@@ -124,10 +129,11 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
   };
 
   const getCard: ArtifactListPageRenderingSetup['getFirstCard'] = (props) => {
-    return getFirstCard(renderResult, props);
+    return getFirstCard(user, renderResult, props);
   };
 
   return {
+    user,
     renderArtifactListPage,
     history,
     coreStart,
