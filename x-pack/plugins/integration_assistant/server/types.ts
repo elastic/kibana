@@ -54,6 +54,7 @@ export interface CategorizationState {
   pipelineResults: object[];
   finalized: boolean;
   reviewed: boolean;
+  hasTriedOnce: boolean;
   currentPipeline: object;
   currentProcessors: object[];
   invalidCategorization: object[];
@@ -78,6 +79,7 @@ export interface EcsMappingState {
   finalMapping: object;
   chunkMapping: object;
   useFinalMapping: boolean;
+  hasTriedOnce: boolean;
   currentPipeline: object;
   duplicateFields: string[];
   missingKeys: string[];
@@ -110,6 +112,7 @@ export interface RelatedState {
   pipelineResults: object[];
   finalized: boolean;
   reviewed: boolean;
+  hasTriedOnce: boolean;
   currentPipeline: object;
   currentProcessors: object[];
   initialPipeline: object;

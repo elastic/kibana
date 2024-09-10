@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiSpacer } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { HttpSetup } from '@kbn/core-http-browser';
+import { getDatasetDisplayName } from '../../common/utils/get_dataset_display_name';
 import { CspVulnerabilityFinding } from '../../../common/schemas';
 import { CloudSecurityDataTable } from '../../components/cloud_security_data_table';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
@@ -86,6 +87,11 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
   'vulnerability.severity': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
     <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
       {({ finding }) => <SeverityStatusBadge severity={finding.vulnerability.severity} />}
+    </CspVulnerabilityFindingRenderer>
+  ),
+  'data_stream.dataset': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => <>{getDatasetDisplayName(finding.data_stream.dataset) || '-'}</>}
     </CspVulnerabilityFindingRenderer>
   ),
 });

@@ -108,108 +108,111 @@ describe('current status route', () => {
   describe('queryMonitorStatus', () => {
     it('parses expected agg fields', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
-      esClient.search.mockResponseOnce(
-        getEsResponse([
-          {
-            key: 'id1',
-            location: {
-              buckets: [
-                {
-                  key: 'Asia/Pacific - Japan',
-                  status: {
-                    hits: {
-                      hits: [
-                        {
-                          _source: {
-                            '@timestamp': '2022-09-15T16:08:16.724Z',
-                            monitor: {
-                              status: 'up',
-                              id: 'id1',
-                            },
-                            summary: {
-                              up: 1,
-                              down: 0,
-                            },
-                            config_id: 'id1',
-                            observer: {
-                              geo: {
-                                name: 'Asia/Pacific - Japan',
+      esClient.msearch.mockResponseOnce({
+        responses: [
+          getEsResponse([
+            {
+              key: 'id1',
+              location: {
+                buckets: [
+                  {
+                    key: 'Asia/Pacific - Japan',
+                    status: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2022-09-15T16:08:16.724Z',
+                              monitor: {
+                                status: 'up',
+                                id: 'id1',
+                              },
+                              summary: {
+                                up: 1,
+                                down: 0,
+                              },
+                              config_id: 'id1',
+                              observer: {
+                                geo: {
+                                  name: 'Asia/Pacific - Japan',
+                                },
                               },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-          {
-            key: 'id2',
-            location: {
-              buckets: [
-                {
-                  key: 'Asia/Pacific - Japan',
-                  status: {
-                    hits: {
-                      hits: [
-                        {
-                          _source: {
-                            '@timestamp': '2022-09-15T16:09:16.724Z',
-                            monitor: {
-                              status: 'up',
-                              id: 'id2',
-                            },
-                            summary: {
-                              up: 1,
-                              down: 0,
-                            },
-                            config_id: 'id2',
-                            observer: {
-                              geo: {
-                                name: 'Asia/Pacific - Japan',
+            {
+              key: 'id2',
+              location: {
+                buckets: [
+                  {
+                    key: 'Asia/Pacific - Japan',
+                    status: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2022-09-15T16:09:16.724Z',
+                              monitor: {
+                                status: 'up',
+                                id: 'id2',
+                              },
+                              summary: {
+                                up: 1,
+                                down: 0,
+                              },
+                              config_id: 'id2',
+                              observer: {
+                                geo: {
+                                  name: 'Asia/Pacific - Japan',
+                                },
                               },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
                   },
-                },
-                {
-                  key: 'Europe - Germany',
-                  status: {
-                    hits: {
-                      hits: [
-                        {
-                          _source: {
-                            '@timestamp': '2022-09-15T16:19:16.724Z',
-                            monitor: {
-                              status: 'down',
-                              id: 'id2',
-                            },
-                            summary: {
-                              down: 1,
-                              up: 0,
-                            },
-                            config_id: 'id2',
-                            observer: {
-                              geo: {
-                                name: 'Europe - Germany',
+                  {
+                    key: 'Europe - Germany',
+                    status: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2022-09-15T16:19:16.724Z',
+                              monitor: {
+                                status: 'down',
+                                id: 'id2',
+                              },
+                              summary: {
+                                down: 1,
+                                up: 0,
+                              },
+                              config_id: 'id2',
+                              observer: {
+                                geo: {
+                                  name: 'Europe - Germany',
+                                },
                               },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-        ])
-      );
+          ]),
+        ],
+        took: 605,
+      });
       expect(
         await queryMonitorStatus(
           syntheticsEsClient,
@@ -261,108 +264,111 @@ describe('current status route', () => {
 
     it('handles limits with multiple requests', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
-      esClient.search.mockResponseOnce(
-        getEsResponse([
-          {
-            key: 'id1',
-            location: {
-              buckets: [
-                {
-                  key: 'Asia/Pacific - Japan',
-                  status: {
-                    hits: {
-                      hits: [
-                        {
-                          _source: {
-                            '@timestamp': '2022-09-15T16:08:16.724Z',
-                            monitor: {
-                              status: 'up',
-                              id: 'id1',
-                            },
-                            summary: {
-                              up: 1,
-                              down: 0,
-                            },
-                            config_id: 'id1',
-                            observer: {
-                              geo: {
-                                name: 'Asia/Pacific - Japan',
+      esClient.msearch.mockResponseOnce({
+        responses: [
+          getEsResponse([
+            {
+              key: 'id1',
+              location: {
+                buckets: [
+                  {
+                    key: 'Asia/Pacific - Japan',
+                    status: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2022-09-15T16:08:16.724Z',
+                              monitor: {
+                                status: 'up',
+                                id: 'id1',
+                              },
+                              summary: {
+                                up: 1,
+                                down: 0,
+                              },
+                              config_id: 'id1',
+                              observer: {
+                                geo: {
+                                  name: 'Asia/Pacific - Japan',
+                                },
                               },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-          {
-            key: 'id2',
-            location: {
-              buckets: [
-                {
-                  key: 'Asia/Pacific - Japan',
-                  status: {
-                    hits: {
-                      hits: [
-                        {
-                          _source: {
-                            '@timestamp': '2022-09-15T16:09:16.724Z',
-                            monitor: {
-                              status: 'up',
-                              id: 'id2',
-                            },
-                            summary: {
-                              up: 1,
-                              down: 0,
-                            },
-                            config_id: 'id2',
-                            observer: {
-                              geo: {
-                                name: 'Asia/Pacific - Japan',
+            {
+              key: 'id2',
+              location: {
+                buckets: [
+                  {
+                    key: 'Asia/Pacific - Japan',
+                    status: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2022-09-15T16:09:16.724Z',
+                              monitor: {
+                                status: 'up',
+                                id: 'id2',
+                              },
+                              summary: {
+                                up: 1,
+                                down: 0,
+                              },
+                              config_id: 'id2',
+                              observer: {
+                                geo: {
+                                  name: 'Asia/Pacific - Japan',
+                                },
                               },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
                   },
-                },
-                {
-                  key: 'Europe - Germany',
-                  status: {
-                    hits: {
-                      hits: [
-                        {
-                          _source: {
-                            '@timestamp': '2022-09-15T16:19:16.724Z',
-                            monitor: {
-                              status: 'down',
-                              id: 'id2',
-                            },
-                            summary: {
-                              up: 0,
-                              down: 1,
-                            },
-                            config_id: 'id2',
-                            observer: {
-                              geo: {
-                                name: 'Europe - Germany',
+                  {
+                    key: 'Europe - Germany',
+                    status: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2022-09-15T16:19:16.724Z',
+                              monitor: {
+                                status: 'down',
+                                id: 'id2',
+                              },
+                              summary: {
+                                up: 0,
+                                down: 1,
+                              },
+                              config_id: 'id2',
+                              observer: {
+                                geo: {
+                                  name: 'Europe - Germany',
+                                },
                               },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-        ])
-      );
+          ]),
+        ],
+        took: 605,
+      });
 
       /**
        * By passing the function a location count of 10k, it forces the query to paginate once,
@@ -422,122 +428,125 @@ describe('current status route', () => {
         },
         pendingConfigs: {},
       });
-      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(esClient.msearch).toHaveBeenCalledTimes(1);
       // These assertions are to ensure that we are paginating through the IDs we use for filtering
       expect(
         // @ts-expect-error mock search is not lining up with expected type
-        esClient.search.mock.calls[0][0].body.query.bool.filter[2].terms['monitor.id']
+        esClient.msearch.mock.calls[0][0].searches[1].query.bool.filter[2].terms['monitor.id']
       ).toEqual(['id1']);
       expect(
         // @ts-expect-error mock search is not lining up with expected type
-        esClient.search.mock.calls[1][0].body.query.bool.filter[2].terms['monitor.id']
+        esClient.msearch.mock.calls[0][0].searches[3].query.bool.filter[2].terms['monitor.id']
       ).toEqual(['id2']);
     });
 
     it('handles pending configs', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
-      esClient.search.mockResponseOnce(
-        getEsResponse([
-          {
-            key: 'id1',
-            location: {
-              buckets: [
-                {
-                  key: 'Asia/Pacific - Japan',
-                  status: {
-                    hits: {
-                      hits: [
-                        {
-                          _source: {
-                            '@timestamp': '2022-09-15T16:08:16.724Z',
-                            monitor: {
-                              status: 'up',
-                              id: 'id1',
-                            },
-                            summary: {
-                              up: 1,
-                              down: 0,
-                            },
-                            config_id: 'id1',
-                            observer: {
-                              geo: {
-                                name: 'Asia/Pacific - Japan',
+      esClient.msearch.mockResponseOnce({
+        responses: [
+          getEsResponse([
+            {
+              key: 'id1',
+              location: {
+                buckets: [
+                  {
+                    key: 'Asia/Pacific - Japan',
+                    status: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2022-09-15T16:08:16.724Z',
+                              monitor: {
+                                status: 'up',
+                                id: 'id1',
+                              },
+                              summary: {
+                                up: 1,
+                                down: 0,
+                              },
+                              config_id: 'id1',
+                              observer: {
+                                geo: {
+                                  name: 'Asia/Pacific - Japan',
+                                },
                               },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-          {
-            key: 'id2',
-            location: {
-              buckets: [
-                {
-                  key: 'Asia/Pacific - Japan',
-                  status: {
-                    hits: {
-                      hits: [
-                        {
-                          _source: {
-                            '@timestamp': '2022-09-15T16:09:16.724Z',
-                            monitor: {
-                              status: 'up',
-                              id: 'id2',
-                            },
-                            summary: {
-                              up: 1,
-                              down: 0,
-                            },
-                            config_id: 'id2',
-                            observer: {
-                              geo: {
-                                name: 'Asia/Pacific - Japan',
+            {
+              key: 'id2',
+              location: {
+                buckets: [
+                  {
+                    key: 'Asia/Pacific - Japan',
+                    status: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2022-09-15T16:09:16.724Z',
+                              monitor: {
+                                status: 'up',
+                                id: 'id2',
+                              },
+                              summary: {
+                                up: 1,
+                                down: 0,
+                              },
+                              config_id: 'id2',
+                              observer: {
+                                geo: {
+                                  name: 'Asia/Pacific - Japan',
+                                },
                               },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
                   },
-                },
-                {
-                  key: 'Europe - Germany',
-                  status: {
-                    hits: {
-                      hits: [
-                        {
-                          _source: {
-                            '@timestamp': '2022-09-15T16:19:16.724Z',
-                            monitor: {
-                              status: 'down',
-                              id: 'id2',
-                            },
-                            summary: {
-                              down: 1,
-                              up: 0,
-                            },
-                            config_id: 'id2',
-                            observer: {
-                              geo: {
-                                name: 'Europe - Germany',
+                  {
+                    key: 'Europe - Germany',
+                    status: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2022-09-15T16:19:16.724Z',
+                              monitor: {
+                                status: 'down',
+                                id: 'id2',
+                              },
+                              summary: {
+                                down: 1,
+                                up: 0,
+                              },
+                              config_id: 'id2',
+                              observer: {
+                                geo: {
+                                  name: 'Europe - Germany',
+                                },
                               },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-        ])
-      );
+          ]),
+        ],
+        took: 605,
+      });
       expect(
         await queryMonitorStatus(
           syntheticsEsClient,
@@ -668,108 +677,111 @@ describe('current status route', () => {
         } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>,
       ]);
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
-      esClient.search.mockResponseOnce(
-        getEsResponse([
-          {
-            key: 'id1',
-            location: {
-              buckets: [
-                {
-                  key: 'Asia/Pacific - Japan',
-                  status: {
-                    hits: {
-                      hits: [
-                        {
-                          _source: {
-                            '@timestamp': '2022-09-15T16:08:16.724Z',
-                            monitor: {
-                              status: 'up',
-                              id: 'id1',
-                            },
-                            summary: {
-                              up: 1,
-                              down: 0,
-                            },
-                            config_id: 'id1',
-                            observer: {
-                              geo: {
-                                name: 'Asia/Pacific - Japan',
+      esClient.msearch.mockResponseOnce({
+        responses: [
+          getEsResponse([
+            {
+              key: 'id1',
+              location: {
+                buckets: [
+                  {
+                    key: 'Asia/Pacific - Japan',
+                    status: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2022-09-15T16:08:16.724Z',
+                              monitor: {
+                                status: 'up',
+                                id: 'id1',
+                              },
+                              summary: {
+                                up: 1,
+                                down: 0,
+                              },
+                              config_id: 'id1',
+                              observer: {
+                                geo: {
+                                  name: 'Asia/Pacific - Japan',
+                                },
                               },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-          {
-            key: 'id2',
-            location: {
-              buckets: [
-                {
-                  key: 'Asia/Pacific - Japan',
-                  status: {
-                    hits: {
-                      hits: [
-                        {
-                          _source: {
-                            '@timestamp': '2022-09-15T16:09:16.724Z',
-                            monitor: {
-                              status: 'up',
-                              id: 'id2',
-                            },
-                            summary: {
-                              up: 1,
-                              down: 0,
-                            },
-                            config_id: 'id2',
-                            observer: {
-                              geo: {
-                                name: 'Asia/Pacific - Japan',
+            {
+              key: 'id2',
+              location: {
+                buckets: [
+                  {
+                    key: 'Asia/Pacific - Japan',
+                    status: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2022-09-15T16:09:16.724Z',
+                              monitor: {
+                                status: 'up',
+                                id: 'id2',
+                              },
+                              summary: {
+                                up: 1,
+                                down: 0,
+                              },
+                              config_id: 'id2',
+                              observer: {
+                                geo: {
+                                  name: 'Asia/Pacific - Japan',
+                                },
                               },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
                   },
-                },
-                {
-                  key: 'Europe - Germany',
-                  status: {
-                    hits: {
-                      hits: [
-                        {
-                          _source: {
-                            '@timestamp': '2022-09-15T16:19:16.724Z',
-                            monitor: {
-                              status: 'down',
-                              id: 'id2',
-                            },
-                            summary: {
-                              down: 1,
-                              up: 0,
-                            },
-                            config_id: 'id2',
-                            observer: {
-                              geo: {
-                                name: 'Europe - Germany',
+                  {
+                    key: 'Europe - Germany',
+                    status: {
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              '@timestamp': '2022-09-15T16:19:16.724Z',
+                              monitor: {
+                                status: 'down',
+                                id: 'id2',
+                              },
+                              summary: {
+                                down: 1,
+                                up: 0,
+                              },
+                              config_id: 'id2',
+                              observer: {
+                                geo: {
+                                  name: 'Europe - Germany',
+                                },
                               },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-        ])
-      );
+          ]),
+        ],
+        took: 605,
+      });
       const result = await getStatus(
         {
           syntheticsEsClient,
@@ -834,7 +846,7 @@ describe('current status route', () => {
         } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>,
       ]);
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
-      esClient.search.mockResponseOnce(getEsResponse([]));
+      esClient.msearch.mockResponseOnce({ responses: [getEsResponse([])], took: 605 });
       expect(
         await getStatus(
           {

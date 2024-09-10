@@ -46,7 +46,7 @@ jest.mock('../../../../../common/lib/api', () => ({
 const mockOnComplete = jest.fn();
 const mockOnClose = jest.fn();
 
-const wrapper: React.FC = ({ children }) => (
+const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
     <ActionsProvider value={mockActions}>{children}</ActionsProvider>
   </TestProvider>

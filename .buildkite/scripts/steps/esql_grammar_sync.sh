@@ -11,7 +11,7 @@ synchronize_lexer_grammar () {
 
   # Insert the license header
   temp_file=$(mktemp)
-  printf "%s\n\n// DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.\n\n%s" "$(cat $destination_file)" > "$temp_file"
+  printf "// DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.\n\n%s" "$(cat $destination_file)" > "$temp_file"
   mv "$temp_file" "$destination_file"
 
   # Replace the line containing "lexer grammar" with "lexer grammar esql_lexer;"
@@ -33,7 +33,7 @@ synchronize_parser_grammar () {
 
   # Insert the license header
   temp_file=$(mktemp)
-  printf "%s\n\n// DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.\n\n%s" "$(cat ${destination_file})" > "$temp_file"
+  printf "// DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.\n\n%s" "$(cat ${destination_file})" > "$temp_file"
   mv "$temp_file" "$destination_file"
 
   # Replace the line containing "parser grammar" with "parser grammar esql_parser;"

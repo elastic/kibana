@@ -23,7 +23,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../../timelines/store';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
-import { CellActions } from '../components/cell_actions';
+import { CellActions } from '../../shared/components/cell_actions';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { isInTableScope, isTimelineScope } from '../../../../helpers';
 
@@ -108,7 +108,7 @@ export const getColumns: ColumnsProvider = ({ browserFields, eventId, scopeId, g
       return (
         <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
           <TableFieldValueCell
-            contextId={scopeId}
+            scopeId={scopeId}
             data={data as EventFieldsData}
             eventId={eventId}
             fieldFromBrowserField={fieldFromBrowserField}
