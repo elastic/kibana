@@ -11,8 +11,8 @@ import { GlobalSearchBatchedResults, GlobalSearchResult } from '@kbn/global-sear
 import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import React from 'react';
 import { of, throwError } from 'rxjs';
 import { EventReporter } from '.';
@@ -52,6 +52,7 @@ describe('SearchBar', () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
   const core = coreMock.createStart();
   const basePathUrl = '/plugins/globalSearchBar/assets/';
+  let user: UserEvent;
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
   let mockReportUiCounter: typeof usageCollection.reportUiCounter;
@@ -68,6 +69,8 @@ describe('SearchBar', () => {
   });
 
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     applications = applicationServiceMock.createStartContract();
     searchService = globalSearchPluginMock.createStartContract();
 
@@ -210,7 +213,7 @@ describe('SearchBar', () => {
       jest.spyOn(Date, 'now').mockReturnValue(1000);
 
       await focusAndUpdate();
-      userEvent.type(await screen.findByTestId('nav-search-input'), 'Ahoy!');
+      await user.type(await screen.findByTestId('nav-search-input'), 'Ahoy!');
 
       jest.spyOn(Date, 'now').mockReturnValue(2000);
 
@@ -243,7 +246,11 @@ describe('SearchBar', () => {
         </IntlProvider>
       );
 
-      userEvent.type(await screen.findByTestId('nav-search-input'), 'Ahoy!');
+      await waitFor(() => {
+        expect(screen.getByTestId('nav-search-input')).toBeInTheDocument();
+      });
+
+      await user.type(screen.getByTestId('nav-search-input'), 'Ahoy!');
 
       await focusAndUpdate();
 
