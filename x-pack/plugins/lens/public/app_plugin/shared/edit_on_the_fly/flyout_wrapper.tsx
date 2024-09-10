@@ -18,6 +18,7 @@ import {
   EuiButton,
   EuiLink,
   EuiBetaBadge,
+  EuiText,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -87,11 +88,13 @@ export const FlyoutWrapper = ({
             </EuiFlexItem>
             {navigateToLensEditor && (
               <EuiFlexItem grow={false}>
-                <EuiLink onClick={navigateToLensEditor} data-test-subj="navigateToLensEditorLink">
-                  {i18n.translate('xpack.lens.config.editLinkLabel', {
-                    defaultMessage: 'Edit in Lens',
-                  })}
-                </EuiLink>
+                <EuiText size="xs">
+                  <EuiLink onClick={navigateToLensEditor} data-test-subj="navigateToLensEditorLink">
+                    {i18n.translate('xpack.lens.config.editLinkLabel', {
+                      defaultMessage: 'Edit in Lens',
+                    })}
+                  </EuiLink>
+                </EuiText>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
