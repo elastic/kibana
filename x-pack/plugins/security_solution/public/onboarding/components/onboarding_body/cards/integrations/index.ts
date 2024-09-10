@@ -9,10 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { OnboardingCardConfig } from '../../../../types';
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
-import { OnboardingHubCardId } from '../../../../constants';
+import { OnboardingCardId } from '../../../../constants';
 
 export const integrationsCardConfig: OnboardingCardConfig = {
-  id: OnboardingHubCardId.integrations,
+  id: OnboardingCardId.integrations,
   title: i18n.translate('xpack.securitySolution.onboarding.integrationsCard.title', {
     defaultMessage: 'Add data with integrations',
   }),

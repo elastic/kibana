@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { OnboardingHubCardId } from '../../constants';
+import type { OnboardingCardId } from '../../constants';
 import type { OnboardingCardConfig, OnboardingGroupConfig } from '../../types';
 
 /**
@@ -14,7 +14,7 @@ import type { OnboardingCardConfig, OnboardingGroupConfig } from '../../types';
  **/
 export const useCheckCompleteCards = (
   cardsGroupConfig: OnboardingGroupConfig[],
-  setCardComplete: (cardId: OnboardingHubCardId, complete: boolean) => void
+  setCardComplete: (cardId: OnboardingCardId, complete: boolean) => void
 ) => {
   // Stores all cards that have a checkComplete function in a flat array
   const cardsWithCheckComplete = useMemo(
@@ -37,7 +37,7 @@ export const useCheckCompleteCards = (
 
   // Exported function to run the check for a specific card
   const checkCardComplete = useCallback(
-    (cardId: OnboardingHubCardId) => {
+    (cardId: OnboardingCardId) => {
       const cardConfig = cardsWithCheckComplete.find(({ id }) => id === cardId);
 
       if (cardConfig) {

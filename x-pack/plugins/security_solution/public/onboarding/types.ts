@@ -8,7 +8,7 @@
 import type React from 'react';
 import type { IconType } from '@elastic/eui';
 import type { LicenseType } from '@kbn/licensing-plugin/public';
-import type { OnboardingHubCardId } from './constants';
+import type { OnboardingCardId } from './constants';
 import type { RequiredCapabilities } from '../common/lib/capabilities';
 
 export type OnboardingCardComponent = React.FunctionComponent<{
@@ -18,7 +18,7 @@ export type OnboardingCardComponent = React.FunctionComponent<{
 export type OnboardingCardCheckComplete = () => Promise<boolean>;
 
 export interface OnboardingCardConfig {
-  id: OnboardingHubCardId;
+  id: OnboardingCardId;
   title: string;
   icon: IconType;
   /**

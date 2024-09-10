@@ -6,7 +6,7 @@
  */
 
 import { useLocalStorage } from 'react-use';
-import type { OnboardingHubCardId } from '../constants';
+import type { OnboardingCardId } from '../constants';
 
 const LocalStorageKey = {
   completeCards: 'ONBOARDING_HUB.COMPLETE_CARDS',
@@ -23,10 +23,10 @@ const useDefinedLocalStorage = <T>(key: string, defaultValue: T) => {
 };
 
 export const useStoredCompletedCardIds = (spaceId: string) =>
-  useDefinedLocalStorage<OnboardingHubCardId[]>(`${LocalStorageKey.completeCards}.${spaceId}`, []);
+  useDefinedLocalStorage<OnboardingCardId[]>(`${LocalStorageKey.completeCards}.${spaceId}`, []);
 
 export const useStoredExpandedCardId = (spaceId: string) =>
-  useDefinedLocalStorage<OnboardingHubCardId | null>(
+  useDefinedLocalStorage<OnboardingCardId | null>(
     `${LocalStorageKey.expandedCard}.${spaceId}`,
     null
   );

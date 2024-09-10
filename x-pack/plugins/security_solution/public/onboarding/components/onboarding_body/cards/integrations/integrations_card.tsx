@@ -8,13 +8,13 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import type { OnboardingCardComponent } from '../../../../types';
-import { OnboardingCardContentPanel } from '../common/card_content_panel';
+import { OnboardingCardContentWrapper } from '../common/card_content_wrapper';
 
 export const IntegrationsCard: OnboardingCardComponent = ({ setComplete }) => {
   return (
-    <OnboardingCardContentPanel>
+    <OnboardingCardContentWrapper>
       <EuiButton onClick={() => setComplete(false)}>{'Set not complete'}</EuiButton>
-    </OnboardingCardContentPanel>
+    </OnboardingCardContentWrapper>
   );
 };
 

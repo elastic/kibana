@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { useStoredCompletedCardIds } from '../use_stored_state';
-import type { OnboardingHubCardId } from '../../constants';
+import type { OnboardingCardId } from '../../constants';
 
 /**
  * This hook implements the logic for tracking which onboarding cards have been completed using Local Storage.
@@ -16,12 +16,12 @@ export const useCompletedCards = (spaceId: string) => {
   const [completeCardIds, setCompleteCardIds] = useStoredCompletedCardIds(spaceId);
 
   const isCardComplete = useCallback(
-    (cardId: OnboardingHubCardId) => completeCardIds.includes(cardId),
+    (cardId: OnboardingCardId) => completeCardIds.includes(cardId),
     [completeCardIds]
   );
 
   const setCardComplete = useCallback(
-    (cardId: OnboardingHubCardId, complete: boolean) => {
+    (cardId: OnboardingCardId, complete: boolean) => {
       if (complete) {
         setCompleteCardIds((currentCompleteCards = []) => [
           ...new Set([...currentCompleteCards, cardId]),

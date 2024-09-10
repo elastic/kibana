@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useStoredExpandedCardId } from '../use_stored_state';
 import { HEIGHT_ANIMATION_DURATION } from './onboarding_card_panel.styles';
-import type { OnboardingHubCardId } from '../../constants';
+import type { OnboardingCardId } from '../../constants';
 
 const HEADER_OFFSET = 40;
 
@@ -36,7 +36,7 @@ export const useExpandedCard = (spaceId: string) => {
   // This effect implements auto-scroll in the initial render, further changes in the hash should not trigger this effect
   useEffect(() => {
     if (documentReadyState !== 'complete') return; // Wait for page to finish loading before scrolling
-    let cardIdFromHash = location.hash.split('?')[0].replace('#', '') as OnboardingHubCardId | '';
+    let cardIdFromHash = location.hash.split('?')[0].replace('#', '') as OnboardingCardId | '';
     if (!cardIdFromHash) {
       if (expandedCardId == null) return;
       // Use the expanded card id if we have it stored and the hash is empty.

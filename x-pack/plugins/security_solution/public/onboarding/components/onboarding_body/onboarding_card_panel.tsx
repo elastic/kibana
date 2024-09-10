@@ -17,12 +17,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import classnames from 'classnames';
-import type { OnboardingHubCardId } from '../../constants';
+import type { OnboardingCardId } from '../../constants';
 import { CARD_COMPLETE_BADGE, EXPAND_CARD_BUTTON_LABEL } from './translations';
 import { useCardPanelStyles } from './onboarding_card_panel.styles';
 
 interface OnboardingCardPanelProps {
-  id: OnboardingHubCardId;
+  id: OnboardingCardId;
   title: string;
   icon: IconType;
   isExpanded: boolean;

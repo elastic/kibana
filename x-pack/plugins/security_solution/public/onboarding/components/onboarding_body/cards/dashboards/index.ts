@@ -6,15 +6,13 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { OnboardingCardConfig } from '../../../../types';
-import { OnboardingHubCardId } from '../../../../constants';
+import { OnboardingCardId } from '../../../../constants';
+import { DASHBOARDS_CARD_TITLE } from './translations';
 
 export const dashboardsCardConfig: OnboardingCardConfig = {
-  id: OnboardingHubCardId.dashboards,
-  title: i18n.translate('xpack.securitySolution.onboarding.dashboardsCard.title', {
-    defaultMessage: 'View and analyze your data using dashboards',
-  }),
+  id: OnboardingCardId.dashboards,
+  title: DASHBOARDS_CARD_TITLE,
   icon: 'dashboardApp',
   Component: React.lazy(
     () => import('./dashboards_card' /* webpackChunkName: "onboarding_dashboards_card" */)

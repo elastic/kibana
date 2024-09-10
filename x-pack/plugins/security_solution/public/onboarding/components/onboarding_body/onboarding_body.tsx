@@ -9,7 +9,7 @@ import React, { Suspense, useCallback, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
-import { PAGE_CONTENT_WIDTH, type OnboardingHubCardId } from '../../constants';
+import { PAGE_CONTENT_WIDTH, type OnboardingCardId } from '../../constants';
 import { useCardGroupsConfig } from './use_card_groups_config';
 import { useOnboardingContext } from '../onboarding_context';
 import { OnboardingCardGroup } from './onboarding_card_group';
@@ -37,7 +37,7 @@ export const OnboardingBody = React.memo(() => {
   }, [checkAllCardsComplete]);
 
   const createOnToggleExpanded = useCallback(
-    (cardId: OnboardingHubCardId) => () => {
+    (cardId: OnboardingCardId) => () => {
       if (expandedCardId === cardId) {
         setExpandedCardId(null);
       } else {
@@ -50,7 +50,7 @@ export const OnboardingBody = React.memo(() => {
   );
 
   const createSetCardComplete = useCallback(
-    (cardId: OnboardingHubCardId) => (complete: boolean) => {
+    (cardId: OnboardingCardId) => (complete: boolean) => {
       setCardComplete(cardId, complete);
     },
     [setCardComplete]
