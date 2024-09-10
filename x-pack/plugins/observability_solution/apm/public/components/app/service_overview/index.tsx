@@ -17,7 +17,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { isApmSignal, isLogsSignal } from '../../../utils/get_signal_type';
 import { ApmOverview } from './apm_overview';
 import { LogsOverview } from './logs_overview';
-import { isPending } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -60,7 +60,7 @@ export function ServiceOverview() {
   const showApmOverview =
     isEntityCentricExperienceViewEnabled === false || hasApmSignal || !hasSignal;
 
-  if (isPending(serviceEntitySummaryStatus)) {
+  if (serviceEntitySummaryStatus === FETCH_STATUS.LOADING) {
     return (
       <div style={{ textAlign: 'center' }}>
         <EuiLoadingLogo logo="logoObservability" size="l" />
