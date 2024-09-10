@@ -853,6 +853,7 @@ class AgentPolicyService {
           searchFields: ['data_output_id', 'monitoring_output_id'],
           search: escapeSearchQueryPhrase(outputId),
           perPage: SO_SEARCH_LIMIT,
+          namespaces: ['*'],
         })
     ).saved_objects.map(mapAgentPolicySavedObjectToAgentPolicy);
 
