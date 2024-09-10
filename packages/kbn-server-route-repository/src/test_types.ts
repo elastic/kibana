@@ -99,13 +99,12 @@ createServerRouteFactory<{}, { options: { tags: string[] } }>()({
 });
 
 // Public APIs should be versioned
-// @ts-expect-error
 createServerRouteFactory<{}, { options: { tags: string[] } }>()({
+  // @ts-expect-error
   endpoint: 'GET /api/endpoint_with_params',
   options: {
     tags: [],
   },
-  // @ts-expect-error
   handler: async (resources) => {},
 });
 
@@ -115,6 +114,15 @@ createServerRouteFactory<{}, { options: { tags: string[] } }>()({
     tags: [],
   },
   handler: async (resources) => {},
+});
+
+// cannot return observables that are not in the SSE structure
+const route = createServerRouteFactory<{}, {}>()({
+  endpoint: 'POST /internal/endpoint_returning_observable_without_sse_structure',
+  // @ts-expect-error
+  handler: async () => {
+    return of({ streamed_response: true });
+  },
 });
 
 const createServerRoute = createServerRouteFactory<{}, {}>();
@@ -205,15 +213,7 @@ const repository = {
   ...createServerRoute({
     endpoint: 'POST /internal/endpoint_returning_observable',
     handler: async () => {
-      return of({ type: 'foo' as const, data: { streamed_response: true } });
-    },
-  }),
-  // cannot return observables that are not in the SSE structure
-  ...createServerRoute({
-    endpoint: 'POST /internal/endpoint_returning_observable_without_sse_structure',
-    // @ts-expect-error
-    handler: async () => {
-      return of({ streamed_response: true });
+      return of({ type: 'foo' as const, streamed_response: true });
     },
   }),
 };
@@ -408,7 +408,7 @@ assertType<{ path: { serviceName: boolean } }>(
   )
 );
 
-assertType<Observable<{ type: 'foo'; data: { streamed_response: boolean } }>>(
+assertType<Observable<{ type: 'foo'; streamed_response: boolean }>>(
   client.stream('POST /internal/endpoint_returning_observable', {
     timeout: 10,
   })
