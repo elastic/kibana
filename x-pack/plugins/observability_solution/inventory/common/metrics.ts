@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Entity } from './entities';
+
 type MetricType =
   | 'count'
   | 'count_distinct'
@@ -15,59 +17,33 @@ type MetricType =
   | 'min'
   | 'percentile';
 
-type FormatType = 'number' | 'duration' | 'bytes' | 'percentage' | 'currency';
+type MetricFormatType = 'number' | 'duration' | 'bytes' | 'percentage' | 'currency';
 
-interface Format {
-  type: FormatType;
-}
-
-export interface BaseMetric {
-  label: string;
-  type: MetricType;
-  grouping?: string;
-  format?: Format;
-  filter?: string;
+interface MetricFormat {
+  type: MetricFormatType;
 }
 
-export interface CountMetric extends BaseMetric {
-  type: 'count';
-}
-export interface CountDistinctMetric extends BaseMetric {
-  field: string;
-  type: 'count_distinct';
-}
+type MetricEntityBase<
+  TMetricType extends MetricType,
+  TAdditionalProperties extends Record<string, any> = {}
+> = Entity<{
+  metric: {
+    type: TMetricType;
+    format: MetricFormat;
+    grouping?: {
+      field?: string;
+    };
+  } & TAdditionalProperties;
+}>;
 
-export interface SumMetric extends BaseMetric {
-  type: 'sum';
-  field: string;
-}
-
-export interface AvgMetric extends BaseMetric {
-  type: 'avg';
-  field: string;
-}
-
-export interface WeightedAvgMetric extends BaseMetric {
-  type: 'weighted_avg';
-  field: string;
-  by: string;
-}
-
-export interface MaxMetric extends BaseMetric {
-  type: 'max';
-  field: string;
-}
-
-export interface MinMetric extends BaseMetric {
-  type: 'min';
-  field: string;
-}
-
-export interface PercentileMetric extends BaseMetric {
-  type: 'percentile';
-  field: string;
-  percentile: number;
-}
+type CountMetric = MetricEntityBase<'count', {}>;
+type CountDistinctMetric = MetricEntityBase<'count_distinct', { field: string }>;
+type AvgMetric = MetricEntityBase<'avg', { field: string }>;
+type WeightedAvgMetric = MetricEntityBase<'weighted_avg', { field: string; weight: string }>;
+type SumMetric = MetricEntityBase<'sum', { field: string }>;
+type MinMetric = MetricEntityBase<'min', { field: string }>;
+type MaxMetric = MetricEntityBase<'max', { field: string }>;
+type PercentileMetric = MetricEntityBase<'percentile', { field: string; percentile: number }>;
 
 export type Metric =
   | CountMetric
@@ -78,8 +54,3 @@ export type Metric =
   | MaxMetric
   | MinMetric
   | PercentileMetric;
-
-export interface MetricDefinition {
-  filter?: string;
-  metric: Metric;
-}

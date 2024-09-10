@@ -8,6 +8,7 @@
 export interface Entity<TAttributes extends Record<string, any> = {}> {
   id: string;
   name: string;
+  label: string;
   type: string;
   properties: TAttributes;
 }

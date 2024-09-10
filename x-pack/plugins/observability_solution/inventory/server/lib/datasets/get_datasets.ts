@@ -46,7 +46,8 @@ export async function getDatasets({
       entity: {
         id: dataset.name,
         name: dataset.name,
-        type: 'dataStream',
+        label: dataset.name,
+        type: 'datastream',
         properties: {
           'dataset.type': dataset.type,
         },
