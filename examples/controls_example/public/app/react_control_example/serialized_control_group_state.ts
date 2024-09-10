@@ -91,12 +91,12 @@ const initialSerializedControlGroupState = {
   } as object,
   references: [
     {
-      name: `controlGroup_${rangeSliderControlId}:${RANGE_SLIDER_CONTROL}DataView`,
+      name: `controlGroup_${rangeSliderControlId}:rangeSliderDataView`,
       type: 'index-pattern',
       id: WEB_LOGS_DATA_VIEW_ID,
     },
     {
-      name: `controlGroup_${optionsListId}:${OPTIONS_LIST_CONTROL}DataView`,
+      name: `controlGroup_${optionsListId}:optionsListDataView`,
       type: 'index-pattern',
       id: WEB_LOGS_DATA_VIEW_ID,
     },

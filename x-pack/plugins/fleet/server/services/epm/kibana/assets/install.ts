@@ -269,7 +269,7 @@ export async function installKibanaAssetsAndReferences({
   // This is where the memory consumption is rising up in the first place
   const kibanaAssets = getKibanaAssets(packageInstallContext);
   if (installedPkg) {
-    await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
+    await deleteKibanaSavedObjectsAssets({ installedPkg, spaceId });
   }
   let installedKibanaAssetsRefs: KibanaAssetReference[] = [];
   if (!installAsAdditionalSpace) {
@@ -344,7 +344,7 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
       'Impossible to delete kibana assets from the space where the package was installed, you must uninstall the package.'
     );
   }
-  await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
+  await deleteKibanaSavedObjectsAssets({ installedPkg, spaceId });
   await saveKibanaAssetsRefs(savedObjectsClient, pkgName, [], true);
 }
 

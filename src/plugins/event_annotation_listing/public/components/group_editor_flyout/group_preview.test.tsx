@@ -148,7 +148,7 @@ describe('group editor preview', () => {
     expect(getEmbeddableTimeRange()).toEqual({ from: 'now/d', to: 'now/d' });
 
     // from chart brush
-    userEvent.click(screen.getByTestId('brushEnd'));
+    await userEvent.click(screen.getByTestId('brushEnd'));
 
     EuiSuperDatePickerTestHarness.assertCurrentRange(
       { from: BRUSH_RANGE[0], to: BRUSH_RANGE[1] },
@@ -162,14 +162,14 @@ describe('group editor preview', () => {
   });
 
   it('updates the time field', async () => {
-    EuiSuperDatePickerTestHarness.togglePopover();
+    await EuiSuperDatePickerTestHarness.togglePopover();
 
     const select = screen.getByRole('combobox', { name: 'Time field' });
 
     expect(select).toHaveValue('@timestamp');
     expect(getCurrentTimeField(getLensAttributes())).toBe('@timestamp');
 
-    userEvent.selectOptions(select, 'other-time-field');
+    await userEvent.selectOptions(select, 'other-time-field');
 
     expect(select).toHaveValue('other-time-field');
 
@@ -178,11 +178,11 @@ describe('group editor preview', () => {
     });
   });
 
-  it('refreshes the chart data', () => {
+  it('refreshes the chart data', async () => {
     expect(defaultProps.refreshSearchSession).not.toHaveBeenCalled();
     expect(getEmbeddableSearchSessionId()).toBe(defaultProps.searchSessionId);
 
-    EuiSuperDatePickerTestHarness.refresh();
+    await EuiSuperDatePickerTestHarness.refresh();
 
     expect(defaultProps.refreshSearchSession).toHaveBeenCalled();
 
