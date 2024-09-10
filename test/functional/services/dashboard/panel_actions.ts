@@ -266,19 +266,33 @@ export class DashboardPanelActionsService extends FtrService {
     await this.expectLinkedToLibrary(newTitle);
   }
 
+  async panelActionExists(testSubject: string, wrapper?: WebElementWrapper) {
+    this.log.debug(`panelActionExists(${testSubject})`);
+    return wrapper
+      ? await this.testSubjects.descendantExists(testSubject, wrapper)
+      : await this.testSubjects.exists(testSubject, { allowHidden: true });
+  }
+
+  async panelActionExistsByTitle(testSubject: string, title = '') {
+    this.log.debug(`panelActionExists(${testSubject}) on "${title}"`);
+    const wrapper = title ? await this.getPanelWrapper(title) : undefined;
+
+    return wrapper
+      ? await this.testSubjects.descendantExists(testSubject, wrapper)
+      : await this.testSubjects.exists(testSubject, { allowHidden: true });
+  }
+
   async expectExistsPanelAction(testSubject: string, title = '') {
     this.log.debug('expectExistsPanelAction', testSubject, title);
 
-    const panelWrapper = title ? await this.getPanelWrapper(title) : undefined;
+    const wrapper = title ? await this.getPanelWrapper(title) : undefined;
 
-    const exists = panelWrapper
-      ? await this.testSubjects.descendantExists(testSubject, panelWrapper)
-      : await this.testSubjects.exists(testSubject, { allowHidden: true });
+    const exists = this.panelActionExists(testSubject, wrapper);
 
     if (!exists) {
-      await this.openContextMenu(panelWrapper);
+      await this.openContextMenu(wrapper);
       await this.testSubjects.existOrFail(testSubject, { allowHidden: true });
-      await this.toggleContextMenu(panelWrapper);
+      await this.toggleContextMenu(wrapper);
     }
   }
 
@@ -308,15 +322,13 @@ export class DashboardPanelActionsService extends FtrService {
 
   async expectMissingPanelAction(testSubject: string, title = '') {
     this.log.debug('expectMissingPanelAction', testSubject, title);
-    const panelWrapper = title ? await this.getPanelWrapper(title) : undefined;
-    const exists = panelWrapper
-      ? await panelWrapper?.findAllByTestSubject(testSubject)
-      : await this.testSubjects.exists(testSubject, { allowHidden: true });
+    const wrapper = title ? await this.getPanelWrapper(title) : undefined;
+    const exists = this.panelActionExists(testSubject, wrapper);
 
     if (!exists) {
-      await this.openContextMenu(panelWrapper);
+      await this.openContextMenu(wrapper);
       await this.testSubjects.missingOrFail(testSubject, { allowHidden: true });
-      await this.toggleContextMenu(panelWrapper);
+      await this.toggleContextMenu(wrapper);
     }
   }
 
