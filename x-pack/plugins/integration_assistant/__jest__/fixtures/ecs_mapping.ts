@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SamplesFormatName } from '../../common/api/model/common_attributes';
+
 export const ecsMappingExpectedResults = {
   mapping: {
     mysql_enterprise: {
@@ -64,8 +66,15 @@ export const ecsMappingExpectedResults = {
         },
       },
       {
+        set: {
+          copy_from: 'message',
+          field: 'originalMessage',
+          tag: 'copy_original_message',
+        },
+      },
+      {
         rename: {
-          field: 'message',
+          field: 'originalMessage',
           target_field: 'event.original',
           tag: 'rename_message',
           ignore_missing: true,
@@ -74,10 +83,17 @@ export const ecsMappingExpectedResults = {
       },
       {
         remove: {
+          field: 'originalMessage',
+          if: 'ctx.event?.original != null',
+          ignore_missing: true,
+          tag: 'remove_copied_message',
+        },
+      },
+      {
+        remove: {
           field: 'message',
           ignore_missing: true,
           tag: 'remove_message',
-          if: 'ctx.event?.original != null',
         },
       },
       {
@@ -450,7 +466,7 @@ export const ecsTestState = {
   finalMapping: { test: 'testmapping' },
   sampleChunks: [''],
   results: { test: 'testresults' },
-  samplesFormat: 'testsamplesFormat',
+  samplesFormat: { name: SamplesFormatName.Values.json },
   ecsVersion: 'testversion',
   chunkMapping: { test1: 'test1' },
   useFinalMapping: false,
@@ -462,4 +478,5 @@ export const ecsTestState = {
   packageName: 'testpackage',
   dataStreamName: 'testDataStream',
   combinedSamples: '{"test1": "test1"}',
+  additionalProcessors: [],
 };
