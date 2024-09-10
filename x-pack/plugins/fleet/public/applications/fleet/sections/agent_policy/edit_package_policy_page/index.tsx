@@ -106,7 +106,7 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { isAgentlessAgentPolicy } = useAgentless();
+  const { isAgentlessEnabled } = useAgentless();
 
   const {
     // data
@@ -441,8 +441,6 @@ export const EditPackagePolicyForm = memo<{
     ]
   );
 
-  const agentlessPolicy = agentPolicies.find((agentPolicy) => agentPolicy?.supports_agentless);
-
   const replaceConfigurePackage = replaceDefineStepView && originalPackagePolicy && packageInfo && (
     <ExtensionWrapper>
       <replaceDefineStepView.Component
@@ -453,7 +451,7 @@ export const EditPackagePolicyForm = memo<{
         onChange={handleExtensionViewOnChange}
         validationResults={validationResults}
         isEditPage={true}
-        isAgentlessEnabled={isAgentlessAgentPolicy(agentlessPolicy)}
+        isAgentlessEnabled={isAgentlessEnabled}
       />
     </ExtensionWrapper>
   );

@@ -16,9 +16,11 @@ export default createTestConfig({
   kbnServerArgs: [
     `--xpack.fleet.packages.0.name=cloud_security_posture`,
     `--xpack.fleet.packages.0.version=${CLOUD_CREDENTIALS_PACKAGE_VERSION}`,
+    `--xpack.fleet.agentless.enabled=true`,
+    `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
+    `--xpack.fleet.internal.fleetServerStandalone=true`,
 
-    // Agentless Configuration based on Serverless Security Dev Yaml - config/serverless.security.dev.yml
-    `--xpack.fleet.enableExperimental.0=agentless`,
+    // Agentless Configuration based on Serverless Secu`--xpack.fleet.agentless.enabled=true`,
     `--xpack.fleet.agentPolicies.0.id=agentless`,
     `--xpack.fleet.agentPolicies.0.name=agentless`,
     `--xpack.fleet.agentPolicies.0.package_policies=[]`,
