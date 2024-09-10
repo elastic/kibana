@@ -12,18 +12,23 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'header', 'timePicker']);
+  const { common, visualize, visEditor, header } = getPageObjects([
+    'common',
+    'visualize',
+    'visEditor',
+    'header',
+  ]);
   const comboBox = getService('comboBox');
 
   describe('dynamic options', () => {
     before(async () => {
-      await PageObjects.visualize.initTests();
+      await visualize.initTests();
     });
 
     describe('without chained controls', () => {
       beforeEach(async () => {
-        await PageObjects.common.navigateToApp('visualize');
-        await PageObjects.visualize.loadSavedVisualization('dynamic options input control', {
+        await common.navigateToApp('visualize');
+        await visualize.loadSavedVisualization('dynamic options input control', {
           navigateToVisualize: false,
         });
       });
@@ -33,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(initialOptions.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU');
 
         await comboBox.filterOptionsList('listControlSelect0', 'R');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
         const updatedOptions = await comboBox.getOptionsList('listControlSelect0');
         expect(updatedOptions.trim().split('\n').join()).to.equal('AR,BR,FR,GR,IR,KR,RO,RU,RW');
@@ -41,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not fetch new options when non-string is filtered', async () => {
         await comboBox.set('fieldSelect-0', 'clientip');
-        await PageObjects.visEditor.clickGo();
+        await visEditor.clickGo();
 
         const initialOptions = await comboBox.getOptionsList('listControlSelect0');
         expect(initialOptions.trim().split('\n').join()).to.equal(
@@ -49,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await comboBox.filterOptionsList('listControlSelect0', '17');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
         const updatedOptions = await comboBox.getOptionsList('listControlSelect0');
         expect(updatedOptions.trim().split('\n').join()).to.equal(
@@ -60,11 +65,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('with chained controls', () => {
       before(async () => {
-        await PageObjects.common.navigateToApp('visualize');
-        await PageObjects.visualize.loadSavedVisualization(
-          'chained input control with dynamic options',
-          { navigateToVisualize: false }
-        );
+        await common.navigateToApp('visualize');
+        await visualize.loadSavedVisualization('chained input control with dynamic options', {
+          navigateToVisualize: false,
+        });
         await comboBox.set('listControlSelect0', 'win 7');
       });
 
@@ -73,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(initialOptions.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,MX,NG,PK');
 
         await comboBox.filterOptionsList('listControlSelect1', 'R');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
         const updatedOptions = await comboBox.getOptionsList('listControlSelect1');
         expect(updatedOptions.trim().split('\n').join()).to.equal('AR,BR,FR,GR,IR,KR,RO,RS,RU');
