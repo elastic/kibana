@@ -264,16 +264,6 @@ export const reportingExportModalProvider = ({
 
     const requiresSavedState = sharingData.locatorParams === null;
 
-    const relativePathPDF = apiClient.getReportingPublicJobPath(
-      'printablePdfV2',
-      apiClient.getDecoratedJobParams(getJobParams(jobProviderOptions, 'printablePdfV2')())
-    );
-
-    const relativePathPNG = apiClient.getReportingPublicJobPath(
-      'pngV2',
-      apiClient.getDecoratedJobParams(getJobParams(jobProviderOptions, 'pngV2')())
-    );
-
     const generateReportPDF = ({
       intl,
       optimizedForPrinting = false,
@@ -403,7 +393,14 @@ export const reportingExportModalProvider = ({
       },
       label: 'PDF' as const,
       generateExport: generateReportPDF,
-      generateExportUrl: () => new URL(relativePathPDF, window.location.href).toString(),
+      generateExportUrl: ({ optimizedForPrinting }) => {
+        const relativePathPDF = apiClient.getReportingPublicJobPath(
+          'printablePdfV2',
+          apiClient.getDecoratedJobParams(getJobParams(jobProviderOptions, 'printablePdfV2')())
+        );
+
+        return new URL(relativePathPDF, window.location.href).toString();
+      },
       reportType: 'printablePdfV2',
       requiresSavedState,
       helpText: (
@@ -434,7 +431,14 @@ export const reportingExportModalProvider = ({
       },
       label: 'PNG' as const,
       generateExport: generateReportPNG,
-      generateExportUrl: () => new URL(relativePathPNG, window.location.href).toString(),
+      generateExportUrl: () => {
+        const relativePathPNG = apiClient.getReportingPublicJobPath(
+          'pngV2',
+          apiClient.getDecoratedJobParams(getJobParams(jobProviderOptions, 'pngV2')())
+        );
+
+        return new URL(relativePathPNG, window.location.href).toString();
+      },
       reportType: 'pngV2',
       requiresSavedState,
       helpText: (
