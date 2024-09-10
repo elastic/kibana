@@ -66,6 +66,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) =
       label={i18n.translate('xpack.serverlessSearch.connectors.serviceTypeLabel', {
         defaultMessage: 'Connector type',
       })}
+      data-test-subj="serverlessSearchEditConnectorType"
       fullWidth
     >
       <EuiSuperSelect
