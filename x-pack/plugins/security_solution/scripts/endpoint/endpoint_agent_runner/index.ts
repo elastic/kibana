@@ -15,6 +15,7 @@ const runSetupAll: RunFn = async (cliContext) => {
   const apiKey = cliContext.flags.apiKey as string;
   const kibanaUrl = cliContext.flags.kibanaUrl as string;
   const elasticUrl = cliContext.flags.elasticUrl as string;
+  const spaceId = cliContext.flags.spaceId as string;
   const fleetServerUrl = cliContext.flags.fleetServerUrl as string;
   const version = cliContext.flags.version as string;
   const policy = cliContext.flags.policy as string;
@@ -30,6 +31,7 @@ const runSetupAll: RunFn = async (cliContext) => {
     version,
     policy,
     log,
+    spaceId,
   });
 };
 
@@ -45,7 +47,16 @@ export const cli = () => {
   'multipass', install Elastic Agent and enroll it with Fleet. Can be used multiple times
   against the same stack.`,
       flags: {
-        string: ['kibana', 'elastic', 'username', 'password', 'version', 'policy', 'apiKey'],
+        string: [
+          'kibana',
+          'elastic',
+          'username',
+          'password',
+          'version',
+          'policy',
+          'apiKey',
+          'spaceId',
+        ],
         default: {
           kibanaUrl: 'http://127.0.0.1:5601',
           elasticUrl: 'http://127.0.0.1:9200',
@@ -54,6 +65,7 @@ export const cli = () => {
           apiKey: '',
           version: '',
           policy: '',
+          spaceId: '',
         },
         help: `
         --version           Optional. The version of the Agent to use for enrolling the new host.
@@ -67,6 +79,8 @@ export const cli = () => {
         --password          Optional. Password associated with the username (Default: changeme)
         --apiKey            Optional. A Kibana API key to use for authz. When defined, 'username'
                             and 'password' arguments are ignored.
+        --spaceId           Optional. The space id where the host should be added to in kibana. The
+                            space must already exist. Default: default space
         --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
         --elasticUrl        Optional. The url to Elasticsearch (Default: http://127.0.0.1:9200)
       `,
