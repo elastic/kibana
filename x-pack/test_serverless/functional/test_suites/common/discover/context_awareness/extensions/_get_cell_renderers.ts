@@ -257,7 +257,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
 
-        it.only("should not render service.name badge cell if it's not a logs data source", async () => {
+        it("should not render service.name badge cell if it's not a logs data source", async () => {
           await PageObjects.common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });

@@ -13,7 +13,12 @@ import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'unifiedFieldList', 'header']);
+  const { common, discover, unifiedFieldList, header } = getPageObjects([
+    'common',
+    'discover',
+    'unifiedFieldList',
+    'header',
+  ]);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
@@ -40,14 +45,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               esql: 'from my-example-logs,logstash* | sort @timestamp desc | where `log.level` is not null',
             },
           });
-          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
             ensureCurrentUrl: false,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-          await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await unifiedFieldList.clickFieldListItemAdd('log.level');
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
 
           const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
@@ -64,14 +69,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               esql: 'from my-example* | sort @timestamp desc | where `log.level` is not null',
             },
           });
-          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
             ensureCurrentUrl: false,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-          await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await unifiedFieldList.clickFieldListItemAdd('log.level');
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
 
           await retry.try(async () => {
             const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -88,14 +93,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               esql: 'from my-example-logs,logstash* | sort @timestamp desc | where `service.name` is not null',
             },
           });
-          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
             ensureCurrentUrl: false,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-          await PageObjects.unifiedFieldList.clickFieldListItemAdd('service.name');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await unifiedFieldList.clickFieldListItemAdd('service.name');
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
 
           const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const lastCell = await dataGrid.getCellElementExcludingControlColumns(2, 0);
@@ -116,14 +121,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               esql: 'from my-example* | sort @timestamp desc | where `service.name` is not null',
             },
           });
-          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
             ensureCurrentUrl: false,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-          await PageObjects.unifiedFieldList.clickFieldListItemAdd('service.name');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await unifiedFieldList.clickFieldListItemAdd('service.name');
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
 
           await retry.try(async () => {
             const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -137,19 +142,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       describe('Log Level Badge Cell', () => {
         it('should render log.level badge cell', async () => {
-          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+          await common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
           await dataViews.switchToAndValidate('my-example-logs,logstash*');
           await queryBar.setQuery('log.level:*');
           await queryBar.submitQuery();
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-          await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await unifiedFieldList.clickFieldListItemAdd('log.level');
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
 
           let firstCell: WebElementWrapper;
           let logLevelBadge: WebElementWrapper;
@@ -167,9 +172,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataGrid.clickRowToggle();
           const [, surroundingActionEl] = await dataGrid.getRowActions();
           await surroundingActionEl.click();
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
           await browser.refresh();
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
             firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
@@ -182,19 +187,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it("should not render log.level badge cell if it's not a logs data source", async () => {
-          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+          await common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
           await dataViews.switchToAndValidate('my-example-*');
           await queryBar.setQuery('log.level:*');
           await queryBar.submitQuery();
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-          await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await unifiedFieldList.clickFieldListItemAdd('log.level');
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
 
           let firstCell: WebElementWrapper;
 
@@ -208,9 +213,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataGrid.clickRowToggle();
           const [, surroundingActionEl] = await dataGrid.getRowActions();
           await surroundingActionEl.click();
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
           await browser.refresh();
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
             firstCell = await dataGrid.getCellElementExcludingControlColumns(1, 1);
@@ -219,21 +224,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
       });
+
       describe('Service Name Badge Cell', () => {
         it('should render service.name badge cell', async () => {
-          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+          await common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
           await dataViews.switchToAndValidate('my-example-logs,logstash*');
           await queryBar.setQuery('service.name:*');
           await queryBar.submitQuery();
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-          await PageObjects.unifiedFieldList.clickFieldListItemAdd('service.name');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await unifiedFieldList.clickFieldListItemAdd('service.name');
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
 
           let firstCell: WebElementWrapper;
           let lastCell: WebElementWrapper;
@@ -253,19 +259,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it("should not render service.name badge cell if it's not a logs data source", async () => {
-          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+          await common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
           await dataViews.switchToAndValidate('my-example-*');
           await queryBar.setQuery('service.name:*');
           await queryBar.submitQuery();
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-          await PageObjects.unifiedFieldList.clickFieldListItemAdd('service.name');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await unifiedFieldList.clickFieldListItemAdd('service.name');
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
 
           let firstCell: WebElementWrapper;
           let lastCell: WebElementWrapper;
