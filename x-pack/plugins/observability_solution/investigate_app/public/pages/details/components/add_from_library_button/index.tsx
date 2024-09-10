@@ -56,7 +56,7 @@ export function AddFromLibraryButton({ onItemAdd }: AddFromLibraryButtonProps) {
         type: EMBEDDABLE_ITEM_TYPE,
         params: {
           savedObjectId,
-          config: attributes,
+          config: {},
           type,
         },
       };
