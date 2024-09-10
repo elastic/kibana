@@ -386,7 +386,7 @@ describe('UnifiedDataTable', () => {
         expect(
           screen.queryByTestId('dataGridHeaderCellActionGroup-message')
         ).not.toBeInTheDocument();
-        userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
+        await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
         expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
         expect(screen.getByTestId('gridEditFieldButton')).toBeInTheDocument();
       },
@@ -400,7 +400,7 @@ describe('UnifiedDataTable', () => {
         expect(
           screen.queryByTestId('dataGridHeaderCellActionGroup-message')
         ).not.toBeInTheDocument();
-        userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
+        await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
         expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
         expect(screen.queryByTestId('gridEditFieldButton')).not.toBeInTheDocument();
       },
@@ -499,12 +499,11 @@ describe('UnifiedDataTable', () => {
           'message_8',
           'message_9',
         ]);
-        userEvent.click(getColumnActions('message'));
+        await userEvent.click(getColumnActions('message'));
+        await waitForEuiPopoverOpen();
         // Column sort button incorrectly renders as "Sort " instead
         // of "Sort Z-A" in Jest tests, so we need to find it by index
-        userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], undefined, {
-          skipPointerEventsCheck: true,
-        });
+        await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2]);
         await waitFor(() => {
           values = getCellValuesByColumn();
           expect(values.message).toEqual([
@@ -546,12 +545,11 @@ describe('UnifiedDataTable', () => {
           'message_8',
           'message_9',
         ]);
-        userEvent.click(getColumnActions('message'));
+        await userEvent.click(getColumnActions('message'));
+        await waitForEuiPopoverOpen();
         // Column sort button incorrectly renders as "Sort " instead
         // of "Sort Z-A" in Jest tests, so we need to find it by index
-        userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], undefined, {
-          skipPointerEventsCheck: true,
-        });
+        await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2]);
         await waitFor(() => {
           values = getCellValuesByColumn();
           expect(values.message).toEqual([
@@ -1083,26 +1081,27 @@ describe('UnifiedDataTable', () => {
   describe('document comparison', () => {
     const getSelectedDocumentsButton = () => screen.queryByTestId('unifiedDataTableSelectionBtn');
 
-    const selectDocument = (document: EsHitRecord) =>
-      userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(document)}`));
+    const selectDocument = async (document: EsHitRecord) =>
+      await userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(document)}`));
 
     const openSelectedRowsMenu = async () => {
-      userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
+      await userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
       await screen.findAllByText('Clear selection');
     };
 
     const closeSelectedRowsMenu = async () => {
-      userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
+      await userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
     };
 
     const getCompareDocumentsButton = () =>
       screen.queryByTestId('unifiedDataTableCompareSelectedDocuments');
 
     const goToComparisonMode = async () => {
-      selectDocument(esHitsMock[0]);
-      selectDocument(esHitsMock[1]);
+      await selectDocument(esHitsMock[0]);
+      await selectDocument(esHitsMock[1]);
       await openSelectedRowsMenu();
-      userEvent.click(await screen.findByTestId('unifiedDataTableCompareSelectedDocuments'));
+      await waitForEuiPopoverOpen();
+      await userEvent.click(await screen.findByTestId('unifiedDataTableCompareSelectedDocuments'));
       await screen.findByText('Comparing 2 documents');
       // EuiDataGrid makes state updates after calling requestAnimationFrame, which can lead
       // to "Can't perform a React state update on an unmounted component." warnings in tests,
@@ -1131,15 +1130,17 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderDataTable({ enableComparisonMode: true });
         expect(getSelectedDocumentsButton()).not.toBeInTheDocument();
-        selectDocument(esHitsMock[0]);
+        await selectDocument(esHitsMock[0]);
         expect(getSelectedDocumentsButton()).toBeInTheDocument();
         await openSelectedRowsMenu();
         expect(getCompareDocumentsButton()).not.toBeInTheDocument();
         await closeSelectedRowsMenu();
-        selectDocument(esHitsMock[1]);
+        await selectDocument(esHitsMock[1]);
         expect(getSelectedDocumentsButton()).toBeInTheDocument();
         await openSelectedRowsMenu();
-        expect(getCompareDocumentsButton()).toBeInTheDocument();
+        waitFor(() => {
+          expect(getCompareDocumentsButton()).toBeInTheDocument();
+        });
         await closeSelectedRowsMenu();
       },
       EXTENDED_JEST_TIMEOUT
@@ -1149,8 +1150,8 @@ describe('UnifiedDataTable', () => {
       'should not allow comparison if comparison mode is disabled',
       async () => {
         await renderDataTable({ enableComparisonMode: false });
-        selectDocument(esHitsMock[0]);
-        selectDocument(esHitsMock[1]);
+        await selectDocument(esHitsMock[0]);
+        await selectDocument(esHitsMock[1]);
         await openSelectedRowsMenu();
         expect(getCompareDocumentsButton()).not.toBeInTheDocument();
         await closeSelectedRowsMenu();
