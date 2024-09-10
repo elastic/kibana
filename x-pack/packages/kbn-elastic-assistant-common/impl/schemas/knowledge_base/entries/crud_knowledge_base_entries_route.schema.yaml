@@ -3,7 +3,7 @@ info:
   title: Manage Knowledge Base Entries API endpoint
   version: '1'
 paths:
-  /internnal/elastic_assistant/knowledge_base/entries:
+  /internal/elastic_assistant/knowledge_base/entries:
     post:
       x-codegen-enabled: true
       # This API is still behind the `assistantKnowledgeBaseByDefault` feature flag
@@ -51,7 +51,7 @@ paths:
           required: true
           description: The Knowledge Base Entry's `id` value.
           schema:
-            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Successful request returning a Knowledge Base Entry
@@ -81,7 +81,7 @@ paths:
           required: true
           description: The Knowledge Base Entry's `id` value
           schema:
-            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       requestBody:
         required: true
         content:
@@ -117,7 +117,7 @@ paths:
           required: true
           description: The Knowledge Base Entry's `id` value
           schema:
-            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Successful request returning the deleted Knowledge Base Entry
