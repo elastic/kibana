@@ -126,7 +126,8 @@ describe('request logging', () => {
               timeout: [Object],
               body: undefined
             }
-          }
+          },
+          authzResult: undefined
         }"
       `);
     });
