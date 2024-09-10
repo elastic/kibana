@@ -19,7 +19,8 @@ import type {
   ElasticsearchClientConfig,
   ElasticsearchClient,
 } from '@kbn/core-elasticsearch-server';
-import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
+import type { FakeRawRequest } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import { ClusterClient } from './cluster_client';
 import {
   DEFAULT_HEADERS,
@@ -954,19 +955,28 @@ describe('ClusterClient', () => {
         kibanaVersion,
       });
       const apiKey = { id: 'foo', api_key: 'bar' };
-      const request = getFakeKibanaRequest(apiKey);
+
+      const fakeRawRequest: FakeRawRequest = {
+        headers: {
+          authorization: `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString(
+            'base64'
+          )}`,
+        },
+        path: '/',
+      };
+
+      const request = CoreKibanaRequest.from(fakeRawRequest);
 
       const scopedClusterClient = clusterClient.asScoped(request);
       // trigger client instantiation via getter
       client = scopedClusterClient.asSecondaryAuthUser;
 
       expect(internalClient.child).toHaveBeenCalledTimes(1);
-      const expectedHeader = `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString(
-        'base64'
-      )}`;
       expect(internalClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
-          headers: expect.objectContaining({ [ES_SECONDARY_AUTH_HEADER]: expectedHeader }),
+          headers: expect.objectContaining({
+            [ES_SECONDARY_AUTH_HEADER]: fakeRawRequest.headers.authorization,
+          }),
         })
       );
     });
