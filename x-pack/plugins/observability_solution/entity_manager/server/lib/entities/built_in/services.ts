@@ -121,7 +121,7 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
           {
             name: 'A',
             aggregation: 'doc_count',
-            filter: 'log.level: * OR error.log.level: *',
+            filter: 'data_stream.type: logs',
           },
         ],
       },

@@ -81,7 +81,6 @@ export function createGetLogErrorRateTimeseries() {
       query: {
         bool: {
           filter: [
-            ...existsQuery(LOG_LEVEL),
             ...kqlQuery(kuery),
             {
               terms: {
