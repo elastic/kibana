@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import { BehaviorSubject } from 'rxjs';
 
-export default {
-  title: 'Test',
-  parameters: {},
-};
-
-export const Example = () => <div>TEST</div>;
+export class EsqlInspectorState {
+  public readonly src$ = new BehaviorSubject<string>('');
+}
