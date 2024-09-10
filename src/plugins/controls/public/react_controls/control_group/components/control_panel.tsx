@@ -34,7 +34,6 @@ import { ControlPanelProps, DefaultControlApi } from '../../controls/types';
 import { ControlError } from './control_error';
 
 import './control_panel.scss';
-import { A } from '@storybook/components';
 
 const DragHandle = ({
   isEditable,
