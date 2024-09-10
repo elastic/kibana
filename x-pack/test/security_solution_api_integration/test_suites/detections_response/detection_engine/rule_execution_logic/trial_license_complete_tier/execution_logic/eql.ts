@@ -1192,7 +1192,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.only('preview logged requests', () => {
+    describe('preview logged requests', () => {
       it('should not return requests property when not enabled', async () => {
         const { logs } = await previewRule({
           supertest,
