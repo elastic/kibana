@@ -61,7 +61,17 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
                 [
                   'monitoring',
                   'observabilityAIAssistant',
-
+                  'enterpriseSearch',
+                  'enterpriseSearchContent',
+                  'enterpriseSearchAnalytics',
+                  'enterpriseSearchApplications',
+                  'enterpriseSearchAISearch',
+                  'enterpriseSearchVectorSearch',
+                  'enterpriseSearchSemanticSearch',
+                  'enterpriseSearchElasticsearch',
+                  'enterpriseSearchRelevance',
+                  'searchInferenceEndpoints',
+                  'searchExperiences',
                   'guidedOnboardingFeature',
                   'securitySolutionAssistant',
                   'securitySolutionAttackDiscovery',
