@@ -1191,5 +1191,31 @@ export default ({ getService }: FtrProviderContext) => {
         expect(updatedAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).equal(1);
       });
     });
+
+    describe.only('preview logged requests', () => {
+      it('should not return requests property when not enabled', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule: getEqlRuleForAlertTesting(['auditbeat-*']),
+        });
+
+        expect(logs[0].requests).equal(undefined);
+      });
+      it('should return requests property when enable_logged_requests set to true', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule: getEqlRuleForAlertTesting(['auditbeat-*']),
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+
+        expect(requests).to.have.length(1);
+        expect(requests![0].description).to.be('EQL request to find all matches');
+        expect(requests![0].request).to.contain(
+          'POST /auditbeat-*/_eql/search?allow_no_indices=true'
+        );
+      });
+    });
   });
 };
