@@ -45,19 +45,19 @@ export const registerProfileProviders = ({
 
   registerEnabledProfileProviders({
     profileService: rootProfileService,
-    providers: [...rootProfileProviders],
+    providers: rootProfileProviders,
     enabledExperimentalProfileIds,
   });
 
   registerEnabledProfileProviders({
     profileService: dataSourceProfileService,
-    providers: [...dataSourceProfileProviders],
+    providers: dataSourceProfileProviders,
     enabledExperimentalProfileIds,
   });
 
   registerEnabledProfileProviders({
     profileService: documentProfileService,
-    providers: [...documentProfileProviders],
+    providers: documentProfileProviders,
     enabledExperimentalProfileIds,
   });
 };
@@ -78,18 +78,15 @@ export const registerEnabledProfileProviders = <
   enabledExperimentalProfileIds?: string[];
 }) => {
   for (const provider of availableProviders) {
-    const isProfileExperimental = provider.isExperimental ?? false;
-    const isProfileEnabled =
-      enabledExperimentalProfileIds.includes(provider.profileId) || !isProfileExperimental;
-    if (isProfileEnabled) {
+    if (!provider.isExperimental || enabledExperimentalProfileIds.includes(provider.profileId)) {
       profileService.registerProvider(provider);
     }
   }
 };
 
-const createRootProfileProviders = (_providerServices: ProfileProviderServices) => [
+const createRootProfileProviders = (providerServices: ProfileProviderServices) => [
   exampleRootProfileProvider,
-  createSecurityRootProfileProvider(_providerServices),
+  createSecurityRootProfileProvider(providerServices),
 ];
 
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
