@@ -12,7 +12,7 @@
   ],
   "private": true,
   "version": "8.16.0",
-  "branch": "main",
+  "branch": "8.x",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {

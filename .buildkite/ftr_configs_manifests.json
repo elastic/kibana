@@ -5,10 +5,5 @@
         ".buildkite/ftr_security_stateful_configs.yml",
         ".buildkite/ftr_search_stateful_configs.yml"
     ],
-    "serverless" : [
-        ".buildkite/ftr_base_serverless_configs.yml",
-        ".buildkite/ftr_oblt_serverless_configs.yml",
-        ".buildkite/ftr_security_serverless_configs.yml",
-        ".buildkite/ftr_search_serverless_configs.yml"
-    ]
+    "serverless" : []
 }
