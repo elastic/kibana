@@ -24,6 +24,8 @@ import {
   type SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { DASHBOARDS, useOnboardingFlow } from './use_onboarding_flow';
 import { ProgressIndicator } from '../shared/progress_indicator';
@@ -34,11 +36,26 @@ import { LocatorButtonEmpty } from '../shared/locator_button_empty';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
 import { FeedbackButtons } from '../shared/feedback_buttons';
+import { ObservabilityOnboardingContextValue } from '../../../plugin';
+import { useAutoDetectTelemetry } from './use_auto_detect_telemetry';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const command = data ? getAutoDetectCommand(data) : undefined;
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
+  const {
+    services: { share },
+  } = useKibana<ObservabilityOnboardingContextValue>();
+
+  useAutoDetectTelemetry(
+    status,
+    installedIntegrations.map(({ title, pkgName, pkgVersion, installSource }) => ({
+      title,
+      pkgName,
+      pkgVersion,
+      installSource,
+    }))
+  );
 
   if (error) {
     return <EmptyPrompt error={error} onRetryClick={refetch} />;
@@ -50,6 +67,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
   const customIntegrations = installedIntegrations.filter(
     (integration) => integration.installSource === 'custom'
   );
+  const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
@@ -162,10 +180,14 @@ export const AutoDetectPanel: FunctionComponent = () => {
                           integration={integration.pkgName}
                           newTab
                           isLoading={status !== 'dataReceived'}
-                          dashboardLinks={integration.kibanaAssets
+                          actionLinks={integration.kibanaAssets
                             .filter((asset) => asset.type === 'dashboard')
                             .map((asset) => {
                               const dashboard = DASHBOARDS[asset.id as keyof typeof DASHBOARDS];
+                              const href =
+                                dashboardLocator?.getRedirectUrl({
+                                  dashboardId: asset.id,
+                                }) ?? '';
 
                               return {
                                 id: asset.id,
@@ -199,6 +221,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                           defaultMessage: 'Explore logs data',
                                         }
                                       ),
+                                href,
                               };
                             })}
                         />

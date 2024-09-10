@@ -227,7 +227,9 @@ export class TaskManagerRunner implements TaskRunner {
    * @param id
    */
   public isSameTask(executionId: string) {
-    return executionId.startsWith(this.id);
+    const executionIdParts = executionId.split('::');
+    const executionIdCompare = executionIdParts.length > 0 ? executionIdParts[0] : executionId;
+    return executionIdCompare === this.id;
   }
 
   /**
