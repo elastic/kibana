@@ -39,7 +39,11 @@ import {
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import {
+  getShouldShowFieldHandler,
+  canPrependTimeFieldColumn,
+  getVisibleColumns,
+} from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
@@ -62,8 +66,6 @@ import { getRenderCellValueFn } from '../utils/get_render_cell_value';
 import {
   getEuiGridColumns,
   getLeadControlColumns,
-  getVisibleColumns,
-  canPrependTimeFieldColumn,
   SELECT_ROW,
   OPEN_DETAILS,
 } from './data_table_columns';
@@ -290,13 +292,12 @@ export interface UnifiedDataTableProps {
   /**
    * Callback to render DocumentView when the document is expanded
    */
-  renderDocumentView?: (props: {
-    hit: DataTableRecord;
-    displayedRows: DataTableRecord[];
-    displayedColumns: string[]; // with an added time field column when necessary
-    columns: string[]; // columns selected by user
-    columnsMeta?: DataTableColumnsMeta;
-  }) => JSX.Element | undefined;
+  renderDocumentView?: (
+    hit: DataTableRecord,
+    displayedRows: DataTableRecord[],
+    displayedColumns: string[],
+    columnsMeta?: DataTableColumnsMeta
+  ) => JSX.Element | undefined;
   /**
    * Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true.
    */
@@ -489,8 +490,8 @@ export const UnifiedDataTable = ({
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
-  const columnsWithSourceFallback = getDisplayedColumns(columns, dataView);
-  const defaultColumns = columnsWithSourceFallback.includes('_source');
+  const displayedColumns = getDisplayedColumns(columns, dataView);
+  const defaultColumns = displayedColumns.includes('_source');
   const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
   const selectedDocsState = useSelectedDocs(docMap);
@@ -523,11 +524,11 @@ export const UnifiedDataTable = ({
 
   const visibleColumns = useMemo(() => {
     return getVisibleColumns(
-      columnsWithSourceFallback,
+      displayedColumns,
       dataView,
-      shouldPrependTimeFieldColumn(columnsWithSourceFallback)
+      shouldPrependTimeFieldColumn(displayedColumns)
     );
-  }, [dataView, columnsWithSourceFallback, shouldPrependTimeFieldColumn]);
+  }, [dataView, displayedColumns, shouldPrependTimeFieldColumn]);
 
   const { sortedRows, sorting } = useSorting({
     rows,
@@ -1180,13 +1181,7 @@ export const UnifiedDataTable = ({
         )}
         {canSetExpandedDoc &&
           expandedDoc &&
-          renderDocumentView!({
-            hit: expandedDoc,
-            displayedRows,
-            displayedColumns: visibleColumns, // with a time field column when necessary
-            columns,
-            columnsMeta,
-          })}
+          renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
       </span>
     </UnifiedDataTableContext.Provider>
   );

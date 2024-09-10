@@ -218,15 +218,13 @@ const {
 // Use onAddColumn, onRemoveColumn handlers in the DocumentView
 
 const renderDocumentView = useCallback(
-    ({ hit, displayedRows, columns, columnsMeta, displayedColumns }) => (
+    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
       <DiscoverGridFlyout
         dataView={dataView}
         hit={hit}
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-        columns={columns}
-        columnsMeta={columnsMeta}
-        displayedColumns={displayedColumns}
+        columns={displayedColumns}
         savedSearchId={savedSearch.id}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumn}

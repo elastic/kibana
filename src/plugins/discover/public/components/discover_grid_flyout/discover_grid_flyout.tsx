@@ -29,7 +29,6 @@ export interface DiscoverGridFlyoutProps {
   query?: Query | AggregateQuery;
   columns: string[];
   columnsMeta?: DataTableColumnsMeta;
-  displayedColumns: string[]; // columns that are currently displayed in the grid (a time field might be added to the selected `columns`)
   hit: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
@@ -49,7 +48,6 @@ export function DiscoverGridFlyout({
   dataView,
   columns,
   columnsMeta,
-  displayedColumns,
   savedSearchId,
   filters,
   query,
@@ -109,7 +107,6 @@ export function DiscoverGridFlyout({
       dataView={dataView}
       columns={columns}
       columnsMeta={columnsMeta}
-      displayedColumns={displayedColumns}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       onClose={onClose}

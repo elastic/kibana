@@ -25,11 +25,11 @@ import {
   generateEsHits,
 } from '@kbn/discover-utils/src/__mocks__';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataLoadingState, UnifiedDataTable, type UnifiedDataTableProps } from './data_table';
+import { DataLoadingState, UnifiedDataTable, UnifiedDataTableProps } from './data_table';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { servicesMock } from '../../__mocks__/services';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   mockRowAdditionalLeadingControls,
@@ -826,13 +826,12 @@ describe('UnifiedDataTable', () => {
         flattened: { test: jest.fn() },
       };
       const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
-      const renderDocumentViewMock: UnifiedDataTableProps['renderDocumentView'] = jest.fn(
-        ({ hit }) => <div data-test-subj="test-document-view">{hit.id}</div>
-      );
+      const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
+        <div data-test-subj="test-document-view">{hit.id}</div>
+      ));
 
-      const props = getProps();
       const component = await getComponent({
-        ...props,
+        ...getProps(),
         expandedDoc,
         setExpandedDoc: jest.fn(),
         columnsMeta: columnsMetaOverride,
@@ -843,13 +842,10 @@ describe('UnifiedDataTable', () => {
       findTestSubject(component, 'docTableExpandToggleColumn').first().simulate('click');
       expect(findTestSubject(component, 'test-document-view').exists()).toBeTruthy();
       expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          hit: expandedDoc,
-          displayedRows: props.rows,
-          columns: props.columns,
-          columnsMeta: columnsMetaOverride,
-          displayedColumns: ['@timestamp', '_source'],
-        })
+        expandedDoc,
+        getProps().rows,
+        ['_source'],
+        columnsMetaOverride
       );
     },
     EXTENDED_JEST_TIMEOUT

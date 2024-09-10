@@ -9,8 +9,7 @@
 
 import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
 
@@ -18,7 +17,6 @@ export interface RowViewerProps {
   notifications?: NotificationsStart;
   columns: string[];
   columnsMeta?: DataTableColumnsMeta;
-  displayedColumns?: string[]; // columns that are currently displayed in the grid (a time field might be added to the selected `columns`)
   hit: DataTableRecord;
   hits?: DataTableRecord[];
   flyoutType?: 'push' | 'overlay';
@@ -39,7 +37,6 @@ export function RowViewer({
   dataView,
   columns,
   columnsMeta,
-  displayedColumns,
   notifications,
   flyoutType = 'push',
   onClose,
@@ -61,7 +58,6 @@ export function RowViewer({
       dataView={dataView}
       columns={columns}
       columnsMeta={columnsMeta}
-      displayedColumns={displayedColumns}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       onClose={onClose}

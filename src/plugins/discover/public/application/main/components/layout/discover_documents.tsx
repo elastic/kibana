@@ -26,11 +26,11 @@ import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import {
   DataLoadingState,
   useColumns,
-  type DataGridDensity,
-  type UnifiedDataTableProps,
   type DataTableColumnsMeta,
   getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
+  type DataGridDensity,
+  UnifiedDataTableProps,
   UseColumnsProps,
 } from '@kbn/unified-data-table';
 import {
@@ -264,22 +264,20 @@ function DiscoverDocumentsComponent({
     [documentState.esqlQueryColumns]
   );
 
-  const renderDocumentView: UnifiedDataTableProps['renderDocumentView'] = useCallback(
-    ({
-      hit,
-      displayedRows,
-      columns: selectedColumns,
-      columnsMeta: customColumnsMeta,
-      displayedColumns,
-    }) => (
+  const renderDocumentView = useCallback(
+    (
+      hit: DataTableRecord,
+      displayedRows: DataTableRecord[],
+      displayedColumns: string[],
+      customColumnsMeta?: DataTableColumnsMeta
+    ) => (
       <DiscoverGridFlyout
         dataView={dataView}
         hit={hit}
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-        columns={selectedColumns}
+        columns={displayedColumns}
         columnsMeta={customColumnsMeta}
-        displayedColumns={displayedColumns} // with an added time field column
         savedSearchId={savedSearch.id}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumn}

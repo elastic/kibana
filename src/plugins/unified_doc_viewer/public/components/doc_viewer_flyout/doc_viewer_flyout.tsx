@@ -29,8 +29,7 @@ import {
   useIsWithinMinBreakpoint,
   EuiFlyoutProps,
 } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -55,7 +54,6 @@ export interface UnifiedDocViewerFlyoutProps {
   isEsqlQuery: boolean;
   columns: string[];
   columnsMeta?: DataTableColumnsMeta;
-  displayedColumns?: string[]; // columns that are currently displayed in the grid (a time field might be added to the selected `columns`)
   hit: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
@@ -92,7 +90,6 @@ export function UnifiedDocViewerFlyout({
   dataView,
   columns,
   columnsMeta,
-  displayedColumns,
   onFilter,
   onClose,
   onRemoveColumn,
@@ -183,7 +180,6 @@ export function UnifiedDocViewerFlyout({
       <UnifiedDocViewer
         columns={columns}
         columnsMeta={columnsMeta}
-        displayedColumns={displayedColumns}
         dataView={dataView}
         filter={onFilter}
         hit={actualHit}
@@ -199,7 +195,6 @@ export function UnifiedDocViewerFlyout({
       addColumn,
       columns,
       columnsMeta,
-      displayedColumns,
       dataView,
       hits,
       isEsqlQuery,

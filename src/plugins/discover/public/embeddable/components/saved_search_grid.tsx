@@ -14,6 +14,7 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
   type UnifiedDataTableProps,
+  type DataTableColumnsMeta,
   DataLoadingState as DiscoverGridLoadingState,
   getRenderCustomToolbarWithElements,
 } from '@kbn/unified-data-table';
@@ -46,22 +47,20 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const { interceptedWarnings, ...gridProps } = props;
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
-  const renderDocumentView: UnifiedDataTableProps['renderDocumentView'] = useCallback(
-    ({
-      hit,
-      displayedRows,
-      columns: selectedColumns,
-      columnsMeta: customColumnsMeta,
-      displayedColumns,
-    }) => (
+  const renderDocumentView = useCallback(
+    (
+      hit: DataTableRecord,
+      displayedRows: DataTableRecord[],
+      displayedColumns: string[],
+      customColumnsMeta?: DataTableColumnsMeta
+    ) => (
       <DiscoverGridFlyout
         dataView={props.dataView}
         hit={hit}
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-        columns={selectedColumns}
+        columns={displayedColumns}
         columnsMeta={customColumnsMeta}
-        displayedColumns={displayedColumns} // with an added time field column
         savedSearchId={props.savedSearchId}
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}

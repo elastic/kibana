@@ -136,16 +136,14 @@ export function ContextAppContent({
     return [[dataView.timeFieldName!, SortDirection.desc]];
   }, [dataView]);
 
-  const renderDocumentView: UnifiedDataTableProps['renderDocumentView'] = useCallback(
-    ({ hit, displayedRows, columns: selectedColumns, columnsMeta, displayedColumns }) => (
+  const renderDocumentView = useCallback(
+    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
       <DiscoverGridFlyout
         dataView={dataView}
         hit={hit}
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-        columns={selectedColumns}
-        columnsMeta={columnsMeta}
-        displayedColumns={displayedColumns} // with an added time field column
+        columns={displayedColumns}
         onFilter={addFilter}
         onRemoveColumn={onRemoveColumn}
         onAddColumn={onAddColumn}

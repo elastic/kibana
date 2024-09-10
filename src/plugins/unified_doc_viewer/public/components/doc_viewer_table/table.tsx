@@ -32,11 +32,14 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getFieldIconType } from '@kbn/field-utils/src/utils/get_field_icon_type';
 import {
   SHOW_MULTIFIELDS,
+  DOC_HIDE_TIME_COLUMN_SETTING,
   formatFieldValue,
   getIgnoredReason,
   getShouldShowFieldHandler,
   isNestedFieldParent,
   usePager,
+  getVisibleColumns,
+  canPrependTimeFieldColumn,
 } from '@kbn/discover-utils';
 import { getTextBasedColumnIconType } from '@kbn/field-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -125,7 +128,6 @@ const updatePageSize = (newPageSize: number, storage: Storage) => {
 export const DocViewerTable = ({
   columns,
   columnsMeta,
-  displayedColumns,
   hit,
   dataView,
   textBasedHits,
@@ -240,15 +242,12 @@ export const DocViewerTable = ({
     ]
   );
 
-  const fieldsFromDisplayedColumns = useMemo(
-    () => (displayedColumns || columns)?.filter((column) => column !== '_source') || [],
-    [displayedColumns, columns]
+  const fieldsFromColumns = useMemo(
+    () => columns?.filter((column) => column !== '_source') || [],
+    [columns]
   );
 
-  const isShowOnlySelectedFieldsDisabled = useMemo(
-    () => displayedColumns?.includes('_source') || columns?.includes('_source') || !columns?.length,
-    [displayedColumns, columns]
-  );
+  const isShowOnlySelectedFieldsDisabled = !fieldsFromColumns?.length;
 
   const shouldShowOnlySelectedFields = useMemo(
     () => showOnlySelectedFields && !isShowOnlySelectedFieldsDisabled,
@@ -257,7 +256,17 @@ export const DocViewerTable = ({
 
   const displayedFieldNames = useMemo(() => {
     if (shouldShowOnlySelectedFields) {
-      return fieldsFromDisplayedColumns;
+      return getVisibleColumns(
+        fieldsFromColumns,
+        dataView,
+        canPrependTimeFieldColumn(
+          columns,
+          dataView.timeFieldName,
+          columnsMeta,
+          !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+          isEsqlMode
+        )
+      );
     }
     return Object.keys(flattened).sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
@@ -266,7 +275,17 @@ export const DocViewerTable = ({
       const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
       return nameA.localeCompare(nameB);
     });
-  }, [fieldsFromDisplayedColumns, flattened, shouldShowOnlySelectedFields, mapping]);
+  }, [
+    fieldsFromColumns,
+    flattened,
+    shouldShowOnlySelectedFields,
+    mapping,
+    dataView,
+    columns,
+    columnsMeta,
+    isEsqlMode,
+    uiSettings,
+  ]);
 
   const { pinnedItems, restItems, allFields } = useMemo(
     () =>

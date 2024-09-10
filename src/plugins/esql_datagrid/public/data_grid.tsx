@@ -14,18 +14,17 @@ import {
   DataLoadingState,
   type SortOrder,
   renderCustomToolbar,
-  type UnifiedDataTableProps,
-  type UnifiedDataTableRenderCustomToolbarProps,
+  UnifiedDataTableRenderCustomToolbarProps,
 } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLRow } from '@kbn/es-types';
-import type { DatatableColumn, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -47,13 +46,6 @@ interface ESQLDataGridProps {
   initialRowHeight?: number;
   controlColumnIds?: string[];
 }
-type DataTableColumnsMeta = Record<
-  string,
-  {
-    type: DatatableColumnMeta['type'];
-    esType?: DatatableColumnMeta['esType'];
-  }
->;
 
 const sortOrder: SortOrder[] = [];
 const DEFAULT_INITIAL_ROW_HEIGHT = 5;
@@ -70,26 +62,24 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
-  const onSetColumns = useCallback((columns: string[]) => {
+  const onSetColumns = useCallback((columns) => {
     setActiveColumns(columns);
   }, []);
 
-  const renderDocumentView: UnifiedDataTableProps['renderDocumentView'] = useCallback(
-    ({
-      hit,
-      displayedRows,
-      columns: selectedColumns,
-      columnsMeta: customColumnsMeta,
-      displayedColumns,
-    }) => (
+  const renderDocumentView = useCallback(
+    (
+      hit: DataTableRecord,
+      displayedRows: DataTableRecord[],
+      displayedColumns: string[],
+      customColumnsMeta?: DataTableColumnsMeta
+    ) => (
       <RowViewer
         dataView={props.dataView}
         notifications={props.core.notifications}
         hit={hit}
         hits={displayedRows}
-        columns={selectedColumns}
+        columns={displayedColumns}
         columnsMeta={customColumnsMeta}
-        displayedColumns={displayedColumns} // with an added time field column
         flyoutType={props.flyoutType ?? 'push'}
         onRemoveColumn={(column) => {
           setActiveColumns(activeColumns.filter((c) => c !== column));

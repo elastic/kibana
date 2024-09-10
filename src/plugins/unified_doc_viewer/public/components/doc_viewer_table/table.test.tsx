@@ -86,42 +86,6 @@ describe('DocViewerTable', () => {
   });
 
   describe('switch - show only selected fields', () => {
-    it('should disable the switch if _source is present in columns', async () => {
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable
-            dataView={dataView}
-            hit={hit}
-            columns={[]}
-            displayedColumns={['@timestamp', '_source']}
-          />
-        </IntlProvider>
-      );
-
-      expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
-      expect(screen.getByText('@timestamp')).toBeInTheDocument();
-      expect(screen.getByText('bytes')).toBeInTheDocument();
-      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
-    });
-
-    it('should disable the switch if only a time field is selected', async () => {
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable
-            dataView={dataView}
-            hit={hit}
-            columns={['@timestamp']}
-            displayedColumns={['@timestamp', '_source']}
-          />
-        </IntlProvider>
-      );
-
-      expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
-      expect(screen.getByText('@timestamp')).toBeInTheDocument();
-      expect(screen.getByText('bytes')).toBeInTheDocument();
-      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
-    });
-
     it('should disable the switch if columns is empty', async () => {
       render(
         <IntlProvider locale="en">
@@ -155,12 +119,7 @@ describe('DocViewerTable', () => {
 
       render(
         <IntlProvider locale="en">
-          <DocViewerTable
-            dataView={dataView}
-            hit={hit}
-            columns={['extension.keyword']}
-            displayedColumns={['@timestamp', 'extension.keyword']}
-          />
+          <DocViewerTable dataView={dataView} hit={hit} columns={['extension.keyword']} />
         </IntlProvider>
       );
 
@@ -173,12 +132,7 @@ describe('DocViewerTable', () => {
     it('should allow toggling the switch', async () => {
       render(
         <IntlProvider locale="en">
-          <DocViewerTable
-            dataView={dataView}
-            hit={hit}
-            columns={['bytes']}
-            displayedColumns={['@timestamp', 'bytes']}
-          />
+          <DocViewerTable dataView={dataView} hit={hit} columns={['bytes']} />
         </IntlProvider>
       );
 
