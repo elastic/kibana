@@ -88,7 +88,7 @@ export async function getDegradedFields({
         x: timeSeriesBucket.key,
         y: timeSeriesBucket.doc_count,
       })),
-      indexFieldWasLastPresentIn: bucket.index.buckets[0].key,
+      indexFieldWasLastPresentIn: bucket.index.buckets[0].key as string,
     })) ?? [];
 
   console.table(result);

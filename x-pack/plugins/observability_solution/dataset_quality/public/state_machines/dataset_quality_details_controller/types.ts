@@ -46,7 +46,7 @@ export interface WithDefaultControllerState {
   isIndexNotFoundError?: boolean;
   integration?: Integration;
   expandedDegradedField?: string;
-  isDegradedFieldFlyoutOpen?: boolean;
+  currentQualityIssues?: boolean;
 }
 
 export interface WithDataStreamDetails {
@@ -95,10 +95,9 @@ export type DatasetQualityDetailsControllerTypeState =
   | {
       value:
         | 'initializing'
-        | 'uninitialized'
         | 'initializing.nonAggregatableDataset.fetching'
         | 'initializing.dataStreamDegradedFields.fetching'
-        | 'initializing.dataStreamSettings.fetching'
+        | 'initializing.dataStreamSettings.fetchingDataStreamSettings'
         | 'initializing.dataStreamDetails.fetching';
       context: WithDefaultControllerState;
     }
@@ -124,20 +123,20 @@ export type DatasetQualityDetailsControllerTypeState =
     }
   | {
       value:
-        | 'initializing.degradedFieldFlyout.initializing.ignoredValues.fetching'
-        | 'initializing.degradedFieldFlyout.initializing.analyze.fetching';
+        | 'initializing.degradedFieldFlyout.open.ignoredValues.fetching'
+        | 'initializing.degradedFieldFlyout.open.analyze.fetching';
       context: WithDefaultControllerState & WithDegradedFieldsData;
     }
   | {
-      value: 'initializing.degradedFieldFlyout.initializing.ignoredValues.done';
+      value: 'initializing.degradedFieldFlyout.open.ignoredValues.done';
       context: WithDefaultControllerState & WithDegradedFieldsData & WithDegradedFieldValues;
     }
   | {
-      value: 'initializing.degradedFieldFlyout.initializing.analyze.done';
+      value: 'initializing.degradedFieldFlyout.open.analyze.done';
       context: WithDefaultControllerState & WithDegradedFieldsData & WithDegradeFieldAnalysis;
     }
   | {
-      value: 'initializing.degradedFieldFlyout.initialized';
+      value: 'initializing.degradedFieldFlyout.open';
       context: WithDefaultControllerState &
         WithDegradedFieldsData &
         WithDegradedFieldValues &
@@ -145,16 +144,16 @@ export type DatasetQualityDetailsControllerTypeState =
     }
   | {
       value:
-        | 'initializing.dataStreamSettings.initializeIntegrations'
-        | 'initializing.dataStreamSettings.initializeIntegrations.integrationDetails.fetching'
-        | 'initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.fetching'
-        | 'initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.unauthorized';
+        | 'initializing.dataStreamSettings.initializingIntegrations'
+        | 'initializing.dataStreamSettings.initializingIntegrations.integrationDetails.fetching'
+        | 'initializing.dataStreamSettings.initializingIntegrations.integrationDashboards.fetching'
+        | 'initializing.dataStreamSettings.initializingIntegrations.integrationDashboards.unauthorized';
       context: WithDefaultControllerState & WithDataStreamSettings;
     }
   | {
       value:
-        | 'initializing.dataStreamSettings.initializeIntegrations.integrationDetails.done'
-        | 'initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.done';
+        | 'initializing.dataStreamSettings.initializingIntegrations.integrationDetails.done'
+        | 'initializing.dataStreamSettings.initializingIntegrations.integrationDashboards.done';
       context: WithDefaultControllerState & WithDataStreamSettings & WithIntegration;
     };
 
@@ -172,6 +171,9 @@ export type DatasetQualityDetailsControllerEvent =
     }
   | {
       type: 'CLOSE_DEGRADED_FIELD_FLYOUT';
+    }
+  | {
+      type: 'DEGRADED_FIELDS_LOADED';
     }
   | {
       type: 'BREAKDOWN_FIELD_CHANGE';

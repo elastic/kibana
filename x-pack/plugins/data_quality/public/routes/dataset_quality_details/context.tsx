@@ -79,14 +79,6 @@ export function DatasetQualityDetailsContextProvider({
         });
       datasetQualityDetailsController.service.start();
 
-      // TODO: Work on this
-      // if (initialState?.expandedDegradedField) {
-      //   datasetQualityDetailsController.service.send({
-      //     type: 'OPEN_DEGRADED_FIELD_FLYOUT',
-      //     fieldName: initialState.expandedDegradedField,
-      //   });
-      // }
-
       setController(datasetQualityDetailsController);
 
       const datasetQualityStateSubscription = datasetQualityDetailsController.state$.subscribe(

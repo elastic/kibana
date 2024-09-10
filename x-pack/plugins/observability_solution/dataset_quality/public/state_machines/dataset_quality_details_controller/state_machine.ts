@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { assign, createMachine, DoneInvokeEvent, InterpreterFrom, raise } from 'xstate';
 import { getDateISORange } from '@kbn/timerange';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import {
@@ -48,14 +48,10 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
       id: 'DatasetQualityDetailsController',
       context: initialContext,
       predictableActionArguments: true,
-      initial: 'uninitialized',
+      initial: 'initializing',
       states: {
-        uninitialized: {
-          always: {
-            target: 'initializing',
-          },
-        },
         initializing: {
+          // TODO: Change it to ready
           type: 'parallel',
           states: {
             nonAggregatableDataset: {
@@ -154,7 +150,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     src: 'loadDegradedFields',
                     onDone: {
                       target: 'done',
-                      actions: ['storeDegradedFields'],
+                      actions: ['storeDegradedFields', 'raiseDegradedFieldsLoaded'],
                     },
                     onError: [
                       {
@@ -179,21 +175,25 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     },
                     OPEN_DEGRADED_FIELD_FLYOUT: {
                       target:
-                        '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.initializing',
-                      actions: ['storeExpandedDegradedField', 'openDegradedFieldFlyout'],
+                        '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
+                      actions: ['storeExpandedDegradedField'],
+                    },
+                    TOGGLE_CURRENT_QUALITY_ISSUES: {
+                      target: 'fetching',
+                      actions: ['toggleCurrentQualityIssues'],
                     },
                   },
                 },
               },
             },
             dataStreamSettings: {
-              initial: 'fetching',
+              initial: 'fetchingDataStreamSettings',
               states: {
-                fetching: {
+                fetchingDataStreamSettings: {
                   invoke: {
                     src: 'loadDataStreamSettings',
                     onDone: {
-                      target: 'initializeIntegrations',
+                      target: 'initializingIntegrations',
                       actions: ['storeDataStreamSettings'],
                     },
                     onError: [
@@ -208,7 +208,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     ],
                   },
                 },
-                initializeIntegrations: {
+                initializingIntegrations: {
                   type: 'parallel',
                   states: {
                     integrationDetails: {
@@ -227,9 +227,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             },
                           },
                         },
-                        done: {
-                          type: 'final',
-                        },
+                        done: {},
                       },
                     },
                     integrationDashboards: {
@@ -254,30 +252,49 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             ],
                           },
                         },
-                        done: {
-                          type: 'final',
-                        },
+                        done: {},
                         unauthorized: {
                           type: 'final',
                         },
                       },
                     },
                   },
-                },
-                done: {
-                  on: {
-                    UPDATE_TIME_RANGE: {
-                      target: 'fetching',
-                      actions: ['resetDegradedFieldPageAndRowsPerPage'],
-                    },
+                  onDone: {
+                    target: 'done',
                   },
+                },
+                done: {},
+              },
+              on: {
+                UPDATE_TIME_RANGE: {
+                  target: '.fetchingDataStreamSettings',
                 },
               },
             },
             degradedFieldFlyout: {
-              initial: 'closed',
+              initial: 'pending',
               states: {
-                initializing: {
+                pending: {
+                  always: [
+                    {
+                      target: 'closed',
+                      cond: 'hasNoDegradedFieldsSelected',
+                    },
+                  ],
+                  on: {
+                    // TODO: Delete this on handler after talking with Felix
+                    DEGRADED_FIELDS_LOADED: [
+                      {
+                        target: 'open',
+                        cond: 'shouldOpenFlyout',
+                      },
+                      {
+                        target: 'closed',
+                      },
+                    ],
+                  },
+                },
+                open: {
                   type: 'parallel',
                   states: {
                     ignoredValues: {
@@ -301,9 +318,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             ],
                           },
                         },
-                        done: {
-                          type: 'final',
-                        },
+                        done: {},
                       },
                     },
                     analyze: {
@@ -321,32 +336,18 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             },
                           },
                         },
-                        done: {
-                          type: 'final',
-                        },
+                        done: {},
                       },
                     },
                   },
-                  onDone: {
-                    target:
-                      '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.initialized',
-                  },
                   on: {
                     CLOSE_DEGRADED_FIELD_FLYOUT: {
                       target: 'closed',
-                      actions: ['storeExpandedDegradedField', 'closeDegradedFieldFlyout'],
-                    },
-                  },
-                },
-                initialized: {
-                  on: {
-                    CLOSE_DEGRADED_FIELD_FLYOUT: {
-                      target: 'closed',
-                      actions: ['storeExpandedDegradedField', 'closeDegradedFieldFlyout'],
+                      actions: ['storeExpandedDegradedField'],
                     },
                     UPDATE_TIME_RANGE: {
                       target:
-                        '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.initializing',
+                        '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
                     },
                   },
                 },
@@ -354,11 +355,22 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                   on: {
                     OPEN_DEGRADED_FIELD_FLYOUT: {
                       target:
-                        '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.initializing',
-                      actions: ['storeExpandedDegradedField', 'openDegradedFieldFlyout'],
+                        '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
+                      actions: ['storeExpandedDegradedField'],
                     },
                   },
                 },
+              },
+              on: {
+                DEGRADED_FIELDS_LOADED: [
+                  {
+                    target: '.open',
+                    cond: 'shouldOpenFlyout',
+                  },
+                  {
+                    target: '.closed',
+                  },
+                ],
               },
             },
           },
@@ -440,16 +452,12 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             expandedDegradedField: 'fieldName' in event ? event.fieldName : undefined,
           };
         }),
-        openDegradedFieldFlyout: assign(() => {
+        toggleCurrentQualityIssues: assign((context) => {
           return {
-            isDegradedFieldFlyoutOpen: true,
+            currentQualityIssues: !context.currentQualityIssues,
           };
         }),
-        closeDegradedFieldFlyout: assign(() => {
-          return {
-            isDegradedFieldFlyoutOpen: false,
-          };
-        }),
+        raiseDegradedFieldsLoaded: raise('DEGRADED_FIELDS_LOADED'),
         resetDegradedFieldPageAndRowsPerPage: assign((context, _event) => ({
           degradedFields: {
             ...context.degradedFields,
@@ -506,6 +514,19 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               (event.data.originalMessage as string)?.includes('index_not_found_exception')) ??
             false
           );
+        },
+        shouldOpenFlyout: (context) => {
+          return (
+            Boolean(context.expandedDegradedField) &&
+            Boolean(
+              context.degradedFields.data?.some(
+                (field) => field.name === context.expandedDegradedField
+              )
+            )
+          );
+        },
+        hasNoDegradedFieldsSelected: (context) => {
+          return !Boolean(context.expandedDegradedField);
         },
       },
     }
@@ -590,7 +611,12 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
         return dataStreamDetailsClient.getDataStreamDegradedFields({
-          dataStream: context.dataStream,
+          dataStream:
+            context.currentQualityIssues &&
+            'dataStreamSettings' in context &&
+            context.dataStreamSettings
+              ? context.dataStreamSettings.lastBackingIndexName
+              : context.dataStream,
           start,
           end,
         });

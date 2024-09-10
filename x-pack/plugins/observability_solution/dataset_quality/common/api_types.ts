@@ -139,12 +139,16 @@ export const degradedFieldAnalysisRt = rt.intersection([
 
 export type DegradedFieldAnalysis = rt.TypeOf<typeof degradedFieldAnalysisRt>;
 
-export const dataStreamSettingsRt = rt.partial({
-  createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
-  integration: rt.string,
-  datasetUserPrivileges: datasetUserPrivilegesRt,
-  lastBackingIndexName: rt.string,
-});
+export const dataStreamSettingsRt = rt.intersection([
+  rt.type({
+    lastBackingIndexName: rt.string,
+  }),
+  rt.partial({
+    createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
+    integration: rt.string,
+    datasetUserPrivileges: datasetUserPrivilegesRt,
+  }),
+]);
 
 export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useSelector } from '@xstate/react';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
 import { DegradedField } from '../../common/data_streams_stats';
 import { SortDirection } from '../../common/types';
@@ -29,7 +29,7 @@ export function useDegradedFields() {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
 
-  const { degradedFields, expandedDegradedField, isDegradedFieldFlyoutOpen } = useSelector(
+  const { degradedFields, expandedDegradedField, currentQualityIssues } = useSelector(
     service,
     (state) => state.context
   );
@@ -70,12 +70,12 @@ export function useDegradedFields() {
     return sortedItems.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
   }, [data, sort.field, sort.direction, page, rowsPerPage]);
 
+  const expandedRenderedItem = useMemo(() => {
+    return renderedItems.find((item) => item.name === expandedDegradedField);
+  }, [expandedDegradedField, renderedItems]);
+
   const isDegradedFieldsLoading = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDegradedFields.fetching')
-  );
-
-  const hasDataStreamSettingsLoaded = useSelector(service, (state) =>
-    state.matches('initializing.dataStreamSettings.initializeIntegrations')
   );
 
   const closeDegradedFieldFlyout = useCallback(
@@ -94,34 +94,18 @@ export function useDegradedFields() {
     [expandedDegradedField, service]
   );
 
-  useEffect(() => {
-    if (
-      hasDataStreamSettingsLoaded &&
-      expandedDegradedField &&
-      !isDegradedFieldsLoading &&
-      !isDegradedFieldFlyoutOpen
-    ) {
-      service.send({
-        type: 'OPEN_DEGRADED_FIELD_FLYOUT',
-        fieldName: expandedDegradedField,
-      });
-    }
-  }, [
-    isDegradedFieldsLoading,
-    expandedDegradedField,
-    service,
-    isDegradedFieldFlyoutOpen,
-    hasDataStreamSettingsLoaded,
-  ]);
+  const toggleCurrentQualityIssues = useCallback(() => {
+    service.send('TOGGLE_CURRENT_QUALITY_ISSUES');
+  }, [service]);
 
   const degradedFieldValues = useSelector(service, (state) =>
-    state.matches('initializing.degradedFieldFlyout.initialized')
+    state.matches('initializing.degradedFieldFlyout.open.ignoredValues.done')
       ? state.context.degradedFieldValues
       : undefined
   );
 
   const degradedFieldAnalysis = useSelector(service, (state) =>
-    state.matches('initializing.degradedFieldFlyout.initialized')
+    state.matches('initializing.degradedFieldFlyout.open.analyze.done')
       ? state.context.degradedFieldAnalysis
       : undefined
   );
@@ -167,11 +151,11 @@ export function useDegradedFields() {
   }, [degradedFieldAnalysis, degradedFieldValues]);
 
   const isDegradedFieldsValueLoading = useSelector(service, (state) => {
-    return state.matches('initializing.degradedFieldFlyout.initializing.ignoredValues.fetching');
+    return state.matches('initializing.degradedFieldFlyout.open.ignoredValues.fetching');
   });
 
   const isAnalysisInProgress = useSelector(service, (state) => {
-    return state.matches('initializing.degradedFieldFlyout.initializing.analyze.fetching');
+    return state.matches('initializing.degradedFieldFlyout.open.analyze.fetching');
   });
 
   return {
@@ -190,5 +174,8 @@ export function useDegradedFields() {
     isAnalysisInProgress,
     degradedFieldAnalysis,
     degradedFieldAnalysisResult,
+    toggleCurrentQualityIssues,
+    currentQualityIssues,
+    expandedRenderedItem,
   };
 }

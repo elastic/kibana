@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlexGroup,
   EuiPanel,
@@ -15,10 +15,12 @@ import {
   useGeneratedHtmlId,
   EuiBadge,
   EuiBetaBadge,
+  EuiSwitch,
 } from '@elastic/eui';
 import {
   overviewDegradedFieldsSectionTitle,
   overviewDegradedFieldsSectionTitleTooltip,
+  overviewDegradedFieldToggleSwitch,
   overviewQualityIssuesAccordionTechPreviewBadge,
 } from '../../../../../common/translations';
 import { DegradedFieldTable } from './table';
@@ -28,8 +30,26 @@ export function DegradedFields() {
   const accordionId = useGeneratedHtmlId({
     prefix: overviewDegradedFieldsSectionTitle,
   });
+  const toggleTextSwitchId = useGeneratedHtmlId({ prefix: 'toggleTextSwitch' });
 
-  const { totalItemCount } = useDegradedFields();
+  const { totalItemCount, toggleCurrentQualityIssues } = useDegradedFields();
+
+  const [checked, setChecked] = useState(false);
+
+  const onChange = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
+    setChecked(e.target.checked);
+    toggleCurrentQualityIssues();
+  };
+
+  const latestBackingIndexToggle = (
+    <EuiSwitch
+      label={overviewDegradedFieldToggleSwitch}
+      checked={checked}
+      onChange={onChange}
+      aria-describedby={toggleTextSwitchId}
+      compressed
+    />
+  );
 
   const accordionTitle = (
     <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
@@ -58,6 +78,7 @@ export function DegradedFields() {
         buttonContent={accordionTitle}
         paddingSize="none"
         initialIsOpen={true}
+        extraAction={latestBackingIndexToggle}
         data-test-subj="datasetQualityDetailsOverviewDocumentTrends"
       >
         <DegradedFieldTable />

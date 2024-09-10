@@ -28,7 +28,6 @@ export const useDatasetQualityDetailsState = () => {
     breakdownField,
     isIndexNotFoundError,
     expandedDegradedField,
-    isDegradedFieldFlyoutOpen,
   } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
@@ -52,7 +51,7 @@ export const useDatasetQualityDetailsState = () => {
   );
 
   const dataStreamSettings = useSelector(service, (state) =>
-    state.matches('initializing.dataStreamSettings.initializeIntegrations')
+    state.matches('initializing.dataStreamSettings.initializingIntegrations')
       ? state.context.dataStreamSettings
       : undefined
   );
@@ -60,14 +59,14 @@ export const useDatasetQualityDetailsState = () => {
   const integrationDetails = {
     integration: useSelector(service, (state) =>
       state.matches(
-        'initializing.dataStreamSettings.initializeIntegrations.integrationDetails.done'
+        'initializing.dataStreamSettings.initializingIntegrations.integrationDetails.done'
       )
         ? state.context.integration
         : undefined
     ),
     dashboard: useSelector(service, (state) =>
       state.matches(
-        'initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.done'
+        'initializing.dataStreamSettings.initializingIntegrations.integrationDashboards.done'
       )
         ? state.context.integrationDashboards
         : undefined
@@ -78,7 +77,7 @@ export const useDatasetQualityDetailsState = () => {
     service,
     (state) =>
       !state.matches(
-        'initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.unauthorized'
+        'initializing.dataStreamSettings.initializingIntegrations.integrationDashboards.unauthorized'
       )
   );
 
@@ -104,17 +103,23 @@ export const useDatasetQualityDetailsState = () => {
   const loadingState = useSelector(service, (state) => ({
     nonAggregatableDatasetLoading: state.matches('initializing.nonAggregatableDataset.fetching'),
     dataStreamDetailsLoading: state.matches('initializing.dataStreamDetails.fetching'),
-    dataStreamSettingsLoading: state.matches('initializing.dataStreamSettings.fetching'),
+    dataStreamSettingsLoading: state.matches(
+      'initializing.dataStreamSettings.fetchingDataStreamSettings'
+    ),
     integrationDetailsLoadings: state.matches(
-      'initializing.dataStreamSettings.initializeIntegrations.integrationDetails.fetching'
+      'initializing.dataStreamSettings.initializingIntegrations.integrationDetails.fetching'
     ),
     integrationDetailsLoaded: state.matches(
-      'initializing.dataStreamSettings.initializeIntegrations.integrationDetails.done'
+      'initializing.dataStreamSettings.initializingIntegrations.integrationDetails.done'
     ),
     integrationDashboardsLoading: state.matches(
-      'initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.fetching'
+      'initializing.dataStreamSettings.initializingIntegrations.integrationDashboards.fetching'
     ),
   }));
+
+  const isDegradedFieldFlyoutOpen = useSelector(service, (state) =>
+    state.matches('initializing.degradedFieldFlyout.open')
+  );
 
   const updateTimeRange = useCallback(
     ({ start, end, refreshInterval }: OnRefreshProps) => {

@@ -329,6 +329,13 @@ export const overviewDegradedFieldsSectionTitle = i18n.translate(
   }
 );
 
+export const overviewDegradedFieldToggleSwitch = i18n.translate(
+  'xpack.datasetQuality.details.degradedFieldToggleSwitch',
+  {
+    defaultMessage: 'Current quality issues only',
+  }
+);
+
 export const overviewDegradedFieldsSectionTitleTooltip = i18n.translate(
   'xpack.datasetQuality.details.degradedFieldsSectionTooltip',
   {
