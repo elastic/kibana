@@ -14,10 +14,9 @@ import React, { useMemo, useRef } from 'react';
 import { Item } from '@kbn/investigation-shared';
 import { BehaviorSubject } from 'rxjs';
 import { PresentationContainer } from '@kbn/presentation-containers';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { EMBEDDABLE_ITEM_TYPE } from '../../../../items/embeddable_item/register_embeddable_item';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { InvestigateTextButton } from '../investigate_text_button';
-
 interface AddFromLibraryButtonProps {
   onItemAdd: (item: Item) => Promise<void>;
 }
@@ -108,7 +107,8 @@ export function AddFromLibraryButton({ onItemAdd }: AddFromLibraryButtonProps) {
   }, [children$, contentManagement.client, onItemAdd]);
 
   return (
-    <InvestigateTextButton
+    <EuiButtonEmpty
+      data-test-subj="investigateAppAddFromLibraryButtonImportFromLibraryButton"
       iconType="importAction"
       onClick={() => {
         panelRef.current = openAddPanelFlyout({
@@ -123,6 +123,6 @@ export function AddFromLibraryButton({ onItemAdd }: AddFromLibraryButtonProps) {
       {i18n.translate('xpack.investigateApp.addFromLibraryButtonLabel', {
         defaultMessage: 'Import from library',
       })}
-    </InvestigateTextButton>
+    </EuiButtonEmpty>
   );
 }
