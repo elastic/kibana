@@ -42,7 +42,7 @@ import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import { DISCOVER_CELL_ACTIONS_TRIGGER, useAdditionalCellActions } from '../../context_awareness';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
-import { createDataSource } from '../utils/create_data_source';
+import { createDataSource } from '../../../common/data_sources';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
@@ -138,7 +138,6 @@ export function SearchEmbeddableGridComponent({
   });
 
   const dataSource = useMemo(() => createDataSource({ dataView, query }), [dataView, query]);
-
   const timeRange = useMemo(
     () => (fetchContext ? getTimeRangeFromFetchContext(fetchContext) : undefined),
     [fetchContext]

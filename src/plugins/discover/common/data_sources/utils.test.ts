@@ -8,9 +8,8 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { createDataViewDataSource, createEsqlDataSource } from '../../../common/data_sources';
-import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
-import { createDataSource } from './create_data_source';
+import { dataViewWithTimefieldMock } from '../../public/__mocks__/data_view_with_timefield';
+import { createDataSource, createDataViewDataSource, createEsqlDataSource } from './utils';
 
 describe('createDataSource', () => {
   it('should return ES|QL source when ES|QL query', () => {

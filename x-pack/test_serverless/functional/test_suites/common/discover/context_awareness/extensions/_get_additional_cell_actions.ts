@@ -118,6 +118,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         } finally {
           await alert?.dismiss();
         }
+        // check Surrounding docs page
+        await dataGrid.clickRowToggle();
+        const [, surroundingActionEl] = await dataGrid.getRowActions();
+        await surroundingActionEl.click();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
+        await dataGrid.clickCellExpandPopoverAction('example-data-source-action');
+        alert = await browser.getAlert();
+        try {
+          expect(await alert?.getText()).to.be('Example data source action executed');
+        } finally {
+          await alert?.dismiss();
+        }
+        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
+        await dataGrid.clickCellExpandPopoverAction('another-example-data-source-action');
+        alert = await browser.getAlert();
+        try {
+          expect(await alert?.getText()).to.be('Another example data source action executed');
+        } finally {
+          await alert?.dismiss();
+        }
       });
 
       it('should not render incompatible cell action for message column', async () => {
