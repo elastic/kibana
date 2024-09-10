@@ -287,3 +287,29 @@ export interface IndexSummaryTableItem {
   sizeInBytes: number | undefined;
   checkedAt: number | undefined;
 }
+
+export interface StorageResult {
+  batchId: string;
+  indexName: string;
+  indexPattern: string;
+  isCheckAll: boolean;
+  checkedAt: number;
+  docsCount: number;
+  totalFieldCount: number;
+  ecsFieldCount: number;
+  customFieldCount: number;
+  incompatibleFieldCount: number;
+  incompatibleFieldMappingItems: IncompatibleFieldMappingItem[];
+  incompatibleFieldValueItems: IncompatibleFieldValueItem[];
+  sameFamilyFieldCount: number;
+  sameFamilyFields: string[];
+  sameFamilyFieldItems: SameFamilyFieldItem[];
+  unallowedMappingFields: string[];
+  unallowedValueFields: string[];
+  sizeInBytes: number;
+  ilmPhase?: IlmPhase;
+  markdownComments: string[];
+  ecsVersion: string;
+  indexId: string;
+  error: string | null;
+}

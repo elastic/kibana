@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-export const getIndexResultBadgeColor = (incompatible: number | undefined): string => {
-  if (incompatible == null) {
-    return 'ghost';
-  } else if (incompatible === 0) {
-    return '#6dcbb1';
-  } else {
-    return 'danger';
-  }
-};
+export const DEFAULT_HISTORICAL_RESULTS_START_DATE = 'now-7d';
+export const DEFAULT_HISTORICAL_RESULTS_END_DATE = 'now';

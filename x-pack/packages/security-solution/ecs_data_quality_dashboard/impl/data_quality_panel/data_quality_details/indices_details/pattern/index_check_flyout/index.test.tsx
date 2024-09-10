@@ -63,11 +63,7 @@ describe('IndexCheckFlyout', () => {
         'true'
       );
       expect(screen.getByRole('tab', { name: 'Latest Check' })).not.toBeDisabled();
-      expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute(
-        'aria-selected',
-        'false'
-      );
-      expect(screen.getByRole('tab', { name: 'History' })).toBeDisabled();
+      expect(screen.getByRole('tab', { name: 'History' })).not.toBeDisabled();
     });
 
     it('should render the correct index properties panel', () => {

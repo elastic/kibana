@@ -9,11 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 
 import { useResultsRollupContext } from '../../contexts/results_rollup_context';
 import { StorageTreemap } from './storage_treemap';
-import { DEFAULT_MAX_CHART_HEIGHT } from '../indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/styles';
 import { SelectedIndex } from '../../types';
 import { useDataQualityContext } from '../../data_quality_context';
 import { DOCS_UNIT } from './translations';
 import { getFlattenedBuckets } from './utils/get_flattened_buckets';
+import { DEFAULT_MAX_CHART_HEIGHT } from '../indices_details/pattern/index_check_flyout/latest_results/index_check_fields/tabs/styles';
 
 export interface Props {
   onIndexSelected: ({ indexName, pattern }: SelectedIndex) => void;
