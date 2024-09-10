@@ -165,8 +165,6 @@ export function MockApmPluginStorybook({
     initialEntries: [routePath || '/services/?rangeFrom=now-15m&rangeTo=now'],
   });
 
-  console.log('Initial history location:', history2.location);
-
   return (
     <IntlProvider locale="en">
       <EuiThemeProvider darkMode={false}>
