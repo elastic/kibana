@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiPopover,
   EuiButton,
@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { getDocumentationSections } from '@kbn/text-based-editor';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import {
   LanguageDocumentationFlyout,
@@ -35,15 +34,14 @@ export const ESQLMenuPopover = () => {
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
 
-  useEffect(() => {
-    async function getDocumentation() {
+  const toggleLanguageComponent = useCallback(async () => {
+    if (!documentationSections) {
+      const { getDocumentationSections } = await import('@kbn/text-based-editor');
       const sections = await getDocumentationSections('esql');
       setDocumentationSections(sections);
     }
-    if (!documentationSections) {
-      getDocumentation();
-    }
-  }, [documentationSections]);
+    setIsLanguageComponentOpen(!isLanguageComponentOpen);
+  }, [documentationSections, isLanguageComponentOpen]);
 
   const esqlPanelItems = useMemo(() => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
@@ -52,7 +50,7 @@ export const ESQLMenuPopover = () => {
         key="quickReference"
         icon="documentation"
         data-test-subj="esql-quick-reference"
-        onClick={() => setIsLanguageComponentOpen(!isLanguageComponentOpen)}
+        onClick={() => toggleLanguageComponent()}
       >
         {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.quickReference', {
           defaultMessage: 'Quick Reference',
@@ -97,7 +95,7 @@ export const ESQLMenuPopover = () => {
   }, [
     docLinks.links.query.queryESQL,
     docLinks.links.query.queryESQLExamples,
-    isLanguageComponentOpen,
+    toggleLanguageComponent,
   ]);
 
   return (

@@ -14,7 +14,6 @@ In order to enable text based languages on your unified search bar add `textBase
 
 
 ## Languages supported
-- SQL: based on the Elasticsearch sql api
 - ESQL: based on the Elastisearch esql api
 
 

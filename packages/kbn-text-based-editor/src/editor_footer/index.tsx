@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useState, useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCode, EuiButtonIcon } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  LanguageDocumentationFlyout,
   LanguageDocumentationInline,
   type LanguageDocumentationSections,
 } from '@kbn/language-documentation-popover';
@@ -24,7 +22,6 @@ import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { QueryHistoryAction, QueryHistory } from './query_history';
 import { SubmitFeedbackComponent } from './feedback_component';
 import { QueryWrapComponent } from './query_wrap_component';
-import type { TextBasedEditorDeps } from '../types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -73,9 +70,6 @@ export const EditorFooter = memo(function EditorFooter({
   measuredContainerWidth,
   code,
 }: EditorFooterProps) {
-  const kibana = useKibana<TextBasedEditorDeps>();
-  const { docLinks } = kibana.services;
-
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
@@ -101,22 +95,16 @@ export const EditorFooter = memo(function EditorFooter({
     setIsLanguageComponentOpen(false);
   }, [isHistoryOpen, setIsHistoryOpen]);
 
-  const toggleLanguageComponent = useCallback(() => {
-    setIsLanguageComponentOpen(!isLanguageComponentOpen);
-    setIsHistoryOpen(false);
-  }, [isLanguageComponentOpen, setIsHistoryOpen]);
-
-  const limit = useMemo(() => getLimitFromESQLQuery(code), [code]);
-
-  useEffect(() => {
-    async function getDocumentation() {
+  const toggleLanguageComponent = useCallback(async () => {
+    if (!documentationSections) {
       const sections = await getDocumentationSections('esql');
       setDocumentationSections(sections);
     }
-    if (!documentationSections) {
-      getDocumentation();
-    }
-  }, [documentationSections]);
+    setIsLanguageComponentOpen(!isLanguageComponentOpen);
+    setIsHistoryOpen(false);
+  }, [documentationSections, isLanguageComponentOpen, setIsHistoryOpen]);
+
+  const limit = useMemo(() => getLimitFromESQLQuery(code), [code]);
 
   return (
     <EuiFlexGroup
@@ -294,30 +282,6 @@ export const EditorFooter = memo(function EditorFooter({
                   </EuiFlexGroup>
                 </EuiFlexItem>
               )}
-              {documentationSections && !editorIsInline && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="documentation"
-                    onClick={() => setIsLanguageComponentOpen(!isLanguageComponentOpen)}
-                    color="text"
-                    size="xs"
-                    data-test-subj="TextBasedLangEditor-documentation"
-                    aria-label={i18n.translate(
-                      'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
-                      {
-                        defaultMessage: 'Documentation',
-                      }
-                    )}
-                  />
-                  <LanguageDocumentationFlyout
-                    sections={documentationSections}
-                    searchInDescription
-                    linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
-                    isHelpMenuOpen={isLanguageComponentOpen}
-                    onHelpMenuVisibilityChange={setIsLanguageComponentOpen}
-                  />
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           {Boolean(editorIsInline) && (
@@ -332,11 +296,9 @@ export const EditorFooter = memo(function EditorFooter({
                       isSpaceReduced={true}
                     />
                   )}
-                  {documentationSections && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon iconType="documentation" onClick={toggleLanguageComponent} />
-                    </EuiFlexItem>
-                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon iconType="documentation" onClick={toggleLanguageComponent} />
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             </>
