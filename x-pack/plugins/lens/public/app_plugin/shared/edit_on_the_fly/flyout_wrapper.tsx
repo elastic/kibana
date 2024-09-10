@@ -67,13 +67,19 @@ export const FlyoutWrapper = ({
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
-                        content={i18n.translate('xpack.lens.config.experimentalLabelDataview', {
-                          defaultMessage:
-                            'Technical preview, inline editing currently offers limited configuration options',
+                        title={i18n.translate('xpack.lens.config.experimentalLabelDataview.title', {
+                          defaultMessage: 'Technical preview',
                         })}
+                        content={i18n.translate(
+                          'xpack.lens.config.experimentalLabelDataview.content',
+                          {
+                            defaultMessage:
+                              'Inline editing currently offers limited configuration options.',
+                          }
+                        )}
                       >
                         <EuiBetaBadge
-                          label="Lab"
+                          label=""
                           iconType="beaker"
                           size="s"
                           css={css`
