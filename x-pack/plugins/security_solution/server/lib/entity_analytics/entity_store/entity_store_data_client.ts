@@ -8,6 +8,12 @@
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import { createQueryFilterClauses } from '../../../utils/build_query';
+import type {
+  HostEntityRecord,
+  UserEntityRecord,
+} from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type {
   InitEntityStoreRequestBody,
   InitEntityStoreResponse,
@@ -15,10 +21,11 @@ import type {
 import type {
   EngineDescriptor,
   EntityType,
+  InspectQuery,
 } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { entityEngineDescriptorTypeName } from './saved_object';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
-import { getEntityDefinition } from './utils/utils';
+import { getEntitiesIndexName, getEntityDefinition } from './utils/utils';
 import { ENGINE_STATUS } from './constants';
 
 interface EntityStoreClientOpts {
@@ -28,6 +35,17 @@ interface EntityStoreClientOpts {
   namespace: string;
   soClient: SavedObjectsClientContract;
 }
+
+interface SearchEntitiesParams {
+  entityTypes: EntityType[];
+  filterQuery?: string; // or filter
+  page: number;
+  perPage: number;
+  sortField: string;
+  sortOrder: SortOrder;
+}
+
+const MAX_SEARCH_RESPONSE_SIZE = 10_000;
 
 export class EntityStoreDataClient {
   private engineClient: EngineDescriptorClient;
@@ -116,5 +134,45 @@ export class EntityStoreDataClient {
     await this.engineClient.delete(id);
 
     return { deleted: true };
+  }
+
+  public async searchEntities(params: SearchEntitiesParams): Promise<{
+    records: Array<UserEntityRecord | HostEntityRecord>;
+    total: number;
+    inspect: InspectQuery;
+  }> {
+    const { page, perPage, sortField, sortOrder, filterQuery, entityTypes } = params;
+
+    const index = entityTypes.map(getEntitiesIndexName);
+    const from = (page - 1) * perPage;
+    const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
+
+    const filter = [...createQueryFilterClauses(filterQuery)];
+    const query = {
+      bool: {
+        filter,
+      },
+    };
+
+    const response = await this.options.esClient.search<UserEntityRecord | HostEntityRecord>({
+      index,
+      query,
+      size: Math.min(perPage, MAX_SEARCH_RESPONSE_SIZE),
+      from,
+      sort,
+      ignore_unavailable: true,
+    });
+    const { hits } = response;
+
+    const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
+
+    const records = hits.hits.map((hit) => hit._source as UserEntityRecord | HostEntityRecord);
+
+    const inspect: InspectQuery = {
+      dsl: [JSON.stringify({ index, body: query }, null, 2)],
+      response: [JSON.stringify(response, null, 2)],
+    };
+
+    return { records, total, inspect };
   }
 }

@@ -1,0 +1,89 @@
+# ⚠️ Updating this file? Also update the public API docs at https://github.com/elastic/security-docs/tree/main/docs/advanced-entity-analytics/api
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Entities List Schema
+paths:
+  /api/entity_store/entities/list:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ListEntities
+      summary: List Entity Store Entities
+      description: List entities records, paging, sorting and filtering as needed.
+      parameters:
+        - name: sort_field
+          in: query
+          required: false
+          schema:
+            type: string
+          description: The field to sort by.
+        - name: sort_order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+          description: The order to sort by.
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          description: The page number to return.
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+          description: The number of records to return per page.
+        - name: filterQuery
+          in: query
+          required: false
+          schema:
+            type: string
+          description: The filterQuery to filter by.
+        - name: entities_types
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '../common.schema.yaml#/components/schemas/EntityType'
+          description: The entity types to filter by.
+      responses:
+        '200':
+          description: Entities returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: './common.schema.yaml#/components/schemas/UserEntityRecord'
+                        - $ref: './common.schema.yaml#/components/schemas/HostEntityRecord'
+                  page:
+                    type: integer
+                    minimum: 1
+                  per_page:
+                    type: integer
+                    minimum: 1
+                    maximum: 1000
+                  total:
+                    type: integer
+                    minimum: 0
+                  inspect:
+                    $ref: '../common.schema.yaml#/components/schemas/InspectQuery'
+                required:
+                  - records
+                  - page
+                  - per_page
+                  - total

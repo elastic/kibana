@@ -269,6 +269,10 @@ import type {
   StopEntityStoreRequestParamsInput,
   StopEntityStoreResponse,
 } from './entity_analytics/entity_store/engine/stop.gen';
+import type {
+  ListEntitiesRequestQueryInput,
+  ListEntitiesResponse,
+} from './entity_analytics/entity_store/entities/list_entities.gen';
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
 import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
@@ -1445,6 +1449,23 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * List entities records, paging, sorting and filtering as needed.
+   */
+  async listEntities(props: ListEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListEntities`);
+    return this.kbnClient
+      .request<ListEntitiesResponse>({
+        path: '/api/entity_store/entities/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async listEntityStoreEngines() {
     this.log.info(`${new Date().toISOString()} Calling API ListEntityStoreEngines`);
     return this.kbnClient
@@ -2065,6 +2086,9 @@ export interface InstallPrepackedTimelinesProps {
 }
 export interface InternalUploadAssetCriticalityRecordsProps {
   attachment: FormData;
+}
+export interface ListEntitiesProps {
+  query: ListEntitiesRequestQueryInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;

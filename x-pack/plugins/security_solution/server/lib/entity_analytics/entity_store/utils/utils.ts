@@ -31,3 +31,7 @@ export const ensureEngineExists =
 export const getByEntityTypeQuery = (entityType: EntityType) => {
   return `${entityEngineDescriptorTypeName}.attributes.type: ${entityType}`;
 };
+
+export const getEntitiesIndexName = (entityType: EntityType) => {
+  return `.entities.v1.latest.ea_${entityType}_entity_store`;
+};

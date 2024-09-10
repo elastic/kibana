@@ -1,0 +1,172 @@
+openapi: 3.0.0
+info:
+  title: Common Entities Schemas
+  description: Common Entities schemas for the Entity Store
+  version: '1'
+paths: {}
+components:
+  schemas:
+    UserEntityRecord:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            full_name:
+              type: array
+              items:
+                type: string
+            domain:
+              type: array
+              items:
+                type: string
+            roles:
+              type: array
+              items:
+                type: string
+            name:
+              type: string
+            id:
+              type: array
+              items:
+                type: string
+            email:
+              type: array
+              items:
+                type: string
+            hash:
+              type: array
+              items:
+                type: string
+          required:
+            - name
+        entity:
+          type: object
+          properties:
+            lastSeenTimestamp:
+              type: string
+              format: date-time
+              description: The last seen timestamp of the entity.
+            schemaVersion:
+              type: string
+              description: The schema version of the entity.
+            definitionVersion:
+              type: string
+              description: The definition version of the entity.
+            displayName:
+              type: string
+              description: The display name of the entity.
+            identityFields:
+              type: array
+              items:
+                type: string
+              description: The identity fields of the entity.
+            id:
+              type: string
+              description: The ID of the entity.
+            type:
+              type: string
+              enum:
+                - node
+              description: The type of the entity.
+            firstSeenTimestamp:
+              type: string
+              format: date-time
+              description: The first seen timestamp of the entity.
+            definitionId:
+              type: string
+              description: The definition ID of the entity.
+          required:
+            - lastSeenTimestamp
+            - schemaVersion
+            - definitionVersion
+            - displayName
+            - identityFields
+            - id
+            - type
+            - firstSeenTimestamp
+            - definitionId
+    HostEntityRecord:
+      type: object
+      properties:
+        host:
+          type: object
+          properties:
+            hostname:
+              type: array
+              items:
+                type: string
+            domain:
+              type: array
+              items:
+                type: string
+            ip:
+              type: array
+              items:
+                type: string
+            name:
+              type: string
+            id:
+              type: array
+              items:
+                type: string
+            type:
+              type: array
+              items:
+                type: string
+            mac:
+              type: array
+              items:
+                type: string
+            architecture:
+              type: array
+              items:
+                type: string
+          required:
+            - name
+        entity:
+          type: object
+          properties:
+            lastSeenTimestamp:
+              type: string
+              format: date-time
+              description: The last seen timestamp of the entity.
+            schemaVersion:
+              type: string
+              description: The schema version of the entity.
+            definitionVersion:
+              type: string
+              description: The definition version of the entity.
+            displayName:
+              type: string
+              description: The display name of the entity.
+            identityFields:
+              type: array
+              items:
+                type: string
+              description: The identity fields of the entity.
+            id:
+              type: string
+              description: The ID of the entity.
+            type:
+              type: string
+              enum:
+                - node
+              description: The type of the entity.
+            firstSeenTimestamp:
+              type: string
+              format: date-time
+              description: The first seen timestamp of the entity.
+            definitionId:
+              type: string
+              description: The definition ID of the entity.
+          required:
+            - lastSeenTimestamp
+            - schemaVersion
+            - definitionVersion
+            - displayName
+            - identityFields
+            - id
+            - type
+            - firstSeenTimestamp
+            - definitionId
