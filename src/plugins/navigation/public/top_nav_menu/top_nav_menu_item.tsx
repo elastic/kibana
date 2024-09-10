@@ -50,7 +50,6 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     'data-test-subj': props.testId,
     className: props.className,
     color: (props.color ?? 'primary') as EuiButtonColor,
-    fill: props.fill ?? true,
   };
 
   // If the item specified a href, then override the suppress the onClick
@@ -60,8 +59,9 @@ export function TopNavMenuItem(props: TopNavMenuData) {
       ? { onClick: undefined, href: props.href, target: props.target }
       : {};
 
+  // fill is not compatible with EuiHeaderLink
   const btn = props.emphasize ? (
-    <EuiButton size="s" {...commonButtonProps}>
+    <EuiButton size="s" {...commonButtonProps} fill={props.fill ?? true}>
       {getButtonContainer()}
     </EuiButton>
   ) : (

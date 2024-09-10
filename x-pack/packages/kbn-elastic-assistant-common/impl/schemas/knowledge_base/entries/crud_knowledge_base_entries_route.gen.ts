@@ -21,7 +21,7 @@ import {
   KnowledgeBaseEntryResponse,
   KnowledgeBaseEntryUpdateProps,
 } from './common_attributes.gen';
-import { NonEmptyString } from '../common_attributes.gen';
+import { NonEmptyString } from '../../common_attributes.gen';
 
 export type CreateKnowledgeBaseEntryRequestBody = z.infer<
   typeof CreateKnowledgeBaseEntryRequestBody
