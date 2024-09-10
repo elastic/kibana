@@ -13,7 +13,7 @@ export * from 'openapi-types';
 declare module 'openapi-types' {
   export namespace OpenAPIV3 {
     export interface BaseSchemaObject {
-      // Custom OpenAPI field added by Kibana
+      // Custom OpenAPI field added by Kibana for a new field at the shema level.
       discontinued?: string;
     }
   }
