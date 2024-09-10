@@ -8,12 +8,17 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/css';
+
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 import { OptimizedAccordion } from './optimized_accordion';
 import { LoggedRequestsItem } from './logged_requests_item';
+import { useAccordionStyling } from './use_accordion_styling';
 
 const LoggedRequestsComponent: FC<{ logs: RulePreviewLogs[] }> = ({ logs }) => {
+  const cssStyles = useAccordionStyling();
+
   const AccordionContent = useMemo(
     () => (
       <>
@@ -38,10 +43,13 @@ const LoggedRequestsComponent: FC<{ logs: RulePreviewLogs[] }> = ({ logs }) => {
         id="preview-logged-requests-accordion"
         data-test-subj="preview-logged-requests-accordion"
         buttonContent={i18n.LOGGED_REQUESTS_ACCORDION_BUTTON}
+        borders="horizontal"
+        css={css`
+          ${cssStyles}
+        `}
       >
         {AccordionContent}
       </OptimizedAccordion>
-      <EuiSpacer size="m" />
     </>
   );
 };

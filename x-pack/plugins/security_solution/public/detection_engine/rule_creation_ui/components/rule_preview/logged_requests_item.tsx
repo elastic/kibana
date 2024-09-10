@@ -21,6 +21,7 @@ import type { RulePreviewLogs } from '../../../../../common/api/detection_engine
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { OptimizedAccordion } from './optimized_accordion';
+import { useAccordionStyling } from './use_accordion_styling';
 
 const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs>> = ({
   startedAt,
@@ -28,11 +29,11 @@ const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs>> = ({
   requests,
 }) => {
   const paddingLarge = useEuiPaddingSize('l');
-  const paddingSmall = useEuiPaddingSize('s');
+  const cssStyles = useAccordionStyling();
+
   return (
     <OptimizedAccordion
       data-test-subj="preview-logged-requests-item-accordion"
-      borders="horizontal"
       buttonContent={
         <>
           {startedAt ? (
@@ -50,8 +51,7 @@ const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs>> = ({
       id={`ruleExecution-${startedAt}`}
       css={css`
         margin-left: ${paddingLarge};
-        padding-bottom: ${paddingLarge};
-        padding-top: ${paddingSmall};
+        ${cssStyles}
       `}
     >
       {(requests ?? []).map((request, key) => (
