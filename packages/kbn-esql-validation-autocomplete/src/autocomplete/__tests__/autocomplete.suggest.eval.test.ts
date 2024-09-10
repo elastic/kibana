@@ -541,7 +541,12 @@ describe('autocomplete.suggest', () => {
       );
       await assertSuggestions(
         'from a | eval var0=date_trunc(/)',
-        getLiteralsByType('time_literal').map((t) => `${t}, `),
+        [
+          ...getLiteralsByType('time_literal').map((t) => `${t}, `),
+          ...getFunctionSignaturesByReturnType('eval', 'time_duration', { scalar: true }).map(
+            (t) => `${t.text},`
+          ),
+        ],
         { triggerCharacter: '(' }
       );
       await assertSuggestions(
