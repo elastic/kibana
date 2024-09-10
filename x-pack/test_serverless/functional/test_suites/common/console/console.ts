@@ -43,5 +43,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(actualResponse).to.contain(expectedResponseContains);
       });
     });
+
+    it('should open API Reference documentation page when open documentation button is clicked', async () => {
+      await PageObjects.console.clearEditorText();
+      await PageObjects.console.enterText('GET _search');
+      await PageObjects.console.clickContextMenu();
+      await PageObjects.console.clickOpenDocumentationButton();
+
+      await retry.tryForTime(10000, async () => {
+        await browser.switchTab(1);
+      });
+
+      // Retry until the documentation is loaded
+      await retry.try(async () => {
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain('api-reference.html');
+      });
+
+      // Close the documentation tab
+      await browser.closeCurrentWindow();
+      await browser.switchTab(0);
+    });
   });
 }
