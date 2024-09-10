@@ -230,4 +230,33 @@ describe('RouteSecurity validation', () => {
       `"[authz.requiredPrivileges]: anyRequired and allRequired cannot have the same values: [privilege2]"`
     );
   });
+
+  it('should fail validation when anyRequired has duplicate entries', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [
+          { anyRequired: ['privilege1', 'privilege1'], allRequired: ['privilege4'] },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: anyRequired privileges must contain unique values"`
+    );
+  });
+
+  it('should fail validation when anyRequired has duplicates in multiple privilege entries', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [
+          { anyRequired: ['privilege1', 'privilege1'], allRequired: ['privilege4'] },
+          { anyRequired: ['privilege1', 'privilege1'] },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: anyRequired privileges must contain unique values"`
+    );
+  });
 });

@@ -56,6 +56,14 @@ const requiredPrivilegesSchema = schema.arrayOf(
           }
         }
       }
+
+      if (anyRequired.length) {
+        const uniquePrivileges = new Set([...anyRequired]);
+
+        if (anyRequired.length !== uniquePrivileges.size) {
+          return 'anyRequired privileges must contain unique values';
+        }
+      }
     },
     minSize: 1,
   }
