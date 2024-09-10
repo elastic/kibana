@@ -44,7 +44,7 @@ describe('TheHive Cases Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    await userEvent.selectOptions(screen.getByTestId('tlp-field'), '4');
+    await userEvent.selectOptions(await screen.findByTestId('tlp-field'), '4');
     expect(await screen.findByTestId('tlp-field')).toHaveValue(TheHiveTLP.RED.toString());
   });
 });
