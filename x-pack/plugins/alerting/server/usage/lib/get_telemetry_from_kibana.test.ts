@@ -6,11 +6,61 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { getTotalCountAggregations, getTotalCountInUse } from './get_telemetry_from_kibana';
+import {
+  getTotalCountAggregations,
+  getTotalCountInUse,
+  getTotalMWCount,
+} from './get_telemetry_from_kibana';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
+import { ISavedObjectsRepository } from '@kbn/core/server';
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
+const savedObjectsClient = savedObjectsClientMock.create() as unknown as ISavedObjectsRepository;
+const thrownError = new Error('Fail');
+
+// introduce fake dates
+const mockedMWAttributes = [
+  {
+    title: 'test_rule_1',
+    enabled: true,
+    duration: 1800000,
+    expirationDate: '2025-09-09T13:13:07.824Z',
+    events: [],
+    rRule: {
+      dtstart: '2024-09-09T13:13:02.054Z',
+      tzid: 'Europe/Stockholm',
+      freq: 0,
+      count: 1,
+    },
+    createdBy: null,
+    updatedBy: null,
+    createdAt: '2024-09-09T13:13:07.825Z',
+    updatedAt: '2024-09-09T13:13:07.825Z',
+    scopedQuery: null,
+  },
+];
+
+const mockCreatePointInTimeFinder = (
+  response = {
+    saved_objects: [
+      {
+        id: 'abc',
+        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+        attributes: mockedMWAttributes,
+      },
+    ],
+  }
+) => {
+  savedObjectsClient.createPointInTimeFinder = jest.fn().mockResolvedValue({
+    close: jest.fn(),
+    find: function* asyncGenerator() {
+      yield response;
+    },
+  });
+};
 
 describe('kibana index telemetry', () => {
   beforeEach(() => {
@@ -419,5 +469,42 @@ describe('kibana index telemetry', () => {
         hasErrors: true,
       });
     });
+  });
+
+  describe('getTotalMWCount', () => {
+    test('should return total count of MW', async () => {
+      mockCreatePointInTimeFinder();
+      const telemetry = await getTotalMWCount({
+        savedObjectsClient,
+        logger,
+      });
+
+      expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+        perPage: 100,
+      });
+      expect(telemetry).toStrictEqual({ count_total_mw: 1, hasErrors: false });
+    });
+  });
+
+  test('should throw the error', async () => {
+    savedObjectsClient.createPointInTimeFinder = jest.fn().mockRejectedValueOnce(thrownError);
+    const telemetry = await getTotalMWCount({
+      savedObjectsClient,
+      logger,
+    });
+
+    expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      perPage: 100,
+    });
+
+    expect(telemetry).toStrictEqual({ count_total_mw: 0, hasErrors: true, errorMessage: 'Fail' });
+    expect(logger.warn).toHaveBeenCalled();
+    const loggerCall = logger.warn.mock.calls[0][0];
+    const loggerMeta = logger.warn.mock.calls[0][1];
+    expect(loggerCall).toBe('Error executing alerting telemetry task: getTotalMWCount - {}');
+    expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
+    expect(loggerMeta?.error?.stack_trace).toBeDefined();
   });
 });

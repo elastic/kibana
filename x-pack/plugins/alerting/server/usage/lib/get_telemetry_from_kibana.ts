@@ -508,10 +508,11 @@ export async function getTotalMWCount({
   logger,
 }: MWOpts): Promise<GetTotalMWCountResults> {
   try {
-    const MWFinder = savedObjectsClient.createPointInTimeFinder<MaintenanceWindowAttributes>({
+    const MWFinder = await savedObjectsClient.createPointInTimeFinder<MaintenanceWindowAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      perPage: 10000,
+      perPage: 100,
     });
+
     const MWs = [];
     for await (const response of MWFinder.find()) {
       MWs.push(...response.saved_objects);
@@ -523,12 +524,12 @@ export async function getTotalMWCount({
       count_total_mw: MWs?.length ?? 0,
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
+    const errorMessage = err?.message ? err.message : err.toString();
     logger.warn(
-      `Error executing alerting telemetry task: getTotalCountAggregations - ${JSON.stringify(err)}`,
+      `Error executing alerting telemetry task: getTotalMWCount - ${JSON.stringify(err)}`,
       {
         tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
+        error: { stack_trace: err?.stack },
       }
     );
     return {
