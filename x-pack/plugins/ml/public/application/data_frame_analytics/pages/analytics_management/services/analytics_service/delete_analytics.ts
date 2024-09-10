@@ -8,18 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { useMlApiContext } from '../../../../../contexts/kibana';
+import { useMlApi } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
 import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
 
 export const useDeleteAnalytics = () => {
   const toastNotificationService = useToastNotificationService();
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
 
   return async (analyticsConfig: DataFrameAnalyticsListRow['config']) => {
     try {
-      await ml.dataFrameAnalytics.deleteDataFrameAnalytics(analyticsConfig.id);
+      await mlApi.dataFrameAnalytics.deleteDataFrameAnalytics(analyticsConfig.id);
       toastNotificationService.displaySuccessToast(
         i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsSuccessMessage', {
           defaultMessage: 'Request to delete data frame analytics job {analyticsId} acknowledged.',
@@ -41,7 +41,7 @@ export const useDeleteAnalytics = () => {
 
 export const useDeleteAnalyticsAndDestIndex = () => {
   const toastNotificationService = useToastNotificationService();
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
 
   return async (
     analyticsConfig: DataFrameAnalyticsListRow['config'],
@@ -50,7 +50,7 @@ export const useDeleteAnalyticsAndDestIndex = () => {
   ) => {
     const destinationIndex = analyticsConfig.dest.index;
     try {
-      const status = await ml.dataFrameAnalytics.deleteDataFrameAnalyticsAndDestIndex(
+      const status = await mlApi.dataFrameAnalytics.deleteDataFrameAnalyticsAndDestIndex(
         analyticsConfig.id,
         deleteDestIndex,
         deleteDestDataView
@@ -134,11 +134,11 @@ export const useDeleteAnalyticsAndDestIndex = () => {
 
 export const useCanDeleteIndex = () => {
   const toastNotificationService = useToastNotificationService();
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
 
   return async (indexName: string) => {
     try {
-      const privilege = await ml.hasPrivileges({
+      const privilege = await mlApi.hasPrivileges({
         index: [
           {
             names: [indexName], // uses wildcard

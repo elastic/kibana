@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.15.1>>
 * <<release-notes-8.15.0>>
 * <<release-notes-8.14.3>>
 * <<release-notes-8.14.2>>
@@ -70,6 +71,50 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.15.1]]
+== {kib} 8.15.1
+
+The 8.15.1 release includes the following bug fixes.
+
+// [float]
+// [[enhancement-v8.15.1]]
+// === Enhancements
+// Other::
+// * Automatic Import now supports the 'multiline newline-delimited JSON' log sample format for the Filestream input ({kibana-pull}190588[#190588]).
+
+[float]
+[[fixes-v8.15.1]]
+=== Bug fixes
+Data Discovery::
+* Fixes time range filter ({kibana-pull}187010[#187010]).
+Elastic Security::
+For the Elastic Security 8.15.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Remove duplicative retries from client-side requests to APIs that depend on EPR ({kibana-pull}190722[#190722]).
+Lens & Visualizations::
+* Visualization blows up when invalid color is passed in *TSVB* ({kibana-pull}190658[#190658]).
+Observability::
+* Enables wildcard search for the Synthetics waterfall chart ({kibana-pull}191132[#191132]).
+* Fixes accordion disclosure keyboard focus border ({kibana-pull}190436[#190436]).
+* Always pass allowLeadingWildcards as true to the KQL validation in the custom threshold rule API param validation ({kibana-pull}190031[#190031]).
+* Prevent excess calls to get agent namespace ({kibana-pull}189995[#189995]).
+* Fixes blank storage explorer summary when filter string is active ({kibana-pull}189760[#189760]).
+* Observability AI Assistant: Use internal user when fetching connectors ({kibana-pull}190462[#190462]).
+* Observability AI Assistant: Fixes bug “Cannot set initialMessages if initialConversationId is set" ({kibana-pull}189885[#189885]).
+Platform::
+* Fixes handling of splittable subkeys when processing values ({kibana-pull}190590[#190590]). Fixes a bug when processing YAML configuration keys that contain dotted notation in objects in arrays. This can manifest as a validation error causing Kibana to not start.
+Presentation::
+* Fixes by-value map embeddables have broken layers ({kibana-pull}190996[#190996]).
+* Fixes text readability on map scale, attribution, and coordinate controls ({kibana-pull}189639[#189639]).
+Search::
+* Fixes index error incorrectly showing up ({kibana-pull}189283[#189283]). Fixes a bug where an index error about the `semantic_text` field would be incorrectly displayed when the inference endpoint was configured and available.
+Uptime::
+* Fixes broken pagination in Uptime when a filter is applied ({kibana-pull}189831[#189831]).
+// Security::
+// * Resolve a bug in ECS missing fields detection ({kibana-pull}191502[#191502]).
+// * Improve sample merge functionality ({kibana-pull}190656[#190656]).
+// * Try parsing samples as both NDJSON and JSON ({kibana-pull}190046[#190046]).
 
 [[release-notes-8.15.0]]
 == {kib} 8.15.0
@@ -610,6 +655,18 @@ The visualization type, region map, comes out of technical preview and is genera
 ====
 *Details* +
 UI improvements for managed tags. For more information, refer to ({kibana-pull}177089[#177089]).
+====
+
+[discrete]
+[[breaking-178159]]
+.Downloading a CSV file from a saved search panel in a dashboard has become deprecated in favor of generating a CSV report.
+[%collapsible]
+====
+*Details* +
+The mechanism of exporting CSV data from a saved search panel in a dashboard has been changed to generate a CSV report, rather than allowing the CSV data to be downloaded
+without creating a report. To preserve the original behavior, it is necessary to update `kibana.yml` with the setting of `xpack.reporting.csv.enablePanelActionDownload:
+true`. The scope of this breaking change is limited to downloading CSV files from saved search panels only; downloading CSV files from other types of dashboard panels is
+unchanged. For more information, refer to {kibana-pull}178159[#178159].
 ====
 
 [float]
@@ -2275,6 +2332,16 @@ For the full list, refer to {kib-issue}146945[#146945].
 ====
 *Details* +
 The function `addProcessorDefinition` is removed from the Console plugin start contract (server side). For more information, refer to ({kibana-pull}159041[#159041]).
+====
+
+[discrete]
+[[breaking-162288]]
+.The Download CSV endpoint has changed.
+[%collapsible]
+====
+*Details* +
+The API endpoint for downloading a CSV file from a saved search in the Dashboard application has changed to reflect the fact that this is an internal API. The previous API path of
+`/api/reporting/v1/generate/immediate/csv_searchsource` has been changed to `/internal/reporting/generate/immediate/csv_searchsource`. For more information, refer to {kibana-pull}162288[#162288].
 ====
 
 [float]

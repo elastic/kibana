@@ -15,33 +15,25 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { GetInvestigationResponse, InvestigationNoteResponse } from '@kbn/investigation-shared';
+import { InvestigationNoteResponse } from '@kbn/investigation-shared';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import React, { useState } from 'react';
-import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
-import { useFetchInvestigationNotes } from '../../../../hooks/use_fetch_investigation_notes';
 import { useTheme } from '../../../../hooks/use_theme';
+import { useInvestigation } from '../../contexts/investigation_context';
 import { Note } from './note';
 import { ResizableTextInput } from './resizable_text_input';
 
 export interface Props {
-  investigation: GetInvestigationResponse;
   user: AuthenticatedUser;
 }
 
-export function InvestigationNotes({ investigation, user }: Props) {
+export function InvestigationNotes({ user }: Props) {
   const theme = useTheme();
+  const { investigation, addNote, isAddingNote } = useInvestigation();
   const [noteInput, setNoteInput] = useState('');
 
-  const { data: notes, refetch } = useFetchInvestigationNotes({
-    investigationId: investigation.id,
-    initialNotes: investigation.notes,
-  });
-  const { mutateAsync: addInvestigationNote, isLoading: isAdding } = useAddInvestigationNote();
-
   const onAddNote = async (content: string) => {
-    await addInvestigationNote({ investigationId: investigation.id, note: { content } });
-    refetch();
+    await addNote(content);
     setNoteInput('');
   };
 
@@ -54,22 +46,20 @@ export function InvestigationNotes({ investigation, user }: Props) {
       <EuiSplitPanel.Inner className={panelClassName}>
         <EuiTitle size="xs">
           <h2>
-            {i18n.translate('xpack.investigateApp.investigationNotes.investigationTimelineHeader', {
-              defaultMessage: 'Investigation timeline',
+            {i18n.translate('xpack.investigateApp.investigationNotes.header', {
+              defaultMessage: 'Notes',
             })}
           </h2>
         </EuiTitle>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>
         <EuiFlexGroup direction="column" gutterSize="m">
-          {notes?.map((currNote: InvestigationNoteResponse) => {
+          {investigation?.notes.map((currNote: InvestigationNoteResponse) => {
             return (
               <Note
                 key={currNote.id}
-                investigationId={investigation.id}
                 note={currNote}
                 disabled={currNote.createdBy !== user.username}
-                onUpdateOrDeleteCompleted={() => refetch()}
               />
             );
           })}
@@ -87,7 +77,7 @@ export function InvestigationNotes({ investigation, user }: Props) {
               placeholder={i18n.translate('xpack.investigateApp.investigationNotes.placeholder', {
                 defaultMessage: 'Add a note to the investigation',
               })}
-              disabled={isAdding}
+              disabled={isAddingNote}
               value={noteInput}
               onChange={(value) => {
                 setNoteInput(value);
@@ -106,8 +96,8 @@ export function InvestigationNotes({ investigation, user }: Props) {
               aria-label={i18n.translate('xpack.investigateApp.investigationNotes.addButtonLabel', {
                 defaultMessage: 'Add',
               })}
-              disabled={isAdding || noteInput.trim() === ''}
-              isLoading={isAdding}
+              disabled={isAddingNote || noteInput.trim() === ''}
+              isLoading={isAddingNote}
               size="m"
               onClick={() => {
                 onAddNote(noteInput.trim());

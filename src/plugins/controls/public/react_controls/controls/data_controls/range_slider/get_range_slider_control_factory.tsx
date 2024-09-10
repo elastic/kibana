@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -63,6 +64,7 @@ export const getRangesliderControlFactory = (
       const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step'>>(
         uuid,
         RANGE_SLIDER_CONTROL,
+        'rangeSliderDataView',
         initialState,
         {
           step: step$,
@@ -158,8 +160,8 @@ export const getRangesliderControlFactory = (
           if (error) {
             dataControl.api.setBlockingError(error);
           }
-          max$.next(max);
-          min$.next(min);
+          max$.next(max !== undefined ? Math.ceil(max) : undefined);
+          min$.next(min !== undefined ? Math.floor(min) : undefined);
         }
       );
 

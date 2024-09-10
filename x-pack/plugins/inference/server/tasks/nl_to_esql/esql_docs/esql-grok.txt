@@ -1,0 +1,55 @@
+## GROK
+
+GROK enables you to extract structured data out of a string. It matches the string against patterns based on regular expressions and extracts the specified patterns as columns. This command is useful for parsing logs, extracting fields from text, and structuring unstructured data. 
+
+### Use Cases
+- **Log Parsing**: Extracting timestamps, IP addresses, and other fields from log entries.
+- **Data Structuring**: Converting unstructured text data into structured columns.
+- **Field Extraction**: Extracting specific fields from a string for further analysis.
+
+### Limitations
+- If a field name conflicts with an existing column, the existing column is discarded.
+- If a field name is used more than once, a multi-valued column will be created with one value per each occurrence of the field name.
+- The `GROK` command does not support configuring custom patterns or multiple patterns.
+- The `GROK` command is not subject to Grok watchdog settings.
+
+### Examples
+
+#### Example 1: Basic GROK Usage
+This example parses a string that contains a timestamp, an IP address, an email address, and a number.
+
+```esql
+ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
+| GROK a "%{TIMESTAMP_ISO8601:date} %{IP:ip} %{EMAILADDRESS:email} %{NUMBER:num}"
+| KEEP date, ip, email, num
+```
+
+#### Example 2: Type Conversion with GROK
+By default, GROK outputs keyword string columns. To convert to other types, append `:type` to the semantics in the pattern.
+
+```esql
+ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
+| GROK a "%{TIMESTAMP_ISO8601:date} %{IP:ip} %{EMAILADDRESS:email} %{NUMBER:num:int}"
+| KEEP date, ip, email, num
+```
+
+#### Example 3: Using Type Conversion Functions
+For other type conversions, use Type conversion functions.
+
+```esql
+ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
+| GROK a "%{TIMESTAMP_ISO8601:date} %{IP:ip} %{EMAILADDRESS:email} %{NUMBER:num:int}"
+| KEEP date, ip, email, num
+| EVAL date = TO_DATETIME(date)
+```
+
+#### Example 4: Handling Multi-Valued Columns
+If a field name is used more than once, GROK creates a multi-valued column.
+
+```esql
+FROM addresses
+| KEEP city.name, zip_code
+| GROK zip_code "%{WORD:zip_parts} %{WORD:zip_parts}"
+```
+
+These examples showcase different usages of the GROK command, from basic extraction to handling type conversions and multi-valued columns.

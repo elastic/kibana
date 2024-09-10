@@ -58,7 +58,7 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
   );
 
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: any) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]

@@ -25,7 +25,7 @@ export class Detectors extends Component {
 
     const mlJobService = mlJobServiceFactory(
       toastNotificationServiceProvider(constructorContext.services.notifications.toasts),
-      constructorContext.services.mlServices.mlApiServices
+      constructorContext.services.mlServices.mlApi
     );
 
     this.detectors = mlJobService.getJobGroups().map((g) => ({ label: g.id }));

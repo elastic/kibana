@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { screen, waitFor, render } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { Severity } from './severity';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -15,8 +17,18 @@ import { FormTestComponent } from '../../common/test_utils';
 const onSubmit = jest.fn();
 
 describe('Severity form field', () => {
+  let appMockRender: AppMockRenderer;
+
+  beforeEach(() => {
+    appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('renders', async () => {
-    render(
+    appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
         <Severity isLoading={false} />
       </FormTestComponent>
@@ -28,7 +40,7 @@ describe('Severity form field', () => {
 
   // default to LOW in this test configuration
   it('defaults to the correct value', async () => {
-    render(
+    appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
         <Severity isLoading={false} />
       </FormTestComponent>
@@ -39,7 +51,7 @@ describe('Severity form field', () => {
   });
 
   it('selects the correct value when changed', async () => {
-    render(
+    appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
         <Severity isLoading={false} />
       </FormTestComponent>
@@ -47,12 +59,12 @@ describe('Severity form field', () => {
 
     expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('case-severity-selection'));
+    await userEvent.click(await screen.findByTestId('case-severity-selection'));
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId('case-severity-selection-high'));
+    await userEvent.click(await screen.findByTestId('case-severity-selection-high'));
 
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -61,7 +73,7 @@ describe('Severity form field', () => {
   });
 
   it('disables when loading data', async () => {
-    render(
+    appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
         <Severity isLoading={true} />
       </FormTestComponent>

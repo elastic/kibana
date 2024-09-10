@@ -46,10 +46,10 @@ export class JobsListUI extends Component {
       itemIdToExpandedRowMap: {},
     };
 
-    this.mlApiServices = props.kibana.services.mlServices.mlApiServices;
+    this.mlApi = props.kibana.services.mlServices.mlApi;
     this.mlJobService = mlJobServiceFactory(
       toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
-      this.mlApiServices
+      this.mlApi
     );
   }
 
@@ -340,7 +340,7 @@ export class JobsListUI extends Component {
         actions: actionsMenuContent(
           this.props.kibana.services.notifications.toasts,
           this.props.kibana.services.application,
-          this.mlApiServices,
+          this.mlApi,
           this.mlJobService,
           this.props.showEditJobFlyout,
           this.props.showDatafeedChartFlyout,

@@ -25,7 +25,7 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: 'true' });
   };
 
-  describe('setup api', async () => {
+  describe('setup api', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
@@ -37,7 +37,7 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackage('multiple_versions', '0.3.0');
     });
 
-    describe('setup performs upgrades', async () => {
+    describe('setup performs upgrades', () => {
       const oldEndpointVersion = '1.0.0';
       beforeEach(async () => {
         const url = '/api/fleet/epm/packages/endpoint';

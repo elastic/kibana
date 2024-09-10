@@ -6,6 +6,7 @@
  */
 
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import rison from '@kbn/rison';
 import { getThresholds } from '../common/get_values';
 import { set } from '@kbn/safer-lodash-set';
 import { COMPARATORS } from '@kbn/alerting-comparators';
@@ -32,6 +33,11 @@ import {
 } from '@kbn/rule-data-utils';
 import { type Group } from '@kbn/observability-alerting-rule-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import {
+  AssetDetailsLocatorParams,
+  MetricsExplorerLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
+import { InfraLocators } from '../../infra_types';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 
@@ -51,6 +57,14 @@ const logger = {
 const mockNow = new Date('2023-09-20T15:11:04.105Z');
 
 const STARTED_AT_MOCK_DATE = new Date();
+
+const mockAssetDetailsLocator = {
+  getRedirectUrl: jest.fn(),
+};
+
+const mockMetricsExplorerLocator = {
+  getRedirectUrl: jest.fn(),
+};
 
 const mockOptions = {
   executionId: '',
@@ -101,6 +115,15 @@ describe('The metric threshold rule type', () => {
   });
   beforeEach(() => {
     jest.resetAllMocks();
+
+    mockAssetDetailsLocator.getRedirectUrl.mockImplementation(
+      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
+        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
+    );
+
+    mockMetricsExplorerLocator.getRedirectUrl.mockImplementation(
+      ({}: MetricsExplorerLocatorParams) => `/metrics-mock`
+    );
 
     services.alertsClient.report.mockImplementation(({ id }: { id: string }) => ({
       uuid: `uuid-${id}`,
@@ -2366,8 +2389,7 @@ describe('The metric threshold rule type', () => {
         group: id,
         reason,
         timestamp: mockNow.toISOString(),
-        viewInAppUrl: 'http://localhost:5601/app/metrics/explorer',
-
+        viewInAppUrl: '/metrics-mock',
         metric: conditions.reduce((acc, curr, ndx) => {
           set(acc, `condition${ndx}`, curr.metric);
           return acc;
@@ -2482,7 +2504,10 @@ const mockLibs: any = {
   logger,
 };
 
-const executor = createMetricThresholdExecutor(mockLibs);
+const executor = createMetricThresholdExecutor(mockLibs, {
+  assetDetailsLocator: mockAssetDetailsLocator,
+  metricsExplorerLocator: mockMetricsExplorerLocator,
+} as unknown as InfraLocators);
 
 const services = alertsMock.createRuleExecutorServices();
 services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {

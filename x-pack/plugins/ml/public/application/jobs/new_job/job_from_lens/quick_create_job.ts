@@ -19,7 +19,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
-import type { MlApiServices } from '../../../services/ml_api_service';
+import type { MlApi } from '../../../services/ml_api_service';
 import type { MlJobService } from '../../../services/job_service';
 import {
   CREATED_BY_LABEL,
@@ -42,10 +42,10 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
     dashboardService: DashboardStart,
-    mlApiServices: MlApiServices,
+    mlApi: MlApi,
     mlJobService: MlJobService
   ) {
-    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApiServices, mlJobService);
+    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApi, mlJobService);
   }
 
   public async createAndSaveJob(

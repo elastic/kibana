@@ -218,7 +218,7 @@ export async function generateEnrollmentAPIKey(
   const id = uuidv4();
   const { name: providedKeyName, forceRecreate, agentPolicyId } = data;
   const logger = appContextService.getLogger();
-  logger.debug(`Creating enrollment API key ${data}`);
+  logger.debug(`Creating enrollment API key ${JSON.stringify(data)}`);
 
   const agentPolicy = await retrieveAgentPolicyId(soClient, agentPolicyId);
 
@@ -360,7 +360,14 @@ function getQueryForExistingKeyNameOnPolicy(agentPolicyId: string, providedKeyNa
         },
         {
           bool: {
-            should: [{ query_string: { fields: ['name'], query: `(${providedKeyName}) *` } }],
+            should: [
+              {
+                query_string: {
+                  fields: ['name'],
+                  query: `(${providedKeyName.replace('!', '\\!')}) *`,
+                },
+              },
+            ],
             minimum_should_match: 1,
           },
         },

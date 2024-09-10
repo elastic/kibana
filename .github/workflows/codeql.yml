@@ -41,9 +41,16 @@ jobs:
     #     export PATH=~/.npm-global/bin:$PATH
     #     yarn kbn bootstrap --no-validate --no-vscode
 
+    - name: Set sha and branch
+      run: |
+        echo "CHECKOUT_REF=$(git symbolic-ref HEAD)" >> "$GITHUB_ENV"
+        echo "CHECKOUT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@883d8588e56d1753a8a58c1c86e88976f0c23449 # v3.26.3
-      # env:
-      #   NODE_OPTIONS: "--max-old-space-size=6144"
+      env:
+        NODE_OPTIONS: "--max-old-space-size=6144"
       with:
         category: "/language:${{matrix.language}}"
+        ref: ${{ env.CHECKOUT_REF }}
+        sha: ${{ env.CHECKOUT_SHA }}

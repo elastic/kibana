@@ -59,7 +59,7 @@ export class StartDatafeedModal extends Component {
     this.toastNotifications = constructorContext.services.notifications.toasts;
     this.mlJobService = mlJobServiceFactory(
       toastNotificationServiceProvider(this.toastNotifications),
-      constructorContext.services.mlServices.mlApiServices
+      constructorContext.services.mlServices.mlApi
     );
   }
 

@@ -13717,57 +13717,6 @@
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy",
-            "type": "Object",
-            "tags": [],
-            "label": "legacy",
-            "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.getDisplayName",
-                "type": "Function",
-                "tags": [],
-                "label": "getDisplayName",
-                "description": [],
-                "signature": [
-                  "() => string"
-                ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.order",
-                "type": "number",
-                "tags": [],
-                "label": "order",
-                "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "embeddable",
             "id": "def-public.COMMON_EMBEDDABLE_GROUPING.annotation",
             "type": "Object",
             "tags": [],
@@ -13803,6 +13752,17 @@
                 "trackAdoption": false,
                 "children": [],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.annotation.order",
+                "type": "number",
+                "tags": [],
+                "label": "order",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -13863,6 +13823,57 @@
               {
                 "parentPluginId": "embeddable",
                 "id": "def-public.COMMON_EMBEDDABLE_GROUPING.other.order",
+                "type": "number",
+                "tags": [],
+                "label": "order",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy",
+            "type": "Object",
+            "tags": [],
+            "label": "legacy",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.getDisplayName",
+                "type": "Function",
+                "tags": [],
+                "label": "getDisplayName",
+                "description": [],
+                "signature": [
+                  "() => string"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.order",
                 "type": "number",
                 "tags": [],
                 "label": "order",
@@ -14227,10 +14238,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "visualizations",
-              "path": "src/plugins/visualizations/public/plugin.ts"
-            },
-            {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/plugin.ts"
             }
@@ -14454,10 +14461,6 @@
           "deprecated": true,
           "trackAdoption": false,
           "references": [
-            {
-              "plugin": "visualizations",
-              "path": "src/plugins/visualizations/public/plugin.ts"
-            },
             {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/plugin.ts"
