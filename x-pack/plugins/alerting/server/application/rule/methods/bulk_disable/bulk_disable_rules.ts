@@ -133,8 +133,6 @@ const bulkDisableRulesWithOCC = async (
     untrack: boolean;
   }
 ) => {
-  const additionalFilter = nodeBuilder.is('alert.attributes.enabled', 'true');
-
   const rulesFinder = await withSpan(
     {
       name: 'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
@@ -143,7 +141,7 @@ const bulkDisableRulesWithOCC = async (
     () =>
       context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
         {
-          filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
+          filter,
           type: RULE_SAVED_OBJECT_TYPE,
           perPage: 100,
           ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
