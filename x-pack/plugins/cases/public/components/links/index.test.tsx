@@ -32,23 +32,23 @@ describe('Configuration button', () => {
     wrapper = mount(<ConfigureCaseButton {...props} />, { wrappingComponent: TestProviders });
   });
 
-  test('it renders without the tooltip', () => {
+  it('renders without the tooltip', () => {
     expect(wrapper.find('[data-test-subj="configure-case-button"]').first().exists()).toBe(true);
 
     expect(wrapper.find('[data-test-subj="configure-case-tooltip"]').first().exists()).toBe(false);
   });
 
-  test('it pass the correct props to the button', () => {
+  it('passes the correct props to the button', () => {
     expect(wrapper.find('[data-test-subj="configure-case-button"]').first().props()).toMatchObject({
       href: `/app/security/cases/configure`,
-      iconType: 'controlsHorizontal',
+      iconType: 'gear',
       isDisabled: false,
       'aria-label': 'My label',
       children: 'My label',
     });
   });
 
-  test('it renders the tooltip', () => {
+  it('renders the tooltip', () => {
     const msgTooltip = <EuiText>{'My message tooltip'}</EuiText>;
 
     const newWrapper = mount(
@@ -70,7 +70,7 @@ describe('Configuration button', () => {
     expect(wrapper.find('[data-test-subj="configure-case-button"]').first().exists()).toBe(true);
   });
 
-  test('it shows the tooltip when hovering the button', () => {
+  it('shows the tooltip when hovering the button', () => {
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
     jest.useFakeTimers({ legacyFakeTimers: true });
 
@@ -118,43 +118,45 @@ describe('CaseDetailsLink', () => {
     useCaseViewNavigationMock.mockReturnValue({ getCaseViewUrl, navigateToCaseView });
   });
 
-  test('it renders', () => {
+  it('renders', async () => {
     render(<CaseDetailsLink {...props} />);
-    expect(screen.getByText('test detail name')).toBeInTheDocument();
+    expect(await screen.findByText('test detail name')).toBeInTheDocument();
   });
 
-  test('it renders the children instead of the detail name if provided', () => {
+  it('renders the children instead of the detail name if provided', async () => {
     render(<CaseDetailsLink {...props}>{'children'}</CaseDetailsLink>);
     expect(screen.queryByText('test detail name')).toBeFalsy();
-    expect(screen.getByText('children')).toBeInTheDocument();
+    expect(await screen.findByText('children')).toBeInTheDocument();
   });
 
-  test('it uses the detailName in the aria-label if the title is not provided', () => {
+  it('uses the detailName in the aria-label if the title is not provided', async () => {
     render(<CaseDetailsLink {...props} />);
     expect(
-      screen.getByLabelText(`click to visit case with title ${props.detailName}`)
+      await screen.findByLabelText(`click to visit case with title ${props.detailName}`)
     ).toBeInTheDocument();
   });
 
-  test('it uses the title in the aria-label if provided', () => {
+  it('uses the title in the aria-label if provided', async () => {
     render(<CaseDetailsLink {...props} title={'my title'} />);
-    expect(screen.getByText('test detail name')).toBeInTheDocument();
-    expect(screen.getByLabelText(`click to visit case with title my title`)).toBeInTheDocument();
+    expect(await screen.findByText('test detail name')).toBeInTheDocument();
+    expect(
+      await screen.findByLabelText(`click to visit case with title my title`)
+    ).toBeInTheDocument();
   });
 
-  test('it calls navigateToCaseViewClick on click', () => {
+  it('calls navigateToCaseViewClick on click', async () => {
     render(<CaseDetailsLink {...props} />);
-    userEvent.click(screen.getByText('test detail name'));
+    userEvent.click(await screen.findByText('test detail name'));
     expect(navigateToCaseView).toHaveBeenCalledWith({
       detailName: props.detailName,
     });
   });
 
-  test('it set the href correctly', () => {
+  it('sets the href correctly', async () => {
     render(<CaseDetailsLink {...props} />);
     expect(getCaseViewUrl).toHaveBeenCalledWith({
       detailName: props.detailName,
     });
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/cases/test');
+    expect(await screen.findByRole('link')).toHaveAttribute('href', '/cases/test');
   });
 });
