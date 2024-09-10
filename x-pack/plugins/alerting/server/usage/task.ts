@@ -16,7 +16,7 @@ import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_ta
 import {
   getTotalCountAggregations,
   getTotalCountInUse,
-  getTotalMWCount,
+  getMWTelemetry,
 } from './lib/get_telemetry_from_kibana';
 import {
   getExecutionsPerDayCount,
@@ -117,7 +117,7 @@ export function telemetryTaskRunner(
           getExecutionsPerDayCount({ esClient, eventLogIndex, logger }),
           getExecutionTimeoutsPerDayCount({ esClient, eventLogIndex, logger }),
           getFailedAndUnrecognizedTasksPerDay({ esClient, taskManagerIndex, logger }),
-          getTotalMWCount({ logger, savedObjectsClient }),
+          getMWTelemetry({ logger, savedObjectsClient }),
         ])
           .then(
             ([
@@ -126,7 +126,7 @@ export function telemetryTaskRunner(
               dailyExecutionCounts,
               dailyExecutionTimeoutCounts,
               dailyFailedAndUnrecognizedTasks,
-              totalMWCount,
+              MWTelemetry,
             ]) => {
               const hasErrors =
                 totalCountAggregations.hasErrors ||
@@ -134,7 +134,7 @@ export function telemetryTaskRunner(
                 dailyExecutionCounts.hasErrors ||
                 dailyExecutionTimeoutCounts.hasErrors ||
                 dailyFailedAndUnrecognizedTasks.hasErrors ||
-                totalMWCount.hasErrors;
+                MWTelemetry.hasErrors;
 
               const errorMessages = [
                 totalCountAggregations.errorMessage,
@@ -142,7 +142,7 @@ export function telemetryTaskRunner(
                 dailyExecutionCounts.errorMessage,
                 dailyExecutionTimeoutCounts.errorMessage,
                 dailyFailedAndUnrecognizedTasks.errorMessage,
-                totalMWCount.errorMessage,
+                MWTelemetry.errorMessage,
               ].filter((message) => message !== undefined);
 
               const updatedState: LatestTaskStateSchema = {
@@ -165,7 +165,10 @@ export function telemetryTaskRunner(
                 count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
                 count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
                 count_rules_muted: totalCountAggregations.count_rules_muted,
-                count_total_mw: totalMWCount.count_total_mw,
+                count_total_mw: MWTelemetry.count_total_mw,
+                count_mw_with_repeate_toggle_on: MWTelemetry.count_mw_with_repeate_toggle_on,
+                count_mw_with_filter_alert_toggle_on:
+                  MWTelemetry.count_mw_with_filter_alert_toggle_on,
                 count_rules_with_muted_alerts: totalCountAggregations.count_rules_with_muted_alerts,
                 count_connector_types_by_consumers:
                   totalCountAggregations.count_connector_types_by_consumers,

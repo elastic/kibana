@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import {
   getTotalCountAggregations,
   getTotalCountInUse,
-  getTotalMWCount,
+  getMWTelemetry,
 } from './get_telemetry_from_kibana';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
@@ -22,38 +22,84 @@ const savedObjectsClient = savedObjectsClientMock.create() as unknown as ISavedO
 const thrownError = new Error('Fail');
 
 // introduce fake dates
-const mockedMWAttributes = [
-  {
-    title: 'test_rule_1',
-    enabled: true,
-    duration: 1800000,
-    expirationDate: '2025-09-09T13:13:07.824Z',
-    events: [],
-    rRule: {
-      dtstart: '2024-09-09T13:13:02.054Z',
-      tzid: 'Europe/Stockholm',
-      freq: 0,
-      count: 1,
-    },
-    createdBy: null,
-    updatedBy: null,
-    createdAt: '2024-09-09T13:13:07.825Z',
-    updatedAt: '2024-09-09T13:13:07.825Z',
-    scopedQuery: null,
-  },
-];
-
-const mockCreatePointInTimeFinder = (
-  response = {
-    saved_objects: [
-      {
-        id: 'abc',
-        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-        attributes: mockedMWAttributes,
+const mockedResponse = {
+  saved_objects: [
+    {
+      id: '1',
+      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      attributes: {
+        title: 'test_rule_1',
+        enabled: true,
+        duration: 1800000,
+        expirationDate: '2025-09-09T13:13:07.824Z',
+        events: [],
+        rRule: {
+          dtstart: '2024-09-09T13:13:02.054Z',
+          tzid: 'Europe/Stockholm',
+          freq: 0,
+          count: 1,
+        },
+        createdBy: null,
+        updatedBy: null,
+        createdAt: '2024-09-09T13:13:07.825Z',
+        updatedAt: '2024-09-09T13:13:07.825Z',
+        scopedQuery: null,
       },
-    ],
-  }
-) => {
+    },
+    {
+      id: '2',
+      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      attributes: {
+        title: 'test_rule_2',
+        enabled: true,
+        duration: 1800000,
+        expirationDate: '2025-09-09T13:13:07.824Z',
+        events: [],
+        rRule: {
+          dtstart: '2024-09-09T13:13:02.054Z',
+          tzid: 'Europe/Stockholm',
+          freq: 3,
+          interval: 1,
+          byweekday: ['SU'],
+        },
+        createdBy: null,
+        updatedBy: null,
+        createdAt: '2024-09-09T13:13:07.825Z',
+        updatedAt: '2024-09-09T13:13:07.825Z',
+        scopedQuery: {
+          filters: [],
+          kql: 'kibana.alert.job_errors_results.job_id : * ',
+          dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+        },
+      },
+    },
+    {
+      id: '3',
+      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      attributes: {
+        title: 'test_rule_3',
+        enabled: true,
+        duration: 1800000,
+        expirationDate: '2025-09-09T13:13:07.824Z',
+        events: [],
+        rRule: {
+          dtstart: '2024-09-09T13:13:02.054Z',
+          tzid: 'Europe/Stockholm',
+          freq: 3,
+          interval: 1,
+          byweekday: ['TU'],
+        },
+        createdBy: null,
+        updatedBy: null,
+        createdAt: '2024-09-09T13:13:07.825Z',
+        updatedAt: '2024-09-09T13:13:07.825Z',
+        scopedQuery: null,
+      },
+    },
+  ],
+};
+
+const mockCreatePointInTimeFinder = (response = mockedResponse) => {
   savedObjectsClient.createPointInTimeFinder = jest.fn().mockResolvedValue({
     close: jest.fn(),
     find: function* asyncGenerator() {
@@ -471,10 +517,10 @@ describe('kibana index telemetry', () => {
     });
   });
 
-  describe('getTotalMWCount', () => {
+  describe('getMWTelemetry', () => {
     test('should return total count of MW', async () => {
       mockCreatePointInTimeFinder();
-      const telemetry = await getTotalMWCount({
+      const telemetry = await getMWTelemetry({
         savedObjectsClient,
         logger,
       });
@@ -483,13 +529,18 @@ describe('kibana index telemetry', () => {
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
         perPage: 100,
       });
-      expect(telemetry).toStrictEqual({ count_total_mw: 1, hasErrors: false });
+      expect(telemetry).toStrictEqual({
+        count_total_mw: 3,
+        count_mw_with_repeate_toggle_on: 2,
+        count_mw_with_filter_alert_toggle_on: 1,
+        hasErrors: false,
+      });
     });
   });
 
   test('should throw the error', async () => {
     savedObjectsClient.createPointInTimeFinder = jest.fn().mockRejectedValueOnce(thrownError);
-    const telemetry = await getTotalMWCount({
+    const telemetry = await getMWTelemetry({
       savedObjectsClient,
       logger,
     });
@@ -499,7 +550,13 @@ describe('kibana index telemetry', () => {
       perPage: 100,
     });
 
-    expect(telemetry).toStrictEqual({ count_total_mw: 0, hasErrors: true, errorMessage: 'Fail' });
+    expect(telemetry).toStrictEqual({
+      count_total_mw: 0,
+      count_mw_with_repeate_toggle_on: 0,
+      count_mw_with_filter_alert_toggle_on: 0,
+      hasErrors: true,
+      errorMessage: 'Fail',
+    });
     expect(logger.warn).toHaveBeenCalled();
     const loggerCall = logger.warn.mock.calls[0][0];
     const loggerMeta = logger.warn.mock.calls[0][1];
