@@ -34,7 +34,7 @@ interface BaseQuickStatProps {
   content?: React.ReactNode;
   stats: Array<{
     title: string;
-    description?: React.ReactNode;
+    description: NonNullable<React.ReactNode>;
   }>;
   setOpen: (open: boolean) => void;
   first?: boolean;
@@ -98,11 +98,11 @@ const QuickStat: React.FC<BaseQuickStatProps> = ({
         </EuiPanel>
       }
     >
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          {content ? (
-            content
-          ) : (
+      {content ? (
+        content
+      ) : (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
             <EuiDescriptionList
               type="column"
               listItems={stats}
@@ -112,9 +112,9 @@ const QuickStat: React.FC<BaseQuickStatProps> = ({
                 color: 'subdued',
               }}
             />
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </EuiAccordion>
   );
 };
@@ -126,25 +126,31 @@ interface QuickStatsProps {
 
 export const SetupAISearchButton: React.FC = () => {
   return (
-    <EuiFlexGroup gutterSize="s" justifyContent="spaceAround">
-      <EuiFlexItem grow={false}>
-        <EuiText>
-          {i18n.translate('xpack.searchIndices.quickStats.setup_ai_search_description', {
-            defaultMessage: 'Use Elastic to build powerful AI Search',
-          })}
-        </EuiText>
-        <EuiButton
-          href="https://www.elastic.co/guide/en/elasticsearch/reference/current/semantic-search.html"
-          target="_blank"
-        >
-          {i18n.translate('xpack.searchIndices.quickStats.setup_ai_search_button', {
-            defaultMessage: 'Setup now',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  )
-}
+    <EuiPanel hasBorder={false} hasShadow={false} color="transparent">
+      <EuiFlexGroup gutterSize="s" direction="column" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <h6>
+              {i18n.translate('xpack.searchIndices.quickStats.setup_ai_search_description', {
+                defaultMessage: 'Use Elastic to build powerful AI Search',
+              })}
+            </h6>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/semantic-search.html"
+            target="_blank"
+          >
+            {i18n.translate('xpack.searchIndices.quickStats.setup_ai_search_button', {
+              defaultMessage: 'Setup now',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
 
 export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
   const [open, setOpen] = React.useState<boolean>(false);
@@ -176,7 +182,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
             secondaryTitle={<EuiI18nNumber value={index.documents ?? 0} />}
             stats={[
               { title: 'Total', description: <EuiI18nNumber value={index.documents ?? 0} /> },
-              { title: 'Index Size', description: index.size },
+              { title: 'Index Size', description: index.size ?? 0 },
             ]}
             first
           />
@@ -193,14 +199,14 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
             secondaryTitle={
               vectorFieldCount > 0
                 ? i18n.translate('xpack.searchIndices.quickStats.total_count', {
-                  defaultMessage: '{value} Field',
-                  values: {
-                    value: vectorFieldCount,
-                  },
-                })
+                    defaultMessage: '{value} Field',
+                    values: {
+                      value: vectorFieldCount,
+                    },
+                  })
                 : i18n.translate('xpack.searchIndices.quickStats.no_vector_fields', {
-                  defaultMessage: 'Not configured',
-                })
+                    defaultMessage: 'Not configured',
+                  })
             }
             content={vectorFieldCount === 0 && <SetupAISearchButton />}
             stats={[

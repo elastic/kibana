@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Mappings } from '../../types';
 import { countVectorBasedTypesFromMappings } from './mappings_convertor';
 
 describe('mappings convertor', () => {
@@ -24,14 +25,17 @@ describe('mappings convertor', () => {
           field4: {
             type: 'dense_vector',
           },
+          field5: {
+            type: 'semantic_text',
+          },
         },
       },
     };
-    const result = countVectorBasedTypesFromMappings(mappings);
+    const result = countVectorBasedTypesFromMappings(mappings as unknown as Mappings);
     expect(result).toEqual({
       dense_vector: 3,
       sparse_vector: 1,
-      semantic_text: 0,
+      semantic_text: 1,
     });
   });
 });

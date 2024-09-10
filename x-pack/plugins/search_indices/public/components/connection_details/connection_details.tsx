@@ -9,11 +9,9 @@ import React from 'react';
 
 import {
   EuiButtonIcon,
-  EuiCodeBlock,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -39,10 +37,18 @@ export const ConnectionDetails: React.FC<ConnectionDetailsProps> = ({ elasticsea
           </h1>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <EuiCodeBlock paddingSize="s" language="http">
-          <p css={{ color: euiTheme.colors.successText }}>{elasticsearchUrl}</p>
-        </EuiCodeBlock>
+      <EuiFlexItem css={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+        <p
+          css={{
+            color: euiTheme.colors.successText,
+            padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+            backgroundColor: euiTheme.colors.lightestShade,
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+          }}
+        >
+          {elasticsearchUrl}
+        </p>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiCopy

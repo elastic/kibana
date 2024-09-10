@@ -26,8 +26,8 @@ export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const { console: consolePlugin, application, cloud } = useKibana().services;
 
-  const { data: index, isLoading } = useIndex(indexName);
-  const { data: mappings, isLoading: isMappingLoading } = useIndexMapping(indexName);
+  const { data: index } = useIndex(indexName);
+  const { data: mappings } = useIndexMapping(indexName);
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
@@ -75,7 +75,7 @@ export const SearchIndexDetailsPage = () => {
           <EuiFlexItem>
             <ConnectionDetails elasticsearchUrl={elasticsearchUrl} />
           </EuiFlexItem>
-          <EuiFlexItem>{/*TODO: API KEY */}</EuiFlexItem>
+          <EuiFlexItem>{/* TODO: API KEY */}</EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="l" />
