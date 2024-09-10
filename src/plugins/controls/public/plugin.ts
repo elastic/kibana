@@ -10,6 +10,10 @@
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
 
+import { registerControlGroupEmbeddable } from './react_controls/control_group/register_control_group_embeddable';
+import { registerOptionsListControl } from './react_controls/controls/data_controls/options_list_control/register_options_list_control';
+import { registerRangeSliderControl } from './react_controls/controls/data_controls/range_slider/register_range_slider_control';
+import { registerTimeSliderControl } from './react_controls/controls/timeslider_control/register_timeslider_control';
 import { controlsService } from './services/controls/controls_service';
 import {
   ControlsPluginSetup,
@@ -40,6 +44,12 @@ export class ControlsPlugin
     _setupPlugins: ControlsPluginSetupDeps
   ): ControlsPluginSetup {
     const { registerControlFactory } = controlsService;
+    const { embeddable } = _setupPlugins;
+
+    registerControlGroupEmbeddable(_coreSetup, embeddable);
+    registerOptionsListControl(_coreSetup);
+    registerRangeSliderControl(_coreSetup);
+    registerTimeSliderControl(_coreSetup);
 
     return {
       registerControlFactory,
