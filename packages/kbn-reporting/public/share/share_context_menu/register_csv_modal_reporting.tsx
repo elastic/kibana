@@ -16,7 +16,7 @@ import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-c
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
-import { ShareContext, ShareMenuItem } from '@kbn/share-plugin/public';
+import { ShareContext, ShareMenuItemV2 } from '@kbn/share-plugin/public';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
 
@@ -69,7 +69,7 @@ export const reportingCsvShareProvider = ({
       };
     };
 
-    const shareActions: ShareMenuItem[] = [];
+    const shareActions: ShareMenuItemV2[] = [];
 
     const licenseCheck = checkLicense(license.check('reporting', 'basic'));
     const licenseToolTipContent = licenseCheck.message;

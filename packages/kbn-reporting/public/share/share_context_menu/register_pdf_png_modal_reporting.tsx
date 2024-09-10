@@ -10,7 +10,12 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
+import {
+  ShareContext,
+  ShareMenuItem,
+  ShareMenuItemV2,
+  ShareMenuProvider,
+} from '@kbn/share-plugin/public';
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -249,7 +254,7 @@ export const reportingExportModalProvider = ({
     }
 
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
-    const shareActions: ShareMenuItem[] = [];
+    const shareActions: ShareMenuItemV2[] = [];
 
     const jobProviderOptions: JobParamsProviderOptions = {
       shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
