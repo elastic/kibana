@@ -121,10 +121,15 @@ describe('indexpattern_datasource utils', () => {
         );
 
         expect(warningMessages).toHaveLength(1);
+        const { longMessage, ...rest } = warningMessages[0];
 
-        expect({ ...warningMessages[0], longMessage: '' }).toMatchSnapshot();
+        expect({ ...rest, longMessage: '' }).toMatchSnapshot();
 
-        render(<I18nProvider>{warningMessages[0].longMessage as React.ReactNode}</I18nProvider>);
+        render(
+          <I18nProvider>
+            {typeof longMessage === 'function' ? longMessage() : longMessage}
+          </I18nProvider>
+        );
 
         expect(screen.getByTestId('lnsPrecisionWarningEnableAccuracy')).toBeInTheDocument();
         await userEvent.click(screen.getByTestId('lnsPrecisionWarningEnableAccuracy'));
@@ -145,11 +150,14 @@ describe('indexpattern_datasource utils', () => {
         );
 
         expect(warningMessages).toHaveLength(1);
+        const { longMessage, ...rest } = warningMessages[0];
 
-        expect({ ...warningMessages[0], longMessage: '' }).toMatchSnapshot();
+        expect({ ...rest, longMessage: '' }).toMatchSnapshot();
 
         const { container } = render(
-          <I18nProvider>{warningMessages[0].longMessage as React.ReactNode}</I18nProvider>
+          <I18nProvider>
+            {typeof longMessage === 'function' ? longMessage() : longMessage}
+          </I18nProvider>
         );
         expect(container).toHaveTextContent(
           'might be an approximation. For more precise results, try increasing the number of Top Values or using Filters instead.'
@@ -178,7 +186,7 @@ describe('indexpattern_datasource utils', () => {
         } as unknown as GenericIndexPatternColumn,
       };
       const setState = jest.fn();
-      const warnings = getPrecisionErrorWarningMessages(
+      const warningMessages = getPrecisionErrorWarningMessages(
         datatableUtilitites,
         state,
         framePublicAPI,
@@ -186,10 +194,16 @@ describe('indexpattern_datasource utils', () => {
         setState
       );
 
-      expect(warnings).toHaveLength(1);
-      expect({ ...warnings[0], longMessage: '' }).toMatchSnapshot();
+      expect(warningMessages).toHaveLength(1);
+      const { longMessage, ...rest } = warningMessages[0];
 
-      render(<I18nProvider>{warnings[0].longMessage as React.ReactNode}</I18nProvider>);
+      expect({ ...rest, longMessage: '' }).toMatchSnapshot();
+
+      render(
+        <I18nProvider>
+          {typeof longMessage === 'function' ? longMessage() : longMessage}
+        </I18nProvider>
+      );
       await userEvent.click(screen.getByText('Rank by rarity'));
       const stateSetter = setState.mock.calls[0][0];
       const newState = stateSetter(state);

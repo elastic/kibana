@@ -164,14 +164,13 @@ describe('application-level user messages', () => {
         visualization: {} as Visualization,
         visualizationState: { activeId: 'foo', state: {} },
       };
+      const firstMessage = getApplicationUserMessages({ ...props, ...propsOverrides }).at(0);
       const rtlRender = render(
         <I18nProvider>
-          {
-            getApplicationUserMessages({
-              ...props,
-              ...propsOverrides,
-            })[0].longMessage as React.ReactNode
-          }
+          {firstMessage &&
+            (typeof firstMessage.longMessage === 'function'
+              ? firstMessage.longMessage()
+              : firstMessage.longMessage)}
         </I18nProvider>
       );
       return rtlRender;

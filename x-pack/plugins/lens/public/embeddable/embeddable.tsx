@@ -248,7 +248,7 @@ export interface ViewUnderlyingDataArgs {
 }
 
 function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; canEdit: boolean }) {
-  const showMore = errors.length > 1;
+  const firstError = errors.at(0);
   const canFixInLens = canEdit && errors.some(({ fixableInEditor }) => fixableInEditor);
   return (
     <div className="lnsEmbeddedError">
@@ -258,10 +258,14 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
         data-test-subj="embeddable-lens-failure"
         body={
           <>
-            {errors.length ? (
+            {firstError ? (
               <>
-                <p>{errors[0].longMessage as React.ReactNode}</p>
-                {showMore && !canFixInLens ? (
+                <p>
+                  {typeof firstError.longMessage === 'function'
+                    ? firstError.longMessage()
+                    : firstError.longMessage}
+                </p>
+                {errors.length > 1 && !canFixInLens ? (
                   <p>
                     <FormattedMessage
                       id="xpack.lens.embeddable.moreErrors"

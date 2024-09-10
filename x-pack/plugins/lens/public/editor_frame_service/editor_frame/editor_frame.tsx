@@ -129,7 +129,9 @@ export function EditorFrame(props: EditorFrameProps) {
           bannerMessages.length ? (
             <ErrorBoundary onError={onError}>
               <BannerWrapper
-                nodes={bannerMessages.map(({ longMessage }) => longMessage as React.ReactNode)}
+                nodes={bannerMessages.map(({ longMessage }) =>
+                  typeof longMessage === 'function' ? longMessage() : longMessage
+                )}
               />
             </ErrorBoundary>
           ) : undefined

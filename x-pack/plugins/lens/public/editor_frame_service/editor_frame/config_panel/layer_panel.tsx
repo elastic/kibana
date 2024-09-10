@@ -518,6 +518,7 @@ export function LayerPanel(props: LayerPanelProps) {
                             props?.getUserMessages?.('dimensionButton', {
                               dimensionId: columnId,
                             }) ?? [];
+                          const firstMessage = messages.at(0);
 
                           return (
                             <DraggableDimensionButton
@@ -567,11 +568,18 @@ export function LayerPanel(props: LayerPanelProps) {
                                   props.onRemoveDimension({ columnId: id, layerId });
                                   removeButtonRef(id);
                                 }}
-                                message={{
-                                  severity: messages[0]?.severity,
-                                  content: (messages[0]?.shortMessage ||
-                                    messages[0]?.longMessage) as React.ReactNode,
-                                }}
+                                message={
+                                  firstMessage
+                                    ? {
+                                        severity: firstMessage.severity,
+                                        content:
+                                          firstMessage.shortMessage ||
+                                          (typeof firstMessage.longMessage === 'function'
+                                            ? firstMessage.longMessage()
+                                            : firstMessage.longMessage),
+                                      }
+                                    : undefined
+                                }
                               >
                                 {layerDatasource ? (
                                   <>

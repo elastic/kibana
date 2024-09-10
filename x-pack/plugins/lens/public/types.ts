@@ -302,7 +302,7 @@ export interface UserMessage {
   severity: 'error' | 'warning' | 'info';
   hidePopoverIcon?: boolean;
   shortMessage: string;
-  longMessage: string | React.ReactNode | ((closePopover: () => void) => React.ReactNode);
+  longMessage: string | React.ReactNode | ((closePopover?: () => void) => React.ReactNode);
   fixableInEditor: boolean;
   displayLocations: UserMessageDisplayLocation[];
 }

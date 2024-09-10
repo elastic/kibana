@@ -995,7 +995,10 @@ function getLayerErrorMessages(
                 defaultMessage="Layer {position} error: {wrappedMessage}"
                 values={{
                   position: index + 1,
-                  wrappedMessage: <>{error.longMessage}</>,
+                  wrappedMessage:
+                    typeof error.longMessage === 'function'
+                      ? error.longMessage()
+                      : error.longMessage,
                 }}
               />
             ),
