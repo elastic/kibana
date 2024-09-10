@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { parseDuration } from '@kbn/alerting-plugin/server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { savedObjectsAdapter } from '../../saved_objects';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
@@ -55,19 +56,29 @@ export class DefaultAlertService {
     };
   }
 
+  getMinimumRuleInterval() {
+    const minimumInterval = this.server.alerting.getConfig().minimumScheduleInterval;
+    const minimumIntervalInMs = parseDuration(minimumInterval.value);
+    const defaultIntervalInMs = parseDuration('1m');
+    const interval = minimumIntervalInMs < defaultIntervalInMs ? '1m' : minimumInterval.value;
+    return interval;
+  }
+
   setupStatusRule() {
+    const minimumRuleInterval = this.getMinimumRuleInterval();
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_STATUS_RULE,
       `Synthetics status internal rule`,
-      '1m'
+      minimumRuleInterval
     );
   }
 
   setupTlsRule() {
+    const minimumRuleInterval = this.getMinimumRuleInterval();
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_TLS_RULE,
       `Synthetics internal TLS rule`,
-      '1m'
+      minimumRuleInterval
     );
   }
 
@@ -122,10 +133,20 @@ export class DefaultAlertService {
   }
 
   updateStatusRule() {
-    return this.updateDefaultAlert(SYNTHETICS_STATUS_RULE, `Synthetics status internal rule`, '1m');
+    const minimumRuleInterval = this.getMinimumRuleInterval();
+    return this.updateDefaultAlert(
+      SYNTHETICS_STATUS_RULE,
+      `Synthetics status internal rule`,
+      minimumRuleInterval
+    );
   }
   updateTlsRule() {
-    return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS rule`, '1m');
+    const minimumRuleInterval = this.getMinimumRuleInterval();
+    return this.updateDefaultAlert(
+      SYNTHETICS_TLS_RULE,
+      `Synthetics internal TLS rule`,
+      minimumRuleInterval
+    );
   }
 
   async updateDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
@@ -133,6 +154,8 @@ export class DefaultAlertService {
 
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
+      const currentIntervalInMs = parseDuration(alert.schedule.interval);
+      const minimumIntervalInMs = parseDuration(interval);
       const actions = await this.getAlertActions(ruleType);
       const {
         actions: actionsFromRules = [],
@@ -144,7 +167,10 @@ export class DefaultAlertService {
           actions,
           name: alert.name,
           tags: alert.tags,
-          schedule: alert.schedule,
+          schedule: {
+            interval:
+              currentIntervalInMs < minimumIntervalInMs ? interval : alert.schedule.interval,
+          },
           params: alert.params,
         },
       });
